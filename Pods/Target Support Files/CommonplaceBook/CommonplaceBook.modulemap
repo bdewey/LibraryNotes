@@ -1,0 +1,6 @@
+framework module CommonplaceBook {
+  umbrella header "CommonplaceBook-umbrella.h"
+
+  export *
+  module * { export * }
+}

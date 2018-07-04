@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */; };
+		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
-		D3DC5EC520EC9B0100F0B74B /* MasterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC420EC9B0100F0B74B /* MasterViewController.swift */; };
-		D3DC5EC720EC9B0100F0B74B /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC620EC9B0100F0B74B /* DetailViewController.swift */; };
-		D3DC5ECA20EC9B0100F0B74B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5EC820EC9B0100F0B74B /* Main.storyboard */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
 		D3DC5EDA20EC9B0200F0B74B /* CommonplaceBookAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5ED920EC9B0200F0B74B /* CommonplaceBookAppTests.swift */; };
+		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
+		D3DC5EE720ECA53900F0B74B /* remember.txt in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5EE620ECA53900F0B74B /* remember.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,17 +28,22 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3859AFBAF83CDE4C1D927655 /* Pods-CommonplaceBookAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookAppTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookAppTests/Pods-CommonplaceBookAppTests.release.xcconfig"; sourceTree = "<group>"; };
+		40E5CAEA0C56356AEC6FF6A6 /* Pods-CommonplaceBookApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.debug.xcconfig"; sourceTree = "<group>"; };
+		9E64A6ABB8A8D87E6BFEE2DB /* Pods-CommonplaceBookAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookAppTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookAppTests/Pods-CommonplaceBookAppTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D3DC5EC420EC9B0100F0B74B /* MasterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasterViewController.swift; sourceTree = "<group>"; };
-		D3DC5EC620EC9B0100F0B74B /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
-		D3DC5EC920EC9B0100F0B74B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D3DC5ECE20EC9B0200F0B74B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D3DC5ED020EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5ED920EC9B0200F0B74B /* CommonplaceBookAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonplaceBookAppTests.swift; sourceTree = "<group>"; };
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
+		D3DC5EE620ECA53900F0B74B /* remember.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = remember.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -45,6 +51,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,20 +59,45 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0D695C07C08EFF8CC9D9B854 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */,
+				C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B2A86493BC166F95A728F5E8 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				40E5CAEA0C56356AEC6FF6A6 /* Pods-CommonplaceBookApp.debug.xcconfig */,
+				C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */,
+				9E64A6ABB8A8D87E6BFEE2DB /* Pods-CommonplaceBookAppTests.debug.xcconfig */,
+				3859AFBAF83CDE4C1D927655 /* Pods-CommonplaceBookAppTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
 				D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */,
 				D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
+				B2A86493BC166F95A728F5E8 /* Pods */,
+				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		D3DC5EC020EC9B0100F0B74B /* Products */ = {
 			isa = PBXGroup;
@@ -79,13 +111,12 @@
 		D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */ = {
 			isa = PBXGroup;
 			children = (
+				D3DC5EE620ECA53900F0B74B /* remember.txt */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
-				D3DC5EC420EC9B0100F0B74B /* MasterViewController.swift */,
-				D3DC5EC620EC9B0100F0B74B /* DetailViewController.swift */,
-				D3DC5EC820EC9B0100F0B74B /* Main.storyboard */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
+				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -106,9 +137,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookApp" */;
 			buildPhases = (
+				4A382C3252F169262AAA8C4F /* [CP] Check Pods Manifest.lock */,
 				D3DC5EBB20EC9B0100F0B74B /* Sources */,
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
 				D3DC5EBD20EC9B0100F0B74B /* Resources */,
+				556A7CDB6EF5F61DEE38FE72 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -123,6 +156,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EE120EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookAppTests" */;
 			buildPhases = (
+				FCA6B0A8BA294A7968665621 /* [CP] Check Pods Manifest.lock */,
 				D3DC5ED120EC9B0200F0B74B /* Sources */,
 				D3DC5ED220EC9B0200F0B74B /* Frameworks */,
 				D3DC5ED320EC9B0200F0B74B /* Resources */,
@@ -182,7 +216,7 @@
 			files = (
 				D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */,
 				D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */,
-				D3DC5ECA20EC9B0100F0B74B /* Main.storyboard in Resources */,
+				D3DC5EE720ECA53900F0B74B /* remember.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,13 +229,85 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		4A382C3252F169262AAA8C4F /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CommonplaceBookApp-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		556A7CDB6EF5F61DEE38FE72 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CommonplaceBook/CommonplaceBook.framework",
+				"${BUILT_PRODUCTS_DIR}/MDFInternationalization/MDFInternationalization.framework",
+				"${BUILT_PRODUCTS_DIR}/MDFTextAccessibility/MDFTextAccessibility.framework",
+				"${BUILT_PRODUCTS_DIR}/MaterialComponents/MaterialComponents.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionAnimator/MotionAnimator.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionInterchange/MotionInterchange.framework",
+				"${BUILT_PRODUCTS_DIR}/MotionTransitioning/MotionTransitioning.framework",
+				"${BUILT_PRODUCTS_DIR}/Yoga/yoga.framework",
+				"${BUILT_PRODUCTS_DIR}/YogaKit/YogaKit.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CommonplaceBook.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDFInternationalization.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDFTextAccessibility.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MaterialComponents.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionAnimator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionInterchange.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionTransitioning.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/yoga.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YogaKit.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FCA6B0A8BA294A7968665621 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-CommonplaceBookAppTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D3DC5EBB20EC9B0100F0B74B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D3DC5EC720EC9B0100F0B74B /* DetailViewController.swift in Sources */,
-				D3DC5EC520EC9B0100F0B74B /* MasterViewController.swift in Sources */,
+				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -225,14 +331,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		D3DC5EC820EC9B0100F0B74B /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D3DC5EC920EC9B0100F0B74B /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
 		D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -360,11 +458,13 @@
 		};
 		D3DC5EDF20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40E5CAEA0C56356AEC6FF6A6 /* Pods-CommonplaceBookApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -378,11 +478,13 @@
 		};
 		D3DC5EE020EC9B0200F0B74B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -396,6 +498,7 @@
 		};
 		D3DC5EE220EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9E64A6ABB8A8D87E6BFEE2DB /* Pods-CommonplaceBookAppTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -417,6 +520,7 @@
 		};
 		D3DC5EE320EC9B0200F0B74B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3859AFBAF83CDE4C1D927655 /* Pods-CommonplaceBookAppTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
