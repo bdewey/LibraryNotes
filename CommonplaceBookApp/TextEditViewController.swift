@@ -7,10 +7,16 @@ import MaterialComponents
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
   
-  let appBar = MDCAppBar()
+  let appBar: MDCAppBar = {
+    let appBar = MDCAppBar()
+    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
+    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
+    return appBar
+  }()
   let textView: UITextView = {
     let textView = UITextView(frame: .zero)
     textView.backgroundColor = .white
+    textView.font = Stylesheet.default.typographyScheme.body2
     return textView
   }()
   

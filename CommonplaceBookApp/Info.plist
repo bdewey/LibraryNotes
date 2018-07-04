@@ -22,6 +22,29 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>LibreFranklin-Black.otf</string>
+		<string>LibreFranklin-BlackItalic.otf</string>
+		<string>LibreFranklin-Bold.otf</string>
+		<string>LibreFranklin-ExtraBoldItalic.otf</string>
+		<string>LibreFranklin-ExtraLight.otf</string>
+		<string>LibreFranklin-ExtraLightItalic.otf</string>
+		<string>LibreFranklin-Light.otf</string>
+		<string>LibreFranklin-Medium.otf</string>
+		<string>LibreFranklin-MediumItalic.otf</string>
+		<string>LibreFranklin-Regular.otf</string>
+		<string>LibreFranklin-SemiBold.otf</string>
+		<string>LibreFranklin-ThinItalic.otf</string>
+		<string>Merriweather-Black.otf</string>
+		<string>Merriweather-BlackItalic.otf</string>
+		<string>Merriweather-Bold.otf</string>
+		<string>Merriweather-BoldItalic.otf</string>
+		<string>Merriweather-Italic.otf</string>
+		<string>Merriweather-Light.otf</string>
+		<string>Merriweather-LightItalic.otf</string>
+		<string>Merriweather-Regular.otf</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
