@@ -2,11 +2,14 @@
 
 import UIKit
 
+import CommonplaceBook
 import MaterialComponents
 
 fileprivate let reuseIdentifier = "HACKY_document"
 
 final class DocumentListViewController: UIViewController {
+  
+  private let commonplaceBook: CommonplaceBook
   
   private let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
@@ -15,7 +18,18 @@ final class DocumentListViewController: UIViewController {
     return appBar
   }()
   
-  init() {
+  private let dataSource: ArrayDataSource<URL> = ArrayDataSource {
+    (url, collectionView, indexPath) -> UICollectionViewCell in
+    let cell = collectionView.dequeueReusableCell(
+      withReuseIdentifier: reuseIdentifier,
+      for: indexPath
+      ) as! DocumentCollectionViewCell
+    cell.titleLabel.text = url.lastPathComponent
+    return cell
+  }
+  
+  init(commonplaceBook: CommonplaceBook) {
+    self.commonplaceBook = commonplaceBook
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Documents"
     self.addChild(appBar.headerViewController)
@@ -35,7 +49,7 @@ final class DocumentListViewController: UIViewController {
       DocumentCollectionViewCell.self,
       forCellWithReuseIdentifier: reuseIdentifier
     )
-    collectionView.dataSource = self
+    collectionView.dataSource = dataSource
     collectionView.delegate = self
     collectionView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
     return collectionView
@@ -55,6 +69,15 @@ final class DocumentListViewController: UIViewController {
     super.viewDidLoad()
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = collectionView
+    commonplaceBook.contents { (result) in
+      switch result {
+      case .success(let urls):
+        self.dataSource.models = urls
+        self.collectionView.reloadData()
+      case .failure(let error):
+        print("Unexpected error: \(error.localizedDescription)")
+      }
+    }
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -68,43 +91,6 @@ final class DocumentListViewController: UIViewController {
   {
     super.viewWillTransition(to: size, with: coordinator)
     layout.itemSize = CGSize(width: size.width, height: 48)
-  }
-}
-
-fileprivate let hackTemporaryData = [
-  "foo",
-  "bar",
-  "baz",
-  "remember.txt",
-  "time.log",
-  "categories.txt",
-]
-
-extension DocumentListViewController: UICollectionViewDataSource {
-  
-  func numberOfSections(in collectionView: UICollectionView) -> Int {
-    return 1
-  }
-  
-  func collectionView(
-    _ collectionView: UICollectionView,
-    numberOfItemsInSection section: Int
-    ) -> Int
-  {
-    return hackTemporaryData.count
-  }
-  
-  func collectionView(
-    _ collectionView: UICollectionView,
-    cellForItemAt indexPath: IndexPath
-    ) -> UICollectionViewCell
-  {
-    let cell = collectionView.dequeueReusableCell(
-      withReuseIdentifier: reuseIdentifier,
-      for: indexPath
-      ) as! DocumentCollectionViewCell
-    cell.titleLabel.text = hackTemporaryData[indexPath.row]
-    return cell
   }
 }
 
