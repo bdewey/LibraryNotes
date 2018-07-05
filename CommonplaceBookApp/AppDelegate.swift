@@ -13,7 +13,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     ) -> Bool
   {
     let window = UIWindow(frame: UIScreen.main.bounds)
-    window.rootViewController = TextEditViewController()
+    window.rootViewController = DocumentListViewController()
     window.makeKeyAndVisible()
     self.window = window
     return true
