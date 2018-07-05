@@ -2,10 +2,14 @@
 
 import UIKit
 
+import CommonplaceBook
 import MaterialComponents
 
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
+  
+  let commonplaceBook: CommonplaceBook
+  let documentURL: URL
   
   let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
@@ -13,6 +17,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
     return appBar
   }()
+  
   let textView: UITextView = {
     let textView = UITextView(frame: .zero)
     textView.backgroundColor = .white
@@ -21,7 +26,9 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }()
   
   /// Designated initializer.
-  init() {
+  init(commonplaceBook: CommonplaceBook, documentURL: URL) {
+    self.commonplaceBook = commonplaceBook
+    self.documentURL = documentURL
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
     self.addChild(appBar.headerViewController)
@@ -42,10 +49,18 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.headerViewController.headerView.trackingScrollView = textView
     textView.delegate = self
     
-    DispatchQueue.global(qos: .default).async {
-      let text = try! String(contentsOf: Bundle.main.url(forResource: "remember", withExtension: "txt")!)
-      DispatchQueue.main.async {
-        self.textView.text = text
+    commonplaceBook.openDocument(
+      at: documentURL.lastPathComponent,
+      using: PlainTextDocument.Factory.default
+    ) { (result) in
+      switch result {
+      case .success(let document):
+        self.textView.text = document.text
+      case .failure(let error):
+        let messageText = "Error opening \(self.documentURL): \(error.localizedDescription)"
+        let message = MDCSnackbarMessage(text: messageText)
+        MDCSnackbarManager.show(message)
+        print(messageText)
       }
     }
   }
