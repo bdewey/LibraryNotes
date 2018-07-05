@@ -13,11 +13,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, CommonplaceBookDele
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
-    ) -> Bool
-  {
+  ) -> Bool {
     commonplaceBook.delegate = self
     let window = UIWindow(frame: UIScreen.main.bounds)
-    window.rootViewController = DocumentListViewController(commonplaceBook: commonplaceBook)
+    let navigationController = UINavigationController(
+      rootViewController: DocumentListViewController(commonplaceBook: commonplaceBook)
+    )
+    navigationController.isNavigationBarHidden = true
+    window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
     return true

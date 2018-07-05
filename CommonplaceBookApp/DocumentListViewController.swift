@@ -95,6 +95,12 @@ final class DocumentListViewController: UIViewController {
 }
 
 extension DocumentListViewController: UICollectionViewDelegate {
+  
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    self.navigationController?.pushViewController(TextEditViewController(), animated: true)
+  }
+  
+  // MARK:- Forward scroll events on to the app bar.
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
     appBar.headerViewController.headerView.trackingScrollDidScroll()
   }
