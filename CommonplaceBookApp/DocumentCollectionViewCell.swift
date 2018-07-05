@@ -2,13 +2,18 @@
 
 import UIKit
 
+import MaterialComponents
+
 final class DocumentCollectionViewCell: UICollectionViewCell {
   
   let titleLabel = UILabel(frame: .zero)
-  let divider = UIView(frame: .zero)
+  private let divider = UIView(frame: .zero)
+  private var inkTouchController: MDCInkTouchController!
   
   override init(frame: CGRect) {
     super.init(frame: frame)
+    inkTouchController = MDCInkTouchController(view: contentView)
+    inkTouchController.addInkView()
     titleLabel.frame = self.contentView.bounds
     let stylesheet = Stylesheet.default
     titleLabel.font = stylesheet.typographyScheme.body2
