@@ -629,6 +629,7 @@
 		D2CC761F40B51081D9912EE8F8D48927 /* MDCAlertController.h in Headers */ = {isa = PBXBuildFile; fileRef = 1D369C9B029B9826E5EA0B0DCCA1431F /* MDCAlertController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D2DA4DD5DFBFA111473DCF946D228F39 /* ic_settings.png in Resources */ = {isa = PBXBuildFile; fileRef = AF96F4C4D622E7C3326C20FBCC618603 /* ic_settings.png */; };
 		D387F16251E7BF0151C47DDE3537D5FB /* Yoga.c in Sources */ = {isa = PBXBuildFile; fileRef = C10AC6C0E054429D3EF4F496198141BF /* Yoga.c */; settings = {COMPILER_FLAGS = "-fno-omit-frame-pointer -fexceptions -Wall -Werror -std=c11 -fPIC -fno-objc-arc"; }; };
+		D3A6EFA920EE47BF00AC428D /* MetadataQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFA820EE47BF00AC428D /* MetadataQuery.swift */; };
 		D3AF0F31EF6F5961D6BEBDD2B9236A7D /* MDCOverlayObserver.m in Sources */ = {isa = PBXBuildFile; fileRef = A8ADAE397418D5619542F6F3CE4DDAB0 /* MDCOverlayObserver.m */; };
 		D3BCDBAC8E5561B4FE32FB82CB7C2DA0 /* MaterialDialogsStrings_table.h in Headers */ = {isa = PBXBuildFile; fileRef = A5CDE9B644B15AC51D504FD86F72FFE8 /* MaterialDialogsStrings_table.h */; settings = {ATTRIBUTES = (Project, ); }; };
 		D4542B49009AAB655A44AC7ADB48325A /* ic_more_horiz@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = C8DEFE55ECB99C67E2216CE75E6EA2E5 /* ic_more_horiz@3x.png */; };
@@ -1670,6 +1671,7 @@
 		D2BF58DC24E3B5689609032BE7602509 /* ic_chevron_right.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_chevron_right.png; path = components/private/Icons/icons/ic_chevron_right/src/MaterialIcons_ic_chevron_right.bundle/ic_chevron_right.png; sourceTree = "<group>"; };
 		D2DF2181BF95E695FD455F948E9A9A36 /* MDCProgressView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCProgressView.m; path = components/ProgressView/src/MDCProgressView.m; sourceTree = "<group>"; };
 		D3A30CD81D29207C8EC647550BC55935 /* MDCOverlayObserverOverlay.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCOverlayObserverOverlay.m; path = components/private/Overlay/src/private/MDCOverlayObserverOverlay.m; sourceTree = "<group>"; };
+		D3A6EFA820EE47BF00AC428D /* MetadataQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataQuery.swift; sourceTree = "<group>"; };
 		D467A73E5782152F2699255890536BEB /* MDCTextInputControllerLegacyFullWidth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextInputControllerLegacyFullWidth.h; path = components/TextFields/src/MDCTextInputControllerLegacyFullWidth.h; sourceTree = "<group>"; };
 		D490BC44AA8EDAA3A5B72D0B45871ED2 /* MDMTransition.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMTransition.h; path = src/MDMTransition.h; sourceTree = "<group>"; };
 		D4A1CBE98A7BAE7A42E288339835E8E3 /* MDCTextFieldColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextFieldColorThemer.h; path = components/TextFields/src/ColorThemer/MDCTextFieldColorThemer.h; sourceTree = "<group>"; };
@@ -3086,8 +3088,9 @@
 			isa = PBXGroup;
 			children = (
 				350D77DEC5AFDD0B6ED045A41F6B9908 /* CommonplaceBook.swift */,
-				F974847D3FFAD15147F57C1FB922A430 /* Result.swift */,
+				D3A6EFA820EE47BF00AC428D /* MetadataQuery.swift */,
 				4819566179D86D34CCF67DA562B8B76E /* Pod */,
+				F974847D3FFAD15147F57C1FB922A430 /* Result.swift */,
 				DBFD9582ABA9D5A8BBE7E6054CF08FDA /* Support Files */,
 			);
 			name = CommonplaceBook;
@@ -5234,6 +5237,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C205F2E5B23057EAE10FE9CDAF48300 /* CommonplaceBook-dummy.m in Sources */,
+				D3A6EFA920EE47BF00AC428D /* MetadataQuery.swift in Sources */,
 				002154E1F03091B9CE1E4A34052DC05C /* CommonplaceBook.swift in Sources */,
 				F992C360E46D21E6E27B083C91879B96 /* Result.swift in Sources */,
 			);

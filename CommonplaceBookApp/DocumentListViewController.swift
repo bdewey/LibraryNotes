@@ -18,13 +18,13 @@ final class DocumentListViewController: UIViewController {
     return appBar
   }()
   
-  private let dataSource: ArrayDataSource<URL> = ArrayDataSource {
-    (url, collectionView, indexPath) -> UICollectionViewCell in
+  private let dataSource: ArrayDataSource<FileMetadata> = ArrayDataSource {
+    (metadata, collectionView, indexPath) -> UICollectionViewCell in
     let cell = collectionView.dequeueReusableCell(
       withReuseIdentifier: reuseIdentifier,
       for: indexPath
       ) as! DocumentCollectionViewCell
-    cell.titleLabel.text = url.lastPathComponent
+    cell.titleLabel.text = metadata.displayName
     return cell
   }
   
@@ -55,6 +55,8 @@ final class DocumentListViewController: UIViewController {
     return collectionView
   }()
   
+  var metadataQuery: MetadataQuery?
+  
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -69,15 +71,7 @@ final class DocumentListViewController: UIViewController {
     super.viewDidLoad()
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = collectionView
-    commonplaceBook.contents { (result) in
-      switch result {
-      case .success(let urls):
-        self.dataSource.models = urls
-        self.collectionView.reloadData()
-      case .failure(let error):
-        print("Unexpected error: \(error.localizedDescription)")
-      }
-    }
+    metadataQuery = MetadataQuery(delegate: self)
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -97,9 +91,9 @@ final class DocumentListViewController: UIViewController {
 extension DocumentListViewController: UICollectionViewDelegate {
   
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let url = dataSource.models[indexPath.row]
+    let metadata = dataSource.models[indexPath.row]
     self.navigationController?.pushViewController(
-      TextEditViewController(commonplaceBook: commonplaceBook, documentURL: url),
+      TextEditViewController(commonplaceBook: commonplaceBook, documentURL: metadata.fileURL),
       animated: true
     )
   }
@@ -119,5 +113,13 @@ extension DocumentListViewController: UICollectionViewDelegate {
   
   func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
     appBar.headerViewController.headerView.trackingScrollWillEndDragging(withVelocity: velocity, targetContentOffset: targetContentOffset)
+  }
+}
+
+extension DocumentListViewController: MetadataQueryDelegate {
+  
+  func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
+    dataSource.models = items.map { FileMetadata(metadataItem: $0) }
+    collectionView.reloadData()
   }
 }
