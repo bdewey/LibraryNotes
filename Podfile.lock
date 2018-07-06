@@ -433,6 +433,7 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.0.4)
   - MDFTextAccessibility (1.2.0)
+  - MiniMarkdown (0.1.0)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
@@ -444,6 +445,7 @@ PODS:
 DEPENDENCIES:
   - CommonplaceBook (from `../CommonplaceBook`)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
+  - MiniMarkdown (from `../MiniMarkdown`)
   - Yoga (from `https://github.com/facebook/yoga`, tag `1.7.0`)
   - YogaKit (from `https://github.com/facebook/yoga`, tag `1.7.0`)
 
@@ -460,6 +462,8 @@ EXTERNAL SOURCES:
     :path: "../CommonplaceBook"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
+  MiniMarkdown:
+    :path: "../MiniMarkdown"
   Yoga:
     :git: https://github.com/facebook/yoga
     :tag: 1.7.0
@@ -483,12 +487,13 @@ SPEC CHECKSUMS:
   MaterialComponents: 33d741abcd9caa9ca04bc8191e42f7e034f3022d
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
+  MiniMarkdown: 44077d1c11e1f179e8efacbd9cc8636fd9c5e62e
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
   Yoga: 983d0c15b9676d5beeea25103fd5673fd481b123
   YogaKit: 3e547ded4f2cdcd353163f239b548d1ca2ad0c4a
 
-PODFILE CHECKSUM: 362fb3160185161fa200b14ca5f56c33f0af2e92
+PODFILE CHECKSUM: 4b71656b3c3e15bcdd18157f2cb005238a3eee20
 
 COCOAPODS: 1.5.0
