@@ -12,10 +12,18 @@ final class PlainTextDocument: UIDocument {
   }
 
   /// The document text.
-  var text: String = ""
+  private(set) var text: String = ""
   
   /// Any internal error from working with the file.
-  var previousError: Swift.Error?
+  private var previousError: Swift.Error?
+  
+  public func applyChange(_ change: StringChange) {
+    let inverse = text.inverse(of: change)
+    undoManager.registerUndo(withTarget: self) { (doc) in
+      doc.text.applyChange(inverse)
+    }
+    text.applyChange(change)
+  }
 
   
   override func contents(forType typeName: String) throws -> Any {

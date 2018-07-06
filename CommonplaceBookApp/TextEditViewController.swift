@@ -8,6 +8,8 @@ import MaterialComponents
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
   
+  // Init-time state.
+  
   let commonplaceBook: CommonplaceBook
   let documentURL: URL
   
@@ -38,6 +40,17 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     fatalError("init(coder:) has not been implemented")
   }
   
+  // Load-time state.
+  
+  var changeDelegate: TextStorageChangeCreatingDelegate!
+  var document: PlainTextDocument? {
+    didSet {
+      changeDelegate.suppressChangeBlock {
+        self.textView.text = document?.text
+      }
+    }
+  }
+  
   // MARK: - Lifecycle
   override func loadView() {
     self.view = textView
@@ -48,14 +61,21 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = textView
     textView.delegate = self
-    
+    changeDelegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](change) in
+      self?.document?.applyChange(change)
+    })
+    textView.textStorage.delegate = changeDelegate
+  }
+  
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
     commonplaceBook.openDocument(
       at: documentURL.lastPathComponent,
       using: PlainTextDocument.Factory.default
     ) { (result) in
       switch result {
       case .success(let document):
-        self.textView.text = document.text
+        self.document = document
       case .failure(let error):
         let messageText = "Error opening \(self.documentURL): \(error.localizedDescription)"
         let message = MDCSnackbarMessage(text: messageText)
@@ -63,6 +83,13 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
         print(messageText)
       }
     }
+  }
+  
+  override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    document?.close(completionHandler: { (_) in
+      self.document = nil
+    })
   }
   
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
