@@ -4,6 +4,7 @@ import UIKit
 
 import CommonplaceBook
 import MaterialComponents
+import MiniMarkdown
 
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
@@ -20,10 +21,31 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     return appBar
   }()
   
-  let textView: UITextView = {
-    let textView = UITextView(frame: .zero)
-    textView.backgroundColor = .white
-    textView.font = Stylesheet.default.typographyScheme.body2
+  private lazy var textStorage: MiniMarkdownTextStorage = {
+    let textStorage = MiniMarkdownTextStorage()
+    textStorage.defaultAttributes = NSAttributedString.Attributes(
+      Stylesheet.default.typographyScheme.body2
+    )
+    // TODO: Change font
+    textStorage.stylesheet.heading = { (block, attributes) in
+      attributes.fontSize = 20
+    }
+    textStorage.stylesheet.emphasis = { (_, attributes) in
+      attributes.italic = true
+    }
+    textStorage.stylesheet.bold = { (_, attributes) in
+      attributes.bold = true
+    }
+    return textStorage
+  }()
+  
+  private lazy var textView: UITextView = {
+    let layoutManager = NSLayoutManager()
+    textStorage.addLayoutManager(layoutManager)
+    let textContainer = NSTextContainer()
+    layoutManager.addTextContainer(textContainer)
+    let textView = UITextView(frame: .zero, textContainer: textContainer)
+    textView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
     return textView
   }()
   
