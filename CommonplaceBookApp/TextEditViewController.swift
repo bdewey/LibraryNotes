@@ -6,6 +6,27 @@ import CommonplaceBook
 import MaterialComponents
 import MiniMarkdown
 
+fileprivate struct KeyboardInfo {
+  var animationCurve: UIView.AnimationCurve
+  var animationDuration: Double
+  var isLocal: Bool
+  var frameBegin: CGRect
+  var frameEnd: CGRect
+}
+
+extension KeyboardInfo {
+  init?(_ notification: Notification) {
+    guard notification.name == UIResponder.keyboardWillShowNotification || notification.name == UIResponder.keyboardWillChangeFrameNotification else { return nil }
+    let u = notification.userInfo!
+    
+    animationCurve = UIView.AnimationCurve(rawValue: u[UIWindow.keyboardAnimationCurveUserInfoKey] as! Int)!
+    animationDuration = u[UIWindow.keyboardAnimationDurationUserInfoKey] as! Double
+    isLocal = u[UIWindow.keyboardIsLocalUserInfoKey] as! Bool
+    frameBegin = u[UIWindow.keyboardFrameBeginUserInfoKey] as! CGRect
+    frameEnd = u[UIWindow.keyboardFrameEndUserInfoKey] as! CGRect
+  }
+}
+
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
   
@@ -74,12 +95,10 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }
   
   // MARK: - Lifecycle
-  override func loadView() {
-    self.view = textView
-  }
-  
   override func viewDidLoad() {
     super.viewDidLoad()
+    view.addSubview(textView)
+    textView.frame = view.bounds
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = textView
     textView.delegate = self
@@ -105,6 +124,14 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
         print(messageText)
       }
     }
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(handleKeyboardNotification(_:)),
+                                           name: UIResponder.keyboardWillHideNotification,
+                                           object: nil)
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(handleKeyboardNotification(_:)),
+                                           name: UIResponder.keyboardWillChangeFrameNotification,
+                                           object: nil)
   }
   
   override func viewDidDisappear(_ animated: Bool) {
@@ -112,7 +139,20 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     document?.close(completionHandler: { (_) in
       self.document = nil
     })
+    NotificationCenter.default.removeObserver(self)
   }
+  
+  // MARK: - Keyboard
+  
+  @objc func handleKeyboardNotification(_ notification: Notification) {
+    guard let keyboardInfo = KeyboardInfo(notification) else { return }
+    var textViewFrame = view.bounds
+    let keyboardFrame = keyboardInfo.frameEnd
+    textViewFrame.size.height -= keyboardFrame.height
+    textView.frame = textViewFrame
+  }
+  
+  // MARK: - Scrolling
   
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
     appBar.headerViewController.headerView.trackingScrollDidScroll()
