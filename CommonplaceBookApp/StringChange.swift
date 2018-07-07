@@ -13,7 +13,7 @@ extension String {
   public mutating func applyChange(_ change: StringChange) {
     let range = Range(change.rangeToReplace, in: self)!
     self.replaceSubrange(range, with: change.replacement)
-    assert(self == change.finalResult)
+//    assert(self == change.finalResult)
   }
   
   public func applyingChange(_ change: StringChange) -> String {
