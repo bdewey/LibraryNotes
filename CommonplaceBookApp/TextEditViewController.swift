@@ -95,12 +95,15 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }
   
   // MARK: - Lifecycle
+  override func loadView() {
+    self.view = textView
+  }
+  
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.addSubview(textView)
-    textView.frame = view.bounds
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = textView
+    appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
     changeDelegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](change) in
       self?.document?.applyChange(change)
@@ -146,10 +149,9 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   
   @objc func handleKeyboardNotification(_ notification: Notification) {
     guard let keyboardInfo = KeyboardInfo(notification) else { return }
-    var textViewFrame = view.bounds
-    let keyboardFrame = keyboardInfo.frameEnd
-    textViewFrame.size.height -= keyboardFrame.height
-    textView.frame = textViewFrame
+    textView.contentInset.bottom = keyboardInfo.frameEnd.height
+    textView.scrollIndicatorInsets = textView.contentInset
+    textView.scrollRangeToVisible(textView.selectedRange)
   }
   
   // MARK: - Scrolling
