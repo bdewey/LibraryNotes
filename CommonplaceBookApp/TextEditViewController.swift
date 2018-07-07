@@ -50,6 +50,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     // TODO: Change font
     textStorage.stylesheet.heading = { (block, attributes) in
       attributes.fontSize = 20
+      attributes.familyName = "LibreFranklin-Medium"
     }
     textStorage.stylesheet.emphasis = { (_, attributes) in
       attributes.italic = true
@@ -57,6 +58,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textStorage.stylesheet.bold = { (_, attributes) in
       attributes.bold = true
     }
+    textStorage.stylesheet.list = { $1.list = true }
     return textStorage
   }()
   
@@ -67,6 +69,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     layoutManager.addTextContainer(textContainer)
     let textView = UITextView(frame: .zero, textContainer: textContainer)
     textView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
+    textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()
   
@@ -150,7 +153,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   @objc func handleKeyboardNotification(_ notification: Notification) {
     guard let keyboardInfo = KeyboardInfo(notification) else { return }
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
-    textView.scrollIndicatorInsets = textView.contentInset
+    textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
   }
   
