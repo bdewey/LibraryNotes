@@ -59,11 +59,27 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       attributes.bold = true
     }
     textStorage.stylesheet.list = { $1.list = true }
+    textStorage.stylesheet.customizations.listItem = { (string, block, attributes) in
+      if let firstWhitespaceIndex = block.slice.substring.firstIndex(where: { $0.isWhitespace }) {
+        var attributes = attributes
+        attributes[.treatAsTab] = true
+        string.addAttributes(
+          attributes,
+          range: NSRange(
+            firstWhitespaceIndex...firstWhitespaceIndex,
+            in: block.slice.string
+          )
+        )
+      }
+    }
     return textStorage
   }()
   
+  private let layoutManagerDelegate = TreatAsTabLayoutManagerDelegate()
+  
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()
+    layoutManager.delegate = layoutManagerDelegate
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
