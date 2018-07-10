@@ -16,7 +16,17 @@
     "tag": "0.1.0"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "11.0"
   },
-  "source_files": "MiniMarkdown/Classes/**/*"
+  "source_files": "MiniMarkdown/Classes/**/*",
+  "testspecs": [
+    {
+      "name": "Tests",
+      "test_type": "unit",
+      "source_files": "MiniMarkdown/Tests/**/*",
+      "resource_bundles": {
+        "TestContent": "MiniMarkdown/TestContent/*"
+      }
+    }
+  ]
 }

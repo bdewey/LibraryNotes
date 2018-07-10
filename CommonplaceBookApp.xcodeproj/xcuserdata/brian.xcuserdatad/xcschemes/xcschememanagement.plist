@@ -7,7 +7,20 @@
 		<key>CommonplaceBookApp.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>23</integer>
+			<integer>24</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>D3DC5EBE20EC9B0100F0B74B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D3DC5ED420EC9B0200F0B74B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
 		</dict>
 	</dict>
 </dict>

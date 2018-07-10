@@ -9,7 +9,7 @@ target 'CommonplaceBookApp' do
 
   # Pods for remember
   pod 'CommonplaceBook', :path => '../CommonplaceBook'
-  pod 'MiniMarkdown', :path => '../MiniMarkdown'
+  pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'Yoga', :git => 'https://github.com/facebook/yoga', :tag => '1.7.0'
   pod 'YogaKit', :git => 'https://github.com/facebook/yoga', :tag => '1.7.0'
