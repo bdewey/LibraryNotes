@@ -24,24 +24,7 @@
 #import "MaterialMath.h"
 #import "MDCBottomNavigationItemBadge.h"
 
-static NSString *const MDCBottomNavigationItemViewTitleBelowIconKey =
-    @"MDCBottomNavigationItemViewTitleBelowIconKey";
-static NSString *const MDCBottomNavigationItemViewSelectedKey =
-    @"MDCBottomNavigationItemViewSelectedKey";
-static NSString *const MDCBottomNavigationItemViewTitleVisibilityKey =
-    @"MDCBottomNavigationItemViewTitleVisibilityKey";
-static NSString *const MDCBottomNavigationItemViewTitleKey = @"MDCBottomNavigationItemViewTitleKey";
-static NSString *const MDCBottomNavigationItemViewItemTitleFontKey =
-    @"MDCBottomNavigationItemViewItemTitleFontKey";
-static NSString *const MDCBottomNavigationItemViewBadgeColorKey =
-    @"MDCBottomNavigationItemViewBadgeColorKey";
-static NSString *const MDCBottomNavigationItemViewSelectedItemTintColorKey =
-    @"MDCBottomNavigationItemViewSelectedItemTintColorKey";
-static NSString *const MDCBottomNavigationItemViewUnselectedItemTintColorKey =
-    @"MDCBottomNavigationItemViewUnselectedItemTintColorKey";
-
 static const CGFloat MDCBottomNavigationItemViewInkOpacity = 0.150f;
-static const CGFloat kMDCBottomNavigationItemViewItemInset = 8.f;
 static const CGFloat MDCBottomNavigationItemViewTitleFontSize = 12.f;
 
 // The duration of the selection transition animation.
@@ -99,51 +82,9 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
              @"Unexpected number of subviews. Expected %lu but restored %lu. Unarchiving may fail.",
              (unsigned long)self.subviews.count, (unsigned long)totalViewsProcessed);
 
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewTitleBelowIconKey]) {
-      _titleBelowIcon = [aDecoder decodeBoolForKey:MDCBottomNavigationItemViewTitleBelowIconKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewSelectedKey]) {
-      _selected = [aDecoder decodeBoolForKey:MDCBottomNavigationItemViewSelectedKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewTitleVisibilityKey]) {
-      _titleVisibility =
-          [aDecoder decodeIntegerForKey:MDCBottomNavigationItemViewTitleVisibilityKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewTitleKey]) {
-      _title = [aDecoder decodeObjectForKey:MDCBottomNavigationItemViewTitleKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewItemTitleFontKey]) {
-      _itemTitleFont = [aDecoder decodeObjectForKey:MDCBottomNavigationItemViewItemTitleFontKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewBadgeColorKey]) {
-      _badgeColor = [aDecoder decodeObjectForKey:MDCBottomNavigationItemViewBadgeColorKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewSelectedItemTintColorKey]) {
-      _selectedItemTintColor =
-          [aDecoder decodeObjectForKey:MDCBottomNavigationItemViewSelectedItemTintColorKey];
-    }
-    if ([aDecoder containsValueForKey:MDCBottomNavigationItemViewUnselectedItemTintColorKey]) {
-      _unselectedItemTintColor =
-      [aDecoder decodeObjectForKey:MDCBottomNavigationItemViewUnselectedItemTintColorKey];
-    }
-
     [self commonMDCBottomNavigationItemViewInit];
   }
   return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder {
-  [super encodeWithCoder:aCoder];
-  [aCoder encodeBool:self.titleBelowIcon forKey:MDCBottomNavigationItemViewTitleBelowIconKey];
-  [aCoder encodeBool:self.selected forKey:MDCBottomNavigationItemViewSelectedKey];
-  [aCoder encodeInteger:self.titleVisibility forKey:MDCBottomNavigationItemViewTitleVisibilityKey];
-  [aCoder encodeObject:self.title forKey:MDCBottomNavigationItemViewTitleKey];
-  [aCoder encodeObject:self.itemTitleFont forKey:MDCBottomNavigationItemViewItemTitleFontKey];
-  [aCoder encodeObject:self.badgeColor  forKey:MDCBottomNavigationItemViewBadgeColorKey];
-  [aCoder encodeObject:self.selectedItemTintColor
-                forKey:MDCBottomNavigationItemViewSelectedItemTintColorKey];
-  [aCoder encodeObject:self.unselectedItemTintColor
-                forKey:MDCBottomNavigationItemViewUnselectedItemTintColorKey];
 }
 
 - (void)commonMDCBottomNavigationItemViewInit {
@@ -215,26 +156,32 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
 }
 
 - (void)centerLayoutAnimated:(BOOL)animated {
+  CGRect contentBoundingRect = UIEdgeInsetsInsetRect(self.bounds, self.contentInsets);
+  CGRect iconBounds = self.iconImageView.bounds;
+  CGFloat centerY = CGRectGetMidY(contentBoundingRect);
+  CGFloat centerX = CGRectGetMidX(contentBoundingRect);
+  UIUserInterfaceLayoutDirection layoutDirection = self.mdf_effectiveUserInterfaceLayoutDirection;
+  BOOL isRTL = layoutDirection == UIUserInterfaceLayoutDirectionRightToLeft;
+  if (isRTL) {
+    centerX = CGRectGetWidth(self.bounds) - centerX;
+  }
+
   if (self.titleBelowIcon) {
-    CGPoint iconImageViewCenter =
-        CGPointMake(CGRectGetMidX(self.bounds), CGRectGetHeight(self.iconImageView.bounds) / 2 +
-                    kMDCBottomNavigationItemViewItemInset);
-    BOOL titleVisibilityNever = self.selected &&
-        self.titleVisibility == MDCBottomNavigationBarTitleVisibilityNever;
-    BOOL titleVisibilitySelectedNever = !self.selected &&
-        (self.titleVisibility == MDCBottomNavigationBarTitleVisibilitySelected ||
-         self.titleVisibility == MDCBottomNavigationBarTitleVisibilityNever);
-    if (titleVisibilityNever) {
-      iconImageViewCenter = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
-    } else if (titleVisibilitySelectedNever) {
-      iconImageViewCenter = CGPointMake(CGRectGetMidX(self.bounds), CGRectGetMidY(self.bounds));
+    BOOL titleHidden =
+        self.titleVisibility == MDCBottomNavigationBarTitleVisibilityNever ||
+        (self.titleVisibility == MDCBottomNavigationBarTitleVisibilitySelected && !self.selected);
+    CGFloat iconHeight = CGRectGetHeight(self.iconImageView.bounds);
+    CGFloat labelHeight = CGRectGetHeight(self.label.bounds);
+    CGFloat totalContentHeight = iconHeight;
+    if (!titleHidden) {
+      totalContentHeight += labelHeight + self.contentVerticalMargin;
     }
+    CGPoint iconImageViewCenter =
+        CGPointMake(centerX, centerY - totalContentHeight / 2 + iconHeight / 2);
     CGPoint badgeCenter =
-        CGPointMake(CGRectGetMidX(self.bounds) + CGRectGetWidth(self.iconImageView.bounds) / 2,
-                    iconImageViewCenter.y - CGRectGetMidX(self.iconImageView.bounds));
-    self.label.center =
-        CGPointMake(CGRectGetMidX(self.bounds), CGRectGetHeight(self.bounds) -
-                    CGRectGetHeight(self.label.bounds) / 2 - kMDCBottomNavigationItemViewItemInset);
+        CGPointMake(iconImageViewCenter.x + CGRectGetMidX(iconBounds) * (isRTL ? -1 : 1),
+                    iconImageViewCenter.y - CGRectGetMidY(iconBounds));
+    self.label.center = CGPointMake(centerX, centerY + totalContentHeight / 2 - labelHeight / 2);
     if (animated) {
       [UIView animateWithDuration:kMDCBottomNavigationItemViewTransitionDuration animations:^(void) {
         self.iconImageView.center = iconImageViewCenter;
@@ -246,35 +193,54 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
     }
     self.label.textAlignment = NSTextAlignmentCenter;
   } else {
-    UIUserInterfaceLayoutDirection layoutDirection = self.mdf_effectiveUserInterfaceLayoutDirection;
-    if (layoutDirection == UIUserInterfaceLayoutDirectionLeftToRight) {
+    CGFloat contentsWidth =
+        CGRectGetWidth(self.iconImageView.bounds) + CGRectGetWidth(self.label.bounds);
+    if (!isRTL) {
       CGPoint iconImageViewCenter =
-          CGPointMake(CGRectGetMidX(self.bounds) - CGRectGetWidth(self.bounds) * 0.2f,
-                      CGRectGetMidY(self.bounds));
+          CGPointMake(centerX - CGRectGetWidth(contentBoundingRect) * 0.2f, centerY);
       self.iconImageView.center = iconImageViewCenter;
-      self.label.center =
-          CGPointMake(iconImageViewCenter.x + CGRectGetWidth(self.iconImageView.bounds) +
-                      CGRectGetWidth(self.label.bounds) / 2,
-                      CGRectGetMidY(self.bounds));
+      CGFloat labelCenterX =
+          iconImageViewCenter.x + contentsWidth / 2 + self.contentHorizontalMargin;
+      self.label.center = CGPointMake(labelCenterX, centerY);
       self.badge.center =
-          CGPointMake(CGRectGetMidX(self.bounds) - CGRectGetWidth(self.bounds) * 0.2f +
-                      CGRectGetWidth(self.iconImageView.bounds) / 2,
-                      iconImageViewCenter.y - CGRectGetMidX(self.iconImageView.bounds));
+          CGPointMake(iconImageViewCenter.x + CGRectGetMidX(iconBounds),
+                      iconImageViewCenter.y - CGRectGetMidY(iconBounds));
       self.label.textAlignment = NSTextAlignmentLeft;
     } else {
       CGPoint iconImageViewCenter =
-          CGPointMake(CGRectGetMidX(self.bounds) + CGRectGetWidth(self.bounds) * 0.2f,
-                      CGRectGetMidY(self.bounds));
+          CGPointMake(centerX + CGRectGetWidth(contentBoundingRect) * 0.2f, centerY);
       self.iconImageView.center = iconImageViewCenter;
-      self.label.center =
-          CGPointMake(iconImageViewCenter.x - CGRectGetWidth(self.iconImageView.bounds) -
-                      CGRectGetWidth(self.label.bounds) / 2,
-                      CGRectGetMidY(self.bounds));
+      CGFloat labelCenterX =
+          iconImageViewCenter.x - contentsWidth / 2 - self.contentHorizontalMargin;
+      self.label.center = CGPointMake(labelCenterX, centerY);
       self.badge.center =
-          CGPointMake(CGRectGetMidX(self.bounds) + CGRectGetWidth(self.bounds) * 0.2f +
-                      CGRectGetWidth(self.iconImageView.bounds) / 2,
-                      iconImageViewCenter.y - CGRectGetMidX(self.iconImageView.bounds));
+          CGPointMake(iconImageViewCenter.x - CGRectGetMidX(iconBounds),
+                      iconImageViewCenter.y - CGRectGetMidY(iconBounds));
       self.label.textAlignment = NSTextAlignmentRight;
+    }
+  }
+}
+
+- (void)updateLabelVisibility {
+  if (self.selected) {
+    switch (self.titleVisibility) {
+      case MDCBottomNavigationBarTitleVisibilitySelected:
+      case MDCBottomNavigationBarTitleVisibilityAlways:
+        self.label.hidden = NO;
+        break;
+      case MDCBottomNavigationBarTitleVisibilityNever:
+        self.label.hidden = YES;
+        break;
+    }
+  } else {
+    switch (self.titleVisibility) {
+      case MDCBottomNavigationBarTitleVisibilitySelected:
+      case MDCBottomNavigationBarTitleVisibilityNever:
+        self.label.hidden = YES;
+        break;
+      case MDCBottomNavigationBarTitleVisibilityAlways:
+        self.label.hidden = NO;
+        break;
     }
   }
 }
@@ -317,33 +283,13 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
     self.iconImageView.tintColor = self.selectedItemTintColor;
     self.button.accessibilityTraits |= UIAccessibilityTraitSelected;
     self.iconImageView.image = (self.selectedImage) ? self.selectedImage : self.image;
-    switch (self.titleVisibility) {
-      case MDCBottomNavigationBarTitleVisibilitySelected:
-        self.label.hidden = NO;
-        break;
-      case MDCBottomNavigationBarTitleVisibilityAlways:
-        self.label.hidden = NO;
-        break;
-      case MDCBottomNavigationBarTitleVisibilityNever:
-        self.label.hidden = YES;
-        break;
-    }
+    [self updateLabelVisibility];
   } else {
     self.label.textColor = self.unselectedItemTintColor;
     self.iconImageView.tintColor = self.unselectedItemTintColor;
     self.button.accessibilityTraits &= ~UIAccessibilityTraitSelected;
     self.iconImageView.image = self.image;
-    switch (self.titleVisibility) {
-      case MDCBottomNavigationBarTitleVisibilitySelected:
-        self.label.hidden = YES;
-        break;
-      case MDCBottomNavigationBarTitleVisibilityAlways:
-        self.label.hidden = NO;
-        break;
-      case MDCBottomNavigationBarTitleVisibilityNever:
-        self.label.hidden = YES;
-        break;
-    }
+    [self updateLabelVisibility];
   }
   [self centerLayoutAnimated:animated];
 }
@@ -418,6 +364,11 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
   self.button.accessibilityLabel = [self accessibilityLabelWithTitle:_title];
 }
 
+-(void)setTitleVisibility:(MDCBottomNavigationBarTitleVisibility)titleVisibility {
+  _titleVisibility = titleVisibility;
+  [self updateLabelVisibility];
+}
+
 - (void)setItemTitleFont:(UIFont *)itemTitleFont {
   _itemTitleFont = itemTitleFont;
   self.label.font = itemTitleFont;
@@ -430,6 +381,14 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
 
 - (NSString *)accessibilityValue {
   return self.button.accessibilityValue;
+}
+
+-(void)setAccessibilityIdentifier:(NSString *)accessibilityIdentifier {
+  self.button.accessibilityIdentifier = accessibilityIdentifier;
+}
+
+-(NSString *)accessibilityIdentifier {
+  return self.button.accessibilityIdentifier;
 }
 
 #pragma mark - Resource bundle

@@ -33,33 +33,6 @@ static const CGFloat MDCTextInputControllerFullWidthHorizontalInnerPadding = 8.f
 static const CGFloat MDCTextInputControllerFullWidthHorizontalPadding = 16.f;
 static const CGFloat MDCTextInputControllerFullWidthVerticalPadding = 20.f;
 
-static NSString *const MDCTextInputControllerFullWidthCharacterCounterKey =
-    @"MDCTextInputControllerFullWidthCharacterCounterKey";
-static NSString *const MDCTextInputControllerFullWidthCharacterCountViewModeKey =
-    @"MDCTextInputControllerFullWidthCharacterCountViewModeKey";
-static NSString *const MDCTextInputControllerFullWidthCharacterCountMaxKey =
-    @"MDCTextInputControllerFullWidthCharacterCountMaxKey";
-static NSString *const MDCTextInputControllerFullWidthErrorAccessibilityValueKey =
-    @"MDCTextInputControllerFullWidthErrorAccessibilityValueKey";
-static NSString *const MDCTextInputControllerFullWidthErrorColorKey =
-    @"MDCTextInputControllerFullWidthErrorColorKey";
-static NSString *const MDCTextInputControllerFullWidthErrorTextKey =
-    @"MDCTextInputControllerFullWidthErrorTextKey";
-static NSString *const MDCTextInputControllerFullWidthHelperTextKey =
-    @"MDCTextInputControllerFullWidthHelperTextKey";
-static NSString *const MDCTextInputControllerFullWidthInlinePlaceholderColorKey =
-    @"MDCTextInputControllerFullWidthInlinePlaceholderColorKey";
-static NSString *const MDCTextInputControllerFullWidthInlinePlaceholderFontKey =
-    @"MDCTextInputControllerFullWidthInlinePlaceholderFontKey";
-static NSString *const MDCTextInputControllerFullWidthPresentationStyleKey =
-    @"MDCTextInputControllerFullWidthPresentationStyleKey";
-static NSString *const MDCTextInputControllerFullWidthTextInputKey =
-    @"MDCTextInputControllerFullWidthTextInputKey";
-static NSString *const MDCTextInputControllerFullWidthTrailingUnderlineLabelTextColor =
-    @"MDCTextInputControllerFullWidthTrailingUnderlineLabelTextColor";
-static NSString *const MDCTextInputControllerFullWidthTrailingUnderlineLabelFontKey =
-    @"MDCTextInputControllerFullWidthTrailingUnderlineLabelFontKey";
-
 static inline UIColor *MDCTextInputControllerFullWidthInlinePlaceholderTextColorDefault() {
   return [UIColor colorWithWhite:0 alpha:MDCTextInputControllerFullWidthHintTextOpacity];
 }
@@ -78,6 +51,7 @@ static UIColor *_trailingUnderlineLabelTextColorDefault;
 
 static UIFont *_inlinePlaceholderFontDefault;
 static UIFont *_textInputFontDefault;
+static UIColor *_textInputClearButtonTintColorDefault;
 static UIFont *_trailingUnderlineLabelFontDefault;
 
 @interface MDCTextInputControllerFullWidth () {
@@ -92,6 +66,7 @@ static UIFont *_trailingUnderlineLabelFontDefault;
 
   UIFont *_inlinePlaceholderFont;
   UIFont *_textInputFont;
+  UIColor *_textInputClearButtonTintColor;
   UIFont *_trailingUnderlineLabelFont;
 }
 
@@ -141,35 +116,6 @@ static UIFont *_trailingUnderlineLabelFontDefault;
   self = [super init];
   if (self) {
     [self commonMDCTextInputControllerFullWidthInitialization];
-
-    _characterCounter =
-        [aDecoder decodeObjectOfClass:[NSObject<MDCTextInputCharacterCounter> class]
-                               forKey:MDCTextInputControllerFullWidthCharacterCounterKey];
-    if ([aDecoder containsValueForKey:MDCTextInputControllerFullWidthCharacterCountMaxKey]) {
-      _characterCountMax =
-          [aDecoder decodeIntegerForKey:MDCTextInputControllerFullWidthCharacterCountMaxKey];
-    }
-    if ([aDecoder containsValueForKey:MDCTextInputControllerFullWidthCharacterCountViewModeKey]) {
-      _characterCountViewMode =
-          [aDecoder decodeIntegerForKey:MDCTextInputControllerFullWidthCharacterCountViewModeKey];
-    }
-    _errorColor = [aDecoder decodeObjectOfClass:[UIColor class]
-                                         forKey:MDCTextInputControllerFullWidthErrorColorKey];
-    _inlinePlaceholderColor =
-        [aDecoder decodeObjectOfClass:[UIColor class]
-                               forKey:MDCTextInputControllerFullWidthInlinePlaceholderColorKey];
-    _inlinePlaceholderFont =
-        [aDecoder decodeObjectOfClass:[UIFont class]
-                               forKey:MDCTextInputControllerFullWidthInlinePlaceholderFontKey];
-    _textInput =
-        [aDecoder decodeObjectOfClass:[UIView<MDCTextInput> class]
-                               forKey:MDCTextInputControllerFullWidthTextInputKey];
-    _trailingUnderlineLabelFont =
-        [aDecoder decodeObjectOfClass:[UIFont class]
-                               forKey:MDCTextInputControllerFullWidthTrailingUnderlineLabelFontKey];
-    _trailingUnderlineLabelTextColor = [aDecoder
-        decodeObjectOfClass:[UIColor class]
-                     forKey:MDCTextInputControllerFullWidthTrailingUnderlineLabelTextColor];
   }
   return self;
 }
@@ -182,32 +128,6 @@ static UIFont *_trailingUnderlineLabelFontDefault;
     [self setupInput];
   }
   return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)aCoder {
-  if ([self.characterCounter conformsToProtocol:@protocol(NSSecureCoding)]) {
-    [aCoder encodeObject:self.characterCounter
-                  forKey:MDCTextInputControllerFullWidthCharacterCounterKey];
-  }
-  [aCoder encodeInteger:self.characterCountMax
-                 forKey:MDCTextInputControllerFullWidthCharacterCountMaxKey];
-  [aCoder encodeInteger:self.characterCountViewMode
-                 forKey:MDCTextInputControllerFullWidthCharacterCountViewModeKey];
-  [aCoder encodeObject:self.errorAccessibilityValue
-                forKey:MDCTextInputControllerFullWidthErrorAccessibilityValueKey];
-  [aCoder encodeObject:self.errorColor forKey:MDCTextInputControllerFullWidthErrorColorKey];
-  [aCoder encodeObject:self.errorText forKey:MDCTextInputControllerFullWidthErrorTextKey];
-  [aCoder encodeObject:self.helperText forKey:MDCTextInputControllerFullWidthHelperTextKey];
-  [aCoder encodeObject:self.inlinePlaceholderColor
-                forKey:MDCTextInputControllerFullWidthInlinePlaceholderColorKey];
-  [aCoder encodeObject:self.inlinePlaceholderFont
-                forKey:MDCTextInputControllerFullWidthInlinePlaceholderFontKey];
-  [aCoder encodeConditionalObject:self.textInput
-                           forKey:MDCTextInputControllerFullWidthTextInputKey];
-  [aCoder encodeObject:self.trailingUnderlineLabelFont
-                forKey:MDCTextInputControllerFullWidthTrailingUnderlineLabelFontKey];
-  [aCoder encodeObject:self.trailingUnderlineLabelTextColor
-                forKey:MDCTextInputControllerFullWidthTrailingUnderlineLabelTextColor];
 }
 
 - (instancetype)copyWithZone:(__unused NSZone *)zone {
@@ -258,6 +178,7 @@ static UIFont *_trailingUnderlineLabelFontDefault;
 
   [self subscribeForNotifications];
   _textInput.underline.color = [UIColor clearColor];
+  _textInput.clearButton.tintColor = self.textInputClearButtonTintColor;
   [self updateLayout];
 }
 
@@ -736,6 +657,26 @@ static UIFont *_trailingUnderlineLabelFontDefault;
   _textInputFontDefault = textInputFontDefault;
 }
 
+- (UIColor *)textInputClearButtonTintColor {
+    if (_textInputClearButtonTintColor) {
+        return _textInputClearButtonTintColor;
+    }
+    return [self class].textInputClearButtonTintColorDefault ?: self.textInput.clearButton.tintColor;
+}
+
+- (void)setTextInputClearButtonTintColor:(UIColor *)textInputClearButtonTintColor {
+    _textInputClearButtonTintColor = textInputClearButtonTintColor;
+    _textInput.clearButton.tintColor = _textInputClearButtonTintColor;
+}
+
++ (UIColor *)textInputClearButtonTintColorDefault {
+    return _textInputClearButtonTintColorDefault;
+}
+
++ (void)setTextInputClearButtonTintColorDefault:(UIColor *)textInputClearButtonTintColorDefault {
+    _textInputClearButtonTintColorDefault = textInputClearButtonTintColorDefault;
+}
+
 - (UIFont *)trailingUnderlineLabelFont {
   return _trailingUnderlineLabelFont ?: [self class].trailingUnderlineLabelFontDefault;
 }
@@ -832,12 +773,6 @@ static UIFont *_trailingUnderlineLabelFontDefault;
 
 + (void)setUnderlineViewModeDefault:(__unused UITextFieldViewMode)underlineViewModeDefault {
   // Not implemented. Underline is never shown.
-}
-
-#pragma mark - NSSecureCoding
-
-+ (BOOL)supportsSecureCoding {
-  return YES;
 }
 
 #pragma mark - Layout

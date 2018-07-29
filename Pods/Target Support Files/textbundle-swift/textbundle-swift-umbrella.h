@@ -10,9 +10,7 @@
 #endif
 #endif
 
-#import "UIView+Yoga.h"
-#import "YGLayout.h"
 
-FOUNDATION_EXPORT double YogaKitVersionNumber;
-FOUNDATION_EXPORT const unsigned char YogaKitVersionString[];
+FOUNDATION_EXPORT double textbundle_swiftVersionNumber;
+FOUNDATION_EXPORT const unsigned char textbundle_swiftVersionString[];
 

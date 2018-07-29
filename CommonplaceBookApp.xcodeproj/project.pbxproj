@@ -21,6 +21,7 @@
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
 		D381292D20F4E7EC00684847 /* TreatAsTabLayoutManagerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D381292C20F4E7EC00684847 /* TreatAsTabLayoutManagerDelegate.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
+		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3CA919720ED848E00F6DF13 /* Merriweather-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */; };
 		D3CA919820ED84E300F6DF13 /* Merriweather-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12C20ED847A00224FCD /* Merriweather-Black.otf */; };
 		D3CA919920ED84E300F6DF13 /* Merriweather-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12A20ED847A00224FCD /* Merriweather-BlackItalic.otf */; };
@@ -95,6 +96,7 @@
 		D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextDocument.swift; sourceTree = "<group>"; };
 		D381292C20F4E7EC00684847 /* TreatAsTabLayoutManagerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreatAsTabLayoutManagerDelegate.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
+		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.otf"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -130,6 +133,7 @@
 		0D695C07C08EFF8CC9D9B854 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D3C1F402210E5AC400F92E85 /* CoreServices.framework */,
 				A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */,
 				C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */,
 			);
@@ -390,8 +394,7 @@
 				"${BUILT_PRODUCTS_DIR}/MotionAnimator/MotionAnimator.framework",
 				"${BUILT_PRODUCTS_DIR}/MotionInterchange/MotionInterchange.framework",
 				"${BUILT_PRODUCTS_DIR}/MotionTransitioning/MotionTransitioning.framework",
-				"${BUILT_PRODUCTS_DIR}/Yoga/yoga.framework",
-				"${BUILT_PRODUCTS_DIR}/YogaKit/YogaKit.framework",
+				"${BUILT_PRODUCTS_DIR}/textbundle-swift/textbundle_swift.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -403,8 +406,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionAnimator.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionInterchange.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MotionTransitioning.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/yoga.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/YogaKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/textbundle_swift.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;

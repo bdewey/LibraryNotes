@@ -22,7 +22,7 @@
 @protocol MDCTextInputCharacterCounter;
 
 /** Controllers that manipulate styling and animation of text inputs. */
-@protocol MDCTextInputController <NSObject, NSSecureCoding, NSCopying, MDCTextInputPositioningDelegate>
+@protocol MDCTextInputController <NSObject, NSCopying, MDCTextInputPositioningDelegate>
 
 /**
  Color for decorations that indicates the input is currently editing.
@@ -194,6 +194,16 @@
 
 /** The text input the controller is affecting. */
 @property(nonatomic, nullable, strong) UIView<MDCTextInput> *textInput;
+
+/**
+ The tintColor applied to the textInput's clear button.
+ See @c UIImageView.tintColor for additional details.
+ */
+@property(nonatomic, null_resettable, strong) UIColor *textInputClearButtonTintColor;
+
+/**
+ Default value for @c textInputClearButtonTintColor. */
+@property(class, nonatomic, nullable, strong) UIColor *textInputClearButtonTintColorDefault;
 
 /**
  The font applied to the trailing side underline label.

@@ -4,8 +4,21 @@ import UIKit
 
 import CommonplaceBook
 import MaterialComponents
+import CoreServices
 
 fileprivate let reuseIdentifier = "HACKY_document"
+
+extension NSComparisonPredicate {
+  fileprivate convenience init(conformingToUTI uti: String) {
+    self.init(
+      leftExpression: NSExpression(forKeyPath: "kMDItemContentTypeTree"),
+      rightExpression: NSExpression(forConstantValue: uti),
+      modifier: .any,
+      type: .like,
+      options: []
+    )
+  }
+}
 
 final class DocumentListViewController: UIViewController {
   
@@ -71,7 +84,12 @@ final class DocumentListViewController: UIViewController {
     super.viewDidLoad()
     appBar.addSubviewsToParent()
     appBar.headerViewController.headerView.trackingScrollView = collectionView
-    metadataQuery = MetadataQuery(delegate: self)
+    let predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
+      NSComparisonPredicate(conformingToUTI: "public.plain-text"),
+      NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
+      ])
+    metadataQuery = MetadataQuery(predicate: predicate, delegate: self)
+    navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Browse", style: .plain, target: self, action: #selector(didTapBrowse))
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -81,10 +99,23 @@ final class DocumentListViewController: UIViewController {
   
   override func viewWillTransition(
     to size: CGSize,
-    with coordinator: UIViewControllerTransitionCoordinator)
-  {
+    with coordinator: UIViewControllerTransitionCoordinator
+  ) {
     super.viewWillTransition(to: size, with: coordinator)
     layout.itemSize = CGSize(width: size.width, height: 48)
+  }
+  
+  @objc private func didTapBrowse() {
+    let documentBrowser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.textbundle.package", "public.plain-text"])
+    documentBrowser.delegate = self
+    present(documentBrowser, animated: true, completion: nil)
+  }
+}
+
+extension DocumentListViewController: UIDocumentBrowserViewControllerDelegate {
+  func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
+    print(documentURLs.first)
+    dismiss(animated: true, completion: nil)
   }
 }
 
