@@ -10,6 +10,7 @@ struct FileMetadata {
     assert(metadataItem.attributes.contains(NSMetadataItemURLKey))
     assert(metadataItem.attributes.contains(NSMetadataItemDisplayNameKey))
     assert(metadataItem.attributes.contains(NSMetadataItemContentTypeKey))
+    assert(metadataItem.attributes.contains(NSMetadataItemContentTypeTreeKey))
     self.metadataItem = metadataItem
   }
   
@@ -25,5 +26,10 @@ struct FileMetadata {
   var contentType: String {
     let nsstring = metadataItem.value(forAttribute: NSMetadataItemContentTypeKey) as! NSString
     return String(nsstring)
+  }
+  
+  var contentTypeTree: [String] {
+    let nsStringArray = metadataItem.value(forAttribute: NSMetadataItemContentTypeTreeKey) as! [NSString]
+    return nsStringArray.map { String($0) }
   }
 }

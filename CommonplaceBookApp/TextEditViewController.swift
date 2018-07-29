@@ -5,6 +5,9 @@ import UIKit
 import CommonplaceBook
 import MaterialComponents
 import MiniMarkdown
+import textbundle_swift
+
+fileprivate typealias TextEditViewControllerDocument = UIDocument & EditableDocument
 
 fileprivate struct KeyboardInfo {
   var animationCurve: UIView.AnimationCurve
@@ -27,13 +30,25 @@ extension KeyboardInfo {
   }
 }
 
+extension FileMetadata {
+  fileprivate func makeDocument() -> TextEditViewControllerDocument? {
+    if contentTypeTree.contains("public.plain-text") {
+      return PlainTextDocument(fileURL: fileURL)
+    } else if contentTypeTree.contains("org.textbundle.package") {
+      return TextBundleDocument(fileURL: fileURL)
+    } else {
+      return nil
+    }
+  }
+}
+
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
   
   // Init-time state.
   
   let commonplaceBook: CommonplaceBook
-  let documentURL: URL
+  let fileMetadata: FileMetadata
   
   let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
@@ -90,9 +105,9 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }()
   
   /// Designated initializer.
-  init(commonplaceBook: CommonplaceBook, documentURL: URL) {
+  init(commonplaceBook: CommonplaceBook, fileMetadata: FileMetadata) {
     self.commonplaceBook = commonplaceBook
-    self.documentURL = documentURL
+    self.fileMetadata = fileMetadata
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
     self.addChild(appBar.headerViewController)
@@ -105,7 +120,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   // Load-time state.
   
   var changeDelegate: TextStorageChangeCreatingDelegate!
-  var document: PlainTextDocument? {
+  fileprivate var document: TextEditViewControllerDocument? {
     didSet {
       changeDelegate.suppressChangeBlock {
         self.textView.text = document?.text
@@ -132,18 +147,18 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    commonplaceBook.openDocument(
-      at: documentURL.lastPathComponent,
-      using: PlainTextDocument.Factory.default
-    ) { (result) in
-      switch result {
-      case .success(let document):
+    guard let document = fileMetadata.makeDocument() else {
+      let message = MDCSnackbarMessage(text: "Could not open \(fileMetadata.displayName)")
+      MDCSnackbarManager.show(message)
+      return
+    }
+    document.open { (success) in
+      if success {
         self.document = document
-      case .failure(let error):
-        let messageText = "Error opening \(self.documentURL): \(error.localizedDescription)"
+      } else {
+        let messageText = "Error opening \(self.fileMetadata.displayName): \(document.previousError?.localizedDescription ?? "Unknown error")"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
-        print(messageText)
       }
     }
     NotificationCenter.default.addObserver(self,

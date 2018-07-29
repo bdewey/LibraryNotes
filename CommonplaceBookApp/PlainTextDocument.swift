@@ -4,7 +4,7 @@ import UIKit
 
 import CommonplaceBook
 
-final class PlainTextDocument: UIDocument {
+final class PlainTextDocument: UIDocument, EditableDocument {
   
   enum Error: Swift.Error {
     case internalInconsistency
@@ -14,9 +14,6 @@ final class PlainTextDocument: UIDocument {
   /// The document text.
   private(set) var text: String = ""
   
-  /// Any internal error from working with the file.
-  private var previousError: Swift.Error?
-  
   public func applyChange(_ change: StringChange) {
     let inverse = text.inverse(of: change)
     undoManager.registerUndo(withTarget: self) { (doc) in
@@ -24,7 +21,9 @@ final class PlainTextDocument: UIDocument {
     }
     text.applyChange(change)
   }
-
+  
+  /// Any internal error from working with the file.
+  private(set) var previousError: Swift.Error?
   
   override func contents(forType typeName: String) throws -> Any {
     if let data = text.data(using: .utf8) {

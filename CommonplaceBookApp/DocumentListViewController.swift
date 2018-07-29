@@ -89,7 +89,6 @@ final class DocumentListViewController: UIViewController {
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
       ])
     metadataQuery = MetadataQuery(predicate: predicate, delegate: self)
-    navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Browse", style: .plain, target: self, action: #selector(didTapBrowse))
   }
   
   override func viewWillAppear(_ animated: Bool) {
@@ -104,19 +103,6 @@ final class DocumentListViewController: UIViewController {
     super.viewWillTransition(to: size, with: coordinator)
     layout.itemSize = CGSize(width: size.width, height: 48)
   }
-  
-  @objc private func didTapBrowse() {
-    let documentBrowser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.textbundle.package", "public.plain-text"])
-    documentBrowser.delegate = self
-    present(documentBrowser, animated: true, completion: nil)
-  }
-}
-
-extension DocumentListViewController: UIDocumentBrowserViewControllerDelegate {
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-    print(documentURLs.first)
-    dismiss(animated: true, completion: nil)
-  }
 }
 
 extension DocumentListViewController: UICollectionViewDelegate {
@@ -124,7 +110,7 @@ extension DocumentListViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     let metadata = dataSource.models[indexPath.row]
     self.navigationController?.pushViewController(
-      TextEditViewController(commonplaceBook: commonplaceBook, documentURL: metadata.fileURL),
+      TextEditViewController(commonplaceBook: commonplaceBook, fileMetadata: metadata),
       animated: true
     )
   }
