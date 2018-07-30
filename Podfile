@@ -18,4 +18,8 @@ target 'CommonplaceBookApp' do
     # Pods for testing
   end
 
+  post_install do |installer|
+    installer.pods_project.main_group.tab_width = '2';
+    installer.pods_project.main_group.indent_width = '2';
+  end
 end
