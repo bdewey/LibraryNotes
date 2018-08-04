@@ -671,6 +671,7 @@
 		D3DF3F9521156908002FF1B6 /* MiniMarkdown+DocumentParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F9421156908002FF1B6 /* MiniMarkdown+DocumentParser.swift */; };
 		D3DF3F9721157474002FF1B6 /* MiniMarkdown+Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F9621157474002FF1B6 /* MiniMarkdown+Text.swift */; };
 		D3DF3F9921157953002FF1B6 /* MiniMarkdown+InlineParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F9821157953002FF1B6 /* MiniMarkdown+InlineParser.swift */; };
+		D3DF3F9B211589CD002FF1B6 /* Emphasis.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F9A211589CD002FF1B6 /* Emphasis.swift */; };
 		D3E8B2497F568B2A5AAB2D5F6DB9791D /* MDCSnackbarMessageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 13D79A8F42BFC039C12A359591615B60 /* MDCSnackbarMessageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3FDFBDDB0613FA1A9322DE5B24B3DCD /* MDCChipViewThemer.m in Sources */ = {isa = PBXBuildFile; fileRef = 518A5FE4B6E09AD2BA671ABE3F882941 /* MDCChipViewThemer.m */; };
 		D4312CDC156BFF8FE2F08C670CE2C54F /* MDCTabBarViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7BF18A2891269B03B8A84506F1401C1E /* MDCTabBarViewController.m */; };
@@ -1778,6 +1779,7 @@
 		D3DF3F9421156908002FF1B6 /* MiniMarkdown+DocumentParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MiniMarkdown+DocumentParser.swift"; path = "MiniMarkdown/Classes/MiniMarkdown+DocumentParser.swift"; sourceTree = "<group>"; };
 		D3DF3F9621157474002FF1B6 /* MiniMarkdown+Text.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MiniMarkdown+Text.swift"; path = "MiniMarkdown/Classes/MiniMarkdown+Text.swift"; sourceTree = "<group>"; };
 		D3DF3F9821157953002FF1B6 /* MiniMarkdown+InlineParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "MiniMarkdown+InlineParser.swift"; path = "MiniMarkdown/Classes/MiniMarkdown+InlineParser.swift"; sourceTree = "<group>"; };
+		D3DF3F9A211589CD002FF1B6 /* Emphasis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Emphasis.swift; path = MiniMarkdown/Classes/Emphasis.swift; sourceTree = "<group>"; };
 		D3FDF1B22B082BEFE607C6AA78541604 /* MDCFeatureHighlightFontThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCFeatureHighlightFontThemer.h; path = components/FeatureHighlight/src/FontThemer/MDCFeatureHighlightFontThemer.h; sourceTree = "<group>"; };
 		D4691F92786C2C050E0A9457EE1CCF7E /* MDCCurvedCornerTreatment.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCCurvedCornerTreatment.m; path = components/private/ShapeLibrary/src/MDCCurvedCornerTreatment.m; sourceTree = "<group>"; };
 		D47FC9CE75251DA118FA8933A2228303 /* MDFTextAccessibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDFTextAccessibility.h; path = src/MDFTextAccessibility.h; sourceTree = "<group>"; };
@@ -2197,6 +2199,7 @@
 				D3DF3F9421156908002FF1B6 /* MiniMarkdown+DocumentParser.swift */,
 				D3DF3F9621157474002FF1B6 /* MiniMarkdown+Text.swift */,
 				D3DF3F9821157953002FF1B6 /* MiniMarkdown+InlineParser.swift */,
+				D3DF3F9A211589CD002FF1B6 /* Emphasis.swift */,
 			);
 			name = MiniMarkdown;
 			path = ../../MiniMarkdown;
@@ -5647,6 +5650,7 @@
 				D3DF3F9521156908002FF1B6 /* MiniMarkdown+DocumentParser.swift in Sources */,
 				7307612F09D244D9D26412F1BE6C0EC0 /* StringSlice+MiniMarkdown.swift in Sources */,
 				0668075F1B2C95CAC1DDDF5B5E52FAAF /* StringSlice.swift in Sources */,
+				D3DF3F9B211589CD002FF1B6 /* Emphasis.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
