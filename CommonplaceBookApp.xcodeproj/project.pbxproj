@@ -49,7 +49,6 @@
 		D3DC5EDA20EC9B0200F0B74B /* CommonplaceBookAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5ED920EC9B0200F0B74B /* CommonplaceBookAppTests.swift */; };
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
 		D3DF3F8521150030002FF1B6 /* MiniMarkdown+Normalizing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F8421150030002FF1B6 /* MiniMarkdown+Normalizing.swift */; };
-		D3DF3F8721150126002FF1B6 /* AttributedStringRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F8621150126002FF1B6 /* AttributedStringRenderer.swift */; };
 		D3DF3F8921150677002FF1B6 /* AttributedStringRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DF3F8821150677002FF1B6 /* AttributedStringRendererTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -115,7 +114,6 @@
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D3DF3F8421150030002FF1B6 /* MiniMarkdown+Normalizing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdown+Normalizing.swift"; sourceTree = "<group>"; };
-		D3DF3F8621150126002FF1B6 /* AttributedStringRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringRenderer.swift; sourceTree = "<group>"; };
 		D3DF3F8821150677002FF1B6 /* AttributedStringRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttributedStringRendererTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -233,7 +231,6 @@
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3C1F406210E776000F92E85 /* TextBundleDocument+EditableDocument.swift */,
 				D3DF3F8421150030002FF1B6 /* MiniMarkdown+Normalizing.swift */,
-				D3DF3F8621150126002FF1B6 /* AttributedStringRenderer.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -468,7 +465,6 @@
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D34D875920ED0B6A0043F755 /* UIColor+DSL.swift in Sources */,
-				D3DF3F8721150126002FF1B6 /* AttributedStringRenderer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

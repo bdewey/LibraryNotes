@@ -63,30 +63,33 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       Stylesheet.default.typographyScheme.body2
     )
     // TODO: Change font
-    textStorage.stylesheet.heading = { (block, attributes) in
+    textStorage.stylesheet.nodeAttributes[.heading] = { (_, attributes) in
       attributes.fontSize = 20
       attributes.familyName = "LibreFranklin-Medium"
     }
-    textStorage.stylesheet.emphasis = { (_, attributes) in
+    textStorage.stylesheet.nodeAttributes[.emphasis] = { (_, attributes) in
       attributes.italic = true
     }
-    textStorage.stylesheet.bold = { (_, attributes) in
+    textStorage.stylesheet.nodeAttributes[.bold] = { (_, attributes) in
       attributes.bold = true
     }
-    textStorage.stylesheet.list = { $1.list = true }
-    textStorage.stylesheet.customizations.listItem = { (string, block, attributes) in
-      if let firstWhitespaceIndex = block.slice.substring.firstIndex(where: { $0.isWhitespace }) {
-        var attributes = attributes
-        attributes[.treatAsTab] = true
-        string.addAttributes(
-          attributes,
-          range: NSRange(
-            firstWhitespaceIndex...firstWhitespaceIndex,
-            in: block.slice.string
-          )
-        )
-      }
-    }
+    textStorage.stylesheet.nodeAttributes[.list] = { $1.list = true }
+    
+    // TODO: The equivalent of this code should be done in building / normalizing the string
+    
+//    textStorage.stylesheet.customizations.listItem = { (string, block, attributes) in
+//      if let firstWhitespaceIndex = block.slice.substring.firstIndex(where: { $0.isWhitespace }) {
+//        var attributes = attributes
+//        attributes[.treatAsTab] = true
+//        string.addAttributes(
+//          attributes,
+//          range: NSRange(
+//            firstWhitespaceIndex...firstWhitespaceIndex,
+//            in: block.slice.string
+//          )
+//        )
+//      }
+//    }
     return textStorage
   }()
   

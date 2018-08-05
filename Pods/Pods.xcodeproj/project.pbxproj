@@ -678,6 +678,7 @@
 		D38BEFB62115FDB700CC4BF1 /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38BEFB52115FDB700CC4BF1 /* List.swift */; };
 		D38BEFB82116015100CC4BF1 /* Table.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38BEFB72116015100CC4BF1 /* Table.swift */; };
 		D38BEFBA21162CA400CC4BF1 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38BEFB921162CA400CC4BF1 /* Image.swift */; };
+		D38BEFBC211676D600CC4BF1 /* BlankLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38BEFBB211676D600CC4BF1 /* BlankLine.swift */; };
 		D3D197CE68AB30CBDF3794622AC106AA /* MaterialButtonBar.h in Headers */ = {isa = PBXBuildFile; fileRef = 74CDF0ED2F7696C895CBC7B35A67EB07 /* MaterialButtonBar.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3E8B2497F568B2A5AAB2D5F6DB9791D /* MDCSnackbarMessageView.h in Headers */ = {isa = PBXBuildFile; fileRef = 13D79A8F42BFC039C12A359591615B60 /* MDCSnackbarMessageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3FDFBDDB0613FA1A9322DE5B24B3DCD /* MDCChipViewThemer.m in Sources */ = {isa = PBXBuildFile; fileRef = 518A5FE4B6E09AD2BA671ABE3F882941 /* MDCChipViewThemer.m */; };
@@ -1792,6 +1793,7 @@
 		D38BEFB52115FDB700CC4BF1 /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = List.swift; path = MiniMarkdown/Classes/List.swift; sourceTree = "<group>"; };
 		D38BEFB72116015100CC4BF1 /* Table.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Table.swift; path = MiniMarkdown/Classes/Table.swift; sourceTree = "<group>"; };
 		D38BEFB921162CA400CC4BF1 /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Image.swift; path = MiniMarkdown/Classes/Image.swift; sourceTree = "<group>"; };
+		D38BEFBB211676D600CC4BF1 /* BlankLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BlankLine.swift; path = MiniMarkdown/Classes/BlankLine.swift; sourceTree = "<group>"; };
 		D3FDF1B22B082BEFE607C6AA78541604 /* MDCFeatureHighlightFontThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCFeatureHighlightFontThemer.h; path = components/FeatureHighlight/src/FontThemer/MDCFeatureHighlightFontThemer.h; sourceTree = "<group>"; };
 		D4691F92786C2C050E0A9457EE1CCF7E /* MDCCurvedCornerTreatment.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCCurvedCornerTreatment.m; path = components/private/ShapeLibrary/src/MDCCurvedCornerTreatment.m; sourceTree = "<group>"; };
 		D47FC9CE75251DA118FA8933A2228303 /* MDFTextAccessibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDFTextAccessibility.h; path = src/MDFTextAccessibility.h; sourceTree = "<group>"; };
@@ -3188,6 +3190,7 @@
 				D38BEFB52115FDB700CC4BF1 /* List.swift */,
 				D38BEFB72116015100CC4BF1 /* Table.swift */,
 				D38BEFB921162CA400CC4BF1 /* Image.swift */,
+				D38BEFBB211676D600CC4BF1 /* BlankLine.swift */,
 			);
 			name = MiniMarkdown;
 			path = ../../MiniMarkdown;
@@ -5613,6 +5616,7 @@
 				E8EBC98386A2652930258D053ED0DD12 /* MiniMarkdown+BlockParsers.swift in Sources */,
 				B753CF247596EE5D4E93597A276E9D0C /* MiniMarkdown+InlineParsers.swift in Sources */,
 				08F76D29221F18B1A1F88E39320D323A /* MiniMarkdown-dummy.m in Sources */,
+				D38BEFBC211676D600CC4BF1 /* BlankLine.swift in Sources */,
 				D38BEFB62115FDB700CC4BF1 /* List.swift in Sources */,
 				7A61F9C8E243BA668409413C8E662577 /* MiniMarkdown.swift in Sources */,
 				2E6277E84F24E1F12B750F2BABD9FB97 /* MiniMarkdownNode.swift in Sources */,
