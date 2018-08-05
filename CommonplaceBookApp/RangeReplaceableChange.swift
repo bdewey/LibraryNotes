@@ -23,20 +23,13 @@ extension RangeReplaceableCollection {
   /// Changes the collection.
   ///
   /// - parameter change: The change to make.
+  /// - returns: A change that will undo this change.
+  @discardableResult
   public mutating func applyChange<C>(
     _ change: RangeReplaceableChange<Index, C>
-  ) where C.Element == Self.Element {
-    replaceSubrange(change.range, with: change.newElements)
-  }
-  
-  /// Computes how to undo a change.
-  ///
-  /// - parameter change: The change to make.
-  /// - returns: A change that will undo `change`
-  public func inverse<C>(
-    of change: RangeReplaceableChange<Index, C>
-  ) -> RangeReplaceableChange<Index, SubSequence> {
+  ) -> RangeReplaceableChange<Index, SubSequence> where C.Element == Self.Element {
     let existingElements = self[change.range]
+    replaceSubrange(change.range, with: change.newElements)
     let upperBound = index(change.range.lowerBound, offsetBy: change.newElements.count)
     return RangeReplaceableChange(
       range: change.range.lowerBound ..< upperBound,

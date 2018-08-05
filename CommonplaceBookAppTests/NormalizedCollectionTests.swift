@@ -31,6 +31,22 @@ final class NormalizedCollectionTests: XCTestCase {
     validateNormalization(input: input, expectedOutput: expectedOutput, transformation: replaceSpacesWithTabs)
   }
   
+  func testSimpleMutation() {
+    let input = "1\t2\t3"
+    var normalized = NormalizedCollection(originalCollection: input, normalizingChanges: replaceTabsWithSpaces(input: input))
+    normalized[normalized.startIndex] = "x"
+    XCTAssertEqual(normalized.normalizedCollection, "x    2    3")
+    XCTAssertEqual(normalized.originalCollection, "x\t2\t3")
+  }
+  
+  func testInsertMutation() {
+    let input = "1\t2\t3"
+    var normalized = NormalizedCollection(originalCollection: input, normalizingChanges: replaceTabsWithSpaces(input: input))
+    normalized.insert("!", at: normalized.startIndex)
+    XCTAssertEqual(normalized.normalizedCollection, "!1    2    3")
+    XCTAssertEqual(normalized.originalCollection, "!1\t2\t3")
+  }
+  
   func validateNormalization(
     input: String,
     expectedOutput: String,
