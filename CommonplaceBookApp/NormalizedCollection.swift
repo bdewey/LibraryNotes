@@ -10,29 +10,33 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
   /// A change to this particular collection.
   public typealias Change = RangeReplaceableChange<CollectionType.Index, CollectionType.SubSequence>
   
+  public init() { }
+  
+  public init<ChangeCollection: Collection>(
+    originalCollection: CollectionType,
+    normalizingChanges: ChangeCollection
+  ) where ChangeCollection.Element == Change {
+    setOriginalCollection(originalCollection, normalizingChanges: normalizingChanges)
+  }
+
   /// The collection after applying normalizing changes.
-  public var normalizedCollection: CollectionType
+  public private(set) var normalizedCollection = CollectionType()
   
   /// Changes will recover the original collection.
   private var inverseNormalizingChanges: [Change] = []
   
-  public init<C: Collection>(
-    originalCollection: CollectionType,
-    normalizingChanges: C
-  ) where C.Element == Change {
+  public mutating func setOriginalCollection<ChangeCollection: Collection>(
+    _ originalCollection: CollectionType,
+    normalizingChanges: ChangeCollection
+  ) where ChangeCollection.Element == Change {
     normalizedCollection = originalCollection
-    for change in normalizingChanges.sorted(by: NormalizedCollection.orderedByLowerBound).reversed() {
-      let inverse = normalizedCollection.applyChange(change)
-      inverseNormalizingChanges.append(inverse)
-    }
+    inverseNormalizingChanges = normalizedCollection.applyChanges(normalizingChanges)
   }
   
   /// The original view of the collection.
   public var originalCollection: CollectionType {
     var results = normalizedCollection
-    for change in inverseNormalizingChanges.reversed() {
-      results.applyChange(change)
-    }
+    results.applyChanges(inverseNormalizingChanges)
     return results
   }
   
@@ -42,10 +46,6 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
 }
 
 extension NormalizedCollection: Collection, RangeReplaceableCollection {
-
-  public init() {
-    self.init(originalCollection: CollectionType(), normalizingChanges: [])
-  }
   
   public var startIndex: CollectionType.Index {
     return normalizedCollection.startIndex
@@ -91,7 +91,9 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
     let delta = change.newElements.count - change.countOfElementsToRemove
     return changes.compactMap({ (change) -> Change? in
       let inverseRange = self.range(of: change)
-      if range.overlaps(inverseRange) { return nil }
+      if range.overlaps(inverseRange) {
+        return nil
+      }
       if range.lowerBound < inverseRange.lowerBound {
         return Change(
           startIndex: index(change.startIndex, offsetBy: delta),
@@ -113,5 +115,19 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
     )
     inverseNormalizingChanges = adjustInverseChanges(inverseNormalizingChanges, for: change)
     normalizedCollection.replaceSubrange(subrange, with: newElements)
+  }
+}
+
+extension NormalizedCollection: CustomStringConvertible where CollectionType == String {
+
+  public var description: String {
+    let changes = inverseNormalizingChanges.map { (change) -> String in
+      let location = normalizedCollection.distance(from: normalizedCollection.startIndex, to: change.startIndex)
+      let endIndex = normalizedCollection.index(change.startIndex, offsetBy: change.countOfElementsToRemove)
+      let replaced = normalizedCollection[change.startIndex ..< endIndex]
+      return String(format: "(%d, %d) Replace '%@' with '%@'", location, change.countOfElementsToRemove, String(replaced), String(change.newElements))
+    }
+    let description = "Normalized text: \"\(self.normalizedCollection)\"\nChanges:\(changes)"
+    return description
   }
 }

@@ -42,9 +42,23 @@ final class NormalizedCollectionTests: XCTestCase {
   func testInsertMutation() {
     let input = "1\t2\t3"
     var normalized = NormalizedCollection(originalCollection: input, normalizingChanges: replaceTabsWithSpaces(input: input))
+    XCTAssertEqual(input, normalized.originalCollection)
+    XCTAssertEqual("1    2    3", normalized.normalizedCollection)
     normalized.insert("!", at: normalized.startIndex)
     XCTAssertEqual(normalized.normalizedCollection, "!1    2    3")
     XCTAssertEqual(normalized.originalCollection, "!1\t2\t3")
+  }
+  
+  func testReplaceTextInMiddle() {
+    let input = "alpha\tbeta\tgamma\n"
+    var normalized = NormalizedCollection(originalCollection: input, normalizingChanges: replaceTabsWithSpaces(input: input))
+    guard let rangeToReplace = normalized.normalizedCollection.range(of: "beta") else {
+      XCTFail()
+      return
+    }
+    normalized.replaceSubrange(rangeToReplace, with: "BETA")
+    XCTAssertEqual(normalized.normalizedCollection, "alpha    BETA    gamma\n")
+    XCTAssertEqual(normalized.originalCollection, "alpha\tBETA\tgamma\n")
   }
   
   func validateNormalization(

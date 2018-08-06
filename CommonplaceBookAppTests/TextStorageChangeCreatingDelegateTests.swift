@@ -35,6 +35,13 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     XCTAssertEqual(undoingChanges(count: 1), "Initial text")
   }
   
+  func testReplaceTextInMiddle() {
+    setInitialText("Initial text")
+    textStorage.replaceCharacters(in: NSRange(location: 2, length: 5), with: "...")
+    XCTAssertEqual(text, "In... text")
+    XCTAssertEqual(undoingChanges(count: 1), "Initial text")
+  }
+  
   func testDeleteAtEnd() {
     setInitialText("Initial textx")
     textStorage.replaceCharacters(in: NSRange(location: 12, length: 1), with: "")

@@ -3,6 +3,7 @@
 import UIKit
 
 import CommonplaceBook
+import MiniMarkdown
 
 final class PlainTextDocument: UIDocument, EditableDocument {
   
@@ -12,20 +13,37 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   }
 
   /// The document text.
-  private(set) var text: String = ""
+  public var text: String {
+    return normalizedText.normalizedCollection
+  }
   
   public func applyChange(_ change: StringChange) {
-    let inverse = text.applyChange(change)
+    let inverse = normalizedText.applyChange(change)
     undoManager.registerUndo(withTarget: self) { (doc) in
-      doc.text.applyChange(inverse)
+      doc.normalizedText.applyChange(inverse)
     }
   }
+  
+  private var normalizedText = NormalizedCollection<String>()
+  
+  private let normalizer: StringNormalizer = {
+    var normalizer = StringNormalizer()
+    normalizer.nodeSubstitutions[.listItem] = { (node) in
+      var changes: [RangeReplaceableChange<String.Index, Substring>] = []
+      if let firstWhitespaceIndex = node.slice.substring.firstIndex(where: { $0.isWhitespace }),
+        node.slice.substring[firstWhitespaceIndex] != "\t" {
+        changes.append(RangeReplaceableChange(startIndex: firstWhitespaceIndex, countOfElementsToRemove: 1, newElements: "\t"))
+      }
+      return changes
+    }
+    return normalizer
+  }()
   
   /// Any internal error from working with the file.
   private(set) var previousError: Swift.Error?
   
   override func contents(forType typeName: String) throws -> Any {
-    if let data = text.data(using: .utf8) {
+    if let data = normalizedText.originalCollection.data(using: .utf8) {
       return data
     } else {
       throw Error.internalInconsistency
@@ -39,7 +57,11 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       else {
         throw Error.internalInconsistency
     }
-    self.text = string
+    let changes = Array(normalizer.normalizingChanges(for: string))
+    normalizedText.setOriginalCollection(
+      string,
+      normalizingChanges: changes
+    )
   }
   
   override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {

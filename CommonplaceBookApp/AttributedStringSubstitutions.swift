@@ -5,7 +5,7 @@ import MiniMarkdown
 
 struct StringNormalizer {
   
-  typealias Change = RangeReplaceableChange<String.Index, String>
+  typealias Change = RangeReplaceableChange<String.Index, Substring>
   
   /// Given a node, returns an array of substitutions
   typealias SubstitutionBlock = (MiniMarkdownNode) -> [Change]
