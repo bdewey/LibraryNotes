@@ -3,7 +3,7 @@
 import UIKit
 
 public protocol EditableDocument: class {
-  typealias StringChange = RangeReplaceableChange<String.Index, Substring>
+  typealias StringChange = RangeReplaceableChange<Substring>
   func applyChange(_ change: StringChange)
   var previousError: Swift.Error? { get }
   var text: String { get }

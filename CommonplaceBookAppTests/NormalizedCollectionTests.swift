@@ -5,7 +5,7 @@ import CommonplaceBookApp
 
 final class NormalizedCollectionTests: XCTestCase {
   
-  typealias StringChange = RangeReplaceableChange<String.Index, Substring>
+  typealias StringChange = RangeReplaceableChange<Substring>
 
   func testNoSubstitutions() {
     let input = "This is a string."
@@ -76,7 +76,7 @@ final class NormalizedCollectionTests: XCTestCase {
     var results: [StringChange] = []
     for (index, character) in zip(input.indices, input) {
       if character == "\t" {
-        let change = StringChange(startIndex: index, countOfElementsToRemove: 1, newElements: "    ")
+        let change = StringChange(range: NSRange(index...index, in: input), newElements: "    ")
         results.append(change)
       }
     }
@@ -87,7 +87,8 @@ final class NormalizedCollectionTests: XCTestCase {
     var results: [StringChange] = []
     var searchSubsequence = input[input.startIndex...]
     while let spaceRange = searchSubsequence.range(of: "    ") {
-      let change = StringChange(startIndex: spaceRange.lowerBound, countOfElementsToRemove: 4, newElements: "\t")
+      let location = input.distance(from: input.startIndex, to: spaceRange.lowerBound)
+      let change = StringChange(range: NSRange(location: location, length: 4), newElements: "\t")
       results.append(change)
       searchSubsequence = input[spaceRange.upperBound...]
     }

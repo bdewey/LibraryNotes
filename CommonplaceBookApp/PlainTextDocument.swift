@@ -29,10 +29,11 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   private let normalizer: StringNormalizer = {
     var normalizer = StringNormalizer()
     normalizer.nodeSubstitutions[.listItem] = { (node) in
-      var changes: [RangeReplaceableChange<String.Index, Substring>] = []
+      var changes: [RangeReplaceableChange<Substring>] = []
       if let firstWhitespaceIndex = node.slice.substring.firstIndex(where: { $0.isWhitespace }),
         node.slice.substring[firstWhitespaceIndex] != "\t" {
-        changes.append(RangeReplaceableChange(startIndex: firstWhitespaceIndex, countOfElementsToRemove: 1, newElements: "\t"))
+        let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: node.slice.substring)
+        changes.append(RangeReplaceableChange(range: nsRange, newElements: "\t"))
       }
       return changes
     }

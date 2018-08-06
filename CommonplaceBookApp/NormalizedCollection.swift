@@ -8,7 +8,7 @@ import Foundation
 public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
   
   /// A change to this particular collection.
-  public typealias Change = RangeReplaceableChange<CollectionType.Index, CollectionType.SubSequence>
+  public typealias Change = RangeReplaceableChange<CollectionType.SubSequence>
   
   public init() { }
   
@@ -39,10 +39,6 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
     results.applyChanges(inverseNormalizingChanges)
     return results
   }
-  
-  private static func orderedByLowerBound(lhs: Change, rhs: Change) -> Bool {
-    return lhs.startIndex < rhs.startIndex
-  }
 }
 
 extension NormalizedCollection: Collection, RangeReplaceableCollection {
@@ -69,37 +65,21 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
     }
   }
   
-  private func shiftedRange(
-    _ range: Range<CollectionType.Index>,
-    by delta: Int
-  ) -> Range<CollectionType.Index> {
-    if delta == 0 { return range }
-    return index(range.lowerBound, offsetBy: delta) ..< index(range.upperBound, offsetBy: delta)
-  }
-  
-  private func range<C>(of change: RangeReplaceableChange<CollectionType.Index, C>) -> Range<Index> {
-    let endIndex = index(change.startIndex, offsetBy: change.countOfElementsToRemove)
-    let range = change.startIndex ..< endIndex
-    return range
-  }
-  
   private func adjustInverseChanges<C: Collection>(
     _ changes: [Change],
-    for change: RangeReplaceableChange<CollectionType.Index, C>
+    for change: RangeReplaceableChange<C>
   ) -> [Change] {
-    let range = self.range(of: change)
-    let delta = change.newElements.count - change.countOfElementsToRemove
+    let range = change.range
+    let delta = change.delta
     return changes.compactMap({ (change) -> Change? in
-      let inverseRange = self.range(of: change)
-      if range.overlaps(inverseRange) {
+      let inverseRange = change.range
+      if range.intersection(inverseRange) != nil {
         return nil
       }
       if range.lowerBound < inverseRange.lowerBound {
-        return Change(
-          startIndex: index(change.startIndex, offsetBy: delta),
-          countOfElementsToRemove: change.countOfElementsToRemove,
-          newElements: change.newElements
-        )
+        var change = change
+        change.range.shift(by: delta)
+        return change
       } else {
         return change
       }
@@ -107,10 +87,8 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
   }
   
   public mutating func replaceSubrange<C, R>(_ subrange: R, with newElements: C) where C : Collection, R : RangeExpression, CollectionType.Element == C.Element, CollectionType.Index == R.Bound {
-    let range = subrange.relative(to: self)
     let change = RangeReplaceableChange(
-      startIndex: range.lowerBound,
-      countOfElementsToRemove: distance(from: range.lowerBound, to: range.upperBound),
+      range: NSRange(subrange, in: self),
       newElements: newElements
     )
     inverseNormalizingChanges = adjustInverseChanges(inverseNormalizingChanges, for: change)
@@ -118,16 +96,23 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
   }
 }
 
+extension NSRange {
+  init<R: RangeExpression, CollectionType: Collection>(
+    _ rangeExpression: R,
+    in collection: CollectionType
+  ) where R.Bound == CollectionType.Index {
+    let range = rangeExpression.relative(to: collection)
+    self.init(
+      location: collection.distance(from: collection.startIndex, to: range.lowerBound),
+      length: collection.distance(from: range.lowerBound, to: range.upperBound)
+    )
+  }
+}
+
 extension NormalizedCollection: CustomStringConvertible where CollectionType == String {
 
   public var description: String {
-    let changes = inverseNormalizingChanges.map { (change) -> String in
-      let location = normalizedCollection.distance(from: normalizedCollection.startIndex, to: change.startIndex)
-      let endIndex = normalizedCollection.index(change.startIndex, offsetBy: change.countOfElementsToRemove)
-      let replaced = normalizedCollection[change.startIndex ..< endIndex]
-      return String(format: "(%d, %d) Replace '%@' with '%@'", location, change.countOfElementsToRemove, String(replaced), String(change.newElements))
-    }
-    let description = "Normalized text: \"\(self.normalizedCollection)\"\nChanges:\(changes)"
+    let description = "Normalized text: \"\(self.normalizedCollection)\"\nChanges:\(self.normalizedCollection.describeChanges(inverseNormalizingChanges))"
     return description
   }
 }
