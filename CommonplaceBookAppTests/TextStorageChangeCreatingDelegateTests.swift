@@ -16,9 +16,7 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     super.setUp()
     changes = []
     textStorage = NSTextStorage()
-    delegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](postFactoChange) in
-      guard let text = self?.text else { return }
-      let change = postFactoChange.change(from: text)
+    delegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](change) in
       self?.applyChange(change)
     })
     textStorage.delegate = delegate

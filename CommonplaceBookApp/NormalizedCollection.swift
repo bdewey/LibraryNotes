@@ -37,7 +37,7 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
   }
   
   private static func orderedByLowerBound(lhs: Change, rhs: Change) -> Bool {
-    return lhs.range.lowerBound < rhs.range.lowerBound
+    return lhs.startIndex < rhs.startIndex
   }
 }
 
@@ -77,14 +77,27 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
     return index(range.lowerBound, offsetBy: delta) ..< index(range.upperBound, offsetBy: delta)
   }
   
-  private func adjustInverseChanges<C: Collection>(_ changes: [Change], for change: RangeReplaceableChange<CollectionType.Index, C>) -> [Change] {
-    let range = change.range
-    let subrangeLength = distance(from: range.lowerBound, to: range.upperBound)
-    let delta = change.newElements.count - subrangeLength
+  private func range<C>(of change: RangeReplaceableChange<CollectionType.Index, C>) -> Range<Index> {
+    let endIndex = index(change.startIndex, offsetBy: change.countOfElementsToRemove)
+    let range = change.startIndex ..< endIndex
+    return range
+  }
+  
+  private func adjustInverseChanges<C: Collection>(
+    _ changes: [Change],
+    for change: RangeReplaceableChange<CollectionType.Index, C>
+  ) -> [Change] {
+    let range = self.range(of: change)
+    let delta = change.newElements.count - change.countOfElementsToRemove
     return changes.compactMap({ (change) -> Change? in
-      if range.overlaps(change.range) { return nil }
-      if range.lowerBound < change.range.lowerBound {
-        return Change(range: shiftedRange(change.range, by: delta), newElements: change.newElements)
+      let inverseRange = self.range(of: change)
+      if range.overlaps(inverseRange) { return nil }
+      if range.lowerBound < inverseRange.lowerBound {
+        return Change(
+          startIndex: index(change.startIndex, offsetBy: delta),
+          countOfElementsToRemove: change.countOfElementsToRemove,
+          newElements: change.newElements
+        )
       } else {
         return change
       }
@@ -93,7 +106,11 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
   
   public mutating func replaceSubrange<C, R>(_ subrange: R, with newElements: C) where C : Collection, R : RangeExpression, CollectionType.Element == C.Element, CollectionType.Index == R.Bound {
     let range = subrange.relative(to: self)
-    let change = RangeReplaceableChange(range: range, newElements: newElements)
+    let change = RangeReplaceableChange(
+      startIndex: range.lowerBound,
+      countOfElementsToRemove: distance(from: range.lowerBound, to: range.upperBound),
+      newElements: newElements
+    )
     inverseNormalizingChanges = adjustInverseChanges(inverseNormalizingChanges, for: change)
     normalizedCollection.replaceSubrange(subrange, with: newElements)
   }

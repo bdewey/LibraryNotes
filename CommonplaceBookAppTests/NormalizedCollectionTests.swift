@@ -62,8 +62,8 @@ final class NormalizedCollectionTests: XCTestCase {
     var results: [StringChange] = []
     for (index, character) in zip(input.indices, input) {
       if character == "\t" {
-        let nextIndex = input.index(after: index)
-        results.append(StringChange(range: index ..< nextIndex, newElements: "    "))
+        let change = StringChange(startIndex: index, countOfElementsToRemove: 1, newElements: "    ")
+        results.append(change)
       }
     }
     return results
@@ -73,7 +73,8 @@ final class NormalizedCollectionTests: XCTestCase {
     var results: [StringChange] = []
     var searchSubsequence = input[input.startIndex...]
     while let spaceRange = searchSubsequence.range(of: "    ") {
-      results.append(StringChange(range: spaceRange, newElements: "\t"))
+      let change = StringChange(startIndex: spaceRange.lowerBound, countOfElementsToRemove: 4, newElements: "\t")
+      results.append(change)
       searchSubsequence = input[spaceRange.upperBound...]
     }
     return results

@@ -8,10 +8,3 @@ public protocol EditableDocument: class {
   var previousError: Swift.Error? { get }
   var text: String { get }
 }
-
-extension EditableDocument {
-  public func applyChange(_ postFactoChange: PostFactoStringChange) {
-    let change = postFactoChange.change(from: text)
-    applyChange(change)
-  }
-}

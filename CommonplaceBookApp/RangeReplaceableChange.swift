@@ -6,14 +6,18 @@ import Foundation
 public struct RangeReplaceableChange<Index: Comparable, ElementCollection>
   where ElementCollection: Collection {
   
-  /// The range to replace
-  public let range: Range<Index>
+  /// The start location for the insertion
+  public let startIndex: Index
   
-  /// The new elements to insert at `range`
+  /// How many elements in the existing collection to replace
+  public let countOfElementsToRemove: Int
+  
+  /// The new elements to insert at `startLocation`
   public let newElements: ElementCollection
-  
-  public init(range: Range<Index>, newElements: ElementCollection) {
-    self.range = range
+
+  public init(startIndex: Index, countOfElementsToRemove: Int, newElements: ElementCollection) {
+    self.startIndex = startIndex
+    self.countOfElementsToRemove = countOfElementsToRemove
     self.newElements = newElements
   }
 }
@@ -28,11 +32,13 @@ extension RangeReplaceableCollection {
   public mutating func applyChange<C>(
     _ change: RangeReplaceableChange<Index, C>
   ) -> RangeReplaceableChange<Index, SubSequence> where C.Element == Self.Element {
-    let existingElements = self[change.range]
-    replaceSubrange(change.range, with: change.newElements)
-    let upperBound = index(change.range.lowerBound, offsetBy: change.newElements.count)
+    let endIndex = index(change.startIndex, offsetBy: change.countOfElementsToRemove)
+    let range = change.startIndex ..< endIndex
+    let existingElements = self[range]
+    replaceSubrange(range, with: change.newElements)
     return RangeReplaceableChange(
-      range: change.range.lowerBound ..< upperBound,
+      startIndex: change.startIndex,
+      countOfElementsToRemove: change.newElements.count,
       newElements: existingElements
     )
   }

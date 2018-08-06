@@ -4,6 +4,8 @@ import UIKit
 
 public final class TextStorageChangeCreatingDelegate: NSObject, NSTextStorageDelegate {
   
+  public typealias PostFactoStringChange = RangeReplaceableChange<String.Index, Substring>
+  
   private var suppressChange: Int = 0
   private let changeBlock: (PostFactoStringChange) -> Void
   
@@ -25,7 +27,11 @@ public final class TextStorageChangeCreatingDelegate: NSObject, NSTextStorageDel
   ) {
     guard suppressChange == 0, editedMask.contains(.editedCharacters) else { return }
     let insertedSubstring = textStorage.string[Range(editedRange, in: textStorage.string)!]
-    let change = PostFactoStringChange(editedRange: editedRange, changeInLength: delta, insertedSubstring: insertedSubstring)
+    let change = PostFactoStringChange(
+      startIndex: textStorage.string.index(textStorage.string.startIndex, offsetBy: editedRange.location),
+      countOfElementsToRemove: editedRange.length - delta,
+      newElements: insertedSubstring
+    )
     changeBlock(change)
   }
 }
