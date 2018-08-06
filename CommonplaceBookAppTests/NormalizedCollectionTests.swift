@@ -60,6 +60,18 @@ final class NormalizedCollectionTests: XCTestCase {
     XCTAssertEqual(normalized.normalizedCollection, "alpha    BETA    gamma\n")
     XCTAssertEqual(normalized.originalCollection, "alpha\tBETA\tgamma\n")
   }
+
+  func testShrinkTextInMiddle() {
+    let input = "alpha\tbeta\tgamma\n"
+    var normalized = NormalizedCollection(originalCollection: input, normalizingChanges: replaceTabsWithSpaces(input: input))
+    guard let rangeToReplace = normalized.normalizedCollection.range(of: "beta") else {
+      XCTFail()
+      return
+    }
+    normalized.replaceSubrange(rangeToReplace, with: "ß")
+    XCTAssertEqual(normalized.normalizedCollection, "alpha    ß    gamma\n")
+    XCTAssertEqual(normalized.originalCollection, "alpha\tß\tgamma\n")
+  }
   
   func validateNormalization(
     input: String,
