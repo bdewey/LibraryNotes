@@ -32,7 +32,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       var changes: [RangeReplaceableChange<Substring>] = []
       if let firstWhitespaceIndex = node.slice.substring.firstIndex(where: { $0.isWhitespace }),
         node.slice.substring[firstWhitespaceIndex] != "\t" {
-        let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: node.slice.substring)
+        let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: node.slice.string)
         changes.append(RangeReplaceableChange(range: nsRange, newElements: "\t"))
       }
       return changes
