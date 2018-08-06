@@ -15,11 +15,10 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   private(set) var text: String = ""
   
   public func applyChange(_ change: StringChange) {
-    let inverse = text.inverse(of: change)
+    let inverse = text.applyChange(change)
     undoManager.registerUndo(withTarget: self) { (doc) in
       doc.text.applyChange(inverse)
     }
-    text.applyChange(change)
   }
   
   /// Any internal error from working with the file.

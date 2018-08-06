@@ -9,14 +9,16 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
   var text = ""
   var textStorage: NSTextStorage!
   var delegate: TextStorageChangeCreatingDelegate!
-  var changes: [StringChange] = []
-  var inverseChanges: [StringChange] = []
+  var changes: [EditableDocument.StringChange] = []
+  var inverseChanges: [EditableDocument.StringChange] = []
   
   override func setUp() {
     super.setUp()
     changes = []
     textStorage = NSTextStorage()
-    delegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](change) in
+    delegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](postFactoChange) in
+      guard let text = self?.text else { return }
+      let change = postFactoChange.change(from: text)
       self?.applyChange(change)
     })
     textStorage.delegate = delegate
@@ -34,6 +36,13 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     XCTAssertEqual(text, "Initial words")
     XCTAssertEqual(undoingChanges(count: 1), "Initial text")
   }
+  
+  func testDeleteAtEnd() {
+    setInitialText("Initial textx")
+    textStorage.replaceCharacters(in: NSRange(location: 12, length: 1), with: "")
+    XCTAssertEqual(text, "Initial text")
+    XCTAssertEqual(undoingChanges(count: 1), "Initial textx")
+  }
 
   fileprivate func setInitialText(_ text: String) {
     precondition(textStorage.length == 0)
@@ -44,10 +53,10 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     XCTAssertEqual(changes.count, 0)
   }
   
-  fileprivate func applyChange(_ change: StringChange) {
+  fileprivate func applyChange(_ change: EditableDocument.StringChange) {
     changes.append(change)
-    inverseChanges.append(text.inverse(of: change))
-    text.applyChange(change)
+    let inverse = text.applyChange(change)
+    inverseChanges.append(inverse)
   }
   
   fileprivate func undoingChanges(count: Int) -> String {

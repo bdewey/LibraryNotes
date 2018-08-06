@@ -5,9 +5,9 @@ import UIKit
 public final class TextStorageChangeCreatingDelegate: NSObject, NSTextStorageDelegate {
   
   private var suppressChange: Int = 0
-  private let changeBlock: (StringChange) -> Void
+  private let changeBlock: (PostFactoStringChange) -> Void
   
-  public init(changeBlock: @escaping (StringChange) -> Void) {
+  public init(changeBlock: @escaping (PostFactoStringChange) -> Void) {
     self.changeBlock = changeBlock
   }
   
@@ -22,16 +22,10 @@ public final class TextStorageChangeCreatingDelegate: NSObject, NSTextStorageDel
     didProcessEditing editedMask: NSTextStorage.EditActions,
     range editedRange: NSRange,
     changeInLength delta: Int
-    ) {
+  ) {
     guard suppressChange == 0, editedMask.contains(.editedCharacters) else { return }
-    let originalRange = NSRange(location: editedRange.location, length: editedRange.length - delta)
-    let finalResult = textStorage.string
-    let insertedSubstring = finalResult[Range(editedRange, in: finalResult)!]
-    let change = StringChange(
-      rangeToReplace: originalRange,
-      replacement: String(insertedSubstring),
-      finalResult: finalResult
-    )
+    let insertedSubstring = textStorage.string[Range(editedRange, in: textStorage.string)!]
+    let change = PostFactoStringChange(editedRange: editedRange, changeInLength: delta, insertedSubstring: insertedSubstring)
     changeBlock(change)
   }
 }

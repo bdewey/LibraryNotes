@@ -5,24 +5,25 @@ import textbundle_swift
 
 extension TextBundleDocument: EditableDocument {
   
-  var text: String {
+  public var text: String {
     return (try? self.textBundle.text()) ?? ""
   }
   
   // TODO: Eww.
-  func applyChange(_ change: StringChange) {
+  public func applyChange(_ change: StringChange) {
     do {
-      let text = try self.textBundle.text()
-      let inverse = text.inverse(of: change)
+      var text = try self.textBundle.text()
+      let inverse = text.applyChange(change)
       undoManager.registerUndo(withTarget: self) { (doc) in
         do {
-          let text = try doc.textBundle.text()
-          try doc.textBundle.setText(text.applyingChange(inverse))
+          var text = try doc.textBundle.text()
+          text.applyChange(inverse)
+          try doc.textBundle.setText(text)
         } catch {
           // NOTHING
         }
       }
-      try textBundle.setText(text.applyingChange(change))
+      try textBundle.setText(text)
     } catch {
       // NOTHING
     }
