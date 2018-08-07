@@ -4,19 +4,15 @@ import XCTest
 @testable import CommonplaceBookApp
 import MiniMarkdown
 
-private let renderer: AttributedStringRenderer = {
-  var renderer = AttributedStringRenderer()
-  renderer.fixupBlocks[.listItem] = { (listItem) in
+private let renderer: MarkdownFixer = {
+  var renderer = MarkdownFixer()
+  renderer.fixupsForNode[.listItem] = { (listItem) in
     if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
-      listItem.slice.substring[firstWhitespaceIndex] != "\t" {
+       listItem.slice.substring[firstWhitespaceIndex] != "\t" {
       let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: listItem.slice.string)
-      let originalString = String(listItem.slice.string[firstWhitespaceIndex...firstWhitespaceIndex])
-      return [NSMutableAttributedString.Change(
+      return [NSMutableAttributedString.Fixup(
         range: nsRange,
-        newString: NSAttributedString(
-          string: "\t",
-          attributes: [.markdownOriginalString: originalString]
-        )
+        newString: NSAttributedString(string: "\t")
         )]
     }
     return []
@@ -35,7 +31,7 @@ final class AttributedStringRendererTests: XCTestCase {
 -\tItem 1
 -\tItem 2
 """
-    let rendered = renderer.renderMarkdown(markdown)
+    let rendered = renderer.attributedStringWithFixups(from: markdown)
     XCTAssertEqual(rendered.string, fixed)
     XCTAssertEqual(rendered.stringWithoutFixups, markdown)
   }
@@ -53,7 +49,7 @@ final class AttributedStringRendererTests: XCTestCase {
 - Item one
 - Item 2
 """
-    let rendered = renderer.renderMarkdown(markdown).mutableCopy() as! NSMutableAttributedString
+    let rendered = renderer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
     let change = RangeReplaceableChange(range: NSRange(location: 7, length: 1), newElements: "one")
     rendered.applyChange(change)
     XCTAssertEqual(rendered.string, fixed)
@@ -73,7 +69,7 @@ final class AttributedStringRendererTests: XCTestCase {
 - Item one
 - Item 2
 """
-    let rendered = renderer.renderMarkdown(markdown).mutableCopy() as! NSMutableAttributedString
+    let rendered = renderer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
     let stylesheet = MiniMarkdown.Stylesheet()
     let baseAttributes = NSAttributedString.Attributes(UIFont.systemFont(ofSize: 14))
     try! rendered.applySyntaxHighlighting(to: rendered.string.startIndex ..< rendered.string.endIndex, baseAttributes: baseAttributes, stylesheet: stylesheet)

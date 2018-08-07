@@ -12,22 +12,18 @@ final class MarkdownFixupTextBundle {
   private let textStorage: TextStorage
   private lazy var mutableText: NSMutableAttributedString = {
     let markdown = (try? textStorage.text.value()) ?? ""
-    return renderer.renderMarkdown(markdown).mutableCopy() as! NSMutableAttributedString
+    return fixer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
   }()
   
-  private let renderer: AttributedStringRenderer = {
-    var renderer = AttributedStringRenderer()
-    renderer.fixupBlocks[.listItem] = { (listItem) in
+  private let fixer: MarkdownFixer = {
+    var renderer = MarkdownFixer()
+    renderer.fixupsForNode[.listItem] = { (listItem) in
       if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
         listItem.slice.substring[firstWhitespaceIndex] != "\t" {
         let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: listItem.slice.string)
-        let originalString = String(listItem.slice.string[firstWhitespaceIndex...firstWhitespaceIndex])
-        return [NSMutableAttributedString.Change(
+        return [NSMutableAttributedString.Fixup(
           range: nsRange,
-          newString: NSAttributedString(
-            string: "\t",
-            attributes: [.markdownOriginalString: originalString]
-          )
+          newString: NSAttributedString(string: "\t")
           )]
       }
       return []
@@ -53,5 +49,11 @@ extension MarkdownFixupTextBundle: EditableDocument {
   public func applyChange(_ change: StringChange) {
     mutableText.applyChange(change)
     textStorage.text.setValue(mutableText.stringWithoutFixups)
+  }
+}
+
+extension NSMutableAttributedString {
+  public func applyChange<C: Collection>(_ change: RangeReplaceableChange<C>) where C.Element == Character {
+    self.replaceCharacters(in: change.range, with: String(change.newElements))
   }
 }
