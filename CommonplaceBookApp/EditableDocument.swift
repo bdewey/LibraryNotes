@@ -2,7 +2,9 @@
 
 import UIKit
 
-public protocol EditableDocument: class {
+import textbundle_swift
+
+public protocol EditableDocument: DocumentProtocol {
   typealias StringChange = RangeReplaceableChange<Substring>
   func applyChange(_ change: StringChange)
   var previousError: Swift.Error? { get }

@@ -7,7 +7,7 @@ import MaterialComponents
 import MiniMarkdown
 import textbundle_swift
 
-fileprivate typealias TextEditViewControllerDocument = UIDocument & EditableDocument
+fileprivate typealias TextEditViewControllerDocument = EditableDocument
 
 fileprivate struct KeyboardInfo {
   var animationCurve: UIView.AnimationCurve
@@ -31,11 +31,11 @@ extension KeyboardInfo {
 }
 
 extension FileMetadata {
-  fileprivate func makeDocument() -> TextEditViewControllerDocument? {
+  fileprivate func makeDocument() -> EditableDocument? {
     if contentTypeTree.contains("public.plain-text") {
       return PlainTextDocument(fileURL: fileURL)
     } else if contentTypeTree.contains("org.textbundle.package") {
-      return TextBundleDocument(fileURL: fileURL)
+      return MarkdownFixupTextBundle(fileURL: fileURL)
     } else {
       return nil
     }

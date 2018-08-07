@@ -24,6 +24,8 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     }
   }
   
+  public var document: UIDocument { return self }
+  
   private var normalizedText = NormalizedCollection<String>()
   
   private let normalizer: StringNormalizer = {
