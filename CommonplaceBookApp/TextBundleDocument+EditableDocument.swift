@@ -1,7 +1,22 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
 import Foundation
+import MiniMarkdown
 import textbundle_swift
+
+private func useTabsToSeparateListMarker(
+  _ listItem: MiniMarkdownNode
+) -> [NSMutableAttributedString.Fixup] {
+  if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
+    listItem.slice.substring[firstWhitespaceIndex] != "\t" {
+    let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: listItem.slice.string)
+    return [NSMutableAttributedString.Fixup(
+      range: nsRange,
+      newString: NSAttributedString(string: "\t")
+      )]
+  }
+  return []
+}
 
 final class MarkdownFixupTextBundle {
   
@@ -15,21 +30,30 @@ final class MarkdownFixupTextBundle {
     return fixer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
   }()
   
-  private let fixer: MarkdownFixer = {
+  private lazy var fixer: MarkdownFixer = {
     var renderer = MarkdownFixer()
-    renderer.fixupsForNode[.listItem] = { (listItem) in
-      if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
-        listItem.slice.substring[firstWhitespaceIndex] != "\t" {
-        let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: listItem.slice.string)
-        return [NSMutableAttributedString.Fixup(
-          range: nsRange,
-          newString: NSAttributedString(string: "\t")
-          )]
-      }
-      return []
-    }
+    renderer.fixupsForNode[.listItem] = useTabsToSeparateListMarker
+    renderer.fixupsForNode[.image] = self.substituteImageAttachmentForMarkup
     return renderer
   }()
+
+  private func substituteImageAttachmentForMarkup(
+    _ imageNode: MiniMarkdownNode
+  ) -> [NSMutableAttributedString.Fixup] {
+    guard let imageNode = imageNode as? MiniMarkdown.Image
+      else { return [] }
+    let imagePath = imageNode.url.split(separator: "/").map { String($0) }
+    guard let key = imagePath.last,
+          let data = try? textStorage.document.data(for: key, at: Array(imagePath.dropLast())),
+          let image = UIImage(data: data)
+          else { return [] }
+    let attachment = NSTextAttachment()
+    attachment.image = image
+    return [NSMutableAttributedString.Fixup(
+      range: imageNode.slice.nsRange,
+      newString: NSAttributedString(attachment: attachment)
+    )]
+  }
 }
 
 extension MarkdownFixupTextBundle: WrappingDocument {
