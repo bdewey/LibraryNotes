@@ -47,6 +47,7 @@ extension MarkdownFixupTextBundle: EditableDocument {
   }
   
   public func applyChange(_ change: StringChange) {
+    print("Applying change to range \(change.range)")
     mutableText.applyChange(change)
     textStorage.text.setValue(mutableText.stringWithoutFixups)
   }
