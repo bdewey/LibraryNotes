@@ -13,8 +13,8 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   }
 
   /// The document text.
-  public var text: String {
-    return normalizedText.normalizedCollection
+  public var text: NSAttributedString {
+    return NSAttributedString(string: normalizedText.normalizedCollection)
   }
   
   public func applyChange(_ change: StringChange) {

@@ -126,7 +126,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   fileprivate var document: TextEditViewControllerDocument? {
     didSet {
       changeDelegate.suppressChangeBlock {
-        self.textView.text = document?.text
+        self.textView.attributedText = document?.text
       }
     }
   }

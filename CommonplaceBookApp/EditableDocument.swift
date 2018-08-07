@@ -6,5 +6,5 @@ public protocol EditableDocument: class {
   typealias StringChange = RangeReplaceableChange<Substring>
   func applyChange(_ change: StringChange)
   var previousError: Swift.Error? { get }
-  var text: String { get }
+  var text: NSAttributedString { get }
 }

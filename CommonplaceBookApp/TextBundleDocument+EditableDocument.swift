@@ -5,8 +5,9 @@ import textbundle_swift
 
 extension TextBundleDocument: EditableDocument {
   
-  public var text: String {
-    return (try? self.textBundle.text()) ?? ""
+  public var text: NSAttributedString {
+    let str = (try? self.textBundle.text()) ?? ""
+    return NSAttributedString(string: str)
   }
   
   // TODO: Eww.
