@@ -74,6 +74,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       attributes.bold = true
     }
     textStorage.stylesheet.nodeAttributes[.list] = { $1.list = true }
+    textStorage.stylesheet.nodeAttributes[.table] = { $1.familyName = "Menlo" }
     
     // TODO: The equivalent of this code should be done in building / normalizing the string
     
