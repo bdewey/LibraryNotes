@@ -75,30 +75,11 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     }
     textStorage.stylesheet.nodeAttributes[.list] = { $1.list = true }
     textStorage.stylesheet.nodeAttributes[.table] = { $1.familyName = "Menlo" }
-    
-    // TODO: The equivalent of this code should be done in building / normalizing the string
-    
-//    textStorage.stylesheet.customizations.listItem = { (string, block, attributes) in
-//      if let firstWhitespaceIndex = block.slice.substring.firstIndex(where: { $0.isWhitespace }) {
-//        var attributes = attributes
-//        attributes[.treatAsTab] = true
-//        string.addAttributes(
-//          attributes,
-//          range: NSRange(
-//            firstWhitespaceIndex...firstWhitespaceIndex,
-//            in: block.slice.string
-//          )
-//        )
-//      }
-//    }
     return textStorage
   }()
   
-  private let layoutManagerDelegate = TreatAsTabLayoutManagerDelegate()
-  
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()
-    layoutManager.delegate = layoutManagerDelegate
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
