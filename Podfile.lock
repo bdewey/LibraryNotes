@@ -458,7 +458,7 @@ DEPENDENCIES:
   - textbundle-swift/Tests (from `../textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - MDFInternationalization
     - MDFTextAccessibility
     - MotionAnimator
@@ -493,4 +493,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 8e030c8fba5f597db8b991e7a3a0e4801a7f373d
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.5.0
