@@ -22,8 +22,6 @@ extension NSComparisonPredicate {
 
 final class DocumentListViewController: UIViewController {
   
-  private let commonplaceBook: CommonplaceBook
-  
   private let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
     MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
@@ -41,8 +39,7 @@ final class DocumentListViewController: UIViewController {
     return cell
   }
   
-  init(commonplaceBook: CommonplaceBook) {
-    self.commonplaceBook = commonplaceBook
+  init() {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Documents"
     self.addChild(appBar.headerViewController)
@@ -110,7 +107,7 @@ extension DocumentListViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     let metadata = dataSource.models[indexPath.row]
     self.navigationController?.pushViewController(
-      TextEditViewController(commonplaceBook: commonplaceBook, fileMetadata: metadata),
+      TextEditViewController(fileMetadata: metadata),
       animated: true
     )
   }

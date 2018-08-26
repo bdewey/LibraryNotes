@@ -4,20 +4,18 @@ import UIKit
 import CommonplaceBook
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate, CommonplaceBookDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var window: UIWindow?
-  let commonplaceBook = CommonplaceBook()
   let useCloud = true
 
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    commonplaceBook.delegate = self
     let window = UIWindow(frame: UIScreen.main.bounds)
     let navigationController = UINavigationController(
-      rootViewController: DocumentListViewController(commonplaceBook: commonplaceBook)
+      rootViewController: DocumentListViewController()
     )
     navigationController.isNavigationBarHidden = true
     window.rootViewController = navigationController

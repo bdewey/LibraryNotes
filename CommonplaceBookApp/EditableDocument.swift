@@ -2,7 +2,7 @@
 
 import UIKit
 
-import textbundle_swift
+import TextBundleKit
 
 public protocol EditableDocument: DocumentProtocol {
   typealias StringChange = RangeReplaceableChange<Substring>

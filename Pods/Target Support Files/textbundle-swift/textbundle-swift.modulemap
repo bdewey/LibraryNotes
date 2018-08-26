@@ -1,6 +1,0 @@
-framework module textbundle_swift {
-  umbrella header "textbundle-swift-umbrella.h"
-
-  export *
-  module * { export * }
-}

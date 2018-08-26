@@ -5,7 +5,7 @@ import UIKit
 import CommonplaceBook
 import MaterialComponents
 import MiniMarkdown
-import textbundle_swift
+import TextBundleKit
 
 fileprivate typealias TextEditViewControllerDocument = EditableDocument
 
@@ -47,7 +47,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   
   // Init-time state.
   
-  let commonplaceBook: CommonplaceBook
   let fileMetadata: FileMetadata
   
   let appBar: MDCAppBar = {
@@ -90,8 +89,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }()
   
   /// Designated initializer.
-  init(commonplaceBook: CommonplaceBook, fileMetadata: FileMetadata) {
-    self.commonplaceBook = commonplaceBook
+  init(fileMetadata: FileMetadata) {
     self.fileMetadata = fileMetadata
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"

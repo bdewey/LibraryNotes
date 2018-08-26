@@ -76,6 +76,8 @@ final class PlainTextDocument: UIDocument, EditableDocument {
 extension PlainTextDocument {
   
   struct Factory: DocumentFactory {
+    var useCloud: Bool = true
+
     static let `default` = Factory()
     
     func openDocument(at url: URL, completion: @escaping (Result<PlainTextDocument>) -> Void) {

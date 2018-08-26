@@ -18,5 +18,10 @@
   "platforms": {
     "ios": "8.0"
   },
-  "source_files": "CommonplaceBook/Classes/**/*"
+  "source_files": "CommonplaceBook/Classes/**/*",
+  "dependencies": {
+    "MaterialComponents": [
+      ">= 59.0"
+    ]
+  }
 }

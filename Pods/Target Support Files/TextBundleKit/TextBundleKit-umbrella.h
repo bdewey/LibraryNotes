@@ -11,6 +11,6 @@
 #endif
 
 
-FOUNDATION_EXPORT double textbundle_swiftVersionNumber;
-FOUNDATION_EXPORT const unsigned char textbundle_swiftVersionString[];
+FOUNDATION_EXPORT double TextBundleKitVersionNumber;
+FOUNDATION_EXPORT const unsigned char TextBundleKitVersionString[];
 

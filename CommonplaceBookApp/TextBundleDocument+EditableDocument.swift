@@ -2,7 +2,7 @@
 
 import Foundation
 import MiniMarkdown
-import textbundle_swift
+import TextBundleKit
 
 private func useTabsToSeparateListMarker(
   _ listItem: MiniMarkdownNode
@@ -26,7 +26,7 @@ final class MarkdownFixupTextBundle {
   
   private let textStorage: TextStorage
   private lazy var mutableText: NSMutableAttributedString = {
-    let markdown = (try? textStorage.text.value()) ?? ""
+    let markdown = textStorage.text.currentResult.value ?? ""
     return fixer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
   }()
   

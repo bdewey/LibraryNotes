@@ -1,0 +1,6 @@
+framework module TextBundleKit {
+  umbrella header "TextBundleKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

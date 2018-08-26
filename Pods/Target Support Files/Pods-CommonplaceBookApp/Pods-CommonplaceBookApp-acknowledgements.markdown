@@ -1283,7 +1283,7 @@ THE SOFTWARE.
    limitations under the License.
 
 
-## textbundle-swift
+## TextBundleKit
 
                                  Apache License
                            Version 2.0, January 2004
