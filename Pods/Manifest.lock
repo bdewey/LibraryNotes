@@ -1,6 +1,7 @@
 PODS:
   - CommonplaceBook (0.1.0):
     - MaterialComponents (>= 59.0)
+    - TextBundleKit (~> 0.2)
   - MaterialComponents (59.0.0):
     - MaterialComponents/ActivityIndicator (= 59.0.0)
     - "MaterialComponents/ActivityIndicator+ColorThemer (= 59.0.0)"
@@ -447,8 +448,8 @@ PODS:
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
   - MotionTransitioning (5.0.0)
-  - TextBundleKit (0.1.0)
-  - TextBundleKit/Tests (0.1.0)
+  - TextBundleKit (0.2.1)
+  - TextBundleKit/Tests (0.2.1)
 
 DEPENDENCIES:
   - CommonplaceBook (from `../CommonplaceBook`)
@@ -459,7 +460,7 @@ DEPENDENCIES:
   - TextBundleKit/Tests (from `../textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - MDFInternationalization
     - MDFTextAccessibility
     - MotionAnimator
@@ -482,7 +483,7 @@ CHECKOUT OPTIONS:
     :git: https://github.com/material-components/material-components-ios
 
 SPEC CHECKSUMS:
-  CommonplaceBook: 065da16857fbc07fe0de7c1d2857a63179532aed
+  CommonplaceBook: ce7864b1d804d2db27f09cc826fdcd8ed3710aea
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
@@ -490,8 +491,8 @@ SPEC CHECKSUMS:
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
-  TextBundleKit: 63bc3d81ca55275da94218e41be7338368c3c9d6
+  TextBundleKit: 3e011b3f76b629486bffc261b55f578aab5989bd
 
 PODFILE CHECKSUM: a2cff1df40798f8a89e91f7d638e35cf6fc9a392
 
-COCOAPODS: 1.5.2
+COCOAPODS: 1.5.0

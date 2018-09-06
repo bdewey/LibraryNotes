@@ -4,6 +4,7 @@ import UIKit
 
 import CommonplaceBook
 import MiniMarkdown
+import TextBundleKit
 
 final class PlainTextDocument: UIDocument, EditableDocument {
   
