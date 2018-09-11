@@ -1,9 +1,9 @@
 {
   "name": "MiniMarkdown",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "summary": "A short description of MiniMarkdown.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/bdewey@gmail.com/MiniMarkdown",
+  "homepage": "https://github.com/bdewey/MiniMarkdown",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -12,8 +12,8 @@
     "bdewey@gmail.com": "bdewey@gmail.com"
   },
   "source": {
-    "git": "https://github.com/bdewey@gmail.com/MiniMarkdown.git",
-    "tag": "0.1.0"
+    "git": "https://github.com/bdewey/MiniMarkdown.git",
+    "tag": "0.4.0"
   },
   "platforms": {
     "ios": "11.0"

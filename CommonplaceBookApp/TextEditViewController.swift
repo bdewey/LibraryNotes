@@ -62,18 +62,18 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       Stylesheet.default.typographyScheme.body2
     )
     // TODO: Change font
-    textStorage.stylesheet.nodeAttributes[.heading] = { (_, attributes) in
+    textStorage.stylesheet[.heading] = { (_, attributes) in
       attributes.fontSize = 20
       attributes.familyName = "LibreFranklin-Medium"
     }
-    textStorage.stylesheet.nodeAttributes[.emphasis] = { (_, attributes) in
+    textStorage.stylesheet[.emphasis] = { (_, attributes) in
       attributes.italic = true
     }
-    textStorage.stylesheet.nodeAttributes[.bold] = { (_, attributes) in
+    textStorage.stylesheet[.bold] = { (_, attributes) in
       attributes.bold = true
     }
-    textStorage.stylesheet.nodeAttributes[.list] = { $1.list = true }
-    textStorage.stylesheet.nodeAttributes[.table] = { $1.familyName = "Menlo" }
+    textStorage.stylesheet[.list] = { $1.list = true }
+    textStorage.stylesheet[.table] = { $1.familyName = "Menlo" }
     return textStorage
   }()
   

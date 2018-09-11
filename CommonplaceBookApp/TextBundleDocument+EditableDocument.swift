@@ -5,7 +5,7 @@ import MiniMarkdown
 import TextBundleKit
 
 private func useTabsToSeparateListMarker(
-  _ listItem: MiniMarkdownNode
+  _ listItem: Node
 ) -> [NSMutableAttributedString.Fixup] {
   if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
     listItem.slice.substring[firstWhitespaceIndex] != "\t" {
@@ -38,7 +38,7 @@ final class MarkdownFixupTextBundle {
   }()
 
   private func substituteImageAttachmentForMarkup(
-    _ imageNode: MiniMarkdownNode
+    _ imageNode: Node
   ) -> [NSMutableAttributedString.Fixup] {
     guard let imageNode = imageNode as? MiniMarkdown.Image
       else { return [] }
