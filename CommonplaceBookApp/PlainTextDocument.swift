@@ -7,7 +7,7 @@ import MiniMarkdown
 import TextBundleKit
 
 final class PlainTextDocument: UIDocument, EditableDocument {
-  
+
   enum Error: Swift.Error {
     case internalInconsistency
     case couldNotOpenDocument
@@ -17,18 +17,18 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   public var text: NSAttributedString {
     return NSAttributedString(string: normalizedText.normalizedCollection)
   }
-  
+
   public func applyChange(_ change: StringChange) {
     let inverse = normalizedText.applyChange(change)
     undoManager.registerUndo(withTarget: self) { (doc) in
       doc.normalizedText.applyChange(inverse)
     }
   }
-  
+
   public var document: UIDocument { return self }
-  
+
   private var normalizedText = NormalizedCollection<String>()
-  
+
   private let normalizer: StringNormalizer = {
     var normalizer = StringNormalizer()
     normalizer.nodeSubstitutions[.listItem] = { (node) in
@@ -42,10 +42,10 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     }
     return normalizer
   }()
-  
+
   /// Any internal error from working with the file.
   private(set) var previousError: Swift.Error?
-  
+
   override func contents(forType typeName: String) throws -> Any {
     if let data = normalizedText.originalCollection.data(using: .utf8) {
       return data
@@ -53,7 +53,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       throw Error.internalInconsistency
     }
   }
-  
+
   override func load(fromContents contents: Any, ofType typeName: String?) throws {
     guard
       let data = contents as? Data,
@@ -67,7 +67,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       normalizingChanges: changes
     )
   }
-  
+
   override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {
     previousError = error
     finishedHandlingError(error, recovered: false)
@@ -75,12 +75,12 @@ final class PlainTextDocument: UIDocument, EditableDocument {
 }
 
 extension PlainTextDocument {
-  
+
   struct Factory: DocumentFactory {
     var useCloud: Bool = true
 
     static let `default` = Factory()
-    
+
     func openDocument(at url: URL, completion: @escaping (Result<PlainTextDocument>) -> Void) {
       let document = PlainTextDocument(fileURL: url)
       document.open { (success) in
@@ -91,9 +91,9 @@ extension PlainTextDocument {
         }
       }
     }
-    
+
     func merge(source: PlainTextDocument, destination: PlainTextDocument) { }
-    
+
     func delete(_ document: PlainTextDocument) {
       document.close { (_) in
         try? FileManager.default.removeItem(at: document.fileURL)

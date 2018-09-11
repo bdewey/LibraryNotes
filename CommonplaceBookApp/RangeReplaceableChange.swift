@@ -7,7 +7,7 @@ public struct RangeReplaceableChange<ElementCollection>
   where ElementCollection: Collection {
 
   public var range: NSRange
-  
+
   /// The new elements to insert at `startLocation`
   public let newElements: ElementCollection
 
@@ -15,7 +15,7 @@ public struct RangeReplaceableChange<ElementCollection>
     self.range = range
     self.newElements = newElements
   }
-  
+
   public var delta: Int {
     return newElements.count - range.length
   }
@@ -34,9 +34,9 @@ extension NSRange {
 }
 
 extension RangeReplaceableCollection {
-  
+
   public typealias Change = RangeReplaceableChange<SubSequence>
-  
+
   /// Changes the collection.
   ///
   /// - parameter change: The change to make.
@@ -60,14 +60,17 @@ extension RangeReplaceableCollection {
   ) -> [Change] where ChangeCollection.Element == Change {
     var cumulativeDelta = 0
     let preChangeSnapshot = self
-    print("Applying changes to '\(String(describing: self).addingSpecialCharacterEscapes)'" + describeChanges(changes))
+    print("Applying changes to '\(String(describing: self).addingSpecialCharacterEscapes)'" +
+      describeChanges(changes))
     let changesNeedingFixup = changes
       .sorted(by: { $0.range.location < $1.range.location })
       .reversed()
       .map({ (change) -> Change in
         self.applyChange(change)
       })
-    print("self is now: '\(String.init(describing: self).addingSpecialCharacterEscapes)'\nInverted changes that need fixup: " + preChangeSnapshot.describeChanges(changesNeedingFixup.reversed()))
+    print("self is now: '\(String.init(describing: self).addingSpecialCharacterEscapes)'\n" +
+      "Inverted changes that need fixup: " +
+      preChangeSnapshot.describeChanges(changesNeedingFixup.reversed()))
     let fixedChanges = changesNeedingFixup
       .reversed()
       .map({ (change) -> Change in
@@ -81,11 +84,16 @@ extension RangeReplaceableCollection {
   }
 
   public func describeChange(_ change: Change) -> String {
-    return "[\(change.range.location), \(change.range.length)] '\(String(describing: change.newElements).addingSpecialCharacterEscapes)'"
+    return "[\(change.range.location), \(change.range.length)] " +
+      "'\(String(describing: change.newElements).addingSpecialCharacterEscapes)'"
   }
 
-  public func describeChanges<ChangeCollection: Collection>(_ changes: ChangeCollection) -> String where ChangeCollection.Element == Change {
-    return "Changes: [\n" + changes.map({ "  " + self.describeChange($0) }).joined(separator: ",\n") + "\n]"
+  public func describeChanges<ChangeCollection: Collection>(
+    _ changes: ChangeCollection
+  ) -> String where ChangeCollection.Element == Change {
+    return "Changes: [\n" +
+      changes.map({ "  " + self.describeChange($0) }).joined(separator: ",\n") +
+      "\n]"
   }
 }
 

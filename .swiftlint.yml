@@ -1,0 +1,29 @@
+excluded:
+  - Pods
+
+disabled_rules:
+  - todo
+
+opt_in_rules:
+  - closure_end_indentation
+  - closure_parameter_position
+  - closure_spacing
+  - contains_over_first_not_nil
+  - convenience_type
+  - empty_count
+  - empty_string
+  - file_header
+  - sorted_imports
+
+identifier_name:
+  excluded:
+    - i
+
+line_length: 100
+
+file_header:
+  required_string:  |
+                    // Copyright © 2018 Brian's Brain. All rights reserved.
+
+trailing_comma:
+  mandatory_comma: true

@@ -1,25 +1,27 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
-import UIKit
 import MiniMarkdown
+import UIKit
 
 public final class TextStorageChangeCreatingDelegate: NSObject, NSTextStorageDelegate {
 
-  public func miniMarkdownTextStorage(_ textStorage: MiniMarkdownTextStorage, willHighlightForEditsInRange range: NSRange) {
+  public func miniMarkdownTextStorage(
+    _ textStorage: MiniMarkdownTextStorage,
+    willHighlightForEditsInRange range: NSRange
+  ) {
     guard suppressChange == 0 else { return }
   }
 
-  
   public typealias PostFactoStringChange = RangeReplaceableChange<Substring>
-  
+
   private var suppressChange: Int = 0
   private let changeBlock: (PostFactoStringChange) -> Void
-  
+
   public init(changeBlock: @escaping (PostFactoStringChange) -> Void) {
     self.changeBlock = changeBlock
   }
-  
-  public func suppressChangeBlock(during block: () -> ()) {
+
+  public func suppressChangeBlock(during block: () -> Void) {
     suppressChange += 1
     block()
     suppressChange -= 1

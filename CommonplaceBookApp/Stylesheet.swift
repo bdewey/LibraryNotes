@@ -1,16 +1,10 @@
-//
-//  Stylesheet.swift
-//  remember
-//
-//  Created by Brian Dewey on 5/1/18.
-//  Copyright © 2018 Brian's Brain. All rights reserved.
-//
+// Copyright © 2018 Brian's Brain. All rights reserved.
 
 import Foundation
 
 import MaterialComponents
 
-fileprivate func printFontNames() {
+private func printFontNames() {
   for family in UIFont.familyNames.sorted() {
     print(family)
     for fontName in UIFont.fontNames(forFamilyName: family) {
@@ -19,11 +13,10 @@ fileprivate func printFontNames() {
   }
 }
 
-struct Stylesheet
-{
+struct Stylesheet {
   let colorScheme: MDCSemanticColorScheme
   let typographyScheme: MDCTypographyScheme
-  
+
   static let `default`: Stylesheet = {
     let colorScheme = MDCSemanticColorScheme()
     colorScheme.primaryColor = UIColor.white

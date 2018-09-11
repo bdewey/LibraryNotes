@@ -264,6 +264,7 @@
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
 				D3DC5EBD20EC9B0100F0B74B /* Resources */,
 				556A7CDB6EF5F61DEE38FE72 /* [CP] Embed Pods Frameworks */,
+				D318C0FC2148707D00B035A1 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -430,6 +431,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		D318C0FC2148707D00B035A1 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
 		FCA6B0A8BA294A7968665621 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

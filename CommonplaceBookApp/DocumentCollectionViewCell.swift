@@ -5,11 +5,11 @@ import UIKit
 import MaterialComponents
 
 final class DocumentCollectionViewCell: UICollectionViewCell {
-  
+
   let titleLabel = UILabel(frame: .zero)
   private let divider = UIView(frame: .zero)
   private var inkTouchController: MDCInkTouchController!
-  
+
   override init(frame: CGRect) {
     super.init(frame: frame)
     inkTouchController = MDCInkTouchController(view: contentView)
@@ -23,11 +23,11 @@ final class DocumentCollectionViewCell: UICollectionViewCell {
     self.contentView.addSubview(titleLabel)
     self.contentView.addSubview(divider)
   }
-  
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   override func layoutSubviews() {
     super.layoutSubviews()
     let bounds = self.contentView.bounds

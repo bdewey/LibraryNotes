@@ -11,7 +11,7 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
   var delegate: TextStorageChangeCreatingDelegate!
   var changes: [EditableDocument.StringChange] = []
   var inverseChanges: [EditableDocument.StringChange] = []
-  
+
   override func setUp() {
     super.setUp()
     changes = []
@@ -27,21 +27,21 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     textStorage.insert(NSAttributedString(string: "awesome "), at: 8)
     XCTAssertEqual(text, "Initial awesome text")
   }
-  
+
   func testReplaceText() {
     setInitialText("Initial text")
     textStorage.replaceCharacters(in: NSRange(location: 8, length: 4), with: "words")
     XCTAssertEqual(text, "Initial words")
     XCTAssertEqual(undoingChanges(count: 1), "Initial text")
   }
-  
+
   func testReplaceTextInMiddle() {
     setInitialText("Initial text")
     textStorage.replaceCharacters(in: NSRange(location: 2, length: 5), with: "...")
     XCTAssertEqual(text, "In... text")
     XCTAssertEqual(undoingChanges(count: 1), "Initial text")
   }
-  
+
   func testDeleteAtEnd() {
     setInitialText("Initial textx")
     textStorage.replaceCharacters(in: NSRange(location: 12, length: 1), with: "")
@@ -57,13 +57,13 @@ final class TextStorageChangeCreatingDelegateTests: XCTestCase {
     }
     XCTAssertEqual(changes.count, 0)
   }
-  
+
   fileprivate func applyChange(_ change: EditableDocument.StringChange) {
     changes.append(change)
     let inverse = text.applyChange(change)
     inverseChanges.append(inverse)
   }
-  
+
   fileprivate func undoingChanges(count: Int) -> String {
     precondition(count <= inverseChanges.count)
     var result = text

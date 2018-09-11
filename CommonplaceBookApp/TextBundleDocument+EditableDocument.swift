@@ -13,23 +13,25 @@ private func useTabsToSeparateListMarker(
     return [NSMutableAttributedString.Fixup(
       range: nsRange,
       newString: NSAttributedString(string: "\t")
-      )]
+      ), ]
   }
   return []
 }
 
 final class MarkdownFixupTextBundle {
-  
+
   init(fileURL: URL) {
     self.textStorage = TextStorage(document: TextBundleDocument(fileURL: fileURL))
   }
-  
+
   private let textStorage: TextStorage
   private lazy var mutableText: NSMutableAttributedString = {
     let markdown = textStorage.text.currentResult.value ?? ""
-    return fixer.attributedStringWithFixups(from: markdown).mutableCopy() as! NSMutableAttributedString
+    return fixer
+      .attributedStringWithFixups(from: markdown)
+      .mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
   }()
-  
+
   private lazy var fixer: MarkdownFixer = {
     var renderer = MarkdownFixer()
     renderer.fixupsForNode[.listItem] = useTabsToSeparateListMarker
@@ -52,7 +54,7 @@ final class MarkdownFixupTextBundle {
     return [NSMutableAttributedString.Fixup(
       range: imageNode.slice.nsRange,
       newString: NSAttributedString(attachment: attachment)
-    )]
+    ), ]
   }
 }
 
@@ -61,15 +63,15 @@ extension MarkdownFixupTextBundle: WrappingDocument {
 }
 
 extension MarkdownFixupTextBundle: EditableDocument {
-  
+
   public var previousError: Error? {
     return document.previousError
   }
-  
+
   public var text: NSAttributedString {
     return mutableText
   }
-  
+
   public func applyChange(_ change: StringChange) {
     print("Applying change to range \(change.range)")
     mutableText.applyChange(change)
@@ -78,7 +80,9 @@ extension MarkdownFixupTextBundle: EditableDocument {
 }
 
 extension NSMutableAttributedString {
-  public func applyChange<C: Collection>(_ change: RangeReplaceableChange<C>) where C.Element == Character {
+  public func applyChange<C: Collection>(
+    _ change: RangeReplaceableChange<C>
+  ) where C.Element == Character {
     self.replaceCharacters(in: change.range, with: String(change.newElements))
   }
 }

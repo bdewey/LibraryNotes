@@ -6,12 +6,12 @@ import Foundation
 /// changes. At any time, even after mutations, you can recover a view of the collection that has
 /// the normalizing changes undone.
 public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
-  
+
   /// A change to this particular collection.
   public typealias Change = RangeReplaceableChange<CollectionType.SubSequence>
-  
+
   public init() { }
-  
+
   public init<ChangeCollection: Collection>(
     originalCollection: CollectionType,
     normalizingChanges: ChangeCollection
@@ -21,10 +21,10 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
 
   /// The collection after applying normalizing changes.
   public private(set) var normalizedCollection = CollectionType()
-  
+
   /// Changes will recover the original collection.
   private var inverseNormalizingChanges: [Change] = []
-  
+
   public mutating func setOriginalCollection<ChangeCollection: Collection>(
     _ originalCollection: CollectionType,
     normalizingChanges: ChangeCollection
@@ -32,7 +32,7 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
     normalizedCollection = originalCollection
     inverseNormalizingChanges = normalizedCollection.applyChanges(normalizingChanges)
   }
-  
+
   /// The original view of the collection.
   public var originalCollection: CollectionType {
     var results = normalizedCollection
@@ -42,19 +42,19 @@ public struct NormalizedCollection<CollectionType: RangeReplaceableCollection> {
 }
 
 extension NormalizedCollection: Collection, RangeReplaceableCollection {
-  
+
   public var startIndex: CollectionType.Index {
     return normalizedCollection.startIndex
   }
-  
+
   public var endIndex: CollectionType.Index {
     return normalizedCollection.endIndex
   }
-  
+
   public func index(after i: CollectionType.Index) -> CollectionType.Index {
     return normalizedCollection.index(after: i)
   }
-  
+
   public subscript(i: CollectionType.Index) -> CollectionType.Element {
     get {
       return normalizedCollection[i]
@@ -64,7 +64,7 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
       replaceSubrange(i ..< nextIndex, with: [newValue])
     }
   }
-  
+
   private func adjustInverseChanges<C: Collection>(
     _ changes: [Change],
     for change: RangeReplaceableChange<C>
@@ -85,8 +85,13 @@ extension NormalizedCollection: Collection, RangeReplaceableCollection {
       }
     })
   }
-  
-  public mutating func replaceSubrange<C, R>(_ subrange: R, with newElements: C) where C : Collection, R : RangeExpression, CollectionType.Element == C.Element, CollectionType.Index == R.Bound {
+
+  public mutating func replaceSubrange<C, R>(
+    _ subrange: R,
+    with newElements: C
+  ) where C: Collection, R: RangeExpression,
+    CollectionType.Element == C.Element,
+    CollectionType.Index == R.Bound {
     let change = RangeReplaceableChange(
       range: NSRange(subrange, in: self),
       newElements: newElements
@@ -112,7 +117,8 @@ extension NSRange {
 extension NormalizedCollection: CustomStringConvertible where CollectionType == String {
 
   public var description: String {
-    let description = "Normalized text: \"\(self.normalizedCollection)\"\nChanges:\(self.normalizedCollection.describeChanges(inverseNormalizingChanges))"
+    let description = "Normalized text: \"\(self.normalizedCollection)\"\n" +
+      "Changes:\(self.normalizedCollection.describeChanges(inverseNormalizingChanges))"
     return description
   }
 }

@@ -7,9 +7,9 @@ import MaterialComponents
 import MiniMarkdown
 import TextBundleKit
 
-fileprivate typealias TextEditViewControllerDocument = EditableDocument
+private typealias TextEditViewControllerDocument = EditableDocument
 
-fileprivate struct KeyboardInfo {
+private struct KeyboardInfo {
   var animationCurve: UIView.AnimationCurve
   var animationDuration: Double
   var isLocal: Bool
@@ -19,14 +19,21 @@ fileprivate struct KeyboardInfo {
 
 extension KeyboardInfo {
   init?(_ notification: Notification) {
-    guard notification.name == UIResponder.keyboardWillShowNotification || notification.name == UIResponder.keyboardWillChangeFrameNotification else { return nil }
-    let u = notification.userInfo!
-    
-    animationCurve = UIView.AnimationCurve(rawValue: u[UIWindow.keyboardAnimationCurveUserInfoKey] as! Int)!
-    animationDuration = u[UIWindow.keyboardAnimationDurationUserInfoKey] as! Double
-    isLocal = u[UIWindow.keyboardIsLocalUserInfoKey] as! Bool
-    frameBegin = u[UIWindow.keyboardFrameBeginUserInfoKey] as! CGRect
-    frameEnd = u[UIWindow.keyboardFrameEndUserInfoKey] as! CGRect
+    guard notification.name == UIResponder.keyboardWillShowNotification ||
+          notification.name == UIResponder.keyboardWillChangeFrameNotification else {
+        return nil
+    }
+    let userInfo = notification.userInfo!
+
+    // swiftlint:disable force_cast
+    animationCurve = UIView.AnimationCurve(
+      rawValue: userInfo[UIWindow.keyboardAnimationCurveUserInfoKey] as! Int
+    )!
+    animationDuration = userInfo[UIWindow.keyboardAnimationDurationUserInfoKey] as! Double
+    isLocal = userInfo[UIWindow.keyboardIsLocalUserInfoKey] as! Bool
+    frameBegin = userInfo[UIWindow.keyboardFrameBeginUserInfoKey] as! CGRect
+    frameEnd = userInfo[UIWindow.keyboardFrameEndUserInfoKey] as! CGRect
+    // swiftlint:enable force_cast
   }
 }
 
@@ -44,18 +51,18 @@ extension FileMetadata {
 
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
-  
+
   // Init-time state.
-  
+
   let fileMetadata: FileMetadata
-  
+
   let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
     MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
     MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
     return appBar
   }()
-  
+
   private lazy var textStorage: MiniMarkdownTextStorage = {
     let textStorage = MiniMarkdownTextStorage()
     textStorage.defaultAttributes = NSAttributedString.Attributes(
@@ -76,7 +83,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textStorage.stylesheet[.table] = { $1.familyName = "Menlo" }
     return textStorage
   }()
-  
+
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)
@@ -87,7 +94,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()
-  
+
   /// Designated initializer.
   init(fileMetadata: FileMetadata) {
     self.fileMetadata = fileMetadata
@@ -95,13 +102,13 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     self.navigationItem.title = "Commonplace Book"
     self.addChild(appBar.headerViewController)
   }
-  
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   // Load-time state.
-  
+
   var changeDelegate: TextStorageChangeCreatingDelegate!
   fileprivate var document: TextEditViewControllerDocument? {
     didSet {
@@ -110,12 +117,12 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       }
     }
   }
-  
+
   // MARK: - Lifecycle
   override func loadView() {
     self.view = textView
   }
-  
+
   override func viewDidLoad() {
     super.viewDidLoad()
     appBar.addSubviewsToParent()
@@ -127,7 +134,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     })
     textView.textStorage.delegate = changeDelegate
   }
-  
+
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     guard let document = fileMetadata.makeDocument() else {
@@ -139,7 +146,8 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       if success {
         self.document = document
       } else {
-        let messageText = "Error opening \(self.fileMetadata.displayName): \(document.previousError?.localizedDescription ?? "Unknown error")"
+        let messageText = "Error opening \(self.fileMetadata.displayName): " +
+          "\(document.previousError?.localizedDescription ?? "Unknown error")"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
       }
@@ -153,7 +161,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
                                            name: UIResponder.keyboardWillChangeFrameNotification,
                                            object: nil)
   }
-  
+
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
     document?.close(completionHandler: { (_) in
@@ -161,31 +169,38 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     })
     NotificationCenter.default.removeObserver(self)
   }
-  
+
   // MARK: - Keyboard
-  
+
   @objc func handleKeyboardNotification(_ notification: Notification) {
     guard let keyboardInfo = KeyboardInfo(notification) else { return }
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
     textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
   }
-  
+
   // MARK: - Scrolling
-  
+
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
     appBar.headerViewController.headerView.trackingScrollDidScroll()
   }
-  
+
   func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
     appBar.headerViewController.headerView.trackingScrollDidEndDecelerating()
   }
-  
+
   func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
     appBar.headerViewController.headerView.trackingScrollDidEndDraggingWillDecelerate(decelerate)
   }
-  
-  func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-    appBar.headerViewController.headerView.trackingScrollWillEndDragging(withVelocity: velocity, targetContentOffset: targetContentOffset)
+
+  func scrollViewWillEndDragging(
+    _ scrollView: UIScrollView,
+    withVelocity velocity: CGPoint,
+    targetContentOffset: UnsafeMutablePointer<CGPoint>
+  ) {
+    appBar.headerViewController.headerView.trackingScrollWillEndDragging(
+      withVelocity: velocity,
+      targetContentOffset: targetContentOffset
+    )
   }
 }

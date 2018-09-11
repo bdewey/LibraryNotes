@@ -3,24 +3,31 @@
 import Foundation
 
 extension NSAttributedString.Key {
-  public static let markdownOriginalString = NSMutableAttributedString.Key(rawValue: "markdownOriginalString")
+  public static let markdownOriginalString = NSMutableAttributedString.Key(
+    rawValue: "markdownOriginalString"
+  )
 }
 
 extension NSMutableAttributedString {
-  
+
   public struct Fixup {
     let range: NSRange
     let newString: NSAttributedString
   }
-  
+
   public func performFixup(_ change: Fixup) {
     let range = Range(change.range, in: string)!
     let original = String(string[range])
+    // swiftlint:disable:next force_cast
     let new = change.newString.mutableCopy() as! NSMutableAttributedString
-    new.addAttribute(.markdownOriginalString, value: original, range: NSRange(location: 0, length: new.length))
+    new.addAttribute(
+      .markdownOriginalString,
+      value: original,
+      range: NSRange(location: 0, length: new.length)
+    )
     replaceCharacters(in: change.range, with: new)
   }
-  
+
   public func performFixups<C: Collection>(_ changes: C) where C.Element == Fixup {
     for change in changes.sorted(by: { $1.range.location < $0.range.location }) {
       performFixup(change)

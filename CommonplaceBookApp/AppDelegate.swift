@@ -1,7 +1,7 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
-import UIKit
 import CommonplaceBook
+import UIKit
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -24,4 +24,3 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 }
-

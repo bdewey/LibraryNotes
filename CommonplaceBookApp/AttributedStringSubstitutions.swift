@@ -6,14 +6,14 @@ import MiniMarkdown
 // TODO: Rationalize this + fixups
 
 struct StringNormalizer {
-  
+
   typealias Change = RangeReplaceableChange<Substring>
-  
+
   /// Given a node, returns an array of substitutions
   typealias SubstitutionBlock = (Node) -> [Change]
-  
-  var nodeSubstitutions: [NodeType : SubstitutionBlock] = [:]
-  
+
+  var nodeSubstitutions: [NodeType: SubstitutionBlock] = [:]
+
   func normalizingChanges(for markdown: String) -> FlattenCollection<[[Change]]> {
     // TODO: Pass in parsing rules
     let nodes = ParsingRules().parse(markdown)
