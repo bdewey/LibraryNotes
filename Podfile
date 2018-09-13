@@ -10,6 +10,7 @@ target 'CommonplaceBookApp' do
   # Pods for remember
   # pod 'CommonplaceBook', :path => '../CommonplaceBook'
   pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
+  pod 'IGListKit', '~> 3.0'
   # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
   pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'

@@ -2,6 +2,11 @@ PODS:
   - CommonplaceBook (0.1.0):
     - MaterialComponents (>= 59.0)
     - TextBundleKit (~> 0.2)
+  - IGListKit (3.4.0):
+    - IGListKit/Default (= 3.4.0)
+  - IGListKit/Default (3.4.0):
+    - IGListKit/Diffing
+  - IGListKit/Diffing (3.4.0)
   - MaterialComponents (59.0.0):
     - MaterialComponents/ActivityIndicator (= 59.0.0)
     - "MaterialComponents/ActivityIndicator+ColorThemer (= 59.0.0)"
@@ -454,6 +459,7 @@ PODS:
 
 DEPENDENCIES:
   - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
+  - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
   - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
@@ -463,6 +469,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - IGListKit
     - MDFInternationalization
     - MDFTextAccessibility
     - MotionAnimator
@@ -501,6 +508,7 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   CommonplaceBook: 048ed7683086afc72b271645bf30a0f50ec5bbab
+  IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
@@ -511,6 +519,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 58ea3b55e0ec7728c92ca365034b44dfb65d46ee
   TextBundleKit: 692d3dda9d19594821da9f88b50ddc609861dc27
 
-PODFILE CHECKSUM: 9ca64b00303790c50819075ff9d07a6807f0a677
+PODFILE CHECKSUM: dd4faabfbc1a58d479de2ff9ecfb202be390e2c1
 
 COCOAPODS: 1.5.0

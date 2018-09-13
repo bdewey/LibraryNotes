@@ -3,8 +3,11 @@
 // swiftlint:disable force_cast
 
 import Foundation
+import IGListKit
 
-struct FileMetadata {
+// TODO: This now looks like it should just be type-safe extensions on NSMetadataItem
+
+final class FileMetadata {
 
   let metadataItem: NSMetadataItem
 
@@ -35,5 +38,16 @@ struct FileMetadata {
       forAttribute: NSMetadataItemContentTypeTreeKey
     ) as! [NSString]
     return nsStringArray.map { String($0) }
+  }
+}
+
+extension FileMetadata: ListDiffable {
+  func diffIdentifier() -> NSObjectProtocol {
+    return fileURL as NSURL
+  }
+
+  func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
+    guard let otherItem = object as? FileMetadata else { return false }
+    return fileURL == otherItem.fileURL
   }
 }

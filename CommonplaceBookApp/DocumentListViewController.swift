@@ -2,8 +2,8 @@
 
 import CommonplaceBook
 import CoreServices
+import IGListKit
 import MaterialComponents
-import SwipeCellKit
 import UIKit
 
 private let reuseIdentifier = "HACKY_document"
@@ -49,18 +49,6 @@ final class DocumentListViewController: UIViewController {
     )
   }()
 
-  private lazy var dataSource: ArrayDataSource<FileMetadata> = {
-    ArrayDataSource { [weak self](metadata, collectionView, indexPath) -> UICollectionViewCell in
-      let cell = collectionView.dequeueReusableCell(
-        withReuseIdentifier: reuseIdentifier,
-        for: indexPath
-      ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
-      cell.titleLabel.text = metadata.displayName
-      cell.delegate = self
-      return cell
-    }
-  }()
-
   private lazy var layout: UICollectionViewFlowLayout = {
     let layout = UICollectionViewFlowLayout()
     layout.scrollDirection = .vertical
@@ -69,15 +57,25 @@ final class DocumentListViewController: UIViewController {
     return layout
   }()
 
+  private let dataSource = DocumentDataSource()
+
+  private lazy var adapter: ListAdapter = {
+    let updater = ListAdapterUpdater()
+    let adapter = ListAdapter(updater: updater, viewController: self)
+    adapter.dataSource = dataSource
+    adapter.scrollViewDelegate = self
+    dataSource.adapter = adapter
+    return adapter
+  }()
+
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
     collectionView.register(
       DocumentCollectionViewCell.self,
       forCellWithReuseIdentifier: reuseIdentifier
     )
-    collectionView.dataSource = dataSource
-    collectionView.delegate = self
     collectionView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
+    adapter.collectionView = collectionView
     return collectionView
   }()
 
@@ -97,7 +95,7 @@ final class DocumentListViewController: UIViewController {
       NSComparisonPredicate(conformingToUTI: "public.plain-text"),
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
       ])
-    metadataQuery = MetadataQuery(predicate: predicate, delegate: self)
+    metadataQuery = MetadataQuery(predicate: predicate, delegate: dataSource)
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -129,44 +127,10 @@ final class DocumentListViewController: UIViewController {
         print(success)
       })
     }
-    print("yo")
-  }
-}
-
-extension DocumentListViewController: SwipeCollectionViewCellDelegate {
-  func collectionView(
-    _ collectionView: UICollectionView,
-    editActionsForItemAt indexPath: IndexPath,
-    for orientation: SwipeActionsOrientation
-  ) -> [SwipeAction]? {
-    guard orientation == .right else { return nil }
-
-    let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
-      // handle action by updating model with deletion
-      guard let model = self?.dataSource.models[indexPath.row] else { return }
-      try? FileManager.default.removeItem(at: model.fileURL)
-      self?.dataSource.models.remove(at: indexPath.row)
-      self?.collectionView.reloadData()
-      action.fulfill(with: .delete)
-    }
-
-    // TODO: customize the action appearance
-    deleteAction.image = UIImage(named: "delete")
-    deleteAction.hidesWhenSelected = true
-
-    return [deleteAction]
   }
 }
 
 extension DocumentListViewController: UICollectionViewDelegate {
-
-  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let metadata = dataSource.models[indexPath.row]
-    self.navigationController?.pushViewController(
-      TextEditViewController(fileMetadata: metadata),
-      animated: true
-    )
-  }
 
   // MARK: - Forward scroll events on to the app bar.
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -190,13 +154,5 @@ extension DocumentListViewController: UICollectionViewDelegate {
       withVelocity: velocity,
       targetContentOffset: targetContentOffset
     )
-  }
-}
-
-extension DocumentListViewController: MetadataQueryDelegate {
-
-  func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
-    dataSource.models = items.map { FileMetadata(metadataItem: $0) }
-    collectionView.reloadData()
   }
 }
