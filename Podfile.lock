@@ -2,6 +2,9 @@ PODS:
   - CommonplaceBook (0.1.0):
     - MaterialComponents (>= 59.0)
     - TextBundleKit (~> 0.2)
+  - CwlSignal (2.0.0):
+    - CwlUtils
+  - CwlUtils (1.1.0)
   - IGListKit (3.4.0):
     - IGListKit/Default (= 3.4.0)
   - IGListKit/Default (3.4.0):
@@ -459,6 +462,8 @@ PODS:
 
 DEPENDENCIES:
   - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
+  - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
+  - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -479,6 +484,10 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   CommonplaceBook:
     :git: https://github.com/bdewey/CommonplaceBook.git
+  CwlSignal:
+    :git: https://github.com/bdewey/CwlSignal
+  CwlUtils:
+    :git: https://github.com/bdewey/CwlUtils
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -493,6 +502,12 @@ CHECKOUT OPTIONS:
   CommonplaceBook:
     :commit: 38ea70209f0b5a659271425f85f1b1811a96ec62
     :git: https://github.com/bdewey/CommonplaceBook.git
+  CwlSignal:
+    :commit: c86edbc54c6613424f88782220b6c6c2771a166e
+    :git: https://github.com/bdewey/CwlSignal
+  CwlUtils:
+    :commit: 9b185d63fbf0f51155119b70dded344572c31f11
+    :git: https://github.com/bdewey/CwlUtils
   MaterialComponents:
     :commit: 203160c80e8e5572443ee27616be730e56a43a79
     :git: https://github.com/material-components/material-components-ios
@@ -508,6 +523,8 @@ CHECKOUT OPTIONS:
 
 SPEC CHECKSUMS:
   CommonplaceBook: 048ed7683086afc72b271645bf30a0f50ec5bbab
+  CwlSignal: 6b87ee172614a141ba06f2145f5a18bd7e66c983
+  CwlUtils: c1ba508748e8000989df81730b153f4eaeaaa6c8
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
@@ -519,6 +536,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 58ea3b55e0ec7728c92ca365034b44dfb65d46ee
   TextBundleKit: 692d3dda9d19594821da9f88b50ddc609861dc27
 
-PODFILE CHECKSUM: dd4faabfbc1a58d479de2ff9ecfb202be390e2c1
+PODFILE CHECKSUM: 4e6df361d68c5d995b53aba18b3bf3a0fc60d096
 
 COCOAPODS: 1.5.0
