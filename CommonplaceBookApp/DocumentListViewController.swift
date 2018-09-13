@@ -22,11 +22,31 @@ extension NSComparisonPredicate {
 
 final class DocumentListViewController: UIViewController {
 
+  init() {
+    super.init(nibName: nil, bundle: nil)
+    self.navigationItem.title = "Documents"
+    self.navigationItem.rightBarButtonItem = newDocumentButton
+    self.addChild(appBar.headerViewController)
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
   private let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
     MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
     MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
     return appBar
+  }()
+
+  private let newDocumentButton: UIBarButtonItem = {
+    return UIBarButtonItem(
+      image: UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate),
+      style: .plain,
+      target: self,
+      action: #selector(didTapNewDocument)
+    )
   }()
 
   private let dataSource: ArrayDataSource<FileMetadata> =
@@ -38,12 +58,6 @@ final class DocumentListViewController: UIViewController {
       cell.titleLabel.text = metadata.displayName
       return cell
     }
-
-  init() {
-    super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = "Documents"
-    self.addChild(appBar.headerViewController)
-  }
 
   private lazy var layout: UICollectionViewFlowLayout = {
     let layout = UICollectionViewFlowLayout()
@@ -66,10 +80,6 @@ final class DocumentListViewController: UIViewController {
   }()
 
   var metadataQuery: MetadataQuery?
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
 
   // MARK: - Lifecycle
 
@@ -99,6 +109,25 @@ final class DocumentListViewController: UIViewController {
   ) {
     super.viewWillTransition(to: size, with: coordinator)
     layout.itemSize = CGSize(width: size.width, height: 48)
+  }
+
+  @objc private func didTapNewDocument() {
+    DispatchQueue.global(qos: .default).async {
+      let day = DayComponents(Date())
+      var pathComponent = "\(day).txt"
+      var counter = 0
+      var url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
+      while (try? url.checkPromisedItemIsReachable()) ?? false {
+        counter += 1
+        pathComponent = "\(day) \(counter).txt"
+        url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
+      }
+      let document = PlainTextDocument(fileURL: url)
+      document.save(to: url, for: .forCreating, completionHandler: { (success) in
+        print(success)
+      })
+    }
+    print("yo")
   }
 }
 
