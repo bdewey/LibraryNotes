@@ -1,10 +1,10 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
-import UIKit
-
 import CommonplaceBook
 import CoreServices
 import MaterialComponents
+import SwipeCellKit
+import UIKit
 
 private let reuseIdentifier = "HACKY_document"
 
@@ -49,15 +49,17 @@ final class DocumentListViewController: UIViewController {
     )
   }()
 
-  private let dataSource: ArrayDataSource<FileMetadata> =
-    ArrayDataSource { (metadata, collectionView, indexPath) -> UICollectionViewCell in
+  private lazy var dataSource: ArrayDataSource<FileMetadata> = {
+    ArrayDataSource { [weak self](metadata, collectionView, indexPath) -> UICollectionViewCell in
       let cell = collectionView.dequeueReusableCell(
         withReuseIdentifier: reuseIdentifier,
         for: indexPath
       ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
       cell.titleLabel.text = metadata.displayName
+      cell.delegate = self
       return cell
     }
+  }()
 
   private lazy var layout: UICollectionViewFlowLayout = {
     let layout = UICollectionViewFlowLayout()
@@ -128,6 +130,31 @@ final class DocumentListViewController: UIViewController {
       })
     }
     print("yo")
+  }
+}
+
+extension DocumentListViewController: SwipeCollectionViewCellDelegate {
+  func collectionView(
+    _ collectionView: UICollectionView,
+    editActionsForItemAt indexPath: IndexPath,
+    for orientation: SwipeActionsOrientation
+  ) -> [SwipeAction]? {
+    guard orientation == .right else { return nil }
+
+    let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
+      // handle action by updating model with deletion
+      guard let model = self?.dataSource.models[indexPath.row] else { return }
+      try? FileManager.default.removeItem(at: model.fileURL)
+      self?.dataSource.models.remove(at: indexPath.row)
+      self?.collectionView.reloadData()
+      action.fulfill(with: .delete)
+    }
+
+    // TODO: customize the action appearance
+    deleteAction.image = UIImage(named: "delete")
+    deleteAction.hidesWhenSelected = true
+
+    return [deleteAction]
   }
 }
 

@@ -1,10 +1,10 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import MaterialComponents
+import SwipeCellKit
 import UIKit
 
-import MaterialComponents
-
-final class DocumentCollectionViewCell: UICollectionViewCell {
+final class DocumentCollectionViewCell: SwipeCollectionViewCell {
 
   let titleLabel = UILabel(frame: .zero)
   private let divider = UIView(frame: .zero)
