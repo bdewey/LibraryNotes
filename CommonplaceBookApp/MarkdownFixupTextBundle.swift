@@ -4,6 +4,7 @@ import Foundation
 import MiniMarkdown
 import TextBundleKit
 
+/// Fixup function: Uses a single tab to separate the list marker from its content.
 private func useTabsToSeparateListMarker(
   _ listItem: Node
 ) -> [NSMutableAttributedString.Fixup] {
@@ -18,6 +19,7 @@ private func useTabsToSeparateListMarker(
   return []
 }
 
+/// Wraps a TextStorage...
 final class MarkdownFixupTextBundle {
 
   init(fileURL: URL) {
@@ -32,6 +34,7 @@ final class MarkdownFixupTextBundle {
       .mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
   }()
 
+  /// The render-time fixups we do to the Markdown content for proper display.
   private lazy var fixer: MarkdownFixer = {
     var renderer = MarkdownFixer()
     renderer.fixupsForNode[.listItem] = useTabsToSeparateListMarker
@@ -39,6 +42,7 @@ final class MarkdownFixupTextBundle {
     return renderer
   }()
 
+  /// Fixup function: Replaces an Image with an actual NSTextAttachment containing the image data.
   private func substituteImageAttachmentForMarkup(
     _ imageNode: Node
   ) -> [NSMutableAttributedString.Fixup] {

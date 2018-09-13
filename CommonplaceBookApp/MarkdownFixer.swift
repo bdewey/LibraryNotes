@@ -3,6 +3,7 @@
 import Foundation
 import MiniMarkdown
 
+/// Performs modifications to ... ???
 struct MarkdownFixer {
 
   /// Given a node, returns any changes needed to fix up an attributed string for rendering.
