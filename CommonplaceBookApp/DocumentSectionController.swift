@@ -5,6 +5,12 @@ import IGListKit
 import SwipeCellKit
 
 public final class DocumentSectionController: ListSectionController {
+  private let dataSource: DocumentDataSource
+
+  init(dataSource: DocumentDataSource) {
+    self.dataSource = dataSource
+  }
+
   private var fileMetadata: FileMetadata!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
@@ -42,10 +48,11 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   ) -> [SwipeAction]? {
     guard orientation == .right else { return nil }
 
+    let dataSource = self.dataSource
+    let fileMetadata = self.fileMetadata
     let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
+      dataSource.deleteMetadata(fileMetadata!)
       // handle action by updating model with deletion
-      guard let model = self?.fileMetadata else { return }
-      try? FileManager.default.removeItem(at: model.fileURL)
       action.fulfill(with: .delete)
     }
 

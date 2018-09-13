@@ -7,8 +7,7 @@ import IGListKit
 
 // TODO: This now looks like it should just be type-safe extensions on NSMetadataItem
 
-final class FileMetadata {
-
+public final class FileMetadata: Equatable {
   let metadataItem: NSMetadataItem
 
   init(metadataItem: NSMetadataItem) {
@@ -39,14 +38,18 @@ final class FileMetadata {
     ) as! [NSString]
     return nsStringArray.map { String($0) }
   }
+
+  public static func == (lhs: FileMetadata, rhs: FileMetadata) -> Bool {
+    return lhs.metadataItem === rhs.metadataItem
+  }
 }
 
 extension FileMetadata: ListDiffable {
-  func diffIdentifier() -> NSObjectProtocol {
+  public func diffIdentifier() -> NSObjectProtocol {
     return fileURL as NSURL
   }
 
-  func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
+  public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherItem = object as? FileMetadata else { return false }
     return fileURL == otherItem.fileURL
   }

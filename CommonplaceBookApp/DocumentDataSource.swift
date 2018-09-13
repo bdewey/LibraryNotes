@@ -7,6 +7,14 @@ import IGListKit
 public final class DocumentDataSource: NSObject {
   private var models: [FileMetadata] = []
   public weak var adapter: ListAdapter?
+
+  public func deleteMetadata(_ fileMetadata: FileMetadata) {
+    if let index = models.firstIndex(where: { $0 == fileMetadata }) {
+      try? FileManager.default.removeItem(at: fileMetadata.fileURL)
+      models.remove(at: index)
+      adapter?.performUpdates(animated: true)
+    }
+  }
 }
 
 extension DocumentDataSource: MetadataQueryDelegate {
@@ -27,7 +35,7 @@ extension DocumentDataSource: ListAdapterDataSource {
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return DocumentSectionController()
+    return DocumentSectionController(dataSource: self)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {
