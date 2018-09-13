@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CommonplaceBook
 import MaterialComponents
 import SwipeCellKit
 import UIKit

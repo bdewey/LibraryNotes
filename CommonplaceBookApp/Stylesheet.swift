@@ -1,22 +1,10 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CommonplaceBook
 import Foundation
-
 import MaterialComponents
 
-private func printFontNames() {
-  for family in UIFont.familyNames.sorted() {
-    print(family)
-    for fontName in UIFont.fontNames(forFamilyName: family) {
-      print(" --> \(fontName)")
-    }
-  }
-}
-
-struct Stylesheet {
-  let colorScheme: MDCSemanticColorScheme
-  let typographyScheme: MDCTypographyScheme
-
+extension Stylesheet {
   static let `default`: Stylesheet = {
     let colorScheme = MDCSemanticColorScheme()
     colorScheme.primaryColor = UIColor.white
@@ -27,6 +15,11 @@ struct Stylesheet {
     printFontNames()
     typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
     typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
-    return Stylesheet(colorScheme: colorScheme, typographyScheme: typographyScheme)
+    return Stylesheet(
+      appTitle: "Commonplace Book",
+      colorScheme: colorScheme,
+      darkSurface: UIColor(rgb: 0xf5f5f5),
+      typographyScheme: typographyScheme
+    )
   }()
 }
