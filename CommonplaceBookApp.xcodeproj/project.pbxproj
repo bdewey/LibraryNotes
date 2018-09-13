@@ -25,6 +25,7 @@
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
 		D3C1F407210E776000F92E85 /* TextBundleDocument+EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F406210E776000F92E85 /* TextBundleDocument+EditableDocument.swift */; };
+		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CA919720ED848E00F6DF13 /* Merriweather-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */; };
 		D3CA919820ED84E300F6DF13 /* Merriweather-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12C20ED847A00224FCD /* Merriweather-Black.otf */; };
 		D3CA919920ED84E300F6DF13 /* Merriweather-BlackItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12A20ED847A00224FCD /* Merriweather-BlackItalic.otf */; };
@@ -106,6 +107,7 @@
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
 		D3C1F406210E776000F92E85 /* TextBundleDocument+EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextBundleDocument+EditableDocument.swift"; sourceTree = "<group>"; };
+		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.otf"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -226,6 +228,7 @@
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
+				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D3543ACB211950F10072DEAD /* MarkdownFixer.swift */,
 				D3ECBB2721174E05003D8B22 /* NormalizedCollection.swift */,
@@ -482,6 +485,7 @@
 				D3C1F407210E776000F92E85 /* TextBundleDocument+EditableDocument.swift in Sources */,
 				D3543ACA21194FB70072DEAD /* NSMutableAttributedString+Fixup.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,
+				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D35E2A0920EFBEE60010B21C /* TextStorageChangeCreatingDelegate.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,

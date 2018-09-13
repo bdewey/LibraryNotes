@@ -9,34 +9,6 @@ import TextBundleKit
 
 private typealias TextEditViewControllerDocument = EditableDocument
 
-private struct KeyboardInfo {
-  var animationCurve: UIView.AnimationCurve
-  var animationDuration: Double
-  var isLocal: Bool
-  var frameBegin: CGRect
-  var frameEnd: CGRect
-}
-
-extension KeyboardInfo {
-  init?(_ notification: Notification) {
-    guard notification.name == UIResponder.keyboardWillShowNotification ||
-          notification.name == UIResponder.keyboardWillChangeFrameNotification else {
-        return nil
-    }
-    let userInfo = notification.userInfo!
-
-    // swiftlint:disable force_cast
-    animationCurve = UIView.AnimationCurve(
-      rawValue: userInfo[UIWindow.keyboardAnimationCurveUserInfoKey] as! Int
-    )!
-    animationDuration = userInfo[UIWindow.keyboardAnimationDurationUserInfoKey] as! Double
-    isLocal = userInfo[UIWindow.keyboardIsLocalUserInfoKey] as! Bool
-    frameBegin = userInfo[UIWindow.keyboardFrameBeginUserInfoKey] as! CGRect
-    frameEnd = userInfo[UIWindow.keyboardFrameEndUserInfoKey] as! CGRect
-    // swiftlint:enable force_cast
-  }
-}
-
 extension FileMetadata {
   fileprivate func makeDocument() -> EditableDocument? {
     if contentTypeTree.contains("public.plain-text") {
@@ -99,7 +71,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   init(fileMetadata: FileMetadata) {
     self.fileMetadata = fileMetadata
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = "Commonplace Book"
+    self.navigationItem.title = fileMetadata.displayName
     self.addChild(appBar.headerViewController)
   }
 
