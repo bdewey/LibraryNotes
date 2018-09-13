@@ -442,8 +442,8 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.0.4)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.4.0)
-  - MiniMarkdown/Tests (0.4.0)
+  - MiniMarkdown (0.4.1)
+  - MiniMarkdown/Tests (0.4.1)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
@@ -452,12 +452,12 @@ PODS:
   - TextBundleKit/Tests (0.2.1)
 
 DEPENDENCIES:
-  - CommonplaceBook (from `../CommonplaceBook`)
+  - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `../MiniMarkdown`)
-  - MiniMarkdown/Tests (from `../MiniMarkdown`)
-  - TextBundleKit (from `../textbundle-swift`)
-  - TextBundleKit/Tests (from `../textbundle-swift`)
+  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
+  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
+  - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
+  - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -469,30 +469,39 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   CommonplaceBook:
-    :path: "../CommonplaceBook"
+    :git: https://github.com/bdewey/CommonplaceBook.git
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :path: "../MiniMarkdown"
+    :git: https://github.com/bdewey/MiniMarkdown
   TextBundleKit:
-    :path: "../textbundle-swift"
+    :git: https://github.com/bdewey/textbundle-swift
 
 CHECKOUT OPTIONS:
+  CommonplaceBook:
+    :commit: 38ea70209f0b5a659271425f85f1b1811a96ec62
+    :git: https://github.com/bdewey/CommonplaceBook.git
   MaterialComponents:
     :commit: 203160c80e8e5572443ee27616be730e56a43a79
     :git: https://github.com/material-components/material-components-ios
+  MiniMarkdown:
+    :commit: bfe643feaf8593369eb228c59742b1492d83c7c3
+    :git: https://github.com/bdewey/MiniMarkdown
+  TextBundleKit:
+    :commit: ffb7208dae57275298a16a75b630856a6a1710d1
+    :git: https://github.com/bdewey/textbundle-swift
 
 SPEC CHECKSUMS:
-  CommonplaceBook: ce7864b1d804d2db27f09cc826fdcd8ed3710aea
+  CommonplaceBook: 048ed7683086afc72b271645bf30a0f50ec5bbab
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: ad43637464c5ab525c4235b15813c13c708c3041
+  MiniMarkdown: 01c274b18916cfdc72ba0648ede3c80cd2140668
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
-  TextBundleKit: 3e011b3f76b629486bffc261b55f578aab5989bd
+  TextBundleKit: 692d3dda9d19594821da9f88b50ddc609861dc27
 
-PODFILE CHECKSUM: a2cff1df40798f8a89e91f7d638e35cf6fc9a392
+PODFILE CHECKSUM: 1e7e2022db1691f929641ffa2e0e6821b7cf7abd
 
 COCOAPODS: 1.5.0

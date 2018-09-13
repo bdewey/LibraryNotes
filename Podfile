@@ -8,10 +8,13 @@ target 'CommonplaceBookApp' do
   platform :ios, '11.0'
 
   # Pods for remember
-  pod 'CommonplaceBook', :path => '../CommonplaceBook'
-  pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
+  # pod 'CommonplaceBook', :path => '../CommonplaceBook'
+  pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
+  # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
+  pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
-  pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
+  # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
+  pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['Tests']
 
   target 'CommonplaceBookAppTests' do
     inherit! :search_paths
