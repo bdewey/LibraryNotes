@@ -466,8 +466,8 @@ DEPENDENCIES:
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
-  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
+  - MiniMarkdown (from `../MiniMarkdown`)
+  - MiniMarkdown/Tests (from `../MiniMarkdown`)
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`, branch `swift_4.2`)
   - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
   - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
@@ -491,7 +491,7 @@ EXTERNAL SOURCES:
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :git: https://github.com/bdewey/MiniMarkdown
+    :path: "../MiniMarkdown"
   SwipeCellKit:
     :branch: swift_4.2
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
@@ -511,9 +511,6 @@ CHECKOUT OPTIONS:
   MaterialComponents:
     :commit: 203160c80e8e5572443ee27616be730e56a43a79
     :git: https://github.com/material-components/material-components-ios
-  MiniMarkdown:
-    :commit: bfe643feaf8593369eb228c59742b1492d83c7c3
-    :git: https://github.com/bdewey/MiniMarkdown
   SwipeCellKit:
     :commit: 4d6d983123210104f2d83de03adfc30ea931982b
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
@@ -529,13 +526,13 @@ SPEC CHECKSUMS:
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: 01c274b18916cfdc72ba0648ede3c80cd2140668
+  MiniMarkdown: 84b6edfa3d32a70ffcf44edae4eee75983720b3b
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
   SwipeCellKit: 58ea3b55e0ec7728c92ca365034b44dfb65d46ee
   TextBundleKit: 692d3dda9d19594821da9f88b50ddc609861dc27
 
-PODFILE CHECKSUM: 4e6df361d68c5d995b53aba18b3bf3a0fc60d096
+PODFILE CHECKSUM: 3d670a60968fd987b5ebd1125b491c81dcea2071
 
 COCOAPODS: 1.5.0

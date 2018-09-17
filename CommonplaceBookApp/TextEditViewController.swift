@@ -36,23 +36,37 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }()
 
   private lazy var textStorage: MiniMarkdownTextStorage = {
-    let textStorage = MiniMarkdownTextStorage()
+    let textStorage = MiniMarkdownTextStorage(
+      parsingRules: ParsingRules(),
+      configurationFunction: { (formatters, renderers) in
+        // TODO: Change font
+        formatters[.heading] = { (_, attributes) in
+          attributes.fontSize = 20
+          attributes.familyName = "LibreFranklin-Medium"
+        }
+        formatters[.emphasis] = { (_, attributes) in
+          attributes.italic = true
+        }
+        formatters[.bold] = { (_, attributes) in
+          attributes.bold = true
+        }
+        formatters[.list] = { $1.listLevel += 1 }
+        formatters[.table] = { $1.familyName = "Menlo" }
+        renderers[.text] = { $0.renderedMarkdownNode(with: $1) }
+        renderers[.emphasis] = { $0.renderedMarkdownNode(with: $1) }
+        renderers[.bold] = { $0.renderedMarkdownNode(with: $1) }
+        renderers[.blank] = { $0.renderedMarkdownNode(with: $1) }
+        renderers[.listItem] = { (node, attributes) in
+          let listItem = node as! ListItem // swiftlint:disable:this force_cast
+          return RenderedMarkdownNode(
+            text: String(listItem.slice.string[listItem.markerRange]),
+            renderedResult: NSAttributedString(string: "*\t", attributes: attributes.attributes)
+          )
+        }
+      })
     textStorage.defaultAttributes = NSAttributedString.Attributes(
       Stylesheet.default.typographyScheme.body2
     )
-    // TODO: Change font
-    textStorage.stylesheet[.heading] = { (_, attributes) in
-      attributes.fontSize = 20
-      attributes.familyName = "LibreFranklin-Medium"
-    }
-    textStorage.stylesheet[.emphasis] = { (_, attributes) in
-      attributes.italic = true
-    }
-    textStorage.stylesheet[.bold] = { (_, attributes) in
-      attributes.bold = true
-    }
-    textStorage.stylesheet[.list] = { $1.list = true }
-    textStorage.stylesheet[.table] = { $1.familyName = "Menlo" }
     return textStorage
   }()
 
@@ -81,12 +95,9 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   // Load-time state.
 
-  var changeDelegate: TextStorageChangeCreatingDelegate!
   fileprivate var document: TextEditViewControllerDocument? {
     didSet {
-      changeDelegate.suppressChangeBlock {
-        self.textView.attributedText = document?.text
-      }
+      self.textView.attributedText = document?.text
     }
   }
 
@@ -101,10 +112,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.headerViewController.headerView.trackingScrollView = textView
     appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
-    changeDelegate = TextStorageChangeCreatingDelegate(changeBlock: { [weak self](change) in
-      self?.document?.applyChange(change)
-    })
-    textView.textStorage.delegate = changeDelegate
   }
 
   override func viewWillAppear(_ animated: Bool) {
