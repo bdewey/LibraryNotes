@@ -450,8 +450,8 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.0.4)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.4.1)
-  - MiniMarkdown/Tests (0.4.1)
+  - MiniMarkdown (0.5.0)
+  - MiniMarkdown/Tests (0.5.0)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
@@ -526,7 +526,7 @@ SPEC CHECKSUMS:
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: 84b6edfa3d32a70ffcf44edae4eee75983720b3b
+  MiniMarkdown: 9ff1a86a3b9cc7bbf1552f50f59bc531462c5b2a
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a

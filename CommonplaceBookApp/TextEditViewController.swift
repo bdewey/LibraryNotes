@@ -35,35 +35,37 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     return appBar
   }()
 
+  private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
+    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
+    formatters[.heading] = { $1.fontSize = 24 }
+    formatters[.list] = { $1.listLevel += 1 }
+    formatters[.bold] = { $1.bold = true }
+    formatters[.emphasis] = { $1.italic = true }
+    return formatters
+  }()
+
+  private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
+    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
+    renderers[.listItem] = { (node, attributes) in
+      let listItem = node as! ListItem // swiftlint:disable:this force_cast
+      let text = String(listItem.slice.string[listItem.markerRange])
+      let replacement = listItem.listType == .unordered
+        ? "\u{2022}\t"
+        : text.replacingOccurrences(of: " ", with: "\t")
+      return RenderedMarkdownNode(
+        text: text,
+        renderedResult: NSAttributedString(string: replacement, attributes: attributes.attributes)
+      )
+    }
+    return renderers
+  }()
+
   private lazy var textStorage: MiniMarkdownTextStorage = {
     let textStorage = MiniMarkdownTextStorage(
       parsingRules: ParsingRules(),
-      configurationFunction: { (formatters, renderers) in
-        // TODO: Change font
-        formatters[.heading] = { (_, attributes) in
-          attributes.fontSize = 20
-          attributes.familyName = "LibreFranklin-Medium"
-        }
-        formatters[.emphasis] = { (_, attributes) in
-          attributes.italic = true
-        }
-        formatters[.bold] = { (_, attributes) in
-          attributes.bold = true
-        }
-        formatters[.list] = { $1.listLevel += 1 }
-        formatters[.table] = { $1.familyName = "Menlo" }
-        renderers[.text] = { $0.renderedMarkdownNode(with: $1) }
-        renderers[.emphasis] = { $0.renderedMarkdownNode(with: $1) }
-        renderers[.bold] = { $0.renderedMarkdownNode(with: $1) }
-        renderers[.blank] = { $0.renderedMarkdownNode(with: $1) }
-        renderers[.listItem] = { (node, attributes) in
-          let listItem = node as! ListItem // swiftlint:disable:this force_cast
-          return RenderedMarkdownNode(
-            text: String(listItem.slice.string[listItem.markerRange]),
-            renderedResult: NSAttributedString(string: "*\t", attributes: attributes.attributes)
-          )
-        }
-      })
+      formatters: TextEditViewController.formatters,
+      renderers: TextEditViewController.renderers
+    )
     textStorage.defaultAttributes = NSAttributedString.Attributes(
       Stylesheet.default.typographyScheme.body2
     )
