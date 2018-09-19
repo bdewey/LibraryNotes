@@ -24,9 +24,50 @@ extension FileMetadata {
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
 
+  /// Designated initializer.
+  init?(fileMetadata: FileMetadata) {
+    self.fileMetadata = fileMetadata
+    guard let document = fileMetadata.makeDocument() else {
+      let message = MDCSnackbarMessage(text: "Could not open \(fileMetadata.displayName)")
+      MDCSnackbarManager.show(message)
+      return nil
+    }
+    var renderers = TextEditViewController.renderers
+    if let configurer = document as? ConfiguresRenderers {
+      configurer.configureRenderers(&renderers)
+    }
+    self.document = document
+    self.textStorage = TextEditViewController.makeTextStorage(
+      formatters: TextEditViewController.formatters,
+      renderers: renderers
+    )
+    super.init(nibName: nil, bundle: nil)
+    self.navigationItem.title = fileMetadata.displayName
+    self.addChild(appBar.headerViewController)
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(handleKeyboardNotification(_:)),
+                                           name: UIResponder.keyboardWillHideNotification,
+                                           object: nil)
+    NotificationCenter.default.addObserver(self,
+                                           selector: #selector(handleKeyboardNotification(_:)),
+                                           name: UIResponder.keyboardWillChangeFrameNotification,
+                                           object: nil)
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  deinit {
+    document.close(completionHandler: nil)
+    NotificationCenter.default.removeObserver(self)
+  }
+
   // Init-time state.
 
-  let fileMetadata: FileMetadata
+  private let fileMetadata: FileMetadata
+  private let document: TextEditViewControllerDocument
+  private let textStorage: MiniMarkdownTextStorage
 
   let appBar: MDCAppBar = {
     let appBar = MDCAppBar()
@@ -61,17 +102,20 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     return renderers
   }()
 
-  private lazy var textStorage: MiniMarkdownTextStorage = {
+  private static func makeTextStorage(
+    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    renderers: [NodeType: RenderedMarkdown.RenderFunction]
+  ) -> MiniMarkdownTextStorage {
     let textStorage = MiniMarkdownTextStorage(
       parsingRules: ParsingRules(),
-      formatters: TextEditViewController.formatters,
-      renderers: TextEditViewController.renderers
+      formatters: formatters,
+      renderers: renderers
     )
     textStorage.defaultAttributes = NSAttributedString.Attributes(
       Stylesheet.default.typographyScheme.body2
     )
     return textStorage
-  }()
+  }
 
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()
@@ -84,26 +128,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     return textView
   }()
 
-  /// Designated initializer.
-  init(fileMetadata: FileMetadata) {
-    self.fileMetadata = fileMetadata
-    super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = fileMetadata.displayName
-    self.addChild(appBar.headerViewController)
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
-  // Load-time state.
-
-  fileprivate var document: TextEditViewControllerDocument? {
-    didSet {
-      self.textView.attributedText = document?.text
-    }
-  }
-
   // MARK: - Lifecycle
   override func loadView() {
     self.view = textView
@@ -115,41 +139,16 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.headerViewController.headerView.trackingScrollView = textView
     appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
-  }
-
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    guard let document = fileMetadata.makeDocument() else {
-      let message = MDCSnackbarMessage(text: "Could not open \(fileMetadata.displayName)")
-      MDCSnackbarManager.show(message)
-      return
-    }
     document.open { (success) in
       if success {
-        self.document = document
+        self.textView.attributedText = self.document.text
       } else {
         let messageText = "Error opening \(self.fileMetadata.displayName): " +
-          "\(document.previousError?.localizedDescription ?? "Unknown error")"
+        "\(self.document.previousError?.localizedDescription ?? "Unknown error")"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
       }
     }
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(handleKeyboardNotification(_:)),
-                                           name: UIResponder.keyboardWillHideNotification,
-                                           object: nil)
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(handleKeyboardNotification(_:)),
-                                           name: UIResponder.keyboardWillChangeFrameNotification,
-                                           object: nil)
-  }
-
-  override func viewDidDisappear(_ animated: Bool) {
-    super.viewDidDisappear(animated)
-    document?.close(completionHandler: { (_) in
-      self.document = nil
-    })
-    NotificationCenter.default.removeObserver(self)
   }
 
   // MARK: - Keyboard

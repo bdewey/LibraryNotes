@@ -33,8 +33,9 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didSelectItem(at index: Int) {
+    guard let textEditor = TextEditViewController(fileMetadata: fileMetadata) else { return }
     viewController?.navigationController?.pushViewController(
-      TextEditViewController(fileMetadata: fileMetadata),
+      textEditor,
       animated: true
     )
   }

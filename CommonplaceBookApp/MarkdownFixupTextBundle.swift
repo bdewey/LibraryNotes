@@ -29,36 +29,36 @@ final class MarkdownFixupTextBundle {
   private let textStorage: TextStorage
   private lazy var mutableText: NSMutableAttributedString = {
     let markdown = textStorage.text.currentResult.value ?? ""
-    return fixer
-      .attributedStringWithFixups(from: markdown)
-      .mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
+    // TODO: This is wrong.
+    return NSMutableAttributedString(string: markdown)
   }()
+}
 
-  /// The render-time fixups we do to the Markdown content for proper display.
-  private lazy var fixer: MarkdownFixer = {
-    var renderer = MarkdownFixer()
-    renderer.fixupsForNode[.listItem] = useTabsToSeparateListMarker
-    renderer.fixupsForNode[.image] = self.substituteImageAttachmentForMarkup
-    return renderer
-  }()
-
-  /// Fixup function: Replaces an Image with an actual NSTextAttachment containing the image data.
-  private func substituteImageAttachmentForMarkup(
-    _ imageNode: Node
-  ) -> [NSMutableAttributedString.Fixup] {
-    guard let imageNode = imageNode as? MiniMarkdown.Image
-      else { return [] }
-    let imagePath = imageNode.url.split(separator: "/").map { String($0) }
-    guard let key = imagePath.last,
-          let data = try? textStorage.document.data(for: key, at: Array(imagePath.dropLast())),
-          let image = UIImage(data: data)
-          else { return [] }
-    let attachment = NSTextAttachment()
-    attachment.image = image
-    return [NSMutableAttributedString.Fixup(
-      range: imageNode.slice.nsRange,
-      newString: NSAttributedString(attachment: attachment)
-    ), ]
+extension MarkdownFixupTextBundle: ConfiguresRenderers {
+  func configureRenderers(_ renderers: inout [NodeType : RenderedMarkdown.RenderFunction]) {
+    renderers[.image] = { [weak self](node, attributes) in
+      let imageNode = node as! MiniMarkdown.Image
+      let imagePath = imageNode.url.split(separator: "/").map { String($0) }
+      let text = String(imageNode.slice.substring)
+      guard let key = imagePath.last,
+            let document = self?.textStorage.document,
+            let data = try? document.data(for: key, at: Array(imagePath.dropLast())),
+            let image = UIImage(data: data)
+        else {
+          return RenderedMarkdownNode(
+            type: .image,
+            text: text,
+            renderedResult: NSAttributedString(string: text, attributes: attributes.attributes)
+          )
+      }
+      let attachment = NSTextAttachment()
+      attachment.image = image
+      return RenderedMarkdownNode(
+        type: .image,
+        text: text,
+        renderedResult: NSAttributedString(attachment: attachment)
+      )
+    }
   }
 }
 
