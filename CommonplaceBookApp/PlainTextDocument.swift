@@ -18,13 +18,6 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     return NSAttributedString(string: normalizedText.normalizedCollection)
   }
 
-  public func applyChange(_ change: StringChange) {
-    let inverse = normalizedText.applyChange(change)
-    undoManager.registerUndo(withTarget: self) { (doc) in
-      doc.normalizedText.applyChange(inverse)
-    }
-  }
-
   public var document: UIDocument { return self }
 
   private var normalizedText = NormalizedCollection<String>()

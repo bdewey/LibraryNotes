@@ -4,21 +4,6 @@ import Foundation
 import MiniMarkdown
 import TextBundleKit
 
-/// Fixup function: Uses a single tab to separate the list marker from its content.
-private func useTabsToSeparateListMarker(
-  _ listItem: Node
-) -> [NSMutableAttributedString.Fixup] {
-  if let firstWhitespaceIndex = listItem.slice.substring.firstIndex(where: { $0.isWhitespace }),
-    listItem.slice.substring[firstWhitespaceIndex] != "\t" {
-    let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: listItem.slice.string)
-    return [NSMutableAttributedString.Fixup(
-      range: nsRange,
-      newString: NSAttributedString(string: "\t")
-      ), ]
-  }
-  return []
-}
-
 /// Wraps a TextStorage...
 final class MarkdownFixupTextBundle {
 
@@ -74,12 +59,6 @@ extension MarkdownFixupTextBundle: EditableDocument {
 
   public var text: NSAttributedString {
     return mutableText
-  }
-
-  public func applyChange(_ change: StringChange) {
-    print("Applying change to range \(change.range)")
-    mutableText.applyChange(change)
-    textStorage.text.setValue(mutableText.stringWithoutFixups)
   }
 }
 

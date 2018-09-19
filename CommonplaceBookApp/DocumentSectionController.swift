@@ -51,7 +51,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 
     let dataSource = self.dataSource
     let fileMetadata = self.fileMetadata
-    let deleteAction = SwipeAction(style: .destructive, title: "Delete") { [weak self] action, indexPath in
+    let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
       dataSource.deleteMetadata(fileMetadata!)
       // handle action by updating model with deletion
       action.fulfill(with: .delete)

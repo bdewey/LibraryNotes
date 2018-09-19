@@ -13,8 +13,6 @@
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D32C8B5C214ACC2F0048BF80 /* DocumentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* DocumentDataSource.swift */; };
 		D34D875720ED0A7C0043F755 /* Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34D875620ED0A7C0043F755 /* Stylesheet.swift */; };
-		D3543ACA21194FB70072DEAD /* NSMutableAttributedString+Fixup.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3543AC921194FB70072DEAD /* NSMutableAttributedString+Fixup.swift */; };
-		D3543ACC211950F10072DEAD /* MarkdownFixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3543ACB211950F10072DEAD /* MarkdownFixer.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
@@ -91,8 +89,6 @@
 		D34D876320ED84330043F755 /* LibreFranklin-BlackItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-BlackItalic.otf"; sourceTree = "<group>"; };
 		D34D876420ED84330043F755 /* LibreFranklin-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-Black.otf"; sourceTree = "<group>"; };
 		D34D876520ED84330043F755 /* LibreFranklin-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-Bold.otf"; sourceTree = "<group>"; };
-		D3543AC921194FB70072DEAD /* NSMutableAttributedString+Fixup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMutableAttributedString+Fixup.swift"; sourceTree = "<group>"; };
-		D3543ACB211950F10072DEAD /* MarkdownFixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownFixer.swift; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
@@ -224,9 +220,7 @@
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
-				D3543ACB211950F10072DEAD /* MarkdownFixer.swift */,
 				D3ECBB2721174E05003D8B22 /* NormalizedCollection.swift */,
-				D3543AC921194FB70072DEAD /* NSMutableAttributedString+Fixup.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D3ECBB2521174D3E003D8B22 /* RangeReplaceableChange.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
@@ -478,7 +472,6 @@
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D3ECBB222116840A003D8B22 /* AttributedStringSubstitutions.swift in Sources */,
 				D3C1F407210E776000F92E85 /* MarkdownFixupTextBundle.swift in Sources */,
-				D3543ACA21194FB70072DEAD /* NSMutableAttributedString+Fixup.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
@@ -487,7 +480,6 @@
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D3ECBB2621174D3E003D8B22 /* RangeReplaceableChange.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
-				D3543ACC211950F10072DEAD /* MarkdownFixer.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
