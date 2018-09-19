@@ -53,6 +53,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
         ? "\u{2022}\t"
         : text.replacingOccurrences(of: " ", with: "\t")
       return RenderedMarkdownNode(
+        type: .listItem,
         text: text,
         renderedResult: NSAttributedString(string: replacement, attributes: attributes.attributes)
       )
