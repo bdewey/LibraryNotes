@@ -14,6 +14,8 @@ final class TextBundleEditableDocument: WrappingDocument {
 
   internal let document: TextBundleDocument
   weak var delegate: EditableDocumentDelegate?
+
+  static let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
 }
 
 extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
@@ -43,23 +45,11 @@ extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
 
 extension TextBundleEditableDocument: ConfiguresRenderers {
   func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { [weak self](node, attributes) in
-      let imageNode = node as! MiniMarkdown.Image // swiftlint:disable:this force_cast
-      let imagePath = imageNode.url.split(separator: "/").map { String($0) }
-      let text = String(imageNode.slice.substring)
-      guard let key = imagePath.last,
-            let document = self?.document,
-            let data = try? document.data(for: key, at: Array(imagePath.dropLast())),
-            let image = UIImage(data: data)
-        else {
-          return RenderedMarkdownNode(
-            type: .image,
-            text: text,
-            renderedResult: NSAttributedString(string: text, attributes: attributes.attributes)
-          )
-      }
+    renderers[.image] = { (node, attributes) in
       let attachment = NSTextAttachment()
-      attachment.image = image
+      attachment.image = TextBundleEditableDocument.placeholderImage
+      attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)
+      let text = String(node.slice.substring)
       return RenderedMarkdownNode(
         type: .image,
         text: text,
