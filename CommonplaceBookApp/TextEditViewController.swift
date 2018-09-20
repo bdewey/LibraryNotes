@@ -82,6 +82,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
+    formatters[.table] = { $1.familyName = "Menlo" }
     return formatters
   }()
 
