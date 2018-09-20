@@ -459,7 +459,7 @@ And back to a normal paragraph outside the list.
             ]),
           ExpectedNode(type: .blank),
           ExpectedNode(type: .paragraph, children: [
-            ExpectedNode(type: .text, string: "This is a new paragraph that is part of the list item.\n"),
+            ExpectedNode(type: .text, string: "  This is a new paragraph that is part of the list item.\n"),
             ]),
           ExpectedNode(type: .blank),
           ]),

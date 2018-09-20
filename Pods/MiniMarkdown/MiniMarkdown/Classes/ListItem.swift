@@ -43,23 +43,12 @@ public final class ListItem: BlockContainingNode, LineParseable {
   ///         line will hae to be part of the same list item. When parsing this content, we want
   ///         to disregard this indentation.
   public override var containedLines: [StringSlice] {
-
+    guard let (line, remainder) = LineSequence(slice).decomposed else { return [] }
     // How many characters we throw away from the beginning of each line.
     let countToDrop = NSRange(markerRange, in: slice.string).length
-    return LineSequence(slice).map { (lineSlice) -> StringSlice in
-      // Move the lower bound forward.
-      var offsetLowerBound = lineSlice.range.lowerBound
-      for _ in 0 ..< countToDrop {
-        // It's possible for containedLines to have completely blank lines, which won't have
-        // enough content to offset the lower bound. In this case return everything.
-        if offsetLowerBound == lineSlice.range.upperBound { return lineSlice }
-        offsetLowerBound = lineSlice.string.index(after: offsetLowerBound)
-      }
-      return StringSlice(
-        string: lineSlice.string,
-        range: offsetLowerBound ..< lineSlice.range.upperBound
-      )
-    }
+    var lines = [line.dropFirst(countToDrop)]
+    lines.append(contentsOf: remainder)
+    return lines
   }
 
   public static let parser =

@@ -34,10 +34,10 @@ public final class DocumentProperty<Storage: StableStorage> {
 
   public typealias ValueWithSource = DocumentValueWithSource<Storage.Value>
 
-  public init() { }
+  public init(storage: Storage) { self.storage = storage }
   
   /// Weak reference back to stable storage.
-  public weak var storage: Storage?
+  private weak var storage: Storage?
   
   /// In-memory copy of the value.
   private var _result: Result<ValueWithSource>?

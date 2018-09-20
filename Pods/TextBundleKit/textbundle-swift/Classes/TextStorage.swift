@@ -23,11 +23,10 @@ public final class TextStorage: WrappingDocument {
   public init(document: TextBundleDocument) {
     self.document = document
     document.addListener(self)
-    text.storage = self
   }
   
   public let document: TextBundleDocument
-  public var text = DocumentProperty<TextStorage>()
+  public private(set) lazy var text = DocumentProperty(storage: self)
   
   var key: String {
     return document.bundle.fileWrappers?.keys.first(where: { $0.hasPrefix("text.") })

@@ -82,6 +82,15 @@ public struct StringSlice: Equatable {
     return expectedBound == self.range.upperBound
   }
 
+  public func dropFirst(_ countToDrop: Int) -> StringSlice {
+    // Move the lower bound forward.
+    let offsetLowerBound = string.index(range.lowerBound, offsetBy: countToDrop)
+    return StringSlice(
+      string: string,
+      range: offsetLowerBound ..< range.upperBound
+    )
+  }
+
   /// Adds two slices.
   /// - precondition: The slices must come from the same string and must follow each other,
   ///                 sequentially. If there is a gap between lhs and rhs, it must contain only

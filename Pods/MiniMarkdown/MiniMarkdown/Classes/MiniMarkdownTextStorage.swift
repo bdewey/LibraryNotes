@@ -20,53 +20,79 @@ import UIKit
 /// Text storage with syntax highlighting.
 public final class MiniMarkdownTextStorage: NSTextStorage {
 
+  public init(
+    parsingRules: ParsingRules,
+    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    renderers: [NodeType: RenderedMarkdown.RenderFunction]
+  ) {
+    self.storage = RenderedMarkdown(
+      parsingRules: parsingRules,
+      formatters: formatters,
+      renderers: renderers
+    )
+    super.init()
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
   /// The core storage
-  private let storage = NSMutableAttributedString()
+  private let storage: RenderedMarkdown
 
   /// Default text attributes
-  public var defaultAttributes = NSAttributedString.Attributes(
-    UIFont.preferredFont(forTextStyle: .body)
-  )
+  public var defaultAttributes: NSAttributedString.Attributes {
+    get {
+      return storage.defaultAttributes
+    }
+    set {
+      storage.defaultAttributes = newValue
+    }
+  }
 
-  public var stylesheet = AttributedStringStylesheet()
-  public var editedRangeBeforeHighlighting: NSRange?
-  public var parsingRules = ParsingRules()
-
-  public override func processEditing() {
-    editedRangeBeforeHighlighting = editedRange
-    guard let range = Range(self.editedRange, in: self.string) else { return }
-    try? self.applySyntaxHighlighting(
-      to: range,
-      baseAttributes: defaultAttributes,
-      stylesheet: stylesheet,
-      parsingRules: parsingRules
-    )
-    super.processEditing()
-    editedRangeBeforeHighlighting = nil
+  public func expectedAttributes(for nodeType: NodeType) -> [NSAttributedString.Key: Any] {
+    var attributes = defaultAttributes
+    storage.formatters[nodeType]?(Node(type: nodeType, slice: StringSlice("")), &attributes)
+    return attributes.attributes
   }
 
   // MARK: - Required overrides
 
+  private var memoizedString: String?
+
   override public var string: String {
-    return storage.string
+    if let memoizedString = memoizedString {
+      return memoizedString
+    }
+    memoizedString = storage.attributedString.string
+    return memoizedString!
   }
 
-  override public func attributes(at location: Int, effectiveRange range: NSRangePointer?)
-    -> [NSAttributedString.Key: Any] {
-    return storage.attributes(at: location, effectiveRange: range)
+  override public func attributes(
+    at location: Int,
+    effectiveRange range: NSRangePointer?
+  ) -> [NSAttributedString.Key: Any] {
+    let (attributes, effectiveRange) = storage.attributesAndRange(at: location)
+    range?.pointee = effectiveRange
+    return attributes
   }
 
   override public func replaceCharacters(in range: NSRange, with str: String) {
-    storage.replaceCharacters(in: range, with: str)
+    memoizedString = nil
+    let change = storage.replaceCharacters(in: range, with: str)
     self.edited(
       NSTextStorage.EditActions.editedCharacters,
-      range: range,
-      changeInLength: str.count - range.length
+      range: change.changedCharacterRange,
+      changeInLength: change.sizeChange
+    )
+    self.edited(
+      NSTextStorage.EditActions.editedAttributes,
+      range: change.changedAttributesRange,
+      changeInLength: 0
     )
   }
 
   override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
-    storage.setAttributes(attrs, range: range)
-    self.edited(.editedAttributes, range: range, changeInLength: 0)
+    // NOTHING
   }
 }

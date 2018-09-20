@@ -44,6 +44,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = fileMetadata.displayName
     self.addChild(appBar.headerViewController)
+    self.document.delegate = self
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
                                            name: UIResponder.keyboardWillHideNotification,
@@ -59,14 +60,13 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }
 
   deinit {
-    document.close(completionHandler: nil)
     NotificationCenter.default.removeObserver(self)
   }
 
   // Init-time state.
 
   private let fileMetadata: FileMetadata
-  private let document: TextEditViewControllerDocument
+  private var document: TextEditViewControllerDocument!
   private let textStorage: MiniMarkdownTextStorage
 
   let appBar: MDCAppBar = {
@@ -140,14 +140,18 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
     document.open { (success) in
-      if success {
-        self.textView.attributedText = self.document.text
-      } else {
+      if !success {
         let messageText = "Error opening \(self.fileMetadata.displayName): " +
         "\(self.document.previousError?.localizedDescription ?? "Unknown error")"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
       }
+    }
+  }
+
+  override func viewDidDisappear(_ animated: Bool) {
+    document.close { (_) in
+      self.document = nil
     }
   }
 
@@ -183,5 +187,19 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       withVelocity: velocity,
       targetContentOffset: targetContentOffset
     )
+  }
+
+  func textViewDidChange(_ textView: UITextView) {
+    document.didUpdateText()
+  }
+}
+
+extension TextEditViewController: EditableDocumentDelegate {
+  func editableDocumentDidLoadText(_ text: String) {
+    textView.text = text
+  }
+
+  func editableDocumentCurrentText() -> String {
+    return textView.text
   }
 }

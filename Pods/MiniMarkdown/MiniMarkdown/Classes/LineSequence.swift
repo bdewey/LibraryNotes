@@ -42,7 +42,7 @@ extension LineSequence: Sequence {
     private let slice: StringSlice
 
     /// The start location of the next substring
-    private var index: String.Index
+    fileprivate var index: String.Index
 
     init(slice: StringSlice, index: String.Index) {
       self.slice = slice
@@ -68,5 +68,18 @@ extension LineSequence: Sequence {
 
   public func makeIterator() -> Iterator {
     return Iterator(slice: self.slice, index: self.slice.range.lowerBound)
+  }
+}
+
+extension LineSequence {
+
+  public var decomposed: (StringSlice, LineSequence)? {
+    var iterator = makeIterator()
+    guard let firstLine = iterator.next() else { return nil }
+    let remainder = StringSlice(
+      string: slice.string,
+      range: iterator.index ..< slice.range.upperBound
+    )
+    return (firstLine, LineSequence(remainder))
   }
 }

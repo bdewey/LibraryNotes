@@ -13,34 +13,18 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     case couldNotOpenDocument
   }
 
-  /// The document text.
-  public var text: NSAttributedString {
-    return NSAttributedString(string: normalizedText.normalizedCollection)
-  }
-
-  public var document: UIDocument { return self }
-
-  private var normalizedText = NormalizedCollection<String>()
-
-  private let normalizer: StringNormalizer = {
-    var normalizer = StringNormalizer()
-    normalizer.nodeSubstitutions[.listItem] = { (node) in
-      var changes: [RangeReplaceableChange<Substring>] = []
-      if let firstWhitespaceIndex = node.slice.substring.firstIndex(where: { $0.isWhitespace }),
-        node.slice.substring[firstWhitespaceIndex] != "\t" {
-        let nsRange = NSRange(firstWhitespaceIndex ... firstWhitespaceIndex, in: node.slice.string)
-        changes.append(RangeReplaceableChange(range: nsRange, newElements: "\t"))
-      }
-      return changes
-    }
-    return normalizer
-  }()
+  public var delegate: EditableDocumentDelegate?
 
   /// Any internal error from working with the file.
   private(set) var previousError: Swift.Error?
 
+  func didUpdateText() {
+    updateChangeCount(.done)
+  }
+
   override func contents(forType typeName: String) throws -> Any {
-    if let data = normalizedText.originalCollection.data(using: .utf8) {
+    let string = delegate?.editableDocumentCurrentText() ?? ""
+    if let data = string.data(using: .utf8) {
       return data
     } else {
       throw Error.internalInconsistency
@@ -54,11 +38,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       else {
         throw Error.internalInconsistency
     }
-    let changes = Array(normalizer.normalizingChanges(for: string))
-    normalizedText.setOriginalCollection(
-      string,
-      normalizingChanges: changes
-    )
+    delegate?.editableDocumentDidLoadText(string)
   }
 
   override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {

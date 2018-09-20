@@ -22,10 +22,9 @@ public final class MetadataStorage: TextBundleDocumentSaveListener, WrappingDocu
   public init(document: TextBundleDocument) {
     self.document = document
     document.addListener(self)
-    metadata.storage = self
   }
   
-  public var metadata = DocumentProperty<MetadataStorage>()
+  private(set) public lazy var metadata = DocumentProperty(storage: self)
 
   public let document: TextBundleDocument
   private let key = "info.json"

@@ -5,18 +5,40 @@ import MiniMarkdown
 import TextBundleKit
 
 /// Wraps a TextStorage...
-final class MarkdownFixupTextBundle {
+final class MarkdownFixupTextBundle: WrappingDocument {
 
   init(fileURL: URL) {
-    self.textStorage = TextStorage(document: TextBundleDocument(fileURL: fileURL))
+    self.document = TextBundleDocument(fileURL: fileURL)
+    document.addListener(self)
   }
 
-  private let textStorage: TextStorage
-  private lazy var mutableText: NSMutableAttributedString = {
-    let markdown = textStorage.text.currentResult.value ?? ""
-    // TODO: This is wrong.
-    return NSMutableAttributedString(string: markdown)
-  }()
+  internal let document: TextBundleDocument
+  weak var delegate: EditableDocumentDelegate?
+}
+
+extension MarkdownFixupTextBundle: TextBundleDocumentSaveListener {
+  var key: String {
+    return document.bundle.fileWrappers?.keys.first(where: { $0.hasPrefix("text.") })
+      ?? "text.markdown"
+  }
+
+  func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
+    guard let value = delegate?.editableDocumentCurrentText() else { return }
+    guard let data = value.data(using: .utf8) else {
+      throw NSError.fileWriteInapplicableStringEncoding
+    }
+    let wrapper = FileWrapper(regularFileWithContents: data)
+    document.bundle.replaceFileWrapper(wrapper, key: key)
+  }
+
+  func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
+    guard let data = try? document.data(for: key),
+          let text = String(data: data, encoding: .utf8) else {
+      assertionFailure()
+      return
+    }
+    delegate?.editableDocumentDidLoadText(text)
+  }
 }
 
 extension MarkdownFixupTextBundle: ConfiguresRenderers {
@@ -26,7 +48,7 @@ extension MarkdownFixupTextBundle: ConfiguresRenderers {
       let imagePath = imageNode.url.split(separator: "/").map { String($0) }
       let text = String(imageNode.slice.substring)
       guard let key = imagePath.last,
-            let document = self?.textStorage.document,
+            let document = self?.document,
             let data = try? document.data(for: key, at: Array(imagePath.dropLast())),
             let image = UIImage(data: data)
         else {
@@ -47,25 +69,12 @@ extension MarkdownFixupTextBundle: ConfiguresRenderers {
   }
 }
 
-extension MarkdownFixupTextBundle: WrappingDocument {
-  var document: TextBundleDocument { return textStorage.document }
-}
-
 extension MarkdownFixupTextBundle: EditableDocument {
-
   public var previousError: Error? {
     return document.previousError
   }
 
-  public var text: NSAttributedString {
-    return mutableText
-  }
-}
-
-extension NSMutableAttributedString {
-  public func applyChange<C: Collection>(
-    _ change: RangeReplaceableChange<C>
-  ) where C.Element == Character {
-    self.replaceCharacters(in: change.range, with: String(change.newElements))
+  func didUpdateText() {
+    document.updateChangeCount(.done)
   }
 }

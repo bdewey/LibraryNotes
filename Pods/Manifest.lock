@@ -457,8 +457,8 @@ PODS:
   - MotionInterchange (1.6.0)
   - MotionTransitioning (5.0.0)
   - SwipeCellKit (2.4.3)
-  - TextBundleKit (0.2.1)
-  - TextBundleKit/Tests (0.2.1)
+  - TextBundleKit (0.3.0)
+  - TextBundleKit/Tests (0.3.0)
 
 DEPENDENCIES:
   - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
@@ -466,14 +466,14 @@ DEPENDENCIES:
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `../MiniMarkdown`)
-  - MiniMarkdown/Tests (from `../MiniMarkdown`)
+  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`, branch `new-rendering-architecture`)
+  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`, branch `new-rendering-architecture`)
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`, branch `swift_4.2`)
   - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
   - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - IGListKit
     - MDFInternationalization
     - MDFTextAccessibility
@@ -491,7 +491,8 @@ EXTERNAL SOURCES:
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :path: "../MiniMarkdown"
+    :branch: new-rendering-architecture
+    :git: https://github.com/bdewey/MiniMarkdown
   SwipeCellKit:
     :branch: swift_4.2
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
@@ -511,11 +512,14 @@ CHECKOUT OPTIONS:
   MaterialComponents:
     :commit: 203160c80e8e5572443ee27616be730e56a43a79
     :git: https://github.com/material-components/material-components-ios
+  MiniMarkdown:
+    :commit: 641d82db1317bf91e7f9de9e490d1756b5a14ac7
+    :git: https://github.com/bdewey/MiniMarkdown
   SwipeCellKit:
     :commit: 4d6d983123210104f2d83de03adfc30ea931982b
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
   TextBundleKit:
-    :commit: ffb7208dae57275298a16a75b630856a6a1710d1
+    :commit: a5bfcf093f61dd568242ab0795be3a7731cc9430
     :git: https://github.com/bdewey/textbundle-swift
 
 SPEC CHECKSUMS:
@@ -526,13 +530,13 @@ SPEC CHECKSUMS:
   MaterialComponents: 3607dd0e952af5c0254798758b6944712465243f
   MDFInternationalization: e355b0cebecf53d60233bd267084e49366c82513
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: 9ff1a86a3b9cc7bbf1552f50f59bc531462c5b2a
+  MiniMarkdown: d6b6f9196204c501214a2c138fe6e220593bc4c9
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
   SwipeCellKit: 58ea3b55e0ec7728c92ca365034b44dfb65d46ee
-  TextBundleKit: 692d3dda9d19594821da9f88b50ddc609861dc27
+  TextBundleKit: c6e037f4a9702602584e368dd648d62c6ffbcf18
 
-PODFILE CHECKSUM: 3d670a60968fd987b5ebd1125b491c81dcea2071
+PODFILE CHECKSUM: f2939352dc3f4346e9f689cd94cb59902fed21b3
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.2
