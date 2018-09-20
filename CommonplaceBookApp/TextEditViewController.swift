@@ -14,7 +14,7 @@ extension FileMetadata {
     if contentTypeTree.contains("public.plain-text") {
       return PlainTextDocument(fileURL: fileURL)
     } else if contentTypeTree.contains("org.textbundle.package") {
-      return MarkdownFixupTextBundle(fileURL: fileURL)
+      return TextBundleEditableDocument(fileURL: fileURL)
     } else {
       return nil
     }

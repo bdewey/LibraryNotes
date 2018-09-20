@@ -5,7 +5,7 @@ import MiniMarkdown
 import TextBundleKit
 
 /// Wraps a TextStorage...
-final class MarkdownFixupTextBundle: WrappingDocument {
+final class TextBundleEditableDocument: WrappingDocument {
 
   init(fileURL: URL) {
     self.document = TextBundleDocument(fileURL: fileURL)
@@ -16,7 +16,7 @@ final class MarkdownFixupTextBundle: WrappingDocument {
   weak var delegate: EditableDocumentDelegate?
 }
 
-extension MarkdownFixupTextBundle: TextBundleDocumentSaveListener {
+extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
   var key: String {
     return document.bundle.fileWrappers?.keys.first(where: { $0.hasPrefix("text.") })
       ?? "text.markdown"
@@ -41,7 +41,7 @@ extension MarkdownFixupTextBundle: TextBundleDocumentSaveListener {
   }
 }
 
-extension MarkdownFixupTextBundle: ConfiguresRenderers {
+extension TextBundleEditableDocument: ConfiguresRenderers {
   func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
     renderers[.image] = { [weak self](node, attributes) in
       let imageNode = node as! MiniMarkdown.Image // swiftlint:disable:this force_cast
@@ -69,7 +69,7 @@ extension MarkdownFixupTextBundle: ConfiguresRenderers {
   }
 }
 
-extension MarkdownFixupTextBundle: EditableDocument {
+extension TextBundleEditableDocument: EditableDocument {
   public var previousError: Error? {
     return document.previousError
   }
