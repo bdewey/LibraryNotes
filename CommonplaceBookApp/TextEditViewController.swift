@@ -196,10 +196,10 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
 extension TextEditViewController: EditableDocumentDelegate {
   func editableDocumentDidLoadText(_ text: String) {
-    textView.text = text
+    textStorage.markdown = text
   }
 
   func editableDocumentCurrentText() -> String {
-    return textView.text
+    return textStorage.markdown
   }
 }
