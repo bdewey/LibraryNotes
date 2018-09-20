@@ -68,6 +68,16 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     return memoizedString!
   }
 
+  public var markdown: String {
+    get {
+      return storage.markdown
+    }
+    set {
+      let attributedString = storage.attributedString
+      replaceCharacters(in: NSRange(location: 0, length: attributedString.length), with: newValue)
+    }
+  }
+
   override public func attributes(
     at location: Int,
     effectiveRange range: NSRangePointer?

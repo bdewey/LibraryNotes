@@ -42,9 +42,9 @@ extension MarkdownFixupTextBundle: TextBundleDocumentSaveListener {
 }
 
 extension MarkdownFixupTextBundle: ConfiguresRenderers {
-  func configureRenderers(_ renderers: inout [NodeType : RenderedMarkdown.RenderFunction]) {
+  func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
     renderers[.image] = { [weak self](node, attributes) in
-      let imageNode = node as! MiniMarkdown.Image
+      let imageNode = node as! MiniMarkdown.Image // swiftlint:disable:this force_cast
       let imagePath = imageNode.url.split(separator: "/").map { String($0) }
       let text = String(imageNode.slice.substring)
       guard let key = imagePath.last,

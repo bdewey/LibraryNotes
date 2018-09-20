@@ -1,8 +1,8 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
-import UIKit
 import MiniMarkdown
 import TextBundleKit
+import UIKit
 
 public protocol EditableDocumentDelegate: class {
   func editableDocumentDidLoadText(_ text: String)

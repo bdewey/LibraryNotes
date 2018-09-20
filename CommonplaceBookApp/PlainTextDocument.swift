@@ -13,7 +13,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     case couldNotOpenDocument
   }
 
-  public var delegate: EditableDocumentDelegate?
+  public weak var delegate: EditableDocumentDelegate?
 
   /// Any internal error from working with the file.
   private(set) var previousError: Swift.Error?
