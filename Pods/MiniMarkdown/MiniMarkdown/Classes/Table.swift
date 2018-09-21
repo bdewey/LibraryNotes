@@ -34,9 +34,9 @@ public final class Table: Node, LineParseable {
     }
   }
 
-  public let header: NewTableRow
-  public let delimiter: NewTableDelimiter
-  public let rows: [NewTableRow]
+  public let header: TableRow
+  public let delimiter: TableDelimiter
+  public let rows: [TableRow]
 
   public override var children: [Node] {
     var results: [Node] = [header, delimiter]
@@ -44,7 +44,7 @@ public final class Table: Node, LineParseable {
     return results
   }
 
-  public init?(header: NewTableRow, delimiter: NewTableDelimiter, rows: [NewTableRow]) {
+  public init?(header: TableRow, delimiter: TableDelimiter, rows: [TableRow]) {
     guard header.children.count == delimiter.children.count else { return nil }
     self.header = header
     self.delimiter = delimiter
@@ -56,18 +56,14 @@ public final class Table: Node, LineParseable {
   }
 
   public static let parser = (curry(Table.init)
-    <^> NewTableRow.parser(type: .tableHeader)
-    <*> NewTableDelimiter.parser
-    <*> NewTableRow.parser(type: .tableRow).many).unwrapped
+    <^> TableRow.parser(type: .tableHeader)
+    <*> TableDelimiter.parser
+    <*> TableRow.parser(type: .tableRow).many).unwrapped
 }
 
 public final class TableCell: InlineContainingNode {
   public init(slice: StringSlice) {
     super.init(type: .tableCell, slice: slice)
-  }
-
-  public override var inlineSlice: StringSlice {
-    return StringSlice(string: slice.string, substring: contents)
   }
 
   // "Spaces between pipes and cell content are trimmed."
@@ -76,7 +72,7 @@ public final class TableCell: InlineContainingNode {
   }
 }
 
-public final class NewTableRow: Node {
+public final class TableRow: Node {
   public override var parsingRules: ParsingRules! {
     didSet {
       for child in children { child.parsingRules = parsingRules }
@@ -93,14 +89,14 @@ public final class NewTableRow: Node {
     super.init(type: type, slice: slice)
   }
 
-  public static func parser(type: NodeType) -> Parser<NewTableRow, ArraySlice<StringSlice>> {
+  public static func parser(type: NodeType) -> Parser<TableRow, ArraySlice<StringSlice>> {
     assert(type == .tableHeader || type == .tableRow)
-    return curry(NewTableRow.init)(type)
+    return curry(TableRow.init)(type)
       <^> LineParsers.line(where: { !$0.substring.isWhitespace })
   }
 }
 
-public final class NewTableDelimiter: Node, LineParseable {
+public final class TableDelimiter: Node, LineParseable {
   public override var parsingRules: ParsingRules! {
     didSet {
       for child in children { child.parsingRules = parsingRules }
@@ -115,7 +111,7 @@ public final class NewTableDelimiter: Node, LineParseable {
     super.init(type: .tableDelimiter, slice: slice)
   }
 
-  public static let parser = NewTableDelimiter.init <^>
+  public static let parser = TableDelimiter.init <^>
     LineParsers.line(where: { (slice) in
       slice.tableCells.allSatisfy({ $0.substring.isTableDelimiterCell })
     })

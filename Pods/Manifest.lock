@@ -513,7 +513,7 @@ CHECKOUT OPTIONS:
     :commit: 203160c80e8e5572443ee27616be730e56a43a79
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :commit: 51f9f8cbfd37dc79682f7371c8d89bb0594604d1
+    :commit: 10309ab753a8c471c8b11124d462b8806e962597
     :git: https://github.com/bdewey/MiniMarkdown
   SwipeCellKit:
     :commit: 4d6d983123210104f2d83de03adfc30ea931982b

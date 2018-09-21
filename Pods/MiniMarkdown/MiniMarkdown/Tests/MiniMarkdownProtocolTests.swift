@@ -208,7 +208,11 @@ final class MiniMarkdownProtocolTests: XCTestCase {
       ExpectedNode(type: .tableDelimiter, children: twoCells),
       ExpectedNode(type: .tableRow, children: [
         ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
-        ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .image)]),
+        ExpectedNode(type: .tableCell, children: [
+          ExpectedNode(type: .text),
+          ExpectedNode(type: .image),
+          ExpectedNode(type: .text),
+          ]),
         ])
       ])
     do {
@@ -244,7 +248,11 @@ And now there is a paragraph.
         ExpectedNode(type: .tableDelimiter, children: twoCells),
         ExpectedNode(type: .tableRow, children: [
           ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
-          ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .image)]),
+          ExpectedNode(type: .tableCell, children: [
+            ExpectedNode(type: .text),
+            ExpectedNode(type: .image),
+            ExpectedNode(type: .text),
+            ]),
           ])
         ]),
       ExpectedNode(type: .blank),
