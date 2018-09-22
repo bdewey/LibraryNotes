@@ -58,14 +58,19 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
 
   // MARK: - Required overrides
 
-  private var memoizedString: String?
+  private var memoizedAttributedString: NSAttributedString?
 
-  override public var string: String {
-    if let memoizedString = memoizedString {
+  private func getAttributedString() -> NSAttributedString {
+    if let memoizedString = self.memoizedAttributedString {
       return memoizedString
     }
-    memoizedString = storage.attributedString.string
-    return memoizedString!
+    let memoizedString = storage.attributedString
+    self.memoizedAttributedString = memoizedString
+    return memoizedString
+  }
+
+  override public var string: String {
+    return getAttributedString().string
   }
 
   public var markdown: String {
@@ -82,13 +87,11 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     at location: Int,
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
-    let (attributes, effectiveRange) = storage.attributesAndRange(at: location)
-    range?.pointee = effectiveRange
-    return attributes
+    return getAttributedString().attributes(at: location, effectiveRange: range)
   }
 
   override public func replaceCharacters(in range: NSRange, with str: String) {
-    memoizedString = nil
+    memoizedAttributedString = nil
     let change = storage.replaceCharacters(in: range, with: str)
     self.edited(
       NSTextStorage.EditActions.editedCharacters,

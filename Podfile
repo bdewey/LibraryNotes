@@ -14,7 +14,7 @@ target 'CommonplaceBookApp' do
   pod 'CwlUtils', :git => 'https://github.com/bdewey/CwlUtils'
   pod 'IGListKit', '~> 3.0'
   # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
-  pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests'], :branch => 'new-rendering-architecture'
+  pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git', :branch => 'swift_4.2'
   # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
