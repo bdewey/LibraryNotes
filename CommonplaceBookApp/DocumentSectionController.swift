@@ -1,8 +1,10 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import FlashcardKit
 import Foundation
 import IGListKit
 import SwipeCellKit
+import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
   private let dataSource: DocumentDataSource
@@ -33,9 +35,9 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didSelectItem(at index: Int) {
-    guard let textEditor = TextEditViewController(fileMetadata: fileMetadata) else { return }
+    guard let editingViewController = fileMetadata.editingViewController else { return }
     viewController?.navigationController?.pushViewController(
-      textEditor,
+      editingViewController,
       animated: true
     )
   }
@@ -62,5 +64,50 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
     deleteAction.hidesWhenSelected = true
 
     return [deleteAction]
+  }
+}
+
+extension FileMetadata {
+  private var editableDocument: EditableDocument? {
+    if contentTypeTree.contains("public.plain-text") {
+      return PlainTextDocument(fileURL: fileURL)
+    } else if contentTypeTree.contains("org.textbundle.package") {
+      return TextBundleEditableDocument(fileURL: fileURL)
+    } else {
+      return nil
+    }
+  }
+
+  private var languageDeck: LanguageDeck? {
+    guard contentTypeTree.contains("org.brians-brain.swiftflash") else { return nil }
+    let languageDeck = LanguageDeck(document: TextBundleDocument(fileURL: fileURL))
+    languageDeck.document.open(completionHandler: nil)
+    return languageDeck
+  }
+
+  private func viewController(for languageDeck: LanguageDeck) -> UIViewController {
+    let tabBarViewController = ScrollingTopTabBarViewController()
+    let vocabularyViewController = VocabularyViewController(storage: languageDeck)
+    let challengesViewController = ChallengesViewController(storage: languageDeck)
+    challengesViewController.title = "Challenges"
+    let statisticsViewController = StatisticsViewController(
+      studyStatisticsContainer: languageDeck
+    )
+    tabBarViewController.viewControllers = [
+      vocabularyViewController,
+      challengesViewController,
+      statisticsViewController,
+    ]
+    return tabBarViewController
+  }
+
+  var editingViewController: UIViewController? {
+    if let languageDeck = self.languageDeck {
+      return viewController(for: languageDeck)
+    }
+    if let document = editableDocument {
+      return TextEditViewController(document: document)
+    }
+    return nil
   }
 }

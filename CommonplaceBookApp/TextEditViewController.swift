@@ -25,24 +25,17 @@ extension FileMetadata {
 final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   /// Designated initializer.
-  init?(fileMetadata: FileMetadata) {
-    self.fileMetadata = fileMetadata
-    guard let document = fileMetadata.makeDocument() else {
-      let message = MDCSnackbarMessage(text: "Could not open \(fileMetadata.displayName)")
-      MDCSnackbarManager.show(message)
-      return nil
-    }
+  init?(document: EditableDocument) {
+    self.document = document
     var renderers = TextEditViewController.renderers
     if let configurer = document as? ConfiguresRenderers {
       configurer.configureRenderers(&renderers)
     }
-    self.document = document
     self.textStorage = TextEditViewController.makeTextStorage(
       formatters: TextEditViewController.formatters,
       renderers: renderers
     )
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = fileMetadata.displayName
     self.addChild(appBar.headerViewController)
     self.document.delegate = self
     NotificationCenter.default.addObserver(self,
@@ -65,7 +58,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   // Init-time state.
 
-  private let fileMetadata: FileMetadata
   private var document: TextEditViewControllerDocument!
   private let textStorage: MiniMarkdownTextStorage
 
@@ -142,7 +134,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textView.delegate = self
     document.open { (success) in
       if !success {
-        let messageText = "Error opening \(self.fileMetadata.displayName): " +
+        let messageText = "Error opening document: " +
         "\(self.document.previousError?.localizedDescription ?? "Unknown error")"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
