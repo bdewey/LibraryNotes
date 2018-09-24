@@ -1,18 +1,16 @@
-/*
- Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #import "MDCTextInputControllerBase.h"
 #import "private/MDCTextInputControllerBase+Subclassing.h"
@@ -127,6 +125,7 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
 
 @property(nonatomic, copy) NSString *errorAccessibilityValue;
 @property(nonatomic, copy, readwrite) NSString *errorText;
+@property(nonatomic, copy) NSString *helperAccessibilityLabel;
 @property(nonatomic, copy) NSString *previousLeadingText;
 
 @end
@@ -276,6 +275,11 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
     return;
   }
   NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
+
+  [defaultCenter addObserver:self
+                    selector:@selector(textInputDidToggleEnabled:)
+                        name:MDCTextInputDidToggleEnabledNotification
+                      object:_textInput];
 
   if ([_textInput isKindOfClass:[UITextField class]]) {
     [defaultCenter addObserver:self
@@ -431,7 +435,10 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
                            ? self.errorColor
                            : nonErrorColor;
   } else {
-    placeholderColor = self.textInput.isEditing ? self.activeColor : self.inlinePlaceholderColor;
+    placeholderColor = self.inlinePlaceholderColor;
+  }
+  if (!self.textInput.isEnabled) {
+    placeholderColor = self.disabledColor;
   }
   self.textInput.placeholderLabel.textColor = placeholderColor;
 }
@@ -844,6 +851,13 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
   _errorAccessibilityValue = [errorAccessibilityValue copy];
 }
 
+-(void)setHelperAccessibilityLabel:(NSString *)helperAccessibilityLabel {
+  _helperAccessibilityLabel = [helperAccessibilityLabel copy];
+  if ([self.textInput.leadingUnderlineLabel.text isEqualToString:self.helperText]) {
+    self.textInput.leadingUnderlineLabel.accessibilityLabel = _helperAccessibilityLabel;
+  }
+}
+
 - (UIColor *)errorColor {
   if (!_errorColor) {
     _errorColor = [self class].errorColorDefault;
@@ -1116,7 +1130,7 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
 - (void)setNormalColor:(UIColor *)normalColor {
   if (![_normalColor isEqual:normalColor]) {
     _normalColor = normalColor;
-    [self updateUnderline];
+    [self updateLayout];
   }
 }
 
@@ -1449,6 +1463,13 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
   }
 }
 
+- (void)textInputDidToggleEnabled:(NSNotification *)notification {
+  if (notification.object != self.textInput) {
+    return;
+  }
+  [self updateLayout];
+}
+
 - (void)textInputDidChange:(NSNotification *)note {
   if ([note.name isEqualToString:MDCTextFieldTextDidSetTextNotification]) {
     [CATransaction begin];
@@ -1562,8 +1583,18 @@ static UITextFieldViewMode _underlineViewModeDefault = UITextFieldViewModeWhileE
     UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, self.textInput.leadingUnderlineLabel);
   } else {
     self.textInput.accessibilityValue = nil;
-    self.textInput.leadingUnderlineLabel.accessibilityLabel = nil;
+    if ([self.textInput.leadingUnderlineLabel.text isEqualToString:self.helperText]) {
+      self.textInput.leadingUnderlineLabel.accessibilityLabel = self.helperAccessibilityLabel;
+    } else {
+      self.textInput.leadingUnderlineLabel.accessibilityLabel = nil;
+    }
   }
+}
+
+-(void)setHelperText:(NSString *)helperText
+    helperAccessibilityLabel:(NSString *)helperAccessibilityLabel {
+  self.helperText = helperText;
+  self.helperAccessibilityLabel = helperAccessibilityLabel;
 }
 
 #pragma mark - Accessibility

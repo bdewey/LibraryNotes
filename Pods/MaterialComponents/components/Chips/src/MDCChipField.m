@@ -1,23 +1,22 @@
-/*
- Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #import "MDCChipField.h"
 
 #import <MDFInternationalization/MDFInternationalization.h>
 
+#import "MaterialMath.h"
 #import "MaterialTextFields.h"
 
 static NSString *const MDCChipFieldTextFieldKey = @"textField";
@@ -37,6 +36,8 @@ static const CGFloat MDCChipFieldVerticalInset = 8.f;
 static const CGFloat MDCChipFieldIndent = 4.f;
 static const CGFloat MDCChipFieldHorizontalMargin = 4.f;
 static const CGFloat MDCChipFieldVerticalMargin = 5.f;
+static const CGFloat MDCChipFieldClearButtonSquareWidthHeight = 24.f;
+static const CGFloat MDCChipFieldClearImageSquareWidthHeight = 18.f;
 static const UIKeyboardType MDCChipFieldDefaultKeyboardType = UIKeyboardTypeEmailAddress;
 
 const CGFloat MDCChipFieldDefaultMinTextFieldWidth = 60.f;
@@ -398,6 +399,9 @@ const UIEdgeInsets MDCChipFieldDefaultContentEdgeInsets = {
   if (strippedTitle.length > 0) {
     MDCChipView *chip = [[MDCChipView alloc] init];
     chip.titleLabel.text = strippedTitle;
+    if (self.showChipsDeleteButton) {
+      [self addClearButtonToChip:chip];
+    }
     BOOL shouldAddChip = YES;
     if ([self.delegate respondsToSelector:@selector(chipField:shouldAddChip:)]) {
       shouldAddChip = [self.delegate chipField:self shouldAddChip:chip];
@@ -409,6 +413,129 @@ const UIEdgeInsets MDCChipFieldDefaultContentEdgeInsets = {
   } else {
     [self clearTextInput];
   }
+}
+
+- (void)addClearButtonToChip:(MDCChipView *)chip {
+  UIControl *clearButton = [[UIControl alloc] init];
+  CGFloat clearButtonWidthAndHeight = MDCChipFieldClearButtonSquareWidthHeight;
+  clearButton.frame = CGRectMake(0, 0, clearButtonWidthAndHeight, clearButtonWidthAndHeight);
+  clearButton.layer.cornerRadius = clearButtonWidthAndHeight / 2;
+  UIImageView *clearImageView = [[UIImageView alloc] initWithImage:[self drawClearButton]];
+  CGFloat widthAndHeight = MDCChipFieldClearImageSquareWidthHeight;
+  CGFloat padding =
+      (MDCChipFieldClearButtonSquareWidthHeight - MDCChipFieldClearImageSquareWidthHeight) / 2;
+  clearImageView.frame = CGRectMake(padding, padding, widthAndHeight, widthAndHeight);
+  clearButton.tintColor = [UIColor.blackColor colorWithAlphaComponent:0.6f];
+  [clearButton addSubview:clearImageView];
+  chip.accessoryView = clearButton;
+  [clearButton addTarget:self
+                  action:@selector(deleteChip:)
+        forControlEvents:UIControlEventTouchUpInside];
+}
+
+- (UIImage *)drawClearButton {
+  CGSize clearButtonSize =
+      CGSizeMake(MDCChipFieldClearImageSquareWidthHeight, MDCChipFieldClearImageSquareWidthHeight);
+
+  CGRect bounds = CGRectMake(0, 0, clearButtonSize.width, clearButtonSize.height);
+  UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0);
+  [UIColor.grayColor setFill];
+  [MDCPathForClearButtonImageFrame(bounds) fill];
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+
+  image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+  return image;
+}
+
+static inline UIBezierPath *MDCPathForClearButtonImageFrame(CGRect frame) {
+  // GENERATED CODE
+
+  CGRect innerBounds = CGRectMake(CGRectGetMinX(frame) + 2, CGRectGetMinY(frame) + 2,
+                                  MDCFloor((frame.size.width - 2) * 0.90909f + 0.5f),
+                                  MDCFloor((frame.size.height - 2) * 0.90909f + 0.5f));
+  UIBezierPath *ic_clear_path = [UIBezierPath bezierPath];
+  [ic_clear_path
+      moveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.50000f * innerBounds.size.width,
+                              CGRectGetMinY(innerBounds) + 0.00000f * innerBounds.size.height)];
+  [ic_clear_path
+      addCurveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 1.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.50000f * innerBounds.size.height)
+        controlPoint1:CGPointMake(CGRectGetMinX(innerBounds) + 0.77600f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.00000f * innerBounds.size.height)
+        controlPoint2:CGPointMake(CGRectGetMinX(innerBounds) + 1.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.22400f * innerBounds.size.height)];
+  [ic_clear_path
+      addCurveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.50000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 1.00000f * innerBounds.size.height)
+        controlPoint1:CGPointMake(CGRectGetMinX(innerBounds) + 1.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.77600f * innerBounds.size.height)
+        controlPoint2:CGPointMake(CGRectGetMinX(innerBounds) + 0.77600f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 1.00000f * innerBounds.size.height)];
+  [ic_clear_path
+      addCurveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.50000f * innerBounds.size.height)
+        controlPoint1:CGPointMake(CGRectGetMinX(innerBounds) + 0.22400f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 1.00000f * innerBounds.size.height)
+        controlPoint2:CGPointMake(CGRectGetMinX(innerBounds) + 0.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.77600f * innerBounds.size.height)];
+  [ic_clear_path
+      addCurveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.50000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.00000f * innerBounds.size.height)
+        controlPoint1:CGPointMake(CGRectGetMinX(innerBounds) + 0.00000f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.22400f * innerBounds.size.height)
+        controlPoint2:CGPointMake(CGRectGetMinX(innerBounds) + 0.22400f * innerBounds.size.width,
+                                  CGRectGetMinY(innerBounds) + 0.00000f * innerBounds.size.height)];
+  [ic_clear_path closePath];
+  [ic_clear_path
+      moveToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.73417f * innerBounds.size.width,
+                              CGRectGetMinY(innerBounds) + 0.31467f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.68700f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.26750f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.50083f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.45367f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.31467f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.26750f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.26750f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.31467f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.45367f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.50083f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.26750f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.68700f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.31467f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.73417f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.50083f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.54800f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.68700f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.73417f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.73417f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.68700f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.54800f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.50083f * innerBounds.size.height)];
+  [ic_clear_path
+      addLineToPoint:CGPointMake(CGRectGetMinX(innerBounds) + 0.73417f * innerBounds.size.width,
+                                 CGRectGetMinY(innerBounds) + 0.31467f * innerBounds.size.height)];
+  [ic_clear_path closePath];
+
+  return ic_clear_path;
+}
+
+- (void)deleteChip:(id)sender {
+  UIControl *deleteButton = (UIControl *)sender;
+  MDCChipView *chip = (MDCChipView *)deleteButton.superview;
+  [self removeChip:chip];
+  [self clearTextInput];
 }
 
 - (void)notifyDelegateIfSizeNeedsToBeUpdated {

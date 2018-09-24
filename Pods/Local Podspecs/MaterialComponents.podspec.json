@@ -1,13 +1,13 @@
 {
   "name": "MaterialComponents",
-  "version": "59.0.0",
+  "version": "64.0.0",
   "authors": "The Material Components authors.",
   "summary": "A collection of stand-alone production-ready UI libraries focused on design details.",
   "homepage": "https://github.com/material-components/material-components-ios",
   "license": "Apache 2.0",
   "source": {
     "git": "https://github.com/material-components/material-components-ios.git",
-    "tag": "v59.0.0"
+    "tag": "v64.0.0"
   },
   "platforms": {
     "ios": "8.0"
@@ -292,6 +292,25 @@
       }
     },
     {
+      "name": "BottomSheet+ShapeThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/BottomSheet/src/ShapeThemer/*.h",
+      "source_files": [
+        "components/BottomSheet/src/ShapeThemer/*.{h,m}",
+        "components/BottomSheet/src/ShapeThemer/private/*.{h,m}"
+      ],
+      "dependencies": {
+        "MaterialComponents/BottomSheet": [
+
+        ],
+        "MaterialComponents/schemes/Shape": [
+
+        ]
+      }
+    },
+    {
       "name": "Buttons",
       "platforms": {
         "ios": "8.0"
@@ -367,6 +386,22 @@
       }
     },
     {
+      "name": "Buttons+ShapeThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/Buttons/src/ShapeThemer/*.h",
+      "source_files": "components/Buttons/src/ShapeThemer/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/Buttons": [
+
+        ],
+        "MaterialComponents/schemes/Shape": [
+
+        ]
+      }
+    },
+    {
       "name": "Buttons+TypographyThemer",
       "platforms": {
         "ios": "8.0"
@@ -399,6 +434,9 @@
         "MaterialComponents/Buttons+ColorThemer": [
 
         ],
+        "MaterialComponents/Buttons+ShapeThemer": [
+
+        ],
         "MaterialComponents/Buttons+TypographyThemer": [
 
         ]
@@ -419,6 +457,9 @@
 
         ],
         "MaterialComponents/Buttons": [
+
+        ],
+        "MaterialComponents/private/Application": [
 
         ]
       }
@@ -497,6 +538,22 @@
       }
     },
     {
+      "name": "Cards+ShapeThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/Cards/src/ShapeThemer/*.h",
+      "source_files": "components/Cards/src/ShapeThemer/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/Cards": [
+
+        ],
+        "MaterialComponents/schemes/Shape": [
+
+        ]
+      }
+    },
+    {
       "name": "Cards+CardThemer",
       "platforms": {
         "ios": "8.0"
@@ -508,6 +565,9 @@
 
         ],
         "MaterialComponents/Cards+ColorThemer": [
+
+        ],
+        "MaterialComponents/Cards+ShapeThemer": [
 
         ]
       }
@@ -566,6 +626,9 @@
         "MaterialComponents/Chips+ColorThemer": [
 
         ],
+        "MaterialComponents/Chips+ShapeThemer": [
+
+        ],
         "MaterialComponents/Chips+TypographyThemer": [
 
         ]
@@ -599,6 +662,22 @@
 
         ],
         "MaterialComponents/Themes": [
+
+        ]
+      }
+    },
+    {
+      "name": "Chips+ShapeThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/Chips/src/ShapeThemer/*.h",
+      "source_files": "components/Chips/src/ShapeThemer/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/Chips": [
+
+        ],
+        "MaterialComponents/schemes/Shape": [
 
         ]
       }
@@ -791,6 +870,25 @@
       }
     },
     {
+      "name": "Dialogs+DialogThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/Dialogs/src/DialogThemer/*.h",
+      "source_files": "components/Dialogs/src/DialogThemer/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/Dialogs": [
+
+        ],
+        "MaterialComponents/Dialogs+ColorThemer": [
+
+        ],
+        "MaterialComponents/Dialogs+TypographyThemer": [
+
+        ]
+      }
+    },
+    {
       "name": "FeatureHighlight",
       "platforms": {
         "ios": "8.0"
@@ -902,6 +1000,19 @@
       }
     },
     {
+      "name": "FlexibleHeader+CanAlwaysExpandToMaximumHeight",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/FlexibleHeader/src/CanAlwaysExpandToMaximumHeight/*.h",
+      "source_files": "components/FlexibleHeader/src/CanAlwaysExpandToMaximumHeight/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/FlexibleHeader": [
+
+        ]
+      }
+    },
+    {
       "name": "FlexibleHeader+ColorThemer",
       "platforms": {
         "ios": "8.0"
@@ -1002,6 +1113,15 @@
 
         ],
         "MaterialComponents/ShadowLayer": [
+
+        ],
+        "MaterialComponents/Typography": [
+
+        ],
+        "MDFInternationalization": [
+
+        ],
+        "MaterialComponents/private/Math": [
 
         ]
       }
@@ -1254,6 +1374,9 @@
       "source_files": [
         "components/Snackbar/src/*.{h,m}",
         "components/Snackbar/src/private/*.{h,m}"
+      ],
+      "resources": [
+        "components/Snackbar/src/MaterialSnackbar.bundle"
       ],
       "dependencies": {
         "MaterialComponents/AnimationTiming": [
@@ -1536,6 +1659,22 @@
           },
           "public_header_files": "components/schemes/Color/src/*.h",
           "source_files": "components/schemes/Color/src/*.{h,m}"
+        },
+        {
+          "name": "Shape",
+          "platforms": {
+            "ios": "8.0"
+          },
+          "public_header_files": "components/schemes/Shape/src/*.h",
+          "source_files": "components/schemes/Shape/src/*.{h,m}",
+          "dependencies": {
+            "MaterialComponents/private/ShapeLibrary": [
+
+            ],
+            "MaterialComponents/private/Shapes": [
+
+            ]
+          }
         },
         {
           "name": "Typography",

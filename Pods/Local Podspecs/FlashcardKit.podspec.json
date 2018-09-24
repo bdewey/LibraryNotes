@@ -1,0 +1,72 @@
+{
+  "name": "FlashcardKit",
+  "version": "0.1.0",
+  "summary": "A short description of FlashcardKit.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/bdewey@gmail.com/FlashcardKit",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "bdewey@gmail.com": "bdewey@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/bdewey@gmail.com/FlashcardKit.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "11.0"
+  },
+  "source_files": "FlashcardKit/Classes/**/*",
+  "resource_bundles": {
+    "FlashcardKit": [
+      "FlashcardKit/Resources/**/*.ttf"
+    ]
+  },
+  "dependencies": {
+    "CollectionViewLayouts": [
+
+    ],
+    "CommonplaceBook": [
+
+    ],
+    "CwlSignal": [
+
+    ],
+    "CwlUtils": [
+
+    ],
+    "DZNPhotoPickerController": [
+
+    ],
+    "MiniMarkdown": [
+      "~> 0.6"
+    ],
+    "MaterialComponents": [
+      ">= 61.0"
+    ],
+    "NunitoSans": [
+
+    ],
+    "SDWebImage": [
+      "~> 4.0"
+    ],
+    "SDWebImage/GIF": [
+      "~> 4.0"
+    ],
+    "SnapKit": [
+      "~> 4.0"
+    ],
+    "TextBundleKit": [
+      "~> 0.3"
+    ]
+  },
+  "testspecs": [
+    {
+      "name": "Tests",
+      "test_type": "unit",
+      "source_files": "FlashcardKit/Tests/**/*"
+    }
+  ]
+}

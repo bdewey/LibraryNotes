@@ -1,18 +1,16 @@
-/*
- Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 #import "MDCTextInputControllerOutlined.h"
 
@@ -168,6 +166,10 @@ static UIRectCorner _roundedCornersDefault = UIRectCornerAllCorners;
   self.textInput.clipsToBounds = NO;
 }
 
+-(void)updateUnderline {
+  self.textInput.underline.hidden = YES;
+}
+
 - (void)updateBorder {
   [super updateBorder];
 
@@ -182,7 +184,7 @@ static UIRectCorner _roundedCornersDefault = UIRectCornerAllCorners;
     path =
         [self roundedPathFromRect:[self borderRect]
                     withTextSpace:placeholderWidth
-                       leftOffset:MDCTextInputOutlinedTextFieldFullPadding -
+                    leadingOffset:MDCTextInputOutlinedTextFieldFullPadding -
                                   MDCTextInputOutlinedTextFieldFloatingPlaceholderPadding / 2.0f];
   } else {
     CGSize cornerRadius = CGSizeMake(MDCTextInputControllerBaseDefaultBorderRadius,
@@ -194,10 +196,15 @@ static UIRectCorner _roundedCornersDefault = UIRectCornerAllCorners;
   self.textInput.borderPath = path;
 
   UIColor *borderColor = self.textInput.isEditing ? self.activeColor : self.normalColor;
+  if (!self.textInput.isEnabled) {
+    borderColor = self.disabledColor;
+  }
   self.textInput.borderView.borderStrokeColor =
       (self.isDisplayingCharacterCountError || self.isDisplayingErrorText) ? self.errorColor
                                                                            : borderColor;
   self.textInput.borderView.borderPath.lineWidth = self.textInput.isEditing ? 2 : 1;
+
+  [self.textInput.borderView setNeedsLayout];
 
   [self updatePlaceholder];
 }
@@ -211,7 +218,7 @@ static UIRectCorner _roundedCornersDefault = UIRectCornerAllCorners;
 
 - (UIBezierPath *)roundedPathFromRect:(CGRect)f
                         withTextSpace:(CGFloat)textSpace
-                           leftOffset:(CGFloat)offset {
+                        leadingOffset:(CGFloat)offset {
   UIBezierPath *path = [[UIBezierPath alloc] init];
   CGFloat radius = MDCTextInputControllerBaseDefaultBorderRadius;
   CGFloat yOffset = f.origin.y;
@@ -219,11 +226,17 @@ static UIRectCorner _roundedCornersDefault = UIRectCornerAllCorners;
 
   // Draw the path
   [path moveToPoint:CGPointMake(radius + xOffset, yOffset)];
-  [path addLineToPoint:CGPointMake(offset + xOffset, yOffset)];
+  if (self.textInput.mdf_effectiveUserInterfaceLayoutDirection ==
+      UIUserInterfaceLayoutDirectionLeftToRight) {
+    [path addLineToPoint:CGPointMake(offset + xOffset, yOffset)];
+    [path moveToPoint:CGPointMake(textSpace + offset + xOffset, yOffset)];
+    [path addLineToPoint:CGPointMake(f.size.width - radius + xOffset, yOffset)];
+  } else {
+    [path addLineToPoint:CGPointMake(xOffset + (f.size.width - (offset + textSpace)), yOffset)];
+    [path moveToPoint:CGPointMake(xOffset + (f.size.width - offset), yOffset)];
+    [path addLineToPoint:CGPointMake(xOffset + (f.size.width - radius), yOffset)];
+  }
 
-  [path moveToPoint:CGPointMake(textSpace + offset + xOffset, yOffset)];
-
-  [path addLineToPoint:CGPointMake(f.size.width - radius + xOffset, yOffset)];
   [path addArcWithCenter:CGPointMake(f.size.width - radius + xOffset, radius + yOffset)
                   radius:radius
               startAngle:- (CGFloat)(M_PI / 2)

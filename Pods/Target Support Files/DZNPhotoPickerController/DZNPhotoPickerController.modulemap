@@ -1,0 +1,6 @@
+framework module DZNPhotoPickerController {
+  umbrella header "DZNPhotoPickerController-umbrella.h"
+
+  export *
+  module * { export * }
+}

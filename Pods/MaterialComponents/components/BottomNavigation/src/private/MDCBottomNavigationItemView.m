@@ -1,18 +1,16 @@
-/*
- Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
+// Copyright 2017-present the Material Components for iOS authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 #import <CoreGraphics/CoreGraphics.h>
 
 #import "MDCBottomNavigationItemView.h"
@@ -39,6 +37,7 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
 @property(nonatomic, strong) MDCBottomNavigationItemBadge *badge;
 @property(nonatomic, strong) UIImageView *iconImageView;
 @property(nonatomic, strong) UILabel *label;
+@property(nonatomic) BOOL shouldPretendToBeATab;
 
 @end
 
@@ -47,6 +46,17 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
 - (instancetype)initWithFrame:(CGRect)frame {
   self = [super initWithFrame:frame];
   if (self) {
+#if defined(__IPHONE_10_0) && (__IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability"
+#pragma clang diagnostic ignored "-Wtautological-pointer-compare"
+    if (&UIAccessibilityTraitTabBar == NULL) {
+      _shouldPretendToBeATab = YES;
+    }
+#pragma clang diagnostic pop
+#else
+    _shouldPretendToBeATab = YES;
+#endif
     _titleBelowIcon = YES;
     [self commonMDCBottomNavigationItemViewInit];
   }
@@ -253,14 +263,16 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
     [labelComponents addObject:title];
   }
 
-  NSString *key =
-      kMaterialBottomNavigationStringTable[kStr_MaterialBottomNavigationTabElementAccessibilityLabel];
-  NSString *tabString =
-      NSLocalizedStringFromTableInBundle(key,
-                                         kMaterialBottomNavigationStringsTableName,
-                                         [[self class] bundle],
-                                         kMDCBottomNavigationItemViewTabString);
-  [labelComponents addObject:tabString];
+  if (self.shouldPretendToBeATab) {
+    NSString *key =
+        kMaterialBottomNavigationStringTable[kStr_MaterialBottomNavigationTabElementAccessibilityLabel];
+    NSString *tabString =
+        NSLocalizedStringFromTableInBundle(key,
+                                           kMaterialBottomNavigationStringsTableName,
+                                           [[self class] bundle],
+                                           kMDCBottomNavigationItemViewTabString);
+    [labelComponents addObject:tabString];
+  }
 
   // Speak components with a pause in between.
   return [labelComponents componentsJoinedByString:@", "];
@@ -300,9 +312,10 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
   if (self.selected) {
     self.iconImageView.tintColor = self.selectedItemTintColor;
     self.label.textColor = self.selectedItemTitleColor;
-    self.inkView.inkColor =
-        [self.selectedItemTintColor colorWithAlphaComponent:MDCBottomNavigationItemViewInkOpacity];
   }
+  self.inkView.inkColor =
+      [self.selectedItemTintColor colorWithAlphaComponent:MDCBottomNavigationItemViewInkOpacity];
+
 }
 
 - (void)setUnselectedItemTintColor:(UIColor *)unselectedItemTintColor {
@@ -310,8 +323,6 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
   if (!self.selected) {
     self.iconImageView.tintColor = self.unselectedItemTintColor;
     self.label.textColor = self.unselectedItemTintColor;
-    self.inkView.inkColor =
-        [self.selectedItemTintColor colorWithAlphaComponent:MDCBottomNavigationItemViewInkOpacity];
   }
 }
 
@@ -333,7 +344,7 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
     badgeValue = nil;
   }
   self.badge.badgeValue = badgeValue;
-  if (self.accessibilityValue == nil || self.accessibilityValue.length == 0) {
+  if ([super accessibilityValue] == nil || [self accessibilityValue].length == 0) {
     self.button.accessibilityValue = badgeValue;
   }
   if (badgeValue == nil || badgeValue.length == 0) {
@@ -376,6 +387,7 @@ static NSString *const kMDCBottomNavigationItemViewTabString = @"tab";
 }
 
 -(void)setAccessibilityValue:(NSString *)accessibilityValue {
+  [super setAccessibilityValue:accessibilityValue];
   self.button.accessibilityValue = accessibilityValue;
 }
 
