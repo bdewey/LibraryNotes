@@ -29,7 +29,7 @@
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>deck</string>
+					<string>textbundle</string>
 				</array>
 			</dict>
 		</dict>
@@ -44,6 +44,29 @@
 			<array>
 				<string>public.plain-text</string>
 			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array/>
+			<key>CFBundleTypeName</key>
+			<string>Language Flashcards</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.brians-brain.SwiftFlash</string>
+			</array>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>org.textbundle.package</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>deck</string>
+				</array>
+			</dict>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
@@ -131,8 +154,26 @@
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>deck</string>
 					<string>textbundle</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>org.textbundle.package</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Language Flashcards</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>org.brians-brain.SwiftFlash</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>deck</string>
 				</array>
 			</dict>
 		</dict>
