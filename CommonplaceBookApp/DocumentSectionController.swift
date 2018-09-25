@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CommonplaceBook
 import FlashcardKit
 import Foundation
 import IGListKit
@@ -106,7 +107,7 @@ extension FileMetadata {
       return viewController(for: languageDeck)
     }
     if let document = editableDocument {
-      return TextEditViewController(document: document)
+      return TextEditViewController(document: document, stylesheet: Stylesheet.default)
     }
     return nil
   }

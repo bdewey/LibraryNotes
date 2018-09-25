@@ -25,15 +25,17 @@ extension FileMetadata {
 final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   /// Designated initializer.
-  init?(document: EditableDocument) {
+  init?(document: EditableDocument, stylesheet: Stylesheet) {
     self.document = document
+    self.stylesheet = stylesheet
     var renderers = TextEditViewController.renderers
     if let configurer = document as? ConfiguresRenderers {
       configurer.configureRenderers(&renderers)
     }
     self.textStorage = TextEditViewController.makeTextStorage(
       formatters: TextEditViewController.formatters,
-      renderers: renderers
+      renderers: renderers,
+      stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
     self.addChild(appBar.headerViewController)
@@ -59,12 +61,13 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   // Init-time state.
 
   private var document: TextEditViewControllerDocument!
+  private let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
 
-  let appBar: MDCAppBar = {
+  private lazy var appBar: MDCAppBar = {
     let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
+    MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
     return appBar
   }()
 
@@ -97,7 +100,8 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   private static func makeTextStorage(
     formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction]
+    renderers: [NodeType: RenderedMarkdown.RenderFunction],
+    stylesheet: Stylesheet
   ) -> MiniMarkdownTextStorage {
     let textStorage = MiniMarkdownTextStorage(
       parsingRules: ParsingRules(),
@@ -105,7 +109,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       renderers: renderers
     )
     textStorage.defaultAttributes = NSAttributedString.Attributes(
-      Stylesheet.default.typographyScheme.body2
+      stylesheet.typographyScheme.body2
     )
     return textStorage
   }
@@ -116,7 +120,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
     let textView = UITextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
+    textView.backgroundColor = stylesheet.colorScheme.surfaceColor
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()

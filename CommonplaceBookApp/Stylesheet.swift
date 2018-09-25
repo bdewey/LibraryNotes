@@ -5,6 +5,7 @@ import Foundation
 import MaterialComponents
 
 extension Stylesheet {
+  @available(*, deprecated)
   static let `default`: Stylesheet = {
     let colorScheme = MDCSemanticColorScheme()
     colorScheme.primaryColor = UIColor.white
