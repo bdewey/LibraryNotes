@@ -2,6 +2,7 @@
 
 import CommonplaceBook
 import CoreServices
+import FlashcardKit
 import IGListKit
 import MaterialComponents
 import UIKit
@@ -114,17 +115,20 @@ final class DocumentListViewController: UIViewController {
   @objc private func didTapNewDocument() {
     DispatchQueue.global(qos: .default).async {
       let day = DayComponents(Date())
-      var pathComponent = "\(day).txt"
+      var pathComponent = "\(day).deck"
       var counter = 0
       var url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
       while (try? url.checkPromisedItemIsReachable()) ?? false {
         counter += 1
-        pathComponent = "\(day) \(counter).txt"
+        pathComponent = "\(day) \(counter).deck"
         url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
       }
-      let document = PlainTextDocument(fileURL: url)
-      document.save(to: url, for: .forCreating, completionHandler: { (success) in
-        print(success)
+      LanguageDeck.open(at: pathComponent, completion: { (result) in
+        _ = result.flatMap({ (deck) -> Void in
+          deck.document.save(to: url, for: .forCreating, completionHandler: { (success) in
+            print(success)
+          })
+        })
       })
     }
   }
