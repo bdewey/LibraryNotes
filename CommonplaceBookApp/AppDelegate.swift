@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import CommonplaceBook
 import UIKit
 
@@ -13,6 +14,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
+
     let window = UIWindow(frame: UIScreen.main.bounds)
     let navigationController = UINavigationController(
       rootViewController: DocumentListViewController()

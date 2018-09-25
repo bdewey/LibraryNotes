@@ -19,6 +19,11 @@
     "ios": "11.0"
   },
   "source_files": "MiniMarkdown/Classes/**/*",
+  "dependencies": {
+    "CocoaLumberjack/Swift": [
+      ">= 3.4"
+    ]
+  },
   "testspecs": [
     {
       "name": "Tests",

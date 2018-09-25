@@ -530,8 +530,10 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.1.0)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.6.0)
-  - MiniMarkdown/Tests (0.6.0)
+  - MiniMarkdown (0.6.0):
+    - CocoaLumberjack/Swift (>= 3.4)
+  - MiniMarkdown/Tests (0.6.0):
+    - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
@@ -557,8 +559,8 @@ DEPENDENCIES:
   - FlashcardKit (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
-  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
+  - MiniMarkdown (from `../MiniMarkdown`)
+  - MiniMarkdown/Tests (from `../MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
   - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
@@ -595,7 +597,7 @@ EXTERNAL SOURCES:
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :git: https://github.com/bdewey/MiniMarkdown
+    :path: "../MiniMarkdown"
   NunitoSans:
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
@@ -622,11 +624,8 @@ CHECKOUT OPTIONS:
   MaterialComponents:
     :commit: 54853b4e1dcfabcd85bae450c2dc33d2be89089b
     :git: https://github.com/material-components/material-components-ios
-  MiniMarkdown:
-    :commit: 4189c476e670b098384dadecc859da83a71aeb87
-    :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
-    :commit: f0721eec025a80e82621d0d3d76e1c444ef66cb4
+    :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
     :commit: 9c69084b9b331c3c9f4767add20afe72112adee8
@@ -650,7 +649,7 @@ SPEC CHECKSUMS:
   MaterialComponents: 8a8301debcb5fe3583a386914a5a64b7c83f0ae8
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: 12a46f0beaf219ad67356fa1f7244f2f5ae9f2b6
+  MiniMarkdown: 13e369b244ec3b993fb7f6f1661e54d8938d7bbb
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
@@ -660,6 +659,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: c6e037f4a9702602584e368dd648d62c6ffbcf18
 
-PODFILE CHECKSUM: 2065e93d9b2d7f7d7c2948a9e895600c2714790c
+PODFILE CHECKSUM: 7f128f53db96780e7c864f1d2488cc805b8ebaf3
 
 COCOAPODS: 1.5.0

@@ -12,6 +12,11 @@ final class TextBundleEditableDocument: WrappingDocument {
     document.addListener(self)
   }
 
+  init(document: TextBundleDocument) {
+    self.document = document
+    document.addListener(self)
+  }
+
   internal let document: TextBundleDocument
   weak var delegate: EditableDocumentDelegate?
 

@@ -15,14 +15,84 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-import Foundation
+import UIKit
+
+// swiftlint:disable:next convenience_type
+private final class FontLoader {
+  static func loadFont(named name: String) {
+    let bundle = Bundle(for: FontLoader.self)
+    let resourceURL = bundle.url(forResource: "NunitoSans", withExtension: "bundle")!
+    let resourceBundle = Bundle(url: resourceURL)!
+    let fontURL = resourceBundle.url(forResource: name, withExtension: "ttf")!
+    CTFontManagerRegisterFontsForURL(fontURL as CFURL, CTFontManagerScope.process, nil)
+  }
+}
 
 public enum NunitoSans {
   public static let black = "NunitoSans-Black"
   public static let blackItalic = "NunitoSans-BlackItalic"
+  public static let bold = "NunitoSans-Bold"
+  public static let boldItalic = "NunitoSans-BoldItalic"
+  public static let extraBold = "NunitoSans-ExtraBold"
+  public static let extraBoldItalic = "NunitoSans-ExtraBoldItalic"
+  public static let extraLight = "NunitoSans-ExtraLight"
+  public static let italic = "NunitoSans-Italic"
   public static let regular = "NunitoSans-Regular"
   public static let semiBold = "NunitoSans-SemiBold"
+
+  public static func loadAllFonts() {
+    loadNunitoSansBlack
+    loadNunitoSansBlackItalic
+    loadNunitoSansBold
+    loadNunitoSansBoldItalic
+    loadNunitoSansExtraBold
+    loadNunitoSansExtraBoldItalic
+    loadNunitoSansExtraLight
+    loadNunitoSansItalic
+    loadNunitoSansRegular
+    loadNunitoSansSemiBold
+  }
 }
+
+private let loadNunitoSansBlack: Void = {
+  FontLoader.loadFont(named: NunitoSans.black)
+}()
+
+private let loadNunitoSansBlackItalic: Void = {
+  FontLoader.loadFont(named: NunitoSans.blackItalic)
+}()
+
+private let loadNunitoSansBold: Void = {
+  FontLoader.loadFont(named: NunitoSans.bold)
+}()
+
+private let loadNunitoSansBoldItalic: Void = {
+  FontLoader.loadFont(named: NunitoSans.boldItalic)
+}()
+
+private let loadNunitoSansExtraBold: Void = {
+  FontLoader.loadFont(named: NunitoSans.extraBold)
+}()
+
+private let loadNunitoSansExtraBoldItalic: Void = {
+  FontLoader.loadFont(named: NunitoSans.extraBoldItalic)
+}()
+
+private let loadNunitoSansExtraLight: Void = {
+  FontLoader.loadFont(named: NunitoSans.extraLight)
+}()
+
+private let loadNunitoSansItalic: Void = {
+  FontLoader.loadFont(named: NunitoSans.italic)
+}()
+
+private let loadNunitoSansRegular: Void = {
+  FontLoader.loadFont(named: NunitoSans.regular)
+}()
+
+private let loadNunitoSansSemiBold: Void = {
+  FontLoader.loadFont(named: NunitoSans.semiBold)
+}()
 
 extension UIFont {
   public static func nunitoSansBlack(size: CGFloat) -> UIFont {
@@ -35,6 +105,36 @@ extension UIFont {
     return UIFont(name: NunitoSans.blackItalic, size: size)!
   }
 
+  public static func nunitoSansBold(size: CGFloat) -> UIFont {
+    loadNunitoSansBold
+    return UIFont(name: NunitoSans.bold, size: size)!
+  }
+
+  public static func nunitoSansBoldItalic(size: CGFloat) -> UIFont {
+    loadNunitoSansBoldItalic
+    return UIFont(name: NunitoSans.boldItalic, size: size)!
+  }
+
+  public static func nunitoSansExtraBold(size: CGFloat) -> UIFont {
+    loadNunitoSansExtraBold
+    return UIFont(name: NunitoSans.extraBold, size: size)!
+  }
+
+  public static func nunitoSansExtraBoldItalic(size: CGFloat) -> UIFont {
+    loadNunitoSansExtraBoldItalic
+    return UIFont(name: NunitoSans.extraBoldItalic, size: size)!
+  }
+
+  public static func nunitoSansExtraLight(size: CGFloat) -> UIFont {
+    loadNunitoSansExtraLight
+    return UIFont(name: NunitoSans.extraLight, size: size)!
+  }
+
+  public static func nunitoSansItalic(size: CGFloat) -> UIFont {
+    loadNunitoSansItalic
+    return UIFont(name: NunitoSans.italic, size: size)!
+  }
+
   public static func nunitoSansRegular(size: CGFloat) -> UIFont {
     loadNunitoSansRegular
     return UIFont(name: NunitoSans.regular, size: size)!
@@ -45,33 +145,3 @@ extension UIFont {
     return UIFont(name: NunitoSans.semiBold, size: size)!
   }
 }
-
-// swiftlint:disable:next convenience_type
-private final class FontLoader {
-  static func loadFont(named name: String) {
-    let bundle = Bundle(for: FontLoader.self)
-    let resourceURL = bundle.url(forResource: "NunitoSans", withExtension: "bundle")!
-    let resourceBundle = Bundle(url: resourceURL)!
-    let fontURL = resourceBundle.url(forResource: name, withExtension: "ttf")!
-    let data = try! Data(contentsOf: fontURL) // swiftlint:disable:this force_try
-    let dataProvider = CGDataProvider(data: data as CFData)!
-    let font = CGFont(dataProvider)!
-    CTFontManagerRegisterGraphicsFont(font, nil)
-  }
-}
-
-private let loadNunitoSansBlack: Void = {
-  FontLoader.loadFont(named: NunitoSans.black)
-}()
-
-private let loadNunitoSansBlackItalic: Void = {
-  FontLoader.loadFont(named: NunitoSans.blackItalic)
-}()
-
-private let loadNunitoSansRegular: Void = {
-  FontLoader.loadFont(named: NunitoSans.regular)
-}()
-
-private let loadNunitoSansSemiBold: Void = {
-  FontLoader.loadFont(named: NunitoSans.semiBold)
-}()

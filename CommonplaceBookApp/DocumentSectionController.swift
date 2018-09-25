@@ -89,6 +89,12 @@ extension FileMetadata {
   private func viewController(for languageDeck: LanguageDeck) -> UIViewController {
     let tabBarViewController = ScrollingTopTabBarViewController()
     let vocabularyViewController = VocabularyViewController(storage: languageDeck)
+    let textViewController = TextEditViewController(
+      document: TextBundleEditableDocument(document: languageDeck.document),
+      stylesheet: Stylesheet.hablaEspanol
+    )
+    textViewController.title = "Notes"
+    
     let challengesViewController = ChallengesViewController(storage: languageDeck)
     challengesViewController.title = "Challenges"
     let statisticsViewController = StatisticsViewController(
@@ -96,6 +102,7 @@ extension FileMetadata {
     )
     tabBarViewController.viewControllers = [
       vocabularyViewController,
+      textViewController,
       challengesViewController,
       statisticsViewController,
     ]
@@ -107,6 +114,7 @@ extension FileMetadata {
       return viewController(for: languageDeck)
     }
     if let document = editableDocument {
+      document.open(completionHandler: nil)
       return TextEditViewController(document: document, stylesheet: Stylesheet.default)
     }
     return nil

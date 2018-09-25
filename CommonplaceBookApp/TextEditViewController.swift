@@ -9,23 +9,11 @@ import TextBundleKit
 
 private typealias TextEditViewControllerDocument = EditableDocument
 
-extension FileMetadata {
-  fileprivate func makeDocument() -> EditableDocument? {
-    if contentTypeTree.contains("public.plain-text") {
-      return PlainTextDocument(fileURL: fileURL)
-    } else if contentTypeTree.contains("org.textbundle.package") {
-      return TextBundleEditableDocument(fileURL: fileURL)
-    } else {
-      return nil
-    }
-  }
-}
-
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   /// Designated initializer.
-  init?(document: EditableDocument, stylesheet: Stylesheet) {
+  init(document: EditableDocument, stylesheet: Stylesheet) {
     self.document = document
     self.stylesheet = stylesheet
     var renderers = TextEditViewController.renderers
@@ -50,7 +38,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
                                            object: nil)
   }
 
-  required init?(coder aDecoder: NSCoder) {
+  required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
@@ -136,14 +124,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     appBar.headerViewController.headerView.trackingScrollView = textView
     appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
-    document.open { (success) in
-      if !success {
-        let messageText = "Error opening document: " +
-        "\(self.document.previousError?.localizedDescription ?? "Unknown error")"
-        let message = MDCSnackbarMessage(text: messageText)
-        MDCSnackbarManager.show(message)
-      }
-    }
   }
 
   override func viewDidDisappear(_ animated: Bool) {
