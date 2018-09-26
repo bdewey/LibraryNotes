@@ -13,7 +13,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
     case couldNotOpenDocument
   }
 
-  public weak var delegate: EditableDocumentDelegate?
+  public var dataConnection: EditableDocumentDataConnection?
 
   /// Any internal error from working with the file.
   private(set) var previousError: Swift.Error?
@@ -23,7 +23,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
   }
 
   override func contents(forType typeName: String) throws -> Any {
-    let string = delegate?.editableDocumentCurrentText() ?? ""
+    let string = dataConnection?.editableDocumentCurrentText() ?? ""
     if let data = string.data(using: .utf8) {
       return data
     } else {
@@ -38,7 +38,7 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       else {
         throw Error.internalInconsistency
     }
-    delegate?.editableDocumentDidLoadText(string)
+    dataConnection?.editableDocumentDidLoadText(string)
   }
 
   override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {

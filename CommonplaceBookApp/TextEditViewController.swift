@@ -27,7 +27,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     )
     super.init(nibName: nil, bundle: nil)
     self.addChild(appBar.headerViewController)
-    self.document.delegate = self
+    self.document.dataConnection = textStorage
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
                                            name: UIResponder.keyboardWillHideNotification,
@@ -44,6 +44,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   deinit {
     NotificationCenter.default.removeObserver(self)
+    document.close(completionHandler: nil)
   }
 
   // Init-time state.
@@ -126,12 +127,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textView.delegate = self
   }
 
-  override func viewDidDisappear(_ animated: Bool) {
-    document.close { (_) in
-      self.document = nil
-    }
-  }
-
   // MARK: - Keyboard
 
   @objc func handleKeyboardNotification(_ notification: Notification) {
@@ -171,12 +166,12 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   }
 }
 
-extension TextEditViewController: EditableDocumentDelegate {
-  func editableDocumentDidLoadText(_ text: String) {
-    textStorage.markdown = text
+extension MiniMarkdownTextStorage: EditableDocumentDataConnection {
+  public func editableDocumentDidLoadText(_ text: String) {
+    markdown = text
   }
 
-  func editableDocumentCurrentText() -> String {
-    return textStorage.markdown
+  public func editableDocumentCurrentText() -> String {
+    return markdown
   }
 }

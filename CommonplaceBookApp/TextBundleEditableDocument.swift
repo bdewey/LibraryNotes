@@ -18,7 +18,7 @@ final class TextBundleEditableDocument: WrappingDocument {
   }
 
   internal let document: TextBundleDocument
-  weak var delegate: EditableDocumentDelegate?
+  var dataConnection: EditableDocumentDataConnection?
 
   static let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
 }
@@ -30,7 +30,7 @@ extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
   }
 
   func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
-    guard let value = delegate?.editableDocumentCurrentText() else { return }
+    guard let value = dataConnection?.editableDocumentCurrentText() else { return }
     guard let data = value.data(using: .utf8) else {
       throw NSError.fileWriteInapplicableStringEncoding
     }
@@ -44,7 +44,7 @@ extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
       assertionFailure()
       return
     }
-    delegate?.editableDocumentDidLoadText(text)
+    dataConnection?.editableDocumentDidLoadText(text)
   }
 }
 
