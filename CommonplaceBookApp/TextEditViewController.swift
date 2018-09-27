@@ -27,7 +27,7 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     )
     super.init(nibName: nil, bundle: nil)
     self.addChild(appBar.headerViewController)
-    self.document.dataConnection = textStorage
+    self.document.markdownTextStorage = textStorage
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
                                            name: UIResponder.keyboardWillHideNotification,
@@ -44,7 +44,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   deinit {
     NotificationCenter.default.removeObserver(self)
-    document.close(completionHandler: nil)
   }
 
   // Init-time state.
@@ -159,19 +158,5 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       withVelocity: velocity,
       targetContentOffset: targetContentOffset
     )
-  }
-
-  func textViewDidChange(_ textView: UITextView) {
-    document.didUpdateText()
-  }
-}
-
-extension MiniMarkdownTextStorage: EditableDocumentDataConnection {
-  public func editableDocumentDidLoadText(_ text: String) {
-    markdown = text
-  }
-
-  public func editableDocumentCurrentText() -> String {
-    return markdown
   }
 }

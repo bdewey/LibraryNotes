@@ -563,8 +563,8 @@ DEPENDENCIES:
   - MiniMarkdown/Tests (from `../MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
-  - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
-  - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
+  - TextBundleKit (from `../textbundle-swift`)
+  - TextBundleKit/Tests (from `../textbundle-swift`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -603,7 +603,7 @@ EXTERNAL SOURCES:
   SwipeCellKit:
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
   TextBundleKit:
-    :git: https://github.com/bdewey/textbundle-swift
+    :path: "../textbundle-swift"
 
 CHECKOUT OPTIONS:
   CollectionViewLayouts:
@@ -630,9 +630,6 @@ CHECKOUT OPTIONS:
   SwipeCellKit:
     :commit: 9c69084b9b331c3c9f4767add20afe72112adee8
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
-  TextBundleKit:
-    :commit: a5bfcf093f61dd568242ab0795be3a7731cc9430
-    :git: https://github.com/bdewey/textbundle-swift
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
@@ -657,8 +654,8 @@ SPEC CHECKSUMS:
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
   SnapKit: 0de968a9fec17499afa29683b05d0c775b6d1c29
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
-  TextBundleKit: c6e037f4a9702602584e368dd648d62c6ffbcf18
+  TextBundleKit: b8d96772e8d184e65d6696890f85a6d4ce535702
 
-PODFILE CHECKSUM: 7f128f53db96780e7c864f1d2488cc805b8ebaf3
+PODFILE CHECKSUM: c2a29e39932e372ad26dad5176e200db98665f99
 
 COCOAPODS: 1.5.0

@@ -36,11 +36,13 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didSelectItem(at index: Int) {
-    guard let editingViewController = fileMetadata.editingViewController else { return }
-    viewController?.navigationController?.pushViewController(
-      editingViewController,
-      animated: true
-    )
+    fileMetadata.loadEditingViewController { (editingViewController) in
+      guard let editingViewController = editingViewController else { return }
+      self.viewController?.navigationController?.pushViewController(
+        editingViewController,
+        animated: true
+      )
+    }
   }
 }
 
@@ -69,36 +71,46 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 }
 
 extension FileMetadata {
-  private var editableDocument: EditableDocument? {
+  private var editableDocument: (UIDocument & EditableDocument)? {
     if contentTypeTree.contains("public.plain-text") {
       return PlainTextDocument(fileURL: fileURL)
     } else if contentTypeTree.contains("org.textbundle.package") {
-      return TextBundleEditableDocument(fileURL: fileURL)
+      return TextBundleDocument(fileURL: fileURL)
     } else {
       return nil
     }
   }
 
-  private var languageDeck: LanguageDeck? {
-    guard contentTypeTree.contains("org.brians-brain.swiftflash") else { return nil }
-    let languageDeck = LanguageDeck(document: TextBundleDocument(fileURL: fileURL))
-    languageDeck.document.open(completionHandler: nil)
-    return languageDeck
+  private func loadLanguageDeck(completion: @escaping (LanguageDeck?) -> Void) {
+    guard contentTypeTree.contains("org.brians-brain.swiftflash") else {
+      completion(nil)
+      return
+    }
+    let document = TextBundleDocument(fileURL: fileURL)
+    document.open { (success) in
+      if success {
+        completion(LanguageDeck(document: document))
+      } else {
+        completion(nil)
+      }
+    }
   }
 
   private func viewController(for languageDeck: LanguageDeck) -> UIViewController {
     let tabBarViewController = ScrollingTopTabBarViewController()
-    let vocabularyViewController = VocabularyViewController(storage: languageDeck)
+    let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)
     let textViewController = TextEditViewController(
-      document: TextBundleEditableDocument(document: languageDeck.document),
+      document: languageDeck.document,
       stylesheet: Stylesheet.hablaEspanol
     )
     textViewController.title = "Notes"
-    
-    let challengesViewController = ChallengesViewController(storage: languageDeck)
+
+    let challengesViewController = ChallengesViewController(
+      studyStatistics: languageDeck.document.studyStatistics
+    )
     challengesViewController.title = "Challenges"
     let statisticsViewController = StatisticsViewController(
-      studyStatisticsContainer: languageDeck
+      studyStatistics: languageDeck.document.studyStatistics
     )
     tabBarViewController.viewControllers = [
       vocabularyViewController,
@@ -109,14 +121,23 @@ extension FileMetadata {
     return tabBarViewController
   }
 
-  var editingViewController: UIViewController? {
-    if let languageDeck = self.languageDeck {
-      return viewController(for: languageDeck)
+  func loadEditingViewController(completion: @escaping (UIViewController?) -> Void) {
+    loadLanguageDeck { (languageDeck) in
+      if let languageDeck = languageDeck {
+        completion(self.viewController(for: languageDeck))
+        return
+      }
+      if let document = self.editableDocument {
+        document.open(completionHandler: { (success) in
+          if success {
+            completion(TextEditViewController(document: document, stylesheet: Stylesheet.default))
+          } else {
+            completion(nil)
+          }
+        })
+        return
+      }
+      completion(nil)
     }
-    if let document = editableDocument {
-      document.open(completionHandler: nil)
-      return TextEditViewController(document: document, stylesheet: Stylesheet.default)
-    }
-    return nil
   }
 }

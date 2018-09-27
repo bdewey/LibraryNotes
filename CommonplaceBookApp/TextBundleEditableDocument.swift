@@ -4,55 +4,29 @@ import Foundation
 import MiniMarkdown
 import TextBundleKit
 
-/// Wraps a TextStorage...
-final class TextBundleEditableDocument: WrappingDocument {
+private let listenerKey = "org.brians-brain.CommonplaceBookApp.TextBundleDocumentListener"
+private let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
 
-  init(fileURL: URL) {
-    self.document = TextBundleDocument(fileURL: fileURL)
-    document.addListener(self)
+extension TextBundleDocument: EditableDocument {
+  private var markdownStorageListener: DocumentTextStorageConnection {
+    return listener(for: listenerKey, constructor: DocumentTextStorageConnection.init)
   }
 
-  init(document: TextBundleDocument) {
-    self.document = document
-    document.addListener(self)
-  }
-
-  internal let document: TextBundleDocument
-  var dataConnection: EditableDocumentDataConnection?
-
-  static let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
-}
-
-extension TextBundleEditableDocument: TextBundleDocumentSaveListener {
-  var key: String {
-    return document.bundle.fileWrappers?.keys.first(where: { $0.hasPrefix("text.") })
-      ?? "text.markdown"
-  }
-
-  func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
-    guard let value = dataConnection?.editableDocumentCurrentText() else { return }
-    guard let data = value.data(using: .utf8) else {
-      throw NSError.fileWriteInapplicableStringEncoding
+  public var markdownTextStorage: MiniMarkdownTextStorage? {
+    get {
+      return markdownStorageListener.markdownTextStorage
     }
-    let wrapper = FileWrapper(regularFileWithContents: data)
-    document.bundle.replaceFileWrapper(wrapper, key: key)
-  }
-
-  func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
-    guard let data = try? document.data(for: key),
-          let text = String(data: data, encoding: .utf8) else {
-      assertionFailure()
-      return
+    set {
+      markdownStorageListener.markdownTextStorage = newValue
     }
-    dataConnection?.editableDocumentDidLoadText(text)
   }
 }
 
-extension TextBundleEditableDocument: ConfiguresRenderers {
-  func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
+extension TextBundleDocument: ConfiguresRenderers {
+  public func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
     renderers[.image] = { (node, attributes) in
       let attachment = NSTextAttachment()
-      attachment.image = TextBundleEditableDocument.placeholderImage
+      attachment.image = placeholderImage
       attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)
       let text = String(node.slice.substring)
       return RenderedMarkdownNode(
@@ -64,12 +38,53 @@ extension TextBundleEditableDocument: ConfiguresRenderers {
   }
 }
 
-extension TextBundleEditableDocument: EditableDocument {
-  public var previousError: Error? {
-    return document.previousError
+private final class DocumentTextStorageConnection: NSObject,
+  TextBundleDocumentSaveListener,
+  NSTextStorageDelegate {
+
+  init(document: TextBundleDocument) {
+    if let text = try? TextStorage.read(from: document) {
+      if let textStorage = markdownTextStorage {
+        textStorage.markdown = text
+      } else {
+        temporaryText = text
+      }
+    }
   }
 
-  func didUpdateText() {
-    document.updateChangeCount(.done)
+  private var temporaryText: String?
+
+  var markdownTextStorage: MiniMarkdownTextStorage? {
+    didSet {
+      oldValue?.delegate = nil
+      markdownTextStorage?.delegate = self
+      if let text = temporaryText {
+        markdownTextStorage?.markdown = text
+        temporaryText = nil
+      }
+    }
+  }
+
+  var textBundleListenerHasChanges: TextBundleDocumentSaveListener.ChangeBlock?
+
+  func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
+    guard let text = markdownTextStorage?.markdown else { return }
+    try TextStorage.writeValue(text, to: textBundleDocument)
+  }
+
+  func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
+    guard let markdownTextStorage = markdownTextStorage,
+          let markdown = try? TextStorage.read(from: textBundleDocument) else { return }
+    markdownTextStorage.markdown = markdown
+  }
+
+  func textStorage(
+    _ textStorage: NSTextStorage,
+    didProcessEditing editedMask: NSTextStorage.EditActions,
+    range editedRange: NSRange,
+    changeInLength delta: Int
+  ) {
+    guard editedMask.contains(.editedCharacters) else { return }
+    textBundleListenerHasChanges?()
   }
 }

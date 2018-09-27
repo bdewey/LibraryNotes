@@ -6,24 +6,34 @@ import CommonplaceBook
 import MiniMarkdown
 import TextBundleKit
 
-final class PlainTextDocument: UIDocument, EditableDocument {
+final class PlainTextDocument: UIDocumentWithPreviousError,
+EditableDocument,
+NSTextStorageDelegate {
 
   enum Error: Swift.Error {
     case internalInconsistency
     case couldNotOpenDocument
   }
 
-  public var dataConnection: EditableDocumentDataConnection?
+  private var temporaryStorage: String?
 
-  /// Any internal error from working with the file.
-  private(set) var previousError: Swift.Error?
+  public var markdownTextStorage: MiniMarkdownTextStorage? {
+    didSet {
+      oldValue?.delegate = nil
+      markdownTextStorage?.delegate = self
+      if let text = temporaryStorage {
+        markdownTextStorage?.markdown = text
+        temporaryStorage = nil
+      }
+    }
+  }
 
   func didUpdateText() {
     updateChangeCount(.done)
   }
 
   override func contents(forType typeName: String) throws -> Any {
-    let string = dataConnection?.editableDocumentCurrentText() ?? ""
+    let string = markdownTextStorage?.markdown ?? ""
     if let data = string.data(using: .utf8) {
       return data
     } else {
@@ -38,12 +48,20 @@ final class PlainTextDocument: UIDocument, EditableDocument {
       else {
         throw Error.internalInconsistency
     }
-    dataConnection?.editableDocumentDidLoadText(string)
+    if let markdownTextStorage = markdownTextStorage {
+      markdownTextStorage.markdown = string
+    } else {
+      temporaryStorage = string
+    }
   }
 
-  override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {
-    previousError = error
-    finishedHandlingError(error, recovered: false)
+  func textStorage(
+    _ textStorage: NSTextStorage,
+    didProcessEditing editedMask: NSTextStorage.EditActions,
+    range editedRange: NSRange,
+    changeInLength delta: Int
+  ) {
+    updateChangeCount(.done)
   }
 }
 

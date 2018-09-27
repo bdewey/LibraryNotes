@@ -4,15 +4,8 @@ import MiniMarkdown
 import TextBundleKit
 import UIKit
 
-public protocol EditableDocumentDataConnection {
-  func editableDocumentDidLoadText(_ text: String)
-  func editableDocumentCurrentText() -> String
-}
-
-public protocol EditableDocument: DocumentProtocol {
-  var dataConnection: EditableDocumentDataConnection? { get set }
-  var previousError: Swift.Error? { get }
-  func didUpdateText()
+public protocol EditableDocument {
+  var markdownTextStorage: MiniMarkdownTextStorage? { get set }
 }
 
 public protocol ConfiguresRenderers {
