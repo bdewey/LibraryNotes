@@ -4,15 +4,14 @@ import CwlSignal
 import Foundation
 import TextBundleKit
 
-extension TextStorage {
+extension TextBundleDocument {
 
   var vocabularyAssocationsPublisher: Signal<[VocabularyAssociation]> {
-    let document = self.document
     let signalBridge = text.signal
     let result = signalBridge.map({ (valueDescription) -> [VocabularyAssociation] in
       return VocabularyAssociation.makeAssociations(
         from: valueDescription.value,
-        document: document
+        document: self
         ).0
     }).continuous()
     return result
@@ -20,7 +19,7 @@ extension TextStorage {
 
   var vocabularyAssociations: TextBundleKit.Result<[VocabularyAssociation]> {
     return text.currentResult.flatMap({ (text) -> [VocabularyAssociation] in
-      return VocabularyAssociation.makeAssociations(from: text, document: self.document).0
+      return VocabularyAssociation.makeAssociations(from: text, document: self).0
     })
   }
 
@@ -36,7 +35,7 @@ extension TextStorage {
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
         from: initialText,
-        document: self.document
+        document: self
       )
       existingAssociations.append(vocabularyAssociation)
       text.replaceSubrange(range, with: existingAssociations.makeTable())
@@ -52,7 +51,7 @@ extension TextStorage {
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
         from: initialText,
-        document: self.document
+        document: self
       )
       if let index = existingAssociations.firstIndex(of: vocabularyAssociation) {
         existingAssociations[index] = newAssociation

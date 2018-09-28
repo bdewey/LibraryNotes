@@ -18,46 +18,28 @@
 import Foundation
 
 /// Reads and writes data to text.*
-public final class TextStorage: WrappingDocument {
-  
-  public init(document: TextBundleDocument) {
-    self.document = document
-    document.addListener(self)
-  }
-  
-  public let document: TextBundleDocument
-  public private(set) lazy var text = DocumentProperty(storage: self)
-  
-  var key: String {
+public enum TextStorage {
+
+  private static func key(for document: TextBundleDocument) -> String {
     return document.bundle.fileWrappers?.keys.first(where: { $0.hasPrefix("text.") })
       ?? "text.markdown"
   }
-  
-  func writeValue(_ value: String) throws {
-    guard let data = value.data(using: .utf8) else {
+
+  public static func writeValue(_ text: String, to document: TextBundleDocument) throws {
+    guard let data = text.data(using: .utf8) else {
       throw NSError.fileWriteInapplicableStringEncoding
     }
     let wrapper = FileWrapper(regularFileWithContents: data)
-    document.bundle.replaceFileWrapper(wrapper, key: key)
+    document.bundle.replaceFileWrapper(
+      wrapper,
+      key: key(for: document)
+    )
   }
-}
 
-extension TextStorage: TextBundleDocumentSaveListener {
-  public func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
-    if let value = text.clean() {
-      try writeValue(value)
+  public static func read(from document: TextBundleDocument) throws -> String {
+    guard let data = try? document.data(for: key(for: document)) else {
+      return ""
     }
-  }
-  
-  public func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
-    text.invalidate()
-  }
-}
-
-extension TextStorage: StableStorage {
-  
-  public func documentPropertyInitialValue() throws -> String {
-    guard let data = try? document.data(for: key) else { return "" }
     guard let string = String(data: data, encoding: .utf8) else {
       throw NSError(
         domain: NSCocoaErrorDomain,
@@ -67,8 +49,14 @@ extension TextStorage: StableStorage {
     }
     return string
   }
-  
-  public func documentPropertyDidChange() {
-    document.updateChangeCount(.done)
+
+  fileprivate static func makeProperty(for document: TextBundleDocument) -> DocumentProperty<String> {
+    return DocumentProperty(document: document, readFunction: read, writeFunction: writeValue)
+  }
+}
+
+extension TextBundleDocument {
+  public var text: DocumentProperty<String> {
+    return listener(for: "text", constructor: TextStorage.makeProperty)
   }
 }

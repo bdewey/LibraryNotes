@@ -4,20 +4,58 @@ import CommonplaceBook
 import Foundation
 import TextBundleKit
 
-/// Stores the IdentifiersToStudyMetadata association inside `study-metadata.json` in a textbundle.
-public final class DocumentStudyMetadata {
-  init(document: TextBundleDocument) {
-    self.document = document
-    identifiersToStudyMetadata.storage = self
-    document.addListener(self)
+private enum DocumentStudyMetadata {
+  fileprivate static let key = "study-metadata.json"
+
+  private static let encoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    encoder.dateEncodingStrategy = .iso8601
+    return encoder
+  }()
+
+  private static let decoder: JSONDecoder = {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    return decoder
+  }()
+
+  private static func read(from document: TextBundleDocument) throws -> IdentifierToStudyMetadata {
+    do {
+      let data = try document.data(for: DocumentStudyMetadata.key)
+      return (try? decoder.decode(IdentifierToStudyMetadata.self, from: data)) ?? IdentifierToStudyMetadata.empty
+    } catch {
+      if case TextBundleDocument.Error.noSuchDataKey(_) = error {
+        return IdentifierToStudyMetadata.empty
+      } else {
+        throw error
+      }
+    }
   }
 
-  let document: TextBundleDocument
-  let identifiersToStudyMetadata = DocumentProperty<DocumentStudyMetadata>()
+  private static func writeValue(_ value: IdentifierToStudyMetadata, to document: TextBundleDocument) throws {
+    let data = try DocumentStudyMetadata.encoder.encode(value)
+    try document.addData(data, preferredFilename: DocumentStudyMetadata.key)
+  }
 
+  fileprivate static func makeProperty(for document: TextBundleDocument) -> DocumentProperty<IdentifierToStudyMetadata> {
+    return DocumentProperty(document: document, readFunction: read, writeFunction: writeValue)
+  }
+}
+
+extension TextBundleDocument {
+  var documentStudyMetadata: DocumentProperty<IdentifierToStudyMetadata> {
+    return listener(
+      for: DocumentStudyMetadata.key,
+      constructor: DocumentStudyMetadata.makeProperty
+    )
+  }
+}
+
+extension DocumentProperty where Value == IdentifierToStudyMetadata {
   func update(with studySession: StudySession, on date: Date) {
     let day = DayComponents(date)
-    identifiersToStudyMetadata.changeValue { (dictionary) -> Dictionary<String, StudyMetadata> in
+    changeValue { (dictionary) -> Dictionary<String, StudyMetadata> in
       var dictionary = dictionary
       for (identifier, statistics) in studySession.results {
         if let existingMetadata = dictionary[identifier] {
@@ -28,51 +66,5 @@ public final class DocumentStudyMetadata {
       }
       return dictionary
     }
-  }
-}
-
-extension DocumentStudyMetadata: TextBundleDocumentSaveListener {
-  public func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
-    if let value = identifiersToStudyMetadata.clean() {
-      let data = try DocumentStudyMetadata.encoder.encode(value)
-      try document.addData(data, preferredFilename: DocumentStudyMetadata.key)
-    }
-  }
-
-  public func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
-    identifiersToStudyMetadata.invalidate()
-  }
-}
-
-extension DocumentStudyMetadata: StableStorage {
-
-  static let key = "study-metadata.json"
-  static let encoder: JSONEncoder = {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = .prettyPrinted
-    encoder.dateEncodingStrategy = .iso8601
-    return encoder
-  }()
-  static let decoder: JSONDecoder = {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return decoder
-  }()
-
-  public func documentPropertyInitialValue() throws -> IdentifierToStudyMetadata {
-    do {
-      let data = try document.data(for: DocumentStudyMetadata.key)
-      return (try? DocumentStudyMetadata.decoder.decode(IdentifierToStudyMetadata.self, from: data)) ?? IdentifierToStudyMetadata.empty
-    } catch {
-      if case TextBundleDocument.Error.noSuchDataKey(_) = error {
-        return IdentifierToStudyMetadata.empty
-      } else {
-        throw error
-      }
-    }
-  }
-
-  public func documentPropertyDidChange() {
-    document.updateChangeCount(.done)
   }
 }

@@ -39,20 +39,15 @@ extension VocabularyAssociation: StudyItem {
 public final class VocabularyViewController: UIViewController {
 
   public init(
-    storage: DocumentStudyMetadataContaining &
-             StudySessionSignalContaining &
-             StudyStatisticsStorageContaining &
-             TextStorageContaining
+    languageDeck: LanguageDeck
   ) {
-    self.document = storage.textStorage
-    self.documentStudyMetadata = storage.documentStudyMetadata
-    self.statisticsStorage = storage.studyStatisticsStorage
+    self.document = languageDeck.document
     super.init(nibName: nil, bundle: nil)
     self.title = "Vocabulary"
-    subscriptions += storage.studySessionSignal.subscribeValues({ [weak self](studySession) in
+    subscriptions += languageDeck.studySessionSignal.subscribeValues({ [weak self](studySession) in
       self?.nextStudySession = studySession
     })
-    subscriptions += documentStudyMetadata.identifiersToStudyMetadata.signal
+    subscriptions += document.documentStudyMetadata.signal
       .map { return $0.value }
       .combineLatest(document.vocabularyAssocationsPublisher.signal) { return ($0, $1) }
       .subscribeValues({ [weak self](tuple) in
@@ -65,9 +60,7 @@ public final class VocabularyViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let document: TextStorage
-  private let statisticsStorage: StudyStatisticsStorage
-  private let documentStudyMetadata: DocumentStudyMetadata
+  private let document: TextBundleDocument
   private var editingVocabularyAssociation: VocabularyAssociation?
 
   private var subscriptions: [Cancellable] = []
@@ -157,9 +150,9 @@ extension VocabularyViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    documentStudyMetadata.update(with: session, on: Date())
+    document.documentStudyMetadata.update(with: session, on: Date())
     if let statistics = session.statistics {
-      statisticsStorage.statistics.changeValue { (array) -> [StudySession.Statistics] in
+      document.studyStatistics.changeValue { (array) -> [StudySession.Statistics] in
         var array = array
         array.append(statistics)
         return array
@@ -192,7 +185,7 @@ extension VocabularyViewController: NewVocabularyAssociationViewControllerDelega
       // TODO: Make this a meaningful ID
       let uuid = UUID().uuidString
       do {
-        try document.document.addData(
+        try document.addData(
           data,
           preferredFilename: uuid + ".png",
           childDirectoryPath: ["assets"]
@@ -257,7 +250,7 @@ private class SectionHeaderView: UIView {
 
 extension VocabularyViewController: UITableViewDelegate {
 
-  func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+  public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
     guard let string = dataSource.tableView(
       tableView,
       titleForHeaderInSection: section
@@ -267,11 +260,11 @@ extension VocabularyViewController: UITableViewDelegate {
     return label
   }
 
-  func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+  public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
     return 44
   }
 
-  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+  public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
     let association = dataSource.item(at: indexPath)
     editingVocabularyAssociation = association
@@ -283,7 +276,7 @@ extension VocabularyViewController: UITableViewDelegate {
     present(viewController, animated: true)
   }
 
-  func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+  public func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
     guard let cell = tableView.cellForRow(at: indexPath) else { return }
     cell.accessoryType = .none
   }

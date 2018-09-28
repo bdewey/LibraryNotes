@@ -13,24 +13,25 @@ extension Node {
 }
 
 /// Helpers that extract VocabularyAssociation data from a table row.
-extension MiniMarkdown.NewTableRow {
+extension MiniMarkdown.TableRow {
 
   /// Returns the Spanish word in the row.
   fileprivate var spanish: String {
     return String(
-      textOnlyRenderer.render(node: children[0]).strippingLeadingAndTrailingWhitespace
+      textOnlyRenderer.render(node: cells[0]).strippingLeadingAndTrailingWhitespace
     )
   }
 
   /// Returns true if we are supposed to test spelling.
   fileprivate var testSpelling: Bool {
-    return children[0]
+    return cells[0]
       .findNodes(where: { $0.type == .hashtag })
       .contains(where: { $0.slice.substring == "#spelling" })
   }
 
   fileprivate func english(loadingImagesFrom document: TextBundleDocument) -> WordOrImage? {
-    guard var wordOrImage = WordOrImage(String(children[1].contents)) else { return nil }
+    guard cells.count > 1,
+          var wordOrImage = WordOrImage(String(cells[1].contents)) else { return nil }
     if case WordOrImage.image(caption: let caption, image: var bundleImage) = wordOrImage,
       let key = bundleImage.key {
       let components = key.split(separator: "/")

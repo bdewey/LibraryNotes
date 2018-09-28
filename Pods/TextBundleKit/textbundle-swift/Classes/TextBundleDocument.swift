@@ -17,31 +17,9 @@
 
 import UIKit
 
-/// This class is a hack introduced in Xcode 10 Beta 4
-/// With that beta, simply calling the UndoManager methods did not autosave in time
-/// for tests to work. This class makes sure that we tell UIDocument that we have unsaved
-/// changes right away.
-fileprivate class ImmediateUndoManager: UndoManager {
-  
-  weak var document: UIDocument?
-  
-  init(document: UIDocument) {
-    self.document = document
-    super.init()
-  }
-  
-  override func registerUndo(withTarget target: Any, selector: Selector, object anObject: Any?) {
-    super.registerUndo(withTarget: target, selector: selector, object: anObject)
-    document?.updateChangeCount(.done)
-  }
-  
-  override func __registerUndoWithTarget(_ target: Any, handler undoHandler: @escaping (Any) -> Void) {
-    super.__registerUndoWithTarget(target, handler: undoHandler)
-    document?.updateChangeCount(.done)
-  }
-}
-
 public protocol TextBundleDocumentSaveListener: class {
+  typealias ChangeBlock = () -> Void
+  var textBundleListenerHasChanges: ChangeBlock? { get set }
   func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws
   func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument)
 }
@@ -58,19 +36,33 @@ public final class TextBundleDocument: UIDocumentWithPreviousError {
   public override init(fileURL url: URL) {
     self.bundle = FileWrapper(directoryWithFileWrappers: [:])
     super.init(fileURL: url)
-    self.undoManager = ImmediateUndoManager(document: self)
   }
   
   /// Listeners are strongly held until the document closes.
-  private var listeners: [TextBundleDocumentSaveListener] = []
+  private var listeners = [String: TextBundleDocumentSaveListener]()
   
-  public func addListener(_ listener: TextBundleDocumentSaveListener) {
-    listeners.append(listener)
+  public func addListener(key: String, listener: TextBundleDocumentSaveListener) {
+    assert(listeners[key] == nil)
+    listener.textBundleListenerHasChanges = { [weak self] in self?.updateChangeCount(.done) }
+    listeners[key] = listener
+  }
+
+  public func listener<Listener: TextBundleDocumentSaveListener>(
+    for key: String,
+    constructor: (TextBundleDocument) -> Listener
+  ) -> Listener {
+    precondition(!documentState.contains(.closed))
+    if let listener = listeners[key] {
+      return listener as! Listener
+    }
+    let listener = constructor(self)
+    addListener(key: key, listener: listener)
+    return listener
   }
   
   /// Write in-memory contents to textBundle and return textBundle for storage.
   override public func contents(forType typeName: String) throws -> Any {
-    for listener in listeners {
+    for (_, listener) in listeners {
       try listener.textBundleDocumentWillSave(self)
     }
     return bundle
@@ -85,17 +77,9 @@ public final class TextBundleDocument: UIDocumentWithPreviousError {
       throw NSError(domain: NSCocoaErrorDomain, code: NSFileReadCorruptFileError, userInfo: nil)
     }
     bundle = directory
-    for listener in listeners {
+    for (_, listener) in listeners {
       listener.textBundleDocumentDidLoad(self)
     }
-  }
-  
-  public override func close(completionHandler: ((Bool) -> Void)? = nil) {
-    let wrappedHandler = { (success: Bool) in
-      completionHandler?(success)
-      self.listeners = []
-    }
-    super.close(completionHandler: wrappedHandler)
   }
 }
 

@@ -37,7 +37,7 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.1.0):
+  - FlashcardKit (0.2.0):
     - CollectionViewLayouts
     - CommonplaceBook
     - CwlSignal
@@ -49,7 +49,7 @@ PODS:
     - SDWebImage (~> 4.0)
     - SDWebImage/GIF (~> 4.0)
     - SnapKit (~> 4.0)
-    - TextBundleKit (~> 0.3)
+    - TextBundleKit (~> 0.4)
   - IGListKit (3.4.0):
     - IGListKit/Default (= 3.4.0)
   - IGListKit/Default (3.4.0):
@@ -530,9 +530,9 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.1.0)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.6.0):
+  - MiniMarkdown (0.6.1):
     - CocoaLumberjack/Swift (>= 3.4)
-  - MiniMarkdown/Tests (0.6.0):
+  - MiniMarkdown/Tests (0.6.1):
     - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
@@ -547,8 +547,8 @@ PODS:
     - SDWebImage/Core
   - SnapKit (4.0.1)
   - SwipeCellKit (2.5.0)
-  - TextBundleKit (0.3.0)
-  - TextBundleKit/Tests (0.3.0)
+  - TextBundleKit (0.4.0)
+  - TextBundleKit/Tests (0.4.0)
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
@@ -556,18 +556,18 @@ DEPENDENCIES:
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `../MiniMarkdown`)
-  - MiniMarkdown/Tests (from `../MiniMarkdown`)
+  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
+  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
-  - TextBundleKit (from `../textbundle-swift`)
-  - TextBundleKit/Tests (from `../textbundle-swift`)
+  - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
+  - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - AFNetworking
     - CocoaLumberjack
     - DZNEmptyDataSet
@@ -593,17 +593,17 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :path: "../FlashcardKit"
+    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :path: "../MiniMarkdown"
+    :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
   TextBundleKit:
-    :path: "../textbundle-swift"
+    :git: https://github.com/bdewey/textbundle-swift
 
 CHECKOUT OPTIONS:
   CollectionViewLayouts:
@@ -621,15 +621,24 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
+  FlashcardKit:
+    :commit: ec8fbd3c56f1592531815461929cfa2947d64c1f
+    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: 54853b4e1dcfabcd85bae450c2dc33d2be89089b
     :git: https://github.com/material-components/material-components-ios
+  MiniMarkdown:
+    :commit: 4489ed05f9fefc741c932657b085f1c20987f763
+    :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
     :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
     :commit: 9c69084b9b331c3c9f4767add20afe72112adee8
     :git: https://github.com/SwipeCellKit/SwipeCellKit.git
+  TextBundleKit:
+    :commit: 6d4769b34d5c3f809ae4d0893bd516ed5a2934bf
+    :git: https://github.com/bdewey/textbundle-swift
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
@@ -641,12 +650,12 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 93016c5c85334e4e6795bb3ee118d161aa798757
+  FlashcardKit: a3ccb49bbd77c6b438ba61b363d2a3eeaf87d1b0
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 8a8301debcb5fe3583a386914a5a64b7c83f0ae8
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: 13e369b244ec3b993fb7f6f1661e54d8938d7bbb
+  MiniMarkdown: 11f48a78b8f6c86f96b5658a63d1670aa432106b
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
@@ -654,8 +663,8 @@ SPEC CHECKSUMS:
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
   SnapKit: 0de968a9fec17499afa29683b05d0c775b6d1c29
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
-  TextBundleKit: b8d96772e8d184e65d6696890f85a6d4ce535702
+  TextBundleKit: 55ac2ad53edf794737c4c9362b2be4201eee8e43
 
-PODFILE CHECKSUM: c2a29e39932e372ad26dad5176e200db98665f99
+PODFILE CHECKSUM: 6822e12a3a0c84cc5e8be8c5c2e8d9a248cbbc39
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.2

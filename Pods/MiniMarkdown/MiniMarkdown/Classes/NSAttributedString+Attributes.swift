@@ -15,6 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+import CocoaLumberjack
 import UIKit
 
 extension Dictionary where Key == NSAttributedString.Key {
@@ -101,9 +102,12 @@ public extension NSAttributedString {
       if bold {
         traits.formUnion(.traitBold)
       }
-      if let descriptor = UIFontDescriptor(name: familyName, size: fontSize)
-        .withSymbolicTraits(traits) {
+      let baseDescriptor = UIFontDescriptor(name: familyName, size: fontSize)
+      if let descriptor = baseDescriptor.withSymbolicTraits(traits) {
         result[.font] = UIFont(descriptor: descriptor, size: 0)
+      } else {
+        DDLogWarn("Couldn't find a font with traits for \(familyName), size = \(fontSize), traits = \(traits)")
+        result[.font] = UIFont(descriptor: baseDescriptor, size: 0)
       }
       if listLevel > 0 {
         let paragraphStyle = NSMutableParagraphStyle()

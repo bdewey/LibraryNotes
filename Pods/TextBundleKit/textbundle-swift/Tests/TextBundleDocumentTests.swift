@@ -71,9 +71,9 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
     let didOpen = expectation(description: "did open")
     document.open { (success) in
       XCTAssertTrue(success)
-      let textStorage = TextStorage(document: document)
+      let textStorage = document.text
       XCTAssertEqual(
-        textStorage.text.currentResult.value,
+        textStorage.currentResult.value,
         TextBundleTestHelper.expectedDocumentContents
       )
       didOpen.fulfill()
@@ -107,15 +107,14 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
   
   func testCanEditMetadata() {
     let document = try! TextBundleTestHelper.makeDocument("testCanEditMetadata")
-    let metadataStorage = MetadataStorage(document: document)
     defer { try? FileManager.default.removeItem(at: document.fileURL) }
     let didEdit = expectation(description: "did edit")
     let expectedIdentifier = "test application"
     document.open { (success) in
       XCTAssertTrue(success)
-      var metadata = try! metadataStorage.metadata.currentResult.unwrap()
+      var metadata = try! document.metadata.currentResult.unwrap()
       metadata.creatorIdentifier = expectedIdentifier
-      metadataStorage.metadata.setValue(metadata)
+      document.metadata.setValue(metadata)
       didEdit.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)
@@ -130,8 +129,7 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
     let roundTripDocument = TextBundleDocument(fileURL: document.fileURL)
     let didRead = expectation(description: "did read")
     roundTripDocument.open { (_) in
-      let newStorage = MetadataStorage(document: roundTripDocument)
-      let metadata = try! newStorage.metadata.currentResult.unwrap()
+      let metadata = try! roundTripDocument.metadata.currentResult.unwrap()
       XCTAssertEqual(metadata.creatorIdentifier, expectedIdentifier)
       didRead.fulfill()
     }

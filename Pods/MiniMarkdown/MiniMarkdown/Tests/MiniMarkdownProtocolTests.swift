@@ -159,9 +159,10 @@ final class MiniMarkdownProtocolTests: XCTestCase {
     XCTAssertEqual(blocks[0].type, .table)
     guard let table = blocks[0] as? MiniMarkdown.Table else { XCTFail(); return }
     XCTAssertEqual(table.rows.count, 2)
-    XCTAssertEqual(table.rows[0].children[0].contents, "baz")
-    XCTAssertEqual(table.rows[1].children[0].contents, "fe")
-    XCTAssertEqual(table.rows[1].children[1].contents, "")
+    XCTAssertEqual(table.columnCount, 2)
+    XCTAssertEqual(table.rows[0].children[1].contents, "baz")
+    XCTAssertEqual(table.rows[0].cells[0].contents, "baz")
+    XCTAssertEqual(table.rows[1].children[1].contents, "fe")
   }
   
   func testHeadingsCanHaveFormatting() {
@@ -200,19 +201,24 @@ final class MiniMarkdownProtocolTests: XCTestCase {
 """
     let blocks = ParsingRules().parse(example)
     let twoCells = [
+      ExpectedNode(type: .tablePipe),
       ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+      ExpectedNode(type: .tablePipe),
       ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+      ExpectedNode(type: .tablePipe),
     ]
     let expectedStructure = ExpectedNode(type: .table, children: [
       ExpectedNode(type: .tableHeader, children: twoCells),
       ExpectedNode(type: .tableDelimiter, children: twoCells),
       ExpectedNode(type: .tableRow, children: [
+        ExpectedNode(type: .tablePipe),
         ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+        ExpectedNode(type: .tablePipe),
         ExpectedNode(type: .tableCell, children: [
-          ExpectedNode(type: .text),
           ExpectedNode(type: .image),
           ExpectedNode(type: .text),
           ]),
+        ExpectedNode(type: .tablePipe),
         ])
       ])
     do {
@@ -235,8 +241,11 @@ And now there is a paragraph.
 """
     let blocks = ParsingRules().parse(example)
     let twoCells = [
+      ExpectedNode(type: .tablePipe),
       ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+      ExpectedNode(type: .tablePipe),
       ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+      ExpectedNode(type: .tablePipe),
       ]
     let expectedStructure = [
       ExpectedNode(type: .heading, children: [
@@ -247,12 +256,14 @@ And now there is a paragraph.
         ExpectedNode(type: .tableHeader, children: twoCells),
         ExpectedNode(type: .tableDelimiter, children: twoCells),
         ExpectedNode(type: .tableRow, children: [
+          ExpectedNode(type: .tablePipe),
           ExpectedNode(type: .tableCell, children: [ExpectedNode(type: .text)]),
+          ExpectedNode(type: .tablePipe),
           ExpectedNode(type: .tableCell, children: [
-            ExpectedNode(type: .text),
             ExpectedNode(type: .image),
             ExpectedNode(type: .text),
             ]),
+          ExpectedNode(type: .tablePipe),
           ])
         ]),
       ExpectedNode(type: .blank),

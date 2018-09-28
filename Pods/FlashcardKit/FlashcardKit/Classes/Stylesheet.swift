@@ -13,6 +13,7 @@ extension Stylesheet {
     colorScheme.primaryColor = UIColor(rgb: 0x5D1049)
     colorScheme.secondaryColor = UIColor(rgb: 0xFA3336)
     let typographyScheme = MDCTypographyScheme()
+    NunitoSans.loadAllFonts()
     typographyScheme.headline6 = UIFont.nunitoSansSemiBold(size: 21.65)
     typographyScheme.body2 = UIFont.nunitoSansRegular(size: 15.19)
     typographyScheme.button = UIFont.nunitoSansSemiBold(size: 15.16)

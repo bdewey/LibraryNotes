@@ -17,42 +17,31 @@
 
 import Foundation
 
-/// Reads and writes metadata to info.json
-public final class MetadataStorage: TextBundleDocumentSaveListener, WrappingDocument {
-  public init(document: TextBundleDocument) {
-    self.document = document
-    document.addListener(self)
-  }
-  
-  private(set) public lazy var metadata = DocumentProperty(storage: self)
+fileprivate let key = "info.json"
 
-  public let document: TextBundleDocument
-  private let key = "info.json"
-  
-  private func writeValue(_ value: Metadata) throws {
-    let data = try value.makeData()
+public enum MetadataStorage {
+
+  /// Reads and writes metadata to info.json
+  private static func read(from document: TextBundleDocument) throws -> MetadataStorage.Metadata {
+    guard let data = try? document.data(for: key) else { return Metadata() }
+    return try Metadata(from: data)
+  }
+
+  private static func writeValue(_ metadata: MetadataStorage.Metadata, to document: TextBundleDocument) throws {
+    let data = try metadata.makeData()
     let wrapper = FileWrapper(regularFileWithContents: data)
     document.bundle.replaceFileWrapper(wrapper, key: key)
   }
 
-  public func textBundleDocumentWillSave(_ textBundleDocument: TextBundleDocument) throws {
-    if let metadata = metadata.clean() {
-      try writeValue(metadata)
-    }
-  }
-  
-  public func textBundleDocumentDidLoad(_ textBundleDocument: TextBundleDocument) {
-    metadata.invalidate()
+  fileprivate static func makeProperty(
+    for document: TextBundleDocument
+  ) -> DocumentProperty<MetadataStorage.Metadata> {
+    return DocumentProperty(document: document, readFunction: read, writeFunction: writeValue)
   }
 }
 
-extension MetadataStorage: StableStorage {
-  public func documentPropertyInitialValue() throws -> Metadata {
-    guard let data = try? document.data(for: key) else { return Metadata() }
-    return try Metadata(from: data)
-  }
-  
-  public func documentPropertyDidChange() {
-    document.updateChangeCount(.done)
+extension TextBundleDocument {
+  public var metadata: DocumentProperty<MetadataStorage.Metadata> {
+    return listener(for: key, constructor: MetadataStorage.makeProperty)
   }
 }

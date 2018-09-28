@@ -15,6 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+import CocoaLumberjack
 import UIKit
 
 /// Text storage with syntax highlighting.
@@ -91,8 +92,14 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
   }
 
   override public func replaceCharacters(in range: NSRange, with str: String) {
+    DDLogDebug(
+      "MiniMarkdownTextStorage.replaceCharacters " +
+      "length = \(String(describing: memoizedAttributedString?.length)) " +
+      "range = \(range) replacement = " + str.debugDescription
+    )
     memoizedAttributedString = nil
     let change = storage.replaceCharacters(in: range, with: str)
+    DDLogDebug("Change = \(change)")
     self.edited(
       NSTextStorage.EditActions.editedCharacters,
       range: change.changedCharacterRange,

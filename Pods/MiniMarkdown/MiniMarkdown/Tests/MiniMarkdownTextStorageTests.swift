@@ -128,6 +128,37 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     XCTAssertEqual(textStorage.string.count, 1)
     XCTAssertEqual(delegateMessages.count, 2)
   }
+
+  func testRoundTripTable() {
+    let text = """
+| Spanish                  | Engish                                                              |
+| ------------------------ | ------------------------------------------------------------------- |
+| tenedor                  | fork                                                                |
+| hombre                   | man                                                                 |
+| mujer                    | woman                                                               |
+| niño                     | boy                                                                 |
+| niña                     | girl                                                                |
+
+"""
+    textStorage.markdown = text
+    XCTAssertEqual(text, textStorage.markdown)
+  }
+
+  func testAppendAfterTable() {
+    let text = """
+| Spanish                  | Engish                                                              |
+| ------------------------ | ------------------------------------------------------------------- |
+| tenedor                  | fork                                                                |
+| hombre                   | man                                                                 |
+| mujer                    | woman                                                               |
+| niño                     | boy                                                                 |
+| niña                     | girl                                                                |
+
+"""
+    textStorage.markdown = text
+    textStorage.append(NSAttributedString(string: "Hello, world\n"))
+    XCTAssertEqual(text + "Hello, world\n", textStorage.markdown)
+  }
 }
 
 extension MiniMarkdownTextStorageTests: NSTextStorageDelegate {

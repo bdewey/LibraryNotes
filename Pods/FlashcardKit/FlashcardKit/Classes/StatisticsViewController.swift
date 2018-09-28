@@ -7,10 +7,8 @@ import TextBundleKit
 import UIKit
 
 public final class StatisticsViewController: UIViewController {
-  public init(studyStatisticsContainer: StudyStatisticsStorageContaining) {
-    dataSource = StatisticsCalendarDataSource(
-      storage: studyStatisticsContainer.studyStatisticsStorage
-    )
+  public init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
+    dataSource = StatisticsCalendarDataSource(studyStatistics: studyStatistics)
     super.init(nibName: nil, bundle: nil)
     self.title = "Calendar"
   }

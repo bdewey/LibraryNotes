@@ -46,7 +46,6 @@ public final class ScrollingTopTabBarViewController: UIViewController {
   private lazy var tabBar: MDCTabBar = {
     let tabBar = MDCTabBar(frame: .zero)
     tabBar.delegate = self
-    tabBar.alignment = .justified
     MDCTabBarColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colorScheme, toTabs: tabBar)
     MDCTabBarTypographyThemer.applyTypographyScheme(
       Stylesheet.hablaEspanol.typographyScheme,
@@ -73,7 +72,6 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     addChild(appBarViewController)
     view.addSubview(appBarViewController.view)
     appBarViewController.didMove(toParent: self)
-    appBarViewController.headerView.observesTrackingScrollViewScrollEvents = true
     configureTabBar()
     configureScrollView()
   }
@@ -86,6 +84,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     tabBar.items = viewControllers.map { (viewController) -> UITabBarItem in
       return UITabBarItem(title: viewController.title, image: nil, tag: 0)
     }
+    tabBar.alignment = tabBar.items.count <= 3 ? .justified : .leading
   }
 
   private func configureScrollView() {
@@ -125,8 +124,17 @@ public final class ScrollingTopTabBarViewController: UIViewController {
       viewController.navigationItem.rightBarButtonItem
     if let scrollView = viewController as? UIScrollViewForTracking {
       appBarViewController.headerView.trackingScrollView = scrollView.scrollViewForTracking
+      if var forwarder = viewController as? MDCScrollEventForwarder {
+        appBarViewController.headerView.observesTrackingScrollViewScrollEvents = false
+        forwarder.headerView = appBarViewController.headerView
+        appBarViewController.headerView.shiftBehavior = forwarder.desiredShiftBehavior
+      } else {
+        appBarViewController.headerView.shiftBehavior = .disabled
+        appBarViewController.headerView.observesTrackingScrollViewScrollEvents = true
+      }
     } else {
       appBarViewController.headerView.trackingScrollView = nil
+      appBarViewController.headerView.shiftBehavior = .disabled
     }
     scrollView.scrollRectToVisible(frameForIndex(index), animated: animated)
   }

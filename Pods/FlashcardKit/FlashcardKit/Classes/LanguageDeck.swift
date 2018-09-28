@@ -7,30 +7,9 @@ import MiniMarkdown
 import TextBundleKit
 import enum TextBundleKit.Result
 
-public protocol DocumentStudyMetadataContaining {
-  var documentStudyMetadata: DocumentStudyMetadata { get }
-}
-
-public protocol StudySessionSignalContaining {
-  var studySessionSignal: Signal<StudySession> { get }
-}
-
-public protocol StudyStatisticsStorageContaining {
-  var studyStatisticsStorage: StudyStatisticsStorage { get }
-}
-
-public protocol TextStorageContaining {
-  var textStorage: TextStorage { get }
-}
-
 /// This class is the model layer for a single "language deck" (flashcards & study statistics).
 /// It is backed by a single UIDocument.
-public final class LanguageDeck:
-  DocumentStudyMetadataContaining,
-  StudySessionSignalContaining,
-  StudyStatisticsStorageContaining,
-  TextStorageContaining
-{
+public final class LanguageDeck {
 
   /// Initializer.
   ///
@@ -45,10 +24,7 @@ public final class LanguageDeck:
     parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
 
     self.document = document
-    self.documentStudyMetadata = DocumentStudyMetadata(document: document)
-    self.studyStatisticsStorage = StudyStatisticsStorage(document: document)
-    self.textStorage = TextStorage(document: document)
-    self.miniMarkdown = MiniMarkdownSignal(textStorage: textStorage, parsingRules: parsingRules)
+    self.miniMarkdown = MiniMarkdownSignal(textStorage: document.text, parsingRules: parsingRules)
 
     let vocabularyAssociationsSignal = miniMarkdown.signal
       .map { (blocks) -> [VocabularyAssociation] in
@@ -59,7 +35,7 @@ public final class LanguageDeck:
       .combineLatest(clozeCardSignal) { (vocabularyAssociations, closeCards) -> [Card] in
         return Array([vocabularyAssociations.cards, closeCards].joined())
       }
-    self.studySessionSignal = documentStudyMetadata.identifiersToStudyMetadata.signal
+    self.studySessionSignal = document.documentStudyMetadata.signal
       .combineLatest(combinedCards, { (documentValue, cards) -> StudySession in
         return documentValue.value.studySession(from: cards, limit: 500)
       })
@@ -67,15 +43,12 @@ public final class LanguageDeck:
 
   /// The document that stores all of the models.
   public let document: TextBundleDocument
-  public let documentStudyMetadata: DocumentStudyMetadata
   public let miniMarkdown: MiniMarkdownSignal
   public let studySessionSignal: Signal<StudySession>
-  public let studyStatisticsStorage: StudyStatisticsStorage
-  public let textStorage: TextStorage
 
   public func populateEmptyDocument() {
-    if textStorage.text.currentResult.value.isEmpty {
-      textStorage.text.setValue(initialText)
+    if document.text.currentResult.value.isEmpty {
+      document.text.setValue(initialText)
     }
   }
 
@@ -102,13 +75,13 @@ private let initialText = """
 
 These are the words Alex practiced during the summer of 2018:
 
-| Spanish                  | Engish                                                              |
-| ------------------------ | ------------------------------------------------------------------- |
-| tenedor                  | fork                                                                |
-| hombre                   | man                                                                 |
-| mujer                    | woman                                                               |
-| niño                     | boy                                                                 |
-| niña                     | girl                                                                |
+| Spanish | Engish |
+| --------| ------ |
+| tenedor | fork   |
+| hombre  | man    |
+| mujer   | woman  |
+| niño    | boy    |
+| niña    | girl   |
 
 # Mastering the verb "to be"
 

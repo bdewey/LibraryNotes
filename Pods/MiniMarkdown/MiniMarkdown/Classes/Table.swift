@@ -21,6 +21,7 @@ extension NodeType {
   public static let table = NodeType(rawValue: "table")
   public static let tableHeader = NodeType(rawValue: "table-header")
   public static let tableDelimiter = NodeType(rawValue: "table-delimiter")
+  public static let tablePipe = NodeType(rawValue: "table-pipe")
   public static let tableRow = NodeType(rawValue: "table-row")
   public static let tableCell = NodeType(rawValue: "table-cell")
 }
@@ -45,11 +46,11 @@ public final class Table: Node, LineParseable {
   }
 
   public init?(header: TableRow, delimiter: TableDelimiter, rows: [TableRow]) {
-    guard header.children.count == delimiter.children.count else { return nil }
+    guard header.cells.count == delimiter.cells.count else { return nil }
     self.header = header
     self.delimiter = delimiter
     self.rows = rows
-    columnCount = delimiter.children.count
+    columnCount = delimiter.cells.count
     let partialSlice = header.slice + delimiter.slice
     let completeSlice = rows.reduce(into: partialSlice, { $0 += $1.slice })
     super.init(type: .table, slice: completeSlice)
@@ -61,16 +62,46 @@ public final class Table: Node, LineParseable {
     <*> TableRow.parser(type: .tableRow).many).unwrapped
 }
 
-public final class TableCell: InlineContainingNode {
+public final class TablePipe: Node, CharacterParseable {
+  public init(slice: StringSlice) {
+    super.init(type: .tablePipe, slice: slice)
+  }
+
+  public init(leadingWhitespace: [StringCharacter], pipe: StringSlice, trailingWhitespace: [StringCharacter]) {
+    var slice = leadingWhitespace.stringSlice + pipe
+    if let trailingWhitespaceSlice = trailingWhitespace.stringSlice {
+      slice += trailingWhitespaceSlice
+    }
+    super.init(type: .tablePipe, slice: slice)
+  }
+
+  public static let parser = curry(TablePipe.init)
+    <^> CharacterParsers.character(where: { $0.isWhitespace }).many
+    <*> CharacterParsers.characters("|")
+    <*> CharacterParsers.character(where: { $0.isWhitespaceOrNewline }).many
+}
+
+public final class TableCell: InlineContainingNode, CharacterParseable {
   public init(slice: StringSlice) {
     super.init(type: .tableCell, slice: slice)
+  }
+
+  public init(characters: [StringCharacter]) {
+    precondition(!characters.isEmpty)
+    super.init(type: .tableCell, slice: characters.stringSlice!)
   }
 
   // "Spaces between pipes and cell content are trimmed."
   public override var contents: Substring {
     return slice.substring.strippingLeadingAndTrailingWhitespace
   }
+
+  public static let parser = TableCell.init
+    <^> CharacterParsers.character(where: { $0 != "|" }).oneOrMore
 }
+
+private let rowRules = ParsingArray([TablePipe.nodeParser, TableCell.nodeParser])
+
 
 public final class TableRow: Node {
   public override var parsingRules: ParsingRules! {
@@ -79,13 +110,14 @@ public final class TableRow: Node {
     }
   }
   public let cells: [TableCell]
-
+  private let nodes: [Node]
   public override var children: [Node] {
-    return cells
+    return nodes
   }
 
   public override init(type: NodeType, slice: StringSlice) {
-    self.cells = slice.tableCells.map({ MiniMarkdown.TableCell(slice: $0) })
+    self.nodes = rowRules.parse(ArraySlice(slice))
+    self.cells = nodes.filter({ $0 is TableCell }).map({ $0 as! TableCell })
     super.init(type: type, slice: slice)
   }
 
@@ -104,15 +136,18 @@ public final class TableDelimiter: Node, LineParseable {
   }
 
   public let cells: [TableCell]
-  public override var children: [Node] { return cells }
+  public let nodes: [Node]
+  public override var children: [Node] { return nodes }
 
   public init(slice: StringSlice) {
-    self.cells = slice.tableCells.map({ MiniMarkdown.TableCell(slice: $0) })
+    self.nodes = rowRules.parse(ArraySlice(slice))
+    self.cells = nodes.filter({ $0 is TableCell }).map({ $0 as! TableCell })
     super.init(type: .tableDelimiter, slice: slice)
   }
 
   public static let parser = TableDelimiter.init <^>
     LineParsers.line(where: { (slice) in
-      slice.tableCells.allSatisfy({ $0.substring.isTableDelimiterCell })
+      let cells = slice.tableCells
+      return cells.count > 0 && cells.allSatisfy({ $0.substring.isTableDelimiterCell })
     })
 }

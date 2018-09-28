@@ -30,9 +30,9 @@ final class TextBundleSnapshotTests: XCTestCase {
     }
     waitForExpectations(timeout: 3, handler: nil)
     let now = Date()
-    let textStorage = TextStorage(document: document)
-    try! textStorage.makeSnapshot(at: now)
-    textStorage.text.setValue(editedText)
+    let textStorage = document.text
+    try! document.makeSnapshot(at: now)
+    textStorage.setValue(editedText)
     let didClose = expectation(description: "did close")
     document.close { (success) in
       XCTAssert(success)
@@ -43,10 +43,10 @@ final class TextBundleSnapshotTests: XCTestCase {
     let roundTripDocument = TextBundleDocument(fileURL: document.fileURL)
     let didRead = expectation(description: "did read")
     roundTripDocument.open { (_) in
-      let newStorage = TextStorage(document: roundTripDocument)
-      let text = try! newStorage.text.currentResult.unwrap()
+      let newStorage = roundTripDocument.text
+      let text = try! newStorage.currentResult.unwrap()
       XCTAssertEqual(text, editedText)
-      XCTAssertEqual(try? newStorage.snapshot(at: now), TextBundleTestHelper.expectedDocumentContents)
+      XCTAssertEqual(try? roundTripDocument.snapshot(at: now), TextBundleTestHelper.expectedDocumentContents)
       didRead.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)

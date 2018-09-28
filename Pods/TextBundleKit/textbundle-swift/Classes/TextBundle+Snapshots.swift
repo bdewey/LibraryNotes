@@ -43,7 +43,7 @@ extension Date {
 
 // TODO: Move this into a separate pod; the goal is to have composable bundle functionality.
 // TODO: Use https://github.com/google/diff-match-patch to store differences between snapshots.
-extension TextStorage {
+extension TextBundleDocument {
   
   /// Stores a snapshot of the current text.
   /// - parameter snapshotDate: The Date to use to identify the snapshot.
@@ -59,19 +59,19 @@ extension TextStorage {
       )
     }
     let preferredFilename = snapshotDate.snapshotKey
-    try document.addData(data, preferredFilename: preferredFilename, childDirectoryPath: snapshotPath)
+    try addData(data, preferredFilename: preferredFilename, childDirectoryPath: snapshotPath)
     return snapshotDate
   }
   
   /// All snapshots in the bundle.
   public var snapshots: [Date] {
-    guard let snapshotKeys = try? document.keys(at: snapshotPath) else { return [] }
+    guard let snapshotKeys = try? keys(at: snapshotPath) else { return [] }
     return snapshotKeys.compactMap { $0.snapshotDate }
   }
   
   /// Gets the snapshot string associated with a specific date.
   public func snapshot(at snapshotDate: Date) throws -> String {
-    let data = try document.data(for: snapshotDate.snapshotKey, at: snapshotPath)
+    let data = try self.data(for: snapshotDate.snapshotKey, at: snapshotPath)
     guard let snapshot = String(data: data, encoding: .utf8) else {
       throw NSError(
         domain: NSCocoaErrorDomain,

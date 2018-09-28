@@ -40,12 +40,12 @@ extension UICollectionView: StatisticsCalendarCollectionView { }
 final class StatisticsCalendarDataSource: NSObject {
 
   /// Initializer.
-  init(storage: StudyStatisticsStorage) {
+  init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
     let today = Date()
     startDate = calendar.startOfMonth(containing: today)
     endDate = calendar.endOfMonth(containing: today)
     super.init()
-    subscription = storage.statistics.subscribe { [weak self](result) in
+    subscription = studyStatistics.subscribe { [weak self](result) in
       guard let value = result.value else { return }
       self?.processStatistics(value.value)
     }

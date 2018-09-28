@@ -115,6 +115,10 @@ public final class RenderedMarkdown {
       )!
     markdown.replaceSubrange(markdownRange, with: characters)
     let (replacementNodes, _) = nodes(for: markdown)
+    assert(
+      replacementNodes.allText == markdown,
+      "Parsed Markdown is not consistent with original Markdown"
+    )
     let initialRendering = nodesToReplace.allRenderedResults
     let finalRendering = replacementNodes.allRenderedResults
     let changedRange = initialRendering.string.changedRange(

@@ -6,10 +6,10 @@ import UIKit
 
 public final class ChallengesViewController: UIViewController {
 
-  public init(storage: StudyStatisticsStorageContaining) {
-    self.statisticsStorage = storage.studyStatisticsStorage
+  public init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
+    self.studyStatistics = studyStatistics
     super.init(nibName: nil, bundle: nil)
-    subscription = statisticsStorage.statistics.subscribe { [weak self](result) in
+    subscription = studyStatistics.subscribe { [weak self](result) in
       switch result {
       case .success(let statistics):
         self?.processStatistics(statistics.value)
@@ -24,7 +24,7 @@ public final class ChallengesViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let statisticsStorage: StudyStatisticsStorage
+  private let studyStatistics: DocumentProperty<[StudySession.Statistics]>
   private var subscription: AnySubscription!
 
   private let layout: UICollectionViewFlowLayout = {
