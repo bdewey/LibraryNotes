@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Commonplace Book</string>
+	<string>Commonplace</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>

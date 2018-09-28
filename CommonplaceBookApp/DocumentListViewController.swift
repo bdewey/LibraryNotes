@@ -25,7 +25,7 @@ final class DocumentListViewController: UIViewController {
 
   init() {
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = "Documents"
+    self.navigationItem.title = "Commonplace Book"
     self.navigationItem.rightBarButtonItem = newDocumentButton
   }
 
