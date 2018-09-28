@@ -3,6 +3,7 @@
 import UIKit
 
 import CommonplaceBook
+import FlashcardKit
 import MaterialComponents
 import MiniMarkdown
 import TextBundleKit
@@ -158,5 +159,11 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       withVelocity: velocity,
       targetContentOffset: targetContentOffset
     )
+  }
+}
+
+extension TextEditViewController: UIScrollViewForTracking {
+  var scrollViewForTracking: UIScrollView {
+    return textView
   }
 }
