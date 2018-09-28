@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import CommonplaceBook
+import FlashcardKit
 import MaterialComponents.MaterialAppBar
 import UIKit
 
@@ -36,5 +37,10 @@ extension AppDelegate: MDCAppBarNavigationControllerDelegate {
   ) {
     MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
     MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
+    if var forwarder = viewController as? MDCScrollEventForwarder {
+      forwarder.headerView = appBar.headerViewController.headerView
+      appBar.headerViewController.headerView.observesTrackingScrollViewScrollEvents = false
+      appBar.headerViewController.headerView.shiftBehavior = forwarder.desiredShiftBehavior
+    }
   }
 }

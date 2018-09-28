@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -1126,6 +1126,7 @@
 		D5BB97F5973CC5AE48D9376CFE395360 /* IGListBatchUpdateData.mm in Sources */ = {isa = PBXBuildFile; fileRef = 5BE1E3901223E9A6CE709FA8469CBB74 /* IGListBatchUpdateData.mm */; };
 		D5BD0D6AFCFD35D6C5A02B6F2ABA9032 /* MaterialFeatureHighlight+FontThemer.h in Headers */ = {isa = PBXBuildFile; fileRef = 54CCD24F89B67BFB9BCFD11A438C8B4A /* MaterialFeatureHighlight+FontThemer.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D5C15B68AE7F1C39585E979F500B6DC1 /* MaterialSnackbarStrings.h in Headers */ = {isa = PBXBuildFile; fileRef = F5970648680BD6375BFAAD3B0824530C /* MaterialSnackbarStrings.h */; settings = {ATTRIBUTES = (Project, ); }; };
+		D5CF652E215EAF6D00A0DEE2 /* MDCScrollEventForwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5CF652D215EAF6D00A0DEE2 /* MDCScrollEventForwarder.swift */; };
 		D5FAE9538D85526216ADFE824379327C /* FLAnimatedImageView.h in Headers */ = {isa = PBXBuildFile; fileRef = D18C49815022FEEB50BD74A1390F81DF /* FLAnimatedImageView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D6169AF781DC7A6CCC248CB3DFF1B668 /* IGListSingleSectionController.h in Headers */ = {isa = PBXBuildFile; fileRef = 801AC79CAA1CCC8AD0E773453F3CB1EE /* IGListSingleSectionController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D62371436911127379EEA8321AA74AED /* MDCFlexibleHeaderViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 2BD8CB2D7155B560B71DDF7D382E3D5B /* MDCFlexibleHeaderViewController.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1857,9 +1858,9 @@
 /* Begin PBXFileReference section */
 		009183CD36E01A9F8908052DB96E7E2A /* MaterialActivityIndicator+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialActivityIndicator+ColorThemer.h"; path = "components/ActivityIndicator/src/ColorThemer/MaterialActivityIndicator+ColorThemer.h"; sourceTree = "<group>"; };
 		00A59BBAC58C9DF1B87BA60480C82C12 /* MDCNavigationBar.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCNavigationBar.h; path = components/NavigationBar/src/MDCNavigationBar.h; sourceTree = "<group>"; };
-		00F1E4135DDE71771E25554D4BA69CB3 /* NunitoSans.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = NunitoSans.bundle; path = "NunitoSans-NunitoSans.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		00F1E4135DDE71771E25554D4BA69CB3 /* NunitoSans.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NunitoSans.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		015410490808192F7D0750CE8D4669E0 /* ic_info@2x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_info@2x.png"; path = "components/private/Icons/icons/ic_info/src/MaterialIcons_ic_info.bundle/ic_info@2x.png"; sourceTree = "<group>"; };
-		016DC45BC12D0CC62EC3A6F7B4ECB09B /* MaterialIcons_ic_help_outline.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_help_outline.bundle; path = "MaterialComponents-MaterialIcons_ic_help_outline.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		016DC45BC12D0CC62EC3A6F7B4ECB09B /* MaterialIcons_ic_help_outline.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_help_outline.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		018C9BA7488B1EFA3E1948E7FEC09FAB /* MotionTransitioning.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MotionTransitioning.xcconfig; sourceTree = "<group>"; };
 		01AD76FD2577371C4CCC433D729D18D9 /* DZNPhotoPickerController-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DZNPhotoPickerController-prefix.pch"; sourceTree = "<group>"; };
 		0215512D09FDE076287F18E8DBC356AB /* MDCTextInputAllCharactersCounter.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTextInputAllCharactersCounter.m; path = components/TextFields/src/private/MDCTextInputAllCharactersCounter.m; sourceTree = "<group>"; };
@@ -1893,7 +1894,7 @@
 		06FE4B305DF57C01FA7365C8AFDB24CA /* MDCBottomAppBarLayer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCBottomAppBarLayer.h; path = components/BottomAppBar/src/private/MDCBottomAppBarLayer.h; sourceTree = "<group>"; };
 		0732168E2AED0F03D1856F9109487202 /* FLAnimatedImage.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = FLAnimatedImage.xcconfig; sourceTree = "<group>"; };
 		07543AC08F75BB6FA8FA9EA3D0FF0060 /* TextBundleDocument.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TextBundleDocument.swift; path = "textbundle-swift/Classes/TextBundleDocument.swift"; sourceTree = "<group>"; };
-		08180B8EA961BED1C0FFD0B0B3F79640 /* CollectionViewLayouts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CollectionViewLayouts.framework; path = CollectionViewLayouts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		08180B8EA961BED1C0FFD0B0B3F79640 /* CollectionViewLayouts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CollectionViewLayouts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0858884934EC3F089E23047EDBF1B409 /* ReplaceMe.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReplaceMe.swift; path = FlashcardKit/Classes/ReplaceMe.swift; sourceTree = "<group>"; };
 		08FFE3A1106C066E575B3A259A364D12 /* MotionInterchange-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MotionInterchange-prefix.pch"; sourceTree = "<group>"; };
 		091C4FBA9B411F841A8A93826B1C4F48 /* BlockArray.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BlockArray.swift; path = "textbundle-swift/Classes/BlockArray.swift"; sourceTree = "<group>"; };
@@ -1901,10 +1902,10 @@
 		093206646C44831931BE6D5135916433 /* CwlUtils-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CwlUtils-umbrella.h"; sourceTree = "<group>"; };
 		0950523FFDE58C4F854D061CEAB6F08E /* MDMDragCoefficient.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDMDragCoefficient.m; path = src/private/MDMDragCoefficient.m; sourceTree = "<group>"; };
 		09707733815FFF49204FA97E1CC9620D /* IGListAdapterInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListAdapterInternal.h; path = Source/Internal/IGListAdapterInternal.h; sourceTree = "<group>"; };
-		0978AC8B228904846371653D1B16D7E6 /* FlashcardKit.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = FlashcardKit.bundle; path = "FlashcardKit-FlashcardKit.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0978AC8B228904846371653D1B16D7E6 /* FlashcardKit.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FlashcardKit.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		0997ADD0B812F7C344A0847CC6F546D0 /* MDCTabBarIndicatorContext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTabBarIndicatorContext.h; path = components/Tabs/src/MDCTabBarIndicatorContext.h; sourceTree = "<group>"; };
 		09CE97EA45FA9541D97C11BFDEA525B2 /* MDCSnackbarManager.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSnackbarManager.m; path = components/Snackbar/src/MDCSnackbarManager.m; sourceTree = "<group>"; };
-		09E7E18DCB45F6F243482D771CFB5B34 /* MotionTransitioning.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MotionTransitioning.framework; path = MotionTransitioning.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		09E7E18DCB45F6F243482D771CFB5B34 /* MotionTransitioning.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MotionTransitioning.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		09F3A4ACBD208473D561F1C44C07C4F6 /* MDCBottomAppBarView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCBottomAppBarView.h; path = components/BottomAppBar/src/MDCBottomAppBarView.h; sourceTree = "<group>"; };
 		0A951DD0E1BBEB3AA72CCB4A05455718 /* MDCTriangleEdgeTreatment.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTriangleEdgeTreatment.h; path = components/private/ShapeLibrary/src/MDCTriangleEdgeTreatment.h; sourceTree = "<group>"; };
 		0AD1FC7281306E4DA8E0298ECCB26E96 /* CwlSignal.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlSignal.swift; path = Sources/CwlSignal/CwlSignal.swift; sourceTree = "<group>"; };
@@ -1918,21 +1919,21 @@
 		0BCB3914057868E9C3605C13EFA384F0 /* CwlSignalReactive.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlSignalReactive.swift; path = Sources/CwlSignal/CwlSignalReactive.swift; sourceTree = "<group>"; };
 		0C472A79448B7D0770D4039EC6CEEBF0 /* MDCRoundedCornerTreatment.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCRoundedCornerTreatment.h; path = components/private/ShapeLibrary/src/MDCRoundedCornerTreatment.h; sourceTree = "<group>"; };
 		0C6CD6C0F09FD7C0324EC52FCF1F1A89 /* MDCLegacyTonalPalette.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCLegacyTonalPalette.h; path = components/schemes/Color/src/MDCLegacyTonalPalette.h; sourceTree = "<group>"; };
-		0CAAD790D27C3ECBE4322B68D129C713 /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_CommonplaceBookApp.framework; path = "Pods-CommonplaceBookApp.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CAAD790D27C3ECBE4322B68D129C713 /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0CB9CEC00ACF21CADBE219F9FEEE377D /* MDCFeatureHighlightTypographyThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFeatureHighlightTypographyThemer.m; path = components/FeatureHighlight/src/TypographyThemer/MDCFeatureHighlightTypographyThemer.m; sourceTree = "<group>"; };
-		0CBE5F52C62258E6CE2EC867C0B02EF9 /* IGListKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IGListKit.framework; path = IGListKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0CBE5F52C62258E6CE2EC867C0B02EF9 /* IGListKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IGListKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D541FE7998684F41A2D8E40C6E200EB /* DDOSLogger.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDOSLogger.h; path = Classes/DDOSLogger.h; sourceTree = "<group>"; };
 		0D6C4A171CB208F69F757D595092C63D /* MDCLibraryInfo.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCLibraryInfo.m; path = components/LibraryInfo/src/MDCLibraryInfo.m; sourceTree = "<group>"; };
 		0DD881F95227A31358FD317AAF84CDAF /* MaterialCollectionCells.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = MaterialCollectionCells.bundle; path = components/CollectionCells/src/MaterialCollectionCells.bundle; sourceTree = "<group>"; };
-		0E385E0ED28C5A97C12491C43B65BE8D /* MotionAnimator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MotionAnimator.framework; path = MotionAnimator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0E385E0ED28C5A97C12491C43B65BE8D /* MotionAnimator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MotionAnimator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0E67F0E7FE168A2B84B45DC025B7E61E /* SDWebImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "SDWebImage-umbrella.h"; sourceTree = "<group>"; };
 		0EBB1C5FC92062D9DAA969C70D2CF3D8 /* IGListIndexSetResult.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListIndexSetResult.h; path = Source/Common/IGListIndexSetResult.h; sourceTree = "<group>"; };
 		0EBDA63D500951D99582A608D31F3C95 /* UIScrollView+EmptyDataSet.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIScrollView+EmptyDataSet.h"; path = "Source/UIScrollView+EmptyDataSet.h"; sourceTree = "<group>"; };
 		0EDEC5C2251DC6B0E5124E6EFFC1765D /* MDCFloatingActionButtonThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFloatingActionButtonThemer.m; path = components/Buttons/src/ButtonThemer/MDCFloatingActionButtonThemer.m; sourceTree = "<group>"; };
 		0EF58B4241B15A1C6274600DF79E4446 /* ClozeCard.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ClozeCard.swift; path = FlashcardKit/Classes/ClozeCard.swift; sourceTree = "<group>"; };
-		0F38D0D325A065B704E65A8055C0D9E7 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		0F38D0D325A065B704E65A8055C0D9E7 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		0F68DF9E341F2EEB4781C5163ABEBB1C /* SnapKit.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = SnapKit.xcconfig; sourceTree = "<group>"; };
-		0FDCE34585E25D714726BC6735149669 /* MaterialIcons_ic_arrow_back.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_arrow_back.bundle; path = "MaterialComponents-MaterialIcons_ic_arrow_back.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0FDCE34585E25D714726BC6735149669 /* MaterialIcons_ic_arrow_back.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_arrow_back.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FE0164F4CBE6756A5BE204B903F25B1 /* MDCActivityIndicator+Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MDCActivityIndicator+Private.h"; path = "components/ActivityIndicator/src/private/MDCActivityIndicator+Private.h"; sourceTree = "<group>"; };
 		0FF623A3D3A9BA30E905017CF06C8BDC /* MDCChipCollectionViewCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipCollectionViewCell.m; path = components/Chips/src/MDCChipCollectionViewCell.m; sourceTree = "<group>"; };
 		10000EAB53E51F5E3FB8919017BBF323 /* MotionTransitioning-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "MotionTransitioning-dummy.m"; sourceTree = "<group>"; };
@@ -1940,7 +1941,7 @@
 		106009EE0A2519340CA3E2E3000D3F55 /* FLAnimatedImage-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FLAnimatedImage-umbrella.h"; sourceTree = "<group>"; };
 		10C44B0EA8697370898541CB447A293D /* DZNPhotoDisplayViewCell.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DZNPhotoDisplayViewCell.h; path = Source/Classes/Core/DZNPhotoDisplayViewCell.h; sourceTree = "<group>"; };
 		10F72D0A3D5683C2525FFDAB5815CEDF /* MaterialTabs.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = MaterialTabs.bundle; path = components/Tabs/src/MaterialTabs.bundle; sourceTree = "<group>"; };
-		113E7FAA61F6008BDC4374436B7F6176 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SnapKit.framework; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		113E7FAA61F6008BDC4374436B7F6176 /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		116BDC14E04124EF78E4A4DB160EFFB0 /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		11E0E9EC93596D08C3D24F93043A7792 /* MaterialOverlay.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialOverlay.h; path = components/private/Overlay/src/MaterialOverlay.h; sourceTree = "<group>"; };
 		11FA5A20D5A194F808E48A50A0678DBB /* MaterialCollectionsStrings_table.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialCollectionsStrings_table.h; path = components/Collections/src/private/MaterialCollectionsStrings_table.h; sourceTree = "<group>"; };
@@ -1951,7 +1952,7 @@
 		12616606A47471278B93E03CB177C5D4 /* MiniMarkdownTextStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MiniMarkdownTextStorage.swift; path = MiniMarkdown/Classes/MiniMarkdownTextStorage.swift; sourceTree = "<group>"; };
 		12D4F17F02B7E54F1F30F7BD7DCB6FC1 /* MDCCardThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCardThemer.h; path = components/Cards/src/CardThemer/MDCCardThemer.h; sourceTree = "<group>"; };
 		12E08A5749ABDC75B6F459C26364C98A /* Cloze.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Cloze.swift; path = FlashcardKit/Classes/Cloze.swift; sourceTree = "<group>"; };
-		12FC60B311EED5565454B5366668CD72 /* FLAnimatedImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FLAnimatedImage.framework; path = FLAnimatedImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		12FC60B311EED5565454B5366668CD72 /* FLAnimatedImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FLAnimatedImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1384B2A5D610624C99BE2957B756136A /* MDCCard.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCard.h; path = components/Cards/src/MDCCard.h; sourceTree = "<group>"; };
 		13A274C8C15E209780A36C04592B5208 /* UIFontDescriptor+MaterialTypography.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIFontDescriptor+MaterialTypography.h"; path = "components/Typography/src/UIFontDescriptor+MaterialTypography.h"; sourceTree = "<group>"; };
 		13F42928F20D907A30750ED95A4568F1 /* MiniMarkdown-Unit-Tests */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "MiniMarkdown-Unit-Tests"; path = "MiniMarkdown-Unit-Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1974,7 +1975,7 @@
 		165C3F33A5CD75F3014210135087004D /* IGListSectionControllerInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListSectionControllerInternal.h; path = Source/Internal/IGListSectionControllerInternal.h; sourceTree = "<group>"; };
 		1660DBB99F1DD211463DBFA46D685223 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		170E718A139A23583A9524CD73B81FFC /* ic_check_circle.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_check_circle.png; path = components/private/Icons/icons/ic_check_circle/src/MaterialIcons_ic_check_circle.bundle/ic_check_circle.png; sourceTree = "<group>"; };
-		172B6DD7BF51E339B336FC6D7B75B4E4 /* MaterialIcons_ic_reorder.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_reorder.bundle; path = "MaterialComponents-MaterialIcons_ic_reorder.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		172B6DD7BF51E339B336FC6D7B75B4E4 /* MaterialIcons_ic_reorder.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_reorder.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		1796858BCD620F4BD34C609154128C57 /* MDFTextAccessibility-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MDFTextAccessibility-prefix.pch"; sourceTree = "<group>"; };
 		17B54B7E53E1FD6F8EE1FF870A841968 /* ic_color_lens@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_color_lens@3x.png"; path = "components/private/Icons/icons/ic_color_lens/src/MaterialIcons_ic_color_lens.bundle/ic_color_lens@3x.png"; sourceTree = "<group>"; };
 		17E63DC4ABD02CB63DC1B5BC2D265B43 /* MDCButtonScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCButtonScheme.h; path = components/Buttons/src/ButtonThemer/MDCButtonScheme.h; sourceTree = "<group>"; };
@@ -1992,11 +1993,11 @@
 		191CB27D5DEEB3B3E38BF3F95A4AD5DF /* MaterialProgressView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialProgressView.h; path = components/ProgressView/src/MaterialProgressView.h; sourceTree = "<group>"; };
 		193EEFBAB61813AB9C0CF911A6571991 /* SwipeTableViewCell.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwipeTableViewCell.swift; path = Source/SwipeTableViewCell.swift; sourceTree = "<group>"; };
 		19AA224ED1BEF294FD73B3B45C75FCB2 /* MDCBottomAppBarView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCBottomAppBarView.m; path = components/BottomAppBar/src/MDCBottomAppBarView.m; sourceTree = "<group>"; };
-		19AF96A4AD9687749A5C2567222AC107 /* textbundle-md-extension.textbundle */ = {isa = PBXFileReference; includeInIndex = 1; name = "textbundle-md-extension.textbundle"; path = "textbundle-swift/TestContent/textbundle-md-extension.textbundle"; sourceTree = "<group>"; };
+		19AF96A4AD9687749A5C2567222AC107 /* textbundle-md-extension.textbundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper; name = "textbundle-md-extension.textbundle"; path = "textbundle-swift/TestContent/textbundle-md-extension.textbundle"; sourceTree = "<group>"; };
 		1A0F9E75F1B3F9FEB58E1F2C5B11A83E /* MaterialBottomNavigation+TypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialBottomNavigation+TypographyThemer.h"; path = "components/BottomNavigation/src/TypographyThemer/MaterialBottomNavigation+TypographyThemer.h"; sourceTree = "<group>"; };
 		1A18C3F4FF9B59F8BD5286FBB3ACAB50 /* MDCThumbTrack.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCThumbTrack.m; path = components/private/ThumbTrack/src/MDCThumbTrack.m; sourceTree = "<group>"; };
 		1A46C2D35FB8EC6D3EFC112CC06CA32D /* ConstraintPriority.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintPriority.swift; path = Source/ConstraintPriority.swift; sourceTree = "<group>"; };
-		1A47EC3531AFAD93C4D7E7FCE7F9A26C /* NunitoSans-BlackItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-BlackItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-BlackItalic.ttf"; sourceTree = "<group>"; };
+		1A47EC3531AFAD93C4D7E7FCE7F9A26C /* NunitoSans-BlackItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-BlackItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-BlackItalic.ttf"; sourceTree = "<group>"; };
 		1AA5F3E40D6DD696695170B56AB017AF /* MDMRegisteredAnimation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMRegisteredAnimation.h; path = src/private/MDMRegisteredAnimation.h; sourceTree = "<group>"; };
 		1ABD7793B7B8A413343CA27D75F87DA7 /* ic_radio_button_unchecked@2x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_radio_button_unchecked@2x.png"; path = "components/private/Icons/icons/ic_radio_button_unchecked/src/MaterialIcons_ic_radio_button_unchecked.bundle/ic_radio_button_unchecked@2x.png"; sourceTree = "<group>"; };
 		1B03C2370B8C9AFAF82ACB5EE875477F /* MDMTransition.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMTransition.h; path = src/MDMTransition.h; sourceTree = "<group>"; };
@@ -2006,7 +2007,7 @@
 		1B5B49FEF51FE03CE157D34E9AD371E7 /* MDCAlertScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCAlertScheme.h; path = components/Dialogs/src/DialogThemer/MDCAlertScheme.h; sourceTree = "<group>"; };
 		1B7A8F66332A82FC5176AD299447B797 /* IGListReloadDataUpdater.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListReloadDataUpdater.h; path = Source/IGListReloadDataUpdater.h; sourceTree = "<group>"; };
 		1B887D409F64F66C38E4304C57123751 /* MDCCardCollectionCell.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCardCollectionCell.h; path = components/Cards/src/MDCCardCollectionCell.h; sourceTree = "<group>"; };
-		1BBC0148BCBD3E7F1979543BFDAC33C2 /* MiniMarkdown.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; path = MiniMarkdown.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		1BBC0148BCBD3E7F1979543BFDAC33C2 /* MiniMarkdown.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; path = MiniMarkdown.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		1BF2ED97311B36D2486B465C060D28F9 /* MaterialIcons+ic_help_outline.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialIcons+ic_help_outline.h"; path = "components/private/Icons/icons/ic_help_outline/src/MaterialIcons+ic_help_outline.h"; sourceTree = "<group>"; };
 		1C1D2A073B0EBDD94C0E388A6EF4ACC9 /* ResourceBundle-FlashcardKit-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-FlashcardKit-Info.plist"; sourceTree = "<group>"; };
 		1C5FEE71A22DA074605D1E8CC9A5FAAA /* IGListCollectionContext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListCollectionContext.h; path = Source/IGListCollectionContext.h; sourceTree = "<group>"; };
@@ -2044,7 +2045,7 @@
 		2344C26D901D8A1C753009CC486A3D1B /* MDCItemBarStringConstants.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCItemBarStringConstants.h; path = components/Tabs/src/private/MDCItemBarStringConstants.h; sourceTree = "<group>"; };
 		235304E4EEC2EBB03705C4B08FF6A81C /* MaterialFeatureHighlight+FeatureHighlightAccessibilityMutator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialFeatureHighlight+FeatureHighlightAccessibilityMutator.h"; path = "components/FeatureHighlight/src/FeatureHighlightAccessibilityMutator/MaterialFeatureHighlight+FeatureHighlightAccessibilityMutator.h"; sourceTree = "<group>"; };
 		2359593B4CFDDE7F9E8BB432D674ECA9 /* AFImageDownloader.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = AFImageDownloader.m; path = "UIKit+AFNetworking/AFImageDownloader.m"; sourceTree = "<group>"; };
-		235DF2DF70923B6CFC4FB7F4690926D0 /* MDFInternationalization.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MDFInternationalization.framework; path = MDFInternationalization.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		235DF2DF70923B6CFC4FB7F4690926D0 /* MDFInternationalization.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MDFInternationalization.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		238F2D1C2A22D9E401AD5DC8C0B61489 /* MDCTextField.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextField.h; path = components/TextFields/src/MDCTextField.h; sourceTree = "<group>"; };
 		23ECCEFB007E11CCF8B38E672BDB3033 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24153F8EC0871BCD148BDDC3B1B8CCAE /* MDCSemanticColorScheme.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSemanticColorScheme.m; path = components/schemes/Color/src/MDCSemanticColorScheme.m; sourceTree = "<group>"; };
@@ -2170,7 +2171,7 @@
 		390143CFD69072093915F55D1B50E018 /* MDCLegacyInkLayer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCLegacyInkLayer.h; path = components/Ink/src/private/MDCLegacyInkLayer.h; sourceTree = "<group>"; };
 		39524CEB633DE4E619A1AD488E3F8C63 /* Pods-CommonplaceBookAppTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-CommonplaceBookAppTests.debug.xcconfig"; sourceTree = "<group>"; };
 		396F4DE7260246591A0698610AC4B6FA /* IGListAdapter+UICollectionView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "IGListAdapter+UICollectionView.h"; path = "Source/Internal/IGListAdapter+UICollectionView.h"; sourceTree = "<group>"; };
-		39941B6D07163203206FE71ECC554F58 /* NunitoSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-SemiBoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		39941B6D07163203206FE71ECC554F58 /* NunitoSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-SemiBoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
 		39AF61FD60736A356A927566D0FB452E /* IGListBatchUpdates.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListBatchUpdates.h; path = Source/Internal/IGListBatchUpdates.h; sourceTree = "<group>"; };
 		39B62B6D8AA202F9E4D0D5A701F1931F /* MDCTabBarColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTabBarColorThemer.h; path = components/Tabs/src/ColorThemer/MDCTabBarColorThemer.h; sourceTree = "<group>"; };
 		39C50DD4A0C6C0C26CB7612267DD56A0 /* MDCFilledTextFieldColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFilledTextFieldColorThemer.m; path = components/TextFields/src/ColorThemer/MDCFilledTextFieldColorThemer.m; sourceTree = "<group>"; };
@@ -2208,7 +2209,7 @@
 		3F21E72C0E8E1DDB97B952125A26F366 /* MaterialShadowLayer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialShadowLayer.h; path = components/ShadowLayer/src/MaterialShadowLayer.h; sourceTree = "<group>"; };
 		3F4286E08D41ADED3E2CFF431F409E84 /* UIViewController+TransitionController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIViewController+TransitionController.h"; path = "src/UIViewController+TransitionController.h"; sourceTree = "<group>"; };
 		3F6A56E382F8220BC2B0780F80CD6A95 /* MDCTabBarTypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTabBarTypographyThemer.h; path = components/Tabs/src/TypographyThemer/MDCTabBarTypographyThemer.h; sourceTree = "<group>"; };
-		3F903E7960F67A92897EC3E56892D4AC /* MaterialIcons_ic_check_circle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_check_circle.bundle; path = "MaterialComponents-MaterialIcons_ic_check_circle.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3F903E7960F67A92897EC3E56892D4AC /* MaterialIcons_ic_check_circle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_check_circle.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		3FCC79B0D00FFF7893C5A738D5241984 /* ConstraintMakerPriortizable.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintMakerPriortizable.swift; path = Source/ConstraintMakerPriortizable.swift; sourceTree = "<group>"; };
 		3FE4D2CDAC269873FC6605768F9D097A /* ic_more_horiz.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_more_horiz.png; path = components/private/Icons/icons/ic_more_horiz/src/MaterialIcons_ic_more_horiz.bundle/ic_more_horiz.png; sourceTree = "<group>"; };
 		4047B8DAB1F44388A79874E99922BD34 /* MDCItemBar.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCItemBar.m; path = components/Tabs/src/private/MDCItemBar.m; sourceTree = "<group>"; };
@@ -2225,7 +2226,7 @@
 		426E7313118FA5D75FD7429F0AB32A56 /* ic_check_circle@2x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_check_circle@2x.png"; path = "components/private/Icons/icons/ic_check_circle/src/MaterialIcons_ic_check_circle.bundle/ic_check_circle@2x.png"; sourceTree = "<group>"; };
 		42927CDCBD86C91CC78AACD0FBAA322C /* ParsingRules.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ParsingRules.swift; path = MiniMarkdown/Classes/ParsingRules.swift; sourceTree = "<group>"; };
 		42A79B1452A00C9E1D19C4895D49B48D /* MDCHeaderStackView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCHeaderStackView.m; path = components/HeaderStackView/src/MDCHeaderStackView.m; sourceTree = "<group>"; };
-		431A6EC493D3E85636ACE80ABCF5615F /* FlashcardKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = FlashcardKit.framework; path = FlashcardKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		431A6EC493D3E85636ACE80ABCF5615F /* FlashcardKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FlashcardKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4322B29F5F33EEAA92E16A163CC79BA3 /* MaterialIcons+ic_settings.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MaterialIcons+ic_settings.m"; path = "components/private/Icons/icons/ic_settings/src/MaterialIcons+ic_settings.m"; sourceTree = "<group>"; };
 		43415D5463A9837E8100864BA1E73516 /* MDCChipViewShapeThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipViewShapeThemer.m; path = components/Chips/src/ShapeThemer/MDCChipViewShapeThemer.m; sourceTree = "<group>"; };
 		437759F8E765BF162AAF91CECB0FF37A /* CwlDispatch.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlDispatch.swift; path = Sources/CwlUtils/CwlDispatch.swift; sourceTree = "<group>"; };
@@ -2242,7 +2243,7 @@
 		4575177E5EB7DC842A4B5BFDBCAD8FCB /* MDCButtonBarTypographyThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCButtonBarTypographyThemer.m; path = components/ButtonBar/src/TypographyThemer/MDCButtonBarTypographyThemer.m; sourceTree = "<group>"; };
 		4587A13E7DE7839C163F3419DAD9A7A1 /* MaterialIcons+ic_info.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialIcons+ic_info.h"; path = "components/private/Icons/icons/ic_info/src/MaterialIcons+ic_info.h"; sourceTree = "<group>"; };
 		45A9542CF61F1F1CCA4F88B8EA9CE43C /* NSAttributedString+Attributes.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "NSAttributedString+Attributes.swift"; path = "MiniMarkdown/Classes/NSAttributedString+Attributes.swift"; sourceTree = "<group>"; };
-		45B66F9FA535253FE8D2B97B1CBA10F8 /* TestContent.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = TestContent.bundle; path = "TextBundleKit-TestContent.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		45B66F9FA535253FE8D2B97B1CBA10F8 /* TestContent.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TestContent.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		466228D22EF979D5D2D2BC1E25D00550 /* MaterialTextFields.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialTextFields.h; path = components/TextFields/src/MaterialTextFields.h; sourceTree = "<group>"; };
 		46643BCA7ACC2A85B07BA1738D616D36 /* MDCHeaderStackView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCHeaderStackView.h; path = components/HeaderStackView/src/MDCHeaderStackView.h; sourceTree = "<group>"; };
 		4697881B4A6FA011ED46269A0EF997B0 /* IGListAdapter+UICollectionView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "IGListAdapter+UICollectionView.m"; path = "Source/Internal/IGListAdapter+UICollectionView.m"; sourceTree = "<group>"; };
@@ -2286,7 +2287,7 @@
 		4E8403556D20D109D87C22595F0E5B5C /* CwlDebugContext.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlDebugContext.swift; path = Sources/CwlUtils/CwlDebugContext.swift; sourceTree = "<group>"; };
 		4EA4F109DA6E416A90A1BFDB3E3C160B /* FLAnimatedImage.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = FLAnimatedImage.m; path = FLAnimatedImage/FLAnimatedImage.m; sourceTree = "<group>"; };
 		4EC701E2164762232D6ECAF52E47F7C9 /* AFAutoPurgingImageCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = AFAutoPurgingImageCache.m; path = "UIKit+AFNetworking/AFAutoPurgingImageCache.m"; sourceTree = "<group>"; };
-		4F34FD392A344392992A143038ABE890 /* MaterialIcons_ic_color_lens.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_color_lens.bundle; path = "MaterialComponents-MaterialIcons_ic_color_lens.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F34FD392A344392992A143038ABE890 /* MaterialIcons_ic_color_lens.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_color_lens.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F6DD4D3D85584170708BE25F734B76E /* MDCBottomNavigationItemBadge.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCBottomNavigationItemBadge.m; path = components/BottomNavigation/src/private/MDCBottomNavigationItemBadge.m; sourceTree = "<group>"; };
 		4FC0391E41D4EEBD3E044736F898AAE9 /* MDCFlexibleHeaderView+ShiftBehavior.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MDCFlexibleHeaderView+ShiftBehavior.h"; path = "components/FlexibleHeader/src/MDCFlexibleHeaderView+ShiftBehavior.h"; sourceTree = "<group>"; };
 		4FC8687DB8C4AAB9328EF61ED87B4336 /* Pods-CommonplaceBookAppTests-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-CommonplaceBookAppTests-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -2324,10 +2325,10 @@
 		54FB386E70AAB280F107678C06DBE3D2 /* MDCCard.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCCard.m; path = components/Cards/src/MDCCard.m; sourceTree = "<group>"; };
 		556E6EF8A84CC852070166788C46727E /* MaterialButtons+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialButtons+ColorThemer.h"; path = "components/Buttons/src/ColorThemer/MaterialButtons+ColorThemer.h"; sourceTree = "<group>"; };
 		55746C1193B1E8C0F07857C466E78AB5 /* MaterialIcons+ic_check_circle.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MaterialIcons+ic_check_circle.m"; path = "components/private/Icons/icons/ic_check_circle/src/MaterialIcons+ic_check_circle.m"; sourceTree = "<group>"; };
-		56239250BBC3AFBD18CEDEF2BBE736C8 /* NunitoSans.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = NunitoSans.framework; path = NunitoSans.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		56239250BBC3AFBD18CEDEF2BBE736C8 /* NunitoSans.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NunitoSans.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56A76B736F638E63A236B4DAB177CB8A /* MDFColorCalculations.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDFColorCalculations.m; path = src/private/MDFColorCalculations.m; sourceTree = "<group>"; };
 		56AC3EE3D45F45D0305C02063FE712D0 /* MaterialShapes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialShapes.h; path = components/private/Shapes/src/MaterialShapes.h; sourceTree = "<group>"; };
-		56D0F850B525E3BF9541E92D4B8572F2 /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CwlUtils.framework; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		56D0F850B525E3BF9541E92D4B8572F2 /* CwlUtils.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlUtils.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		56E1598937716B7A6D78A4974D4ADA8A /* IGListCompatibility.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListCompatibility.h; path = Source/Common/IGListCompatibility.h; sourceTree = "<group>"; };
 		5785F24BDA6CD0E2CD969CAE4945CC57 /* MDCFeatureHighlightAnimationController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCFeatureHighlightAnimationController.h; path = components/FeatureHighlight/src/private/MDCFeatureHighlightAnimationController.h; sourceTree = "<group>"; };
 		57A6A27105C6C28AE17F62FCCA562C10 /* MaterialAppBar.bundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "wrapper.plug-in"; name = MaterialAppBar.bundle; path = components/AppBar/src/MaterialAppBar.bundle; sourceTree = "<group>"; };
@@ -2335,7 +2336,7 @@
 		57F017F8637E93E44F1FC3CCC629B538 /* MDCOverlayObserver.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCOverlayObserver.m; path = components/private/Overlay/src/MDCOverlayObserver.m; sourceTree = "<group>"; };
 		57FD992C05FEB9C7CF0EF0424D410D5D /* ic_check_circle@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_check_circle@3x.png"; path = "components/private/Icons/icons/ic_check_circle/src/MaterialIcons_ic_check_circle.bundle/ic_check_circle@3x.png"; sourceTree = "<group>"; };
 		582981BDB7758C350A87B276A7E6F6B5 /* MaterialApplication.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialApplication.h; path = components/private/Application/src/MaterialApplication.h; sourceTree = "<group>"; };
-		5831FF6F28BA0E7D8C59B29CF87C2428 /* MotionInterchange.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MotionInterchange.framework; path = MotionInterchange.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5831FF6F28BA0E7D8C59B29CF87C2428 /* MotionInterchange.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MotionInterchange.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5842F955714AD7867960E9013FC8E4F0 /* SwipeTableViewCell+Accessibility.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "SwipeTableViewCell+Accessibility.swift"; path = "Source/SwipeTableViewCell+Accessibility.swift"; sourceTree = "<group>"; };
 		585B6C457E689F409A731AFE6D14C2F9 /* MaterialDialogs.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialDialogs.h; path = components/Dialogs/src/MaterialDialogs.h; sourceTree = "<group>"; };
 		58601951E51E9D45D0FAC927E99FFF9C /* MDCTabBarViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTabBarViewController.m; path = components/Tabs/src/MDCTabBarViewController.m; sourceTree = "<group>"; };
@@ -2363,7 +2364,7 @@
 		5B9382377608CC088349869457048913 /* StudyMetadataDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StudyMetadataDataSource.swift; path = CommonplaceBook/Classes/StudyMetadataDataSource.swift; sourceTree = "<group>"; };
 		5BBE027F0DB311F2DB19AFCE6D7990F3 /* MDCChipViewColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipViewColorThemer.m; path = components/Chips/src/ColorThemer/MDCChipViewColorThemer.m; sourceTree = "<group>"; };
 		5BD076C5200215A61069E51EFDD7E48B /* MDCOverlayImplementor.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCOverlayImplementor.h; path = components/private/Overlay/src/MDCOverlayImplementor.h; sourceTree = "<group>"; };
-		5BE1E3901223E9A6CE709FA8469CBB74 /* IGListBatchUpdateData.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = IGListBatchUpdateData.mm; path = Source/Common/IGListBatchUpdateData.mm; sourceTree = "<group>"; };
+		5BE1E3901223E9A6CE709FA8469CBB74 /* IGListBatchUpdateData.mm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.objcpp; name = IGListBatchUpdateData.mm; path = Source/Common/IGListBatchUpdateData.mm; sourceTree = "<group>"; };
 		5C2E71364B299C1D200B3411A2389BAA /* MDCChipViewThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCChipViewThemer.h; path = components/Chips/src/ChipThemer/MDCChipViewThemer.h; sourceTree = "<group>"; };
 		5C55FBBB8E97ADD33419BC7C9AED86A6 /* ic_settings@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_settings@3x.png"; path = "components/private/Icons/icons/ic_settings/src/MaterialIcons_ic_settings.bundle/ic_settings@3x.png"; sourceTree = "<group>"; };
 		5C5E95B032B7DEAC5F74054916EBB892 /* MDCMath.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCMath.h; path = components/private/Math/src/MDCMath.h; sourceTree = "<group>"; };
@@ -2386,7 +2387,7 @@
 		5EA49714501C4CFCBEF56E5625BAC39E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5EC7F03F2D4BC4924020759F3690F75E /* CwlWrappers.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlWrappers.swift; path = Sources/CwlUtils/CwlWrappers.swift; sourceTree = "<group>"; };
 		5EE6794B7BBD17AE279AAFDDED48BF33 /* CwlKeyValueObserver.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlKeyValueObserver.swift; path = Sources/CwlUtils/CwlKeyValueObserver.swift; sourceTree = "<group>"; };
-		5F07D781594BEB37EDD6ED06A323DB9C /* MDFTextAccessibility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MDFTextAccessibility.framework; path = MDFTextAccessibility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F07D781594BEB37EDD6ED06A323DB9C /* MDFTextAccessibility.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MDFTextAccessibility.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5FE41A749C1A5CEF57A1EE07F681961B /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		60425D46DCCDB10E11381020C5E73C00 /* ic_check.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_check.png; path = components/private/Icons/icons/ic_check/src/MaterialIcons_ic_check.bundle/ic_check.png; sourceTree = "<group>"; };
 		6046AEBEBA3C31D96FC7B6E564016DEE /* MaterialThemes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialThemes.h; path = components/Themes/src/MaterialThemes.h; sourceTree = "<group>"; };
@@ -2441,7 +2442,7 @@
 		68037C5195E0372A4ACF63C4182F3A05 /* CwlStackFrame.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlStackFrame.swift; path = Sources/CwlUtils/CwlStackFrame.swift; sourceTree = "<group>"; };
 		6812DE5046CB87B16A6DD56969B30ABF /* MDCPillShapeGenerator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCPillShapeGenerator.h; path = components/private/ShapeLibrary/src/MDCPillShapeGenerator.h; sourceTree = "<group>"; };
 		682C103D7E339C15C1EE3CC60EE543EB /* MDCTabBarIndicatorAttributes.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTabBarIndicatorAttributes.m; path = components/Tabs/src/MDCTabBarIndicatorAttributes.m; sourceTree = "<group>"; };
-		6832A027772B05ACE38B3E4021F7C7AE /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_CommonplaceBookAppTests.framework; path = "Pods-CommonplaceBookAppTests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6832A027772B05ACE38B3E4021F7C7AE /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		689DEDAF269222FF34F08B3E4C344C1B /* IGListAssert.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListAssert.h; path = Source/Common/IGListAssert.h; sourceTree = "<group>"; };
 		68B024E85B6C664B3770CDBE44FA67C2 /* CwlDeferredWork.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlDeferredWork.swift; path = Sources/CwlUtils/CwlDeferredWork.swift; sourceTree = "<group>"; };
 		68E74BBEBB670788DC1D1783D7315146 /* ic_arrow_back.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_arrow_back.png; path = components/private/Icons/icons/ic_arrow_back/src/MaterialIcons_ic_arrow_back.bundle/ic_arrow_back.png; sourceTree = "<group>"; };
@@ -2453,7 +2454,7 @@
 		69B9EA203261B36858D30F97764813A1 /* TextBundleKit-Unit-Tests-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "TextBundleKit-Unit-Tests-resources.sh"; sourceTree = "<group>"; };
 		69C55C8C296622F35F602B2C3C65DB2C /* UICollectionView+IGListBatchUpdateData.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UICollectionView+IGListBatchUpdateData.h"; path = "Source/Internal/UICollectionView+IGListBatchUpdateData.h"; sourceTree = "<group>"; };
 		69D6CCAA3854585850D2F5E2CAF194D9 /* MaterialBottomAppBar+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialBottomAppBar+ColorThemer.h"; path = "components/BottomAppBar/src/ColorThemer/MaterialBottomAppBar+ColorThemer.h"; sourceTree = "<group>"; };
-		69F77C5852CBD78D9CBB3AF063BD729F /* NunitoSans-LightItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-LightItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		69F77C5852CBD78D9CBB3AF063BD729F /* NunitoSans-LightItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-LightItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-LightItalic.ttf"; sourceTree = "<group>"; };
 		69F7AC17F91EE1BF47FEA93D1A99E6EC /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6A0C30DCF1295DAEAE9B531930DC51D0 /* CwlUnanticipatedError.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlUnanticipatedError.swift; path = Sources/CwlUtils/CwlUnanticipatedError.swift; sourceTree = "<group>"; };
 		6A62D7C6144CF388829A9DBF98387175 /* MDMUIKitValueCoercion.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMUIKitValueCoercion.h; path = src/private/MDMUIKitValueCoercion.h; sourceTree = "<group>"; };
@@ -2565,7 +2566,7 @@
 		7D8FB0FAE8F012721EC4CF8BF0F8A3A1 /* DZNPhotoTag.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DZNPhotoTag.h; path = Source/Classes/Services/DZNPhotoTag.h; sourceTree = "<group>"; };
 		7D9B1E4864A42ED3CED1DE61626DBC66 /* MDCOverlayWindow.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCOverlayWindow.m; path = components/OverlayWindow/src/MDCOverlayWindow.m; sourceTree = "<group>"; };
 		7D9FF69BBC7D2ACF7F21F901E7EB570F /* MaterialCollectionCells.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialCollectionCells.h; path = components/CollectionCells/src/MaterialCollectionCells.h; sourceTree = "<group>"; };
-		7DD7BDCAAEF031446A07A99F240A9357 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		7DD7BDCAAEF031446A07A99F240A9357 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		7E13DE1B4CABCCD93D2E3917A2AABEE6 /* ConstraintRelatableTarget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintRelatableTarget.swift; path = Source/ConstraintRelatableTarget.swift; sourceTree = "<group>"; };
 		7E4ED2E346A1F4BF3525309D3EC4B62A /* Curry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Curry.swift; path = MiniMarkdown/Classes/Curry.swift; sourceTree = "<group>"; };
 		7EA03EE3CFF6C5AD4A14C3B02EBA8544 /* MDCSelfSizingStereoCellLayout.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCSelfSizingStereoCellLayout.h; path = components/List/src/private/MDCSelfSizingStereoCellLayout.h; sourceTree = "<group>"; };
@@ -2627,7 +2628,7 @@
 		87497FF68EBC6B80434D1F4411D0613B /* MDCCollectionViewEditingDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCollectionViewEditingDelegate.h; path = components/Collections/src/MDCCollectionViewEditingDelegate.h; sourceTree = "<group>"; };
 		874E1A8B20AB6B132855CED60AF21193 /* NSArray+MDFUtils.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSArray+MDFUtils.m"; path = "src/private/NSArray+MDFUtils.m"; sourceTree = "<group>"; };
 		877D530EE38AA3ACD8039AB324CF76B7 /* DZNEmptyDataSet.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = DZNEmptyDataSet.xcconfig; sourceTree = "<group>"; };
-		87D623248CFAB1893AB794F39BF46789 /* NunitoSans-Light.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-Light.ttf"; path = "NunitoSans/Resources/NunitoSans-Light.ttf"; sourceTree = "<group>"; };
+		87D623248CFAB1893AB794F39BF46789 /* NunitoSans-Light.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-Light.ttf"; path = "NunitoSans/Resources/NunitoSans-Light.ttf"; sourceTree = "<group>"; };
 		881A703858718C6704D539700A318CB8 /* CwlDeque.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlDeque.swift; path = Sources/CwlUtils/CwlDeque.swift; sourceTree = "<group>"; };
 		88356165F6706EA80B2B1AC433494F4B /* UIViewController+MaterialDialogs.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIViewController+MaterialDialogs.h"; path = "components/Dialogs/src/UIViewController+MaterialDialogs.h"; sourceTree = "<group>"; };
 		885C0DC3F8D25C4E7E9B730F0F1EF116 /* UIProgressView+AFNetworking.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIProgressView+AFNetworking.h"; path = "UIKit+AFNetworking/UIProgressView+AFNetworking.h"; sourceTree = "<group>"; };
@@ -2684,7 +2685,7 @@
 		8FF1D91EAE3E6699C7D3C081DEC25E2D /* SDWebImageDownloaderOperation.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageDownloaderOperation.h; path = SDWebImage/SDWebImageDownloaderOperation.h; sourceTree = "<group>"; };
 		9031C63C16EDCAA8A41018BA94D2759A /* MDCCollectionGridBackgroundView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCollectionGridBackgroundView.h; path = components/Collections/src/private/MDCCollectionGridBackgroundView.h; sourceTree = "<group>"; };
 		907F113478D07E9F82F73855CD4B160E /* TextBundleTestHelper.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TextBundleTestHelper.swift; path = "textbundle-swift/Tests/TextBundleTestHelper.swift"; sourceTree = "<group>"; };
-		908E3702308638AA9B16EE703AC9B339 /* TextBundleKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = TextBundleKit.framework; path = TextBundleKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		908E3702308638AA9B16EE703AC9B339 /* TextBundleKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TextBundleKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		90C3EA519F7875E4D756D59BAC7588E8 /* MaterialComponents.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = MaterialComponents.modulemap; sourceTree = "<group>"; };
 		91043311C8542AAB0D19FCD64E5E568A /* MDCLegacyColorScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCLegacyColorScheme.h; path = components/schemes/Color/src/MDCLegacyColorScheme.h; sourceTree = "<group>"; };
 		9107B8063CE2F2CFD28960FFC52385D0 /* MDCCollectionViewTextCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCCollectionViewTextCell.m; path = components/CollectionCells/src/MDCCollectionViewTextCell.m; sourceTree = "<group>"; };
@@ -2695,13 +2696,13 @@
 		91B52D35DAA558BEF015C36C20FAF232 /* MDCTextInputControllerFloatingPlaceholder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextInputControllerFloatingPlaceholder.h; path = components/TextFields/src/MDCTextInputControllerFloatingPlaceholder.h; sourceTree = "<group>"; };
 		92201BEE87BB4389513D0304543A8618 /* BlockContainingNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BlockContainingNode.swift; path = MiniMarkdown/Classes/BlockContainingNode.swift; sourceTree = "<group>"; };
 		92495FB46965C550C291D25F64FD3437 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = IdentifierToStudyMetadata.swift; path = FlashcardKit/Classes/IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
-		92501ECE357266469E61FD34717F12DD /* NunitoSans-Italic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-Italic.ttf"; path = "NunitoSans/Resources/NunitoSans-Italic.ttf"; sourceTree = "<group>"; };
+		92501ECE357266469E61FD34717F12DD /* NunitoSans-Italic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-Italic.ttf"; path = "NunitoSans/Resources/NunitoSans-Italic.ttf"; sourceTree = "<group>"; };
 		92B0CB5BE87392E1BD5C878877933E19 /* MaterialCards.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialCards.h; path = components/Cards/src/MaterialCards.h; sourceTree = "<group>"; };
 		92F1171CC92B46301255C200EA1AA11F /* SnapKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SnapKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		932818654DE94F8B019BBA0C96E93699 /* MDCColorScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCColorScheme.h; path = components/Themes/src/MDCColorScheme.h; sourceTree = "<group>"; };
 		93888D6A7D5776880F1EB8CBADF748FF /* MDCCutCornerTreatment.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCCutCornerTreatment.h; path = components/private/ShapeLibrary/src/MDCCutCornerTreatment.h; sourceTree = "<group>"; };
 		93A3B070DF0F3F8572EBAB460841E1D6 /* MDCLegacyFontScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCLegacyFontScheme.h; path = components/schemes/Typography/src/MDCLegacyFontScheme.h; sourceTree = "<group>"; };
-		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		941C734AB509BB733318CFC20829DF21 /* MDCFlexibleHeaderViewController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFlexibleHeaderViewController.m; path = components/FlexibleHeader/src/MDCFlexibleHeaderViewController.m; sourceTree = "<group>"; };
 		94AD5F411B099C1EBEE2DAB3C74A4E29 /* MDCSnackbarMessage.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCSnackbarMessage.h; path = components/Snackbar/src/MDCSnackbarMessage.h; sourceTree = "<group>"; };
 		94B021A541388F55DFEE12721EF4433B /* MDFInternationalization.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MDFInternationalization.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -2714,7 +2715,7 @@
 		950030E0899FE9E69837429FABC30AA2 /* AnswerStatistics.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AnswerStatistics.swift; path = CommonplaceBook/Classes/AnswerStatistics.swift; sourceTree = "<group>"; };
 		950397204323571E4BE6F4A73F84DF11 /* MDCChipViewTypographyThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipViewTypographyThemer.m; path = components/Chips/src/TypographyThemer/MDCChipViewTypographyThemer.m; sourceTree = "<group>"; };
 		9549783773C3B1950D15034CB1143B1F /* MDCSnackbarColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSnackbarColorThemer.m; path = components/Snackbar/src/ColorThemer/MDCSnackbarColorThemer.m; sourceTree = "<group>"; };
-		9554450DA435B6A58B858CC6E702906F /* NunitoSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-ExtraBoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		9554450DA435B6A58B858CC6E702906F /* NunitoSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-ExtraBoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
 		959468478803632A6290D7907FF0546B /* ic_color_lens.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_color_lens.png; path = components/private/Icons/icons/ic_color_lens/src/MaterialIcons_ic_color_lens.bundle/ic_color_lens.png; sourceTree = "<group>"; };
 		95996A6A70CB78E5368B6951FBBFBAE2 /* MDCBottomSheetController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCBottomSheetController.m; path = components/BottomSheet/src/MDCBottomSheetController.m; sourceTree = "<group>"; };
 		95AC53DC3B5B35009D79287712B46682 /* DDLegacyMacros.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDLegacyMacros.h; path = Classes/DDLegacyMacros.h; sourceTree = "<group>"; };
@@ -2729,14 +2730,14 @@
 		969D5309E6BEA48F79D1F9D93D9E5AED /* ResourceBundle-MaterialIcons_ic_color_lens-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-MaterialIcons_ic_color_lens-Info.plist"; sourceTree = "<group>"; };
 		96D9A4E8D10454E384DAC6FE724401C7 /* MDCFontScheme.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCFontScheme.h; path = components/Themes/src/MDCFontScheme.h; sourceTree = "<group>"; };
 		972E845D3EAF0EFE3C74CCC13356E739 /* NSData+ImageContentType.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSData+ImageContentType.h"; path = "SDWebImage/NSData+ImageContentType.h"; sourceTree = "<group>"; };
-		974F4C44A3DE1557B29A27C096D88283 /* NunitoSans-SemiBold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-SemiBold.ttf"; path = "NunitoSans/Resources/NunitoSans-SemiBold.ttf"; sourceTree = "<group>"; };
+		974F4C44A3DE1557B29A27C096D88283 /* NunitoSans-SemiBold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-SemiBold.ttf"; path = "NunitoSans/Resources/NunitoSans-SemiBold.ttf"; sourceTree = "<group>"; };
 		977D672DF06172D621E674DE08E08A8F /* MDCMultilineTextField.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCMultilineTextField.m; path = components/TextFields/src/MDCMultilineTextField.m; sourceTree = "<group>"; };
 		97928C05CB64D6AB5BB6E324927CC57B /* StudyViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StudyViewController.swift; path = FlashcardKit/Classes/StudyViewController.swift; sourceTree = "<group>"; };
-		979D5E5AC8FC89452465A3DA0814CE3A /* MaterialIcons_ic_settings.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_settings.bundle; path = "MaterialComponents-MaterialIcons_ic_settings.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		979D5E5AC8FC89452465A3DA0814CE3A /* MaterialIcons_ic_settings.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_settings.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		979EBD1F8BD56B92FF39AD5026AEA547 /* MDCChipField.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipField.m; path = components/Chips/src/MDCChipField.m; sourceTree = "<group>"; };
 		97F44E54143CD230CF1CCFF6A98DDE04 /* NunitoSans.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = NunitoSans.xcconfig; sourceTree = "<group>"; };
 		98145157FB2DEBD7B3BE723FD58F09BD /* MDCSnackbarAlignment.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCSnackbarAlignment.h; path = components/Snackbar/src/MDCSnackbarAlignment.h; sourceTree = "<group>"; };
-		9815FD8C0EBA6C9F3EE04D2AE33ABE79 /* Textbundle Example.textbundle */ = {isa = PBXFileReference; includeInIndex = 1; name = "Textbundle Example.textbundle"; path = "textbundle-swift/TestContent/Textbundle Example.textbundle"; sourceTree = "<group>"; };
+		9815FD8C0EBA6C9F3EE04D2AE33ABE79 /* Textbundle Example.textbundle */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper; name = "Textbundle Example.textbundle"; path = "textbundle-swift/TestContent/Textbundle Example.textbundle"; sourceTree = "<group>"; };
 		98621AE226FB70547C4B128800BFE9D8 /* FlashcardKit-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "FlashcardKit-prefix.pch"; sourceTree = "<group>"; };
 		99029BE78B127F41DCA5341BABCE9F80 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9914168971A71E087A5CDDAAC7E5AE10 /* MDFImageCalculations.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDFImageCalculations.h; path = src/private/MDFImageCalculations.h; sourceTree = "<group>"; };
@@ -2744,7 +2745,7 @@
 		99826B7DD8B913AE32068C08B9B6EDD2 /* MDCTextInputBorderView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTextInputBorderView.m; path = components/TextFields/src/MDCTextInputBorderView.m; sourceTree = "<group>"; };
 		999B08929602CEE94C48B1118327D3BB /* MDCTextInputControllerBase.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTextInputControllerBase.m; path = components/TextFields/src/MDCTextInputControllerBase.m; sourceTree = "<group>"; };
 		99A45A4A175D6F601AB2A2218E8F27D0 /* IGListSectionMap+DebugDescription.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "IGListSectionMap+DebugDescription.h"; path = "Source/Internal/IGListSectionMap+DebugDescription.h"; sourceTree = "<group>"; };
-		99D8724D648CD9AC2F9C7AFAD1F07CF6 /* AFNetworking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = AFNetworking.framework; path = AFNetworking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		99D8724D648CD9AC2F9C7AFAD1F07CF6 /* AFNetworking.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AFNetworking.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		99FCFEC7307C4BD7B05FAFF03B464F03 /* MDCChipViewThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipViewThemer.m; path = components/Chips/src/ChipThemer/MDCChipViewThemer.m; sourceTree = "<group>"; };
 		9A06AAE4B22557950C3EE505D8738A0C /* UICollectionViewController+MDCCardReordering.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UICollectionViewController+MDCCardReordering.m"; path = "components/Cards/src/UICollectionViewController+MDCCardReordering.m"; sourceTree = "<group>"; };
 		9A516CCEAD06ED26C7EBBC37F9CC943F /* MaterialPalettes.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialPalettes.h; path = components/Palettes/src/MaterialPalettes.h; sourceTree = "<group>"; };
@@ -2782,9 +2783,9 @@
 		9E606872ACC9551946503FBB9673A9D6 /* IGListMoveIndex.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IGListMoveIndex.m; path = Source/Common/IGListMoveIndex.m; sourceTree = "<group>"; };
 		9E865B42ED0CD6F14D98829D38FC94A5 /* MDMAnimationRegistrar.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMAnimationRegistrar.h; path = src/private/MDMAnimationRegistrar.h; sourceTree = "<group>"; };
 		9EA041665803F3CDE353EFF609BEF1F1 /* MDCChipCollectionViewFlowLayout.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCChipCollectionViewFlowLayout.m; path = components/Chips/src/MDCChipCollectionViewFlowLayout.m; sourceTree = "<group>"; };
-		9EBC3A3FFF5CA8A1810AF40B2FA24AA8 /* NunitoSans-Bold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-Bold.ttf"; path = "NunitoSans/Resources/NunitoSans-Bold.ttf"; sourceTree = "<group>"; };
+		9EBC3A3FFF5CA8A1810AF40B2FA24AA8 /* NunitoSans-Bold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-Bold.ttf"; path = "NunitoSans/Resources/NunitoSans-Bold.ttf"; sourceTree = "<group>"; };
 		9EC2AE25B3E6D2A0D77BF4E2641D2906 /* DDASLLogCapture.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DDASLLogCapture.m; path = Classes/DDASLLogCapture.m; sourceTree = "<group>"; };
-		9EE72A3487DF7ED63383FB6E32E72CDB /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
+		9EE72A3487DF7ED63383FB6E32E72CDB /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9EEAAA3ACDC675B453F290826CF8A66D /* CwlUtils.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = CwlUtils.h; path = Sources/CwlUtils/CwlUtils.h; sourceTree = "<group>"; };
 		9EFAEC32AF601478D8412B8C5113D16E /* MDCFeatureHighlightColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFeatureHighlightColorThemer.m; path = components/FeatureHighlight/src/ColorThemer/MDCFeatureHighlightColorThemer.m; sourceTree = "<group>"; };
 		9F16EB3C3A591CB0541322E582F2FB27 /* CwlSignal-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CwlSignal-umbrella.h"; sourceTree = "<group>"; };
@@ -2798,14 +2799,14 @@
 		A173738289E0222F75FCCD270BDE7A6A /* CocoaLumberjack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CocoaLumberjack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A18DBF25F7A746C8688982C6D08EEE7D /* MDCChipCollectionViewFlowLayout.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCChipCollectionViewFlowLayout.h; path = components/Chips/src/MDCChipCollectionViewFlowLayout.h; sourceTree = "<group>"; };
 		A1901ACD9354E9BCB4B83742D0B4EF1A /* DZNPhotoSearchResultsController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DZNPhotoSearchResultsController.h; path = Source/Classes/Core/DZNPhotoSearchResultsController.h; sourceTree = "<group>"; };
-		A1A3C9A09A6D0B53201B9E1AED6E8BB9 /* IGListDiff.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = IGListDiff.mm; path = Source/Common/IGListDiff.mm; sourceTree = "<group>"; };
+		A1A3C9A09A6D0B53201B9E1AED6E8BB9 /* IGListDiff.mm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.objcpp; name = IGListDiff.mm; path = Source/Common/IGListDiff.mm; sourceTree = "<group>"; };
 		A1CE521AA988B015718F7579557B58A0 /* ic_info.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = ic_info.png; path = components/private/Icons/icons/ic_info/src/MaterialIcons_ic_info.bundle/ic_info.png; sourceTree = "<group>"; };
 		A1DC3A928F73CC6E66CB665459DCB6C4 /* MaterialButtons+TypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialButtons+TypographyThemer.h"; path = "components/Buttons/src/TypographyThemer/MaterialButtons+TypographyThemer.h"; sourceTree = "<group>"; };
 		A1E6E82610C3B39A7116747560ECA0EA /* Pods-CommonplaceBookAppTests-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-CommonplaceBookAppTests-frameworks.sh"; sourceTree = "<group>"; };
 		A215AF29A89C125BEAD8A8D5E77C1CE6 /* IGListReloadIndexPath.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListReloadIndexPath.h; path = Source/Internal/IGListReloadIndexPath.h; sourceTree = "<group>"; };
 		A24FBF065FCA569D5B9C827A682BB84E /* Result.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Result.swift; path = "textbundle-swift/Classes/Result.swift"; sourceTree = "<group>"; };
 		A26A785B2B02F03FFA7304FEF0CB7060 /* MiniMarkdown-Unit-Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "MiniMarkdown-Unit-Tests-Info.plist"; sourceTree = "<group>"; };
-		A2FE9F612A4C0D98195193C96C8031B0 /* CommonplaceBook.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CommonplaceBook.framework; path = CommonplaceBook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		A2FE9F612A4C0D98195193C96C8031B0 /* CommonplaceBook.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonplaceBook.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A33E36BEC4A8210C1A14AE6E1BAFB3B1 /* CwlOnDelete.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlOnDelete.swift; path = Sources/CwlUtils/CwlOnDelete.swift; sourceTree = "<group>"; };
 		A33F4B20057E99654D3B0CF9C2B76701 /* MDCBottomSheetPresentationController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCBottomSheetPresentationController.m; path = components/BottomSheet/src/MDCBottomSheetPresentationController.m; sourceTree = "<group>"; };
 		A37CF73B2CF794C5C7FDE8AA69A86A9F /* MaterialHeaderStackView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialHeaderStackView.h; path = components/HeaderStackView/src/MaterialHeaderStackView.h; sourceTree = "<group>"; };
@@ -2816,7 +2817,7 @@
 		A4314A8AA9A7663D4ECB812F530C25FB /* LineSequence.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LineSequence.swift; path = MiniMarkdown/Classes/LineSequence.swift; sourceTree = "<group>"; };
 		A45AECFFC45CEBC3A2C192914883EA00 /* LayoutLogging.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LayoutLogging.swift; path = CollectionViewLayouts/Classes/LayoutLogging.swift; sourceTree = "<group>"; };
 		A46998E20F33341A418EF3BF9D18DD1D /* Publisher.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Publisher.swift; path = "textbundle-swift/Classes/Publisher.swift"; sourceTree = "<group>"; };
-		A47588ABF70E841F7D0716EAC80DAA99 /* TestContent.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = TestContent.bundle; path = "MiniMarkdown-TestContent.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A47588ABF70E841F7D0716EAC80DAA99 /* TestContent.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TestContent.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		A47F7F26C42A5287905D85EBD8554A3E /* ic_info@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_info@3x.png"; path = "components/private/Icons/icons/ic_info/src/MaterialIcons_ic_info.bundle/ic_info@3x.png"; sourceTree = "<group>"; };
 		A4B2A16113120C99B595FD2F0406FCC0 /* MDCIcons.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCIcons.m; path = components/private/Icons/src/MDCIcons.m; sourceTree = "<group>"; };
 		A4ECB6BD728AB0B465CC4692E44E5DD7 /* CwlSysctl.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CwlSysctl.swift; path = Sources/CwlUtils/CwlSysctl.swift; sourceTree = "<group>"; };
@@ -2844,8 +2845,8 @@
 		AB1C6884DBE23B7FCA948D5077383BDC /* CollectionViewLayouts-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CollectionViewLayouts-umbrella.h"; sourceTree = "<group>"; };
 		AB1E5A6C27D684A9EC37D1E5C9976C70 /* MDCSnackbarFontThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSnackbarFontThemer.m; path = components/Snackbar/src/FontThemer/MDCSnackbarFontThemer.m; sourceTree = "<group>"; };
 		AB41F75DB5236800D549CDF5AE052E8C /* IGListBatchUpdateData+DebugDescription.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "IGListBatchUpdateData+DebugDescription.m"; path = "Source/Internal/IGListBatchUpdateData+DebugDescription.m"; sourceTree = "<group>"; };
-		AB4E92C45FFA1E413A2FF70273C6382E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; path = README.md; sourceTree = "<group>"; };
-		AB7923C4D175A5D310C4ADD12911C298 /* MiniMarkdown.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MiniMarkdown.framework; path = MiniMarkdown.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB4E92C45FFA1E413A2FF70273C6382E /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		AB7923C4D175A5D310C4ADD12911C298 /* MiniMarkdown.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MiniMarkdown.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABE044D0CAA45391D177C5A9F391BFA0 /* CocoaLumberjack.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = CocoaLumberjack.xcconfig; sourceTree = "<group>"; };
 		AC6E66A8830C4257A1C6E788C122D25A /* ConstraintInsets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintInsets.swift; path = Source/ConstraintInsets.swift; sourceTree = "<group>"; };
 		AD234DF0F9836703878309CD70D64553 /* MDCSlantedRectShapeGenerator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSlantedRectShapeGenerator.m; path = components/private/ShapeLibrary/src/MDCSlantedRectShapeGenerator.m; sourceTree = "<group>"; };
@@ -2900,7 +2901,7 @@
 		B8F4348AAD8C2FAD7C4DB69ABFAD5E16 /* UIViewController+MaterialDialogs.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+MaterialDialogs.m"; path = "components/Dialogs/src/UIViewController+MaterialDialogs.m"; sourceTree = "<group>"; };
 		B9317773D09A8B24ABB7ED7C8A4A228C /* MotionTransitioning-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MotionTransitioning-prefix.pch"; sourceTree = "<group>"; };
 		B97125FB8BBCC4DE35A6AB92967B3EB8 /* TextBundleSnapshotTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TextBundleSnapshotTests.swift; path = "textbundle-swift/Tests/TextBundleSnapshotTests.swift"; sourceTree = "<group>"; };
-		B9CCFA52F3218313C19164CBEE96A80B /* NunitoSans-ExtraLight.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-ExtraLight.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraLight.ttf"; sourceTree = "<group>"; };
+		B9CCFA52F3218313C19164CBEE96A80B /* NunitoSans-ExtraLight.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-ExtraLight.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraLight.ttf"; sourceTree = "<group>"; };
 		B9FA3E985923D20913D9E8052B8DE39B /* MaterialChips+ChipThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialChips+ChipThemer.h"; path = "components/Chips/src/ChipThemer/MaterialChips+ChipThemer.h"; sourceTree = "<group>"; };
 		BA2CA091096807321362B7403D538D5B /* MDCTextInputControllerUnderline.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTextInputControllerUnderline.m; path = components/TextFields/src/MDCTextInputControllerUnderline.m; sourceTree = "<group>"; };
 		BA34C34827B02BECAB9B8209AEA29677 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -2912,9 +2913,9 @@
 		BB3547FBFB1A12651C102439FD579DBE /* ConstraintDescription.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintDescription.swift; path = Source/ConstraintDescription.swift; sourceTree = "<group>"; };
 		BB94CE02371AAC5C49A84BE620E786DB /* Hashtag.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Hashtag.swift; path = MiniMarkdown/Classes/Hashtag.swift; sourceTree = "<group>"; };
 		BBABD19E68F14AF052CF934BECF3D304 /* MDCBottomSheetControllerShapeThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCBottomSheetControllerShapeThemer.h; path = components/BottomSheet/src/ShapeThemer/MDCBottomSheetControllerShapeThemer.h; sourceTree = "<group>"; };
-		BBE295B56449B3C0E635A2845DE7FF90 /* NunitoSans-Regular.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-Regular.ttf"; path = "NunitoSans/Resources/NunitoSans-Regular.ttf"; sourceTree = "<group>"; };
+		BBE295B56449B3C0E635A2845DE7FF90 /* NunitoSans-Regular.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-Regular.ttf"; path = "NunitoSans/Resources/NunitoSans-Regular.ttf"; sourceTree = "<group>"; };
 		BBEE06C9015036CB94BF4D18C8ECD5FD /* MaterialChips+FontThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialChips+FontThemer.h"; path = "components/Chips/src/FontThemer/MaterialChips+FontThemer.h"; sourceTree = "<group>"; };
-		BC02EDE140798BEA5D23C6C8B9C81188 /* remember.txt */ = {isa = PBXFileReference; includeInIndex = 1; name = remember.txt; path = MiniMarkdown/TestContent/remember.txt; sourceTree = "<group>"; };
+		BC02EDE140798BEA5D23C6C8B9C81188 /* remember.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = remember.txt; path = MiniMarkdown/TestContent/remember.txt; sourceTree = "<group>"; };
 		BC4B7D835451FBC9A45E39AC543F7410 /* SwipeActionsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwipeActionsView.swift; path = Source/SwipeActionsView.swift; sourceTree = "<group>"; };
 		BC5C5153F7D8775E58168D58C4730A99 /* NunitoSans-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "NunitoSans-dummy.m"; sourceTree = "<group>"; };
 		BC6D5D1649274229F99BD3FFF7C8A7F1 /* MaterialMaskedTransition.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialMaskedTransition.h; path = components/MaskedTransition/src/MaterialMaskedTransition.h; sourceTree = "<group>"; };
@@ -2935,8 +2936,8 @@
 		BEFA94F3259F08A37CE159946AF6CFE2 /* MDMViewControllerTransitionController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMViewControllerTransitionController.h; path = src/private/MDMViewControllerTransitionController.h; sourceTree = "<group>"; };
 		BF4DB3A453F752FB988AAA8A5E0CF269 /* MDCSnackbarManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCSnackbarManager.h; path = components/Snackbar/src/MDCSnackbarManager.h; sourceTree = "<group>"; };
 		BF5A0B133DD6699CA682392A55AF4B11 /* MaterialPageControl+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialPageControl+ColorThemer.h"; path = "components/PageControl/src/ColorThemer/MaterialPageControl+ColorThemer.h"; sourceTree = "<group>"; };
-		BF969E5B43BB48EFCD2D479A8C90A66D /* NunitoSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-ExtraLightItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
-		BF9ABECA75414397CE68FA278EDD114D /* MaterialComponents.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MaterialComponents.framework; path = MaterialComponents.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF969E5B43BB48EFCD2D479A8C90A66D /* NunitoSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-ExtraLightItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
+		BF9ABECA75414397CE68FA278EDD114D /* MaterialComponents.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MaterialComponents.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFB9C41857B571A56EB974925FA64E70 /* DayComponents.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = DayComponents.swift; path = CommonplaceBook/Classes/DayComponents.swift; sourceTree = "<group>"; };
 		BFE45C314536F5490ADCD68B43F98A49 /* MDCButtonTypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCButtonTypographyThemer.h; path = components/Buttons/src/TypographyThemer/MDCButtonTypographyThemer.h; sourceTree = "<group>"; };
 		C095107F9DF7C7639E555297DAFDF8B8 /* UIImage+MultiFormat.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+MultiFormat.m"; path = "SDWebImage/UIImage+MultiFormat.m"; sourceTree = "<group>"; };
@@ -2944,7 +2945,7 @@
 		C0E900A2415A6E1AD382C0E00122AC27 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C112AA43887C58DE73122C925E425FA3 /* DZNPhotoServiceFactory.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DZNPhotoServiceFactory.m; path = Source/Classes/Services/DZNPhotoServiceFactory.m; sourceTree = "<group>"; };
 		C11EE116C1EDF2BAEDEC1F67AC9EA199 /* MaterialButtonBar+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialButtonBar+ColorThemer.h"; path = "components/ButtonBar/src/ColorThemer/MaterialButtonBar+ColorThemer.h"; sourceTree = "<group>"; };
-		C1216AEE8D058C97099AF4496370D10A /* SwipeCellKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SwipeCellKit.framework; path = SwipeCellKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1216AEE8D058C97099AF4496370D10A /* SwipeCellKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwipeCellKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C12BB2DA28BEA4E760D81FA808A9DF8B /* StatisticsViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StatisticsViewController.swift; path = FlashcardKit/Classes/StatisticsViewController.swift; sourceTree = "<group>"; };
 		C13DF9199C92FC77D5787A4BBDAD8B7D /* MDCTabBarAlignment.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTabBarAlignment.h; path = components/Tabs/src/MDCTabBarAlignment.h; sourceTree = "<group>"; };
 		C19BFF580B545694FDFDE280C49BF9D8 /* IGListCollectionViewDelegateLayout.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListCollectionViewDelegateLayout.h; path = Source/IGListCollectionViewDelegateLayout.h; sourceTree = "<group>"; };
@@ -2955,7 +2956,7 @@
 		C233A76FC434996060C2DDE3DBF23EEF /* NSImage+WebCache.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSImage+WebCache.m"; path = "SDWebImage/NSImage+WebCache.m"; sourceTree = "<group>"; };
 		C24F91927DBF21CBFD48798AA826BEA5 /* MDCKeyboardWatcher.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCKeyboardWatcher.m; path = components/private/KeyboardWatcher/src/MDCKeyboardWatcher.m; sourceTree = "<group>"; };
 		C2737F876411C9E400129C1628B51EA0 /* MDCNavigationBarTypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCNavigationBarTypographyThemer.h; path = components/NavigationBar/src/TypographyThemer/MDCNavigationBarTypographyThemer.h; sourceTree = "<group>"; };
-		C278A69F8EA2F846A7066F4AAFE0764F /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		C278A69F8EA2F846A7066F4AAFE0764F /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		C2965021D2CA3DB89D8CE7BF101CA609 /* MDMSpringTimingCurveGenerator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMSpringTimingCurveGenerator.h; path = src/MDMSpringTimingCurveGenerator.h; sourceTree = "<group>"; };
 		C2CD9CA9C0958C0011D3A286430F6FED /* IGListAdapter+DebugDescription.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "IGListAdapter+DebugDescription.m"; path = "Source/Internal/IGListAdapter+DebugDescription.m"; sourceTree = "<group>"; };
 		C360841FEDC30C237BE7187D73411D45 /* MDCOutlinedButtonColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCOutlinedButtonColorThemer.m; path = components/Buttons/src/ColorThemer/MDCOutlinedButtonColorThemer.m; sourceTree = "<group>"; };
@@ -2979,8 +2980,8 @@
 		C69F72501B104C13BA97366586B9816A /* MDMSpringTimingCurveGenerator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDMSpringTimingCurveGenerator.m; path = src/MDMSpringTimingCurveGenerator.m; sourceTree = "<group>"; };
 		C6AFAEBAC669A266307DAC242A9F0E9D /* MDCButtonBarButton.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCButtonBarButton.h; path = components/ButtonBar/src/MDCButtonBarButton.h; sourceTree = "<group>"; };
 		C6CB7B0A485A79837BADBA780D16DAC1 /* DZNEmptyDataSet.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = DZNEmptyDataSet.modulemap; sourceTree = "<group>"; };
-		C71D3F7D2B91D04B0A3E90F126F6E8DD /* NunitoSans-Black.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-Black.ttf"; path = "NunitoSans/Resources/NunitoSans-Black.ttf"; sourceTree = "<group>"; };
-		C72CBA9D6683CB77C6DDE58256AECC3F /* NunitoSans-ExtraBold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-ExtraBold.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraBold.ttf"; sourceTree = "<group>"; };
+		C71D3F7D2B91D04B0A3E90F126F6E8DD /* NunitoSans-Black.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-Black.ttf"; path = "NunitoSans/Resources/NunitoSans-Black.ttf"; sourceTree = "<group>"; };
+		C72CBA9D6683CB77C6DDE58256AECC3F /* NunitoSans-ExtraBold.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-ExtraBold.ttf"; path = "NunitoSans/Resources/NunitoSans-ExtraBold.ttf"; sourceTree = "<group>"; };
 		C74B1800F74CC9033C3F8D5197CDA8FA /* MDCTextField.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTextField.m; path = components/TextFields/src/MDCTextField.m; sourceTree = "<group>"; };
 		C782346884559CD734181B60DBDF3CEA /* MDMUIKitValueCoercion.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDMUIKitValueCoercion.m; path = src/private/MDMUIKitValueCoercion.m; sourceTree = "<group>"; };
 		C79E2F004A55398F42D2B0AD7314D9B7 /* NSImage+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSImage+WebCache.h"; path = "SDWebImage/NSImage+WebCache.h"; sourceTree = "<group>"; };
@@ -2996,7 +2997,7 @@
 		C92A62BC70F5364CD32DF81BE08B0D70 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C95F6C698D0BFA5796E549CD4762979B /* CAMediaTimingFunction+MotionAnimator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "CAMediaTimingFunction+MotionAnimator.m"; path = "src/private/CAMediaTimingFunction+MotionAnimator.m"; sourceTree = "<group>"; };
 		C972F90E2D48D1369E481FB729E993BE /* ic_chevron_right@3x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_chevron_right@3x.png"; path = "components/private/Icons/icons/ic_chevron_right/src/MaterialIcons_ic_chevron_right.bundle/ic_chevron_right@3x.png"; sourceTree = "<group>"; };
-		CA28EA8C90014CECF58EA2CE7B7E1189 /* IGListCollectionViewLayout.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = IGListCollectionViewLayout.mm; path = Source/IGListCollectionViewLayout.mm; sourceTree = "<group>"; };
+		CA28EA8C90014CECF58EA2CE7B7E1189 /* IGListCollectionViewLayout.mm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.objcpp; name = IGListCollectionViewLayout.mm; path = Source/IGListCollectionViewLayout.mm; sourceTree = "<group>"; };
 		CA38156BA07EC24023981A74B6B47D29 /* MDCPaletteExpansions.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCPaletteExpansions.m; path = components/Palettes/src/private/MDCPaletteExpansions.m; sourceTree = "<group>"; };
 		CA4EC99DD0C71DD4F0ADD2A5B73C846C /* IGListReloadIndexPath.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IGListReloadIndexPath.m; path = Source/Internal/IGListReloadIndexPath.m; sourceTree = "<group>"; };
 		CA6C8C7DEDFE4CCF90F2C661A35FC94B /* MotionAnimator.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MotionAnimator.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -3011,7 +3012,7 @@
 		CBF1D556229B8868D9FC1B7A7A75B97F /* IGListBatchUpdateData.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListBatchUpdateData.h; path = Source/Common/IGListBatchUpdateData.h; sourceTree = "<group>"; };
 		CBF3D9B105B1D01913EA487E5CFBA576 /* MDFInternationalization.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = MDFInternationalization.xcconfig; sourceTree = "<group>"; };
 		CC1A125CA52BF58C6685A87BE0BB2678 /* UIImage+ForceDecode.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIImage+ForceDecode.m"; path = "SDWebImage/UIImage+ForceDecode.m"; sourceTree = "<group>"; };
-		CCB07D9CE0B2B5894421DCAA32256999 /* IGListWorkingRangeHandler.mm */ = {isa = PBXFileReference; includeInIndex = 1; name = IGListWorkingRangeHandler.mm; path = Source/Internal/IGListWorkingRangeHandler.mm; sourceTree = "<group>"; };
+		CCB07D9CE0B2B5894421DCAA32256999 /* IGListWorkingRangeHandler.mm */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.cpp.objcpp; name = IGListWorkingRangeHandler.mm; path = Source/Internal/IGListWorkingRangeHandler.mm; sourceTree = "<group>"; };
 		CCCB58D95663BA066089B86D29B7D776 /* MDCTextInputControllerFullWidth.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextInputControllerFullWidth.h; path = components/TextFields/src/MDCTextInputControllerFullWidth.h; sourceTree = "<group>"; };
 		CCF3CB290D50899E6058F96FBA6CF377 /* SwipeActionButton.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = SwipeActionButton.swift; path = Source/SwipeActionButton.swift; sourceTree = "<group>"; };
 		CD1C7E40C2F61B45CF9BEE0658F7670E /* DZNEmptyDataSet-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "DZNEmptyDataSet-umbrella.h"; sourceTree = "<group>"; };
@@ -3047,10 +3048,10 @@
 		D2ECB20685A244F7EE2FCF8C8D970149 /* MaterialCards+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialCards+ColorThemer.h"; path = "components/Cards/src/ColorThemer/MaterialCards+ColorThemer.h"; sourceTree = "<group>"; };
 		D31537860C7DB2025D551496DDD101BF /* RenderedMarkdownNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = RenderedMarkdownNode.swift; path = MiniMarkdown/Classes/RenderedMarkdownNode.swift; sourceTree = "<group>"; };
 		D34E318F9D315EEF448BBE75177ACFA4 /* UIActivityIndicatorView+AFNetworking.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIActivityIndicatorView+AFNetworking.h"; path = "UIKit+AFNetworking/UIActivityIndicatorView+AFNetworking.h"; sourceTree = "<group>"; };
-		D3535A770E83C64653628903F25F337B /* CwlSignal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CwlSignal.framework; path = CwlSignal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3535A770E83C64653628903F25F337B /* CwlSignal.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CwlSignal.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D361BC115A61D0467182C64765A7EE2E /* IGListBindingSectionControllerSelectionDelegate.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListBindingSectionControllerSelectionDelegate.h; path = Source/IGListBindingSectionControllerSelectionDelegate.h; sourceTree = "<group>"; };
 		D388659A84653B6844C6FFF9E0AB4285 /* MaterialCards+CardThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialCards+CardThemer.h"; path = "components/Cards/src/CardThemer/MaterialCards+CardThemer.h"; sourceTree = "<group>"; };
-		D3B254F4A389C1C81C797711B8675BBE /* MaterialIcons_ic_info.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_info.bundle; path = "MaterialComponents-MaterialIcons_ic_info.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3B254F4A389C1C81C797711B8675BBE /* MaterialIcons_ic_info.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_info.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D404875217AF791582ADE4F863A0C216 /* NunitoSans-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "NunitoSans-umbrella.h"; sourceTree = "<group>"; };
 		D415084823422D95DCB396B166A1003A /* CocoaLumberjack-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "CocoaLumberjack-prefix.pch"; sourceTree = "<group>"; };
 		D420402F8C690AE715CBE22345A88CE7 /* IGListGenericSectionController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListGenericSectionController.h; path = Source/IGListGenericSectionController.h; sourceTree = "<group>"; };
@@ -3061,24 +3062,25 @@
 		D5285ACDC32948F8B3CB98765EABABED /* AFURLResponseSerialization.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = AFURLResponseSerialization.h; path = AFNetworking/AFURLResponseSerialization.h; sourceTree = "<group>"; };
 		D53A1345D8D1C10D11FD375FDF7F99BA /* CABasicAnimation+MotionAnimator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "CABasicAnimation+MotionAnimator.m"; path = "src/private/CABasicAnimation+MotionAnimator.m"; sourceTree = "<group>"; };
 		D5670D3C5708239CF071621781290351 /* ic_check@2x.png */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = image.png; name = "ic_check@2x.png"; path = "components/private/Icons/icons/ic_check/src/MaterialIcons_ic_check.bundle/ic_check@2x.png"; sourceTree = "<group>"; };
-		D5C3CC13582CA58D333B0E60E9A2BA53 /* MaterialIcons_ic_more_horiz.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_more_horiz.bundle; path = "MaterialComponents-MaterialIcons_ic_more_horiz.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5C3CC13582CA58D333B0E60E9A2BA53 /* MaterialIcons_ic_more_horiz.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_more_horiz.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5CF652D215EAF6D00A0DEE2 /* MDCScrollEventForwarder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MDCScrollEventForwarder.swift; path = FlashcardKit/Classes/MDCScrollEventForwarder.swift; sourceTree = "<group>"; };
 		D5F2CE2BE4143124E47FF46E546E8750 /* MDCSlider.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSlider.m; path = components/Slider/src/MDCSlider.m; sourceTree = "<group>"; };
 		D619EE2296F75342B4AFD0CFA2528336 /* MDCCollectionViewEditor.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCCollectionViewEditor.m; path = components/Collections/src/private/MDCCollectionViewEditor.m; sourceTree = "<group>"; };
 		D64E14067EFA727349CA026555E0D531 /* ConstraintLayoutSupportDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutSupportDSL.swift; path = Source/ConstraintLayoutSupportDSL.swift; sourceTree = "<group>"; };
 		D690B03495E1049AAFF6EB46FC25749D /* MDCFeatureHighlightAccessibilityMutator.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCFeatureHighlightAccessibilityMutator.m; path = components/FeatureHighlight/src/FeatureHighlightAccessibilityMutator/MDCFeatureHighlightAccessibilityMutator.m; sourceTree = "<group>"; };
-		D70E297925888F167A269630688B2AFA /* MaterialIcons_ic_radio_button_unchecked.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_radio_button_unchecked.bundle; path = "MaterialComponents-MaterialIcons_ic_radio_button_unchecked.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D70E297925888F167A269630688B2AFA /* MaterialIcons_ic_radio_button_unchecked.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_radio_button_unchecked.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7685604CB15D903EE22A99089E0A6A0 /* MaterialSlider+ColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialSlider+ColorThemer.h"; path = "components/Slider/src/ColorThemer/MaterialSlider+ColorThemer.h"; sourceTree = "<group>"; };
 		D79D5CE8605AAD2A65739EB367BD1F77 /* ChallengesDataSource.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ChallengesDataSource.swift; path = FlashcardKit/Classes/ChallengesDataSource.swift; sourceTree = "<group>"; };
 		D7ADDC9FB484C75B13C34D4654A61BEE /* MDCShapedView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCShapedView.h; path = components/private/Shapes/src/MDCShapedView.h; sourceTree = "<group>"; };
 		D7EC6A87E0B896DB46708391B718AE69 /* MDCButtonTypographyThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCButtonTypographyThemer.m; path = components/Buttons/src/TypographyThemer/MDCButtonTypographyThemer.m; sourceTree = "<group>"; };
-		D7FE0E1DD42DB1F9F64A7280F35A52CA /* DZNPhotoPickerController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = DZNPhotoPickerController.framework; path = DZNPhotoPickerController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7FE0E1DD42DB1F9F64A7280F35A52CA /* DZNPhotoPickerController.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DZNPhotoPickerController.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D86974DA27CE23EAF94F5E43E98FC5BC /* MDCLegacyInkLayer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCLegacyInkLayer.m; path = components/Ink/src/private/MDCLegacyInkLayer.m; sourceTree = "<group>"; };
 		D8798968ABF231B1F957283A63183D0D /* IGListExperiments.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = IGListExperiments.h; path = Source/Common/IGListExperiments.h; sourceTree = "<group>"; };
 		D880EB318D00E192B426D24CAE1B34C7 /* MDMViewControllerTransitionCoordinator.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDMViewControllerTransitionCoordinator.h; path = src/private/MDMViewControllerTransitionCoordinator.h; sourceTree = "<group>"; };
 		D900037A584DAD20E289F12E25668B18 /* MDCSlider+Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MDCSlider+Private.h"; path = "components/Slider/src/private/MDCSlider+Private.h"; sourceTree = "<group>"; };
 		D94DEAA03640F3AEC53E88CD5DFC943D /* MaterialIcons+ic_radio_button_unchecked.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "MaterialIcons+ic_radio_button_unchecked.m"; path = "components/private/Icons/icons/ic_radio_button_unchecked/src/MaterialIcons+ic_radio_button_unchecked.m"; sourceTree = "<group>"; };
 		D95EC42B73ECEBC4E7DB1E9F9D64A2C3 /* NSButton+WebCache.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSButton+WebCache.h"; path = "SDWebImage/NSButton+WebCache.h"; sourceTree = "<group>"; };
-		D9916479CCEE357E376DB6021B3371E1 /* FlashcardKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; path = FlashcardKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		D9916479CCEE357E376DB6021B3371E1 /* FlashcardKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; path = FlashcardKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		DA0447118AD501924E0D9A1AFBBEF249 /* MDCDialogShadowedView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCDialogShadowedView.m; path = components/Dialogs/src/private/MDCDialogShadowedView.m; sourceTree = "<group>"; };
 		DA5F0D831D55D007252D0871DCA511EC /* MDCBottomNavigationBarColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCBottomNavigationBarColorThemer.h; path = components/BottomNavigation/src/ColorThemer/MDCBottomNavigationBarColorThemer.h; sourceTree = "<group>"; };
 		DA62F281943FE0D1F194F2780CA53893 /* MDMViewControllerTransitionController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDMViewControllerTransitionController.m; path = src/private/MDMViewControllerTransitionController.m; sourceTree = "<group>"; };
@@ -3097,7 +3099,7 @@
 		DC93DAC2DDFCFB12D8B00F225BE17BD4 /* SnapKit-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "SnapKit-dummy.m"; sourceTree = "<group>"; };
 		DCC5BD3B7543685DD7249105EBFFD508 /* DZNPhotoPickerControllerConstants.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DZNPhotoPickerControllerConstants.h; path = Source/Classes/Core/DZNPhotoPickerControllerConstants.h; sourceTree = "<group>"; };
 		DCC5D3FC12009C350FBB0CD13CD30763 /* SDWebImageManager.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = SDWebImageManager.h; path = SDWebImage/SDWebImageManager.h; sourceTree = "<group>"; };
-		DCF361455ACD47C24325B329AAB9BE9E /* MaterialIcons_ic_chevron_right.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_chevron_right.bundle; path = "MaterialComponents-MaterialIcons_ic_chevron_right.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DCF361455ACD47C24325B329AAB9BE9E /* MaterialIcons_ic_chevron_right.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_chevron_right.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCF81B0B88D3F1D56CE3745BC06410F3 /* TextBundle+Snapshots.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = "TextBundle+Snapshots.swift"; path = "textbundle-swift/Classes/TextBundle+Snapshots.swift"; sourceTree = "<group>"; };
 		DD1C6F6DC8D4CE35B2AA824F403BD5DE /* MDCShadowLayer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCShadowLayer.h; path = components/ShadowLayer/src/MDCShadowLayer.h; sourceTree = "<group>"; };
 		DD3A70A9EF57D02360B2137D08CA7D9A /* IGListGenericSectionController.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IGListGenericSectionController.m; path = Source/IGListGenericSectionController.m; sourceTree = "<group>"; };
@@ -3111,7 +3113,7 @@
 		DEA010D4754B20320765333EDF9F1245 /* MDCTextInputController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTextInputController.h; path = components/TextFields/src/MDCTextInputController.h; sourceTree = "<group>"; };
 		DEB465D0DF898DE4BEE99E73B7681A5E /* MDCItemBarCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCItemBarCell.m; path = components/Tabs/src/private/MDCItemBarCell.m; sourceTree = "<group>"; };
 		DED99E536A7C691A08D3F7018BFC4E71 /* PersonalitySpeechSynthesizer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PersonalitySpeechSynthesizer.swift; path = CommonplaceBook/Classes/PersonalitySpeechSynthesizer.swift; sourceTree = "<group>"; };
-		DF06CCB32F3405DF8A0669461DCA238C /* MaterialIcons_ic_check.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = MaterialIcons_ic_check.bundle; path = "MaterialComponents-MaterialIcons_ic_check.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF06CCB32F3405DF8A0669461DCA238C /* MaterialIcons_ic_check.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MaterialIcons_ic_check.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		DF17EF2C7A46D67573D7D54C1E1CE443 /* MaterialComponents-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MaterialComponents-umbrella.h"; sourceTree = "<group>"; };
 		DF2DAC0F1D9A18F86ED4C1D90CCADFB9 /* MDCMaskedTransitionMotionForContext.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCMaskedTransitionMotionForContext.h; path = components/MaskedTransition/src/private/MDCMaskedTransitionMotionForContext.h; sourceTree = "<group>"; };
 		DF62888B6851B1F1C946BA8250B1A48C /* MotionAnimator-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "MotionAnimator-prefix.pch"; sourceTree = "<group>"; };
@@ -3120,7 +3122,7 @@
 		DFB285587F916F133F891B8DEB709254 /* MDCOutlinedTextFieldColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCOutlinedTextFieldColorThemer.m; path = components/TextFields/src/ColorThemer/MDCOutlinedTextFieldColorThemer.m; sourceTree = "<group>"; };
 		DFE820EAE683C710B3F69A7B323A70E8 /* DZNPhotoDisplayViewCell.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = DZNPhotoDisplayViewCell.m; path = Source/Classes/Core/DZNPhotoDisplayViewCell.m; sourceTree = "<group>"; };
 		E0037BC9002F2C19405B14D45DC3EE9A /* MiniMarkdown.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MiniMarkdown.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		E04CE8270A3A9771A14F572335B09A67 /* CwlFrameAddress.c */ = {isa = PBXFileReference; includeInIndex = 1; name = CwlFrameAddress.c; path = Sources/CwlFrameAddress/CwlFrameAddress.c; sourceTree = "<group>"; };
+		E04CE8270A3A9771A14F572335B09A67 /* CwlFrameAddress.c */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.c; name = CwlFrameAddress.c; path = Sources/CwlFrameAddress/CwlFrameAddress.c; sourceTree = "<group>"; };
 		E07C26971986F638DFE4F0C94C723FCF /* MDCProgressViewColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCProgressViewColorThemer.h; path = components/ProgressView/src/ColorThemer/MDCProgressViewColorThemer.h; sourceTree = "<group>"; };
 		E0852BD32227A1649E1F7B0663D55A90 /* DDAssertMacros.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = DDAssertMacros.h; path = Classes/DDAssertMacros.h; sourceTree = "<group>"; };
 		E0F28FF7DE2E790BCCF0B1B7DACF422C /* NunitoSans.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = NunitoSans.modulemap; sourceTree = "<group>"; };
@@ -3134,7 +3136,7 @@
 		E28BD4B6C7E79FE9FC8BA57426785FF1 /* MDCNavigationBarColorThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCNavigationBarColorThemer.h; path = components/NavigationBar/src/ColorThemer/MDCNavigationBarColorThemer.h; sourceTree = "<group>"; };
 		E29D8E1575EEC32560EFEEEA76E4B8D8 /* ConstraintLayoutGuideDSL.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConstraintLayoutGuideDSL.swift; path = Source/ConstraintLayoutGuideDSL.swift; sourceTree = "<group>"; };
 		E29DF70665B01DBD7EE4E44606B20037 /* IGListCollectionView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = IGListCollectionView.m; path = Source/IGListCollectionView.m; sourceTree = "<group>"; };
-		E2B0F4B693CF23956D171A5E024BFD36 /* NunitoSans-BoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; name = "NunitoSans-BoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
+		E2B0F4B693CF23956D171A5E024BFD36 /* NunitoSans-BoldItalic.ttf */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file; name = "NunitoSans-BoldItalic.ttf"; path = "NunitoSans/Resources/NunitoSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		E2E306809416CD0347C6D5A3377C42D4 /* AFNetworking-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "AFNetworking-prefix.pch"; sourceTree = "<group>"; };
 		E32AAC8ED3ABEA7A55C172BA9333D760 /* MDCAlertTypographyThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCAlertTypographyThemer.m; path = components/Dialogs/src/TypographyThemer/MDCAlertTypographyThemer.m; sourceTree = "<group>"; };
 		E36B716509FC3556B1987A827C50BC47 /* ResourceBundle-MaterialIcons_ic_check-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "ResourceBundle-MaterialIcons_ic_check-Info.plist"; sourceTree = "<group>"; };
@@ -3175,7 +3177,7 @@
 		EA8C97E0CFDA62A211B430E214D91A8E /* MaterialTypography.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MaterialTypography.h; path = components/Typography/src/MaterialTypography.h; sourceTree = "<group>"; };
 		EAE960DD714006C00AAD64AE259A90B6 /* MDCLegacyFontScheme.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCLegacyFontScheme.m; path = components/schemes/Typography/src/MDCLegacyFontScheme.m; sourceTree = "<group>"; };
 		EB10539C231DD195A8D24D4D4D7E7C2F /* IGListBindingSectionController+DebugDescription.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "IGListBindingSectionController+DebugDescription.m"; path = "Source/Internal/IGListBindingSectionController+DebugDescription.m"; sourceTree = "<group>"; };
-		EBD12D95D7907D34CDA19B2C1E3638B6 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; path = LICENSE; sourceTree = "<group>"; };
+		EBD12D95D7907D34CDA19B2C1E3638B6 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 		EBE09783ABC75C17DA761ABC5CA93D5E /* TextBundleKit-Unit-Tests-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "TextBundleKit-Unit-Tests-Info.plist"; sourceTree = "<group>"; };
 		EBE29E8842921E36D12A74F7E35FA61D /* UIRefreshControl+AFNetworking.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIRefreshControl+AFNetworking.m"; path = "UIKit+AFNetworking/UIRefreshControl+AFNetworking.m"; sourceTree = "<group>"; };
 		EBE9FA00A160D855FB2A6C0C4183430E /* StudyStatisticsStorage.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = StudyStatisticsStorage.swift; path = FlashcardKit/Classes/StudyStatisticsStorage.swift; sourceTree = "<group>"; };
@@ -3236,9 +3238,9 @@
 		F4022322755E6D34387EE80601F2893B /* MDCAlertController.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCAlertController.h; path = components/Dialogs/src/MDCAlertController.h; sourceTree = "<group>"; };
 		F48C23AB2FDCCE84157DF01073E74A55 /* MDCSnackbarMessageInternal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCSnackbarMessageInternal.h; path = components/Snackbar/src/private/MDCSnackbarMessageInternal.h; sourceTree = "<group>"; };
 		F4A31325C1FB36358925A39790261A87 /* MDCAppBarButtonBarBuilder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCAppBarButtonBarBuilder.h; path = components/ButtonBar/src/private/MDCAppBarButtonBarBuilder.h; sourceTree = "<group>"; };
-		F4BD029785CACF61981DEB387291D448 /* DZNEmptyDataSet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = DZNEmptyDataSet.framework; path = DZNEmptyDataSet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F4BD029785CACF61981DEB387291D448 /* DZNEmptyDataSet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DZNEmptyDataSet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4D7039DF87E582FFF808510C8DCF5FF /* MDCTabBarUnderlineIndicatorTemplate.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCTabBarUnderlineIndicatorTemplate.m; path = components/Tabs/src/MDCTabBarUnderlineIndicatorTemplate.m; sourceTree = "<group>"; };
-		F50178E612AF4BBCE901A5947EDCA933 /* TextBundleKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; path = TextBundleKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		F50178E612AF4BBCE901A5947EDCA933 /* TextBundleKit.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; path = TextBundleKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		F501D620EEF3EFBFE03F1A16323F1FF2 /* MDCAlertColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCAlertColorThemer.m; path = components/Dialogs/src/ColorThemer/MDCAlertColorThemer.m; sourceTree = "<group>"; };
 		F52232E0EE0BA8C3A5303D43D00FAB31 /* MDCButtonBarColorThemer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCButtonBarColorThemer.m; path = components/ButtonBar/src/ColorThemer/MDCButtonBarColorThemer.m; sourceTree = "<group>"; };
 		F54B0CBDF19ADC84139B1C3E6C4CDCE2 /* MDCSnackbarMessageView.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCSnackbarMessageView.m; path = components/Snackbar/src/MDCSnackbarMessageView.m; sourceTree = "<group>"; };
@@ -3298,8 +3300,8 @@
 		FE1A388B778041DECEEE62A887E5936E /* MDCBottomAppBarLayer.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = MDCBottomAppBarLayer.m; path = components/BottomAppBar/src/private/MDCBottomAppBarLayer.m; sourceTree = "<group>"; };
 		FE5F9C1F3128CFF6D4DF3FEE10CEBA9C /* MDCChipViewTypographyThemer.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCChipViewTypographyThemer.h; path = components/Chips/src/TypographyThemer/MDCChipViewTypographyThemer.h; sourceTree = "<group>"; };
 		FE650BCA00F8422EC862AFC4F6986C06 /* MDCButtonBar+Private.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MDCButtonBar+Private.h"; path = "components/ButtonBar/src/private/MDCButtonBar+Private.h"; sourceTree = "<group>"; };
-		FE75ACC1436F6590FC180298B20AB111 /* CocoaLumberjack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = CocoaLumberjack.framework; path = CocoaLumberjack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		FE832EE89836B4DDC35B876BDE717CD2 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = SDWebImage.framework; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE75ACC1436F6590FC180298B20AB111 /* CocoaLumberjack.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CocoaLumberjack.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE832EE89836B4DDC35B876BDE717CD2 /* SDWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE8FE92D5AC7C2406E6071DF64C942E3 /* Node.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Node.swift; path = MiniMarkdown/Classes/Node.swift; sourceTree = "<group>"; };
 		FE940A16DF3D16FAF223A01A0518BBE1 /* MaterialIcons+ic_reorder.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "MaterialIcons+ic_reorder.h"; path = "components/private/Icons/icons/ic_reorder/src/MaterialIcons+ic_reorder.h"; sourceTree = "<group>"; };
 		FEEF8BBD32749340CF9D5511FD104CA2 /* MDCTabBarIndicatorView.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MDCTabBarIndicatorView.h; path = components/Tabs/src/private/MDCTabBarIndicatorView.h; sourceTree = "<group>"; };
@@ -3844,7 +3846,6 @@
 				385D0C31D258FB54D6885F870D48E653 /* SwipeTransitionLayout.swift */,
 				3C1082FA8BD6F0E240DADF92651DAA29 /* Support Files */,
 			);
-			name = SwipeCellKit;
 			path = SwipeCellKit;
 			sourceTree = "<group>";
 		};
@@ -3875,7 +3876,6 @@
 				4A8B3880FCB0B60729954AB7FCDAB2C0 /* Support Files */,
 				599A8B68BBFE2B719A5AB5193A989060 /* Swift */,
 			);
-			name = CocoaLumberjack;
 			path = CocoaLumberjack;
 			sourceTree = "<group>";
 		};
@@ -4238,7 +4238,6 @@
 				C6027DA08340E6124638C936BD326468 /* UIViewController+TransitionController.m */,
 				06FF922E812299D008AAF7F0AD347E1F /* Support Files */,
 			);
-			name = MotionTransitioning;
 			path = MotionTransitioning;
 			sourceTree = "<group>";
 		};
@@ -4577,7 +4576,6 @@
 				8AFC0BB7A03B0AA520AD3C3E9E09AE76 /* Resources */,
 				CA0CA299CD616B4FAAB08B6F3B0DB022 /* Support Files */,
 			);
-			name = NunitoSans;
 			path = NunitoSans;
 			sourceTree = "<group>";
 		};
@@ -4706,7 +4704,6 @@
 				873D280F70EB826E2C96DC5DB43851A4 /* UIStackView+SetArrangedSubviews.swift */,
 				5D1404755DF1E1F89631037BEDFE5791 /* Support Files */,
 			);
-			name = CommonplaceBook;
 			path = CommonplaceBook;
 			sourceTree = "<group>";
 		};
@@ -4852,7 +4849,6 @@
 				671D05DCD213AA48A60CC25FD18ED87F /* UILayoutSupport+Extensions.swift */,
 				1F7C42D971222666A77C6F4C2F1EC695 /* Support Files */,
 			);
-			name = SnapKit;
 			path = SnapKit;
 			sourceTree = "<group>";
 		};
@@ -4960,7 +4956,6 @@
 				8B40B40D80AC63745F03E9B521DB4DEC /* UIScrollView+EmptyDataSet.m */,
 				9BCB5DD2DF1F1077502B81F86D5F0B67 /* Support Files */,
 			);
-			name = DZNEmptyDataSet;
 			path = DZNEmptyDataSet;
 			sourceTree = "<group>";
 		};
@@ -5280,7 +5275,6 @@
 				5EC7F03F2D4BC4924020759F3690F75E /* CwlWrappers.swift */,
 				4C1729D33948F574780BCEC9F17718A2 /* Support Files */,
 			);
-			name = CwlUtils;
 			path = CwlUtils;
 			sourceTree = "<group>";
 		};
@@ -5390,7 +5384,6 @@
 				0BCB3914057868E9C3605C13EFA384F0 /* CwlSignalReactive.swift */,
 				9309064632A297E3D3272362A413127C /* Support Files */,
 			);
-			name = CwlSignal;
 			path = CwlSignal;
 			sourceTree = "<group>";
 		};
@@ -5548,7 +5541,6 @@
 				06CB43EA8BBCA9F88120D878D2AD468C /* Diffing */,
 				663D1BD2D73CFECB9D78357818F07B43 /* Support Files */,
 			);
-			name = IGListKit;
 			path = IGListKit;
 			sourceTree = "<group>";
 		};
@@ -5577,7 +5569,6 @@
 				443BCF4584DD17EBC37335DC0894BA0E /* MotionInterchange.h */,
 				DDEEAE06786F771429A3C67D1CBABA45 /* Support Files */,
 			);
-			name = MotionInterchange;
 			path = MotionInterchange;
 			sourceTree = "<group>";
 		};
@@ -5996,7 +5987,6 @@
 				262402377D0E20651098FB188097D27E /* Themes */,
 				846ED458313EEE99726B16E48BBE85E3 /* Typography */,
 			);
-			name = MaterialComponents;
 			path = MaterialComponents;
 			sourceTree = "<group>";
 		};
@@ -6054,7 +6044,6 @@
 				8F730C289C4B469C6A9949D3C7161662 /* FLAnimatedImageView.m */,
 				2705F10D673E6A2B09A75547CE6A052A /* Support Files */,
 			);
-			name = FLAnimatedImage;
 			path = FLAnimatedImage;
 			sourceTree = "<group>";
 		};
@@ -6171,7 +6160,6 @@
 				B0D22878CBEC6DFB0D2B59F243F0F32B /* MotionAnimator.h */,
 				284D4A05E791A9821CB6D93020AD2790 /* Support Files */,
 			);
-			name = MotionAnimator;
 			path = MotionAnimator;
 			sourceTree = "<group>";
 		};
@@ -6282,6 +6270,7 @@
 				DE399691F4700B42F0C8E2B2A7B5121C /* VocabularyViewController.swift */,
 				D184615529E223B4F574BE9413F3E08B /* Pod */,
 				57F225179AED445755E5FF974DADA945 /* Support Files */,
+				D5CF652D215EAF6D00A0DEE2 /* MDCScrollEventForwarder.swift */,
 			);
 			name = FlashcardKit;
 			path = ../../FlashcardKit;
@@ -6330,7 +6319,6 @@
 				4062F43D8D0932791343A64FB6DD7172 /* GIF */,
 				7FA42462A196B6E7E5E7640C1CB0C842 /* Support Files */,
 			);
-			name = SDWebImage;
 			path = SDWebImage;
 			sourceTree = "<group>";
 		};
@@ -6360,7 +6348,6 @@
 				5B09AFCB5EA3ECECE764A4C6B6E94A2F /* UIView+MaterialRTL.m */,
 				F3EA309080D8661393370DF31149610E /* Support Files */,
 			);
-			name = MDFInternationalization;
 			path = MDFInternationalization;
 			sourceTree = "<group>";
 		};
@@ -6401,7 +6388,6 @@
 				0B354C7E94D7B727CB21D42BE341730B /* Support Files */,
 				3C4AE9C9B8D137C8C41CD759A4EFAEB6 /* UIKit */,
 			);
-			name = AFNetworking;
 			path = AFNetworking;
 			sourceTree = "<group>";
 		};
@@ -6426,7 +6412,6 @@
 				DFC81477F1654482CBE038D9A1AB3738 /* Services */,
 				619C52662DA4BBABF217F438D1148BB7 /* Support Files */,
 			);
-			name = DZNPhotoPickerController;
 			path = DZNPhotoPickerController;
 			sourceTree = "<group>";
 		};
@@ -6449,7 +6434,6 @@
 				A45AECFFC45CEBC3A2C192914883EA00 /* LayoutLogging.swift */,
 				4369660723DF2F9978E6E5372D31434A /* Support Files */,
 			);
-			name = CollectionViewLayouts;
 			path = CollectionViewLayouts;
 			sourceTree = "<group>";
 		};
@@ -6807,7 +6791,6 @@
 				874E1A8B20AB6B132855CED60AF21193 /* NSArray+MDFUtils.m */,
 				6FD4B0C1BEF3E64765B72AF3D554AACF /* Support Files */,
 			);
-			name = MDFTextAccessibility;
 			path = MDFTextAccessibility;
 			sourceTree = "<group>";
 		};
@@ -9130,6 +9113,7 @@
 				50AE60069802D2B84E43620C158A619F /* ReplaceMe.swift in Sources */,
 				C943BF51DE9DD681CA0A317AB4B69118 /* ScrollingTopTabBarViewController.swift in Sources */,
 				588C3C6A238F4B07BCF4B4C557BCD5E9 /* StatisticsCalendarDataSource.swift in Sources */,
+				D5CF652E215EAF6D00A0DEE2 /* MDCScrollEventForwarder.swift in Sources */,
 				2E8A333F37B497200FDD34491E686212 /* StatisticsMonthHeaderReusableView.swift in Sources */,
 				8CCFA087276C80679F7E130A1E40B6F2 /* StatisticsViewController.swift in Sources */,
 				E642465C1318D0FB68124329041E5CFC /* StudySession.swift in Sources */,

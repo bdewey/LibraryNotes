@@ -12,7 +12,7 @@ import TextBundleKit
 private typealias TextEditViewControllerDocument = EditableDocument
 
 /// Allows editing of a single text file.
-final class TextEditViewController: UIViewController, UITextViewDelegate {
+final class TextEditViewController: UIViewController, MDCScrollEventForwarder {
 
   /// Designated initializer.
   init(document: EditableDocument, stylesheet: Stylesheet) {
@@ -52,6 +52,8 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
   private let document: TextEditViewControllerDocument
   private let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
+  public var headerView: MDCFlexibleHeaderView?
+  public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
   private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
@@ -129,6 +131,32 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
     textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
+  }
+}
+
+extension TextEditViewController: UITextViewDelegate {
+  func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    forwardScrollViewDidScroll(scrollView)
+  }
+
+  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    forwardScrollViewDidEndDecelerating(scrollView)
+  }
+
+  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    forwardScrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
+  }
+
+  func scrollViewWillEndDragging(
+    _ scrollView: UIScrollView,
+    withVelocity velocity: CGPoint,
+    targetContentOffset: UnsafeMutablePointer<CGPoint>
+  ) {
+    forwardScrollViewWillEndDragging(
+      scrollView,
+      withVelocity: velocity,
+      targetContentOffset: targetContentOffset
+    )
   }
 }
 
