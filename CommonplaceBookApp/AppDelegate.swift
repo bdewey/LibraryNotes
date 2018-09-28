@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import CommonplaceBook
+import MaterialComponents.MaterialAppBar
 import UIKit
 
 @UIApplicationMain
@@ -17,13 +18,23 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
     let window = UIWindow(frame: UIScreen.main.bounds)
-    let navigationController = UINavigationController(
-      rootViewController: DocumentListViewController()
-    )
-    navigationController.isNavigationBarHidden = true
+    let navigationController = MDCAppBarNavigationController()
+    navigationController.delegate = self
+    navigationController.pushViewController(DocumentListViewController(), animated: false)
     window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
     return true
+  }
+}
+
+extension AppDelegate: MDCAppBarNavigationControllerDelegate {
+  func appBarNavigationController(
+    _ navigationController: MDCAppBarNavigationController,
+    willAdd appBar: MDCAppBar,
+    asChildOf viewController: UIViewController
+  ) {
+    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
+    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
   }
 }

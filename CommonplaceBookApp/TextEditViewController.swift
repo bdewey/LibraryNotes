@@ -2,6 +2,7 @@
 
 import UIKit
 
+import CocoaLumberjack
 import CommonplaceBook
 import FlashcardKit
 import MaterialComponents
@@ -27,7 +28,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
-    self.addChild(appBar.headerViewController)
     self.document.markdownTextStorage = textStorage
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
@@ -49,16 +49,9 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   // Init-time state.
 
-  private var document: TextEditViewControllerDocument!
+  private let document: TextEditViewControllerDocument
   private let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
-
-  private lazy var appBar: MDCAppBar = {
-    let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
-    return appBar
-  }()
 
   private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
@@ -121,10 +114,12 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    appBar.addSubviewsToParent()
-    appBar.headerViewController.headerView.trackingScrollView = textView
-    appBar.headerViewController.headerView.shiftBehavior = .enabled
     textView.delegate = self
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    textView.contentOffset = CGPoint(x: 0, y: -1 * textView.adjustedContentInset.top)
   }
 
   // MARK: - Keyboard
@@ -134,31 +129,6 @@ final class TextEditViewController: UIViewController, UITextViewDelegate {
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
     textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
-  }
-
-  // MARK: - Scrolling
-
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    appBar.headerViewController.headerView.trackingScrollDidScroll()
-  }
-
-  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    appBar.headerViewController.headerView.trackingScrollDidEndDecelerating()
-  }
-
-  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    appBar.headerViewController.headerView.trackingScrollDidEndDraggingWillDecelerate(decelerate)
-  }
-
-  func scrollViewWillEndDragging(
-    _ scrollView: UIScrollView,
-    withVelocity velocity: CGPoint,
-    targetContentOffset: UnsafeMutablePointer<CGPoint>
-  ) {
-    appBar.headerViewController.headerView.trackingScrollWillEndDragging(
-      withVelocity: velocity,
-      targetContentOffset: targetContentOffset
-    )
   }
 }
 

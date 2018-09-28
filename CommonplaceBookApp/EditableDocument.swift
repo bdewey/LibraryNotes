@@ -4,7 +4,7 @@ import MiniMarkdown
 import TextBundleKit
 import UIKit
 
-public protocol EditableDocument {
+public protocol EditableDocument: class {
   var markdownTextStorage: MiniMarkdownTextStorage? { get set }
 }
 

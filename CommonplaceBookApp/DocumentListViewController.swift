@@ -27,19 +27,11 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Documents"
     self.navigationItem.rightBarButtonItem = newDocumentButton
-    self.addChild(appBar.headerViewController)
   }
 
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-
-  private let appBar: MDCAppBar = {
-    let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
-    return appBar
-  }()
 
   private let newDocumentButton: UIBarButtonItem = {
     return UIBarButtonItem(
@@ -64,7 +56,6 @@ final class DocumentListViewController: UIViewController {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    adapter.scrollViewDelegate = self
     dataSource.adapter = adapter
     return adapter
   }()
@@ -90,8 +81,6 @@ final class DocumentListViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    appBar.addSubviewsToParent()
-    appBar.headerViewController.headerView.trackingScrollView = collectionView
     let predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
       NSComparisonPredicate(conformingToUTI: "public.plain-text"),
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
@@ -131,32 +120,5 @@ final class DocumentListViewController: UIViewController {
         })
       })
     }
-  }
-}
-
-extension DocumentListViewController: UICollectionViewDelegate {
-
-  // MARK: - Forward scroll events on to the app bar.
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    appBar.headerViewController.headerView.trackingScrollDidScroll()
-  }
-
-  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    appBar.headerViewController.headerView.trackingScrollDidEndDecelerating()
-  }
-
-  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    appBar.headerViewController.headerView.trackingScrollDidEndDraggingWillDecelerate(decelerate)
-  }
-
-  func scrollViewWillEndDragging(
-    _ scrollView: UIScrollView,
-    withVelocity velocity: CGPoint,
-    targetContentOffset: UnsafeMutablePointer<CGPoint>
-  ) {
-    appBar.headerViewController.headerView.trackingScrollWillEndDragging(
-      withVelocity: velocity,
-      targetContentOffset: targetContentOffset
-    )
   }
 }
