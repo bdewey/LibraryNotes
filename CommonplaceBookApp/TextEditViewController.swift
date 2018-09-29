@@ -12,7 +12,9 @@ import TextBundleKit
 private typealias TextEditViewControllerDocument = EditableDocument
 
 /// Allows editing of a single text file.
-final class TextEditViewController: UIViewController, MDCScrollEventForwarder {
+final class TextEditViewController: UIViewController,
+  MDCScrollEventForwarder,
+  StylesheetContaining {
 
   /// Designated initializer.
   init(document: EditableDocument, stylesheet: Stylesheet) {
@@ -50,14 +52,23 @@ final class TextEditViewController: UIViewController, MDCScrollEventForwarder {
   // Init-time state.
 
   private let document: TextEditViewControllerDocument
-  private let stylesheet: Stylesheet
+  internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
   private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-    formatters[.heading] = { $1.fontSize = 24 }
+    formatters[.heading] = {
+      let heading = $0 as! Heading // swiftlint:disable:this force_cast
+      if heading.headingLevel == 1 {
+        $1.fontSize = 20
+        $1.kern = 0.25
+      } else {
+        $1.fontSize = 16
+        $1.kern = 0.15
+      }
+    }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
@@ -95,6 +106,10 @@ final class TextEditViewController: UIViewController, MDCScrollEventForwarder {
     textStorage.defaultAttributes = NSAttributedString.Attributes(
       stylesheet.typographyScheme.body2
     )
+    textStorage.defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
+    textStorage.defaultAttributes.color = stylesheet.colorScheme
+      .onSurfaceColor
+      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
     return textStorage
   }
 

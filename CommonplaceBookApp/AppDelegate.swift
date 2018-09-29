@@ -40,11 +40,13 @@ private let commonplaceBookStylesheet: Stylesheet = {
   stylesheet.colorScheme.surfaceColor = UIColor.white
   stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
   stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
+  stylesheet.kern[.headline6] = 0.25
+  stylesheet.kern[.body2] = 0.25
   return stylesheet
 }()
 
 extension UIViewController {
-  var semanticColorScheme: MDCSemanticColorScheme {
+  var semanticColorScheme: MDCColorScheming {
     if let container = self as? StylesheetContaining {
       return container.stylesheet.colorScheme
     } else {
