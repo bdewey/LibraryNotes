@@ -8,12 +8,14 @@ import SwipeCellKit
 import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
-  private let dataSource: DocumentDataSource
 
-  init(dataSource: DocumentDataSource) {
+  init(dataSource: DocumentDataSource, stylesheet: Stylesheet) {
     self.dataSource = dataSource
+    self.stylesheet = stylesheet
   }
 
+  private let dataSource: DocumentDataSource
+  private let stylesheet: Stylesheet
   private var fileMetadata: FileMetadata!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
@@ -22,6 +24,7 @@ public final class DocumentSectionController: ListSectionController {
       for: self,
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
+    cell.stylesheet = stylesheet
     cell.titleLabel.text = fileMetadata.displayName
     cell.delegate = self
     return cell
@@ -36,7 +39,7 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didSelectItem(at index: Int) {
-    fileMetadata.loadEditingViewController { (editingViewController) in
+    fileMetadata.loadEditingViewController(stylesheet: stylesheet) { (editingViewController) in
       guard let editingViewController = editingViewController else { return }
       self.viewController?.navigationController?.pushViewController(
         editingViewController,
@@ -121,7 +124,10 @@ extension FileMetadata {
     return tabBarViewController
   }
 
-  func loadEditingViewController(completion: @escaping (UIViewController?) -> Void) {
+  func loadEditingViewController(
+    stylesheet: Stylesheet,
+    completion: @escaping (UIViewController?) -> Void
+  ) {
     loadLanguageDeck { (languageDeck) in
       if let languageDeck = languageDeck {
         completion(self.viewController(for: languageDeck))
@@ -130,7 +136,7 @@ extension FileMetadata {
       if let document = self.editableDocument {
         document.open(completionHandler: { (success) in
           if success {
-            completion(TextEditViewController(document: document, stylesheet: Stylesheet.default))
+            completion(TextEditViewController(document: document, stylesheet: stylesheet))
           } else {
             completion(nil)
           }

@@ -21,9 +21,11 @@ extension NSComparisonPredicate {
   }
 }
 
-final class DocumentListViewController: UIViewController {
+final class DocumentListViewController: UIViewController, StylesheetContaining {
 
-  init() {
+  init(stylesheet: Stylesheet) {
+    self.stylesheet = stylesheet
+    self.dataSource = DocumentDataSource(stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
     self.navigationItem.rightBarButtonItem = newDocumentButton
@@ -32,6 +34,9 @@ final class DocumentListViewController: UIViewController {
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+
+  public let stylesheet: Stylesheet
+  private let dataSource: DocumentDataSource
 
   private let newDocumentButton: UIBarButtonItem = {
     return UIBarButtonItem(
@@ -50,8 +55,6 @@ final class DocumentListViewController: UIViewController {
     return layout
   }()
 
-  private let dataSource = DocumentDataSource()
-
   private lazy var adapter: ListAdapter = {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
@@ -66,7 +69,7 @@ final class DocumentListViewController: UIViewController {
       DocumentCollectionViewCell.self,
       forCellWithReuseIdentifier: reuseIdentifier
     )
-    collectionView.backgroundColor = Stylesheet.default.colorScheme.surfaceColor
+    collectionView.backgroundColor = stylesheet.colorScheme.surfaceColor
     adapter.collectionView = collectionView
     return collectionView
   }()

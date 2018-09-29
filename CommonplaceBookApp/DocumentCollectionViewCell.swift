@@ -8,6 +8,16 @@ import UIKit
 final class DocumentCollectionViewCell: SwipeCollectionViewCell {
 
   let titleLabel = UILabel(frame: .zero)
+  var stylesheet: Stylesheet? {
+    didSet {
+      if let stylesheet = stylesheet {
+        titleLabel.font = stylesheet.typographyScheme.body2
+        titleLabel.textColor = stylesheet.colorScheme.onSurfaceColor
+        self.backgroundColor = stylesheet.colorScheme.surfaceColor
+        divider.backgroundColor = stylesheet.colorScheme.onSurfaceColor.withAlphaComponent(0.12)
+      }
+    }
+  }
   private let divider = UIView(frame: .zero)
   private var inkTouchController: MDCInkTouchController!
 
@@ -16,11 +26,6 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     inkTouchController = MDCInkTouchController(view: contentView)
     inkTouchController.addInkView()
     titleLabel.frame = self.contentView.bounds
-    let stylesheet = Stylesheet.default
-    titleLabel.font = stylesheet.typographyScheme.body2
-    titleLabel.textColor = stylesheet.colorScheme.onSurfaceColor
-    self.backgroundColor = stylesheet.colorScheme.surfaceColor
-    divider.backgroundColor = stylesheet.colorScheme.onSurfaceColor.withAlphaComponent(0.12)
     self.contentView.addSubview(titleLabel)
     self.contentView.addSubview(divider)
   }

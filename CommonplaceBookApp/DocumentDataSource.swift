@@ -5,6 +5,12 @@ import Foundation
 import IGListKit
 
 public final class DocumentDataSource: NSObject {
+
+  public init(stylesheet: Stylesheet) {
+    self.stylesheet = stylesheet
+  }
+
+  private let stylesheet: Stylesheet
   private var models: [FileMetadata] = []
   public weak var adapter: ListAdapter?
 
@@ -35,7 +41,7 @@ extension DocumentDataSource: ListAdapterDataSource {
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return DocumentSectionController(dataSource: self)
+    return DocumentSectionController(dataSource: self, stylesheet: stylesheet)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {

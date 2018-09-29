@@ -21,11 +21,43 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let window = UIWindow(frame: UIScreen.main.bounds)
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
-    navigationController.pushViewController(DocumentListViewController(), animated: false)
+    navigationController.pushViewController(
+      DocumentListViewController(stylesheet: commonplaceBookStylesheet),
+      animated: false
+    )
     window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
     return true
+  }
+}
+
+private let commonplaceBookStylesheet: Stylesheet = {
+  var stylesheet = Stylesheet()
+  stylesheet.colorScheme.primaryColor = UIColor.white
+  stylesheet.colorScheme.onPrimaryColor = UIColor.black
+  stylesheet.colorScheme.secondaryColor = UIColor(rgb: 0x661FFF)
+  stylesheet.colorScheme.surfaceColor = UIColor.white
+  stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
+  stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
+  return stylesheet
+}()
+
+extension UIViewController {
+  var semanticColorScheme: MDCSemanticColorScheme {
+    if let container = self as? StylesheetContaining {
+      return container.stylesheet.colorScheme
+    } else {
+      return MDCSemanticColorScheme(defaults: .material201804)
+    }
+  }
+
+  var typographyScheme: MDCTypographyScheme {
+    if let container = self as? StylesheetContaining {
+      return container.stylesheet.typographyScheme
+    } else {
+      return MDCTypographyScheme(defaults: .material201804)
+    }
   }
 }
 
@@ -35,8 +67,14 @@ extension AppDelegate: MDCAppBarNavigationControllerDelegate {
     willAdd appBar: MDCAppBar,
     asChildOf viewController: UIViewController
   ) {
-    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.default.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.default.typographyScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(
+      viewController.semanticColorScheme,
+      to: appBar
+    )
+    MDCAppBarTypographyThemer.applyTypographyScheme(
+      viewController.typographyScheme,
+      to: appBar
+    )
     if var forwarder = viewController as? MDCScrollEventForwarder {
       forwarder.headerView = appBar.headerViewController.headerView
       appBar.headerViewController.headerView.observesTrackingScrollViewScrollEvents = false
