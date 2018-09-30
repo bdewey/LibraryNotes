@@ -104,6 +104,7 @@ extension FileMetadata {
     let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)
     let textViewController = TextEditViewController(
       document: languageDeck.document,
+      parsingRules: LanguageDeck.parsingRules,
       stylesheet: Stylesheet.hablaEspanol
     )
     textViewController.title = "Notes"
@@ -136,7 +137,13 @@ extension FileMetadata {
       if let document = self.editableDocument {
         document.open(completionHandler: { (success) in
           if success {
-            completion(TextEditViewController(document: document, stylesheet: stylesheet))
+            completion(
+              TextEditViewController(
+                document: document,
+                parsingRules: LanguageDeck.parsingRules,
+                stylesheet: stylesheet
+              )
+            )
           } else {
             completion(nil)
           }

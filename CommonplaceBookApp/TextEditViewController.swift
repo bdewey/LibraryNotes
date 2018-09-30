@@ -17,15 +17,17 @@ final class TextEditViewController: UIViewController,
   StylesheetContaining {
 
   /// Designated initializer.
-  init(document: EditableDocument, stylesheet: Stylesheet) {
+  init(document: EditableDocument, parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.document = document
+    self.parsingRules = parsingRules
     self.stylesheet = stylesheet
     var renderers = TextEditViewController.renderers
     if let configurer = document as? ConfiguresRenderers {
       configurer.configureRenderers(&renderers)
     }
     self.textStorage = TextEditViewController.makeTextStorage(
-      formatters: TextEditViewController.formatters,
+      parsingRules: parsingRules,
+      formatters: TextEditViewController.formatters(with: stylesheet),
       renderers: renderers,
       stylesheet: stylesheet
     )
@@ -52,12 +54,15 @@ final class TextEditViewController: UIViewController,
   // Init-time state.
 
   private let document: TextEditViewControllerDocument
+  private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
-  private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
+  private static func formatters(
+    with stylesheet: Stylesheet
+  ) -> [NodeType: RenderedMarkdown.FormattingFunction] {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.heading] = {
       let heading = $0 as! Heading // swiftlint:disable:this force_cast
@@ -73,8 +78,9 @@ final class TextEditViewController: UIViewController,
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
+    formatters[.cloze] = { $1.backgroundColor = stylesheet.colorScheme.darkSurfaceColor }
     return formatters
-  }()
+  }
 
   private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
@@ -94,12 +100,13 @@ final class TextEditViewController: UIViewController,
   }()
 
   private static func makeTextStorage(
+    parsingRules: ParsingRules,
     formatters: [NodeType: RenderedMarkdown.FormattingFunction],
     renderers: [NodeType: RenderedMarkdown.RenderFunction],
     stylesheet: Stylesheet
   ) -> MiniMarkdownTextStorage {
     let textStorage = MiniMarkdownTextStorage(
-      parsingRules: ParsingRules(),
+      parsingRules: parsingRules,
       formatters: formatters,
       renderers: renderers
     )
