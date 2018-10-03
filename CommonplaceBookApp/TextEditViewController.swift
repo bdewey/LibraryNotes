@@ -21,18 +21,13 @@ final class TextEditViewController: UIViewController,
     self.document = document
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    var renderers = TextEditViewController.renderers
-    if let configurer = document as? ConfiguresRenderers {
-      configurer.configureRenderers(&renderers)
-    }
-    self.textStorage = TextEditViewController.makeTextStorage(
+    self.textStorage = document.markdownTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(with: stylesheet),
-      renderers: renderers,
+      renderers: TextEditViewController.renderers,
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
-    self.document.markdownTextStorage = textStorage
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
                                            name: UIResponder.keyboardWillHideNotification,
@@ -90,35 +85,10 @@ final class TextEditViewController: UIViewController,
       let replacement = listItem.listType == .unordered
         ? "\u{2022}\t"
         : text.replacingOccurrences(of: " ", with: "\t")
-      return RenderedMarkdownNode(
-        type: .listItem,
-        text: text,
-        renderedResult: NSAttributedString(string: replacement, attributes: attributes.attributes)
-      )
+      return NSAttributedString(string: replacement, attributes: attributes.attributes)
     }
     return renderers
   }()
-
-  private static func makeTextStorage(
-    parsingRules: ParsingRules,
-    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction],
-    stylesheet: Stylesheet
-  ) -> MiniMarkdownTextStorage {
-    let textStorage = MiniMarkdownTextStorage(
-      parsingRules: parsingRules,
-      formatters: formatters,
-      renderers: renderers
-    )
-    textStorage.defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme.body2
-    )
-    textStorage.defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
-    textStorage.defaultAttributes.color = stylesheet.colorScheme
-      .onSurfaceColor
-      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
-    return textStorage
-  }
 
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()

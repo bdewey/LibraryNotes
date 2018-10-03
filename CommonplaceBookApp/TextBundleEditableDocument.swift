@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CommonplaceBook
 import Foundation
 import MiniMarkdown
 import TextBundleKit
@@ -8,6 +9,30 @@ private let listenerKey = "org.brians-brain.CommonplaceBookApp.TextBundleDocumen
 private let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
 
 extension TextBundleDocument: EditableDocument {
+  public func markdownTextStorage(
+    parsingRules: ParsingRules,
+    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    renderers: [NodeType: RenderedMarkdown.RenderFunction],
+    stylesheet: Stylesheet
+  ) -> MiniMarkdownTextStorage {
+    precondition(markdownStorageListener.markdownTextStorage == nil)
+    var renderers = renderers
+    renderers[.image] = { (_, attributes) in
+      let attachment = NSTextAttachment()
+      attachment.image = placeholderImage
+      attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)
+      return NSAttributedString(attachment: attachment)
+    }
+    let markdownTextStorage = TextBundleDocument.makeTextStorage(
+      parsingRules: parsingRules,
+      formatters: formatters,
+      renderers: renderers,
+      stylesheet: stylesheet
+    )
+    markdownStorageListener.markdownTextStorage = markdownTextStorage
+    return markdownTextStorage
+  }
+
   private var markdownStorageListener: DocumentTextStorageConnection {
     return listener(for: listenerKey, constructor: DocumentTextStorageConnection.init)
   }
@@ -18,22 +43,6 @@ extension TextBundleDocument: EditableDocument {
     }
     set {
       markdownStorageListener.markdownTextStorage = newValue
-    }
-  }
-}
-
-extension TextBundleDocument: ConfiguresRenderers {
-  public func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { (node, attributes) in
-      let attachment = NSTextAttachment()
-      attachment.image = placeholderImage
-      attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)
-      let text = String(node.slice.substring)
-      return RenderedMarkdownNode(
-        type: .image,
-        text: text,
-        renderedResult: NSAttributedString(attachment: attachment)
-      )
     }
   }
 }

@@ -37,7 +37,7 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.1.0):
+  - FlashcardKit (0.2.0):
     - CollectionViewLayouts
     - CommonplaceBook
     - CwlSignal
@@ -49,7 +49,20 @@ PODS:
     - SDWebImage (~> 4.0)
     - SDWebImage/GIF (~> 4.0)
     - SnapKit (~> 4.0)
-    - TextBundleKit (~> 0.3)
+    - TextBundleKit (~> 0.4)
+  - FlashcardKit/Tests (0.2.0):
+    - CollectionViewLayouts
+    - CommonplaceBook
+    - CwlSignal
+    - CwlUtils
+    - DZNPhotoPickerController
+    - MaterialComponents (>= 61.0)
+    - MiniMarkdown (~> 0.6)
+    - NunitoSans
+    - SDWebImage (~> 4.0)
+    - SDWebImage/GIF (~> 4.0)
+    - SnapKit (~> 4.0)
+    - TextBundleKit (~> 0.4)
   - IGListKit (3.4.0):
     - IGListKit/Default (= 3.4.0)
   - IGListKit/Default (3.4.0):
@@ -530,9 +543,9 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.1.0)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.6.1):
+  - MiniMarkdown (0.7.0):
     - CocoaLumberjack/Swift (>= 3.4)
-  - MiniMarkdown/Tests (0.6.1):
+  - MiniMarkdown/Tests (0.7.0):
     - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
@@ -557,6 +570,7 @@ DEPENDENCIES:
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
   - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit/Tests (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `../MiniMarkdown`)
@@ -641,12 +655,12 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 93016c5c85334e4e6795bb3ee118d161aa798757
+  FlashcardKit: 5d2b5824c3b044ce6a015e8a1a6b7bccf19fe667
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 8a8301debcb5fe3583a386914a5a64b7c83f0ae8
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: add80406ae42a1993441524ce77ad58f426a0707
+  MiniMarkdown: b08baee62adf27cbab25f38c6f65613edb5b8acd
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
@@ -656,6 +670,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 55ac2ad53edf794737c4c9362b2be4201eee8e43
 
-PODFILE CHECKSUM: e1815d045c213a5081bc448bbbeed22f88cfc642
+PODFILE CHECKSUM: c70a9409560f1e0a73cd70d17cfa2bf58f57912f
 
 COCOAPODS: 1.5.0

@@ -14,7 +14,7 @@ target 'CommonplaceBookApp' do
   pod 'CwlSignal', :git => 'https://github.com/bdewey/CwlSignal'
   pod 'CwlUtils', :git => 'https://github.com/bdewey/CwlUtils'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  pod 'FlashcardKit', :path => '../FlashcardKit'
+  pod 'FlashcardKit', :path => '../FlashcardKit', :testspecs => ['Tests']
   # pod 'FlashcardKit', :git => 'https://github.com/bdewey/FlashcardKit'
   pod 'IGListKit', '~> 3.0'
   pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']

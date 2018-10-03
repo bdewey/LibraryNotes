@@ -7,8 +7,7 @@ import MiniMarkdown
 import TextBundleKit
 
 final class PlainTextDocument: UIDocumentWithPreviousError,
-EditableDocument,
-NSTextStorageDelegate {
+  NSTextStorageDelegate {
 
   enum Error: Swift.Error {
     case internalInconsistency
@@ -16,17 +15,7 @@ NSTextStorageDelegate {
   }
 
   private var temporaryStorage: String?
-
-  public var markdownTextStorage: MiniMarkdownTextStorage? {
-    didSet {
-      oldValue?.delegate = nil
-      markdownTextStorage?.delegate = self
-      if let text = temporaryStorage {
-        markdownTextStorage?.markdown = text
-        temporaryStorage = nil
-      }
-    }
-  }
+  private var markdownTextStorage: MiniMarkdownTextStorage?
 
   func didUpdateText() {
     updateChangeCount(.done)
@@ -62,6 +51,30 @@ NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     updateChangeCount(.done)
+  }
+}
+
+extension PlainTextDocument: EditableDocument {
+  func markdownTextStorage(
+    parsingRules: ParsingRules,
+    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    renderers: [NodeType: RenderedMarkdown.RenderFunction],
+    stylesheet: Stylesheet
+  ) -> MiniMarkdownTextStorage {
+    precondition(markdownTextStorage == nil)
+    let storage = TextBundleDocument.makeTextStorage(
+      parsingRules: parsingRules,
+      formatters: formatters,
+      renderers: renderers,
+      stylesheet: stylesheet
+    )
+    storage.delegate = self
+    if let text = temporaryStorage {
+      storage.markdown = text
+      temporaryStorage = nil
+    }
+    markdownTextStorage = storage
+    return storage
   }
 }
 
