@@ -62,7 +62,7 @@ extension PlainTextDocument: EditableDocument {
     stylesheet: Stylesheet
   ) -> MiniMarkdownTextStorage {
     precondition(markdownTextStorage == nil)
-    let storage = TextBundleDocument.makeTextStorage(
+    let storage = MiniMarkdownTextStorage(
       parsingRules: parsingRules,
       formatters: formatters,
       renderers: renderers,

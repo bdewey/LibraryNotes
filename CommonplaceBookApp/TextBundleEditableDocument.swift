@@ -23,7 +23,7 @@ extension TextBundleDocument: EditableDocument {
       attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)
       return NSAttributedString(attachment: attachment)
     }
-    let markdownTextStorage = TextBundleDocument.makeTextStorage(
+    let markdownTextStorage = MiniMarkdownTextStorage(
       parsingRules: parsingRules,
       formatters: formatters,
       renderers: renderers,
