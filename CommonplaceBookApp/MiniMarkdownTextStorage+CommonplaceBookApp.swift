@@ -43,10 +43,10 @@ private final class StorageSignalBridge {
   init(storage: MiniMarkdownTextStorage) {
     self.storage = storage
 
-    let (endpoint, signal) = Signal<[Node]>.create()
-    self.endpoint = endpoint
+    let (input, signal) = Signal<[Node]>.create()
+    self.input = input
     self.signal = signal.continuous()
-
+    input.send(value: storage.nodes)
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(storageDidChange(notification:)),
@@ -60,7 +60,7 @@ private final class StorageSignalBridge {
   }
 
   private let storage: MiniMarkdownTextStorage
-  private let endpoint: SignalInput<[Node]>
+  private let input: SignalInput<[Node]>
   public let signal: Signal<[Node]>
 
   @objc private func storageDidChange(notification: Notification) {
@@ -68,6 +68,6 @@ private final class StorageSignalBridge {
       assertionFailure("Expected nodes")
       return
     }
-    endpoint.send(value: nodes)
+    input.send(value: nodes)
   }
 }
