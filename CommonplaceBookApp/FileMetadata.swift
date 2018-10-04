@@ -32,6 +32,25 @@ public final class FileMetadata: Equatable {
     return String(nsstring)
   }
 
+  var downloadingStatus: String {
+    let nsstring = metadataItem.value(forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey) as! NSString
+    return String(nsstring)
+  }
+
+  var isDownloading: Bool {
+    let value = metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemIsDownloadingKey
+      ) as! NSNumber
+    return value.boolValue
+  }
+
+  var isUploading: Bool {
+    let value = metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemIsUploadingKey
+    ) as! NSNumber
+    return value.boolValue
+  }
+
   var contentTypeTree: [String] {
     let nsStringArray = metadataItem.value(
       forAttribute: NSMetadataItemContentTypeTreeKey

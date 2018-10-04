@@ -7,7 +7,24 @@ import UIKit
 
 final class DocumentCollectionViewCell: SwipeCollectionViewCell {
 
+  override init(frame: CGRect) {
+    super.init(frame: frame)
+    inkTouchController = MDCInkTouchController(view: contentView)
+    inkTouchController.addInkView()
+    stack.frame = self.contentView.bounds
+    self.contentView.addSubview(stack)
+    self.contentView.addSubview(divider)
+    stack.addArrangedSubview(titleLabel)
+    stack.addArrangedSubview(statusIcon)
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  let stack = UIStackView(frame: .zero)
   let titleLabel = UILabel(frame: .zero)
+  let statusIcon = UIImageView(frame: .zero)
   var stylesheet: Stylesheet? {
     didSet {
       if let stylesheet = stylesheet {
@@ -21,23 +38,10 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   private let divider = UIView(frame: .zero)
   private var inkTouchController: MDCInkTouchController!
 
-  override init(frame: CGRect) {
-    super.init(frame: frame)
-    inkTouchController = MDCInkTouchController(view: contentView)
-    inkTouchController.addInkView()
-    titleLabel.frame = self.contentView.bounds
-    self.contentView.addSubview(titleLabel)
-    self.contentView.addSubview(divider)
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
   override func layoutSubviews() {
     super.layoutSubviews()
     let bounds = self.contentView.bounds
-    self.titleLabel.frame = bounds.insetBy(dx: 16, dy: 12)
+    self.stack.frame = bounds.insetBy(dx: 16, dy: 12)
     var dividerFrame = bounds
     dividerFrame.origin.y += dividerFrame.size.height - 1
     dividerFrame.size.height = 1

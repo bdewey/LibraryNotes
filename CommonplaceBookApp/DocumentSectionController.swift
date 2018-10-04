@@ -26,6 +26,15 @@ public final class DocumentSectionController: ListSectionController {
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
     cell.titleLabel.text = fileMetadata.displayName
+    if fileMetadata.isUploading {
+      cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
+    } else if fileMetadata.isDownloading {
+      cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
+    } else if fileMetadata.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
+      cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
+    } else {
+      cell.statusIcon.image = nil
+    }
     cell.delegate = self
     return cell
   }
