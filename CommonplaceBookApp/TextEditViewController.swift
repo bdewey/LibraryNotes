@@ -51,7 +51,7 @@ final class TextEditViewController: UIViewController,
   private let document: TextEditViewControllerDocument
   private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
-  private let textStorage: MiniMarkdownTextStorage
+  internal let textStorage: MiniMarkdownTextStorage
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 

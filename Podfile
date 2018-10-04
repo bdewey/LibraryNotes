@@ -22,8 +22,8 @@ target 'CommonplaceBookApp' do
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'NunitoSans', :git => 'https://github.com/bdewey/NunitoSans'
   pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
-  # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
-  pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['Tests']
+  pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
+  # pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['Tests']
 
   target 'CommonplaceBookAppTests' do
     inherit! :search_paths

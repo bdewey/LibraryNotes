@@ -84,29 +84,18 @@ extension FileMetadata {
     }
   }
 
-  private func loadLanguageDeck(completion: @escaping (LanguageDeck?) -> Void) {
-    guard contentTypeTree.contains("org.brians-brain.swiftflash") else {
-      completion(nil)
-      return
-    }
-    let document = TextBundleDocument(fileURL: fileURL)
-    document.open { (success) in
-      if success {
-        completion(LanguageDeck(document: document))
-      } else {
-        completion(nil)
-      }
-    }
-  }
-
-  private func viewController(for languageDeck: LanguageDeck) -> UIViewController {
-    let tabBarViewController = ScrollingTopTabBarViewController()
-    let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)
+  private func languageViewController(for document: TextBundleDocument) -> UIViewController {
     let textViewController = TextEditViewController(
-      document: languageDeck.document,
+      document: document,
       parsingRules: LanguageDeck.parsingRules,
       stylesheet: Stylesheet.hablaEspanol
     )
+    let languageDeck = LanguageDeck(
+      document: document,
+      miniMarkdownSignal: textViewController.textStorage.markdownSignal
+    )
+    let tabBarViewController = ScrollingTopTabBarViewController()
+    let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)
     textViewController.title = "Notes"
 
     let challengesViewController = ChallengesViewController(
@@ -129,28 +118,24 @@ extension FileMetadata {
     stylesheet: Stylesheet,
     completion: @escaping (UIViewController?) -> Void
   ) {
-    loadLanguageDeck { (languageDeck) in
-      if let languageDeck = languageDeck {
-        completion(self.viewController(for: languageDeck))
-        return
-      }
-      if let document = self.editableDocument {
-        document.open(completionHandler: { (success) in
-          if success {
-            completion(
-              TextEditViewController(
-                document: document,
-                parsingRules: LanguageDeck.parsingRules,
-                stylesheet: stylesheet
-              )
-            )
-          } else {
-            completion(nil)
-          }
-        })
-        return
-      }
+    guard let document = self.editableDocument else {
       completion(nil)
+      return
+    }
+    document.open { (success) in
+      guard success else { completion(nil); return }
+      if self.contentTypeTree.contains("org.brians-brain.swiftflash") {
+        // swiftlint:disable:next force_cast
+        completion(self.languageViewController(for: document as! TextBundleDocument))
+      } else {
+        completion(
+          TextEditViewController(
+            document: document,
+            parsingRules: LanguageDeck.parsingRules,
+            stylesheet: stylesheet
+          )
+        )
+      }
     }
   }
 }
