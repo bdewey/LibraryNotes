@@ -174,7 +174,9 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    document.applyTaggedModification(tag: .textEditViewController) { (_) in textStorage.string }
+    document.applyTaggedModification(tag: .textEditViewController) { (_) in
+      self.textStorage.markdown
+    }
   }
 }
 
