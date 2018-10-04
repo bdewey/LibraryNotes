@@ -2,7 +2,12 @@
 
 import XCTest
 
+import CocoaLumberjack
 @testable import MiniMarkdown
+
+private let initializeLogging: Void = {
+  DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
+}()
 
 final class MiniMarkdownTextStorageTests: XCTestCase {
   
@@ -10,6 +15,7 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
   var delegateMessages: [DelegateMessage] = []
   
   override func setUp() {
+    initializeLogging
     super.setUp()
 
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
@@ -19,21 +25,12 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     formatters[.emphasis] = { $1.italic = true }
 
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { (node, attributes) in
-      let listItem = node as! ListItem
-      return RenderedMarkdownNode(
-        type: .listItem,
-        text: String(listItem.slice.string[listItem.markerRange]),
-        renderedResult: NSAttributedString(string: "\u{2022}\t", attributes: attributes.attributes)
-      )
+    renderers[.listItem] = { (_, attributes) in
+      return NSAttributedString(string: "\u{2022}\t", attributes: attributes.attributes)
     }
-    renderers[.image] = { (node, attributes) in
+    renderers[.image] = { (_, attributes) in
       let attachment = NSTextAttachment()
-      return RenderedMarkdownNode(
-        type: .image,
-        text: String(node.slice.substring),
-        renderedResult: NSAttributedString(attachment: attachment)
-      )
+      return NSAttributedString(attachment: attachment)
     }
 
     textStorage = MiniMarkdownTextStorage(
@@ -53,6 +50,16 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     let expectedFont = textStorage.defaultAttributes.attributes[.font] as! UIFont
     XCTAssertEqual(actualFont, expectedFont)
     XCTAssertEqual(range, NSRange(location: 0, length: 10))
+    XCTAssertEqual(delegateMessages.count, 2)
+    XCTAssertEqual(delegateMessages[0].editedRange, NSRange(location: 0, length: 10))
+    XCTAssertEqual(delegateMessages[0].changeInLength, 10)
+  }
+
+  func testBaseTextStorage() {
+    let storage = NSTextStorage()
+    storage.delegate = self
+    storage.append(NSAttributedString(string: "Plain text"))
+    XCTAssertEqual(delegateMessages.count, 2)
   }
   
   func testHeadingTextHasHeadingAttributes() {
@@ -163,6 +170,7 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
 
 extension MiniMarkdownTextStorageTests: NSTextStorageDelegate {
   struct DelegateMessage: Equatable {
+    let message: String
     let editedMask: NSTextStorage.EditActions
     let editedRange: NSRange
     let changeInLength: Int
@@ -176,6 +184,7 @@ extension MiniMarkdownTextStorageTests: NSTextStorageDelegate {
   ) {
     delegateMessages.append(
       DelegateMessage(
+        message: "willProcessEditing",
         editedMask: editedMask,
         editedRange: editedRange,
         changeInLength: delta
@@ -191,6 +200,7 @@ extension MiniMarkdownTextStorageTests: NSTextStorageDelegate {
   ) {
     delegateMessages.append(
       DelegateMessage(
+        message: "didProcessEditing",
         editedMask: editedMask,
         editedRange: editedRange,
         changeInLength: delta

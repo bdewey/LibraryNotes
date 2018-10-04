@@ -44,7 +44,7 @@ final class TextBundleSnapshotTests: XCTestCase {
     let didRead = expectation(description: "did read")
     roundTripDocument.open { (_) in
       let newStorage = roundTripDocument.text
-      let text = try! newStorage.currentResult.unwrap()
+      let text = try! newStorage.taggedResult.unwrap().value
       XCTAssertEqual(text, editedText)
       XCTAssertEqual(try? roundTripDocument.snapshot(at: now), TextBundleTestHelper.expectedDocumentContents)
       didRead.fulfill()

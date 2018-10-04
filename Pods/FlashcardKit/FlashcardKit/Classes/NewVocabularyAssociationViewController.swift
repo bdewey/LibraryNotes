@@ -35,11 +35,12 @@ final class NewVocabularyAssociationViewController: UIViewController {
     vocabularyAssociation: VocabularyAssociation?,
     delegate: NewVocabularyAssociationViewControllerDelegate
   ) {
+    registerBingImageSearch
     self.initialVocabularyAssociation = vocabularyAssociation
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
     addChild(appBar.headerViewController)
-    title = Stylesheet.hablaEspanol.appTitle
+    title = "¡Habla Español!"
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -94,7 +95,10 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private lazy var translateSpanishToEnglishButton: UIButton = {
     let translateButton = UIButton(type: .custom)
-    translateButton.setImage(UIImage(named: "translate"), for: .normal)
+    translateButton.setImage(
+      UIImage(named: "translate", in: ResourceBundle.bundle, compatibleWith: nil),
+      for: .normal
+    )
     translateButton.addTarget(self, action: #selector(didTapTranslateSpanishToEnglish(button:)), for: .touchUpInside)
     translateButton.sizeToFit()
     return translateButton
@@ -102,7 +106,10 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private lazy var translateEnglishToSpanishButton: UIButton = {
     let translateButton = UIButton(type: .custom)
-    translateButton.setImage(UIImage(named: "translate"), for: .normal)
+    translateButton.setImage(
+      UIImage(named: "translate", in: ResourceBundle.bundle, compatibleWith: nil),
+      for: .normal
+    )
     translateButton.addTarget(self, action: #selector(didTapTranslateEnglishToSpanish(button:)), for: .touchUpInside)
     translateButton.sizeToFit()
     return translateButton
@@ -264,6 +271,10 @@ final class NewVocabularyAssociationViewController: UIViewController {
     vc.allowsEditing = false
     vc.enablePhotoDownload = false
     vc.delegate = self
+    vc.modalPresentationStyle = .popover
+    vc.popoverPresentationController?.sourceView = imageSearchButton
+    vc.popoverPresentationController?.sourceRect = imageSearchButton.titleLabel!.frame
+    vc.popoverPresentationController?.permittedArrowDirections = [.up, .down]
     present(vc, animated: true, completion: nil)
   }
 
@@ -313,3 +324,11 @@ extension NewVocabularyAssociationViewController: UITextFieldDelegate {
     return true
   }
 }
+
+private let registerBingImageSearch: Void = {
+  DZNPhotoPickerController.registerFreeService(
+    DZNPhotoPickerControllerServices.serviceBingImages,
+    consumerKey: "e597b057bd4347deb1c2652ae110ae8f",
+    consumerSecret: "ba52bae1ee404a2ea46cd65a8b941eae"
+  )
+}()

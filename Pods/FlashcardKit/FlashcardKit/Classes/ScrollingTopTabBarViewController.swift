@@ -65,7 +65,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
   }()
 
   public override func viewDidLoad() {
-    title = Stylesheet.hablaEspanol.appTitle
+    title = "¡Habla Español!"
     super.viewDidLoad()
     scrollView.frame = view.bounds
     view.addSubview(scrollView)

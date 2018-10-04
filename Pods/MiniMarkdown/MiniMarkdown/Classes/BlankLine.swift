@@ -25,7 +25,7 @@ extension NodeType {
 public final class BlankLine: Node, LineParseable {
 
   public init(slice: StringSlice) {
-    super.init(type: .blank, slice: slice)
+    super.init(type: .blank, slice: slice, markdown: String(slice.substring))
   }
 
   public static let parser = BlankLine.init

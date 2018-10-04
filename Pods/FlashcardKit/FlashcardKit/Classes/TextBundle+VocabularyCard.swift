@@ -18,8 +18,8 @@ extension TextBundleDocument {
   }
 
   var vocabularyAssociations: TextBundleKit.Result<[VocabularyAssociation]> {
-    return text.currentResult.flatMap({ (text) -> [VocabularyAssociation] in
-      return VocabularyAssociation.makeAssociations(from: text, document: self).0
+    return text.taggedResult.flatMap({ (taggedText) -> [VocabularyAssociation] in
+      return VocabularyAssociation.makeAssociations(from: taggedText.value, document: self).0
     })
   }
 

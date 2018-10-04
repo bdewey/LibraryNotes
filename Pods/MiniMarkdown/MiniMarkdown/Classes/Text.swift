@@ -25,7 +25,7 @@ extension NodeType {
 public final class Text: Node, CharacterParseable {
 
   public init(slice: StringSlice) {
-    super.init(type: .text, slice: slice)
+    super.init(type: .text, slice: slice, markdown: String(slice.substring))
   }
 
   public override func combining(with other: Node) -> Self? {

@@ -15,22 +15,16 @@ public final class LanguageDeck {
   ///
   /// - parameter document: The document that stores all of the models
   ///             (vocabulary cards, stats, ...)
-  public init(document: TextBundleDocument) {
-
-    // EWWW -- touching global state.
-    // TODO: Remove this.
-
-    var parsingRules = MiniMarkdown.ParsingRules()
-    parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
-
+  public init(document: TextBundleDocument, miniMarkdownSignal: Signal<[Node]>) {
     self.document = document
-    self.miniMarkdown = MiniMarkdownSignal(textStorage: document.text, parsingRules: parsingRules)
+    self.miniMarkdownSignal = miniMarkdownSignal
 
-    let vocabularyAssociationsSignal = miniMarkdown.signal
+    vocabularyAssociationsSignal = miniMarkdownSignal
       .map { (blocks) -> [VocabularyAssociation] in
         return VocabularyAssociation.makeAssociations(from: blocks, document: document).0
       }
-    let clozeCardSignal = miniMarkdown.signal.map { ClozeCard.makeCards(from: $0) }
+    .continuous()
+    let clozeCardSignal = miniMarkdownSignal.map { ClozeCard.makeCards(from: $0) }
     let combinedCards = vocabularyAssociationsSignal
       .combineLatest(clozeCardSignal) { (vocabularyAssociations, closeCards) -> [Card] in
         return Array([vocabularyAssociations.cards, closeCards].joined())
@@ -41,13 +35,28 @@ public final class LanguageDeck {
       })
   }
 
+  public convenience init(document: TextBundleDocument) {
+    let miniMarkdownSignal = MiniMarkdownSignal(
+      textStorage: document.text,
+      parsingRules: LanguageDeck.parsingRules
+    )
+    self.init(document: document, miniMarkdownSignal: miniMarkdownSignal.signal)
+  }
+
+  public static let parsingRules: ParsingRules = {
+    var parsingRules = MiniMarkdown.ParsingRules()
+    parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
+    return parsingRules
+  }()
+
   /// The document that stores all of the models.
   public let document: TextBundleDocument
-  public let miniMarkdown: MiniMarkdownSignal
+  public let miniMarkdownSignal: Signal<[Node]>
   public let studySessionSignal: Signal<StudySession>
+  internal let vocabularyAssociationsSignal: Signal<[VocabularyAssociation]>
 
   public func populateEmptyDocument() {
-    if document.text.currentResult.value.isEmpty {
+    if (document.text.taggedResult.value?.value).isEmpty {
       document.text.setValue(initialText)
     }
   }

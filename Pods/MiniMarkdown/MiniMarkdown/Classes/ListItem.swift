@@ -34,7 +34,7 @@ public final class ListItem: BlockContainingNode, LineParseable {
   init(listType: ListType, markerRange: Range<String.Index>, slice: StringSlice) {
     self.listType = listType
     self.markerRange = markerRange
-    super.init(type: .listItem, slice: slice)
+    super.init(type: .listItem, slice: slice, markdown: String(slice.string[markerRange]))
   }
 
   /// The lines contained in this list item.

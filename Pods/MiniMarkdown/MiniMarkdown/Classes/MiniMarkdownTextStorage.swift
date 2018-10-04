@@ -18,6 +18,12 @@
 import CocoaLumberjack
 import UIKit
 
+extension NSNotification.Name {
+  public static let miniMarkdownTextStorageNodesDidChange = NSNotification.Name(
+    rawValue: "miniMarkdownTextStorageNodesDidChange"
+  )
+}
+
 /// Text storage with syntax highlighting.
 public final class MiniMarkdownTextStorage: NSTextStorage {
 
@@ -84,6 +90,8 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     }
   }
 
+  public var nodes: [Node] { return storage.nodes }
+
   override public func attributes(
     at location: Int,
     effectiveRange range: NSRangePointer?
@@ -109,6 +117,11 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
       NSTextStorage.EditActions.editedAttributes,
       range: change.changedAttributesRange,
       changeInLength: 0
+    )
+    NotificationCenter.default.post(
+      name: .miniMarkdownTextStorageNodesDidChange,
+      object: self,
+      userInfo: ["nodes": storage.nodes]
     )
   }
 

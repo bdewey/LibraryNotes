@@ -19,7 +19,7 @@ public final class Cloze: Node, CharacterParseable {
     self.hintSlice = hintSlice
     self.hiddenTextSlice = hiddenTextSlice
     let combinedSlice = StringSlice(questionMark) + hintSlice + hiddenTextSlice
-    super.init(type: .cloze, slice: combinedSlice)
+    super.init(type: .cloze, slice: combinedSlice, markdown: String(combinedSlice.substring))
   }
 
   public var hiddenText: Substring {

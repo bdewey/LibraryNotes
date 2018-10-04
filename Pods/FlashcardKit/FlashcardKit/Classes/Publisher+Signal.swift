@@ -34,8 +34,8 @@ extension Signal {
 
 extension DocumentProperty {
 
-  var signal: Signal<ValueWithSource> {
-    let channel = Signal<ValueWithSource>.channel().continuous()
+  public var signal: Signal<Tagged<Value>> {
+    let channel = Signal<Tagged<Value>>.channel().continuous()
     let subscription = self.subscribe { (result) in
       channel.input.send(result: CwlSignal.Result(result))
     }

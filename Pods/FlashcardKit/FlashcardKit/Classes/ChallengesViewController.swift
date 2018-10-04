@@ -38,7 +38,7 @@ public final class ChallengesViewController: UIViewController {
 
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-    collectionView.backgroundColor = Stylesheet.hablaEspanol.darkSurface
+    collectionView.backgroundColor = Stylesheet.hablaEspanol.colorScheme.darkSurfaceColor
     collectionView.dataSource = dataSource
     collectionView.contentInset = UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 0)
     dataSource.collectionView = collectionView

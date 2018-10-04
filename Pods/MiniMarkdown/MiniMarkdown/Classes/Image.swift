@@ -26,7 +26,8 @@ public final class Image: Node, CharacterParseable {
   public init(bang: StringCharacter, textSlice: StringSlice, urlSlice: StringSlice) {
     self.textSlice = textSlice
     self.urlSlice = urlSlice
-    super.init(type: .image, slice: StringSlice(bang) + textSlice + urlSlice)
+    let slice = StringSlice(bang) + textSlice + urlSlice
+    super.init(type: .image, slice: slice, markdown: String(slice.substring))
   }
 
   public let textSlice: StringSlice

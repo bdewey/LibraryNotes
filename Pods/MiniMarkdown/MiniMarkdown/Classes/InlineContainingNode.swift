@@ -34,6 +34,9 @@ open class InlineContainingNode: Node {
       let results = parsingRules.parse(ArraySlice(inlineSlice))
       assert(inlineSlice.covered(by: results.map { $0.slice }))
       assert(results.allSatisfy({ $0.slice.string == slice.string }))
+      for node in results {
+        node.parent = self
+      }
       memoizedChildren = results
       return results
     }

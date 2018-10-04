@@ -1,13 +1,13 @@
 {
   "name": "MaterialComponents",
-  "version": "64.0.0",
+  "version": "65.0.0",
   "authors": "The Material Components authors.",
   "summary": "A collection of stand-alone production-ready UI libraries focused on design details.",
   "homepage": "https://github.com/material-components/material-components-ios",
   "license": "Apache 2.0",
   "source": {
     "git": "https://github.com/material-components/material-components-ios.git",
-    "tag": "v64.0.0"
+    "tag": "v65.0.0"
   },
   "platforms": {
     "ios": "8.0"
@@ -40,7 +40,24 @@
         "MotionAnimator": [
           "~> 2.0"
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/ActivityIndicator/tests/unit/*.{h,m,swift}",
+                "components/ActivityIndicator/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/ActivityIndicator/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "ActivityIndicator+ColorThemer",
@@ -67,6 +84,23 @@
       "source_files": [
         "components/AnimationTiming/src/*.{h,m}",
         "components/AnimationTiming/src/private/*.{h,m}"
+      ],
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/AnimationTiming/tests/unit/*.{h,m,swift}",
+                "components/AnimationTiming/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/AnimationTiming/tests/unit/resources/*"
+            }
+          ]
+        }
       ]
     },
     {
@@ -113,7 +147,24 @@
         "MaterialComponents/private/UIMetrics": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/AppBar/tests/unit/*.{h,m,swift}",
+                "components/AppBar/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/AppBar/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "AppBar+ColorThemer",
@@ -182,7 +233,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/BottomAppBar/tests/unit/*.{h,m,swift}",
+                "components/BottomAppBar/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/BottomAppBar/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "BottomAppBar+ColorThemer",
@@ -232,7 +300,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/BottomNavigation/tests/unit/*.{h,m,swift}",
+                "components/BottomNavigation/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/BottomNavigation/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "BottomNavigation+ColorThemer",
@@ -289,7 +374,24 @@
         "MaterialComponents/private/Shapes": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/BottomSheet/tests/unit/*.{h,m,swift}",
+                "components/BottomSheet/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/BottomSheet/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "BottomSheet+ShapeThemer",
@@ -345,7 +447,24 @@
         "MaterialComponents/private/Shapes": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Buttons/tests/unit/*.{h,m,swift}",
+                "components/Buttons/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Buttons/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Buttons+ColorThemer",
@@ -462,7 +581,24 @@
         "MaterialComponents/private/Application": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/ButtonBar/tests/unit/*.{h,m,swift}",
+                "components/ButtonBar/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/ButtonBar/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "ButtonBar+ColorThemer",
@@ -519,7 +655,24 @@
         "MaterialComponents/private/Shapes": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Cards/tests/unit/*.{h,m,swift}",
+                "components/Cards/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Cards/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Cards+ColorThemer",
@@ -610,7 +763,24 @@
         "MaterialComponents/private/Shapes": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Chips/tests/unit/*.{h,m,swift}",
+                "components/Chips/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Chips/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Chips+ChipThemer",
@@ -752,7 +922,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/CollectionCells/tests/unit/*.{h,m,swift}",
+                "components/CollectionCells/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/CollectionCells/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "CollectionLayoutAttributes",
@@ -760,7 +947,24 @@
         "ios": "8.0"
       },
       "public_header_files": "components/CollectionLayoutAttributes/src/*.h",
-      "source_files": "components/CollectionLayoutAttributes/src/*.{h,m}"
+      "source_files": "components/CollectionLayoutAttributes/src/*.{h,m}",
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/CollectionLayoutAttributes/tests/unit/*.{h,m,swift}",
+                "components/CollectionLayoutAttributes/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/CollectionLayoutAttributes/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Collections",
@@ -801,7 +1005,24 @@
         "MaterialComponents/Typography": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Collections/tests/unit/*.{h,m,swift}",
+                "components/Collections/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Collections/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Dialogs",
@@ -835,7 +1056,24 @@
         "MDFInternationalization": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Dialogs/tests/unit/*.{h,m,swift}",
+                "components/Dialogs/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Dialogs/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Dialogs+ColorThemer",
@@ -911,7 +1149,24 @@
         "MDFTextAccessibility": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/FeatureHighlight/tests/unit/*.{h,m,swift}",
+                "components/FeatureHighlight/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/FeatureHighlight/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "FeatureHighlight+ColorThemer",
@@ -997,7 +1252,24 @@
         "MaterialComponents/private/UIMetrics": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/FlexibleHeader/tests/unit/*.{h,m,swift}",
+                "components/FlexibleHeader/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/FlexibleHeader/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "FlexibleHeader+CanAlwaysExpandToMaximumHeight",
@@ -1034,7 +1306,24 @@
         "ios": "8.0"
       },
       "public_header_files": "components/HeaderStackView/src/*.h",
-      "source_files": "components/HeaderStackView/src/*.{h,m}"
+      "source_files": "components/HeaderStackView/src/*.{h,m}",
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/HeaderStackView/tests/unit/*.{h,m,swift}",
+                "components/HeaderStackView/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/HeaderStackView/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "HeaderStackView+ColorThemer",
@@ -1066,7 +1355,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Ink/tests/unit/*.{h,m,swift}",
+                "components/Ink/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Ink/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Ink+ColorThemer",
@@ -1093,6 +1399,23 @@
       "source_files": [
         "components/LibraryInfo/src/*.{h,m}",
         "components/LibraryInfo/src/private/*.{h,m}"
+      ],
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/LibraryInfo/tests/unit/*.{h,m,swift}",
+                "components/LibraryInfo/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/LibraryInfo/tests/unit/resources/*"
+            }
+          ]
+        }
       ]
     },
     {
@@ -1124,6 +1447,58 @@
         "MaterialComponents/private/Math": [
 
         ]
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/List/tests/unit/*.{h,m,swift}",
+                "components/List/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/List/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "List+TypographyThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/List/src/TypographyThemer/*.h",
+      "source_files": "components/List/src/TypographyThemer/*.{h,m}",
+      "dependencies": {
+        "MaterialComponents/List": [
+
+        ],
+        "MaterialComponents/schemes/Typography": [
+
+        ]
+      }
+    },
+    {
+      "name": "List+ColorThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/List/src/ColorThemer/*.h",
+      "source_files": [
+        "components/List/src/ColorThemer/*.{h,m}",
+        "components/List/src/ColorThemer/private/*.{h,m}"
+      ],
+      "dependencies": {
+        "MaterialComponents/List": [
+
+        ],
+        "MaterialComponents/schemes/Color": [
+
+        ]
       }
     },
     {
@@ -1146,7 +1521,24 @@
         "MotionInterchange": [
           "~> 1.0"
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/MaskedTransition/tests/unit/*.{h,m,swift}",
+                "components/MaskedTransition/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/MaskedTransition/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "NavigationBar",
@@ -1171,7 +1563,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/NavigationBar/tests/unit/*.{h,m,swift}",
+                "components/NavigationBar/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/NavigationBar/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "NavigationBar+ColorThemer",
@@ -1219,7 +1628,24 @@
         "MaterialComponents/private/Application": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/OverlayWindow/tests/unit/*.{h,m,swift}",
+                "components/OverlayWindow/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/OverlayWindow/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "PageControl",
@@ -1233,6 +1659,23 @@
       ],
       "resources": [
         "components/PageControl/src/MaterialPageControl.bundle"
+      ],
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/PageControl/tests/unit/*.{h,m,swift}",
+                "components/PageControl/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/PageControl/tests/unit/resources/*"
+            }
+          ]
+        }
       ]
     },
     {
@@ -1260,6 +1703,23 @@
       "source_files": [
         "components/Palettes/src/*.{h,m}",
         "components/Palettes/src/private/*.{h,m}"
+      ],
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Palettes/tests/unit/*.{h,m,swift}",
+                "components/Palettes/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Palettes/tests/unit/resources/*"
+            }
+          ]
+        }
       ]
     },
     {
@@ -1285,7 +1745,24 @@
         "MotionAnimator": [
           "~> 2.1"
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/ProgressView/tests/unit/*.{h,m,swift}",
+                "components/ProgressView/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/ProgressView/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "ProgressView+ColorThemer",
@@ -1309,7 +1786,24 @@
         "ios": "8.0"
       },
       "public_header_files": "components/ShadowElevations/src/*.h",
-      "source_files": "components/ShadowElevations/src/*.{h,m}"
+      "source_files": "components/ShadowElevations/src/*.{h,m}",
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/ShadowElevations/tests/unit/*.{h,m,swift}",
+                "components/ShadowElevations/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/ShadowElevations/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "ShadowLayer",
@@ -1322,7 +1816,24 @@
         "MaterialComponents/ShadowElevations": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/ShadowLayer/tests/unit/*.{h,m,swift}",
+                "components/ShadowLayer/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/ShadowLayer/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Slider",
@@ -1344,7 +1855,24 @@
         "MaterialComponents/private/ThumbTrack": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Slider/tests/unit/*.{h,m,swift}",
+                "components/Slider/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Slider/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Slider+ColorThemer",
@@ -1400,7 +1928,24 @@
         "MaterialComponents/private/Overlay": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Snackbar/tests/unit/*.{h,m,swift}",
+                "components/Snackbar/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Snackbar/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Snackbar+ColorThemer",
@@ -1485,7 +2030,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Tabs/tests/unit/*.{h,m,swift}",
+                "components/Tabs/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Tabs/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Tabs+ColorThemer",
@@ -1561,7 +2123,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/TextFields/tests/unit/*.{h,m,swift}",
+                "components/TextFields/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/TextFields/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "TextFields+ColorThemer",
@@ -1628,7 +2207,24 @@
         "MaterialComponents/schemes/Typography": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Themes/tests/unit/*.{h,m,swift}",
+                "components/Themes/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Themes/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "Typography",
@@ -1647,7 +2243,24 @@
         "MaterialComponents/private/Math": [
 
         ]
-      }
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/Typography/tests/unit/*.{h,m,swift}",
+                "components/Typography/tests/unit/supplemental/*.{h,m,swift}"
+              ],
+              "resources": "components/Typography/tests/unit/resources/*"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "schemes",
@@ -1658,7 +2271,24 @@
             "ios": "8.0"
           },
           "public_header_files": "components/schemes/Color/src/*.h",
-          "source_files": "components/schemes/Color/src/*.{h,m}"
+          "source_files": "components/schemes/Color/src/*.{h,m}",
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/schemes/Color/tests/unit/*.{h,m,swift}",
+                    "components/schemes/Color/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/schemes/Color/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "Shape",
@@ -1674,7 +2304,24 @@
             "MaterialComponents/private/Shapes": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/schemes/Shape/tests/unit/*.{h,m,swift}",
+                    "components/schemes/Shape/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/schemes/Shape/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "Typography",
@@ -1682,7 +2329,24 @@
             "ios": "8.0"
           },
           "public_header_files": "components/schemes/Typography/src/*.h",
-          "source_files": "components/schemes/Typography/src/*.{h,m}"
+          "source_files": "components/schemes/Typography/src/*.{h,m}",
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/schemes/Typography/tests/unit/*.{h,m,swift}",
+                    "components/schemes/Typography/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/schemes/Typography/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1870,7 +2534,24 @@
             "ios": "8.0"
           },
           "public_header_files": "components/private/Application/src/*.h",
-          "source_files": "components/private/Application/src/*.{h,m}"
+          "source_files": "components/private/Application/src/*.{h,m}",
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/Application/tests/unit/*.{h,m,swift}",
+                    "components/private/Application/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/Application/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "KeyboardWatcher",
@@ -1883,7 +2564,24 @@
             "MaterialComponents/private/Application": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/KeyboardWatcher/tests/unit/*.{h,m,swift}",
+                    "components/private/KeyboardWatcher/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/KeyboardWatcher/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "Math",
@@ -1891,7 +2589,24 @@
             "ios": "8.0"
           },
           "public_header_files": "components/private/Math/src/*.h",
-          "source_files": "components/private/Math/src/*.{h,m}"
+          "source_files": "components/private/Math/src/*.{h,m}",
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/Math/tests/unit/*.{h,m,swift}",
+                    "components/private/Math/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/Math/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "Overlay",
@@ -1902,6 +2617,23 @@
           "source_files": [
             "components/private/Overlay/src/*.{h,m}",
             "components/private/Overlay/src/private/*.{h,m}"
+          ],
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/Overlay/tests/unit/*.{h,m,swift}",
+                    "components/private/Overlay/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/Overlay/tests/unit/resources/*"
+                }
+              ]
+            }
           ]
         },
         {
@@ -1921,7 +2653,24 @@
             "MaterialComponents/private/Math": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/ShapeLibrary/tests/unit/*.{h,m,swift}",
+                    "components/private/ShapeLibrary/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/ShapeLibrary/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "Shapes",
@@ -1940,7 +2689,24 @@
             "MaterialComponents/private/Math": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/Shapes/tests/unit/*.{h,m,swift}",
+                    "components/private/Shapes/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/Shapes/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "ThumbTrack",
@@ -1971,7 +2737,24 @@
             "MaterialComponents/private/Math": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/ThumbTrack/tests/unit/*.{h,m,swift}",
+                    "components/private/ThumbTrack/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/ThumbTrack/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "UIMetrics",
@@ -1987,7 +2770,24 @@
             "MaterialComponents/private/Application": [
 
             ]
-          }
+          },
+          "testspecs": [
+            {
+              "name": "tests",
+              "test_type": "unit",
+              "testspecs": [
+                {
+                  "name": "unit",
+                  "test_type": "unit",
+                  "source_files": [
+                    "components/private/UIMetrics/tests/unit/*.{h,m,swift}",
+                    "components/private/UIMetrics/tests/unit/supplemental/*.{h,m,swift}"
+                  ],
+                  "resources": "components/private/UIMetrics/tests/unit/resources/*"
+                }
+              ]
+            }
+          ]
         }
       ]
     }

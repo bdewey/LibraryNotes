@@ -19,7 +19,7 @@ import Foundation
 
 public final class RenderedMarkdown {
   public typealias FormattingFunction = (Node, inout NSAttributedString.Attributes) -> Void
-  public typealias RenderFunction = (Node, NSAttributedString.Attributes) -> RenderedMarkdownNode
+  public typealias RenderFunction = (Node, NSAttributedString.Attributes) -> NSAttributedString
 
   public struct ChangeDescription {
     public let changedCharacterRange: NSRange
@@ -45,7 +45,7 @@ public final class RenderedMarkdown {
   ///
   /// A Markdown document is a contiguous array of "blocks" (List, Paragraph, Blank, etc)
   /// and each top-level block will be a node in this array.
-  private var nodes: [RenderedMarkdownNode] = []
+  internal var nodes: [Node] = []
 
   public var defaultAttributes = NSAttributedString.Attributes(
     UIFont.preferredFont(forTextStyle: .body)
@@ -54,7 +54,7 @@ public final class RenderedMarkdown {
   /// The raw markdown
   public var markdown: String {
     get {
-      return nodes.allText
+      return nodes.allMarkdown
     }
     set {
       (nodes, finalLocationPair) = nodes(for: newValue)
@@ -65,13 +65,15 @@ public final class RenderedMarkdown {
 
   private func nodes(
     for markdown: String
-  ) -> ([RenderedMarkdownNode], LocationPair) {
+  ) -> ([Node], LocationPair) {
     let parsedResults = parsingRules.parse(markdown)
-    let nodes = parsedResults.map { render(node: $0, attributes: defaultAttributes) }
-    return (nodes, computeLocationPairs(for: nodes))
+    for node in parsedResults {
+      render(node: node, attributes: defaultAttributes)
+    }
+    return (parsedResults, computeLocationPairs(for: parsedResults))
   }
 
-  private func computeLocationPairs(for nodes: [RenderedMarkdownNode]) -> LocationPair {
+  private func computeLocationPairs(for nodes: [Node]) -> LocationPair {
     var locationPair = LocationPair(markdown: 0, rendered: 0)
     for node in nodes {
       locationPair = node.updateInitialLocationPair(locationPair)
@@ -90,7 +92,7 @@ public final class RenderedMarkdown {
 
   private func markdownRange(
     for renderedRange: NSRange,
-    relativeTo topLevelNode: RenderedMarkdownNode?
+    relativeTo topLevelNode: Node?
   ) -> NSRange {
     let markdownLocation = self.markdownLocation(for: renderedRange.location)
     let markdownMax = self.markdownLocation(for: NSMaxRange(renderedRange))
@@ -105,7 +107,7 @@ public final class RenderedMarkdown {
     textRange range: NSRange,
     replacementText characters: String
   ) -> ChangeDescription where R.Bound == Int {
-    var markdown = nodes[rangeToReplace].allText
+    var markdown = nodes[rangeToReplace].allMarkdown
     let nodesToReplace = nodes[rangeToReplace]
     let lowerBound = rangeToReplace.relative(to: nodes).lowerBound
     let upperBound = rangeToReplace.relative(to: nodes).upperBound
@@ -116,11 +118,11 @@ public final class RenderedMarkdown {
     markdown.replaceSubrange(markdownRange, with: characters)
     let (replacementNodes, _) = nodes(for: markdown)
     assert(
-      replacementNodes.allText == markdown,
+      replacementNodes.allMarkdown == markdown,
       "Parsed Markdown is not consistent with original Markdown"
     )
-    let initialRendering = nodesToReplace.allRenderedResults
-    let finalRendering = replacementNodes.allRenderedResults
+    let initialRendering = nodesToReplace.joined().allRenderedResults
+    let finalRendering = replacementNodes.joined().allRenderedResults
     let changedRange = initialRendering.string.changedRange(
       from: finalRendering.string
     )
@@ -172,16 +174,16 @@ public final class RenderedMarkdown {
     }
   }
 
-  private func topLevelIndex(of node: RenderedMarkdownNode) -> Int {
+  private func topLevelIndex(of node: Node) -> Int {
     let root = node.root
     return nodes.firstIndex(where: { $0 === root })!
   }
 
-  private func findNode(containing location: Int) -> RenderedMarkdownNode? {
+  private func findNode(containing location: Int) -> Node? {
     var currentLocation = 0
     for topLevelNode in nodes {
       for node in topLevelNode {
-        let currentRange = NSRange(location: currentLocation, length: node.renderedResult.length)
+        let currentRange = NSRange(location: currentLocation, length: node.attributedString.length)
         if currentRange.contains(location) {
           return node
         }
@@ -196,10 +198,10 @@ public final class RenderedMarkdown {
       return ([:], NSRange(location: location, length: 0))
     }
     return (
-      node.renderedResult.attributes(at: 0, effectiveRange: nil),
+      node.attributedString.attributes(at: 0, effectiveRange: nil),
       NSRange(
         location: node.initialLocationPair.rendered,
-        length: node.renderedResult.length
+        length: node.attributedString.length
       )
     )
   }
@@ -207,16 +209,17 @@ public final class RenderedMarkdown {
   private func render(
     node: Node,
     attributes: NSAttributedString.Attributes
-  ) -> RenderedMarkdownNode {
+  ) {
     var attributes = attributes
     formatters[node.type]?(node, &attributes)
-    let defaultRenderFunction = node.children.isEmpty
-      ? renderNode
-      : { (_, _) in return RenderedMarkdownNode(type: node.type) }
+    let defaultRenderFunction: RenderFunction = { (node, attributes) in
+      NSAttributedString(string: node.markdown, attributes: attributes.attributes)
+    }
     let renderFunction = renderers[node.type] ?? defaultRenderFunction
-    let renderedNode = renderFunction(node, attributes)
-    renderedNode.children = node.children.map { render(node: $0, attributes: attributes) }
-    return renderedNode
+    node.attributedString = renderFunction(node, attributes)
+    for child in node.children {
+      render(node: child, attributes: attributes)
+    }
   }
 
   /// The rendered string
@@ -243,70 +246,10 @@ extension StringProtocol where SubSequence == Substring {
   }
 }
 
-extension Sequence where Element == RenderedMarkdownNode {
-  var allText: String {
-    return self.map({ $0.allText }).reduce(into: "", { $0 += $1 })
-  }
-
+extension Sequence where Element == Node {
   var allRenderedResults: NSAttributedString {
     return self
-      .map { $0.allRenderedResults }
+      .map { $0.attributedString }
       .reduce(into: NSMutableAttributedString(), { $0.append($1) })
   }
-
-//  func diff<OtherSequence: Sequence>(
-//    _ other: OtherSequence
-//  ) where OtherSequence.Element == RenderedMarkdownNode {
-//    let array = Array(self.joined())
-//    let otherArray = Array(other.joined())
-//    let prefix = array.commonPrefix(
-//      with: otherArray,
-//      using: { $0.type == $1.type && $0.renderedResult == $1.renderedResult }
-//    )
-//    let suffix = array.reversed().commonPrefix(
-//      with: otherArray.reversed(),
-//      using: { $0.type == $1.type && $0.renderedResult == $1.renderedResult }
-//    )
-//    let original = array.dropFirst(prefix.count).dropLast(suffix.count)
-//    let modified = otherArray.dropFirst(prefix.count).dropLast(suffix.count)
-//    if original.count == 1 && modified.count == 1 {
-//      print("Can optimize!")
-//    } else {
-//      print("Big and slow")
-//    }
-//  }
-}
-
-//extension Sequence {
-//  func commonPrefix<S: Sequence>(
-//    with other: S,
-//    using areEqual: (Element, Element) -> Bool
-//  ) -> Self.SubSequence where S.Element == Element {
-//    var count = 0
-//    for (lhs, rhs) in zip(self, other) {
-//      if areEqual(lhs, rhs) {
-//        count += 1
-//      } else {
-//        break
-//      }
-//    }
-//    return self.prefix(count)
-//  }
-//}
-//
-extension Array where Element == RenderedMarkdownNode {
-  var allText: String { return self[0...].allText }
-  var allRenderedResults: NSAttributedString { return self[0...].allRenderedResults }
-}
-
-private func renderNode(
-  _ node: Node,
-  with attributes: NSAttributedString.Attributes
-) -> RenderedMarkdownNode {
-  let text = String(node.slice.substring)
-  return RenderedMarkdownNode(
-    type: node.type,
-    text: text,
-    renderedResult: NSAttributedString(string: text, attributes: attributes.attributes)
-  )
 }

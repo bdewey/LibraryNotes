@@ -46,7 +46,7 @@ final class StudyViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     addChild(appBar.headerViewController)
     self.tabBarItem.title = "STUDY"
-    self.title = Stylesheet.hablaEspanol.appTitle
+    self.title = "¡Habla Español!"
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -79,7 +79,7 @@ final class StudyViewController: UIViewController {
     // TODO: this should probably be "caption" -- prototype inside Sketch
     cardsRemainingLabel.font = Stylesheet.hablaEspanol.typographyScheme.body2
     appBar.addSubviewsToParent()
-    view.backgroundColor = Stylesheet.hablaEspanol.darkSurface
+    view.backgroundColor = Stylesheet.hablaEspanol.colorScheme.darkSurfaceColor
     configureUI()
     appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
 

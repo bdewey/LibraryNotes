@@ -34,7 +34,7 @@ final class TextStorageTests: XCTestCase {
     let didOpen = expectation(description: "did open")
     document.open { (success) in
       XCTAssert(success)
-      XCTAssertEqual(document.text.currentResult.value, expectedMarkdown)
+      XCTAssertEqual(document.text.taggedResult.value?.value, expectedMarkdown)
       didOpen.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)
@@ -56,7 +56,7 @@ final class TextStorageTests: XCTestCase {
       didOpenActive.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)
-    var textHistory: [Result<DocumentValueWithSource<String>>] = []
+    var textHistory: [Result<Tagged<String>>] = []
     let passiveDidGetEditedText = expectation(description: "passive document got the edited text")
     var subscription: AnySubscription? = passiveDocument.text.subscribe { (result) in
       textHistory.append(result)

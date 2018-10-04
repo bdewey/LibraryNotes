@@ -63,6 +63,8 @@ public struct ParsingRules {
   }
 
   public func parse(_ markdown: String) -> [Node] {
-    return self.parse(ArraySlice(LineSequence(markdown)))
+    let results = self.parse(ArraySlice(LineSequence(markdown)))
+    assert(results.allMarkdown == markdown)
+    return results
   }
 }

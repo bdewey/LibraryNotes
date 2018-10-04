@@ -24,7 +24,7 @@ extension NodeType {
 public final class Hashtag: Node, CharacterParseable {
 
   public init(slice: StringSlice) {
-    super.init(type: .hashtag, slice: slice)
+    super.init(type: .hashtag, slice: slice, markdown: String(slice.substring))
   }
 
   public static let parser = Hashtag.init

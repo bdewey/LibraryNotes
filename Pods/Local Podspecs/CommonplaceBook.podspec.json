@@ -1,6 +1,6 @@
 {
   "name": "CommonplaceBook",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "summary": "A short description of CommonplaceBook.",
   "description": "TODO: Add long description of the pod here.",
   "homepage": "https://github.com/bdewey/CommonplaceBook.git",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/bdewey/CommonplaceBook.git",
-    "tag": "0.1.0"
+    "tag": "0.2.0"
   },
   "platforms": {
     "ios": "11.0"
@@ -24,7 +24,7 @@
       ">= 59.0"
     ],
     "TextBundleKit": [
-      "~> 0.2"
+      "~> 0.5"
     ]
   }
 }

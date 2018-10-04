@@ -27,6 +27,9 @@ public final class List: Node, LineParseable {
     self.listType = listType
     self.items = items
     super.init(type: .list, slice: slice)
+    for item in items {
+      item.parent = self
+    }
   }
 
   public override var parsingRules: ParsingRules! {

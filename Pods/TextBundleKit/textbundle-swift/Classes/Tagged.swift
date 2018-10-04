@@ -17,31 +17,28 @@
 
 import Foundation
 
-public enum DocumentPropertySource {
-  /// The value came from the document
-  case document
-
-  /// The value came from in-memory modification
-  case memory
+public struct Tag: RawRepresentable {
+  public let rawValue: String
+  public init(rawValue: String) { self.rawValue = rawValue }
 }
 
 /// A structure that carries both a the value and its "source" (did it come from the document
 /// or an in-memory modification)
-public struct DocumentValueWithSource<Value> {
+public struct Tagged<Value> {
 
-  public init(source: DocumentPropertySource, value: Value) {
-    self.source = source
+  public init(tag: Tag, value: Value) {
+    self.tag = tag
     self.value = value
   }
 
   /// Where'd the value come from
-  public let source: DocumentPropertySource
+  public let tag: Tag
 
   /// The value itself
   public let value: Value
 
-  public func settingSource(_ source: DocumentPropertySource) -> DocumentValueWithSource<Value> {
-    return DocumentValueWithSource(source: source, value: self.value)
+  public func tagging(_ tag: Tag) -> Tagged<Value> {
+    return Tagged(tag: tag, value: value)
   }
 }
 

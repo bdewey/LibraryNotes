@@ -26,7 +26,7 @@ extension NodeType {
 public final class Emphasis: Node, CharacterParseable {
 
   public init(slice: StringSlice) {
-    super.init(type: .emphasis, slice: slice)
+    super.init(type: .emphasis, slice: slice, markdown: String(slice.substring))
   }
 
   public static let parser = Emphasis.init <^> (
@@ -39,7 +39,7 @@ public final class Emphasis: Node, CharacterParseable {
 public final class StrongEmphasis: Node, CharacterParseable {
 
   public init(slice: StringSlice) {
-    super.init(type: .bold, slice: slice)
+    super.init(type: .bold, slice: slice, markdown: String(slice.substring))
   }
 
   public static let parser = StrongEmphasis.init <^> CharacterParsers.slice(delimitedBy: "**")

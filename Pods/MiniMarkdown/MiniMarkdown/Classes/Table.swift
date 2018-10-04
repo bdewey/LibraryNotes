@@ -54,6 +54,11 @@ public final class Table: Node, LineParseable {
     let partialSlice = header.slice + delimiter.slice
     let completeSlice = rows.reduce(into: partialSlice, { $0 += $1.slice })
     super.init(type: .table, slice: completeSlice)
+    header.parent = self
+    delimiter.parent = self
+    for row in rows {
+      row.parent = self
+    }
   }
 
   public static let parser = (curry(Table.init)
@@ -72,7 +77,7 @@ public final class TablePipe: Node, CharacterParseable {
     if let trailingWhitespaceSlice = trailingWhitespace.stringSlice {
       slice += trailingWhitespaceSlice
     }
-    super.init(type: .tablePipe, slice: slice)
+    super.init(type: .tablePipe, slice: slice, markdown: String(slice.substring))
   }
 
   public static let parser = curry(TablePipe.init)
@@ -102,7 +107,6 @@ public final class TableCell: InlineContainingNode, CharacterParseable {
 
 private let rowRules = ParsingArray([TablePipe.nodeParser, TableCell.nodeParser])
 
-
 public final class TableRow: Node {
   public override var parsingRules: ParsingRules! {
     didSet {
@@ -115,10 +119,14 @@ public final class TableRow: Node {
     return nodes
   }
 
-  public override init(type: NodeType, slice: StringSlice) {
+  public init(type: NodeType, slice: StringSlice) {
     self.nodes = rowRules.parse(ArraySlice(slice))
+    // swiftlint:disable:next force_cast
     self.cells = nodes.filter({ $0 is TableCell }).map({ $0 as! TableCell })
     super.init(type: type, slice: slice)
+    for node in nodes {
+      node.parent = self
+    }
   }
 
   public static func parser(type: NodeType) -> Parser<TableRow, ArraySlice<StringSlice>> {
@@ -141,13 +149,17 @@ public final class TableDelimiter: Node, LineParseable {
 
   public init(slice: StringSlice) {
     self.nodes = rowRules.parse(ArraySlice(slice))
+    // swiftlint:disable:next force_cast
     self.cells = nodes.filter({ $0 is TableCell }).map({ $0 as! TableCell })
     super.init(type: .tableDelimiter, slice: slice)
+    for node in nodes {
+      node.parent = self
+    }
   }
 
   public static let parser = TableDelimiter.init <^>
     LineParsers.line(where: { (slice) in
       let cells = slice.tableCells
-      return cells.count > 0 && cells.allSatisfy({ $0.substring.isTableDelimiterCell })
+      return !cells.isEmpty && cells.allSatisfy({ $0.substring.isTableDelimiterCell })
     })
 }

@@ -31,22 +31,12 @@ final class MiniMarkdownRendererTests: XCTestCase {
 
   private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { (node, attributes) in
-      let listItem = node as! ListItem
-      return RenderedMarkdownNode(
-        type: .listItem,
-        text: String(listItem.slice.string[listItem.markerRange]),
-        renderedResult: NSAttributedString(string: "*\t", attributes: attributes.attributes)
-      )
+    renderers[.listItem] = { (_, attributes) in
+      return NSAttributedString(string: "*\t", attributes: attributes.attributes)
     }
-    renderers[.image] = { (node, attributes) in
-      let image = node as! Image
+    renderers[.image] = { (_, _) in
       let attachment = NSTextAttachment()
-      return RenderedMarkdownNode(
-        type: .image,
-        text: String(node.slice.substring),
-        renderedResult: NSAttributedString(attachment: attachment)
-      )
+      return NSAttributedString(attachment: attachment)
     }
     return renderers
   }()

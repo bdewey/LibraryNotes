@@ -11,6 +11,7 @@ struct ExpectedNode {
     case stringDoesNotMatch(expectedString: String, actualString: String)
     case childCountDoesNotMatch(text: String, expectedCount: Int, actualCount: Int)
     case invalidChild(childIndex: Int, validationError: Error)
+    case invalidParent(expected: Node, actual: Node?)
     
     var description: String {
       switch self {
@@ -23,6 +24,8 @@ struct ExpectedNode {
       case let .invalidChild(childIndex: index, validationError: error):
         let description = String(describing: error)
         return "\(index).\(description)"
+      case let .invalidParent(expected: expected, actual: actual):
+        return "Invalid parent: Expected \(expected), actual: " + String(describing: actual)
       }
     }
   }
@@ -55,6 +58,9 @@ struct ExpectedNode {
       )
     }
     for ((index, child), otherChild) in zip(zip(children.indices, children), node.children) {
+      if otherChild.parent !== node {
+        throw Error.invalidParent(expected: node, actual: otherChild.parent)
+      }
       do {
         try child.validateNode(otherChild)
       } catch let error as Error {
@@ -75,6 +81,7 @@ final class MiniMarkdownProtocolTests: XCTestCase {
     XCTAssertEqual(results.count, 2)
     XCTAssert(results[0].type == .heading)
     XCTAssert(results[1].type == .paragraph)
+    XCTAssertEqual(results.allMarkdown, example)
   }
   
   func testTextAndHeading() {
@@ -101,7 +108,9 @@ final class MiniMarkdownProtocolTests: XCTestCase {
   
   func testParseJustEmphasis() {
     let example = "*This is emphasized text.*"
-    let block = ParsingRules().parse(example)[0]
+    let results = ParsingRules().parse(example)
+    XCTAssertEqual(results.allMarkdown, example)
+    let block = results[0]
     XCTAssertEqual(block.type, .paragraph)
     XCTAssertEqual(block.children.count, 1)
     if let inline = block.children.first {

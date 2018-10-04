@@ -73,7 +73,7 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
       XCTAssertTrue(success)
       let textStorage = document.text
       XCTAssertEqual(
-        textStorage.currentResult.value,
+        textStorage.taggedResult.value?.value,
         TextBundleTestHelper.expectedDocumentContents
       )
       didOpen.fulfill()
@@ -112,7 +112,7 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
     let expectedIdentifier = "test application"
     document.open { (success) in
       XCTAssertTrue(success)
-      var metadata = try! document.metadata.currentResult.unwrap()
+      var metadata = try! document.metadata.taggedResult.unwrap().value
       metadata.creatorIdentifier = expectedIdentifier
       document.metadata.setValue(metadata)
       didEdit.fulfill()
@@ -129,7 +129,7 @@ final class TextBundleDocumentTests: XCTestCase, TextBundleHelperMethods {
     let roundTripDocument = TextBundleDocument(fileURL: document.fileURL)
     let didRead = expectation(description: "did read")
     roundTripDocument.open { (_) in
-      let metadata = try! roundTripDocument.metadata.currentResult.unwrap()
+      let metadata = try! roundTripDocument.metadata.taggedResult.unwrap().value
       XCTAssertEqual(metadata.creatorIdentifier, expectedIdentifier)
       didRead.fulfill()
     }

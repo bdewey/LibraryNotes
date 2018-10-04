@@ -33,6 +33,9 @@ open class BlockContainingNode: Node {
     } else {
       let results = parsingRules.parse(ArraySlice(containedLines))
       assert(results.allSatisfy({ $0.slice.string == slice.string }))
+      for node in results {
+        node.parent = self
+      }
       memoizedChildren = results
       return results
     }

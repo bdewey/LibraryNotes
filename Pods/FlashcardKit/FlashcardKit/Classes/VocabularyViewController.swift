@@ -49,7 +49,7 @@ public final class VocabularyViewController: UIViewController {
     })
     subscriptions += document.documentStudyMetadata.signal
       .map { return $0.value }
-      .combineLatest(document.vocabularyAssocationsPublisher.signal) { return ($0, $1) }
+      .combineLatest(languageDeck.vocabularyAssociationsSignal) { return ($0, $1) }
       .subscribeValues({ [weak self](tuple) in
         let (studyMetadata, vocabularyAssociations) = tuple
         self?.dataSource.update(items: vocabularyAssociations, studyMetadata: studyMetadata)
@@ -66,7 +66,7 @@ public final class VocabularyViewController: UIViewController {
   private var subscriptions: [Cancellable] = []
 
   private let addVocabularyAssociationButton: MDCButton = {
-    let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
+    let icon = UIImage(named: "baseline_add_black_24pt", in: ResourceBundle.bundle, compatibleWith: nil)?.withRenderingMode(.alwaysTemplate)
     let button = MDCFloatingButton(frame: .zero)
     button.setImage(icon, for: .normal)
     MDCFloatingActionButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
