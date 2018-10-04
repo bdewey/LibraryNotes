@@ -3,26 +3,35 @@
 import UIKit
 
 import CommonplaceBook
+import CwlSignal
 import MiniMarkdown
 import TextBundleKit
+import enum TextBundleKit.Result
 
-final class PlainTextDocument: UIDocumentWithPreviousError,
-  NSTextStorageDelegate {
+final class PlainTextDocument: UIDocumentWithPreviousError {
 
   enum Error: Swift.Error {
     case internalInconsistency
     case couldNotOpenDocument
   }
 
-  private var temporaryStorage: String?
-  private var markdownTextStorage: MiniMarkdownTextStorage?
+  override init(fileURL url: URL) {
+    let (input, signal) = Signal<Tagged<String>>.create()
+    textSignalInput = input
+    textSignal = signal.continuous()
+    super.init(fileURL: url)
+  }
+
+  private let textSignalInput: SignalInput<Tagged<String>>
+  public let textSignal: Signal<Tagged<String>>
+  private var text = ""
 
   func didUpdateText() {
     updateChangeCount(.done)
   }
 
   override func contents(forType typeName: String) throws -> Any {
-    let string = markdownTextStorage?.markdown ?? ""
+    let string = text
     if let data = string.data(using: .utf8) {
       return data
     } else {
@@ -37,44 +46,16 @@ final class PlainTextDocument: UIDocumentWithPreviousError,
       else {
         throw Error.internalInconsistency
     }
-    if let markdownTextStorage = markdownTextStorage {
-      markdownTextStorage.markdown = string
-    } else {
-      temporaryStorage = string
-    }
-  }
-
-  func textStorage(
-    _ textStorage: NSTextStorage,
-    didProcessEditing editedMask: NSTextStorage.EditActions,
-    range editedRange: NSRange,
-    changeInLength delta: Int
-  ) {
-    updateChangeCount(.done)
+    text = string
+    textSignalInput.send(value: Tagged(tag: .document, value: text))
   }
 }
 
 extension PlainTextDocument: EditableDocument {
-  func markdownTextStorage(
-    parsingRules: ParsingRules,
-    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction],
-    stylesheet: Stylesheet
-  ) -> MiniMarkdownTextStorage {
-    precondition(markdownTextStorage == nil)
-    let storage = MiniMarkdownTextStorage(
-      parsingRules: parsingRules,
-      formatters: formatters,
-      renderers: renderers,
-      stylesheet: stylesheet
-    )
-    storage.delegate = self
-    if let text = temporaryStorage {
-      storage.markdown = text
-      temporaryStorage = nil
-    }
-    markdownTextStorage = storage
-    return storage
+  func applyTaggedModification(tag: Tag, modification: (String) -> String) {
+    text = modification(text)
+    updateChangeCount(.done)
+    textSignalInput.send(value: Tagged(tag: tag, value: text))
   }
 }
 

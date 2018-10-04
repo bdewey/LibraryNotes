@@ -92,7 +92,7 @@ extension FileMetadata {
     )
     let languageDeck = LanguageDeck(
       document: document,
-      miniMarkdownSignal: textViewController.textStorage.markdownSignal
+      miniMarkdownSignal: textViewController.miniMarkdownSignal
     )
     let tabBarViewController = ScrollingTopTabBarViewController()
     let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)

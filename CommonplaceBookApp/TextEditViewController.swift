@@ -4,12 +4,17 @@ import UIKit
 
 import CocoaLumberjack
 import CommonplaceBook
+import CwlSignal
 import FlashcardKit
 import MaterialComponents
 import MiniMarkdown
 import TextBundleKit
 
 private typealias TextEditViewControllerDocument = EditableDocument
+
+extension Tag {
+  fileprivate static let textEditViewController = Tag(rawValue: "textEditViewController")
+}
 
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController,
@@ -21,13 +26,25 @@ final class TextEditViewController: UIViewController,
     self.document = document
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    self.textStorage = document.markdownTextStorage(
+    var renderers = TextEditViewController.renderers
+    if let configurer = document as? ConfiguresRenderers {
+      configurer.configureRenderers(&renderers)
+    }
+    self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(with: stylesheet),
-      renderers: TextEditViewController.renderers,
+      renderers: renderers,
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
+    self.endpoint = document.textSignal.subscribeValues { [weak self](taggedString) in
+      guard taggedString.tag != Tag.textEditViewController,
+            let textStorage = self?.textStorage else {
+        return
+      }
+      textStorage.markdown = taggedString.value
+    }
+    textStorage.delegate = self
     NotificationCenter.default.addObserver(self,
                                            selector: #selector(handleKeyboardNotification(_:)),
                                            name: UIResponder.keyboardWillHideNotification,
@@ -51,7 +68,9 @@ final class TextEditViewController: UIViewController,
   private let document: TextEditViewControllerDocument
   private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
-  internal let textStorage: MiniMarkdownTextStorage
+  private let textStorage: MiniMarkdownTextStorage
+  internal var miniMarkdownSignal: Signal<[Node]> { return textStorage.markdownSignal }
+  private var endpoint: SignalEndpoint<Tagged<String>>?
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
@@ -90,6 +109,27 @@ final class TextEditViewController: UIViewController,
     return renderers
   }()
 
+  private static func makeTextStorage(
+    parsingRules: ParsingRules,
+    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    renderers: [NodeType: RenderedMarkdown.RenderFunction],
+    stylesheet: Stylesheet
+  ) -> MiniMarkdownTextStorage {
+    let textStorage = MiniMarkdownTextStorage(
+      parsingRules: parsingRules,
+      formatters: formatters,
+      renderers: renderers
+    )
+    textStorage.defaultAttributes = NSAttributedString.Attributes(
+      stylesheet.typographyScheme.body2
+    )
+    textStorage.defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
+    textStorage.defaultAttributes.color = stylesheet.colorScheme
+      .onSurfaceColor
+      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    return textStorage
+  }
+
   private lazy var textView: UITextView = {
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)
@@ -123,6 +163,18 @@ final class TextEditViewController: UIViewController,
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
     textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
+  }
+}
+
+extension TextEditViewController: NSTextStorageDelegate {
+  func textStorage(
+    _ textStorage: NSTextStorage,
+    didProcessEditing editedMask: NSTextStorage.EditActions,
+    range editedRange: NSRange,
+    changeInLength delta: Int
+  ) {
+    guard editedMask.contains(.editedCharacters) else { return }
+    document.applyTaggedModification(tag: .textEditViewController) { (_) in textStorage.string }
   }
 }
 
