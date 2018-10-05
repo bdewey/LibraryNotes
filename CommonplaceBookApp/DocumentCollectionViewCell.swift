@@ -11,18 +11,15 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     super.init(frame: frame)
     inkTouchController = MDCInkTouchController(view: contentView)
     inkTouchController.addInkView()
-    stack.frame = self.contentView.bounds
-    self.contentView.addSubview(stack)
+    self.contentView.addSubview(titleLabel)
+    self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
-    stack.addArrangedSubview(titleLabel)
-    stack.addArrangedSubview(statusIcon)
   }
 
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
-  let stack = UIStackView(frame: .zero)
   let titleLabel = UILabel(frame: .zero)
   let statusIcon = UIImageView(frame: .zero)
   var stylesheet: Stylesheet? {
@@ -41,10 +38,10 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   override func layoutSubviews() {
     super.layoutSubviews()
     let bounds = self.contentView.bounds
-    self.stack.frame = bounds.insetBy(dx: 16, dy: 12)
-    var dividerFrame = bounds
-    dividerFrame.origin.y += dividerFrame.size.height - 1
-    dividerFrame.size.height = 1
-    self.divider.frame = dividerFrame
+    let layoutRect = bounds.insetBy(dx: 16, dy: 12)
+    let (statusIconSlice, textSlice) = layoutRect.divided(atDistance: 24.0, from: .maxXEdge)
+    self.statusIcon.frame = statusIconSlice
+    self.titleLabel.frame = textSlice
+    self.divider.frame = bounds.divided(atDistance: 1, from: .maxYEdge).slice
   }
 }
