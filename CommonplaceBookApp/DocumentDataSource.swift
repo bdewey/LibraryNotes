@@ -11,12 +11,12 @@ public final class DocumentDataSource: NSObject {
   }
 
   private let stylesheet: Stylesheet
-  private var models: [FileMetadata] = []
+  private var models: [FileMetadataWrapper] = []
   public weak var adapter: ListAdapter?
 
-  public func deleteMetadata(_ fileMetadata: FileMetadata) {
+  public func deleteMetadata(_ fileMetadata: FileMetadataWrapper) {
     if let index = models.firstIndex(where: { $0 == fileMetadata }) {
-      try? FileManager.default.removeItem(at: fileMetadata.fileURL)
+      try? FileManager.default.removeItem(at: fileMetadata.value.fileURL)
       models.remove(at: index)
       adapter?.performUpdates(animated: true)
     }
@@ -26,8 +26,8 @@ public final class DocumentDataSource: NSObject {
 extension DocumentDataSource: MetadataQueryDelegate {
   public func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
     models = items
-      .map { FileMetadata(metadataItem: $0) }
-      .sorted(by: { $0.displayName < $1.displayName })
+      .map { FileMetadataWrapper(metadataItem: $0) }
+      .sorted(by: { $0.value.displayName < $1.value.displayName })
     for fileMetadata in models {
       fileMetadata.downloadIfNeeded()
     }

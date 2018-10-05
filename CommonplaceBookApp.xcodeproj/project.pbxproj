@@ -17,7 +17,7 @@
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
-		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
+		D3A6EFAD20EE500D00AC428D /* FileMetadataWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
 		D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */; };
@@ -92,7 +92,7 @@
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextDocument.swift; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
-		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
+		D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataWrapper.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
 		D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBundleEditableDocument.swift; sourceTree = "<group>"; };
@@ -211,7 +211,7 @@
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
-				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
+				D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
@@ -493,7 +493,7 @@
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
-				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
+				D3A6EFAD20EE500D00AC428D /* FileMetadataWrapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,7 +16,7 @@ public final class DocumentSectionController: ListSectionController {
 
   private let dataSource: DocumentDataSource
   private let stylesheet: Stylesheet
-  private var fileMetadata: FileMetadata!
+  private var fileMetadata: FileMetadataWrapper!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
     let cell = collectionContext!.dequeueReusableCell(
@@ -25,12 +25,12 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    cell.titleLabel.text = fileMetadata.displayName
-    if fileMetadata.isUploading {
+    cell.titleLabel.text = fileMetadata.value.displayName
+    if fileMetadata.value.isUploading {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
-    } else if fileMetadata.isDownloading {
+    } else if fileMetadata.value.isDownloading {
       cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if fileMetadata.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
+    } else if fileMetadata.value.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
       cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
     } else {
       cell.statusIcon.image = nil
@@ -44,7 +44,7 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didUpdate(to object: Any) {
-    self.fileMetadata = (object as! FileMetadata) // swiftlint:disable:this force_cast
+    self.fileMetadata = (object as! FileMetadataWrapper) // swiftlint:disable:this force_cast
   }
 
   public override func didSelectItem(at index: Int) {
@@ -82,12 +82,12 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   }
 }
 
-extension FileMetadata {
+extension FileMetadataWrapper {
   private var editableDocument: (UIDocument & EditableDocument)? {
-    if contentTypeTree.contains("public.plain-text") {
-      return PlainTextDocument(fileURL: fileURL)
-    } else if contentTypeTree.contains("org.textbundle.package") {
-      return TextBundleDocument(fileURL: fileURL)
+    if value.contentTypeTree.contains("public.plain-text") {
+      return PlainTextDocument(fileURL: value.fileURL)
+    } else if value.contentTypeTree.contains("org.textbundle.package") {
+      return TextBundleDocument(fileURL: value.fileURL)
     } else {
       return nil
     }
@@ -133,7 +133,7 @@ extension FileMetadata {
     }
     document.open { (success) in
       guard success else { completion(nil); return }
-      if self.contentTypeTree.contains("org.brians-brain.swiftflash") {
+      if self.value.contentTypeTree.contains("org.brians-brain.swiftflash") {
         // swiftlint:disable:next force_cast
         completion(self.languageViewController(for: document as! TextBundleDocument))
       } else {
