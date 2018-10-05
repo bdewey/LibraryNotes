@@ -28,6 +28,9 @@ extension DocumentDataSource: MetadataQueryDelegate {
     models = items
       .map { FileMetadata(metadataItem: $0) }
       .sorted(by: { $0.displayName < $1.displayName })
+    for fileMetadata in models {
+      fileMetadata.downloadIfNeeded()
+    }
     adapter?.performUpdates(animated: true)
   }
 }

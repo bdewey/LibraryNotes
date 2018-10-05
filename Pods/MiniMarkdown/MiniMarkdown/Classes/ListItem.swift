@@ -51,6 +51,19 @@ public final class ListItem: BlockContainingNode, LineParseable {
     return lines
   }
 
+  public var isEmpty: Bool {
+    return containedLines.allSatisfy({ $0.substring.isWhitespace })
+  }
+
+  public var orderedListNumber: Int? {
+    guard listType == .ordered,
+          let match = orderedRegex.firstMatch(
+            in: markdown,
+            options: [], range: NSRange(markdown.completeRange, in: markdown)
+          ), let numberRange = Range(match.range(at: 1), in: markdown) else { return nil }
+    return Int(markdown[numberRange])
+  }
+
   public static let parser =
     listItemParser(type: .ordered, itemRecognizer: orderedRecognizer) ||
       listItemParser(type: .unordered, itemRecognizer: unorderedRecognizer)
@@ -87,7 +100,11 @@ public final class ListItem: BlockContainingNode, LineParseable {
 }
 
 private let unorderedListMarkerRegularExpression = "^\\s*[-\\+\\*]\\s"
-private let orderedListMarkerRegularExpression = "^\\s*\\d{1,9}[\\.\\)]\\s"
+private let orderedListMarkerRegularExpression = "^\\s*(\\d{1,9})[\\.\\)]\\s"
+private let orderedRegex = try! NSRegularExpression(
+  pattern: orderedListMarkerRegularExpression,
+  options: []
+)
 
 private func rangeOfRegularExpression(
   _ regularExpression: String,

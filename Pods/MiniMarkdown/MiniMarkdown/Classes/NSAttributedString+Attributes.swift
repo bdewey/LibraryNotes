@@ -102,12 +102,16 @@ public extension NSAttributedString {
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.headIndent = 16 * CGFloat(listLevel)
         paragraphStyle.firstLineHeadIndent = 16 * CGFloat(listLevel - 1)
-        let listTab = NSTextTab(
-          textAlignment: .natural,
-          location: paragraphStyle.headIndent,
-          options: [:]
-        )
-        paragraphStyle.tabStops = [listTab]
+        var tabStops: [NSTextTab] = []
+        for i in 0 ..< 4 {
+          let listTab = NSTextTab(
+            textAlignment: .natural,
+            location: paragraphStyle.headIndent + CGFloat(i * 16),
+            options: [:]
+          )
+          tabStops.append(listTab)
+        }
+        paragraphStyle.tabStops = tabStops
         result[.paragraphStyle] = paragraphStyle
       }
       return result

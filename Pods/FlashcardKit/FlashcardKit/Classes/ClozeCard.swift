@@ -1,6 +1,7 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
 import AVFoundation
+import CocoaLumberjack
 import CommonplaceBook
 import Foundation
 import MiniMarkdown
@@ -46,23 +47,12 @@ struct ClozeCard {
 
 extension ClozeCard {
   static func makeCards(from markdown: [Node]) -> [ClozeCard] {
-    let nodePaths = markdown
-      .map { $0.findNodePaths(toBlocksMatching: { $0.type == .cloze }) }
-    let nodes = zip(markdown, nodePaths).compactMap { (zipped) -> Node? in
-      let (node, allPaths) = zipped
-      if let firstPath = allPaths.first {
-        var lastEligibleNode: Node?
-        node.walkNodePath(firstPath, block: { (possibleContainer) in
-          if possibleContainer.type == .paragraph || possibleContainer.type == .listItem {
-            lastEligibleNode = possibleContainer
-          }
-        })
-        return lastEligibleNode
-      } else {
-        return nil
-      }
-    }
-    return nodes.map { ClozeCard(node: $0, clozeIndex: 0) }
+    let clozes = markdown
+      .map { $0.findNodes(where: { $0.type == .cloze }) }
+      .joined()
+      .compactMap { $0.findFirstAncestor(where: { $0.type == .paragraph || $0.type == .listItem }) }
+    DDLogDebug("Found \(clozes.count) clozes")
+    return clozes.map { ClozeCard(node: $0, clozeIndex: 0) }
   }
 }
 

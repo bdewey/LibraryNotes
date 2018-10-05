@@ -179,7 +179,7 @@ public final class RenderedMarkdown {
     return nodes.firstIndex(where: { $0 === root })!
   }
 
-  private func findNode(containing location: Int) -> Node? {
+  internal func findNode(containing location: Int) -> Node? {
     var currentLocation = 0
     for topLevelNode in nodes {
       for node in topLevelNode {

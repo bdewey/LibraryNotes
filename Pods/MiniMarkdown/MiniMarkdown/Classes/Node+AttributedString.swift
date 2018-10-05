@@ -17,9 +17,16 @@
 
 import Foundation
 
-internal struct LocationPair {
-  var markdown: Int
-  var rendered: Int
+/// Defines the location of this node in a Markdown document.
+public struct LocationPair {
+
+  /// The location of this node in the Markdown string.
+  public var markdown: Int
+
+  /// The location of the attributed text in the rendered version of the string.
+  // TODO: This should be a property of the rendering, if we support multiple renderings
+  //       for the same forest.
+  public var rendered: Int
 }
 
 extension Node.Key {
@@ -37,7 +44,7 @@ extension Node {
     }
   }
 
-  internal var initialLocationPair: LocationPair {
+  public var initialLocationPair: LocationPair {
     get {
       return getProperty(
         key: .initialLocationPair,

@@ -8,9 +8,9 @@ import IGListKit
 // TODO: This now looks like it should just be type-safe extensions on NSMetadataItem
 
 public final class FileMetadata: Equatable {
-  let metadataItem: NSMetadataItem
+  private let metadataItem: NSMetadataItem
 
-  init(metadataItem: NSMetadataItem) {
+  public init(metadataItem: NSMetadataItem) {
     assert(metadataItem.attributes.contains(NSMetadataItemURLKey))
     assert(metadataItem.attributes.contains(NSMetadataItemDisplayNameKey))
     assert(metadataItem.attributes.contains(NSMetadataItemContentTypeKey))
@@ -18,40 +18,48 @@ public final class FileMetadata: Equatable {
     self.metadataItem = metadataItem
   }
 
-  var fileURL: URL {
+  public func downloadIfNeeded() {
+    if downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
+      FileMetadata.downloadItem(self)
+    }
+  }
+
+  public var fileURL: URL {
     return metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
   }
 
-  var displayName: String {
+  public var displayName: String {
     let nsstring = metadataItem.value(forAttribute: NSMetadataItemDisplayNameKey) as! NSString
     return String(nsstring)
   }
 
-  var contentType: String {
+  public var contentType: String {
     let nsstring = metadataItem.value(forAttribute: NSMetadataItemContentTypeKey) as! NSString
     return String(nsstring)
   }
 
-  var downloadingStatus: String {
-    let nsstring = metadataItem.value(forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey) as! NSString
+  public var downloadingStatus: String {
+    let nsstring = metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey
+    ) as! NSString
     return String(nsstring)
   }
 
-  var isDownloading: Bool {
+  public var isDownloading: Bool {
     let value = metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemIsDownloadingKey
       ) as! NSNumber
     return value.boolValue
   }
 
-  var isUploading: Bool {
+  public var isUploading: Bool {
     let value = metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemIsUploadingKey
     ) as! NSNumber
     return value.boolValue
   }
 
-  var contentTypeTree: [String] {
+  public var contentTypeTree: [String] {
     let nsStringArray = metadataItem.value(
       forAttribute: NSMetadataItemContentTypeTreeKey
     ) as! [NSString]
@@ -70,6 +78,24 @@ extension FileMetadata: ListDiffable {
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherItem = object as? FileMetadata else { return false }
-    return fileURL == otherItem.fileURL
+    if fileURL != otherItem.fileURL { return false }
+    if downloadingStatus != otherItem.downloadingStatus {
+        return false
+    }
+    return true
+  }
+}
+
+extension FileMetadata {
+  private static let downloadQueue = DispatchQueue(
+    label: "org.brians-brain.FileMetadata.download",
+    qos: .default,
+    attributes: []
+  )
+
+  private static func downloadItem(_ item: FileMetadata) {
+    downloadQueue.async {
+      try? FileManager.default.startDownloadingUbiquitousItem(at: item.fileURL)
+    }
   }
 }

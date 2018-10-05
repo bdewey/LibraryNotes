@@ -125,6 +125,10 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     )
   }
 
+  public func node(at location: Int) -> Node? {
+    return storage.findNode(containing: location)
+  }
+
   override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
     // NOTHING
   }

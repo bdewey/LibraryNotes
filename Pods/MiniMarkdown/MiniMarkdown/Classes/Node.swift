@@ -128,12 +128,20 @@ extension Node: CustomReflectable {
 }
 
 extension Node {
+
+  /// Returns all nodes in the tree that pass `predicate`.
   public func findNodes(where predicate: (Node) -> Bool) -> [Node] {
     var results = Array(children.map { $0.findNodes(where: predicate) }.joined())
     if predicate(self) {
       results.append(self)
     }
     return results
+  }
+
+  /// Returns the first node on the path from the current node to its root that passes `predicate`.
+  public func findFirstAncestor(where predicate: (Node) -> Bool) -> Node? {
+    if predicate(self) { return self }
+    return self.parent?.findFirstAncestor(where: predicate)
   }
 }
 
