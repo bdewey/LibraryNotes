@@ -181,6 +181,12 @@ extension TextEditViewController: NSTextStorageDelegate {
 }
 
 extension TextEditViewController: UITextViewDelegate {
+
+  func replaceCharacters(in range: NSRange, with str: String) {
+    textStorage.replaceCharacters(in: range, with: str)
+    textView.selectedRange = NSRange(location: range.location + str.count, length: 0)
+  }
+
   func textView(
     _ textView: UITextView,
     shouldChangeTextIn range: NSRange,
@@ -192,25 +198,32 @@ extension TextEditViewController: UITextViewDelegate {
          let listItem = currentNode.findFirstAncestor(
           where: { $0.type == .listItem }
           ) as? ListItem {
+        if listItem.isEmpty {
+          // List termination! Someone's hitting return on a list item that contains nothing.
+          // Erase this marker.
+          replaceCharacters(
+            in: NSRange(
+              location: listItem.initialLocationPair.rendered,
+              length: listItem.markdown.count
+            ),
+            with: "\n"
+          )
+          return false
+        }
         switch listItem.listType {
         case .unordered:
-          textStorage.replaceCharacters(in: range, with: "\n* ")
-          textView.selectedRange = NSRange(location: range.location + 3, length: 0)
+          replaceCharacters(in: range, with: "\n* ")
         case .ordered:
           if let containerNumber = listItem.orderedListNumber {
-            let replacement = "\n\(containerNumber + 1). "
-            textStorage.replaceCharacters(in: range, with: replacement)
-            textView.selectedRange = NSRange(location: range.location + replacement.count, length: 0)
+            replaceCharacters(in: range, with: "\n\(containerNumber + 1). ")
           } else {
             return true
           }
-          break
         }
       } else {
         // To make this be a separate paragraph in any conventional Markdown processor, we need
         // the blank line.
-        textStorage.replaceCharacters(in: range, with: "\n\n")
-        textView.selectedRange = NSRange(location: range.location + 2, length: 0)
+        replaceCharacters(in: range, with: "\n\n")
       }
       return false
     } else {
