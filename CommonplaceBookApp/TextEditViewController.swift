@@ -181,6 +181,43 @@ extension TextEditViewController: NSTextStorageDelegate {
 }
 
 extension TextEditViewController: UITextViewDelegate {
+  func textView(
+    _ textView: UITextView,
+    shouldChangeTextIn range: NSRange,
+    replacementText text: String
+  ) -> Bool {
+    guard range.length == 0 else { return true }
+    if text == "\n" {
+      if let currentNode = textStorage.node(at: range.location),
+         let listItem = currentNode.findFirstAncestor(
+          where: { $0.type == .listItem }
+          ) as? ListItem {
+        switch listItem.listType {
+        case .unordered:
+          textStorage.replaceCharacters(in: range, with: "\n* ")
+          textView.selectedRange = NSRange(location: range.location + 3, length: 0)
+        case .ordered:
+          if let containerNumber = listItem.orderedListNumber {
+            let replacement = "\n\(containerNumber + 1). "
+            textStorage.replaceCharacters(in: range, with: replacement)
+            textView.selectedRange = NSRange(location: range.location + replacement.count, length: 0)
+          } else {
+            return true
+          }
+          break
+        }
+      } else {
+        // To make this be a separate paragraph in any conventional Markdown processor, we need
+        // the blank line.
+        textStorage.replaceCharacters(in: range, with: "\n\n")
+        textView.selectedRange = NSRange(location: range.location + 2, length: 0)
+      }
+      return false
+    } else {
+      return true
+    }
+  }
+
   func scrollViewDidScroll(_ scrollView: UIScrollView) {
     forwardScrollViewDidScroll(scrollView)
   }
