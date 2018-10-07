@@ -59,7 +59,7 @@ extension Node {
   internal func updateInitialLocationPair(_ locationPair: LocationPair) -> LocationPair {
     var locationPair = locationPair
     initialLocationPair = locationPair
-    locationPair.markdown += markdown.count
+    locationPair.markdown += markdown.utf16.count
     locationPair.rendered += attributedString.length
     for child in children {
       locationPair = child.updateInitialLocationPair(locationPair)

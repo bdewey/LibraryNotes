@@ -138,7 +138,7 @@ public final class RenderedMarkdown {
       ?? finalLocationPair.rendered
     return ChangeDescription(
       changedCharacterRange: changedRange.offset(by: initialRenderedLocation),
-      sizeChange: finalRendering.string.count - initialRendering.string.count,
+      sizeChange: finalRendering.string.utf16.count - initialRendering.string.utf16.count,
       changedAttributesRange: NSRange(
         location: initialRenderedLocation,
         length: finalRenderedLocation - initialRenderedLocation

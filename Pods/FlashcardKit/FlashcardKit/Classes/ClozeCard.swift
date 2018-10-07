@@ -6,17 +6,17 @@ import CommonplaceBook
 import Foundation
 import MiniMarkdown
 
-struct ClozeCard {
-  init(node: Node, clozeIndex: Int) {
+public struct ClozeCard {
+  public init(node: Node, clozeIndex: Int) {
     self.node = node
     self.clozeIndex = clozeIndex
   }
 
-  private let node: Node
+  public let node: Node
 
   // TODO: I don't actually do anything with the clozeIndex.
 
-  private let clozeIndex: Int
+  public let clozeIndex: Int
 
   public var utterance: AVSpeechUtterance {
     let phrase = clozeRenderer.render(node: node)
@@ -33,32 +33,40 @@ struct ClozeCard {
   }
 
   public func cardFront(with stylesheet: Stylesheet) -> NSAttributedString {
-    let combinedClozeAndCaption = NSMutableAttributedString()
-    combinedClozeAndCaption.append(cardFrontRenderer.render(node: node))
-    combinedClozeAndCaption.append(NSAttributedString(string: "\n"))
-    combinedClozeAndCaption.append(captionRenderer.render(node: node))
-    return combinedClozeAndCaption
+    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
+      stylesheet: stylesheet,
+      hideClozeAt: clozeIndex
+    )
+    return cardFrontRenderer.render(node: node)
   }
 
   public func cardBack(with stylesheet: Stylesheet) -> NSAttributedString {
-    return cardBackRenderer.render(node: node)
+    return MarkdownAttributedStringRenderer
+      .cardBackRenderer(stylesheet: stylesheet, revealingClozeAt: clozeIndex)
+      .render(node: node)
   }
 }
 
 extension ClozeCard {
-  static func makeCards(from markdown: [Node]) -> [ClozeCard] {
+  public static func makeCards(from markdown: [Node]) -> [ClozeCard] {
     let clozes = markdown
       .map { $0.findNodes(where: { $0.type == .cloze }) }
       .joined()
       .compactMap { $0.findFirstAncestor(where: { $0.type == .paragraph || $0.type == .listItem }) }
     DDLogDebug("Found \(clozes.count) clozes")
-    return clozes.map { ClozeCard(node: $0, clozeIndex: 0) }
+    var indexForNode: [ObjectIdentifier: Int] = [:]
+    return clozes.map { (node) in
+      let index = indexForNode[ObjectIdentifier(node), default: 0]
+      indexForNode[ObjectIdentifier(node)] = index + 1
+      return ClozeCard(node: node, clozeIndex: index)
+    }
   }
 }
 
 extension ClozeCard: Card {
   var identifier: String {
-    return String(node.slice.substring)
+    let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
+    return String(node.slice.substring) + suffix
   }
 
   func cardView(with stylesheet: Stylesheet) -> CardView {
@@ -82,59 +90,101 @@ private let defaultParagraphStyle: NSParagraphStyle = {
   return paragraphStyle
 }()
 
-private let textAttributes: [NSAttributedString.Key: Any] = [
-  .font: Stylesheet.hablaEspanol.typographyScheme.body2,
-  .foregroundColor: UIColor(white: 0, alpha: 0.87),
-  .paragraphStyle: defaultParagraphStyle,
-]
+extension Stylesheet {
 
-private let clozeAttributes: [NSAttributedString.Key: Any] = [
-  .font: Stylesheet.hablaEspanol.typographyScheme.body2,
-  .foregroundColor: UIColor(rgb: 0xf6e6f0),
-  .backgroundColor: UIColor(rgb: 0xf6e6f0),
-  .paragraphStyle: defaultParagraphStyle,
-]
-
-private let captionAttributes: [NSAttributedString.Key: Any] = [
-  .font: Stylesheet.hablaEspanol.typographyScheme.caption,
-  .foregroundColor: UIColor(white: 0, alpha: 0.6),
-  .kern: 0.4,
-  .paragraphStyle: defaultParagraphStyle,
-]
-
-private let baseRenderer: MarkdownAttributedStringRenderer = {
-  var renderer = MarkdownAttributedStringRenderer()
-  renderer.renderFunctions[.text] = { (node) in
-    return NSAttributedString(string: String(node.slice.substring), attributes: textAttributes)
+  var textAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
   }
-  return renderer
-}()
 
-private let cardFrontRenderer: MarkdownAttributedStringRenderer = {
-  var renderer = baseRenderer
-  renderer.renderFunctions[.cloze] = { (node) in
-    guard let cloze = node as? Cloze else { return NSAttributedString() }
-    return NSAttributedString(string: String(cloze.hiddenText), attributes: clozeAttributes)
+  var clozeAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colorScheme.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .backgroundColor: UIColor(rgb: 0xf6e6f0),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
   }
-  return renderer
-}()
 
-private let captionRenderer: MarkdownAttributedStringRenderer = {
-  var renderer = MarkdownAttributedStringRenderer()
-  renderer.renderFunctions[.cloze] = { (node) in
-    guard let cloze = node as? Cloze else { return NSAttributedString() }
-    return NSAttributedString(string: String(cloze.hint), attributes: captionAttributes)
+  var captionAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.caption,
+      .foregroundColor: colorScheme.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .kern: kern[.caption] ?? 1.0,
+      .paragraphStyle: defaultParagraphStyle,
+    ]
   }
-  return renderer
-}()
+}
 
-private let cardBackRenderer: MarkdownAttributedStringRenderer = {
-  var renderer = baseRenderer
-  var localClozeAttributes = clozeAttributes
-  localClozeAttributes[.foregroundColor] = UIColor(white: 0, alpha: 0.87)
-  renderer.renderFunctions[.cloze] = { (node) in
-    guard let cloze = node as? Cloze else { return NSAttributedString() }
-    return NSAttributedString(string: String(cloze.hiddenText), attributes: localClozeAttributes)
+extension MarkdownAttributedStringRenderer {
+  init(stylesheet: Stylesheet) {
+    self.init()
+    renderFunctions[.text] = { (node) in
+      return NSAttributedString(
+        string: String(node.slice.substring),
+        attributes: stylesheet.textAttributes
+      )
+    }
   }
-  return renderer
-}()
+
+  static func cardFront(
+    stylesheet: Stylesheet,
+    hideClozeAt index: Int
+  ) -> MarkdownAttributedStringRenderer {
+    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
+    var renderedCloze = 0
+    renderer.renderFunctions[.cloze] = { (node) in
+      guard let cloze = node as? Cloze else { return NSAttributedString() }
+      let shouldHide = renderedCloze == index
+      renderedCloze += 1
+      if shouldHide {
+        return NSAttributedString(
+          string: String(cloze.hint),
+          attributes: stylesheet.clozeAttributes
+        )
+      } else {
+        return NSAttributedString(
+          string: String(cloze.hiddenText),
+          attributes: stylesheet.textAttributes
+        )
+      }
+    }
+    return renderer
+  }
+
+  static func captionRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
+    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
+    renderer.renderFunctions[.cloze] = { (node) in
+      guard let cloze = node as? Cloze else { return NSAttributedString() }
+      return NSAttributedString(
+        string: String(cloze.hint),
+        attributes: stylesheet.captionAttributes
+      )
+    }
+    return renderer
+  }
+
+  static func cardBackRenderer(
+    stylesheet: Stylesheet,
+    revealingClozeAt index: Int
+  ) -> MarkdownAttributedStringRenderer {
+    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
+    var localClozeAttributes = stylesheet.clozeAttributes
+    localClozeAttributes[.foregroundColor] = stylesheet.colorScheme
+      .onSurfaceColor
+      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    var renderedCloze = 0
+    renderer.renderFunctions[.cloze] = { (node) in
+      let attributes = renderedCloze == index ? localClozeAttributes : stylesheet.textAttributes
+      renderedCloze += 1
+      guard let cloze = node as? Cloze else { return NSAttributedString() }
+      return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
+    }
+    return renderer
+  }
+}

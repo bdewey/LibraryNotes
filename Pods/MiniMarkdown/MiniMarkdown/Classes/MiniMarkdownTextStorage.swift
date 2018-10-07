@@ -65,13 +65,13 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
 
   // MARK: - Required overrides
 
-  private var memoizedAttributedString: NSAttributedString?
+  private var memoizedAttributedString: NSMutableAttributedString?
 
-  private func getAttributedString() -> NSAttributedString {
+  private func getAttributedString() -> NSMutableAttributedString {
     if let memoizedString = self.memoizedAttributedString {
       return memoizedString
     }
-    let memoizedString = storage.attributedString
+    let memoizedString = NSMutableAttributedString(attributedString: storage.attributedString)
     self.memoizedAttributedString = memoizedString
     return memoizedString
   }
@@ -113,11 +113,13 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
       range: change.changedCharacterRange,
       changeInLength: change.sizeChange
     )
-    self.edited(
-      NSTextStorage.EditActions.editedAttributes,
-      range: change.changedAttributesRange,
-      changeInLength: 0
-    )
+    if change.changedAttributesRange.length > 0 {
+      self.edited(
+        NSTextStorage.EditActions.editedAttributes,
+        range: change.changedAttributesRange,
+        changeInLength: 0
+      )
+    }
     NotificationCenter.default.post(
       name: .miniMarkdownTextStorageNodesDidChange,
       object: self,
@@ -130,6 +132,10 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
   }
 
   override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
-    // NOTHING
+    guard let attrs = attrs, attrs.count > 0 else {
+      DDLogDebug("Ignoring call to clear attributes at range \(range)")
+      return
+    }
+    getAttributedString().setAttributes(attrs, range: range)
   }
 }
