@@ -6,37 +6,41 @@ import CocoaLumberjack
 import Foundation
 import IGListKit
 
-public struct FileMetadata: Equatable {
+public struct FileMetadata: Equatable, Codable {
   public init(metadataItem: NSMetadataItem) {
-    self.fileURL = metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
-    self.displayName = String(
-      metadataItem.value(forAttribute: NSMetadataItemDisplayNameKey) as! NSString
-    )
+    self.contentChangeDate = metadataItem.value(
+      forAttribute: NSMetadataItemFSContentChangeDateKey
+    ) as! Date
     self.contentType = String(
       metadataItem.value(forAttribute: NSMetadataItemContentTypeKey) as! NSString
     )
-    self.downloadingStatus = String(metadataItem.value(
-      forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey
-      ) as! NSString)
-    self.isDownloading = (metadataItem.value(
-      forAttribute: NSMetadataUbiquitousItemIsDownloadingKey
-      ) as! NSNumber).boolValue
-    self.isUploading = (metadataItem.value(
-      forAttribute: NSMetadataUbiquitousItemIsUploadingKey
-      ) as! NSNumber).boolValue
     let nsStringArray = metadataItem.value(
       forAttribute: NSMetadataItemContentTypeTreeKey
       ) as! [NSString]
     self.contentTypeTree = nsStringArray.map { String($0) }
+    self.displayName = String(
+      metadataItem.value(forAttribute: NSMetadataItemDisplayNameKey) as! NSString
+    )
+    self.downloadingStatus = String(metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey
+      ) as! NSString)
+    self.fileURL = metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
+    self.isDownloading = (metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemIsDownloadingKey
+    ) as! NSNumber).boolValue
+    self.isUploading = (metadataItem.value(
+      forAttribute: NSMetadataUbiquitousItemIsUploadingKey
+    ) as! NSNumber).boolValue
   }
 
-  public let fileURL: URL
-  public let displayName: String
+  public let contentChangeDate: Date
   public let contentType: String
+  public let contentTypeTree: [String]
+  public let displayName: String
   public let downloadingStatus: String
+  public let fileURL: URL
   public let isDownloading: Bool
   public let isUploading: Bool
-  public let contentTypeTree: [String]
 }
 
 // Immutable value object with key properties of an NSMetadataItem, which apparently mutates.

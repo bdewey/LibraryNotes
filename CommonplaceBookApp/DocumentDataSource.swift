@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import CommonplaceBook
 import Foundation
 import IGListKit
@@ -30,6 +31,14 @@ extension DocumentDataSource: MetadataQueryDelegate {
       .sorted(by: { $0.value.displayName < $1.value.displayName })
     for fileMetadata in models {
       fileMetadata.downloadIfNeeded()
+      DocumentProperties.loadProperties(from: fileMetadata) { (result) in
+        switch result {
+        case .success(let properties):
+          DDLogInfo("Successfully loaded: " + properties.title)
+        case .failure(let error):
+          DDLogError("Error loading properties: \(error)")
+        }
+      }
     }
     adapter?.performUpdates(animated: true)
   }

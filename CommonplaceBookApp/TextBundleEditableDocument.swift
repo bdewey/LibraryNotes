@@ -6,11 +6,16 @@ import FlashcardKit
 import Foundation
 import MiniMarkdown
 import TextBundleKit
+import enum TextBundleKit.Result
 
 private let listenerKey = "org.brians-brain.CommonplaceBookApp.TextBundleDocumentListener"
 private let placeholderImage = UIImage(named: "round_crop_original_black_24pt")!
 
 extension TextBundleDocument: EditableDocument {
+  public var currentTextResult: Result<Tagged<String>> {
+    return text.taggedResult
+  }
+
   public var textSignal: Signal<Tagged<String>> {
     return text.signal
   }

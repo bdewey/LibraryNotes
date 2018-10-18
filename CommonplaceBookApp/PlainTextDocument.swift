@@ -52,6 +52,11 @@ final class PlainTextDocument: UIDocumentWithPreviousError {
 }
 
 extension PlainTextDocument: EditableDocument {
+  var currentTextResult: Result<Tagged<String>> {
+    // TODO: This isn't the real tag.
+    return .success(Tagged(tag: .memory, value: text))
+  }
+
   func applyTaggedModification(tag: Tag, modification: (String) -> String) {
     text = modification(text)
     updateChangeCount(.done)

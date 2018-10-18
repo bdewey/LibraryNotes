@@ -50,6 +50,19 @@ PODS:
     - SDWebImage/GIF (~> 4.0)
     - SnapKit (~> 4.0)
     - TextBundleKit (~> 0.5)
+  - FlashcardKit/Tests (0.3.1):
+    - CollectionViewLayouts
+    - CommonplaceBook (~> 0.2)
+    - CwlSignal
+    - CwlUtils
+    - DZNPhotoPickerController
+    - MaterialComponents (>= 61.0)
+    - MiniMarkdown (~> 0.8.1)
+    - NunitoSans
+    - SDWebImage (~> 4.0)
+    - SDWebImage/GIF (~> 4.0)
+    - SnapKit (~> 4.0)
+    - TextBundleKit (~> 0.5)
   - IGListKit (3.4.0):
     - IGListKit/Default (= 3.4.0)
   - IGListKit/Default (3.4.0):
@@ -564,7 +577,8 @@ DEPENDENCIES:
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
+  - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit/Tests (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -601,7 +615,7 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :git: https://github.com/bdewey/FlashcardKit
+    :path: "../FlashcardKit"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -629,9 +643,6 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
-  FlashcardKit:
-    :commit: 922e640ecf58920e1c631ed976ea6f5fef75b824
-    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
     :git: https://github.com/material-components/material-components-ios
@@ -658,7 +669,7 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 2b585087d2e0390cbd1450177d26acf6abe88b60
+  FlashcardKit: 46cdb7f46867c787a3913d5e0f44625aa26546b0
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
@@ -673,6 +684,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: 3643b5d4d9b218f6ebb094dd0eda84ed9ec4f977
+PODFILE CHECKSUM: bc48ff2f5e716010029202389487f6c3d586dd97
 
 COCOAPODS: 1.5.0

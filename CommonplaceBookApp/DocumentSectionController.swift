@@ -83,7 +83,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 }
 
 extension FileMetadataWrapper {
-  private var editableDocument: (UIDocument & EditableDocument)? {
+  internal var editableDocument: (UIDocumentWithPreviousError & EditableDocument)? {
     if value.contentTypeTree.contains("public.plain-text") {
       return PlainTextDocument(fileURL: value.fileURL)
     } else if value.contentTypeTree.contains("org.textbundle.package") {
