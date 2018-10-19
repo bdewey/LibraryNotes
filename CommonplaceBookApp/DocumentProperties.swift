@@ -2,17 +2,16 @@
 
 import CwlSignal
 import Foundation
+import IGListKit
 import TextBundleKit
 import enum TextBundleKit.Result
 
-public struct DocumentProperties: Codable {
-  public let contentChangeDate: Date
+public struct DocumentProperties: Equatable, Codable {
+  public let fileMetadata: FileMetadata
   public let title: String
-  public let url: URL
 
-  private init(contentChangeDate: Date, url: URL, text: String) {
-    self.contentChangeDate = contentChangeDate
-    self.url = url
+  private init(fileMetadata: FileMetadata, text: String) {
+    self.fileMetadata = fileMetadata
     self.title = String(text.split(separator: "\n").first ?? "")
   }
 
@@ -20,7 +19,7 @@ public struct DocumentProperties: Codable {
     from metadataWrapper: FileMetadataWrapper,
     completion: @escaping (Result<DocumentProperties>) -> Void
   ) {
-    guard let document = metadataWrapper.editableDocument else {
+    guard let document = metadataWrapper.value.editableDocument else {
       completion(.failure(Error.noEditableDocument))
       return
     }
@@ -28,8 +27,7 @@ public struct DocumentProperties: Codable {
       if success {
         let result = document.currentTextResult.flatMap({ (taggedText) -> DocumentProperties in
           return DocumentProperties(
-            contentChangeDate: metadataWrapper.value.contentChangeDate,
-            url: metadataWrapper.value.fileURL,
+            fileMetadata: metadataWrapper.value,
             text: taggedText.value
           )
         })
@@ -46,5 +44,22 @@ extension DocumentProperties {
   enum Error: Swift.Error {
     case noEditableDocument
     case cannotOpenDocument
+  }
+}
+
+public final class DocumentPropertiesListDiffable: ListDiffable {
+  public let value: DocumentProperties
+
+  public init(_ value: DocumentProperties) {
+    self.value = value
+  }
+
+  public func diffIdentifier() -> NSObjectProtocol {
+    return value.fileMetadata.fileURL as NSURL
+  }
+
+  public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
+    guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
+    return value == otherWrapper.value
   }
 }

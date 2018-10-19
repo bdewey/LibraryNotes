@@ -16,7 +16,7 @@ public final class DocumentSectionController: ListSectionController {
 
   private let dataSource: DocumentDataSource
   private let stylesheet: Stylesheet
-  private var fileMetadata: FileMetadataWrapper!
+  private var properties: DocumentPropertiesListDiffable!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
     let cell = collectionContext!.dequeueReusableCell(
@@ -25,12 +25,12 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    cell.titleLabel.text = fileMetadata.value.displayName
-    if fileMetadata.value.isUploading {
+    cell.titleLabel.text = properties.value.fileMetadata.displayName
+    if properties.value.fileMetadata.isUploading {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
-    } else if fileMetadata.value.isDownloading {
+    } else if properties.value.fileMetadata.isDownloading {
       cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if fileMetadata.value.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
+    } else if properties.value.fileMetadata.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
       cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
     } else {
       cell.statusIcon.image = nil
@@ -44,11 +44,11 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didUpdate(to object: Any) {
-    self.fileMetadata = (object as! FileMetadataWrapper) // swiftlint:disable:this force_cast
+    self.properties = (object as! DocumentPropertiesListDiffable) // swiftlint:disable:this force_cast
   }
 
   public override func didSelectItem(at index: Int) {
-    fileMetadata.loadEditingViewController(stylesheet: stylesheet) { (editingViewController) in
+    properties.value.fileMetadata.loadEditingViewController(stylesheet: stylesheet) { (editingViewController) in
       guard let editingViewController = editingViewController else { return }
       self.viewController?.navigationController?.pushViewController(
         editingViewController,
@@ -67,27 +67,28 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
     guard orientation == .right else { return nil }
 
     let dataSource = self.dataSource
-    let fileMetadata = self.fileMetadata
-    let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-      dataSource.deleteMetadata(fileMetadata!)
-      // handle action by updating model with deletion
-      action.fulfill(with: .delete)
+    if let propertiesToDelete = self.properties {
+      let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
+        dataSource.deleteDocument(propertiesToDelete)
+        // handle action by updating model with deletion
+        action.fulfill(with: .delete)
+      }
+      // TODO: customize the action appearance
+      deleteAction.image = UIImage(named: "delete")
+      deleteAction.hidesWhenSelected = true
+      return [deleteAction]
+    } else {
+      return []
     }
-
-    // TODO: customize the action appearance
-    deleteAction.image = UIImage(named: "delete")
-    deleteAction.hidesWhenSelected = true
-
-    return [deleteAction]
   }
 }
 
-extension FileMetadataWrapper {
+extension FileMetadata {
   internal var editableDocument: (UIDocumentWithPreviousError & EditableDocument)? {
-    if value.contentTypeTree.contains("public.plain-text") {
-      return PlainTextDocument(fileURL: value.fileURL)
-    } else if value.contentTypeTree.contains("org.textbundle.package") {
-      return TextBundleDocument(fileURL: value.fileURL)
+    if contentTypeTree.contains("public.plain-text") {
+      return PlainTextDocument(fileURL: fileURL)
+    } else if contentTypeTree.contains("org.textbundle.package") {
+      return TextBundleDocument(fileURL: fileURL)
     } else {
       return nil
     }
@@ -133,7 +134,7 @@ extension FileMetadataWrapper {
     }
     document.open { (success) in
       guard success else { completion(nil); return }
-      if self.value.contentTypeTree.contains("org.brians-brain.swiftflash") {
+      if self.contentTypeTree.contains("org.brians-brain.swiftflash") {
         // swiftlint:disable:next force_cast
         completion(self.languageViewController(for: document as! TextBundleDocument))
       } else {
