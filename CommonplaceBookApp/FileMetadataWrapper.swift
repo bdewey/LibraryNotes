@@ -62,17 +62,6 @@ public final class FileMetadataWrapper: Equatable {
   }
 }
 
-extension FileMetadataWrapper: ListDiffable {
-  public func diffIdentifier() -> NSObjectProtocol {
-    return value.fileURL as NSURL
-  }
-
-  public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
-    guard let otherItem = object as? FileMetadataWrapper else { return false }
-    return value == otherItem.value
-  }
-}
-
 extension FileMetadataWrapper {
   private static let downloadQueue = DispatchQueue(
     label: "org.brians-brain.FileMetadata.download",
