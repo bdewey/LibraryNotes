@@ -5,6 +5,7 @@ import CoreServices
 import FlashcardKit
 import IGListKit
 import MaterialComponents
+import MiniMarkdown
 import UIKit
 
 private let reuseIdentifier = "HACKY_document"
@@ -23,9 +24,10 @@ extension NSComparisonPredicate {
 
 final class DocumentListViewController: UIViewController, StylesheetContaining {
 
-  init(stylesheet: Stylesheet) {
+  init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
+    self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(parsingRules: parsingRules, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
     self.navigationItem.rightBarButtonItem = newDocumentButton
@@ -35,6 +37,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     fatalError("init(coder:) has not been implemented")
   }
 
+  private let parsingRules: ParsingRules
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
 

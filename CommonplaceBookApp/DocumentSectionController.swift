@@ -4,6 +4,7 @@ import CommonplaceBook
 import FlashcardKit
 import Foundation
 import IGListKit
+import MiniMarkdown
 import SwipeCellKit
 import TextBundleKit
 
@@ -44,11 +45,15 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func didUpdate(to object: Any) {
-    self.properties = (object as! DocumentPropertiesListDiffable) // swiftlint:disable:this force_cast
+    // swiftlint:disable:next force_cast
+    self.properties = (object as! DocumentPropertiesListDiffable)
   }
 
   public override func didSelectItem(at index: Int) {
-    properties.value.fileMetadata.loadEditingViewController(stylesheet: stylesheet) { (editingViewController) in
+    properties.value.fileMetadata.loadEditingViewController(
+      parsingRules: dataSource.parsingRules,
+      stylesheet: stylesheet
+    ) { (editingViewController) in
       guard let editingViewController = editingViewController else { return }
       self.viewController?.navigationController?.pushViewController(
         editingViewController,
@@ -94,7 +99,10 @@ extension FileMetadata {
     }
   }
 
-  private func languageViewController(for document: TextBundleDocument) -> UIViewController {
+  private func languageViewController(
+    for document: TextBundleDocument,
+    parsingRules: ParsingRules
+  ) -> UIViewController {
     let textViewController = TextEditViewController(
       document: document,
       parsingRules: LanguageDeck.parsingRules,
@@ -125,6 +133,7 @@ extension FileMetadata {
   }
 
   func loadEditingViewController(
+    parsingRules: ParsingRules,
     stylesheet: Stylesheet,
     completion: @escaping (UIViewController?) -> Void
   ) {
@@ -135,8 +144,10 @@ extension FileMetadata {
     document.open { (success) in
       guard success else { completion(nil); return }
       if self.contentTypeTree.contains("org.brians-brain.swiftflash") {
-        // swiftlint:disable:next force_cast
-        completion(self.languageViewController(for: document as! TextBundleDocument))
+        completion(self.languageViewController(
+          for: document as! TextBundleDocument, // swiftlint:disable:this force_cast
+          parsingRules: parsingRules
+        ))
       } else {
         completion(
           TextEditViewController(

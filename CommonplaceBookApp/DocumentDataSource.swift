@@ -4,13 +4,16 @@ import CocoaLumberjack
 import CommonplaceBook
 import Foundation
 import IGListKit
+import MiniMarkdown
 
 public final class DocumentDataSource: NSObject {
 
-  public init(stylesheet: Stylesheet) {
+  public init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
+    self.parsingRules = parsingRules
     self.stylesheet = stylesheet
   }
 
+  public let parsingRules: ParsingRules
   private let stylesheet: Stylesheet
   public weak var adapter: ListAdapter?
   private var properties: [URL: DocumentPropertiesListDiffable] = [:]
@@ -30,7 +33,10 @@ extension DocumentDataSource: MetadataQueryDelegate {
       fileMetadata.value.contentChangeDate {
       return
     }
-    DocumentProperties.loadProperties(from: fileMetadata) { (result) in
+    DocumentProperties.loadProperties(
+      from: fileMetadata,
+      parsingRules: parsingRules
+    ) { (result) in
       switch result {
       case .success(let properties):
         self.properties[urlKey] = DocumentPropertiesListDiffable(properties)

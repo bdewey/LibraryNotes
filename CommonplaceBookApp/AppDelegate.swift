@@ -22,7 +22,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
-      DocumentListViewController(stylesheet: commonplaceBookStylesheet),
+      DocumentListViewController(
+        parsingRules: LanguageDeck.parsingRules,
+        stylesheet: commonplaceBookStylesheet
+      ),
       animated: false
     )
     window.rootViewController = navigationController

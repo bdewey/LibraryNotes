@@ -1,8 +1,10 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
 import CwlSignal
+import FlashcardKit
 import Foundation
 import IGListKit
+import MiniMarkdown
 import TextBundleKit
 import enum TextBundleKit.Result
 
@@ -10,13 +12,14 @@ public struct DocumentProperties: Equatable, Codable {
   public let fileMetadata: FileMetadata
   public let title: String
 
-  private init(fileMetadata: FileMetadata, text: String) {
+  private init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
-    self.title = String(text.split(separator: "\n").first ?? "")
+    self.title = nodes.title
   }
 
   public static func loadProperties(
     from metadataWrapper: FileMetadataWrapper,
+    parsingRules: ParsingRules,
     completion: @escaping (Result<DocumentProperties>) -> Void
   ) {
     guard let document = metadataWrapper.value.editableDocument else {
@@ -28,9 +31,10 @@ public struct DocumentProperties: Equatable, Codable {
         let textResult = document.currentTextResult
         DispatchQueue.global(qos: .default).async {
           let result = textResult.flatMap({ (taggedText) -> DocumentProperties in
+            let nodes = parsingRules.parse(taggedText.value)
             return DocumentProperties(
               fileMetadata: metadataWrapper.value,
-              text: taggedText.value
+              nodes: nodes
             )
           })
           DispatchQueue.main.async {
@@ -66,5 +70,18 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
     return value == otherWrapper.value
+  }
+}
+
+/// Helpers for extracting document properties from nodes.
+extension Array where Element == Node {
+  var title: String {
+    if let heading = self.lazy.compactMap({ $0.first(where: { $0.type == .heading }) }).first {
+      return MarkdownStringRenderer.textOnly.render(node: heading)
+    } else if let notBlank = self.lazy.compactMap({ $0.first(where: { $0.type != .blank }) }).first {
+      return MarkdownStringRenderer.textOnly.render(node: notBlank)
+    } else {
+      return ""
+    }
   }
 }
