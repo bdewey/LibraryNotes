@@ -24,23 +24,32 @@ public final class DocumentDataSource: NSObject {
 }
 
 extension DocumentDataSource: MetadataQueryDelegate {
+  fileprivate func updateProperties(for fileMetadata: FileMetadataWrapper) {
+    let urlKey = fileMetadata.value.fileURL
+    if properties[urlKey]?.value.fileMetadata.contentChangeDate ==
+      fileMetadata.value.contentChangeDate {
+      return
+    }
+    DocumentProperties.loadProperties(from: fileMetadata) { (result) in
+      switch result {
+      case .success(let properties):
+        self.properties[urlKey] = DocumentPropertiesListDiffable(properties)
+        DDLogInfo("Successfully loaded: " + properties.title)
+        self.adapter?.performUpdates(animated: true)
+      case .failure(let error):
+        self.properties[urlKey] = nil
+        DDLogError("Error loading properties: \(error)")
+      }
+    }
+  }
+
   public func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
     let models = items
       .map { FileMetadataWrapper(metadataItem: $0) }
     for fileMetadata in models {
       fileMetadata.downloadIfNeeded()
-      DocumentProperties.loadProperties(from: fileMetadata) { (result) in
-        switch result {
-        case .success(let properties):
-          self.properties[properties.fileMetadata.fileURL] = DocumentPropertiesListDiffable(properties)
-          DDLogInfo("Successfully loaded: " + properties.title)
-        case .failure(let error):
-          self.properties[fileMetadata.value.fileURL] = nil
-          DDLogError("Error loading properties: \(error)")
-        }
-      }
+      updateProperties(for: fileMetadata)
     }
-    adapter?.performUpdates(animated: true)
   }
 }
 
