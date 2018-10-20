@@ -25,13 +25,18 @@ public struct DocumentProperties: Equatable, Codable {
     }
     document.open { (success) in
       if success {
-        let result = document.currentTextResult.flatMap({ (taggedText) -> DocumentProperties in
-          return DocumentProperties(
-            fileMetadata: metadataWrapper.value,
-            text: taggedText.value
-          )
-        })
-        completion(result)
+        let textResult = document.currentTextResult
+        DispatchQueue.global(qos: .default).async {
+          let result = textResult.flatMap({ (taggedText) -> DocumentProperties in
+            return DocumentProperties(
+              fileMetadata: metadataWrapper.value,
+              text: taggedText.value
+            )
+          })
+          DispatchQueue.main.async {
+            completion(result)
+          }
+        }
       } else {
         let error = document.previousError ?? Error.cannotOpenDocument
         completion(.failure(error))
