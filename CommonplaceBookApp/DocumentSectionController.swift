@@ -26,7 +26,10 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    cell.titleLabel.text = properties.value.fileMetadata.displayName
+    cell.titleLabel.attributedText = NSAttributedString(
+      string: properties.value.fileMetadata.displayName,
+      attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
+    )
     if properties.value.fileMetadata.isUploading {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
     } else if properties.value.fileMetadata.isDownloading {
@@ -36,12 +39,21 @@ public final class DocumentSectionController: ListSectionController {
     } else {
       cell.statusIcon.image = nil
     }
+    let dateDelta = Calendar.current.dateComponents(
+      [.day, .hour, .minute],
+      from: properties.value.fileMetadata.contentChangeDate,
+      to: Date()
+    )
+    cell.ageLabel.attributedText = NSAttributedString(
+      string: ageFormatter.string(from: dateDelta) ?? "",
+      attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
+    )
     cell.delegate = self
     return cell
   }
 
   public override func sizeForItem(at index: Int) -> CGSize {
-    return CGSize(width: collectionContext!.containerSize.width, height: 44)
+    return CGSize(width: collectionContext!.containerSize.width, height: 56)
   }
 
   public override func didUpdate(to object: Any) {
@@ -62,6 +74,13 @@ public final class DocumentSectionController: ListSectionController {
     }
   }
 }
+
+private let ageFormatter: DateComponentsFormatter = {
+  let ageFormatter = DateComponentsFormatter()
+  ageFormatter.maximumUnitCount = 1
+  ageFormatter.allowedUnits = [.day, .hour, .minute]
+  return ageFormatter
+}()
 
 extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   public func collectionView(

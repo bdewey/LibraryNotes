@@ -573,7 +573,7 @@ PODS:
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
-  - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
+  - CommonplaceBook (from `../CommonplaceBook`)
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
@@ -607,7 +607,7 @@ EXTERNAL SOURCES:
   CollectionViewLayouts:
     :git: https://github.com/bdewey/CollectionViewLayouts.git
   CommonplaceBook:
-    :git: https://github.com/bdewey/CommonplaceBook.git
+    :path: "../CommonplaceBook"
   CwlSignal:
     :git: https://github.com/bdewey/CwlSignal
   CwlUtils:
@@ -631,9 +631,6 @@ CHECKOUT OPTIONS:
   CollectionViewLayouts:
     :commit: eb323db65d8e9b7c4cbbc31b0dfa83f1ddc90302
     :git: https://github.com/bdewey/CollectionViewLayouts.git
-  CommonplaceBook:
-    :commit: 81be31f358e462529b2b33c79e50c65e96272219
-    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :commit: c86edbc54c6613424f88782220b6c6c2771a166e
     :git: https://github.com/bdewey/CwlSignal
@@ -663,7 +660,7 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
   CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
-  CommonplaceBook: d9dccd47e596df6dfceb7589d81f8e165046062a
+  CommonplaceBook: 5fdeb7ec7a77966df6968fe980afa3b13c0a5927
   CwlSignal: 6b87ee172614a141ba06f2145f5a18bd7e66c983
   CwlUtils: c1ba508748e8000989df81730b153f4eaeaaa6c8
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
@@ -684,6 +681,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: bc48ff2f5e716010029202389487f6c3d586dd97
+PODFILE CHECKSUM: f29c3fd33e908a81ddc65486eb67f27e66c3485a
 
 COCOAPODS: 1.5.0

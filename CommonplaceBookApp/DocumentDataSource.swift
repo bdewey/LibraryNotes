@@ -61,7 +61,7 @@ extension DocumentDataSource: MetadataQueryDelegate {
 
 extension DocumentDataSource: ListAdapterDataSource {
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    return properties.values.sorted(by: { $0.value.fileMetadata.displayName < $1.value.fileMetadata.displayName })
+    return properties.values.sorted(by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate })
   }
 
   public func listAdapter(

@@ -96,7 +96,8 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    layout.itemSize = CGSize(width: view.bounds.width, height: 48)
+    layout.itemSize = CGSize(width: view.bounds.width, height: 56)
+    layout.invalidateLayout()
   }
 
   override func viewWillTransition(
@@ -104,7 +105,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     with coordinator: UIViewControllerTransitionCoordinator
   ) {
     super.viewWillTransition(to: size, with: coordinator)
-    layout.itemSize = CGSize(width: size.width, height: 48)
+    layout.itemSize = CGSize(width: size.width, height: 56)
   }
 
   @objc private func didTapNewDocument() {

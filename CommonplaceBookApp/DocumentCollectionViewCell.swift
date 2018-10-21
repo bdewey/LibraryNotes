@@ -12,8 +12,10 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     inkTouchController = MDCInkTouchController(view: contentView)
     inkTouchController.addInkView()
     self.contentView.addSubview(titleLabel)
+    self.contentView.addSubview(ageLabel)
     self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
+    ageLabel.text = "1d"
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -21,12 +23,11 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   }
 
   let titleLabel = UILabel(frame: .zero)
+  let ageLabel = UILabel(frame: .zero)
   let statusIcon = UIImageView(frame: .zero)
   var stylesheet: Stylesheet? {
     didSet {
       if let stylesheet = stylesheet {
-        titleLabel.font = stylesheet.typographyScheme.body2
-        titleLabel.textColor = stylesheet.colorScheme.onSurfaceColor
         self.backgroundColor = stylesheet.colorScheme.surfaceColor
         divider.backgroundColor = stylesheet.colorScheme.onSurfaceColor.withAlphaComponent(0.12)
       }
@@ -38,10 +39,26 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   override func layoutSubviews() {
     super.layoutSubviews()
     let bounds = self.contentView.bounds
-    let layoutRect = bounds.insetBy(dx: 16, dy: 12)
-    let (statusIconSlice, textSlice) = layoutRect.divided(atDistance: 24.0, from: .maxXEdge)
-    self.statusIcon.frame = statusIconSlice
-    self.titleLabel.frame = textSlice
-    self.divider.frame = bounds.divided(atDistance: 1, from: .maxYEdge).slice
+    var layoutRect = bounds.insetBy(dx: 16, dy: 0)
+    layoutRect.removeSection(atDistance: 56.0, from: .minXEdge) { (ageSlice) in
+      ageLabel.frame = ageSlice.inset(by: UIEdgeInsets(top: 8, left: 0, bottom: 8, right: 16))
+    }
+    self.divider.frame = layoutRect.divided(atDistance: 1, from: .maxYEdge).slice
+    layoutRect.removeSection(atDistance: 24.0, from: .maxXEdge) { (statusIconSlice) in
+      statusIcon.frame = statusIconSlice
+    }
+    self.titleLabel.frame = layoutRect
+  }
+}
+
+extension CGRect {
+  mutating func removeSection(
+    atDistance distance: CGFloat,
+    from edge: CGRectEdge,
+    block: (CGRect) -> Void
+  ) {
+    let division = self.divided(atDistance: distance, from: edge)
+    block(division.slice)
+    self = division.remainder
   }
 }

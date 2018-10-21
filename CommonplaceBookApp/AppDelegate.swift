@@ -43,8 +43,12 @@ private let commonplaceBookStylesheet: Stylesheet = {
   stylesheet.colorScheme.surfaceColor = UIColor.white
   stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
   stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
+  stylesheet.typographyScheme.caption = UIFont(name: "Merriweather-Light", size: 11.4)!
+  stylesheet.typographyScheme.subtitle1 = UIFont(name: "LibreFranklin-SemiBold", size: 15.95)!
   stylesheet.kern[.headline6] = 0.25
   stylesheet.kern[.body2] = 0.25
+  stylesheet.kern[.caption] = 0.4
+  stylesheet.kern[.subtitle1] = 0.15
   return stylesheet
 }()
 

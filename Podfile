@@ -9,8 +9,8 @@ target 'CommonplaceBookApp' do
 
   # Pods for remember
   pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
-  # pod 'CommonplaceBook', :path => '../CommonplaceBook'
-  pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
+  pod 'CommonplaceBook', :path => '../CommonplaceBook'
+  # pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
   pod 'CwlSignal', :git => 'https://github.com/bdewey/CwlSignal'
   pod 'CwlUtils', :git => 'https://github.com/bdewey/CwlUtils'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
