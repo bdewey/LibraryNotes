@@ -14,7 +14,7 @@ public struct DocumentProperties: Equatable, Codable {
 
   private init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
-    self.title = nodes.title
+    self.title = String(nodes.title.split(separator: "\n").first ?? "") 
   }
 
   public static func loadProperties(

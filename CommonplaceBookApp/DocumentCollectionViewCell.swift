@@ -11,11 +11,11 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     super.init(frame: frame)
     inkTouchController = MDCInkTouchController(view: contentView)
     inkTouchController.addInkView()
+    statusIcon.contentMode = .scaleAspectFit
     self.contentView.addSubview(titleLabel)
     self.contentView.addSubview(ageLabel)
     self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
-    ageLabel.text = "1d"
   }
 
   required init?(coder aDecoder: NSCoder) {

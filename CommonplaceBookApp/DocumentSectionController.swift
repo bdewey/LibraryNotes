@@ -27,7 +27,7 @@ public final class DocumentSectionController: ListSectionController {
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
     cell.titleLabel.attributedText = NSAttributedString(
-      string: properties.value.fileMetadata.displayName,
+      string: properties.value.title,
       attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
     )
     if properties.value.fileMetadata.isUploading {
@@ -39,11 +39,8 @@ public final class DocumentSectionController: ListSectionController {
     } else {
       cell.statusIcon.image = nil
     }
-    let dateDelta = Calendar.current.dateComponents(
-      [.day, .hour, .minute],
-      from: properties.value.fileMetadata.contentChangeDate,
-      to: Date()
-    )
+    let now = Date()
+    let dateDelta = now.timeIntervalSince(properties.value.fileMetadata.contentChangeDate)
     cell.ageLabel.attributedText = NSAttributedString(
       string: ageFormatter.string(from: dateDelta) ?? "",
       attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
@@ -78,6 +75,8 @@ public final class DocumentSectionController: ListSectionController {
 private let ageFormatter: DateComponentsFormatter = {
   let ageFormatter = DateComponentsFormatter()
   ageFormatter.maximumUnitCount = 1
+  ageFormatter.unitsStyle = .abbreviated
+  ageFormatter.allowsFractionalUnits = false
   ageFormatter.allowedUnits = [.day, .hour, .minute]
   return ageFormatter
 }()
