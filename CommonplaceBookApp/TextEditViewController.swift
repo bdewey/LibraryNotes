@@ -89,6 +89,11 @@ final class TextEditViewController: UIViewController,
       }
     }
     formatters[.list] = { $1.listLevel += 1 }
+    formatters[.delimiter] = { (_, attributes) in
+      attributes.color = stylesheet.colorScheme
+        .onSurfaceColor
+        .withAlphaComponent(stylesheet.alpha[.darkTextDisabled] ?? 0.5)
+    }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
