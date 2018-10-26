@@ -5,45 +5,29 @@ import CocoaLumberjack
 import CommonplaceBook
 import Foundation
 import MiniMarkdown
+import TextBundleKit
 
-public struct ClozeCard {
-  public init(node: Node, clozeIndex: Int) {
-    self.node = node
+public struct ClozeCard: Codable {
+  public init(markdown: String, clozeIndex: Int) {
+    self.markdown = markdown
     self.clozeIndex = clozeIndex
   }
 
-  public let node: Node
-
-  // TODO: I don't actually do anything with the clozeIndex.
-
+  public let markdown: String
   public let clozeIndex: Int
 
-  public var utterance: AVSpeechUtterance {
-    let phrase = clozeRenderer.render(node: node)
-    return AVSpeechUtterance(string: phrase)
-  }
-
-  public func context(with stylesheet: Stylesheet) -> NSAttributedString {
-    let font = stylesheet.typographyScheme.overline
-    let contextString = "Fill in the blank"
-    return NSAttributedString(
-      string: contextString.localizedUppercase,
-      attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor(white: 0, alpha: 0.6)]
-    )
-  }
-
-  public func cardFront(with stylesheet: Stylesheet) -> NSAttributedString {
-    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
+  public func cardFrontRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
+    return MarkdownAttributedStringRenderer.cardFront(
       stylesheet: stylesheet,
       hideClozeAt: clozeIndex
     )
-    return cardFrontRenderer.render(node: node)
   }
 
-  public func cardBack(with stylesheet: Stylesheet) -> NSAttributedString {
-    return MarkdownAttributedStringRenderer
-      .cardBackRenderer(stylesheet: stylesheet, revealingClozeAt: clozeIndex)
-      .render(node: node)
+  public func cardBackRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
+    return MarkdownAttributedStringRenderer.cardBackRenderer(
+      stylesheet: stylesheet,
+      revealingClozeAt: clozeIndex
+    )
   }
 }
 
@@ -58,7 +42,7 @@ extension ClozeCard {
     return clozes.map { (node) in
       let index = indexForNode[ObjectIdentifier(node), default: 0]
       indexForNode[ObjectIdentifier(node)] = index + 1
-      return ClozeCard(node: node, clozeIndex: index)
+      return ClozeCard(markdown: node.allMarkdown, clozeIndex: index)
     }
   }
 }
@@ -66,58 +50,11 @@ extension ClozeCard {
 extension ClozeCard: Card {
   var identifier: String {
     let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
-    return String(node.slice.substring) + suffix
+    return markdown + suffix
   }
 
-  func cardView(with stylesheet: Stylesheet) -> CardView {
-    return ClozeCardView(card: self, stylesheet: stylesheet)
-  }
-}
-
-private let clozeRenderer: MarkdownStringRenderer = {
-  var renderer = MarkdownStringRenderer()
-  renderer.renderFunctions[.text] = { return String($0.slice.substring) }
-  renderer.renderFunctions[.cloze] = { (node) in
-    guard let cloze = node as? Cloze else { return "" }
-    return String(cloze.hiddenText)
-  }
-  return renderer
-}()
-
-private let defaultParagraphStyle: NSParagraphStyle = {
-  let paragraphStyle = NSMutableParagraphStyle()
-  paragraphStyle.alignment = .left
-  return paragraphStyle
-}()
-
-extension Stylesheet {
-
-  var textAttributes: [NSAttributedString.Key: Any] {
-    return [
-      .font: typographyScheme.body2,
-      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
-      .paragraphStyle: defaultParagraphStyle,
-    ]
-  }
-
-  var clozeAttributes: [NSAttributedString.Key: Any] {
-    return [
-      .font: typographyScheme.body2,
-      .foregroundColor: colorScheme.onSurfaceColor
-        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
-      .backgroundColor: UIColor(rgb: 0xf6e6f0),
-      .paragraphStyle: defaultParagraphStyle,
-    ]
-  }
-
-  var captionAttributes: [NSAttributedString.Key: Any] {
-    return [
-      .font: typographyScheme.caption,
-      .foregroundColor: colorScheme.onSurfaceColor
-        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
-      .kern: kern[.caption] ?? 1.0,
-      .paragraphStyle: defaultParagraphStyle,
-    ]
+  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
+    return ClozeCardView(card: self, parseableDocument: parseableDocument, stylesheet: stylesheet)
   }
 }
 
@@ -153,18 +90,6 @@ extension MarkdownAttributedStringRenderer {
           attributes: stylesheet.textAttributes
         )
       }
-    }
-    return renderer
-  }
-
-  static func captionRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
-    renderer.renderFunctions[.cloze] = { (node) in
-      guard let cloze = node as? Cloze else { return NSAttributedString() }
-      return NSAttributedString(
-        string: String(cloze.hint),
-        attributes: stylesheet.captionAttributes
-      )
     }
     return renderer
   }

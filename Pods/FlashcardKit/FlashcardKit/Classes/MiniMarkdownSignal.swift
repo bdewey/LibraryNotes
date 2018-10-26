@@ -14,7 +14,7 @@ public final class MiniMarkdownSignal {
       .continuous()
   }
 
-  private let parsingRules: MiniMarkdown.ParsingRules
+  public let parsingRules: MiniMarkdown.ParsingRules
   private let textStorage: DocumentProperty<String>
   public let signal: Signal<[Node]>
 }

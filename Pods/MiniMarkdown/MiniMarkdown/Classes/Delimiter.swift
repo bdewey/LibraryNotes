@@ -18,29 +18,21 @@
 import Foundation
 
 extension NodeType {
-  public static let bold = NodeType(rawValue: "bold")
-  public static let emphasis = NodeType(rawValue: "emphasis")
+  public static let delimiter = NodeType(rawValue: "delimiter")
 }
 
-/// Emphasis: https://spec.commonmark.org/0.28/#emphasis-and-strong-emphasis
-public final class Emphasis: DelimitedText, CharacterParseable {
+/// A region of markdown that is a delimiter of some sort of meaning, like "*" or "##".
+public final class Delimiter: Node {
 
-  public init(delimitedSlice: DelimitedSlice) {
-    super.init(type: .emphasis, delimitedSlice: delimitedSlice)
+  public init(_ slice: StringSlice) {
+    super.init(type: .delimiter, slice: slice, markdown: String(slice.substring))
   }
 
-  public static let parser = Emphasis.init <^> (
-    CharacterParsers.slice(delimitedBy: "_") ||
-    CharacterParsers.slice(delimitedBy: "*")
-  )
-}
-
-/// Strong emphasis: https://spec.commonmark.org/0.28/#emphasis-and-strong-emphasis
-public final class StrongEmphasis: DelimitedText, CharacterParseable {
-
-  public init(slice: DelimitedSlice) {
-    super.init(type: .bold, delimitedSlice: slice)
+  public init(_ character: StringCharacter) {
+    super.init(
+      type: .delimiter,
+      slice: StringSlice(character),
+      markdown: String(character.character)
+    )
   }
-
-  public static let parser = StrongEmphasis.init <^> CharacterParsers.slice(delimitedBy: "**")
 }

@@ -41,16 +41,6 @@ extension CharacterParseable where Self: Node {
 public enum CharacterParsers {
   public typealias Stream = ArraySlice<StringCharacter>
 
-  /// Constructs a slice from three parts of a delimited sequence.
-  private static func makeSlice(
-    open: StringSlice,
-    middle: [StringCharacter],
-    close: StringSlice
-    ) -> StringSlice? {
-    guard let middle = middle.stringSlice else { return nil }
-    return open + middle + close
-  }
-
   /// Parses a sequence of characters out of a stream.
   public static func characters<S: Sequence> (_ characters: S) -> Parser<StringSlice, Stream>
     where S.Element == Character {
@@ -91,7 +81,7 @@ public enum CharacterParsers {
   public static func preceedingCharacter(
     where predicate: @escaping (Character) -> Bool,
     parseSucceedsAtStreamStart: Bool
-    ) -> Parser<StringCharacter?, Stream> {
+  ) -> Parser<StringCharacter?, Stream> {
     return Parser { (stream) -> (StringCharacter?, Stream)? in
       guard let first = stream.first, let preceeding = first.previousCharacter else {
         if parseSucceedsAtStreamStart {
@@ -119,29 +109,29 @@ public enum CharacterParsers {
   /// Parses a delimited slice of text.
   public static func slice(
     delimitedBy delimiter: String
-    ) -> Parser<StringSlice, ArraySlice<StringCharacter>> {
-    return Parser { (stream) -> (StringSlice, ArraySlice<StringCharacter>)? in
-      let parser = curry(makeSlice)
-        <^> leftFlanking(characters(delimiter))
-        <*> character(where: { $0 != delimiter.first! }).many
-        <*> characters(delimiter)
-      guard let (results, remainder) = parser.parse(stream), results != nil else { return nil }
-      return (results!, remainder)
-    }
+  ) -> Parser<DelimitedSlice, ArraySlice<StringCharacter>> {
+    return curry(DelimitedSlice.init)
+      <^> leftFlanking(characters(delimiter))
+      <*> character(where: { $0 != delimiter.first! }).oneOrMore
+      <*> characters(delimiter)
   }
 
   private static func makeSlice(
     open: StringCharacter,
     middle: [StringCharacter],
     close: StringCharacter
-    ) -> StringSlice {
-    return StringSlice(open) + (middle.stringSlice + StringSlice(close))
+  ) -> DelimitedSlice {
+    return DelimitedSlice(
+      leftDelimiter: Delimiter(open),
+      slice: middle.stringSlice,
+      rightDelimiter: Delimiter(close)
+    )
   }
 
   public static func slice(
     between opening: Character,
     and closing: Character
-    ) -> Parser<StringSlice, Stream> {
+  ) -> Parser<DelimitedSlice, Stream> {
     return curry(makeSlice)
       <^> character(where: { $0 == opening })
       <*> character(where: { $0 != closing }).many
@@ -152,7 +142,7 @@ public enum CharacterParsers {
   private static func makeSlice(
     openingDelimiter: StringCharacter,
     remainder: [StringCharacter]
-    ) -> StringSlice {
+  ) -> StringSlice {
     if let remainderSlice = remainder.stringSlice {
       return StringSlice(openingDelimiter) + remainderSlice
     } else {
@@ -164,7 +154,7 @@ public enum CharacterParsers {
   /// starts with a special delimiter, like a #hashtag or a @mention.
   public static func whitespaceTerminatedSlice(
     openingDelimiter: Character
-    ) -> Parser<StringSlice, Stream> {
+  ) -> Parser<StringSlice, Stream> {
     return curry(makeSlice)
       <^> (preceedingCharacter(where: { $0.isWhitespace }, parseSucceedsAtStreamStart: true)
         *> character(where: { $0 == openingDelimiter }))

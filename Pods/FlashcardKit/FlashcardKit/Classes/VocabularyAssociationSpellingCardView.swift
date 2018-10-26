@@ -8,8 +8,9 @@ import SnapKit
 import UIKit
 
 final class VocabularyAssociationSpellingCardView: CardView {
-  init(card: VocabularyAssociationSpellingCard) {
+  init(card: VocabularyAssociationSpellingCard, parseableDocument: ParseableDocument) {
     self.card = card
+    self.parseableDocument = parseableDocument
     super.init(frame: .zero)
     addSubview(controlStack)
     controlStack.snp.makeConstraints { (make) in
@@ -35,6 +36,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
   }
 
   private let card: VocabularyAssociationSpellingCard
+  private let parseableDocument: ParseableDocument
 
   override var introductoryUtterances: [AVSpeechUtterance]? {
     return [
@@ -62,7 +64,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
 
   private lazy var imageView: UIImageView = {
     let imageView = UIImageView()
-    if let image = card.image {
+    if let image = card.image(parseableDocument: parseableDocument) {
       imageView.image = image
       imageView.contentMode = .scaleAspectFit
     }

@@ -13,12 +13,14 @@ public final class Cloze: Node, CharacterParseable {
 
   public init(
     questionMark: StringCharacter,
-    hintSlice: StringSlice,
-    hiddenTextSlice: StringSlice
+    hintSlice: DelimitedSlice,
+    hiddenTextSlice: DelimitedSlice
   ) {
-    self.hintSlice = hintSlice
-    self.hiddenTextSlice = hiddenTextSlice
-    let combinedSlice = StringSlice(questionMark) + hintSlice + hiddenTextSlice
+    self.hintSlice = hintSlice.completeSlice
+    self.hiddenTextSlice = hiddenTextSlice.completeSlice
+    let combinedSlice = StringSlice(questionMark) +
+      hintSlice.completeSlice +
+      hiddenTextSlice.completeSlice
     super.init(type: .cloze, slice: combinedSlice, markdown: String(combinedSlice.substring))
   }
 

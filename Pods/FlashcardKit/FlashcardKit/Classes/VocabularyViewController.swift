@@ -130,7 +130,12 @@ public final class VocabularyViewController: UIViewController {
 
   @objc private func startStudySession() {
     guard let studySession = nextStudySession else { return }
-    let studyVC = StudyViewController(studySession: studySession, delegate: self)
+    let studyVC = StudyViewController(
+      studySession: studySession,
+      // TODO: Don't grab this global variable
+      parseableDocument: ParseableDocument(document: document, parsingRules: LanguageDeck.parsingRules),
+      delegate: self
+    )
     studyVC.modalTransitionStyle = .crossDissolve
     present(studyVC, animated: true, completion: nil)
   }
@@ -138,6 +143,8 @@ public final class VocabularyViewController: UIViewController {
   @objc private func addVocabularyAssocation() {
     let newVocabularyAssociation = NewVocabularyAssociationViewController(
       vocabularyAssociation: nil,
+      image: nil,
+      stylesheet: Stylesheet.hablaEspanol,
       delegate: self
     )
     newVocabularyAssociation.modalTransitionStyle = .crossDissolve
@@ -174,26 +181,25 @@ extension VocabularyViewController: StudyViewControllerDelegate {
 extension VocabularyViewController: NewVocabularyAssociationViewControllerDelegate {
   func newVocabularyAssociation(
     _ viewController: NewVocabularyAssociationViewController,
-    didAddVocabularyAssocation association: VocabularyAssociation
+    didAddVocabularyAssocation association: VocabularyAssociation,
+    image: UIImage?
   ) {
     dismiss(animated: true, completion: nil)
     var association = association
-    if case WordOrImage.image(caption: let caption, image: var bundleImage) = association.english,
-       let image = bundleImage.image,
-       let data = image.pngData(),
-       bundleImage.key == nil {
+    // TODO: What if this was an unchanged image (it's already in the document)?
+    if let image = image,
+       let data = image.pngData() {
       // TODO: Make this a meaningful ID
       let uuid = UUID().uuidString
       do {
-        try document.addData(
+        let key = try document.addData(
           data,
           preferredFilename: uuid + ".png",
           childDirectoryPath: ["assets"]
         )
-        bundleImage.key = "assets/\(uuid).png"
-        association.english = .image(caption: caption, image: bundleImage)
+        association.english = "![\(association.english)](\(key))"
       } catch {
-        // NOTHING
+        fatalError("Couldn't save image")
       }
     }
     if let editingAssociation = editingVocabularyAssociation {
@@ -268,8 +274,12 @@ extension VocabularyViewController: UITableViewDelegate {
     tableView.deselectRow(at: indexPath, animated: true)
     let association = dataSource.item(at: indexPath)
     editingVocabularyAssociation = association
+
+    // TODO: Really extract the image. This is really ugly.
     let viewController = NewVocabularyAssociationViewController(
       vocabularyAssociation: association,
+      image: nil,
+      stylesheet: Stylesheet.hablaEspanol,
       delegate: self
     )
     viewController.modalTransitionStyle = .crossDissolve

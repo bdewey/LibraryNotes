@@ -177,11 +177,20 @@ final class MiniMarkdownProtocolTests: XCTestCase {
   func testHeadingsCanHaveFormatting() {
     let example = "# This is a heading with *emphasis*"
     let blocks = ParsingRules().parse(example)
-    XCTAssertEqual(blocks.count, 1)
-    XCTAssertEqual(blocks[0].type, .heading)
-    XCTAssertEqual(blocks[0].children.count, 2)
-    XCTAssertEqual(blocks[0].children[0].type, .text)
-    XCTAssertEqual(blocks[0].children[1].type, .emphasis)
+    let expectedStructure = ExpectedNode(type: .heading, children: [
+      ExpectedNode(type: .delimiter, string: "# "),
+      ExpectedNode(type: .text, string: "This is a heading with "),
+      ExpectedNode(type: .emphasis, children: [
+        ExpectedNode(type: .delimiter, string: "*"),
+        ExpectedNode(type: .text, string: "emphasis"),
+        ExpectedNode(type: .delimiter, string: "*"),
+        ])
+      ])
+    do {
+      try expectedStructure.validateNode(blocks[0])
+    } catch {
+      XCTFail(String(describing: error))
+    }
   }
   
   func testListItemsCanHaveFormatting() {
@@ -191,7 +200,11 @@ final class MiniMarkdownProtocolTests: XCTestCase {
       ExpectedNode(type: .listItem, children: [
         ExpectedNode(type: .paragraph, children: [
           ExpectedNode(type: .text, string: "This is a list item with "),
-          ExpectedNode(type: .bold, string: "**strong emphasis**"),
+          ExpectedNode(type: .bold, children: [
+            ExpectedNode(type: .delimiter, string: "**"),
+            ExpectedNode(type: .text, string: "strong emphasis"),
+            ExpectedNode(type: .delimiter, string: "**"),
+            ]),
           ]),
         ])
       ])
@@ -202,6 +215,28 @@ final class MiniMarkdownProtocolTests: XCTestCase {
     }
   }
   
+  func testListItemsCanHaveFormatting2() {
+    let example = "- This is a list item with *emphasis*"
+    let blocks = ParsingRules().parse(example)
+    let expectedStructure = ExpectedNode(type: .list, children: [
+      ExpectedNode(type: .listItem, children: [
+        ExpectedNode(type: .paragraph, children: [
+          ExpectedNode(type: .text, string: "This is a list item with "),
+          ExpectedNode(type: .emphasis, children: [
+            ExpectedNode(type: .delimiter, string: "*"),
+            ExpectedNode(type: .text, string: "emphasis"),
+            ExpectedNode(type: .delimiter, string: "*"),
+            ]),
+          ]),
+        ])
+      ])
+    do {
+      try expectedStructure.validateNode(blocks[0])
+    } catch {
+      XCTFail(String(describing: error))
+    }
+  }
+
   func testTableCellsCanHaveInlines() {
     let example = """
 | Spanish | English |
@@ -258,7 +293,8 @@ And now there is a paragraph.
       ]
     let expectedStructure = [
       ExpectedNode(type: .heading, children: [
-        ExpectedNode(type: .text, string: "# Example vocabulary\n"),
+        ExpectedNode(type: .delimiter, string: "# "),
+        ExpectedNode(type: .text, string: "Example vocabulary\n"),
         ]),
       ExpectedNode(type: .blank),
       ExpectedNode(type: .table, children: [

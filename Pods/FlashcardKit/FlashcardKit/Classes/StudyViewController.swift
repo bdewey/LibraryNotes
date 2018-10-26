@@ -14,6 +14,8 @@ protocol StudyViewControllerDelegate: class {
 /// Presents a stack of cards for studying.
 final class StudyViewController: UIViewController {
 
+  private let parseableDocument: ParseableDocument
+
   /// The current study session
   private var studySession: StudySession
 
@@ -40,7 +42,8 @@ final class StudyViewController: UIViewController {
   }
 
   /// Designated initializer.
-  init(studySession: StudySession, delegate: StudyViewControllerDelegate) {
+  init(studySession: StudySession, parseableDocument: ParseableDocument, delegate: StudyViewControllerDelegate) {
+    self.parseableDocument = parseableDocument
     self.studySession = studySession
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
@@ -117,7 +120,7 @@ final class StudyViewController: UIViewController {
   /// Creates a card view for a card.
   private func makeCardView(for card: Card?) -> CardView? {
     guard let card = card else { return nil }
-    let cardView = card.cardView(with: Stylesheet.hablaEspanol)
+    let cardView = card.cardView(parseableDocument: parseableDocument, stylesheet: Stylesheet.hablaEspanol)
     cardView.delegate = self
     view.addSubview(cardView)
     cardView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true

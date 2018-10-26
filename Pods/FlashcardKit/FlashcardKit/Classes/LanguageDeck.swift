@@ -21,7 +21,7 @@ public final class LanguageDeck {
 
     vocabularyAssociationsSignal = miniMarkdownSignal
       .map { (blocks) -> [VocabularyAssociation] in
-        return VocabularyAssociation.makeAssociations(from: blocks, document: document).0
+        return VocabularyAssociation.makeAssociations(from: blocks).0
       }
     .continuous()
     let clozeCardSignal = miniMarkdownSignal.map { ClozeCard.makeCards(from: $0) }

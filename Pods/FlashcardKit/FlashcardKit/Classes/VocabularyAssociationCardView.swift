@@ -4,14 +4,19 @@ import AVFoundation
 import CommonplaceBook
 import MaterialComponents
 import SnapKit
+import TextBundleKit
 import UIKit
 
 final class VocabularyAssociationCardView: CardView {
 
   let card: VocabularyAssociationCard
+  let parseableDocument: ParseableDocument
+  let stylesheet: Stylesheet
 
-  init(card: VocabularyAssociationCard) {
+  init(card: VocabularyAssociationCard, parseableDocument: ParseableDocument, stylesheet: Stylesheet) {
     self.card = card
+    self.parseableDocument = parseableDocument
+    self.stylesheet = stylesheet
     super.init(frame: .zero)
     self.addSubview(columnStack)
     columnStack.snp.makeConstraints { (make) in
@@ -20,9 +25,9 @@ final class VocabularyAssociationCardView: CardView {
 
     self.addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
 
-    contextLabel.attributedText = card.context
-    frontLabel.attributedText = card.prompt
-    backLabel.attributedText = card.answer
+    contextLabel.attributedText = card.context(document: parseableDocument, stylesheet: stylesheet)
+    frontLabel.attributedText = card.prompt(document: parseableDocument, stylesheet: stylesheet)
+    backLabel.attributedText = card.answer(document: parseableDocument, stylesheet: stylesheet)
     setAnswerVisible(false, animated: false)
   }
 

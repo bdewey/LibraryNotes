@@ -5,7 +5,7 @@ import MiniMarkdown
 
 // TODO: Can I make a single generic structure with this and MarkdownStringRenderer?
 
-struct MarkdownAttributedStringRenderer {
+public struct MarkdownAttributedStringRenderer {
   public typealias RenderFunction = (Node) -> NSAttributedString
   public var renderFunctions: [NodeType: RenderFunction] = [:]
 
@@ -15,7 +15,7 @@ struct MarkdownAttributedStringRenderer {
 }
 
 extension Array where Element == NSAttributedString {
-  func joined() -> NSAttributedString {
+  public func joined() -> NSAttributedString {
     let attributedString = NSMutableAttributedString()
     for element in self {
       attributedString.append(element)

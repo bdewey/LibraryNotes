@@ -2,6 +2,9 @@
 
 import AVFoundation
 import CommonplaceBook
+import MaterialComponents.MDCTypographyScheme
+import MiniMarkdown
+import TextBundleKit
 import UIKit
 
 /// A specific card for a vocabulary association.
@@ -19,17 +22,17 @@ struct VocabularyAssociationCard: Card {
   var identifier: String {
     return [
       vocabularyAssociation.spanish,
-      vocabularyAssociation.english.identifier,
+      vocabularyAssociation.english,
       promptWithSpanish ? "spanish" : "english",
     ].joined(separator: ":")
   }
 
-  func cardView(with stylesheet: Stylesheet) -> CardView {
-    return VocabularyAssociationCardView(card: self)
+  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
+    return VocabularyAssociationCardView(card: self, parseableDocument: parseableDocument, stylesheet: stylesheet)
   }
 
-  var context: NSAttributedString {
-    let font = Stylesheet.hablaEspanol.typographyScheme.overline
+  func context(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
+    let font = stylesheet.typographyScheme.overline
     let contextString = promptWithSpanish
       ? "How do you say this in English?"
       : "How do you say this in Spanish?"
@@ -39,23 +42,83 @@ struct VocabularyAssociationCard: Card {
     )
   }
 
-  var prompt: NSAttributedString {
-    let font = Stylesheet.hablaEspanol.typographyScheme.headline6
+  func prompt(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
     let phrase = promptWithSpanish
-      ? NSAttributedString(string: vocabularyAssociation.spanish, attributes: [.font: font])
-      : vocabularyAssociation.english.attributedString(with: font)
-    return phrase
+      ? vocabularyAssociation.spanish
+      : vocabularyAssociation.english
+    let blocks = document.parsingRules.parse(phrase)
+    let renderer = MarkdownAttributedStringRenderer.promptRenderer(stylesheet: stylesheet)
+    return blocks.map({ renderer.render(node: $0) }).joined()
   }
 
-  var answer: NSAttributedString {
-    let font = Stylesheet.hablaEspanol.typographyScheme.body2
+  func answer(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
     let phrase = promptWithSpanish
-      ? vocabularyAssociation.english.attributedString(with: font)
-      : NSAttributedString(string: vocabularyAssociation.spanish, attributes: [.font: font])
-    return phrase
+      ? vocabularyAssociation.english
+      : vocabularyAssociation.spanish
+    let blocks = document.parsingRules.parse(phrase)
+    let renderer = MarkdownAttributedStringRenderer.answerRenderer(
+      document: document.document,
+      stylesheet: stylesheet
+    )
+    return blocks.map({ renderer.render(node: $0) }).joined()
   }
 
   var pronunciation: String {
     return vocabularyAssociation.spanish
+  }
+}
+
+// TODO: Move this to CommonplaceBook
+
+extension MarkdownAttributedStringRenderer {
+  static func textRenderer(
+    stylesheet: Stylesheet,
+    style: Stylesheet.Style
+  ) -> MarkdownAttributedStringRenderer {
+    var renderer = MarkdownAttributedStringRenderer()
+    renderer.renderFunctions[.text] = { (node) in
+      return NSAttributedString(
+        string: String(node.slice.substring),
+        attributes: stylesheet.attributes(style: style)
+      )
+    }
+    return renderer
+  }
+
+  static func promptRenderer(
+    stylesheet: Stylesheet
+  ) -> MarkdownAttributedStringRenderer {
+    return MarkdownAttributedStringRenderer.textRenderer(stylesheet: stylesheet, style: .headline6)
+  }
+
+  static func answerRenderer(
+    document: TextBundleDocument,
+    stylesheet: Stylesheet
+  ) -> MarkdownAttributedStringRenderer {
+    var renderer = MarkdownAttributedStringRenderer.textRenderer(
+      stylesheet: stylesheet,
+      style: .body2
+    )
+    renderer.renderFunctions[.image] = { (node) in
+      let results = NSMutableAttributedString()
+      let imageNode = node as! MiniMarkdown.Image
+      if let image = document.image(for: node) {
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        let aspectRatio = image.size.width / image.size.height
+        attachment.bounds = CGRect(x: 0, y: 0, width: 100.0 * aspectRatio, height: 100.0)
+        results.append(NSAttributedString(attachment: attachment))
+      }
+      if !imageNode.textSlice.isEmpty {
+        results.append(
+          NSAttributedString(
+            string: "\n" + String(imageNode.textSlice.substring),
+            attributes: stylesheet.attributes(style: .body2)
+          )
+        )
+      }
+      return results
+    }
+    return renderer
   }
 }

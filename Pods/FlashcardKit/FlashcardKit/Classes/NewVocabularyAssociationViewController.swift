@@ -12,7 +12,8 @@ import TextBundleKit
 protocol NewVocabularyAssociationViewControllerDelegate: class {
   func newVocabularyAssociation(
     _ viewController: NewVocabularyAssociationViewController,
-    didAddVocabularyAssocation: VocabularyAssociation
+    didAddVocabularyAssocation: VocabularyAssociation,
+    image: UIImage?
   )
 
   func newVocabularyAssociationDidCancel(_ viewController: NewVocabularyAssociationViewController)
@@ -33,11 +34,15 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   init(
     vocabularyAssociation: VocabularyAssociation?,
+    image: UIImage?,
+    stylesheet: Stylesheet,
     delegate: NewVocabularyAssociationViewControllerDelegate
   ) {
     registerBingImageSearch
     self.initialVocabularyAssociation = vocabularyAssociation
     self.delegate = delegate
+    self.stylesheet = stylesheet
+    self.image = image
     super.init(nibName: nil, bundle: nil)
     addChild(appBar.headerViewController)
     title = "¡Habla Español!"
@@ -53,16 +58,18 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private weak var delegate: NewVocabularyAssociationViewControllerDelegate?
   private let initialVocabularyAssociation: VocabularyAssociation?
+  private let image: UIImage?
+  private let stylesheet: Stylesheet
 
-  private let appBar: MDCAppBar = {
+  private lazy var appBar: MDCAppBar = {
     let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.hablaEspanol.typographyScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
+    MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
     return appBar
   }()
 
   private lazy var spanishTextField: TextFieldAndController = {
-    let tfac = TextFieldAndController(placeholder: "Spanish", stylesheet: Stylesheet.hablaEspanol)
+    let tfac = TextFieldAndController(placeholder: "Spanish", stylesheet: stylesheet)
     tfac.field.autocapitalizationType = .none
     tfac.field.autocorrectionType = .no
     tfac.field.delegate = self
@@ -78,7 +85,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
   }()
 
   private lazy var englishTextField: TextFieldAndController = {
-    let tfac = TextFieldAndController(placeholder: "English", stylesheet: Stylesheet.hablaEspanol)
+    let tfac = TextFieldAndController(placeholder: "English", stylesheet: stylesheet)
     tfac.field.autocapitalizationType = .none
     tfac.field.autocorrectionType = .no
     tfac.field.delegate = self
@@ -117,7 +124,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private lazy var imageSearchButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Add Image", for: .normal)
     button.addTarget(self, action: #selector(didTapImageSearch), for: .touchUpInside)
     return button
@@ -125,7 +132,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private lazy var removeImageButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Remove Image", for: .normal)
     button.addTarget(self, action: #selector(didTapRemoveImage), for: .touchUpInside)
     return button
@@ -145,7 +152,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
   private lazy var spellingRow: UIStackView = {
     let label = UILabel(frame: .zero)
     label.text = "Quiz spelling?"
-    label.font = Stylesheet.hablaEspanol.typographyScheme.body1
+    label.font = stylesheet.typographyScheme.body1
 
     let stack = UIStackView(arrangedSubviews: [spellingSwitch, label])
     stack.axis = .horizontal
@@ -159,7 +166,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   override func loadView() {
     let view = UIView(frame: .zero)
-    view.backgroundColor = Stylesheet.hablaEspanol.colorScheme.backgroundColor
+    view.backgroundColor = stylesheet.colorScheme.backgroundColor
     self.view = view
   }
 
@@ -195,8 +202,8 @@ final class NewVocabularyAssociationViewController: UIViewController {
     spanishTextField.field.becomeFirstResponder()
 
     spanishTextField.field.text = initialVocabularyAssociation?.spanish
-    englishTextField.field.text = initialVocabularyAssociation?.english.word
-    imageView.image = initialVocabularyAssociation?.english.image
+    englishTextField.field.text = initialVocabularyAssociation?.english
+    imageView.image = image
     spellingSwitch.isOn = initialVocabularyAssociation?.testSpelling ?? false
 
     configureUI()
@@ -224,21 +231,17 @@ final class NewVocabularyAssociationViewController: UIViewController {
     delegate?.newVocabularyAssociationDidCancel(self)
   }
 
-  private func englishWordOrImage() -> WordOrImage {
-    if let image = imageView.image {
-      return WordOrImage.image(caption: englishTextField.field.text ?? "", image: TextBundleImage(image: image, key: nil))
-    } else {
-      return .word(englishTextField.field.text ?? "")
-    }
-  }
-
   @objc private func didTapDone() {
     let association = VocabularyAssociation(
       spanish: spanishTextField.field.text ?? "",
-      wordOrImage: englishWordOrImage(),
+      english: englishTextField.field.text ?? "",
       testSpelling: spellingSwitch.isOn
     )
-    delegate?.newVocabularyAssociation(self, didAddVocabularyAssocation: association)
+    delegate?.newVocabularyAssociation(
+      self,
+      didAddVocabularyAssocation: association,
+      image: imageView.image
+    )
   }
 
   private let translationService = BingTranslation()

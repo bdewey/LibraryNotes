@@ -2,6 +2,7 @@
 
 import AVFoundation
 import CommonplaceBook
+import TextBundleKit
 import UIKit
 
 struct VocabularyAssociationSpellingCard: Card {
@@ -14,20 +15,24 @@ struct VocabularyAssociationSpellingCard: Card {
   var identifier: String {
     return [
       vocabularyAssociation.spanish,
-      vocabularyAssociation.english.identifier,
+      vocabularyAssociation.english,
       "spelling",
     ].joined(separator: ":")
   }
 
-  func cardView(with stylesheet: Stylesheet) -> CardView {
-    return VocabularyAssociationSpellingCardView(card: self)
+  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
+    return VocabularyAssociationSpellingCardView(card: self, parseableDocument: parseableDocument)
   }
 
   var spanish: String {
     return vocabularyAssociation.spanish
   }
 
-  var image: UIImage? {
-    return vocabularyAssociation.english.image
+  func image(parseableDocument: ParseableDocument) -> UIImage? {
+    let blocks = parseableDocument.parsingRules.parse(vocabularyAssociation.english)
+    return blocks.map { $0.findNodes(where: { $0.type == .image }) }
+      .joined()
+      .compactMap { parseableDocument.document.image(for: $0) }
+      .first
   }
 }

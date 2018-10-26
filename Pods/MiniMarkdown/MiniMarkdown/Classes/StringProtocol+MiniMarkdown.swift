@@ -66,27 +66,6 @@ public extension StringProtocol where Self.SubSequence == Substring {
     return self.strippingLeadingWhitespace.suffixAndPrefix(where: { $0.isWhitespace }).prefix
   }
 
-  /// For a MiniMarkdown formatted line, the heading level of the line.
-  ///
-  /// - A line that starts with 4 or more spaces cannot be a heading.
-  /// - A line that starts with between 1 and 6 "#" characters is a heading IF it is followed by
-  ///   whitespace or end-of-line.
-  /// - The number of "#" characters is the heading level.
-  public var headingLevel: Int? {
-    let (leadingWhitespace, remainder) = self.leadingWhitespace
-    if leadingWhitespace.count >= 4 { return nil }
-    let leadingHashes = remainder.prefix(while: { $0 == "#" })
-    if leadingHashes.endIndex < remainder.endIndex,
-       !remainder[leadingHashes.endIndex].isWhitespace {
-      return nil
-    }
-    if (1...6).contains(leadingHashes.count) {
-      return leadingHashes.count
-    } else {
-      return nil
-    }
-  }
-
   /// True if the entire contents of the string is a valid table delimiter cell
   public var isTableDelimiterCell: Bool {
     return self.range(of: "^\\s*:?-+:?\\s*$", options: .regularExpression) != nil

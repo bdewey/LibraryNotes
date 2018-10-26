@@ -3,14 +3,20 @@
 import AVFoundation
 import CommonplaceBook
 import MaterialComponents
+import MiniMarkdown
 import SnapKit
 import UIKit
 
 // TODO: Find commmon code with VocabularyAssociationCardView and create a single reusable class?
 
 final class ClozeCardView: CardView {
-  init(card: ClozeCard, stylesheet: Stylesheet) {
+  init(card: ClozeCard, parseableDocument: ParseableDocument, stylesheet: Stylesheet) {
     self.card = card
+    self.parseableDocument = parseableDocument
+    let nodes = parseableDocument.parsingRules.parse(card.markdown)
+    assert(nodes.count == 1)
+    self.node = nodes[0]
+    self.stylesheet = stylesheet
     super.init(frame: .zero)
     self.addSubview(columnStack)
     columnStack.snp.makeConstraints { (make) in
@@ -19,9 +25,9 @@ final class ClozeCardView: CardView {
 
     self.addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
 
-    contextLabel.attributedText = card.context(with: stylesheet)
-    frontLabel.attributedText = card.cardFront(with: stylesheet)
-    backLabel.attributedText = card.cardBack(with: stylesheet)
+    contextLabel.attributedText = context
+    frontLabel.attributedText = cardFront
+    backLabel.attributedText = cardBack
     setAnswerVisible(false, animated: false)
   }
 
@@ -30,6 +36,9 @@ final class ClozeCardView: CardView {
   }
 
   private let card: ClozeCard
+  private let node: Node
+  private let parseableDocument: ParseableDocument
+  private let stylesheet: Stylesheet
 
   private func setAnswerVisible(_ answerVisible: Bool, animated: Bool) {
     let animations = {
@@ -131,6 +140,83 @@ final class ClozeCardView: CardView {
   }
 
   @objc private func didTapPronounce() {
-    delegate?.cardView(self, didRequestSpeech: card.utterance)
+    delegate?.cardView(self, didRequestSpeech: utterance)
+  }
+}
+
+extension ClozeCardView {
+  var utterance: AVSpeechUtterance {
+    let phrase = clozeRenderer.render(node: node)
+    return AVSpeechUtterance(string: phrase)
+  }
+
+  var context: NSAttributedString {
+    let font = stylesheet.typographyScheme.overline
+    let contextString = "Fill in the blank"
+    return NSAttributedString(
+      string: contextString.localizedUppercase,
+      attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor(white: 0, alpha: 0.6)]
+    )
+  }
+
+  var cardFront: NSAttributedString {
+    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
+      stylesheet: stylesheet,
+      hideClozeAt: card.clozeIndex
+    )
+    return cardFrontRenderer.render(node: node)
+  }
+
+  var cardBack: NSAttributedString {
+    return MarkdownAttributedStringRenderer
+      .cardBackRenderer(stylesheet: stylesheet, revealingClozeAt: card.clozeIndex)
+      .render(node: node)
+  }
+}
+
+private let clozeRenderer: MarkdownStringRenderer = {
+  var renderer = MarkdownStringRenderer()
+  renderer.renderFunctions[.text] = { return String($0.slice.substring) }
+  renderer.renderFunctions[.cloze] = { (node) in
+    guard let cloze = node as? Cloze else { return "" }
+    return String(cloze.hiddenText)
+  }
+  return renderer
+}()
+
+private let defaultParagraphStyle: NSParagraphStyle = {
+  let paragraphStyle = NSMutableParagraphStyle()
+  paragraphStyle.alignment = .left
+  return paragraphStyle
+}()
+
+extension Stylesheet {
+
+  var textAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
+  }
+
+  var clozeAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colorScheme.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .backgroundColor: UIColor(rgb: 0xf6e6f0),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
+  }
+
+  var captionAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.caption,
+      .foregroundColor: colorScheme.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .kern: kern[.caption] ?? 1.0,
+      .paragraphStyle: defaultParagraphStyle,
+    ]
   }
 }

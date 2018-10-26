@@ -10,8 +10,7 @@ extension TextBundleDocument {
     let signalBridge = text.signal
     let result = signalBridge.map({ (valueDescription) -> [VocabularyAssociation] in
       return VocabularyAssociation.makeAssociations(
-        from: valueDescription.value,
-        document: self
+        from: valueDescription.value
         ).0
     }).continuous()
     return result
@@ -19,7 +18,7 @@ extension TextBundleDocument {
 
   var vocabularyAssociations: TextBundleKit.Result<[VocabularyAssociation]> {
     return text.taggedResult.flatMap({ (taggedText) -> [VocabularyAssociation] in
-      return VocabularyAssociation.makeAssociations(from: taggedText.value, document: self).0
+      return VocabularyAssociation.makeAssociations(from: taggedText.value).0
     })
   }
 
@@ -34,8 +33,7 @@ extension TextBundleDocument {
     self.text.changeValue { (initialText) -> String in
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
-        from: initialText,
-        document: self
+        from: initialText
       )
       existingAssociations.append(vocabularyAssociation)
       text.replaceSubrange(range, with: existingAssociations.makeTable())
@@ -50,8 +48,7 @@ extension TextBundleDocument {
     self.text.changeValue { (initialText) -> String in
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
-        from: initialText,
-        document: self
+        from: initialText
       )
       if let index = existingAssociations.firstIndex(of: vocabularyAssociation) {
         existingAssociations[index] = newAssociation

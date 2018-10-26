@@ -83,6 +83,49 @@ extension Stylesheet {
   }
 }
 
+extension NSParagraphStyle {
+  public static let leftAlign: NSParagraphStyle = {
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .left
+    return paragraphStyle
+  }()
+}
+
+extension MDCTypographyScheme {
+  subscript(style: Stylesheet.Style) -> UIFont {
+    switch style {
+    case .headline1: return headline1
+    case .headline2: return headline2
+    case .headline3: return headline3
+    case .headline4: return headline4
+    case .headline5: return headline5
+    case .headline6: return headline6
+    case .subtitle1: return subtitle1
+    case .subtitle2: return subtitle2
+    case .body1: return body1
+    case .body2: return body2
+    case .caption: return caption
+    case .button: return button
+    case .overline: return overline
+    }
+  }
+}
+
+extension Stylesheet {
+  public func attributes(
+    style: Stylesheet.Style,
+    emphasis: AlphaStyle = .darkTextHighEmphasis,
+    paragraphStyle: NSParagraphStyle = NSParagraphStyle.leftAlign
+  ) -> [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme[style],
+      .kern: kern[style] ?? 1.0,
+      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[emphasis] ?? 1),
+      .paragraphStyle: paragraphStyle,
+    ]
+  }
+}
+
 extension Stylesheet {
 
   /// Style debugging help: Prints all of the available fonts to the console.

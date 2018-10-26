@@ -19,7 +19,7 @@ PODS:
     - CocoaLumberjack/Default
   - CollectionViewLayouts (0.1.0):
     - CocoaLumberjack/Swift (>= 3.4)
-  - CommonplaceBook (0.2.0):
+  - CommonplaceBook (0.3.0):
     - MaterialComponents (>= 59.0)
     - TextBundleKit (~> 0.5)
   - CwlSignal (2.0.0):
@@ -37,27 +37,14 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.3.1):
+  - FlashcardKit (0.4.0):
     - CollectionViewLayouts
     - CommonplaceBook (~> 0.2)
     - CwlSignal
     - CwlUtils
     - DZNPhotoPickerController
     - MaterialComponents (>= 61.0)
-    - MiniMarkdown (~> 0.8.1)
-    - NunitoSans
-    - SDWebImage (~> 4.0)
-    - SDWebImage/GIF (~> 4.0)
-    - SnapKit (~> 4.0)
-    - TextBundleKit (~> 0.5)
-  - FlashcardKit/Tests (0.3.1):
-    - CollectionViewLayouts
-    - CommonplaceBook (~> 0.2)
-    - CwlSignal
-    - CwlUtils
-    - DZNPhotoPickerController
-    - MaterialComponents (>= 61.0)
-    - MiniMarkdown (~> 0.8.1)
+    - MiniMarkdown (~> 0.9)
     - NunitoSans
     - SDWebImage (~> 4.0)
     - SDWebImage/GIF (~> 4.0)
@@ -551,9 +538,9 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (1.1.0)
   - MDFTextAccessibility (1.2.0)
-  - MiniMarkdown (0.8.5):
+  - MiniMarkdown (0.9.0):
     - CocoaLumberjack/Swift (>= 3.4)
-  - MiniMarkdown/Tests (0.8.5):
+  - MiniMarkdown/Tests (0.9.0):
     - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
@@ -573,12 +560,11 @@ PODS:
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
-  - CommonplaceBook (from `../CommonplaceBook`)
+  - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `../FlashcardKit`)
-  - FlashcardKit/Tests (from `../FlashcardKit`)
+  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -607,7 +593,7 @@ EXTERNAL SOURCES:
   CollectionViewLayouts:
     :git: https://github.com/bdewey/CollectionViewLayouts.git
   CommonplaceBook:
-    :path: "../CommonplaceBook"
+    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :git: https://github.com/bdewey/CwlSignal
   CwlUtils:
@@ -615,7 +601,7 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :path: "../FlashcardKit"
+    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -631,6 +617,9 @@ CHECKOUT OPTIONS:
   CollectionViewLayouts:
     :commit: eb323db65d8e9b7c4cbbc31b0dfa83f1ddc90302
     :git: https://github.com/bdewey/CollectionViewLayouts.git
+  CommonplaceBook:
+    :commit: f4a5b294896424083c7941489a7cf9bd168ee0a1
+    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :commit: c86edbc54c6613424f88782220b6c6c2771a166e
     :git: https://github.com/bdewey/CwlSignal
@@ -640,11 +629,14 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
+  FlashcardKit:
+    :commit: e6a30d3d7609cf1769032ec6c1ecabc29c27b595
+    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :commit: 30dc6ac643b35da7062a3437d70eac801946bcec
+    :commit: 1d225589ebf2e680b25e147ae225c660ffd578e4
     :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
     :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
@@ -660,18 +652,18 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
   CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
-  CommonplaceBook: 5fdeb7ec7a77966df6968fe980afa3b13c0a5927
+  CommonplaceBook: 9a82bdd29c99d0fb4e4d6b632982588092d5ddaf
   CwlSignal: 6b87ee172614a141ba06f2145f5a18bd7e66c983
   CwlUtils: c1ba508748e8000989df81730b153f4eaeaaa6c8
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 46cdb7f46867c787a3913d5e0f44625aa26546b0
+  FlashcardKit: 3dc9a80e62ea9bee6ebd06e16dcf95adb71088b6
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
   MDFTextAccessibility: 94098925e0853551c5a311ce7c1ecefbe297cdb6
-  MiniMarkdown: ab1707d6d6913e1eaf5cf2075828e1592df30a80
+  MiniMarkdown: 936171aba08047770a2698241c58f6b0309951d8
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
@@ -681,6 +673,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: f29c3fd33e908a81ddc65486eb67f27e66c3485a
+PODFILE CHECKSUM: 3643b5d4d9b218f6ebb094dd0eda84ed9ec4f977
 
 COCOAPODS: 1.5.0

@@ -4,12 +4,12 @@ import AVFoundation
 import CommonplaceBook
 import Foundation
 import MaterialComponents
+import TextBundleKit
 
 /// A specific thing to recall.
-/// TODO: Extend this so prompts and answers can be more than just strings. Pictures? Sounds?
-protocol Card {
+protocol Card: Codable {
 
   var identifier: String { get }
 
-  func cardView(with stylesheet: Stylesheet) -> CardView
+  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView
 }

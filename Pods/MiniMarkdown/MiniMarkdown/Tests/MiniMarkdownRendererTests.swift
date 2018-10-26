@@ -66,13 +66,13 @@ And now I have text with an inline image ![alt text](assets/image.png) and **mor
     XCTAssertEqual(headingRange, NSRange(location: 0, length: 10))
     XCTAssertEqual(headingAttributes.font, renderedMarkdown.expectedAttributes(for: .heading).font)
     let (boldAttributes, boldRange) = renderedMarkdown.attributesAndRange(at: 47)
-    XCTAssertEqual(boldRange, NSRange(location: 44, length: 9))
+    XCTAssertEqual(boldRange, NSRange(location: 46, length: 5))
     XCTAssertEqual(boldAttributes.font, renderedMarkdown.expectedAttributes(for: .bold).font)
     let (lastAttributes, lastRange) = renderedMarkdown.attributesAndRange(
       at: renderedMarkdown.attributedString.length - 2
     )
     XCTAssertEqual(lastAttributes.font, renderedMarkdown.expectedAttributes(for: .bold).font)
-    XCTAssertEqual(lastRange, NSRange(location: 141, length: 15))
+    XCTAssertEqual(lastRange, NSRange(location: 154, length: 2))
   }
 
   func testRenderWithNestedLists() {

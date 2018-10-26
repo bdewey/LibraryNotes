@@ -18,7 +18,7 @@ extension MiniMarkdown.TableRow {
   /// Returns the Spanish word in the row.
   fileprivate var spanish: String {
     return String(
-      textOnlyRenderer.render(node: cells[0]).strippingLeadingAndTrailingWhitespace
+      MarkdownStringRenderer.textOnly.render(node: cells[0]).strippingLeadingAndTrailingWhitespace
     )
   }
 
@@ -29,117 +29,12 @@ extension MiniMarkdown.TableRow {
       .contains(where: { $0.slice.substring == "#spelling" })
   }
 
-  fileprivate func english(loadingImagesFrom document: TextBundleDocument) -> WordOrImage? {
-    guard cells.count > 1,
-          var wordOrImage = WordOrImage(String(cells[1].contents)) else { return nil }
-    if case WordOrImage.image(caption: let caption, image: var bundleImage) = wordOrImage,
-      let key = bundleImage.key {
-      let components = key.split(separator: "/")
-      if let data = try? document.data(for: String(components.last!), at: components.dropLast().map({ String($0) })),
-        let image = UIImage(data: data) {
-        bundleImage.image = image
-        wordOrImage = .image(caption: caption, image: bundleImage)
-      }
-    }
-    return wordOrImage
+  fileprivate var english: String {
+    return String(
+      cells[1].slice.substring.strippingLeadingAndTrailingWhitespace
+    )
   }
 }
-
-/// Encapsulates the "English" side of a vocabulary association, which can be either just a word
-/// or an image.
-enum WordOrImage: LosslessStringConvertible, Equatable {
-  case word(String)
-  case image(caption: String, image: TextBundleImage)
-
-  init?(_ description: String) {
-    // TODO: No way to customize these parsing rules
-    let inlines = MiniMarkdown
-      .ParsingRules()
-      .parse(ArraySlice(StringSlice(description)))
-    precondition(inlines.count == 1)
-    if let image = inlines[0] as? MiniMarkdown.Image {
-      self = .image(
-        caption: String(image.text),
-        image: TextBundleImage(image: nil, key: String(image.url))
-      )
-    } else {
-      self = .word(description)
-    }
-  }
-
-  var description: String {
-    switch self {
-    case .word(let word):
-      return word
-    case .image(caption: let caption, image: let image):
-      return "![\(caption)](\(image.key ?? ""))"
-    }
-  }
-
-  var identifier: String {
-    switch self {
-    case .word(let word):
-      return word
-    case .image(caption: let caption, image: _):
-      return caption
-    }
-  }
-
-  var image: UIImage? {
-    if case .image(_, let textBundleImage) = self, let image = textBundleImage.image {
-      return image
-    } else {
-      return nil
-    }
-  }
-
-  var word: String {
-    switch self {
-    case .word(let word):
-      return word
-    case .image(caption: let caption, image: _):
-      return caption
-    }
-  }
-
-  func attributedString(with font: UIFont) -> NSAttributedString {
-    switch self {
-    case .word(let word):
-      return NSAttributedString(string: word, attributes: [.font: font])
-    case .image(caption: let caption, image: let image):
-      let results = NSMutableAttributedString()
-      if let image = image.image {
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        let aspectRatio = image.size.width / image.size.height
-        attachment.bounds = CGRect(x: 0, y: 0, width: 100.0 * aspectRatio, height: 100.0)
-        results.append(NSAttributedString(attachment: attachment))
-      }
-      if !caption.isEmpty {
-        results.append(NSAttributedString(string: "\n", attributes: [.font: font]))
-        results.append(NSAttributedString(string: caption, attributes: [.font: font]))
-      }
-      return results
-    }
-  }
-}
-
-/// An image inside the TextBundleDocument.
-struct TextBundleImage: Equatable {
-
-  /// The decoded image data.
-  var image: UIImage?
-
-  /// The key for loading the data (e.g., "assets/1234.png")
-  var key: String?
-}
-
-/// Converts a Markdown string to a String preserving only what is in "text" nodes.
-private let textOnlyRenderer: MarkdownStringRenderer = {
-  var renderer = MarkdownStringRenderer()
-  renderer.renderFunctions[.text] = { return String($0.slice.substring) }
-  return renderer
-}()
 
 /// Represents and association of a Spanish to an English word. This association generates
 /// 2 or 3 cards, which are specific things to remember:
@@ -147,14 +42,14 @@ private let textOnlyRenderer: MarkdownStringRenderer = {
 /// - Given the Spanish word, what is the English word?
 /// - Given the Engish word, what is the Spanish word?
 /// - How do you spell the Spanish word? (optional)
-struct VocabularyAssociation: Equatable {
+struct VocabularyAssociation: Equatable, Codable {
 
   /// The Spanish word.
   let spanish: String
 
   /// The associated English word. This can be either a word, just an image, or an image with a
   /// caption.
-  var english: WordOrImage
+  var english: String
 
   /// Whether or not to test spelling of this word.
   var testSpelling: Bool
@@ -162,14 +57,7 @@ struct VocabularyAssociation: Equatable {
   /// Constructs an association given just an English word.
   init(spanish: String, english: String, testSpelling: Bool = false) {
     self.spanish = spanish
-    self.english = .word(english)
-    self.testSpelling = testSpelling
-  }
-
-  /// Constructs an association given a full word-or-image for the English association.
-  init(spanish: String, wordOrImage: WordOrImage, testSpelling: Bool = false) {
-    self.spanish = spanish
-    self.english = wordOrImage
+    self.english = english
     self.testSpelling = testSpelling
   }
 
@@ -183,17 +71,15 @@ struct VocabularyAssociation: Equatable {
   /// - returns: A tuple of VocabularyCard structures extracted from the string and the range
   ///            in `markdown` that the string came from.
   static func makeAssociations(
-    from markdown: String,
-    document: TextBundleDocument
+    from markdown: String
   ) -> ([VocabularyAssociation], Range<String.Index>) {
     // TODO: No way to customize these parsing rules
     let blocks = MiniMarkdown.ParsingRules().parse(markdown)
-    return makeAssociations(from: blocks, document: document)
+    return makeAssociations(from: blocks)
   }
 
   static func makeAssociations(
-    from blocks: [Node],
-    document: TextBundleDocument
+    from blocks: [Node]
   ) -> ([VocabularyAssociation], Range<String.Index>) {
     let maybeTable = blocks.first { $0.isTable(withColumnCount: 2) }
     guard let table = maybeTable as? MiniMarkdown.Table else {
@@ -201,11 +87,11 @@ struct VocabularyAssociation: Equatable {
     }
     var cards: [VocabularyAssociation] = []
     for row in table.rows {
-      guard let english = row.english(loadingImagesFrom: document) else { continue }
+      let english = row.english
       cards.append(
         VocabularyAssociation(
           spanish: row.spanish,
-          wordOrImage: english,
+          english: english,
           testSpelling: row.testSpelling
         )
       )

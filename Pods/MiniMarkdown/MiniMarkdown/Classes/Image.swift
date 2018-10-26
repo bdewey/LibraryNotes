@@ -23,9 +23,9 @@ extension NodeType {
 
 /// An image: https://spec.commonmark.org/0.28/#images
 public final class Image: Node, CharacterParseable {
-  public init(bang: StringCharacter, textSlice: StringSlice, urlSlice: StringSlice) {
-    self.textSlice = textSlice
-    self.urlSlice = urlSlice
+  public init(bang: StringCharacter, text: DelimitedSlice, url: DelimitedSlice) {
+    self.textSlice = text.completeSlice
+    self.urlSlice = url.completeSlice
     let slice = StringSlice(bang) + textSlice + urlSlice
     super.init(type: .image, slice: slice, markdown: String(slice.substring))
   }

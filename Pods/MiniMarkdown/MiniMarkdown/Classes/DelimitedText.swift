@@ -17,32 +17,39 @@
 
 import Foundation
 
-/// A node that contains inline elements as children.
-open class InlineContainingNode: Node {
+/// A node that consists of a left delimiter, a right delimiter, and optional text in between.
+public class DelimitedText: Node {
 
-  open var inlineSlice: StringSlice {
-    return slice
+  public init(type: NodeType, delimitedSlice: DelimitedSlice) {
+    self.memoizedChildren = delimitedSlice.nodes
+    let slice = delimitedSlice.completeSlice
+    super.init(type: type, slice: slice)
+    for child in memoizedChildren {
+      child.parent = self
+    }
   }
 
-  open var memoizedChildrenPrefix: [Node] {
-    return []
+  private let memoizedChildren: [Node]
+
+  public override var children: [Node] {
+    return memoizedChildren
   }
+}
 
-  private var memoizedChildren: [Node]?
-
-  open override var children: [Node] {
-    if let memoizedChildren = memoizedChildren {
-      return memoizedChildren
+extension DelimitedSlice {
+  fileprivate var nodes: [Node] {
+    if let textSlice = slice {
+      return [
+        leftDelimiter,
+        Text(slice: textSlice),
+        rightDelimiter,
+      ]
     } else {
-      let results = parsingRules.parse(ArraySlice(inlineSlice))
-      assert(inlineSlice.covered(by: results.map { $0.slice }))
-      assert(results.allSatisfy({ $0.slice.string == slice.string }))
-      for node in results {
-        node.parent = self
-      }
-      let combined = memoizedChildrenPrefix + results
-      memoizedChildren = combined
-      return combined
+      return [
+        leftDelimiter,
+        rightDelimiter,
+      ]
     }
   }
 }
+
