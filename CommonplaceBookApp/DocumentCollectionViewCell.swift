@@ -17,7 +17,6 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     self.contentView.addSubview(ageLabel)
     self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
-
   }
 
   required init?(coder aDecoder: NSCoder) {
