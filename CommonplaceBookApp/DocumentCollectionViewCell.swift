@@ -13,9 +13,11 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     inkTouchController.addInkView()
     statusIcon.contentMode = .scaleAspectFit
     self.contentView.addSubview(titleLabel)
+    self.contentView.addSubview(detailLabel)
     self.contentView.addSubview(ageLabel)
     self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
+
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -23,6 +25,7 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   }
 
   let titleLabel = UILabel(frame: .zero)
+  let detailLabel = UILabel(frame: .zero)
   let ageLabel = UILabel(frame: .zero)
   let statusIcon = UIImageView(frame: .zero)
   var stylesheet: Stylesheet? {
@@ -47,7 +50,12 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     layoutRect.removeSection(atDistance: 24.0, from: .maxXEdge) { (statusIconSlice) in
       statusIcon.frame = statusIconSlice
     }
-    self.titleLabel.frame = layoutRect
+    layoutRect.removeSection(atDistance: 32.0, from: .minYEdge) { (titleLabelSlice) in
+      self.titleLabel.frame = titleLabelSlice
+    }
+    layoutRect.removeSection(atDistance: 20.0, from: .minYEdge) { (detailLabelSlice) in
+      self.detailLabel.frame = detailLabelSlice
+    }
   }
 }
 

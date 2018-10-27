@@ -30,6 +30,10 @@ public final class DocumentSectionController: ListSectionController {
       string: properties.value.title,
       attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
     )
+    cell.detailLabel.attributedText = NSAttributedString(
+      string: properties.value.hashtags.joined(separator: ", "),
+      attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
+    )
     if properties.value.fileMetadata.isUploading {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
     } else if properties.value.fileMetadata.isDownloading {
@@ -50,7 +54,7 @@ public final class DocumentSectionController: ListSectionController {
   }
 
   public override func sizeForItem(at index: Int) -> CGSize {
-    return CGSize(width: collectionContext!.containerSize.width, height: 56)
+    return CGSize(width: collectionContext!.containerSize.width, height: 72)
   }
 
   public override func didUpdate(to object: Any) {

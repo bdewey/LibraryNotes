@@ -10,11 +10,13 @@ import enum TextBundleKit.Result
 
 public struct DocumentProperties: Equatable, Codable {
   public let fileMetadata: FileMetadata
+  public let hashtags: [String]
   public let title: String
 
   private init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
-    self.title = String(nodes.title.split(separator: "\n").first ?? "") 
+    self.hashtags = nodes.hashtags
+    self.title = String(nodes.title.split(separator: "\n").first ?? "")
   }
 
   public static func loadProperties(
@@ -78,10 +80,20 @@ extension Array where Element == Node {
   var title: String {
     if let heading = self.lazy.compactMap({ $0.first(where: { $0.type == .heading }) }).first {
       return MarkdownStringRenderer.textOnly.render(node: heading)
-    } else if let notBlank = self.lazy.compactMap({ $0.first(where: { $0.type != .blank }) }).first {
+    } else if let notBlank = self.lazy.compactMap({
+      $0.first(where: { $0.type != .blank })
+    }).first {
       return MarkdownStringRenderer.textOnly.render(node: notBlank)
     } else {
       return ""
     }
+  }
+
+  var hashtags: [String] {
+    let hashtagSet = self
+      .map { $0.findNodes(where: { $0.type == .hashtag }) }
+      .joined()
+      .reduce(into: Set<String>()) { $0.insert(String($1.slice.substring)) }
+    return [String](hashtagSet)
   }
 }
