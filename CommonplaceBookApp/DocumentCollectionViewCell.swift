@@ -50,11 +50,18 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
     layoutRect.removeSection(atDistance: 24.0, from: .maxXEdge) { (statusIconSlice) in
       statusIcon.frame = statusIconSlice
     }
+    titleLabel.sizeToFit()
     layoutRect.removeSection(atDistance: 32.0, from: .minYEdge) { (titleLabelSlice) in
-      self.titleLabel.frame = titleLabelSlice
+      // Applying an inset to the top to bottom-align the label in the 32-point high slice
+      self.titleLabel.frame = titleLabelSlice.inset(
+        by: UIEdgeInsets(top: 32.0 - titleLabel.bounds.height, left: 0, bottom: 0, right: 0)
+      )
     }
+    detailLabel.sizeToFit()
     layoutRect.removeSection(atDistance: 20.0, from: .minYEdge) { (detailLabelSlice) in
-      self.detailLabel.frame = detailLabelSlice
+      self.detailLabel.frame = detailLabelSlice.inset(
+        by: UIEdgeInsets(top: 20.0 - detailLabel.bounds.height, left: 0, bottom: 0, right: 0)
+      )
     }
   }
 }

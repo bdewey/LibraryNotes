@@ -50,6 +50,7 @@ public final class DocumentSectionController: ListSectionController {
       attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
     )
     cell.delegate = self
+    cell.setNeedsLayout()
     return cell
   }
 
