@@ -99,6 +99,7 @@ final class TextEditViewController: UIViewController,
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = stylesheet.colorScheme.darkSurfaceColor }
+    formatters[.hashtag] = { $1.backgroundColor = stylesheet.colorScheme.darkSurfaceColor }
     return formatters
   }
 
