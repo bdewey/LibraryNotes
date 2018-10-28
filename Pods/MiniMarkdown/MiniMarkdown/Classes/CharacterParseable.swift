@@ -156,8 +156,11 @@ public enum CharacterParsers {
     openingDelimiter: Character
   ) -> Parser<StringSlice, Stream> {
     return curry(makeSlice)
-      <^> (preceedingCharacter(where: { $0.isWhitespace }, parseSucceedsAtStreamStart: true)
-        *> character(where: { $0 == openingDelimiter }))
-      <*> character(where: { !$0.isWhitespace }).oneOrMore
+      <^> (preceedingCharacter(
+        where: { $0.isWhitespaceOrNewline },
+        parseSucceedsAtStreamStart: true
+        )
+       *> character(where: { $0 == openingDelimiter }))
+      <*> character(where: { !$0.isWhitespaceOrNewline }).oneOrMore
   }
 }

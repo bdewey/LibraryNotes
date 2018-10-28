@@ -339,11 +339,12 @@ And now there is a paragraph.
   }
 
   func testParseHashtag() {
-    let example = "#hashtag"
+    let example = "#hashtag\n"
     let blocks = ParsingRules().parse(example)
     let expectedStructure = ExpectedNode(type: .paragraph, children: [
-      ExpectedNode(type: .hashtag, string: "#hashtag")
-      ])
+      ExpectedNode(type: .hashtag, string: "#hashtag"),
+      ExpectedNode(type: .text, string: "\n"),
+    ])
     do {
       try expectedStructure.validateNode(blocks[0])
     } catch {
@@ -359,6 +360,39 @@ And now there is a paragraph.
       ])
     do {
       try expectedStructure.validateNode(blocks[0])
+    } catch {
+      XCTFail(String(describing: error))
+    }
+  }
+
+  func testHashtagInAParagraph() {
+    let example = """
+☠️
+
+#hashtag
+
+And some text in a paragraph.
+"""
+    let blocks = ParsingRules().parse(example)
+    let expectedStructure = [
+      ExpectedNode(type: .paragraph, children: [
+        ExpectedNode(type: .text, string: "☠️\n")
+      ]),
+      ExpectedNode(type: .blank),
+      ExpectedNode(type: .paragraph, children: [
+        ExpectedNode(type: .hashtag, string: "#hashtag"),
+        ExpectedNode(type: .text, string: "\n"),
+      ]),
+      ExpectedNode(type: .blank),
+      ExpectedNode(type: .paragraph, children: [
+        ExpectedNode(type: .text, string: "And some text in a paragraph.")
+      ]),
+    ]
+    XCTAssertEqual(blocks.count, expectedStructure.count)
+    do {
+      for (block, expected) in zip(blocks, expectedStructure) {
+        try expected.validateNode(block)
+      }
     } catch {
       XCTFail(String(describing: error))
     }
