@@ -33,6 +33,11 @@ extension DocumentDataSource: MetadataQueryDelegate {
       fileMetadata.value.contentChangeDate {
       return
     }
+    // Put an entry in the properties dictionary that contains the current
+    // contentChangeDate. We'll replace it with something with the actual extracted
+    // properties in the completion block below. This is needed to prevent multiple
+    // loads for the same content.
+    properties[urlKey] = DocumentPropertiesListDiffable(fileMetadata.value)
     DocumentProperties.loadProperties(
       from: fileMetadata,
       parsingRules: parsingRules
@@ -61,7 +66,9 @@ extension DocumentDataSource: MetadataQueryDelegate {
 
 extension DocumentDataSource: ListAdapterDataSource {
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    return properties.values.sorted(by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate })
+    return properties.values
+      .filter { !$0.value.placeholder }
+      .sorted(by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate })
   }
 
   public func listAdapter(

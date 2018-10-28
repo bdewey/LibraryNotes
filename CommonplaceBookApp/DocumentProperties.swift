@@ -11,11 +11,13 @@ import enum TextBundleKit.Result
 public struct DocumentProperties: Equatable, Codable {
   public let fileMetadata: FileMetadata
   public let hashtags: [String]
+  public let placeholder: Bool
   public let title: String
 
-  private init(fileMetadata: FileMetadata, nodes: [Node]) {
+  public init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
     self.hashtags = nodes.hashtags
+    self.placeholder = nodes.isEmpty
     self.title = String(nodes.title.split(separator: "\n").first ?? "")
   }
 
@@ -64,6 +66,10 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
 
   public init(_ value: DocumentProperties) {
     self.value = value
+  }
+
+  public init(_ value: FileMetadata) {
+    self.value = DocumentProperties(fileMetadata: value, nodes: [])
   }
 
   public func diffIdentifier() -> NSObjectProtocol {
