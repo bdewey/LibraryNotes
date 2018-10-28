@@ -6,6 +6,7 @@ import FlashcardKit
 import IGListKit
 import MaterialComponents
 import MiniMarkdown
+import SnapKit
 import UIKit
 
 private let reuseIdentifier = "HACKY_document"
@@ -30,7 +31,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     self.dataSource = DocumentDataSource(parsingRules: parsingRules, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
-    self.navigationItem.rightBarButtonItem = newDocumentButton
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -41,13 +41,13 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
 
-  private let newDocumentButton: UIBarButtonItem = {
-    return UIBarButtonItem(
-      image: UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate),
-      style: .plain,
-      target: self,
-      action: #selector(didTapNewDocument)
-    )
+  private lazy var newDocumentButton: MDCButton = {
+    let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
+    let button = MDCFloatingButton(frame: .zero)
+    button.setImage(icon, for: .normal)
+    MDCFloatingActionButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
+    button.addTarget(self, action: #selector(didTapNewDocument), for: .touchUpInside)
+    return button
   }()
 
   private lazy var layout: UICollectionViewFlowLayout = {
@@ -68,6 +68,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
+    collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
     collectionView.register(
       DocumentCollectionViewCell.self,
       forCellWithReuseIdentifier: reuseIdentifier
@@ -81,12 +82,17 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   // MARK: - Lifecycle
 
-  override func loadView() {
-    self.view = collectionView
-  }
-
   override func viewDidLoad() {
     super.viewDidLoad()
+    view.addSubview(collectionView)
+    view.addSubview(newDocumentButton)
+    collectionView.frame = view.bounds
+    newDocumentButton.snp.makeConstraints { (make) in
+      make.trailing.equalToSuperview().offset(-16)
+      make.bottom.equalToSuperview().offset(-16)
+      make.width.equalTo(56)
+      make.height.equalTo(56)
+    }
     let predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
       NSComparisonPredicate(conformingToUTI: "public.plain-text"),
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
