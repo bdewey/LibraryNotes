@@ -62,6 +62,10 @@ extension PlainTextDocument: EditableDocument {
     updateChangeCount(.done)
     textSignalInput.send(value: Tagged(tag: tag, value: text))
   }
+
+  func close() {
+    close(completionHandler: nil)
+  }
 }
 
 extension PlainTextDocument {

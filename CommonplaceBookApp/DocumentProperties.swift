@@ -31,6 +31,7 @@ public struct DocumentProperties: Equatable, Codable {
     document.open { (success) in
       if success {
         let textResult = document.currentTextResult
+        document.close(completionHandler: nil)
         DispatchQueue.global(qos: .default).async {
           let result = textResult.flatMap({ (taggedText) -> DocumentProperties in
             let nodes = parsingRules.parse(taggedText.value)

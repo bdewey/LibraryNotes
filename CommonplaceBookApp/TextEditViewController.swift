@@ -61,6 +61,7 @@ final class TextEditViewController: UIViewController,
 
   deinit {
     NotificationCenter.default.removeObserver(self)
+    document.close()
   }
 
   // Init-time state.

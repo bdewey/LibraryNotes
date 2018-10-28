@@ -23,6 +23,10 @@ extension TextBundleDocument: EditableDocument {
   public func applyTaggedModification(tag: Tag, modification: (String) -> String) {
     text.changeValue(tag: tag, mutation: modification)
   }
+
+  public func close() {
+    close(completionHandler: nil)
+  }
 }
 
 extension TextBundleDocument: ConfiguresRenderers {
