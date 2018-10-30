@@ -6,7 +6,7 @@ import Foundation
 import IGListKit
 import MiniMarkdown
 
-public final class DocumentDataSource: NSObject {
+public final class DocumentPropertiesIndex: NSObject {
 
   public init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.parsingRules = parsingRules
@@ -14,9 +14,13 @@ public final class DocumentDataSource: NSObject {
   }
 
   public let parsingRules: ParsingRules
-  private let stylesheet: Stylesheet
+  fileprivate let stylesheet: Stylesheet
   public weak var adapter: ListAdapter?
-  private var properties: [URL: DocumentPropertiesListDiffable] = [:]
+  fileprivate var properties: [URL: DocumentPropertiesListDiffable] = [:]
+
+  public private(set) lazy var documentDataSource: DocumentDataSource = {
+    return DocumentDataSource(index: self)
+  }()
 
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
     let url = properties.value.fileMetadata.fileURL
@@ -26,7 +30,7 @@ public final class DocumentDataSource: NSObject {
   }
 }
 
-extension DocumentDataSource: MetadataQueryDelegate {
+extension DocumentPropertiesIndex: MetadataQueryDelegate {
   fileprivate func updateProperties(for fileMetadata: FileMetadataWrapper) {
     let urlKey = fileMetadata.value.fileURL
     if properties[urlKey]?.value.fileMetadata.contentChangeDate ==
@@ -64,9 +68,15 @@ extension DocumentDataSource: MetadataQueryDelegate {
   }
 }
 
-extension DocumentDataSource: ListAdapterDataSource {
+public final class DocumentDataSource: NSObject, ListAdapterDataSource {
+  public init(index: DocumentPropertiesIndex) {
+    self.index = index
+  }
+
+  private let index: DocumentPropertiesIndex
+
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    return properties.values
+    return index.properties.values
       .filter { !$0.value.placeholder }
       .sorted(by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate })
   }
@@ -75,7 +85,7 @@ extension DocumentDataSource: ListAdapterDataSource {
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return DocumentSectionController(dataSource: self, stylesheet: stylesheet)
+    return DocumentSectionController(index: self.index, stylesheet: index.stylesheet)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {

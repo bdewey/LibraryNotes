@@ -28,7 +28,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(parsingRules: parsingRules, stylesheet: stylesheet)
+    self.index = DocumentPropertiesIndex(parsingRules: parsingRules, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
   }
@@ -39,7 +39,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private let parsingRules: ParsingRules
   public let stylesheet: Stylesheet
-  private let dataSource: DocumentDataSource
+  private let index: DocumentPropertiesIndex
 
   private lazy var newDocumentButton: MDCButton = {
     let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
@@ -58,15 +58,15 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return layout
   }()
 
-  private lazy var adapter: ListAdapter = {
+  private lazy var documentListAdapter: ListAdapter = {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
-    adapter.dataSource = dataSource
-    dataSource.adapter = adapter
+    adapter.dataSource = index.documentDataSource
+    index.adapter = adapter
     return adapter
   }()
 
-  private lazy var collectionView: UICollectionView = {
+  private lazy var documentCollectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
     collectionView.register(
@@ -74,7 +74,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       forCellWithReuseIdentifier: reuseIdentifier
     )
     collectionView.backgroundColor = stylesheet.colorScheme.surfaceColor
-    adapter.collectionView = collectionView
+    documentListAdapter.collectionView = collectionView
     return collectionView
   }()
 
@@ -84,9 +84,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.addSubview(collectionView)
+    view.addSubview(documentCollectionView)
     view.addSubview(newDocumentButton)
-    collectionView.frame = view.bounds
+    documentCollectionView.frame = view.bounds
     newDocumentButton.snp.makeConstraints { (make) in
       make.trailing.equalToSuperview().offset(-16)
       make.bottom.equalToSuperview().offset(-16)
@@ -97,7 +97,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       NSComparisonPredicate(conformingToUTI: "public.plain-text"),
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
       ])
-    metadataQuery = MetadataQuery(predicate: predicate, delegate: dataSource)
+    metadataQuery = MetadataQuery(predicate: predicate, delegate: index)
   }
 
   @objc private func didTapNewDocument() {

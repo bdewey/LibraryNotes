@@ -10,12 +10,12 @@ import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
 
-  init(dataSource: DocumentDataSource, stylesheet: Stylesheet) {
-    self.dataSource = dataSource
+  init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
+    self.documentIndex = index
     self.stylesheet = stylesheet
   }
 
-  private let dataSource: DocumentDataSource
+  private let documentIndex: DocumentPropertiesIndex
   private let stylesheet: Stylesheet
   private var properties: DocumentPropertiesListDiffable!
 
@@ -65,7 +65,7 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didSelectItem(at index: Int) {
     properties.value.fileMetadata.loadEditingViewController(
-      parsingRules: dataSource.parsingRules,
+      parsingRules: documentIndex.parsingRules,
       stylesheet: stylesheet
     ) { (editingViewController) in
       guard let editingViewController = editingViewController else { return }
@@ -94,7 +94,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   ) -> [SwipeAction]? {
     guard orientation == .right else { return nil }
 
-    let dataSource = self.dataSource
+    let dataSource = self.documentIndex
     if let propertiesToDelete = self.properties {
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
         dataSource.deleteDocument(propertiesToDelete)
