@@ -100,20 +100,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     metadataQuery = MetadataQuery(predicate: predicate, delegate: dataSource)
   }
 
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    layout.itemSize = CGSize(width: view.bounds.width, height: 56)
-    layout.invalidateLayout()
-  }
-
-  override func viewWillTransition(
-    to size: CGSize,
-    with coordinator: UIViewControllerTransitionCoordinator
-  ) {
-    super.viewWillTransition(to: size, with: coordinator)
-    layout.itemSize = CGSize(width: size.width, height: 56)
-  }
-
   @objc private func didTapNewDocument() {
     DispatchQueue.global(qos: .default).async {
       let day = DayComponents(Date())
