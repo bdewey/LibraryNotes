@@ -31,6 +31,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     self.index = DocumentPropertiesIndex(parsingRules: parsingRules, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
+    self.navigationItem.leftBarButtonItem = hashtagMenuButton
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -40,6 +41,15 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private let parsingRules: ParsingRules
   public let stylesheet: Stylesheet
   private let index: DocumentPropertiesIndex
+
+  private lazy var hashtagMenuButton: UIBarButtonItem = {
+    return UIBarButtonItem(
+      image: UIImage(named: "round_menu_black_24pt")?.withRenderingMode(.alwaysTemplate),
+      style: .plain,
+      target: self,
+      action: #selector(didTapHashtagMenu)
+    )
+  }()
 
   private lazy var newDocumentButton: MDCButton = {
     let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
@@ -119,5 +129,18 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
         })
       })
     }
+  }
+
+  @objc private func didTapHashtagMenu() {
+    print("didTapHashtagMenu")
+    let hashtagViewController = HashtagViewController(stylesheet: stylesheet)
+    hashtagViewController.delegate = self
+    present(hashtagViewController, animated: true, completion: nil)
+  }
+}
+
+extension DocumentListViewController: HashtagViewControllerDelegate {
+  func hashtagViewControllerDidCancel(_ viewController: HashtagViewController) {
+    dismiss(animated: true, completion: nil)
   }
 }
