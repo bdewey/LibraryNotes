@@ -73,19 +73,22 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
     self.index = index
   }
 
-  private let index: DocumentPropertiesIndex
+  private weak var index: DocumentPropertiesIndex?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
+    guard let index = index else { return [] }
     return index.properties.values
       .filter { !$0.value.placeholder }
-      .sorted(by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate })
+      .sorted(
+        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+      )
   }
 
   public func listAdapter(
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return DocumentSectionController(index: self.index, stylesheet: index.stylesheet)
+    return DocumentSectionController(index: index!, stylesheet: index!.stylesheet)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {
