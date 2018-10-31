@@ -111,18 +111,17 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     guard let index = index else { return [] }
-    return index.properties.values
-      .filter { !$0.value.placeholder }
-      .sorted(
-        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
-    )
+    let hashtags = index.properties.values.reduce(into: Set<String>()) { (hashtags, props) in
+      hashtags.formUnion(props.value.hashtags)
+    }
+    return Array(hashtags).sorted().map { Hashtag($0) }
   }
 
   public func listAdapter(
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
-    ) -> ListSectionController {
-    return DocumentSectionController(index: index!, stylesheet: index!.stylesheet)
+  ) -> ListSectionController {
+    return HashtagSectionController(stylesheet: index!.stylesheet)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {

@@ -4,8 +4,6 @@ import CommonplaceBook
 import IGListKit
 import UIKit
 
-private let reuseIdentifier = "HACKY_document"
-
 public protocol HashtagViewControllerDelegate: class {
   func hashtagViewControllerDidCancel(_ viewController: HashtagViewController)
 }
@@ -39,10 +37,6 @@ public final class HashtagViewController: UIViewController {
       collectionViewLayout: UICollectionViewFlowLayout()
     )
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.register(
-      DocumentCollectionViewCell.self,
-      forCellWithReuseIdentifier: reuseIdentifier
-    )
     collectionView.backgroundColor = stylesheet.colorScheme.darkSurfaceColor
     documentListAdapter.collectionView = collectionView
     return collectionView
