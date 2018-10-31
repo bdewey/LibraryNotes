@@ -22,11 +22,16 @@ public final class DocumentPropertiesIndex: NSObject {
     return DocumentDataSource(index: self)
   }()
 
+  public private(set) lazy var hashtagDataSource: HashtagDataSource = {
+    return HashtagDataSource(index: self)
+  }()
+
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
     let url = properties.value.fileMetadata.fileURL
     try? FileManager.default.removeItem(at: url)
     self.properties[url] = nil
     adapter?.performUpdates(animated: true)
+    hashtagDataSource.adapter?.performUpdates(animated: true)
   }
 }
 
@@ -88,6 +93,35 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
+    return DocumentSectionController(index: index!, stylesheet: index!.stylesheet)
+  }
+
+  public func emptyView(for listAdapter: ListAdapter) -> UIView? {
+    return nil
+  }
+}
+
+public final class HashtagDataSource: NSObject, ListAdapterDataSource {
+  public init(index: DocumentPropertiesIndex) {
+    self.index = index
+  }
+
+  private weak var index: DocumentPropertiesIndex?
+  public weak var adapter: ListAdapter?
+
+  public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
+    guard let index = index else { return [] }
+    return index.properties.values
+      .filter { !$0.value.placeholder }
+      .sorted(
+        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+    )
+  }
+
+  public func listAdapter(
+    _ listAdapter: ListAdapter,
+    sectionControllerFor object: Any
+    ) -> ListSectionController {
     return DocumentSectionController(index: index!, stylesheet: index!.stylesheet)
   }
 

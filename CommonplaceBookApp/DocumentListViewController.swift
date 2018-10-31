@@ -133,7 +133,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func didTapHashtagMenu() {
     print("didTapHashtagMenu")
-    let hashtagViewController = HashtagViewController(stylesheet: stylesheet)
+    let hashtagViewController = HashtagViewController(
+      dataSource: index.hashtagDataSource,
+      stylesheet: stylesheet
+    )
     hashtagViewController.delegate = self
     present(hashtagViewController, animated: true, completion: nil)
   }
