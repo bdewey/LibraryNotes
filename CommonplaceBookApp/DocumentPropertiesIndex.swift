@@ -111,17 +111,33 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     guard let index = index else { return [] }
+    var results: [ListDiffable] = [
+      TextListDiffable(NSAttributedString(
+        string: "Hashtags",
+        attributes: index.stylesheet.attributes(
+          style: .subtitle1,
+          emphasis: .darkTextHighEmphasis
+        )
+      )),
+    ]
     let hashtags = index.properties.values.reduce(into: Set<String>()) { (hashtags, props) in
       hashtags.formUnion(props.value.hashtags)
     }
-    return Array(hashtags).sorted().map { Hashtag($0) }
+    let hashtagDiffables = Array(hashtags).sorted().map {
+      TextListDiffable(NSAttributedString(
+        string: $0,
+        attributes: index.stylesheet.attributes(style: .body2, emphasis: .darkTextHighEmphasis)
+      ))
+    }
+    results.append(contentsOf: hashtagDiffables)
+    return results
   }
 
   public func listAdapter(
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return HashtagSectionController(stylesheet: index!.stylesheet)
+    return TextSectionController(stylesheet: index!.stylesheet)
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {
