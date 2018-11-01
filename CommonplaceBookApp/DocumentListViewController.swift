@@ -131,12 +131,21 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     }
   }
 
+  private var hamburgerPresentationController: CoverPartiallyPresentationController?
+
   @objc private func didTapHashtagMenu() {
     print("didTapHashtagMenu")
     let hashtagViewController = HashtagViewController(
       dataSource: index.hashtagDataSource,
       stylesheet: stylesheet
     )
+    hamburgerPresentationController = CoverPartiallyPresentationController(
+      presentedViewController: hashtagViewController,
+      presenting: self,
+      coverDirection: .left
+    )
+    hashtagViewController.transitioningDelegate = hamburgerPresentationController
+    hashtagViewController.modalPresentationStyle = .custom
     hashtagViewController.delegate = self
     present(hashtagViewController, animated: true, completion: nil)
   }

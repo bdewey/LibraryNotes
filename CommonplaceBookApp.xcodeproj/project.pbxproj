@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */; };
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
+		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */; };
@@ -69,6 +70,7 @@
 		A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
+		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ExtraLight.otf"; sourceTree = "<group>"; };
 		D31FA12620ED847A00224FCD /* Merriweather-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Regular.otf"; sourceTree = "<group>"; };
 		D31FA12720ED847A00224FCD /* Merriweather-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Italic.otf"; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */,
+				D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D3D8E2722178B2BA00EA318C /* DocumentProperties.swift */,
@@ -501,6 +504,7 @@
 				D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
+				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D3D8E2732178B2BA00EA318C /* DocumentProperties.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
