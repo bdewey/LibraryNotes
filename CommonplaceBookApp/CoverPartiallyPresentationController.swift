@@ -5,7 +5,7 @@ import UIKit
 // https://gist.github.com/MrAlek/3d1520ca2c5d981489e2
 
 enum Direction {
-  case left, right, up, down
+  case left, right, up, down // swiftlint:disable:this identifier_name
 
   var pointVector: CGPoint {
     switch self {
@@ -17,9 +17,11 @@ enum Direction {
   }
 }
 
-class CoverPartiallyPresentationController: UIPresentationController, UIViewControllerTransitioningDelegate {
+class CoverPartiallyPresentationController:
+UIPresentationController,
+UIViewControllerTransitioningDelegate {
 
-  var dismissInteractionController: PanGestureInteractionController? = nil
+  var dismissInteractionController: PanGestureInteractionController?
   var interactiveDismissal: Bool = false
   let coverDirection: Direction
 
@@ -36,7 +38,11 @@ class CoverPartiallyPresentationController: UIPresentationController, UIViewCont
     return view
   }()
 
-  init(presentedViewController: UIViewController, presenting: UIViewController, coverDirection: Direction) {
+  init(
+    presentedViewController: UIViewController,
+    presenting: UIViewController,
+    coverDirection: Direction
+  ) {
     self.coverDirection = coverDirection
     super.init(presentedViewController: presentedViewController, presenting: presenting)
   }
@@ -59,7 +65,10 @@ class CoverPartiallyPresentationController: UIPresentationController, UIViewCont
     if !completed {
       backgroundView.removeFromSuperview()
     }
-    dismissInteractionController = PanGestureInteractionController(view: containerView!, direction: coverDirection)
+    dismissInteractionController = PanGestureInteractionController(
+      view: containerView!,
+      direction: coverDirection
+    )
     dismissInteractionController?.callbacks.didBeginPanning = { [weak self] in
       self?.interactiveDismissal = true
       self?.presentingViewController.dismiss(animated: true, completion: nil)
@@ -80,33 +89,67 @@ class CoverPartiallyPresentationController: UIPresentationController, UIViewCont
 
     switch coverDirection {
     case .left:
-      return CGRect(x: 0, y: 0, width: containerView.bounds.width-margin, height: containerView.bounds.height)
+      return CGRect(
+        x: 0,
+        y: 0,
+        width: containerView.bounds.width-margin,
+        height: containerView.bounds.height
+      )
     case .right:
-      return CGRect(x: margin, y: 0, width: containerView.bounds.width-margin, height: containerView.bounds.height)
+      return CGRect(
+        x: margin,
+        y: 0,
+        width: containerView.bounds.width-margin,
+        height: containerView.bounds.height
+      )
     case .up:
-      return CGRect(x: 0, y: 0, width: containerView.bounds.width, height: containerView.bounds.height-margin)
+      return CGRect(
+        x: 0,
+        y: 0,
+        width: containerView.bounds.width,
+        height: containerView.bounds.height-margin
+      )
     case .down:
-      return CGRect(x: 0, y: margin, width: containerView.bounds.width, height: containerView.bounds.height-margin)
+      return CGRect(
+        x: 0,
+        y: margin,
+        width: containerView.bounds.width,
+        height: containerView.bounds.height-margin
+      )
     }
   }
 
   // MARK: UIViewControllerTransitioningDelegate
 
-  func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+  func presentationController(
+    forPresented presented: UIViewController,
+    presenting: UIViewController?,
+    source: UIViewController
+  ) -> UIPresentationController? {
     return self
   }
 
-  func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) -> UIViewControllerInteractiveTransitioning? {
+  func interactionControllerForDismissal(
+    using animator: UIViewControllerAnimatedTransitioning
+  ) -> UIViewControllerInteractiveTransitioning? {
     return interactiveDismissal ? dismissInteractionController : nil
   }
 
-  func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+  func animationController(
+    forPresented presented: UIViewController,
+    presenting: UIViewController, source: UIViewController
+  ) -> UIViewControllerAnimatedTransitioning? {
     return SlideInTransition(fromDirection: coverDirection)
   }
 
-
-  func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    return SlideInTransition(fromDirection: coverDirection, reverse: true, interactive: interactiveDismissal)
+  func animationController(
+    forDismissed dismissed: UIViewController
+  ) -> UIViewControllerAnimatedTransitioning? {
+    return SlideInTransition(
+      fromDirection: coverDirection,
+      reverse: true,
+      interactive: interactiveDismissal
+    )
   }
 
   @objc func backgroundViewTapped() {
@@ -116,7 +159,7 @@ class CoverPartiallyPresentationController: UIPresentationController, UIViewCont
 
 class PanGestureInteractionController: UIPercentDrivenInteractiveTransition {
   struct Callbacks {
-    var didBeginPanning: (() -> Void)? = nil
+    var didBeginPanning: (() -> Void)?
   }
   var callbacks = Callbacks()
 
@@ -197,11 +240,16 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
 
   func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
 
-    let viewControllerKey = reverse ? UITransitionContextViewControllerKey.from : UITransitionContextViewControllerKey.to
+    let viewControllerKey = reverse
+      ? UITransitionContextViewControllerKey.from
+      : UITransitionContextViewControllerKey.to
     let viewControllerToAnimate = transitionContext.viewController(forKey: viewControllerKey)!
     guard let viewToAnimate = viewControllerToAnimate.view else { return }
 
-    let offsetFrame = fromDirection.offsetFrameForView(view: viewToAnimate, containerView: transitionContext.containerView)
+    let offsetFrame = fromDirection.offsetFrameForView(
+      view: viewToAnimate,
+      containerView: transitionContext.containerView
+    )
 
     if !reverse {
       transitionContext.containerView.addSubview(viewToAnimate)
@@ -210,19 +258,25 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
 
     let options: UIView.AnimationOptions = interactive ? [.curveLinear] : []
 
-    UIView.animate(withDuration: duration, delay: 0, options: options,
-                   animations: { [weak self] in
-                    if self!.reverse {
-                      viewToAnimate.frame = offsetFrame
-                    } else {
-                      viewToAnimate.frame = transitionContext.finalFrame(for: viewControllerToAnimate)
-                    }
-      }, completion: { _ in
+    UIView.animate(
+      withDuration: duration,
+      delay: 0,
+      options: options,
+      animations: {
+        if self.reverse {
+          viewToAnimate.frame = offsetFrame
+        } else {
+          viewToAnimate.frame = transitionContext.finalFrame(for: viewControllerToAnimate)
+        }
+      },
+      completion: { _ in
         transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-    })
+      })
   }
 
-  func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+  func transitionDuration(
+    using transitionContext: UIViewControllerContextTransitioning?
+  ) -> TimeInterval {
     return duration
   }
 }
