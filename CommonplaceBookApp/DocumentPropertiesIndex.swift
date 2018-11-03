@@ -6,6 +6,17 @@ import Foundation
 import IGListKit
 import MiniMarkdown
 
+/// A specialization of ListAdapterDataSource that contains a weak reference back to
+/// an adapter that uses this data source.
+public protocol ListAdapterDataSourceWithAdapter: ListAdapterDataSource {
+  var adapter: ListAdapter? { get }
+}
+
+private struct DataSourceWrapper {
+  init(_ value: ListAdapterDataSourceWithAdapter) { self.value = value }
+  weak var value: ListAdapterDataSourceWithAdapter?
+}
+
 public final class DocumentPropertiesIndex: NSObject {
 
   public init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
@@ -15,19 +26,23 @@ public final class DocumentPropertiesIndex: NSObject {
 
   public let parsingRules: ParsingRules
   fileprivate let stylesheet: Stylesheet
-  fileprivate var properties: [URL: DocumentPropertiesListDiffable] = [:]
+  public var properties: [URL: DocumentPropertiesListDiffable] = [:]
 
-  public private(set) lazy var documentDataSource: DocumentDataSource = {
-    return DocumentDataSource(index: self)
-  }()
+  private var dataSources: [DataSourceWrapper] = []
 
-  public private(set) lazy var hashtagDataSource: HashtagDataSource = {
-    return HashtagDataSource(index: self)
-  }()
+  public func addDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
+    dataSources.append(DataSourceWrapper(dataSource))
+  }
+
+  public func removeDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
+    guard let index = dataSources.firstIndex(where: { $0.value === dataSource }) else { return }
+    dataSources.remove(at: index)
+  }
 
   private func performUpdates() {
-    documentDataSource.adapter?.performUpdates(animated: true)
-    hashtagDataSource.adapter?.performUpdates(animated: true)
+    for dataSource in dataSources {
+      dataSource.value?.adapter?.performUpdates(animated: true)
+    }
   }
 
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
@@ -73,82 +88,5 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
       fileMetadata.downloadIfNeeded()
       updateProperties(for: fileMetadata)
     }
-  }
-}
-
-public final class DocumentDataSource: NSObject, ListAdapterDataSource {
-  public init(index: DocumentPropertiesIndex) {
-    self.index = index
-  }
-
-  private weak var index: DocumentPropertiesIndex?
-  public weak var adapter: ListAdapter?
-
-  public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    guard let index = index else { return [] }
-    return index.properties.values
-      .filter { !$0.value.placeholder }
-      .sorted(
-        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
-      )
-  }
-
-  public func listAdapter(
-    _ listAdapter: ListAdapter,
-    sectionControllerFor object: Any
-  ) -> ListSectionController {
-    return DocumentSectionController(index: index!, stylesheet: index!.stylesheet)
-  }
-
-  public func emptyView(for listAdapter: ListAdapter) -> UIView? {
-    return nil
-  }
-}
-
-public final class HashtagDataSource: NSObject, ListAdapterDataSource {
-  public init(index: DocumentPropertiesIndex) {
-    self.index = index
-  }
-
-  private weak var index: DocumentPropertiesIndex?
-  public weak var adapter: ListAdapter?
-
-  public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    guard let index = index else { return [] }
-    var results: [ListDiffable] = [
-      MenuItem(
-        label: NSAttributedString(
-          string: "Hashtags",
-          attributes: index.stylesheet.attributes(
-            style: .caption,
-            emphasis: .darkTextHighEmphasis
-          )
-        )
-      ),
-    ]
-    let hashtags = index.properties.values.reduce(into: Set<String>()) { (hashtags, props) in
-      hashtags.formUnion(props.value.hashtags)
-    }
-    let hashtagDiffables = Array(hashtags).sorted().map {
-      MenuItem(
-        label: NSAttributedString(
-          string: $0,
-          attributes: index.stylesheet.attributes(style: .body2, emphasis: .darkTextHighEmphasis)
-        )
-      )
-    }
-    results.append(contentsOf: hashtagDiffables)
-    return results
-  }
-
-  public func listAdapter(
-    _ listAdapter: ListAdapter,
-    sectionControllerFor object: Any
-  ) -> ListSectionController {
-    return MenuSectionController(stylesheet: index!.stylesheet)
-  }
-
-  public func emptyView(for listAdapter: ListAdapter) -> UIView? {
-    return nil
   }
 }

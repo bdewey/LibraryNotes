@@ -12,6 +12,8 @@
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D3187CAC218D25D800815772 /* ShadowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAB218D25D800815772 /* ShadowView.swift */; };
 		D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAD218DF7AB00815772 /* MenuItem.swift */; };
+		D3187CB0218DFBBC00815772 /* HashtagDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAF218DFBBC00815772 /* HashtagDataSource.swift */; };
+		D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CB1218DFF4D00815772 /* DocumentDataSource.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */; };
@@ -75,6 +77,8 @@
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D3187CAB218D25D800815772 /* ShadowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowView.swift; sourceTree = "<group>"; };
 		D3187CAD218DF7AB00815772 /* MenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
+		D3187CAF218DFBBC00815772 /* HashtagDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagDataSource.swift; sourceTree = "<group>"; };
+		D3187CB1218DFF4D00815772 /* DocumentDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentDataSource.swift; sourceTree = "<group>"; };
 		D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ExtraLight.otf"; sourceTree = "<group>"; };
 		D31FA12620ED847A00224FCD /* Merriweather-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Regular.otf"; sourceTree = "<group>"; };
 		D31FA12720ED847A00224FCD /* Merriweather-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Italic.otf"; sourceTree = "<group>"; };
@@ -222,12 +226,14 @@
 				D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */,
 				D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */,
+				D3187CB1218DFF4D00815772 /* DocumentDataSource.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D3D8E2722178B2BA00EA318C /* DocumentProperties.swift */,
 				D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */,
 				D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */,
+				D3187CAF218DFBBC00815772 /* HashtagDataSource.swift */,
 				D35C72C02189D8DC0082396D /* HashtagViewController.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
@@ -510,8 +516,10 @@
 				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */,
+				D3187CB0218DFBBC00815772 /* HashtagDataSource.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
+				D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D3D8E2732178B2BA00EA318C /* DocumentProperties.swift in Sources */,

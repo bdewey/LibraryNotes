@@ -29,6 +29,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
     self.index = DocumentPropertiesIndex(parsingRules: parsingRules, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(index: self.index, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Commonplace Book"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
@@ -41,6 +42,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private let parsingRules: ParsingRules
   public let stylesheet: Stylesheet
   private let index: DocumentPropertiesIndex
+  private let dataSource: DocumentDataSource
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     return UIBarButtonItem(
@@ -68,11 +70,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return layout
   }()
 
+  // TODO: Code smell here
   private lazy var documentListAdapter: ListAdapter = {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
-    adapter.dataSource = index.documentDataSource
-    index.documentDataSource.adapter = adapter
+    adapter.dataSource = dataSource
+    dataSource.adapter = adapter
     return adapter
   }()
 
@@ -134,8 +137,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
   @objc private func didTapHashtagMenu() {
+    let dataSource = HashtagDataSource(index: index, stylesheet: stylesheet)
     let hashtagViewController = HashtagViewController(
-      dataSource: index.hashtagDataSource,
+      dataSource: dataSource,
       stylesheet: stylesheet
     )
     hamburgerPresentationController = CoverPartiallyPresentationController(

@@ -4,11 +4,15 @@ import Foundation
 import IGListKit
 
 public final class MenuItem: NSObject {
-  public init(label: NSAttributedString) {
+  public typealias DidSelectBlock = () -> Void
+
+  public init(label: NSAttributedString, didSelect: DidSelectBlock? = nil) {
     self.label = label
+    self.didSelect = didSelect
   }
 
   public let label: NSAttributedString
+  public let didSelect: DidSelectBlock?
 }
 
 extension MenuItem: ListDiffable {
