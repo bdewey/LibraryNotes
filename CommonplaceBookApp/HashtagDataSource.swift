@@ -5,6 +5,7 @@ import Foundation
 import IGListKit
 
 public protocol HashtagDataSourceDelegate: class {
+  func hashtagDataSourceDidClearHashtag()
   func hashtagDataSourceDidSelectHashtag(_ hashtag: String)
 }
 
@@ -29,10 +30,17 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSourceWithAdapter
     var results: [ListDiffable] = [
       MenuItem(
         label: NSAttributedString(
+          string: "All notes",
+          attributes: stylesheet.attributes(style: .body2)
+        ),
+        didSelect: { [weak self] in self?.delegate?.hashtagDataSourceDidClearHashtag() }
+      ),
+      MenuItem(
+        label: NSAttributedString(
           string: "Hashtags",
           attributes: stylesheet.attributes(
             style: .caption,
-            emphasis: .darkTextHighEmphasis
+            emphasis: .darkTextMediumEmphasis
           )
         )
       ),

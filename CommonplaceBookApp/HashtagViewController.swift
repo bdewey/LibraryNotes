@@ -6,6 +6,7 @@ import UIKit
 
 public protocol HashtagViewControllerDelegate: class {
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String)
+  func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController)
   func hashtagViewControllerDidCancel(_ viewController: HashtagViewController)
 }
 
@@ -56,6 +57,10 @@ public final class HashtagViewController: UIViewController {
 }
 
 extension HashtagViewController: HashtagDataSourceDelegate {
+  public func hashtagDataSourceDidClearHashtag() {
+    delegate?.hashtagViewControllerDidClearHashtag(self)
+  }
+
   public func hashtagDataSourceDidSelectHashtag(_ hashtag: String) {
     delegate?.hashtagViewController(self, didTap: hashtag)
   }

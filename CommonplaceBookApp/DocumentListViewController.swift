@@ -154,6 +154,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 }
 
 extension DocumentListViewController: HashtagViewControllerDelegate {
+  func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
+    dataSource.filteredHashtag = nil
+    dismiss(animated: true, completion: nil)
+  }
+
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
     print("Tapped " + hashtag)
     dataSource.filteredHashtag = hashtag
