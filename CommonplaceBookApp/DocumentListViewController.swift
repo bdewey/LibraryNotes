@@ -72,7 +72,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = index.documentDataSource
-    index.adapter = adapter
+    index.documentDataSource.adapter = adapter
     return adapter
   }()
 
@@ -134,7 +134,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
   @objc private func didTapHashtagMenu() {
-    print("didTapHashtagMenu")
     let hashtagViewController = HashtagViewController(
       dataSource: index.hashtagDataSource,
       stylesheet: stylesheet

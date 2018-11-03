@@ -15,7 +15,6 @@ public final class DocumentPropertiesIndex: NSObject {
 
   public let parsingRules: ParsingRules
   fileprivate let stylesheet: Stylesheet
-  public weak var adapter: ListAdapter?
   fileprivate var properties: [URL: DocumentPropertiesListDiffable] = [:]
 
   public private(set) lazy var documentDataSource: DocumentDataSource = {
@@ -26,12 +25,16 @@ public final class DocumentPropertiesIndex: NSObject {
     return HashtagDataSource(index: self)
   }()
 
+  private func performUpdates() {
+    documentDataSource.adapter?.performUpdates(animated: true)
+    hashtagDataSource.adapter?.performUpdates(animated: true)
+  }
+
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
     let url = properties.value.fileMetadata.fileURL
     try? FileManager.default.removeItem(at: url)
     self.properties[url] = nil
-    adapter?.performUpdates(animated: true)
-    hashtagDataSource.adapter?.performUpdates(animated: true)
+    performUpdates()
   }
 }
 
@@ -55,7 +58,7 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
       case .success(let properties):
         self.properties[urlKey] = DocumentPropertiesListDiffable(properties)
         DDLogInfo("Successfully loaded: " + properties.title)
-        self.adapter?.performUpdates(animated: true)
+        self.performUpdates()
       case .failure(let error):
         self.properties[urlKey] = nil
         DDLogError("Error loading properties: \(error)")
@@ -79,6 +82,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 
   private weak var index: DocumentPropertiesIndex?
+  public weak var adapter: ListAdapter?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     guard let index = index else { return [] }
