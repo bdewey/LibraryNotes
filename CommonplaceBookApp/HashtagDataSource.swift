@@ -4,6 +4,10 @@ import CommonplaceBook
 import Foundation
 import IGListKit
 
+public protocol HashtagDataSourceDelegate: class {
+  func hashtagDataSourceDidSelectHashtag(_ hashtag: String)
+}
+
 public final class HashtagDataSource: NSObject, ListAdapterDataSourceWithAdapter {
   public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
     self.index = index
@@ -16,6 +20,7 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSourceWithAdapter
     index.removeDataSource(self)
   }
 
+  public weak var delegate: HashtagDataSourceDelegate?
   private let index: DocumentPropertiesIndex
   private let stylesheet: Stylesheet
   public weak var adapter: ListAdapter?
@@ -35,12 +40,13 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSourceWithAdapter
     let hashtags = index.properties.values.reduce(into: Set<String>()) { (hashtags, props) in
       hashtags.formUnion(props.value.hashtags)
     }
-    let hashtagDiffables = Array(hashtags).sorted().map {
+    let hashtagDiffables = Array(hashtags).sorted().map { (hashtag) in
       MenuItem(
         label: NSAttributedString(
-          string: $0,
+          string: hashtag,
           attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextHighEmphasis)
-        )
+        ),
+        didSelect: { [weak self] in self?.delegate?.hashtagDataSourceDidSelectHashtag(hashtag) }
       )
     }
     results.append(contentsOf: hashtagDiffables)

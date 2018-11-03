@@ -29,6 +29,11 @@ public final class MenuSectionController: ListSectionController {
     return cell
   }
 
+  public override func didSelectItem(at index: Int) {
+    guard let menuItem = object else { return }
+    menuItem.didSelect?()
+  }
+
   public override func didUpdate(to object: Any) {
     self.object = (object as! MenuItem) // swiftlint:disable:this force_cast
   }

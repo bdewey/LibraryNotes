@@ -5,14 +5,16 @@ import IGListKit
 import UIKit
 
 public protocol HashtagViewControllerDelegate: class {
+  func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String)
   func hashtagViewControllerDidCancel(_ viewController: HashtagViewController)
 }
 
 public final class HashtagViewController: UIViewController {
-  public init(dataSource: HashtagDataSource, stylesheet: Stylesheet) {
-    self.dataSource = dataSource
+  public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
+    self.dataSource = HashtagDataSource(index: index, stylesheet: stylesheet)
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
+    self.dataSource.delegate = self
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -50,11 +52,11 @@ public final class HashtagViewController: UIViewController {
 
   public override func viewDidLoad() {
     view.addSubview(collectionView)
-    let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTap))
-    view.addGestureRecognizer(tapGestureRecognizer)
   }
+}
 
-  @objc private func didTap() {
-    delegate?.hashtagViewControllerDidCancel(self)
+extension HashtagViewController: HashtagDataSourceDelegate {
+  public func hashtagDataSourceDidSelectHashtag(_ hashtag: String) {
+    delegate?.hashtagViewController(self, didTap: hashtag)
   }
 }

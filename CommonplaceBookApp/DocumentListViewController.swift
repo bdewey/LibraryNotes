@@ -137,9 +137,8 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
   @objc private func didTapHashtagMenu() {
-    let dataSource = HashtagDataSource(index: index, stylesheet: stylesheet)
     let hashtagViewController = HashtagViewController(
-      dataSource: dataSource,
+      index: index,
       stylesheet: stylesheet
     )
     hamburgerPresentationController = CoverPartiallyPresentationController(
@@ -155,6 +154,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 }
 
 extension DocumentListViewController: HashtagViewControllerDelegate {
+  func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
+    print("Tapped " + hashtag)
+    dismiss(animated: true, completion: nil)
+  }
+
   func hashtagViewControllerDidCancel(_ viewController: HashtagViewController) {
     dismiss(animated: true, completion: nil)
   }
