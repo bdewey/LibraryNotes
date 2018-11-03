@@ -4,9 +4,7 @@ import CommonplaceBook
 import Foundation
 import IGListKit
 
-typealias TextListDiffable = ObjectListDiffable<NSAttributedString>
-
-public final class TextSectionController: ListSectionController {
+public final class MenuSectionController: ListSectionController {
 
   public init(stylesheet: Stylesheet) {
     self.stylesheet = stylesheet
@@ -14,7 +12,7 @@ public final class TextSectionController: ListSectionController {
   }
 
   private let stylesheet: Stylesheet
-  private var object: TextListDiffable?
+  private var object: MenuItem?
 
   public override func sizeForItem(at index: Int) -> CGSize {
     return CGSize(width: collectionContext!.containerSize.width, height: 48)
@@ -27,11 +25,11 @@ public final class TextSectionController: ListSectionController {
       at: index
     ) as! TextCollectionViewCell // swiftlint:disable:this force_cast
     cell.backgroundColor = stylesheet.colorScheme.surfaceColor
-    cell.textLabel.attributedText = object!.value
+    cell.textLabel.attributedText = object!.label
     return cell
   }
 
   public override func didUpdate(to object: Any) {
-    self.object = (object as! TextListDiffable) // swiftlint:disable:this force_cast
+    self.object = (object as! MenuItem) // swiftlint:disable:this force_cast
   }
 }
