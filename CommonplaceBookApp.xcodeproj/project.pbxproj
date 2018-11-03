@@ -11,6 +11,7 @@
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D3187CAA218B372600815772 /* ObjectListDiffable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA9218B372600815772 /* ObjectListDiffable.swift */; };
+		D3187CAC218D25D800815772 /* ShadowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAB218D25D800815772 /* ShadowView.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */; };
@@ -73,6 +74,7 @@
 		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D3187CA9218B372600815772 /* ObjectListDiffable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectListDiffable.swift; sourceTree = "<group>"; };
+		D3187CAB218D25D800815772 /* ShadowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowView.swift; sourceTree = "<group>"; };
 		D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ExtraLight.otf"; sourceTree = "<group>"; };
 		D31FA12620ED847A00224FCD /* Merriweather-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Regular.otf"; sourceTree = "<group>"; };
 		D31FA12720ED847A00224FCD /* Merriweather-Italic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Italic.otf"; sourceTree = "<group>"; };
@@ -234,6 +236,7 @@
 				D3187CA9218B372600815772 /* ObjectListDiffable.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
+				D3187CAB218D25D800815772 /* ShadowView.swift */,
 				D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */,
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
@@ -503,6 +506,7 @@
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */,
 				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
+				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,

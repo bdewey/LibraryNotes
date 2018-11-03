@@ -26,7 +26,7 @@ public final class TextSectionController: ListSectionController {
       for: self,
       at: index
     ) as! TextCollectionViewCell // swiftlint:disable:this force_cast
-    cell.backgroundColor = stylesheet.colorScheme.darkSurfaceColor
+    cell.backgroundColor = stylesheet.colorScheme.surfaceColor
     cell.textLabel.attributedText = object!.value
     return cell
   }

@@ -37,16 +37,19 @@ public final class HashtagViewController: UIViewController {
       collectionViewLayout: UICollectionViewFlowLayout()
     )
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.backgroundColor = stylesheet.colorScheme.darkSurfaceColor
+    collectionView.backgroundColor = stylesheet.colorScheme.surfaceColor
     documentListAdapter.collectionView = collectionView
     return collectionView
   }()
 
   public override func loadView() {
-    self.view = collectionView
+    let shadowView = ShadowView()
+    shadowView.shadowElevation = .menu
+    self.view = shadowView
   }
 
   public override func viewDidLoad() {
+    view.addSubview(collectionView)
     let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTap))
     view.addGestureRecognizer(tapGestureRecognizer)
   }

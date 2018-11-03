@@ -115,7 +115,7 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
       TextListDiffable(NSAttributedString(
         string: "Hashtags",
         attributes: index.stylesheet.attributes(
-          style: .subtitle1,
+          style: .caption,
           emphasis: .darkTextHighEmphasis
         )
       )),

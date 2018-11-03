@@ -25,12 +25,12 @@ UIViewControllerTransitioningDelegate {
   var interactiveDismissal: Bool = false
   let coverDirection: Direction
 
-  private let margin: CGFloat = 64.0
+  private let margin: CGFloat = 56.0
 
   lazy private var backgroundView: UIView = {
-    let view = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+    let view = UIView(frame: .zero)
     view.frame = self.containerView?.bounds ?? CGRect()
-    view.backgroundColor = nil
+    view.backgroundColor = UIColor(white: 0, alpha: 0.32)
 
     let tapGesture = UITapGestureRecognizer(target: self, action: #selector(backgroundViewTapped))
     view.addGestureRecognizer(tapGesture)
@@ -246,6 +246,8 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
     let viewControllerToAnimate = transitionContext.viewController(forKey: viewControllerKey)!
     guard let viewToAnimate = viewControllerToAnimate.view else { return }
 
+    let finalFrame = transitionContext.finalFrame(for: viewControllerToAnimate)
+    viewToAnimate.frame = finalFrame
     let offsetFrame = fromDirection.offsetFrameForView(
       view: viewToAnimate,
       containerView: transitionContext.containerView
@@ -266,7 +268,7 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
         if self.reverse {
           viewToAnimate.frame = offsetFrame
         } else {
-          viewToAnimate.frame = transitionContext.finalFrame(for: viewControllerToAnimate)
+          viewToAnimate.frame = finalFrame
         }
       },
       completion: { _ in
