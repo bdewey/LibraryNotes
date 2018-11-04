@@ -19,13 +19,11 @@ private struct DataSourceWrapper {
 
 public final class DocumentPropertiesIndex: NSObject {
 
-  public init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
+  public init(parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
-    self.stylesheet = stylesheet
   }
 
   public let parsingRules: ParsingRules
-  fileprivate let stylesheet: Stylesheet
   public var properties: [URL: DocumentPropertiesListDiffable] = [:]
 
   private var dataSources: [DataSourceWrapper] = []

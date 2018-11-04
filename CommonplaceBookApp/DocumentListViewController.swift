@@ -28,7 +28,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    self.index = DocumentPropertiesIndex(parsingRules: parsingRules, stylesheet: stylesheet)
+    self.index = DocumentPropertiesIndex(parsingRules: parsingRules)
     self.dataSource = DocumentDataSource(index: self.index, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
