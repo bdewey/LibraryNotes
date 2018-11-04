@@ -4,13 +4,24 @@ import CocoaLumberjack
 import CommonplaceBook
 import FlashcardKit
 import MaterialComponents.MaterialAppBar
+import MaterialComponents.MaterialSnackbar
 import UIKit
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControllerDelegate {
 
   var window: UIWindow?
   let useCloud = true
+
+  private lazy var loadingViewController: UIViewController = {
+    let loadingViewController = LoadingViewController(stylesheet: commonplaceBookStylesheet)
+    loadingViewController.title = "Interactive Notebook"
+    loadingViewController.delegate = self
+    let navigationController = MDCAppBarNavigationController()
+    navigationController.delegate = self
+    navigationController.pushViewController(loadingViewController, animated: false)
+    return navigationController
+  }()
 
   func application(
     _ application: UIApplication,
@@ -19,21 +30,47 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
     let window = UIWindow(frame: UIScreen.main.bounds)
+    window.rootViewController = loadingViewController
+    window.makeKeyAndVisible()
+    CommonplaceBook.openDocument(
+      at: DocumentPropertiesIndexDocument.name,
+      using: DocumentPropertiesIndexDocument.Factory(parsingRules: LanguageDeck.parsingRules)
+    ) { (result) in
+      switch result {
+      case .success(let document):
+        self.window?.rootViewController = self.makeViewController(propertiesDocument: document)
+      case .failure(let error):
+        let messageText = "Error opening \(DocumentPropertiesIndexDocument.name): \(error.localizedDescription)"
+        let message = MDCSnackbarMessage(text: messageText)
+        MDCSnackbarManager.show(message)
+      }
+      print(result)
+    }
+    self.window = window
+    return true
+  }
+
+  private func makeViewController(
+    propertiesDocument: DocumentPropertiesIndexDocument
+  ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
-        parsingRules: LanguageDeck.parsingRules,
+        propertiesDocument: propertiesDocument,
         stylesheet: commonplaceBookStylesheet
       ),
       animated: false
     )
-    window.rootViewController = navigationController
-    window.makeKeyAndVisible()
-    self.window = window
-    return true
+    return navigationController
+  }
+
+  func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor] {
+    return [commonplaceBookStylesheet.colorScheme.secondaryColor]
   }
 }
+
+extension LoadingViewController: StylesheetContaining { }
 
 private let commonplaceBookStylesheet: Stylesheet = {
   var stylesheet = Stylesheet()

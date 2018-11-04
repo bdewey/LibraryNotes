@@ -25,11 +25,10 @@ extension NSComparisonPredicate {
 
 final class DocumentListViewController: UIViewController, StylesheetContaining {
 
-  init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
-    self.parsingRules = parsingRules
+  init(propertiesDocument: DocumentPropertiesIndexDocument, stylesheet: Stylesheet) {
+    self.propertiesDocument = propertiesDocument
     self.stylesheet = stylesheet
-    self.index = DocumentPropertiesIndex(parsingRules: parsingRules)
-    self.dataSource = DocumentDataSource(index: self.index, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(index: propertiesDocument.index, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
@@ -39,9 +38,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let parsingRules: ParsingRules
+  deinit {
+    propertiesDocument.close(completionHandler: nil)
+  }
+
+  private let propertiesDocument: DocumentPropertiesIndexDocument
   public let stylesheet: Stylesheet
-  private let index: DocumentPropertiesIndex
   private let dataSource: DocumentDataSource
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
@@ -110,7 +112,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       NSComparisonPredicate(conformingToUTI: "public.plain-text"),
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
       ])
-    metadataQuery = MetadataQuery(predicate: predicate, delegate: index)
+    metadataQuery = MetadataQuery(predicate: predicate, delegate: propertiesDocument.index)
   }
 
   @objc private func didTapNewDocument() {
@@ -138,7 +140,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func didTapHashtagMenu() {
     let hashtagViewController = HashtagViewController(
-      index: index,
+      index: propertiesDocument.index,
       stylesheet: stylesheet
     )
     hamburgerPresentationController = CoverPartiallyPresentationController(

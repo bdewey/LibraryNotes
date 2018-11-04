@@ -12,6 +12,10 @@ public protocol ListAdapterDataSourceWithAdapter: ListAdapterDataSource {
   var adapter: ListAdapter? { get }
 }
 
+public protocol DocumentPropertiesIndexDelegate: class {
+  func documentPropertiesIndexDidChange(_ index: DocumentPropertiesIndex)
+}
+
 private struct DataSourceWrapper {
   init(_ value: ListAdapterDataSourceWithAdapter) { self.value = value }
   weak var value: ListAdapterDataSourceWithAdapter?
@@ -23,8 +27,14 @@ public final class DocumentPropertiesIndex: NSObject {
     self.parsingRules = parsingRules
   }
 
+  public weak var delegate: DocumentPropertiesIndexDelegate?
   public let parsingRules: ParsingRules
-  public var properties: [URL: DocumentPropertiesListDiffable] = [:]
+  public var properties: [URL: DocumentPropertiesListDiffable] = [:] {
+    didSet {
+      performUpdates()
+      delegate?.documentPropertiesIndexDidChange(self)
+    }
+  }
 
   private var dataSources: [DataSourceWrapper] = []
 
@@ -82,6 +92,7 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
   public func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
     let models = items
       .map { FileMetadataWrapper(metadataItem: $0) }
+      .filter { $0.value.fileURL.lastPathComponent != DocumentPropertiesIndexDocument.name }
     for fileMetadata in models {
       fileMetadata.downloadIfNeeded()
       updateProperties(for: fileMetadata)

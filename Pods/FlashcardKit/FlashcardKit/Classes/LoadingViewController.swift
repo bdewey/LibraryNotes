@@ -5,15 +5,25 @@ import MaterialComponents.MaterialActivityIndicator
 import SnapKit
 import UIKit
 
+public protocol LoadingViewControllerDelegate: class {
+  func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor]
+}
+
 /// Simple view controller that just displays an indeterminate progress indicator in the middle
 /// of its view. Intended to be used for mock UI prior to loading real model data.
 public final class LoadingViewController: UIViewController {
 
-  public var stylesheet: Stylesheet? {
-    didSet {
-      if isViewLoaded { configureUI() }
-    }
+  public init(stylesheet: Stylesheet) {
+    self.stylesheet = stylesheet
+    super.init(nibName: nil, bundle: nil)
   }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  public weak var delegate: LoadingViewControllerDelegate?
+  public let stylesheet: Stylesheet
 
   public override func viewDidLoad() {
     super.viewDidLoad()
@@ -25,16 +35,10 @@ public final class LoadingViewController: UIViewController {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.200) {
       self.activityIndicator.startAnimating()
     }
-    configureUI()
-  }
-
-  private func configureUI() {
-    if let stylesheet = stylesheet {
-      MDCActivityIndicatorColorThemer.applySemanticColorScheme(
-        stylesheet.colorScheme,
-        to: activityIndicator
-      )
-    }
+    view.backgroundColor = stylesheet.colorScheme.surfaceColor
+    let cycleColors = delegate?.loadingViewControllerCycleColors(self)
+      ?? [stylesheet.colorScheme.primaryColor]
+    activityIndicator.cycleColors = cycleColors
   }
 
   private lazy var activityIndicator: MDCActivityIndicator = {
