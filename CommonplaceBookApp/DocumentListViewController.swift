@@ -31,7 +31,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     self.index = DocumentPropertiesIndex(parsingRules: parsingRules, stylesheet: stylesheet)
     self.dataSource = DocumentDataSource(index: self.index, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = "Commonplace Book"
+    self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
   }
 
@@ -156,12 +156,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
     dataSource.filteredHashtag = nil
+    title = "Interactive Notebook"
     dismiss(animated: true, completion: nil)
   }
 
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
     print("Tapped " + hashtag)
     dataSource.filteredHashtag = hashtag
+    title = hashtag
     dismiss(animated: true, completion: nil)
   }
 
