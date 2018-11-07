@@ -13,6 +13,8 @@ public protocol ListAdapterDataSourceWithAdapter: ListAdapterDataSource {
 }
 
 public protocol DocumentPropertiesIndexDelegate: class {
+
+  /// Properties in the index changed.
   func documentPropertiesIndexDidChange(_ index: DocumentPropertiesIndex)
 }
 
@@ -21,38 +23,57 @@ private struct DataSourceWrapper {
   weak var value: ListAdapterDataSourceWithAdapter?
 }
 
+/// Maintains the mapping of document name to document properties.
 public final class DocumentPropertiesIndex: NSObject {
 
+  /// Designated initializer.
+  ///
+  /// @param parsingrules The rules used to parse the text content of documents.
   public init(parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
   }
 
+  /// Delegate.
   public weak var delegate: DocumentPropertiesIndexDelegate?
+
+  /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
-  public var properties: [URL: DocumentPropertiesListDiffable] = [:] {
+
+  /// The mapping between document names and document properties.
+  public internal(set) var properties: [URL: DocumentPropertiesListDiffable] = [:] {
     didSet {
       performUpdates()
       delegate?.documentPropertiesIndexDidChange(self)
     }
   }
 
+  /// All IGListKit data sources that are currently displaying data based on the index.
+  /// These data sources get notified of changes to properties.
   private var dataSources: [DataSourceWrapper] = []
 
+  /// Registers an IGListKit list adapter with this index.
+  ///
+  /// @param dataSource The adapter to register. It will get notifications of changes.
   public func addDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
     dataSources.append(DataSourceWrapper(dataSource))
   }
 
+  /// Removes the list adapter. It will no longer get notifications of changes.
+  ///
+  /// @param The adapter to unregister.
   public func removeDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
     guard let index = dataSources.firstIndex(where: { $0.value === dataSource }) else { return }
     dataSources.remove(at: index)
   }
 
+  /// Tell all registered list adapters to perform updates.
   private func performUpdates() {
     for dataSource in dataSources {
       dataSource.value?.adapter?.performUpdates(animated: true)
     }
   }
 
+  /// Deletes a document and its properties.
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
     let url = properties.value.fileMetadata.fileURL
     try? FileManager.default.removeItem(at: url)
