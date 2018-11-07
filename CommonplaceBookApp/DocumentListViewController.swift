@@ -40,6 +40,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   deinit {
     propertiesDocument.close(completionHandler: nil)
+    dataSource.index.removeAdapter(documentListAdapter)
   }
 
   private let propertiesDocument: DocumentPropertiesIndexDocument
@@ -77,7 +78,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.adapter = adapter
+    dataSource.index.addAdapter(adapter)
     return adapter
   }()
 
@@ -158,6 +159,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
     dataSource.filteredHashtag = nil
+    documentListAdapter.performUpdates(animated: true)
     title = "Interactive Notebook"
     dismiss(animated: true, completion: nil)
   }
@@ -165,6 +167,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
     print("Tapped " + hashtag)
     dataSource.filteredHashtag = hashtag
+    documentListAdapter.performUpdates(animated: true)
     title = hashtag
     dismiss(animated: true, completion: nil)
   }

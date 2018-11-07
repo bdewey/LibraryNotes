@@ -4,26 +4,15 @@ import CommonplaceBook
 import Foundation
 import IGListKit
 
-public final class DocumentDataSource: NSObject, ListAdapterDataSourceWithAdapter {
+public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
     self.index = index
     self.stylesheet = stylesheet
-    super.init()
-    index.addDataSource(self)
   }
 
-  deinit {
-    index.removeDataSource(self)
-  }
-
-  private let index: DocumentPropertiesIndex
+  public let index: DocumentPropertiesIndex
   private let stylesheet: Stylesheet
-  public weak var adapter: ListAdapter?
-  public var filteredHashtag: String? {
-    didSet {
-      adapter?.performUpdates(animated: true)
-    }
-  }
+  public var filteredHashtag: String?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     return index.properties.values

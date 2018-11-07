@@ -9,22 +9,15 @@ public protocol HashtagDataSourceDelegate: class {
   func hashtagDataSourceDidSelectHashtag(_ hashtag: String)
 }
 
-public final class HashtagDataSource: NSObject, ListAdapterDataSourceWithAdapter {
+public final class HashtagDataSource: NSObject, ListAdapterDataSource {
   public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
     self.index = index
     self.stylesheet = stylesheet
-    super.init()
-    index.addDataSource(self)
-  }
-
-  deinit {
-    index.removeDataSource(self)
   }
 
   public weak var delegate: HashtagDataSourceDelegate?
-  private let index: DocumentPropertiesIndex
+  public let index: DocumentPropertiesIndex
   private let stylesheet: Stylesheet
-  public weak var adapter: ListAdapter?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     var results: [ListDiffable] = [

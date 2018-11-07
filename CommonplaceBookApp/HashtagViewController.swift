@@ -22,6 +22,10 @@ public final class HashtagViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  deinit {
+    dataSource.index.removeAdapter(documentListAdapter)
+  }
+
   private let dataSource: HashtagDataSource
   private let stylesheet: Stylesheet
   public weak var delegate: HashtagViewControllerDelegate?
@@ -30,7 +34,7 @@ public final class HashtagViewController: UIViewController {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.adapter = adapter
+    dataSource.index.addAdapter(adapter)
     return adapter
   }()
 

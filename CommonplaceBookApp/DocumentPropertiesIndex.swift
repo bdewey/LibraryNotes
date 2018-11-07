@@ -6,21 +6,10 @@ import Foundation
 import IGListKit
 import MiniMarkdown
 
-/// A specialization of ListAdapterDataSource that contains a weak reference back to
-/// an adapter that uses this data source.
-public protocol ListAdapterDataSourceWithAdapter: ListAdapterDataSource {
-  var adapter: ListAdapter? { get }
-}
-
 public protocol DocumentPropertiesIndexDelegate: class {
 
   /// Properties in the index changed.
   func documentPropertiesIndexDidChange(_ index: DocumentPropertiesIndex)
-}
-
-private struct DataSourceWrapper {
-  init(_ value: ListAdapterDataSourceWithAdapter) { self.value = value }
-  weak var value: ListAdapterDataSourceWithAdapter?
 }
 
 /// Maintains the mapping of document name to document properties.
@@ -49,27 +38,27 @@ public final class DocumentPropertiesIndex: NSObject {
 
   /// All IGListKit data sources that are currently displaying data based on the index.
   /// These data sources get notified of changes to properties.
-  private var dataSources: [DataSourceWrapper] = []
+  private var adapters: [WeakWrapper<ListAdapter>] = []
 
   /// Registers an IGListKit list adapter with this index.
   ///
-  /// @param dataSource The adapter to register. It will get notifications of changes.
-  public func addDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
-    dataSources.append(DataSourceWrapper(dataSource))
+  /// @param adapter The adapter to register. It will get notifications of changes.
+  public func addAdapter(_ adapter: ListAdapter) {
+    adapters.append(WeakWrapper(adapter))
   }
 
   /// Removes the list adapter. It will no longer get notifications of changes.
   ///
   /// @param The adapter to unregister.
-  public func removeDataSource(_ dataSource: ListAdapterDataSourceWithAdapter) {
-    guard let index = dataSources.firstIndex(where: { $0.value === dataSource }) else { return }
-    dataSources.remove(at: index)
+  public func removeAdapter(_ adapter: ListAdapter) {
+    guard let index = adapters.firstIndex(where: { $0.value === adapter }) else { return }
+    adapters.remove(at: index)
   }
 
   /// Tell all registered list adapters to perform updates.
   private func performUpdates() {
-    for dataSource in dataSources {
-      dataSource.value?.adapter?.performUpdates(animated: true)
+    for adapter in adapters {
+      adapter.value?.performUpdates(animated: true)
     }
   }
 
