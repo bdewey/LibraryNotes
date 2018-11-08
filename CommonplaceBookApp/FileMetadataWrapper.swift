@@ -24,7 +24,8 @@ public struct FileMetadata: Equatable, Codable {
     self.downloadingStatus = String(metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey
       ) as! NSString)
-    self.fileURL = metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
+    let fileURL = metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
+    self.fileName = fileURL.lastPathComponent
     self.isDownloading = (metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemIsDownloadingKey
     ) as! NSNumber).boolValue
@@ -38,7 +39,7 @@ public struct FileMetadata: Equatable, Codable {
   public let contentTypeTree: [String]
   public let displayName: String
   public let downloadingStatus: String
-  public let fileURL: URL
+  public let fileName: String
   public let isDownloading: Bool
   public let isUploading: Bool
 }
@@ -55,9 +56,9 @@ public final class FileMetadataWrapper: Equatable {
     return lhs.value == rhs.value
   }
 
-  public func downloadIfNeeded() {
+  public func downloadIfNeeded(in container: URL) {
     if value.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
-      FileMetadataWrapper.downloadItem(self)
+      FileMetadataWrapper.downloadItem(self, in: container)
     }
   }
 }
@@ -69,10 +70,11 @@ extension FileMetadataWrapper {
     attributes: []
   )
 
-  private static func downloadItem(_ item: FileMetadataWrapper) {
+  private static func downloadItem(_ item: FileMetadataWrapper, in container: URL) {
+    let fileURL = container.appendingPathComponent(item.value.fileName)
     downloadQueue.async {
-      DDLogDebug("Downloading " + String(describing: item.value.fileURL))
-      try? FileManager.default.startDownloadingUbiquitousItem(at: item.value.fileURL)
+      DDLogDebug("Downloading " + String(describing: item.value.fileName))
+      try? FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
     }
   }
 }

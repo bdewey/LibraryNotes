@@ -65,6 +65,7 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didSelectItem(at index: Int) {
     properties.value.fileMetadata.loadEditingViewController(
+      containerURL: documentIndex.containerURL,
       parsingRules: documentIndex.parsingRules,
       stylesheet: stylesheet
     ) { (editingViewController) in
@@ -112,7 +113,10 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 }
 
 extension FileMetadata {
-  internal var editableDocument: (UIDocumentWithPreviousError & EditableDocument)? {
+  internal func editableDocument(
+    in container: URL
+  ) -> (UIDocumentWithPreviousError & EditableDocument)? {
+    let fileURL = container.appendingPathComponent(fileName)
     if contentTypeTree.contains("public.plain-text") {
       return PlainTextDocument(fileURL: fileURL)
     } else if contentTypeTree.contains("org.textbundle.package") {
@@ -156,11 +160,12 @@ extension FileMetadata {
   }
 
   func loadEditingViewController(
+    containerURL: URL,
     parsingRules: ParsingRules,
     stylesheet: Stylesheet,
     completion: @escaping (UIViewController?) -> Void
   ) {
-    guard let document = self.editableDocument else {
+    guard let document = self.editableDocument(in: containerURL) else {
       completion(nil)
       return
     }

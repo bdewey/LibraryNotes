@@ -23,10 +23,11 @@ public struct DocumentProperties: Equatable, Codable {
 
   public static func loadProperties(
     from metadataWrapper: FileMetadataWrapper,
+    in container: URL,
     parsingRules: ParsingRules,
     completion: @escaping (Result<DocumentProperties>) -> Void
   ) {
-    guard let document = metadataWrapper.value.editableDocument else {
+    guard let document = metadataWrapper.value.editableDocument(in: container) else {
       completion(.failure(Error.noEditableDocument))
       return
     }
@@ -73,7 +74,7 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
   }
 
   public func diffIdentifier() -> NSObjectProtocol {
-    return value.fileMetadata.fileURL as NSURL
+    return value.fileMetadata.fileName as NSString
   }
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {

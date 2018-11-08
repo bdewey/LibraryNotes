@@ -13,7 +13,10 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
   public static let name = "properties.json"
 
   public init(fileURL url: URL, parsingRules: ParsingRules) {
-    index = DocumentPropertiesIndex(parsingRules: parsingRules)
+    index = DocumentPropertiesIndex(
+      containerURL: url.deletingLastPathComponent(),
+      parsingRules: parsingRules
+    )
     super.init(fileURL: url)
     index.delegate = self
   }
@@ -32,7 +35,7 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
     guard let data = contents as? Data else { return }
     let jsonDecoder = JSONDecoder()
     jsonDecoder.dateDecodingStrategy = .iso8601
-    let encodedProperties = try jsonDecoder.decode([URL: DocumentProperties].self, from: data)
+    let encodedProperties = try jsonDecoder.decode([String: DocumentProperties].self, from: data)
     let diffableProperties = encodedProperties.mapValues({
       return DocumentPropertiesListDiffable($0)
     })
