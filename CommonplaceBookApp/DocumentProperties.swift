@@ -13,12 +13,14 @@ public struct DocumentProperties: Codable {
   public let hashtags: [String]
   public let placeholder: Bool
   public let title: String
+  public let cardTemplates: [CardTemplateSerializationWrapper]
 
   public init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
     self.hashtags = nodes.hashtags
     self.placeholder = nodes.isEmpty
     self.title = String(nodes.title.split(separator: "\n").first ?? "")
+    self.cardTemplates = nodes.cardTemplates
   }
 
   public static func loadProperties(
@@ -65,6 +67,20 @@ extension DocumentProperties {
 extension DocumentProperties: CustomStringConvertible {
   public var description: String {
     return "\(title) \(fileMetadata)"
+  }
+}
+
+extension Array where Element == Node {
+  var cardTemplates: [CardTemplateSerializationWrapper] {
+    var results = [CardTemplateSerializationWrapper]()
+    results.append(
+      contentsOf: VocabularyAssociation.makeAssociations(from: self).0
+        .map { CardTemplateSerializationWrapper($0) }
+    )
+    results.append(
+      contentsOf: ClozeTemplate.extract(from: self).map { CardTemplateSerializationWrapper($0) }
+    )
+    return results
   }
 }
 

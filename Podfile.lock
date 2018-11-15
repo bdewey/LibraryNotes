@@ -630,7 +630,7 @@ CHECKOUT OPTIONS:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :commit: 1e681e35b0c7043f2f60abc84cd16e4c553618a5
+    :commit: aa455bd521b707514d0cb4ddfcbea81a0296d2f1
     :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea

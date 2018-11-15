@@ -36,13 +36,22 @@ extension MiniMarkdown.TableRow {
   }
 }
 
+extension CardTemplateType {
+  public static let vocabularyAssociation = CardTemplateType(
+    rawValue: "vocabularyAssociation",
+    class: VocabularyAssociation.self
+  )
+}
+
 /// Represents and association of a Spanish to an English word. This association generates
 /// 2 or 3 cards, which are specific things to remember:
 ///
 /// - Given the Spanish word, what is the English word?
 /// - Given the Engish word, what is the Spanish word?
 /// - How do you spell the Spanish word? (optional)
-struct VocabularyAssociation: Equatable, Codable {
+public final class VocabularyAssociation: CardTemplate {
+
+  public override var type: CardTemplateType { return .vocabularyAssociation }
 
   /// The Spanish word.
   let spanish: String
@@ -54,11 +63,33 @@ struct VocabularyAssociation: Equatable, Codable {
   /// Whether or not to test spelling of this word.
   var testSpelling: Bool
 
+  enum CodingKeys: String, CodingKey {
+    case spanish
+    case english
+    case testSpelling
+  }
+
   /// Constructs an association given just an English word.
   init(spanish: String, english: String, testSpelling: Bool = false) {
     self.spanish = spanish
     self.english = english
     self.testSpelling = testSpelling
+    super.init()
+  }
+
+  required init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.spanish = try container.decode(String.self, forKey: .spanish)
+    self.english = try container.decode(String.self, forKey: .english)
+    self.testSpelling = try container.decode(Bool.self, forKey: .testSpelling)
+    try super.init(from: decoder)
+  }
+
+  public override func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(spanish, forKey: .spanish)
+    try container.encode(english, forKey: .english)
+    try container.encode(testSpelling, forKey: .testSpelling)
   }
 
   /// Loads cards from a Markdown string.
@@ -70,7 +101,7 @@ struct VocabularyAssociation: Equatable, Codable {
   /// - parameter markdown: The markdown-formatted string.
   /// - returns: A tuple of VocabularyCard structures extracted from the string and the range
   ///            in `markdown` that the string came from.
-  static func makeAssociations(
+  public static func makeAssociations(
     from markdown: String
   ) -> ([VocabularyAssociation], Range<String.Index>) {
     // TODO: No way to customize these parsing rules
@@ -78,7 +109,7 @@ struct VocabularyAssociation: Equatable, Codable {
     return makeAssociations(from: blocks)
   }
 
-  static func makeAssociations(
+  public static func makeAssociations(
     from blocks: [Node]
   ) -> ([VocabularyAssociation], Range<String.Index>) {
     let maybeTable = blocks.first { $0.isTable(withColumnCount: 2) }
@@ -100,7 +131,7 @@ struct VocabularyAssociation: Equatable, Codable {
   }
 
   /// Creates cards from this association.
-  var cards: [Card] {
+  public override var cards: [Card] {
     var cards: [Card] = [
       VocabularyAssociationCard(vocabularyAssociation: self, promptWithSpanish: true),
       VocabularyAssociationCard(vocabularyAssociation: self, promptWithSpanish: false),
@@ -160,10 +191,5 @@ extension Array where Element == VocabularyAssociation {
       markdown += "\n"
     }
     return markdown
-  }
-
-  /// Returns the cards from all of the associations in the array.
-  var cards: [Card] {
-    return Array<Card>(self.map { $0.cards }.joined())
   }
 }

@@ -35,6 +35,7 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
     guard let data = contents as? Data else { return }
     let jsonDecoder = JSONDecoder()
     jsonDecoder.dateDecodingStrategy = .iso8601
+    jsonDecoder.userInfo[.markdownParsingRules] = index.parsingRules
     let encodedProperties = try jsonDecoder.decode([String: DocumentProperties].self, from: data)
     let diffableProperties = encodedProperties.mapValues({
       return DocumentPropertiesListDiffable($0)

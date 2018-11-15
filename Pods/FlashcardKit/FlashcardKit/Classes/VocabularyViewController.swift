@@ -10,14 +10,14 @@ import TextBundleKit
 
 extension VocabularyAssociation: StudyItem {
 
-  var tableViewTitle: NSAttributedString {
+  public var tableViewTitle: NSAttributedString {
     return NSAttributedString(
       string: spanish,
       attributes: [.font: Stylesheet.hablaEspanol.typographyScheme.body2, .kern: 0.25]
     )
   }
 
-  func studyMetadata(from identifierToStudyMetadata: IdentifierToStudyMetadata) -> StudyMetadata {
+  public func studyMetadata(from identifierToStudyMetadata: IdentifierToStudyMetadata) -> StudyMetadata {
     let today = DayComponents(Date())
     return cards
       .map { identifierToStudyMetadata[
@@ -28,8 +28,12 @@ extension VocabularyAssociation: StudyItem {
       .min(by: { $0.dayForNextReview < $1.dayForNextReview })!
   }
 
-  static func < (lhs: VocabularyAssociation, rhs: VocabularyAssociation) -> Bool {
+  public static func < (lhs: VocabularyAssociation, rhs: VocabularyAssociation) -> Bool {
     return lhs.spanish.localizedCompare(rhs.spanish) == .orderedAscending
+  }
+
+  public static func == (lhs: VocabularyAssociation, rhs: VocabularyAssociation) -> Bool {
+    return lhs.spanish.localizedCompare(rhs.spanish) == .orderedSame
   }
 }
 

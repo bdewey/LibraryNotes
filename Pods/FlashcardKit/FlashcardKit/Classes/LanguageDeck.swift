@@ -24,10 +24,10 @@ public final class LanguageDeck {
         return VocabularyAssociation.makeAssociations(from: blocks).0
       }
     .continuous()
-    let clozeCardSignal = miniMarkdownSignal.map { ClozeCard.makeCards(from: $0) }
+    let clozeTemplateSignal = miniMarkdownSignal.map { ClozeTemplate.extract(from: $0) }
     let combinedCards = vocabularyAssociationsSignal
-      .combineLatest(clozeCardSignal) { (vocabularyAssociations, closeCards) -> [Card] in
-        return Array([vocabularyAssociations.cards, closeCards].joined())
+      .combineLatest(clozeTemplateSignal) { (vocabularyAssociations, clozeTemplates) -> [Card] in
+        return Array([vocabularyAssociations.cards, clozeTemplates.cards].joined())
       }
     self.studySessionSignal = document.documentStudyMetadata.signal
       .combineLatest(combinedCards, { (documentValue, cards) -> StudySession in

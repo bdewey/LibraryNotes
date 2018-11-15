@@ -7,15 +7,29 @@ import Foundation
 import MiniMarkdown
 import TextBundleKit
 
+/// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
+/// a hint. The removed word/phrase is a "cloze".
+///
+/// See https://en.wikipedia.org/wiki/Cloze_test
 public struct ClozeCard: Codable {
+
+  /// Designated initializer.
+  ///
+  /// - parameter markdown: The markdown content that contains at least one cloze.
+  /// - parameter closeIndex: The index of the cloze in `markdown` to remove when testing.
   public init(markdown: String, clozeIndex: Int) {
     self.markdown = markdown
     self.clozeIndex = clozeIndex
   }
 
+  /// The markdown content that contains at least one cloze.
   public let markdown: String
+
+  /// The index of the cloze in `markdown` to remove when testing.
   public let clozeIndex: Int
 
+  /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
+  /// replaced with a hint if present, and highlighted.
   public func cardFrontRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
     return MarkdownAttributedStringRenderer.cardFront(
       stylesheet: stylesheet,
@@ -23,6 +37,8 @@ public struct ClozeCard: Codable {
     )
   }
 
+  /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex`
+  /// present and highlighted.
   public func cardBackRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
     return MarkdownAttributedStringRenderer.cardBackRenderer(
       stylesheet: stylesheet,
@@ -31,29 +47,14 @@ public struct ClozeCard: Codable {
   }
 }
 
-extension ClozeCard {
-  public static func makeCards(from markdown: [Node]) -> [ClozeCard] {
-    let clozes = markdown
-      .map { $0.findNodes(where: { $0.type == .cloze }) }
-      .joined()
-      .compactMap { $0.findFirstAncestor(where: { $0.type == .paragraph || $0.type == .listItem }) }
-    DDLogDebug("Found \(clozes.count) clozes")
-    var indexForNode: [ObjectIdentifier: Int] = [:]
-    return clozes.map { (node) in
-      let index = indexForNode[ObjectIdentifier(node), default: 0]
-      indexForNode[ObjectIdentifier(node)] = index + 1
-      return ClozeCard(markdown: node.allMarkdown, clozeIndex: index)
-    }
-  }
-}
-
 extension ClozeCard: Card {
-  var identifier: String {
+
+  public var identifier: String {
     let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
     return markdown + suffix
   }
 
-  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
+  public func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
     return ClozeCardView(card: self, parseableDocument: parseableDocument, stylesheet: stylesheet)
   }
 }
@@ -69,6 +70,8 @@ extension MarkdownAttributedStringRenderer {
     }
   }
 
+  /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
+  /// highlight the cloze.
   static func cardFront(
     stylesheet: Stylesheet,
     hideClozeAt index: Int
@@ -94,6 +97,7 @@ extension MarkdownAttributedStringRenderer {
     return renderer
   }
 
+  /// Builds a renderer that will show and highlight the cloze at clozeIndex. 
   static func cardBackRenderer(
     stylesheet: Stylesheet,
     revealingClozeAt index: Int
