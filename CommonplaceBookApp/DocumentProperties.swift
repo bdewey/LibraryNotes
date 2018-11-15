@@ -8,7 +8,7 @@ import MiniMarkdown
 import TextBundleKit
 import enum TextBundleKit.Result
 
-public struct DocumentProperties: Equatable, Codable {
+public struct DocumentProperties: Codable {
   public var fileMetadata: FileMetadata
   public let hashtags: [String]
   public let placeholder: Bool
@@ -89,7 +89,10 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
-    return value == otherWrapper.value
+    return value.title == otherWrapper.value.title &&
+      value.hashtags == otherWrapper.value.hashtags &&
+      value.fileMetadata == otherWrapper.value.fileMetadata &&
+      value.placeholder == otherWrapper.value.placeholder
   }
 }
 
