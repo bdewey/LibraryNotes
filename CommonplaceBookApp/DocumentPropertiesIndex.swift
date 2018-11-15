@@ -91,7 +91,12 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     // contentChangeDate. We'll replace it with something with the actual extracted
     // properties in the completion block below. This is needed to prevent multiple
     // loads for the same content.
-    properties[name] = DocumentPropertiesListDiffable(fileMetadata.value)
+    if properties[name] == nil {
+      properties[name] = DocumentPropertiesListDiffable(fileMetadata.value)
+    } else {
+      // Update change time to prevent multiple loads
+      properties[name]?.updateMetadata(fileMetadata.value)
+    }
     DocumentProperties.loadProperties(
       from: fileMetadata,
       in: containerURL,
