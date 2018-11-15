@@ -82,8 +82,11 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     let name = fileMetadata.value.fileName
     if properties[name]?.value.fileMetadata.contentChangeDate ==
       fileMetadata.value.contentChangeDate {
+      // Just update the fileMetadata structure without re-extracting document properties.
+      properties[name]?.updateMetadata(fileMetadata.value)
       return
     }
+
     // Put an entry in the properties dictionary that contains the current
     // contentChangeDate. We'll replace it with something with the actual extracted
     // properties in the completion block below. This is needed to prevent multiple
@@ -114,5 +117,6 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
       fileMetadata.downloadIfNeeded(in: containerURL)
       updateProperties(for: fileMetadata)
     }
+    performUpdates()
   }
 }

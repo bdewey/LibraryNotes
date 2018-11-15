@@ -9,7 +9,7 @@ import TextBundleKit
 import enum TextBundleKit.Result
 
 public struct DocumentProperties: Equatable, Codable {
-  public let fileMetadata: FileMetadata
+  public var fileMetadata: FileMetadata
   public let hashtags: [String]
   public let placeholder: Bool
   public let title: String
@@ -62,8 +62,14 @@ extension DocumentProperties {
   }
 }
 
+extension DocumentProperties: CustomStringConvertible {
+  public var description: String {
+    return "\(title) \(fileMetadata)"
+  }
+}
+
 public final class DocumentPropertiesListDiffable: ListDiffable {
-  public let value: DocumentProperties
+  public private(set) var value: DocumentProperties
 
   public init(_ value: DocumentProperties) {
     self.value = value
@@ -73,6 +79,10 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
     self.value = DocumentProperties(fileMetadata: value, nodes: [])
   }
 
+  public func updateMetadata(_ metadata: FileMetadata) {
+    value.fileMetadata = metadata
+  }
+
   public func diffIdentifier() -> NSObjectProtocol {
     return value.fileMetadata.fileName as NSString
   }
@@ -80,6 +90,13 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
     return value == otherWrapper.value
+  }
+}
+
+extension DocumentPropertiesListDiffable: CustomStringConvertible, CustomDebugStringConvertible {
+  public var description: String { return value.description }
+  public var debugDescription: String {
+    return "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) " + value.description
   }
 }
 

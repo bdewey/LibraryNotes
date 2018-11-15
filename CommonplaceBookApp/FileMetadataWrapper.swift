@@ -6,7 +6,7 @@ import CocoaLumberjack
 import Foundation
 import IGListKit
 
-public struct FileMetadata: Equatable, Codable {
+public struct FileMetadata: Equatable {
   public init(metadataItem: NSMetadataItem) {
     self.contentChangeDate = metadataItem.value(
       forAttribute: NSMetadataItemFSContentChangeDateKey
@@ -34,14 +34,58 @@ public struct FileMetadata: Equatable, Codable {
     ) as! NSNumber).boolValue
   }
 
+  // Persisted properties
   public let contentChangeDate: Date
   public let contentType: String
   public let contentTypeTree: [String]
   public let displayName: String
   public let downloadingStatus: String
   public let fileName: String
+
+  // Transient properties
   public let isDownloading: Bool
   public let isUploading: Bool
+}
+
+extension FileMetadata: CustomStringConvertible {
+  public var description: String {
+    return "Name = '\(displayName)' isUploading=\(isUploading)"
+  }
+}
+
+// Need custom Codable conformance because we don't want to load/save transient properties.
+extension FileMetadata: Codable {
+  enum CodingKeys: String, CodingKey {
+    case contentChangeDate
+    case contentType
+    case contentTypeTree
+    case displayName
+    case downloadingStatus
+    case fileName
+  }
+
+  public init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    self.contentChangeDate = try container.decode(Date.self, forKey: .contentChangeDate)
+    self.contentType = try container.decode(String.self, forKey: .contentType)
+    self.contentTypeTree = try container.decode([String].self, forKey: .contentTypeTree)
+    self.displayName = try container.decode(String.self, forKey: .displayName)
+    self.downloadingStatus = try container.decode(String.self, forKey: .downloadingStatus)
+    self.fileName = try container.decode(String.self, forKey: .fileName)
+
+    self.isDownloading = false
+    self.isUploading = false
+  }
+
+  public func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(contentChangeDate, forKey: .contentChangeDate)
+    try container.encode(contentType, forKey: .contentType)
+    try container.encode(contentTypeTree, forKey: .contentTypeTree)
+    try container.encode(displayName, forKey: .displayName)
+    try container.encode(downloadingStatus, forKey: .downloadingStatus)
+    try container.encode(fileName, forKey: .fileName)
+  }
 }
 
 // Immutable value object with key properties of an NSMetadataItem, which apparently mutates.
@@ -61,6 +105,10 @@ public final class FileMetadataWrapper: Equatable {
       FileMetadataWrapper.downloadItem(self, in: container)
     }
   }
+}
+
+extension FileMetadataWrapper: CustomStringConvertible {
+  public var description: String { return value.description }
 }
 
 extension FileMetadataWrapper {
