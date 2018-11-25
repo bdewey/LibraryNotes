@@ -23,8 +23,16 @@ extension NSComparisonPredicate {
   }
 }
 
+/// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController, StylesheetContaining {
 
+  /// Designated initializer.
+  ///
+  /// - note: This object will "own" `propertiesDocument`. No other class should
+  ///         access this simultaneously, and the class will close the document when
+  ///         it is deallocated.
+  /// - parameter propertiesDocument: The cached extracted properties of all documents.
+  /// - parameter stylesheet: Controls the styling of UI elements.
   init(propertiesDocument: DocumentPropertiesIndexDocument, stylesheet: Stylesheet) {
     self.propertiesDocument = propertiesDocument
     self.stylesheet = stylesheet
@@ -32,12 +40,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
+    self.navigationItem.rightBarButtonItem = studyButton
   }
 
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
+  /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
     propertiesDocument.close(completionHandler: nil)
     dataSource.index.removeAdapter(documentListAdapter)
@@ -63,6 +73,15 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     MDCFloatingActionButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.addTarget(self, action: #selector(didTapNewDocument), for: .touchUpInside)
     return button
+  }()
+
+  private lazy var studyButton: UIBarButtonItem = {
+    return UIBarButtonItem(
+      title: "Study",
+      style: .plain,
+      target: self,
+      action: #selector(startStudySession)
+    )
   }()
 
   private lazy var layout: UICollectionViewFlowLayout = {
@@ -114,6 +133,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
       ])
     metadataQuery = MetadataQuery(predicate: predicate, delegate: propertiesDocument.index)
+    configureUI()
   }
 
   @objc private func didTapNewDocument() {
@@ -139,6 +159,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
+  private func configureUI() {
+    studyButton.isEnabled = !dataSource.studySession.isEmpty
+  }
+
   @objc private func didTapHashtagMenu() {
     let hashtagViewController = HashtagViewController(
       index: propertiesDocument.index,
@@ -154,6 +178,17 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     hashtagViewController.delegate = self
     present(hashtagViewController, animated: true, completion: nil)
   }
+
+  @objc private func startStudySession() {
+    let studyVC = StudyViewController(
+      studySession: dataSource.studySession,
+      documentCache: ReadOnlyDocumentCache(delegate: self),
+      stylesheet: stylesheet,
+      delegate: self
+    )
+    studyVC.modalTransitionStyle = .crossDissolve
+    present(studyVC, animated: true, completion: nil)
+  }
 }
 
 extension DocumentListViewController: HashtagViewControllerDelegate {
@@ -161,6 +196,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = nil
     documentListAdapter.performUpdates(animated: true)
     title = "Interactive Notebook"
+    configureUI()
     dismiss(animated: true, completion: nil)
   }
 
@@ -169,10 +205,30 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = hashtag
     documentListAdapter.performUpdates(animated: true)
     title = hashtag
+    configureUI()
     dismiss(animated: true, completion: nil)
   }
 
   func hashtagViewControllerDidCancel(_ viewController: HashtagViewController) {
+    dismiss(animated: true, completion: nil)
+  }
+}
+
+extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
+  func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
+    return nil
+  }
+}
+
+extension DocumentListViewController: StudyViewControllerDelegate {
+  func studyViewController(
+    _ studyViewController: StudyViewController,
+    didFinishSession: StudySession
+  ) {
+    dismiss(animated: true, completion: nil)
+  }
+
+  func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
   }
 }

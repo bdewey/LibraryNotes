@@ -1,6 +1,7 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
 import CommonplaceBook
+import FlashcardKit
 import Foundation
 import IGListKit
 
@@ -15,6 +16,15 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public var filteredHashtag: String?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
+    return filteredDiffableProperties
+      .sorted(
+        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+      )
+      // give IGLitstKit its own copy of the model objects to guard against mutations
+      .map { DocumentPropertiesListDiffable($0.value) }
+  }
+
+  public var filteredDiffableProperties: [DocumentPropertiesListDiffable] {
     return index.properties.values
       // remove placeholders
       .filter { !$0.value.placeholder }
@@ -23,12 +33,18 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
         guard let hashtag = filteredHashtag else { return true }
         return $0.value.hashtags.contains(hashtag)
       }
-      // sort by change time
-      .sorted(
-        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+  }
+
+  public var studySession: StudySession {
+    // TODO: Should be a way to associate ParsingRules with each document
+    return filteredDiffableProperties.map { (diffableProperties) -> StudySession in
+      return StudySession(
+        diffableProperties.value.cardTemplates.cards,
+        documentName: diffableProperties.value.fileMetadata.fileName,
+        documentRules: LanguageDeck.parsingRules
       )
-      // give IGLitstKit its own copy of the model objects to guard against mutations
-      .map { DocumentPropertiesListDiffable($0.value) }
+    }
+    .reduce(into: StudySession(), { $0 += $1 })
   }
 
   public func listAdapter(
