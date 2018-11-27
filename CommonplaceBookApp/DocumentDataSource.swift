@@ -21,6 +21,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
         by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
       )
       // give IGLitstKit its own copy of the model objects to guard against mutations
+      // TODO: Why do I store ListDiffable things if I just make new ListDiffable things?
       .map { DocumentPropertiesListDiffable($0.value) }
   }
 
@@ -35,13 +36,15 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       }
   }
 
-  public var studySession: StudySession {
+  public func studySession(metadata: [String: [String: StudyMetadata]]) -> StudySession {
     // TODO: Should be a way to associate ParsingRules with each document
     return filteredDiffableProperties.map { (diffableProperties) -> StudySession in
-      return StudySession(
-        diffableProperties.value.cardTemplates.cards,
+      let documentMetadata = metadata[diffableProperties.value.fileMetadata.fileName, default: [:]]
+      return documentMetadata.studySession(
+        from: diffableProperties.value.cardTemplates.cards,
+        limit: 500,
         documentName: diffableProperties.value.fileMetadata.fileName,
-        documentRules: LanguageDeck.parsingRules
+        parsingRules: LanguageDeck.parsingRules
       )
     }
     .reduce(into: StudySession(), { $0 += $1 })

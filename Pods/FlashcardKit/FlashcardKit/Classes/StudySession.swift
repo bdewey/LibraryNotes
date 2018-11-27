@@ -36,7 +36,7 @@ public struct StudySession {
   /// When the person ended this particular study session.
   public var studySessionEndDate: Date?
 
-  private(set) public var results: [String: AnswerStatistics] = [:]
+  private(set) public var results = [String: [String: AnswerStatistics]]()
 
   /// Identifiers of cards that weren't answered at all in the study session.
   var didNotAnswerAtAll: Set<String> {
@@ -79,7 +79,7 @@ public struct StudySession {
   mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
     let identifier = currentCard.card.identifier
-    var statistics = results[identifier, default: AnswerStatistics.empty]
+    var statistics = results[currentCard.documentName, default: [:]][identifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1
@@ -88,7 +88,7 @@ public struct StudySession {
       cards.append(currentCard)
       statistics.incorrect += 1
     }
-    results[identifier] = statistics
+    results[currentCard.documentName, default: [:]][identifier] = statistics
     currentIndex += 1
   }
 

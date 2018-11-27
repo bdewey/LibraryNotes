@@ -33,15 +33,27 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ///         access this simultaneously, and the class will close the document when
   ///         it is deallocated.
   /// - parameter propertiesDocument: The cached extracted properties of all documents.
+  /// - parameter studyHistory: A metadocument that contains the records of all study sessions.
   /// - parameter stylesheet: Controls the styling of UI elements.
-  init(propertiesDocument: DocumentPropertiesIndexDocument, stylesheet: Stylesheet) {
+  init(
+    propertiesDocument: DocumentPropertiesIndexDocument,
+    studyHistory: TextBundleDocument,
+    stylesheet: Stylesheet
+  ) {
     self.propertiesDocument = propertiesDocument
+    self.studyHistory = studyHistory
     self.stylesheet = stylesheet
     self.dataSource = DocumentDataSource(index: propertiesDocument.index, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
+    self.studyMetadataSubscription = studyHistory
+      .containerStudyMetadata
+      .subscribe { (taggedMetadataResult) in
+        self.currentDocumentNameToIdentifierToMetadata = taggedMetadataResult.value?.value
+          ?? [String: [String: StudyMetadata]]()
+      }
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -51,12 +63,18 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
     propertiesDocument.close(completionHandler: nil)
+
     dataSource.index.removeAdapter(documentListAdapter)
   }
 
   private let propertiesDocument: DocumentPropertiesIndexDocument
+  private let studyHistory: TextBundleDocument
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
+  private var studyMetadataSubscription: AnySubscription?
+  private var currentDocumentNameToIdentifierToMetadata = [String: [String: StudyMetadata]]() {
+    didSet { configureUI() }
+  }
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     return UIBarButtonItem(
@@ -161,7 +179,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
   private func configureUI() {
-    studyButton.isEnabled = !dataSource.studySession.isEmpty
+    studyButton.isEnabled = !dataSource.studySession(metadata: currentDocumentNameToIdentifierToMetadata).isEmpty
   }
 
   @objc private func didTapHashtagMenu() {
@@ -182,7 +200,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func startStudySession() {
     let studyVC = StudyViewController(
-      studySession: dataSource.studySession,
+      studySession: dataSource.studySession(metadata: currentDocumentNameToIdentifierToMetadata),
       documentCache: ReadOnlyDocumentCache(delegate: self),
       stylesheet: stylesheet,
       delegate: self
@@ -231,8 +249,9 @@ extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
 extension DocumentListViewController: StudyViewControllerDelegate {
   func studyViewController(
     _ studyViewController: StudyViewController,
-    didFinishSession: StudySession
+    didFinishSession session: StudySession
   ) {
+    studyHistory.containerStudyMetadata.update(with: session, on: Date())
     dismiss(animated: true, completion: nil)
   }
 

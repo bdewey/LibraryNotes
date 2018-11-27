@@ -57,11 +57,13 @@ extension DocumentProperty where Value == IdentifierToStudyMetadata {
     let day = DayComponents(date)
     changeValue { (dictionary) -> Dictionary<String, StudyMetadata> in
       var dictionary = dictionary
-      for (identifier, statistics) in studySession.results {
-        if let existingMetadata = dictionary[identifier] {
-          dictionary[identifier] = existingMetadata.updatedMetadata(with: statistics, on: day)
-        } else {
-          dictionary[identifier] = StudyMetadata(day: day, lastAnswers: statistics)
+      for (_, documentResults) in studySession.results {
+        for (identifier, statistics) in documentResults {
+          if let existingMetadata = dictionary[identifier] {
+            dictionary[identifier] = existingMetadata.updatedMetadata(with: statistics, on: day)
+          } else {
+            dictionary[identifier] = StudyMetadata(day: day, lastAnswers: statistics)
+          }
         }
       }
       return dictionary

@@ -11,7 +11,7 @@ import TextBundleKit
 public struct TextBundleDocumentFactory: DocumentFactory {
 
   /// Initializer.
-  init(useCloud: Bool) {
+  public init(useCloud: Bool) {
     self.useCloud = useCloud
   }
 
@@ -34,7 +34,7 @@ public struct TextBundleDocumentFactory: DocumentFactory {
   public func openDocument(
     at url: URL,
     completion: @escaping (Result<TextBundleDocument>) -> Void
-    ) {
+  ) {
     let document = TextBundleDocument(fileURL: url)
     document.open { (success) in
       if success {

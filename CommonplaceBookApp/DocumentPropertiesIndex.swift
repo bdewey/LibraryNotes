@@ -115,9 +115,10 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
   }
 
   public func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
+    let specialNames: Set<String> = [StudyHistory.name, DocumentPropertiesIndexDocument.name]
     let models = items
       .map { FileMetadataWrapper(metadataItem: $0) }
-      .filter { $0.value.fileName != DocumentPropertiesIndexDocument.name }
+      .filter { !specialNames.contains($0.value.fileName) }
     for fileMetadata in models {
       fileMetadata.downloadIfNeeded(in: containerURL)
       updateProperties(for: fileMetadata)

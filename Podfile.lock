@@ -37,7 +37,7 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.6.0):
+  - FlashcardKit (0.6.1):
     - CollectionViewLayouts
     - CommonplaceBook (~> 0.2)
     - CwlSignal
@@ -50,7 +50,7 @@ PODS:
     - SDWebImage/GIF (~> 4.0)
     - SnapKit (~> 4.0)
     - TextBundleKit (~> 0.5)
-  - FlashcardKit/Tests (0.6.0):
+  - FlashcardKit/Tests (0.6.1):
     - CollectionViewLayouts
     - CommonplaceBook (~> 0.2)
     - CwlSignal
@@ -644,7 +644,7 @@ CHECKOUT OPTIONS:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :commit: e613c29d307231cedb72841b45f3f1793bf70c08
+    :commit: 2f695480062a1ee7e681c5d3874e9f8f67b90bf3
     :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
@@ -672,7 +672,7 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 0110eb53ff8a0bcdc066e6956f7991a70b97f48a
+  FlashcardKit: 6244f0ad36ebcc81b923164cbfad13721d1cc44f
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb

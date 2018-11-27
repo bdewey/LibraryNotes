@@ -5,6 +5,7 @@ import CommonplaceBook
 import FlashcardKit
 import MaterialComponents.MaterialAppBar
 import MaterialComponents.MaterialSnackbar
+import TextBundleKit
 import UIKit
 
 @UIApplicationMain
@@ -37,31 +38,41 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
     CommonplaceBook.openDocument(
-      at: DocumentPropertiesIndexDocument.name,
-      using: DocumentPropertiesIndexDocument.Factory(parsingRules: LanguageDeck.parsingRules)
-    ) { (result) in
-      switch result {
-      case .success(let document):
-        self.window?.rootViewController = self.makeViewController(propertiesDocument: document)
-      case .failure(let error):
-        let messageText = "Error opening \(DocumentPropertiesIndexDocument.name): \(error.localizedDescription)"
-        let message = MDCSnackbarMessage(text: messageText)
-        MDCSnackbarManager.show(message)
+      at: StudyHistory.name,
+      using: TextBundleDocumentFactory(useCloud: true)
+    ) { (studyHistoryResult) in
+      CommonplaceBook.openDocument(
+        at: DocumentPropertiesIndexDocument.name,
+        using: DocumentPropertiesIndexDocument.Factory(parsingRules: LanguageDeck.parsingRules)
+      ) { (result) in
+        switch (studyHistoryResult, result) {
+        case (.success(let studyHistory), .success(let document)):
+          self.window?.rootViewController = self.makeViewController(
+            propertiesDocument: document,
+            studyHistory: studyHistory
+          )
+        case (.failure(let error), _), (_, .failure(let error)):
+          let messageText = "Error opening \(DocumentPropertiesIndexDocument.name): \(error.localizedDescription)"
+          let message = MDCSnackbarMessage(text: messageText)
+          MDCSnackbarManager.show(message)
+        }
+        print(result)
       }
-      print(result)
     }
     self.window = window
     return true
   }
 
   private func makeViewController(
-    propertiesDocument: DocumentPropertiesIndexDocument
+    propertiesDocument: DocumentPropertiesIndexDocument,
+    studyHistory: TextBundleDocument
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
         propertiesDocument: propertiesDocument,
+        studyHistory: studyHistory,
         stylesheet: commonplaceBookStylesheet
       ),
       animated: false
