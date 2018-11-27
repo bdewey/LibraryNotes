@@ -31,7 +31,12 @@ public final class LanguageDeck {
       }
     self.studySessionSignal = document.documentStudyMetadata.signal
       .combineLatest(combinedCards, { (documentValue, cards) -> StudySession in
-        return documentValue.value.studySession(from: cards, limit: 500)
+        return documentValue.value.studySession(
+          from: cards,
+          limit: 500,
+          documentName: document.fileURL.lastPathComponent,
+          parsingRules: LanguageDeck.parsingRules
+        )
       })
   }
 

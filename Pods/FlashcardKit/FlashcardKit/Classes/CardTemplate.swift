@@ -43,7 +43,7 @@ open class CardTemplate: Codable {
 
 extension Array where Element: CardTemplate {
   /// Returns the cards from all of the associations in the array.
-  var cards: [Card] {
+  public var cards: [Card] {
     return Array<Card>(self.map { $0.cards }.joined())
   }
 }
@@ -89,5 +89,13 @@ public final class CardTemplateSerializationWrapper: Codable {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(value.type.rawValue, forKey: .type)
     try value.encode(to: encoder)
+  }
+}
+
+extension Array where Element == CardTemplateSerializationWrapper {
+
+  /// Convenience: Returns the cards made from all wrapped templates.
+  public var cards: [Card] {
+    return Array<Card>(self.map { $0.value.cards }.joined())
   }
 }

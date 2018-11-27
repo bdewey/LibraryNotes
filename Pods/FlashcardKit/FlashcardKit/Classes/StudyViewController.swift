@@ -6,18 +6,45 @@ import MaterialComponents
 import TextBundleKit
 import UIKit
 
-protocol StudyViewControllerDelegate: class {
+public protocol StudyViewControllerDelegate: class {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController)
 }
 
 /// Presents a stack of cards for studying.
-final class StudyViewController: UIViewController {
+public final class StudyViewController: UIViewController {
 
-  private let parseableDocument: ParseableDocument
+  /// Designated initializer.
+  ///
+  /// - parameter studySession: The stack of cards to present for studying.
+  /// - parameter documentCache: A properly configured cache for retreiving documents given a
+  ///                            file name.
+  /// - parameter delegate: TSIA.
+  public init(
+    studySession: StudySession,
+    documentCache: DocumentCache,
+    stylesheet: Stylesheet,
+    delegate: StudyViewControllerDelegate
+  ) {
+    self.studySession = studySession
+    self.documentCache = documentCache
+    self.stylesheet = stylesheet
+    self.delegate = delegate
+    super.init(nibName: nil, bundle: nil)
+    addChild(appBar.headerViewController)
+    self.tabBarItem.title = "STUDY"
+    self.title = "¡Habla Español!"
+  }
+
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
 
   /// The current study session
   private var studySession: StudySession
+
+  private let documentCache: DocumentCache
+  private let stylesheet: Stylesheet
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -41,35 +68,20 @@ final class StudyViewController: UIViewController {
     }
   }
 
-  /// Designated initializer.
-  init(studySession: StudySession, parseableDocument: ParseableDocument, delegate: StudyViewControllerDelegate) {
-    self.parseableDocument = parseableDocument
-    self.studySession = studySession
-    self.delegate = delegate
-    super.init(nibName: nil, bundle: nil)
-    addChild(appBar.headerViewController)
-    self.tabBarItem.title = "STUDY"
-    self.title = "¡Habla Español!"
-  }
-
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-
-  private let appBar: MDCAppBar = {
+  private lazy var appBar: MDCAppBar = {
     let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(Stylesheet.hablaEspanol.typographyScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
+    MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
     return appBar
   }()
 
-  override var childForStatusBarStyle: UIViewController? {
+  override public var childForStatusBarStyle: UIViewController? {
     return appBar.headerViewController
   }
 
   private var cardsRemainingLabel: UILabel!
 
-  override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     studySession.studySessionStartDate = Date()
     cardsRemainingLabel = UILabel(frame: .zero)
@@ -80,9 +92,9 @@ final class StudyViewController: UIViewController {
     cardsRemainingLabel.textAlignment = .center
     cardsRemainingLabel.translatesAutoresizingMaskIntoConstraints = false
     // TODO: this should probably be "caption" -- prototype inside Sketch
-    cardsRemainingLabel.font = Stylesheet.hablaEspanol.typographyScheme.body2
+    cardsRemainingLabel.font = stylesheet.typographyScheme.body2
     appBar.addSubviewsToParent()
-    view.backgroundColor = Stylesheet.hablaEspanol.colorScheme.darkSurfaceColor
+    view.backgroundColor = stylesheet.colorScheme.darkSurfaceColor
     configureUI()
     appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
 
@@ -92,7 +104,9 @@ final class StudyViewController: UIViewController {
 
   private func configureUI() {
     guard isViewLoaded else { return }
-    currentCardView = makeCardView(for: studySession.currentCard)
+    makeCardView(for: studySession.currentCard) { (cardView) in
+      self.currentCardView = cardView
+    }
     cardsRemainingLabel.text = "Cards remaining: \(studySession.remainingCards)"
   }
 
@@ -112,22 +126,34 @@ final class StudyViewController: UIViewController {
     }
     alertController.addAction(discard)
     alertController.addAction(cancel)
-    MDCAlertColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colorScheme, to: alertController)
-    MDCAlertTypographyThemer.applyTypographyScheme(Stylesheet.hablaEspanol.typographyScheme, to: alertController)
+    MDCAlertColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: alertController)
+    MDCAlertTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: alertController)
     present(alertController, animated: true, completion: nil)
   }
 
   /// Creates a card view for a card.
-  private func makeCardView(for card: Card?) -> CardView? {
-    guard let card = card else { return nil }
-    let cardView = card.cardView(parseableDocument: parseableDocument, stylesheet: Stylesheet.hablaEspanol)
-    cardView.delegate = self
-    view.addSubview(cardView)
-    cardView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-    cardView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1, constant: -32).isActive = true
-    cardView.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-    cardView.translatesAutoresizingMaskIntoConstraints = false
-    return cardView
+  private func makeCardView(
+    for cardFromDocument: StudySession.CardFromDocument?,
+    completion: @escaping (CardView?) -> Void
+  ) {
+    guard let cardFromDocument = cardFromDocument else { completion(nil); return }
+    documentCache.document(for: cardFromDocument.documentName) { (document) in
+      guard let document = document as? TextBundleDocument else { completion(nil); return }
+      let cardView = cardFromDocument.card.cardView(
+        parseableDocument: ParseableDocument(
+          document: document,
+          parsingRules: cardFromDocument.documentRules
+        ),
+        stylesheet: self.stylesheet
+      )
+      cardView.delegate = self
+      self.view.addSubview(cardView)
+      cardView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+      cardView.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 1, constant: -32).isActive = true
+      cardView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+      cardView.translatesAutoresizingMaskIntoConstraints = false
+      completion(cardView)
+    }
   }
 }
 

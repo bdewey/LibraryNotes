@@ -2,19 +2,24 @@
 
 import CommonplaceBook
 import Foundation
-
-extension Sequence where Element == Card {
-
-  /// For a sequence of cards, return the set of all identifiers.
-  var allIdentifiers: Set<String> {
-    return self.reduce(into: Set<String>(), { $0.insert($1.identifier ) })
-  }
-}
+import MiniMarkdown
 
 public struct StudySession {
 
+  public struct CardFromDocument {
+    public let card: Card
+    public let documentName: String
+    public let documentRules: ParsingRules
+
+    public init(card: Card, documentName: String, documentRules: ParsingRules) {
+      self.card = card
+      self.documentName = documentName
+      self.documentRules = documentRules
+    }
+  }
+
   /// The current set of cards to study.
-  private var cards: [Card]
+  private var cards: [CardFromDocument]
 
   /// The current position in `cards`
   private var currentIndex: Int
@@ -45,13 +50,27 @@ public struct StudySession {
     return cards.allIdentifiers
   }
 
-  init<Cards: Sequence>(_ cards: Cards) where Cards.Element == Card {
-    self.cards = cards.shuffled()
+  /// Creates a study session where all cards come from a single document.
+  public init<Cards: Sequence>(
+    _ cards: Cards,
+    documentName: String,
+    documentRules: ParsingRules
+  ) where Cards.Element == Card {
+    let documentCards = cards.shuffled().map {
+      CardFromDocument(card: $0, documentName: documentName, documentRules: documentRules)
+    }
+    self.cards = documentCards
     currentIndex = self.cards.startIndex
   }
 
+  /// Creates an empty study session.
+  public init() {
+    self.cards = []
+    self.currentIndex = 0
+  }
+
   /// The current card to study. Nil if we're done.
-  var currentCard: Card? {
+  var currentCard: CardFromDocument? {
     guard currentIndex < cards.endIndex else { return nil }
     return cards[currentIndex]
   }
@@ -59,7 +78,7 @@ public struct StudySession {
   /// Record a correct or incorrect answer for the current card, and advance `currentCard`
   mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
-    let identifier = currentCard.identifier
+    let identifier = currentCard.card.identifier
     var statistics = results[identifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
@@ -76,6 +95,23 @@ public struct StudySession {
   /// Number of cards remaining in the study session.
   var remainingCards: Int {
     return cards.endIndex - currentIndex
+  }
+
+  public static func += (lhs: inout StudySession, rhs: StudySession) {
+    lhs.cards.append(contentsOf: rhs.cards)
+    lhs.cards.shuffle()
+    lhs.currentIndex = 0
+  }
+}
+
+extension StudySession: Collection {
+  public var startIndex: Int { return cards.startIndex }
+  public var endIndex: Int { return cards.endIndex }
+  public func index(after i: Int) -> Int {
+    return cards.index(after: i)
+  }
+  public subscript(position: Int) -> CardFromDocument {
+    return cards[position]
   }
 }
 
@@ -97,5 +133,13 @@ extension StudySession {
       answeredCorrectly: self.answeredCorrectly.count,
       answeredIncorrectly: self.answeredIncorrectly.count
     )
+  }
+}
+
+extension Sequence where Element == StudySession.CardFromDocument {
+
+  /// For a sequence of cards, return the set of all identifiers.
+  var allIdentifiers: Set<String> {
+    return self.reduce(into: Set<String>(), { $0.insert($1.card.identifier ) })
   }
 }

@@ -37,7 +37,20 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.5.0):
+  - FlashcardKit (0.6.0):
+    - CollectionViewLayouts
+    - CommonplaceBook (~> 0.2)
+    - CwlSignal
+    - CwlUtils
+    - DZNPhotoPickerController
+    - MaterialComponents (>= 61.0)
+    - MiniMarkdown (~> 0.9)
+    - NunitoSans
+    - SDWebImage (~> 4.0)
+    - SDWebImage/GIF (~> 4.0)
+    - SnapKit (~> 4.0)
+    - TextBundleKit (~> 0.5)
+  - FlashcardKit/Tests (0.6.0):
     - CollectionViewLayouts
     - CommonplaceBook (~> 0.2)
     - CwlSignal
@@ -553,7 +566,7 @@ PODS:
   - SDWebImage/GIF (4.4.2):
     - FLAnimatedImage (~> 1.0)
     - SDWebImage/Core
-  - SnapKit (4.0.1)
+  - SnapKit (4.2.0)
   - SwipeCellKit (2.5.0)
   - TextBundleKit (0.5.0)
   - TextBundleKit/Tests (0.5.0)
@@ -565,6 +578,7 @@ DEPENDENCIES:
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
   - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
+  - FlashcardKit/Tests (from `https://github.com/bdewey/FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -630,7 +644,7 @@ CHECKOUT OPTIONS:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :commit: aa455bd521b707514d0cb4ddfcbea81a0296d2f1
+    :commit: e613c29d307231cedb72841b45f3f1793bf70c08
     :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
@@ -658,7 +672,7 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 356e09e17ee7ccda36359106325e69fa11ce4434
+  FlashcardKit: 0110eb53ff8a0bcdc066e6956f7991a70b97f48a
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
@@ -669,10 +683,10 @@ SPEC CHECKSUMS:
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
   NunitoSans: 64c8e29a148f6c101a78195da1238e0ac8b3b8e6
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
-  SnapKit: 0de968a9fec17499afa29683b05d0c775b6d1c29
+  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: 3643b5d4d9b218f6ebb094dd0eda84ed9ec4f977
+PODFILE CHECKSUM: 88a16d10b16e8a74b5b7d58dd4dc7142734a216d
 
 COCOAPODS: 1.5.0

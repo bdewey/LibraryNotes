@@ -13,7 +13,11 @@ final class VocabularyAssociationCardView: CardView {
   let parseableDocument: ParseableDocument
   let stylesheet: Stylesheet
 
-  init(card: VocabularyAssociationCard, parseableDocument: ParseableDocument, stylesheet: Stylesheet) {
+  init(
+    card: VocabularyAssociationCard,
+    parseableDocument: ParseableDocument,
+    stylesheet: Stylesheet
+  ) {
     self.card = card
     self.parseableDocument = parseableDocument
     self.stylesheet = stylesheet
@@ -26,7 +30,10 @@ final class VocabularyAssociationCardView: CardView {
     self.addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
 
     contextLabel.attributedText = card.context(document: parseableDocument, stylesheet: stylesheet)
-    frontLabel.attributedText = card.prompt(document: parseableDocument, stylesheet: stylesheet)
+    frontLabel.attributedText = card.prompt(
+      parseableDocument: parseableDocument,
+      stylesheet: stylesheet
+    )
     backLabel.attributedText = card.answer(document: parseableDocument, stylesheet: stylesheet)
     setAnswerVisible(false, animated: false)
   }

@@ -136,8 +136,8 @@ public final class VocabularyViewController: UIViewController {
     guard let studySession = nextStudySession else { return }
     let studyVC = StudyViewController(
       studySession: studySession,
-      // TODO: Don't grab this global variable
-      parseableDocument: ParseableDocument(document: document, parsingRules: LanguageDeck.parsingRules),
+      documentCache: self,
+      stylesheet: Stylesheet.hablaEspanol,
       delegate: self
     )
     studyVC.modalTransitionStyle = .crossDissolve
@@ -157,7 +157,7 @@ public final class VocabularyViewController: UIViewController {
 }
 
 extension VocabularyViewController: StudyViewControllerDelegate {
-  func studyViewController(
+  public func studyViewController(
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
@@ -177,7 +177,7 @@ extension VocabularyViewController: StudyViewControllerDelegate {
     })
   }
 
-  func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
+  public func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     studyViewController.dismiss(animated: true, completion: nil)
   }
 }
@@ -201,7 +201,7 @@ extension VocabularyViewController: NewVocabularyAssociationViewControllerDelega
           preferredFilename: uuid + ".png",
           childDirectoryPath: ["assets"]
         )
-        association.english = "![\(association.english)](\(key))"
+        association.english = "![\(association.english)](assets/\(key))"
       } catch {
         fatalError("Couldn't save image")
       }
@@ -217,6 +217,13 @@ extension VocabularyViewController: NewVocabularyAssociationViewControllerDelega
   func newVocabularyAssociationDidCancel(_ viewController: NewVocabularyAssociationViewController) {
     editingVocabularyAssociation = nil
     dismiss(animated: true, completion: nil)
+  }
+}
+
+extension VocabularyViewController: DocumentCache {
+  public func document(for name: String, completion: @escaping (UIDocument?) -> Void) {
+    assert(name == document.fileURL.lastPathComponent)
+    completion(document)
   }
 }
 

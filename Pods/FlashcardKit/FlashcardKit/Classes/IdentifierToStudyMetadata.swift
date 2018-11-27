@@ -2,6 +2,7 @@
 
 import CommonplaceBook
 import Foundation
+import MiniMarkdown
 
 extension Dictionary where Key == String, Value == StudyMetadata {
 
@@ -11,13 +12,15 @@ extension Dictionary where Key == String, Value == StudyMetadata {
   func studySession(
     from cards: [Card],
     limit: Int,
+    documentName: String,
+    parsingRules: ParsingRules,
     date: Date = Date()
   ) -> StudySession {
     let studyCards = cards
       .filter { self.eligibleForStudy(identifier: $0.identifier, on: date) }
       .shuffled()
       .prefix(limit)
-    return StudySession(studyCards)
+    return StudySession(studyCards, documentName: documentName, documentRules: parsingRules)
   }
 
   private func eligibleForStudy(identifier: String, on date: Date) -> Bool {

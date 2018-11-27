@@ -42,12 +42,15 @@ struct VocabularyAssociationCard: Card {
     )
   }
 
-  func prompt(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
+  func prompt(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
     let phrase = promptWithSpanish
       ? vocabularyAssociation.spanish
       : vocabularyAssociation.english
-    let blocks = document.parsingRules.parse(phrase)
-    let renderer = MarkdownAttributedStringRenderer.promptRenderer(stylesheet: stylesheet)
+    let blocks = parseableDocument.parsingRules.parse(phrase)
+    let renderer = MarkdownAttributedStringRenderer.promptRenderer(
+      document: parseableDocument.document,
+      stylesheet: stylesheet
+    )
     return blocks.map({ renderer.render(node: $0) }).joined()
   }
 
@@ -85,19 +88,15 @@ extension MarkdownAttributedStringRenderer {
     return renderer
   }
 
-  static func promptRenderer(
-    stylesheet: Stylesheet
-  ) -> MarkdownAttributedStringRenderer {
-    return MarkdownAttributedStringRenderer.textRenderer(stylesheet: stylesheet, style: .headline6)
-  }
-
-  static func answerRenderer(
+  static func textAndImageRenderer(
     document: TextBundleDocument,
-    stylesheet: Stylesheet
+    stylesheet: Stylesheet,
+    textStyle: Stylesheet.Style,
+    captionStyle: Stylesheet.Style
   ) -> MarkdownAttributedStringRenderer {
     var renderer = MarkdownAttributedStringRenderer.textRenderer(
       stylesheet: stylesheet,
-      style: .body2
+      style: textStyle
     )
     renderer.renderFunctions[.image] = { (node) in
       let results = NSMutableAttributedString()
@@ -109,16 +108,40 @@ extension MarkdownAttributedStringRenderer {
         attachment.bounds = CGRect(x: 0, y: 0, width: 100.0 * aspectRatio, height: 100.0)
         results.append(NSAttributedString(attachment: attachment))
       }
-      if !imageNode.textSlice.isEmpty {
+      if !imageNode.text.isEmpty {
         results.append(
           NSAttributedString(
-            string: "\n" + String(imageNode.textSlice.substring),
-            attributes: stylesheet.attributes(style: .body2)
+            string: "\n" + String(imageNode.text),
+            attributes: stylesheet.attributes(style: captionStyle)
           )
         )
       }
       return results
     }
     return renderer
+  }
+
+  static func promptRenderer(
+    document: TextBundleDocument,
+    stylesheet: Stylesheet
+  ) -> MarkdownAttributedStringRenderer {
+    return MarkdownAttributedStringRenderer.textAndImageRenderer(
+      document: document,
+      stylesheet: stylesheet,
+      textStyle: .headline6,
+      captionStyle: .headline6
+    )
+  }
+
+  static func answerRenderer(
+    document: TextBundleDocument,
+    stylesheet: Stylesheet
+  ) -> MarkdownAttributedStringRenderer {
+    return MarkdownAttributedStringRenderer.textAndImageRenderer(
+      document: document,
+      stylesheet: stylesheet,
+      textStyle: .body2,
+      captionStyle: .body2
+    )
   }
 }
