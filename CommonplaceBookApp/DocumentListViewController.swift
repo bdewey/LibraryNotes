@@ -7,6 +7,7 @@ import IGListKit
 import MaterialComponents
 import MiniMarkdown
 import SnapKit
+import TextBundleKit
 import UIKit
 
 private let reuseIdentifier = "HACKY_document"
@@ -216,7 +217,14 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
 extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
   func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    return nil
+    let fileURL = propertiesDocument.index.containerURL.appendingPathComponent(name)
+    // TODO: Should I really do this based on path extension?
+    switch fileURL.pathExtension {
+    case "deck", "textbundle":
+      return TextBundleDocument(fileURL: fileURL)
+    default:
+      return PlainTextDocument(fileURL: fileURL)
+    }
   }
 }
 
