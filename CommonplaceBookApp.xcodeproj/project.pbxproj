@@ -28,6 +28,7 @@
 		D37AFCB621ADF10D00A1154A /* StudyHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37AFCB521ADF10D00A1154A /* StudyHistory.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadataWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */; };
+		D3A7B27221AF54470015BE97 /* Notebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A7B27121AF54470015BE97 /* Notebook.swift */; };
 		D3BAC1BA219328CE00D576E6 /* WeakWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
@@ -116,6 +117,7 @@
 		D37AFCB521ADF10D00A1154A /* StudyHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyHistory.swift; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadataWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataWrapper.swift; sourceTree = "<group>"; };
+		D3A7B27121AF54470015BE97 /* Notebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notebook.swift; sourceTree = "<group>"; };
 		D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakWrapper.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
@@ -260,6 +262,7 @@
 				D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */,
 				D334E9EB21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift */,
 				D37AFCB521ADF10D00A1154A /* StudyHistory.swift */,
+				D3A7B27121AF54470015BE97 /* Notebook.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -524,6 +527,7 @@
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */,
+				D3A7B27221AF54470015BE97 /* Notebook.swift in Sources */,
 				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
 				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
