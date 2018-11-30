@@ -2,12 +2,33 @@
 
 import CocoaLumberjack
 import Foundation
-import UIKit
 
-/// A "notebook" is a directory that contains individual "pages" (either plain text files
-/// or textbundle bundles). Each page may contain "cards", which are individual facts to review
-/// using a spaced repetition algorithm.
-public final class Notebook {
+public protocol FileMetadataProviderDelegate: class {
+
+  /// Sent when there are new FileMetadata items in the provider.
+  ///
+  /// - parameter provider: The file metadata provider
+  /// - parameter metadata: The updated copy of the FileMetadata array.
+  func fileMetadataProvider(_ provider: FileMetadataProvider, didUpdate metadata: [FileMetadata])
+}
+
+/// A FileMetadataProvider knows how to obtain all of the FileMetadata structures corresponding
+/// to a single container (e.g., iCloud container or documents folder)
+public protocol FileMetadataProvider {
+
+  /// The current array of metadata.
+  var fileMetadata: [FileMetadata] { get }
+
+  /// Delegate that can receive notifications when `fileMetadata` changes.
+  var delegate: FileMetadataProviderDelegate? { get set }
+}
+
+/// A FileMetadataProvider for the iCloud ubiquitous container.
+///
+/// TODO: At some point, write one of these for local files based on NSFilePresenter
+/// for monitoring.
+public final class ICloudFileMetadataProvider: FileMetadataProvider {
+
   public init(container: URL) {
     self.container = container
     query = NSMetadataQuery()
@@ -34,30 +55,35 @@ public final class Notebook {
     NotificationCenter.default.removeObserver(self)
   }
 
+  /// Up to date copy of file metadata
+  public private(set) var fileMetadata = [FileMetadata]() {
+    didSet {
+      delegate?.fileMetadataProvider(self, didUpdate: fileMetadata)
+    }
+  }
+  public var delegate: FileMetadataProviderDelegate?
+
+  /// the specific ubiquitous container we monitor.
   private let container: URL
+
+  /// Our active query for documents
   private let query: NSMetadataQuery
-  private var items: [NSMetadataItem] = []
 
   @objc private func didFinishGatheringNotification(_ notification: NSNotification) {
-    self.items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
+    self.fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
+      guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
+      return FileMetadata(metadataItem: metadataItem)
+    })
   }
 
   @objc private func didUpdateNotification(_ notification: NSNotification) {
     DDLogInfo("Received notification: " + String(describing: notification.userInfo))
-    self.items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
+    self.fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
+      guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
+      return FileMetadata(metadataItem: metadataItem)
+    })
   }
 }
-
-protocol FileMetadataProviderDelegate: class {
-  func fileMetadataProvider(_ provider: FileMetadataProvider, didUpdate metadata: [FileMetadata])
-}
-
-protocol FileMetadataProvider {
-  var fileMetadata: [FileMetadata] { get }
-  var delegate: FileMetadataProviderDelegate? { get set }
-}
-
-
 
 extension NSComparisonPredicate {
 

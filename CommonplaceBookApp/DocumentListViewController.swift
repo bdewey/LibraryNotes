@@ -41,7 +41,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     stylesheet: Stylesheet
   ) {
     // This is a hack -- just trying to experiment with the Notebook interface.
-    self.notebook = Notebook(container: propertiesDocument.fileURL.deletingLastPathComponent())
+    self.notebook = ICloudFileMetadataProvider(container: propertiesDocument.fileURL.deletingLastPathComponent())
     self.propertiesDocument = propertiesDocument
     self.studyHistory = studyHistory
     self.stylesheet = stylesheet
@@ -69,7 +69,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     dataSource.index.removeAdapter(documentListAdapter)
   }
 
-  private let notebook: Notebook
+  private let notebook: ICloudFileMetadataProvider
   private let propertiesDocument: DocumentPropertiesIndexDocument
   private let studyHistory: TextBundleDocument
   public let stylesheet: Stylesheet
