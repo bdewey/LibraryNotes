@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import CommonplaceBook
 import MiniMarkdown
 import TextBundleKit
@@ -35,9 +36,19 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
     let jsonDecoder = JSONDecoder()
     jsonDecoder.dateDecodingStrategy = .iso8601
     jsonDecoder.userInfo[.markdownParsingRules] = index.parsingRules
-    let encodedProperties = try jsonDecoder.decode([String: DocumentProperties].self, from: data)
-    DispatchQueue.main.async {
-      self.index.properties = encodedProperties
+    do {
+      let encodedProperties = try jsonDecoder.decode([DocumentProperties].self, from: data)
+      let fullDictionary = encodedProperties.reduce(
+        into: [String: DocumentProperties]()
+      ) { (dictionary, properties) in
+        dictionary[properties.fileMetadata.fileName] = properties
+      }
+      DispatchQueue.main.async {
+        self.index.properties = fullDictionary
+      }
+    } catch {
+      DDLogError("Error loading properties index: \(error)")
+      throw error
     }
   }
 }
