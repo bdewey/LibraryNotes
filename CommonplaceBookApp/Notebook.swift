@@ -29,27 +29,38 @@ public final class Notebook {
     query.enableUpdates()
     query.start()
   }
-  
+
   deinit {
     NotificationCenter.default.removeObserver(self)
   }
-  
+
   private let container: URL
   private let query: NSMetadataQuery
   private var items: [NSMetadataItem] = []
 
   @objc private func didFinishGatheringNotification(_ notification: NSNotification) {
-    self.items = query.results as! [NSMetadataItem]
+    self.items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
   }
-  
+
   @objc private func didUpdateNotification(_ notification: NSNotification) {
     DDLogInfo("Received notification: " + String(describing: notification.userInfo))
-    self.items = query.results as! [NSMetadataItem]
+    self.items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
   }
 }
 
+protocol FileMetadataProviderDelegate: class {
+  func fileMetadataProvider(_ provider: FileMetadataProvider, didUpdate metadata: [FileMetadata])
+}
+
+protocol FileMetadataProvider {
+  var fileMetadata: [FileMetadata] { get }
+  var delegate: FileMetadataProviderDelegate? { get set }
+}
+
+
+
 extension NSComparisonPredicate {
-  
+
   /// Convenience initializer that finds items that conform to a UTI.
   fileprivate convenience init(conformingToUTI uti: String) {
     self.init(
@@ -60,11 +71,10 @@ extension NSComparisonPredicate {
       options: []
     )
   }
-  
+
   /// Predicate that finds pages (plain text, textbundles)
   fileprivate static let page = NSCompoundPredicate(orPredicateWithSubpredicates: [
     NSComparisonPredicate(conformingToUTI: "public.plain-text"),
     NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
     ])
 }
-
