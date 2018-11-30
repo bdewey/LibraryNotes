@@ -24,12 +24,12 @@ public struct DocumentProperties: Codable {
   }
 
   public static func loadProperties(
-    from metadataWrapper: FileMetadataWrapper,
+    from metadataWrapper: FileMetadata,
     in container: URL,
     parsingRules: ParsingRules,
     completion: @escaping (Result<DocumentProperties>) -> Void
   ) {
-    guard let document = metadataWrapper.value.editableDocument(in: container) else {
+    guard let document = metadataWrapper.editableDocument(in: container) else {
       completion(.failure(Error.noEditableDocument))
       return
     }
@@ -41,7 +41,7 @@ public struct DocumentProperties: Codable {
           let result = textResult.flatMap({ (taggedText) -> DocumentProperties in
             let nodes = parsingRules.parse(taggedText.value)
             return DocumentProperties(
-              fileMetadata: metadataWrapper.value,
+              fileMetadata: metadataWrapper,
               nodes: nodes
             )
           })
