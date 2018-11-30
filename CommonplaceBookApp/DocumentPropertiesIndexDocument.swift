@@ -27,8 +27,7 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
     let jsonEncoder = JSONEncoder()
     jsonEncoder.dateEncodingStrategy = .iso8601
     jsonEncoder.outputFormatting = .prettyPrinted
-    let encodableProperties = index.properties.mapValues({ return $0.value })
-    return try jsonEncoder.encode(encodableProperties)
+    return try jsonEncoder.encode(Array(index.properties.values))
   }
 
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {
@@ -37,11 +36,8 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
     jsonDecoder.dateDecodingStrategy = .iso8601
     jsonDecoder.userInfo[.markdownParsingRules] = index.parsingRules
     let encodedProperties = try jsonDecoder.decode([String: DocumentProperties].self, from: data)
-    let diffableProperties = encodedProperties.mapValues({
-      return DocumentPropertiesListDiffable($0)
-    })
     DispatchQueue.main.async {
-      self.index.properties = diffableProperties
+      self.index.properties = encodedProperties
     }
   }
 }

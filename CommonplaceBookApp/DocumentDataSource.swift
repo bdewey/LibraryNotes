@@ -16,34 +16,34 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public var filteredHashtag: String?
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    return filteredDiffableProperties
+    return propertiesFilteredByHashtag
       .sorted(
-        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+        by: { $0.fileMetadata.contentChangeDate > $1.fileMetadata.contentChangeDate }
       )
       // give IGLitstKit its own copy of the model objects to guard against mutations
       // TODO: Why do I store ListDiffable things if I just make new ListDiffable things?
-      .map { DocumentPropertiesListDiffable($0.value) }
+      .map { DocumentPropertiesListDiffable($0) }
   }
 
-  public var filteredDiffableProperties: [DocumentPropertiesListDiffable] {
+  private var propertiesFilteredByHashtag: [DocumentProperties] {
     return index.properties.values
       // remove placeholders
-      .filter { !$0.value.placeholder }
+      .filter { !$0.placeholder }
       // only show things with the right hashtag
       .filter {
         guard let hashtag = filteredHashtag else { return true }
-        return $0.value.hashtags.contains(hashtag)
+        return $0.hashtags.contains(hashtag)
       }
   }
 
   public func studySession(metadata: [String: [String: StudyMetadata]]) -> StudySession {
     // TODO: Should be a way to associate ParsingRules with each document
-    return filteredDiffableProperties.map { (diffableProperties) -> StudySession in
-      let documentMetadata = metadata[diffableProperties.value.fileMetadata.fileName, default: [:]]
+    return propertiesFilteredByHashtag.map { (diffableProperties) -> StudySession in
+      let documentMetadata = metadata[diffableProperties.fileMetadata.fileName, default: [:]]
       return documentMetadata.studySession(
-        from: diffableProperties.value.cardTemplates.cards,
+        from: diffableProperties.cardTemplates.cards,
         limit: 500,
-        documentName: diffableProperties.value.fileMetadata.fileName,
+        documentName: diffableProperties.fileMetadata.fileName,
         parsingRules: LanguageDeck.parsingRules
       )
     }

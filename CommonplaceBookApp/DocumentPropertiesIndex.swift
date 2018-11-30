@@ -35,7 +35,7 @@ public final class DocumentPropertiesIndex: NSObject {
   public let parsingRules: ParsingRules
 
   /// The mapping between document names and document properties.
-  public internal(set) var properties: [String: DocumentPropertiesListDiffable] = [:] {
+  public internal(set) var properties: [String: DocumentProperties] = [:] {
     didSet {
       performUpdates()
       delegate?.documentPropertiesIndexDidChange(self)
@@ -80,10 +80,10 @@ public final class DocumentPropertiesIndex: NSObject {
 extension DocumentPropertiesIndex: MetadataQueryDelegate {
   fileprivate func updateProperties(for fileMetadata: FileMetadata) {
     let name = fileMetadata.fileName
-    if properties[name]?.value.fileMetadata.contentChangeDate ==
+    if properties[name]?.fileMetadata.contentChangeDate ==
       fileMetadata.contentChangeDate {
       // Just update the fileMetadata structure without re-extracting document properties.
-      properties[name]?.updateMetadata(fileMetadata)
+      properties[name]?.fileMetadata = fileMetadata
       return
     }
 
@@ -92,10 +92,10 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     // properties in the completion block below. This is needed to prevent multiple
     // loads for the same content.
     if properties[name] == nil {
-      properties[name] = DocumentPropertiesListDiffable(fileMetadata)
+      properties[name] = DocumentProperties(fileMetadata: fileMetadata, nodes: [])
     } else {
       // Update change time to prevent multiple loads
-      properties[name]?.updateMetadata(fileMetadata)
+      properties[name]?.fileMetadata = fileMetadata
     }
     DocumentProperties.loadProperties(
       from: fileMetadata,
@@ -104,7 +104,7 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     ) { (result) in
       switch result {
       case .success(let properties):
-        self.properties[name] = DocumentPropertiesListDiffable(properties)
+        self.properties[name] = properties
         DDLogInfo("Successfully loaded: " + properties.title)
         self.performUpdates()
       case .failure(let error):

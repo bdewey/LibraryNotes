@@ -39,7 +39,7 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
       ),
     ]
     let hashtags = index.properties.values.reduce(into: Set<String>()) { (hashtags, props) in
-      hashtags.formUnion(props.value.hashtags)
+      hashtags.formUnion(props.hashtags)
     }
     let hashtagDiffables = Array(hashtags).sorted().map { (hashtag) in
       MenuItem(
