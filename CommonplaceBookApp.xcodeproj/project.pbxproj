@@ -60,6 +60,7 @@
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
+		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -135,6 +136,7 @@
 		D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
+		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,6 +274,7 @@
 			children = (
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D3D11D502153CD3000B1EA09 /* PlaceholderTests.swift */,
+				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -557,6 +560,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D3D11D512153CD3000B1EA09 /* PlaceholderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

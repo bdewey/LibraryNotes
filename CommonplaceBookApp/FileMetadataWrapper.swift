@@ -5,6 +5,7 @@
 import CocoaLumberjack
 import Foundation
 import IGListKit
+import MobileCoreServices
 
 public struct FileMetadata: Equatable {
   public init(metadataItem: NSMetadataItem) {
@@ -32,6 +33,19 @@ public struct FileMetadata: Equatable {
     self.isUploading = (metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemIsUploadingKey
     ) as! NSNumber).boolValue
+  }
+  
+  public init(fileURL: URL) throws {
+    let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path) as NSDictionary
+    self.contentChangeDate = attributes.fileModificationDate()!
+    let uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileURL.pathExtension as CFString, nil)?.takeRetainedValue()
+    self.contentType = (uti as String?) ?? ""
+    self.contentTypeTree = []
+    self.displayName = FileManager.default.displayName(atPath: fileURL.path)
+    self.downloadingStatus = NSMetadataUbiquitousItemDownloadingStatusCurrent
+    self.fileName = fileURL.lastPathComponent
+    self.isDownloading = false
+    self.isUploading = false
   }
 
   // Persisted properties
