@@ -6,12 +6,12 @@ import Foundation
 import IGListKit
 
 public final class DocumentDataSource: NSObject, ListAdapterDataSource {
-  public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
+  public init(index: Notebook, stylesheet: Stylesheet) {
     self.index = index
     self.stylesheet = stylesheet
   }
 
-  public let index: DocumentPropertiesIndex
+  public let index: Notebook
   private let stylesheet: Stylesheet
   public var filteredHashtag: String?
 
@@ -26,7 +26,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 
   private var propertiesFilteredByHashtag: [DocumentProperties] {
-    return index.properties.values
+    return index.pages.values
       // remove placeholders
       .filter { !$0.placeholder }
       // only show things with the right hashtag

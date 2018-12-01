@@ -6,14 +6,16 @@ import Foundation
 import IGListKit
 import MiniMarkdown
 
-public protocol DocumentPropertiesIndexDelegate: class {
+public protocol NotebookPageChangeListener: AnyObject {
 
   /// Properties in the index changed.
-  func documentPropertiesIndexDidChange(_ index: DocumentPropertiesIndex)
+  func notebookPagesDidChange(_ index: Notebook)
 }
 
-/// Maintains the mapping of document name to document properties.
-public final class DocumentPropertiesIndex: NSObject {
+/// A "notebook" is a directory that contains individual "pages" (either plain text files
+/// or textbundle bundles). Each page may contain "cards", which are individual facts to review
+/// using a spaced repetition algorithm.
+public final class Notebook {
 
   /// Designated initializer.
   ///
@@ -25,46 +27,44 @@ public final class DocumentPropertiesIndex: NSObject {
     self.parsingRules = parsingRules
   }
 
-  /// Delegate.
-  public weak var delegate: DocumentPropertiesIndexDelegate?
-
   /// The URL of the directory that contains all of the indexed documents.
   public let containerURL: URL
 
   /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
 
-  /// The mapping between document names and document properties.
-  public internal(set) var properties: [String: DocumentProperties] = [:] {
+  /// The pages of the notebook.
+  public internal(set) var pages: [String: DocumentProperties] = [:] {
     didSet {
-      performUpdates()
-      delegate?.documentPropertiesIndexDidChange(self)
+      notifyListeners()
     }
   }
 
-  /// All IGListKit data sources that are currently displaying data based on the index.
-  /// These data sources get notified of changes to properties.
-  private var adapters: [WeakWrapper<ListAdapter>] = []
+  private struct WeakListener {
+    weak var listener: NotebookPageChangeListener?
+    init(_ listener: NotebookPageChangeListener) { self.listener = listener }
+  }
+  private var listeners: [WeakListener] = []
 
-  /// Registers an IGListKit list adapter with this index.
+  /// Registers an NotebookPageChangeListener.
   ///
-  /// - parameter adapter: The adapter to register. It will get notifications of changes.
-  public func addAdapter(_ adapter: ListAdapter) {
-    adapters.append(WeakWrapper(adapter))
+  /// - parameter listener: The listener to register. It will get notifications of changes.
+  public func addListener(_ listener: NotebookPageChangeListener) {
+    listeners.append(WeakListener(listener))
   }
 
-  /// Removes the list adapter. It will no longer get notifications of changes.
+  /// Removes the NotebookPageChangeListener. It will no longer get notifications of changes.
   ///
-  /// - parameter adapter: The adapter to unregister.
-  public func removeAdapter(_ adapter: ListAdapter) {
-    guard let index = adapters.firstIndex(where: { $0.value === adapter }) else { return }
-    adapters.remove(at: index)
+  /// - parameter listener: The listener to unregister.
+  public func removeListener(_ listener: NotebookPageChangeListener) {
+    guard let index = listeners.firstIndex(where: { $0.listener === listener }) else { return }
+    listeners.remove(at: index)
   }
 
   /// Tell all registered list adapters to perform updates.
-  private func performUpdates() {
-    for adapter in adapters {
-      adapter.value?.performUpdates(animated: true)
+  private func notifyListeners() {
+    for adapter in listeners {
+      adapter.listener?.notebookPagesDidChange(self)
     }
   }
 
@@ -72,18 +72,24 @@ public final class DocumentPropertiesIndex: NSObject {
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
     let name = properties.value.fileMetadata.fileName
     try? FileManager.default.removeItem(at: containerURL.appendingPathComponent(name))
-    self.properties[name] = nil
-    performUpdates()
+    self.pages[name] = nil
   }
 }
 
-extension DocumentPropertiesIndex: MetadataQueryDelegate {
+/// Any IGListKit ListAdapter can be a NotebookPageChangeListener.
+extension ListAdapter: NotebookPageChangeListener {
+  public func notebookPagesDidChange(_ index: Notebook) {
+    performUpdates(animated: true)
+  }
+}
+
+extension Notebook: MetadataQueryDelegate {
   fileprivate func updateProperties(for fileMetadata: FileMetadata) {
     let name = fileMetadata.fileName
-    if properties[name]?.fileMetadata.contentChangeDate ==
+    if pages[name]?.fileMetadata.contentChangeDate ==
       fileMetadata.contentChangeDate {
       // Just update the fileMetadata structure without re-extracting document properties.
-      properties[name]?.fileMetadata = fileMetadata
+      pages[name]?.fileMetadata = fileMetadata
       return
     }
 
@@ -91,11 +97,11 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     // contentChangeDate. We'll replace it with something with the actual extracted
     // properties in the completion block below. This is needed to prevent multiple
     // loads for the same content.
-    if properties[name] == nil {
-      properties[name] = DocumentProperties(fileMetadata: fileMetadata, nodes: [])
+    if pages[name] == nil {
+      pages[name] = DocumentProperties(fileMetadata: fileMetadata, nodes: [])
     } else {
       // Update change time to prevent multiple loads
-      properties[name]?.fileMetadata = fileMetadata
+      pages[name]?.fileMetadata = fileMetadata
     }
     DocumentProperties.loadProperties(
       from: fileMetadata,
@@ -104,11 +110,11 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
     ) { (result) in
       switch result {
       case .success(let properties):
-        self.properties[name] = properties
+        self.pages[name] = properties
         DDLogInfo("Successfully loaded: " + properties.title)
-        self.performUpdates()
+        self.notifyListeners()
       case .failure(let error):
-        self.properties[name] = nil
+        self.pages[name] = nil
         DDLogError("Error loading properties: \(error)")
       }
     }
@@ -123,6 +129,6 @@ extension DocumentPropertiesIndex: MetadataQueryDelegate {
       fileMetadata.downloadIfNeeded(in: containerURL)
       updateProperties(for: fileMetadata)
     }
-    performUpdates()
+    notifyListeners()
   }
 }

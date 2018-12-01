@@ -14,21 +14,21 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
   public static let name = "properties.json"
 
   public init(fileURL url: URL, parsingRules: ParsingRules) {
-    index = DocumentPropertiesIndex(
+    index = Notebook(
       containerURL: url.deletingLastPathComponent(),
       parsingRules: parsingRules
     )
     super.init(fileURL: url)
-    index.delegate = self
+    index.addListener(self)
   }
 
-  public let index: DocumentPropertiesIndex
+  public let index: Notebook
 
   public override func contents(forType typeName: String) throws -> Any {
     let jsonEncoder = JSONEncoder()
     jsonEncoder.dateEncodingStrategy = .iso8601
     jsonEncoder.outputFormatting = .prettyPrinted
-    return try jsonEncoder.encode(Array(index.properties.values))
+    return try jsonEncoder.encode(Array(index.pages.values))
   }
 
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {
@@ -44,7 +44,7 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
         dictionary[properties.fileMetadata.fileName] = properties
       }
       DispatchQueue.main.async {
-        self.index.properties = fullDictionary
+        self.index.pages = fullDictionary
       }
     } catch {
       DDLogError("Error loading properties index: \(error)")
@@ -53,8 +53,8 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
   }
 }
 
-extension DocumentPropertiesIndexDocument: DocumentPropertiesIndexDelegate {
-  public func documentPropertiesIndexDidChange(_ index: DocumentPropertiesIndex) {
+extension DocumentPropertiesIndexDocument: NotebookPageChangeListener {
+  public func notebookPagesDidChange(_ index: Notebook) {
     updateChangeCount(.done)
   }
 }

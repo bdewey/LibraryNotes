@@ -16,7 +16,7 @@
 		D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CB1218DFF4D00815772 /* DocumentDataSource.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
-		D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */; };
+		D32C8B5C214ACC2F0048BF80 /* Notebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* Notebook.swift */; };
 		D334E9EC21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D334E9EB21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift */; };
 		D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */; };
 		D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C02189D8DC0082396D /* HashtagViewController.swift */; };
@@ -28,7 +28,6 @@
 		D37AFCB621ADF10D00A1154A /* StudyHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37AFCB521ADF10D00A1154A /* StudyHistory.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
-		D3BAC1BA219328CE00D576E6 /* WeakWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
 		D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */; };
@@ -94,7 +93,7 @@
 		D31FA12B20ED847A00224FCD /* Merriweather-BoldItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-BoldItalic.otf"; sourceTree = "<group>"; };
 		D31FA12C20ED847A00224FCD /* Merriweather-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Black.otf"; sourceTree = "<group>"; };
 		D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSectionController.swift; sourceTree = "<group>"; };
-		D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPropertiesIndex.swift; sourceTree = "<group>"; };
+		D32C8B5B214ACC2F0048BF80 /* Notebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notebook.swift; sourceTree = "<group>"; };
 		D334E9EB21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerStudyMetadata.swift; sourceTree = "<group>"; };
 		D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StylesheetContaining.swift; sourceTree = "<group>"; };
 		D34D875B20ED84330043F755 /* LibreFranklin-ThinItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ThinItalic.otf"; sourceTree = "<group>"; };
@@ -118,7 +117,6 @@
 		D37AFCB521ADF10D00A1154A /* StudyHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyHistory.swift; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
-		D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakWrapper.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
 		D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBundleEditableDocument.swift; sourceTree = "<group>"; };
@@ -236,16 +234,17 @@
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */,
+				D334E9EB21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift */,
 				D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */,
 				D3187CB1218DFF4D00815772 /* DocumentDataSource.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D3D8E2722178B2BA00EA318C /* DocumentProperties.swift */,
-				D32C8B5B214ACC2F0048BF80 /* DocumentPropertiesIndex.swift */,
 				D3C26BA6218F4B0300FEE85B /* DocumentPropertiesIndexDocument.swift */,
 				D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
+				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D3187CAF218DFBBC00815772 /* HashtagDataSource.swift */,
 				D35C72C02189D8DC0082396D /* HashtagViewController.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
@@ -254,17 +253,15 @@
 				D3187CAD218DF7AB00815772 /* MenuItem.swift */,
 				D35C72C42189E1340082396D /* MenuSectionController.swift */,
 				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
+				D32C8B5B214ACC2F0048BF80 /* Notebook.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
+				D37AFCB521ADF10D00A1154A /* StudyHistory.swift */,
 				D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */,
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
-				D3BAC1B9219328CE00D576E6 /* WeakWrapper.swift */,
-				D334E9EB21ADC6BF006DA8A8 /* ContainerStudyMetadata.swift */,
-				D37AFCB521ADF10D00A1154A /* StudyHistory.swift */,
-				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -529,7 +526,7 @@
 				D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
-				D32C8B5C214ACC2F0048BF80 /* DocumentPropertiesIndex.swift in Sources */,
+				D32C8B5C214ACC2F0048BF80 /* Notebook.swift in Sources */,
 				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
 				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
@@ -539,7 +536,6 @@
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
-				D3BAC1BA219328CE00D576E6 /* WeakWrapper.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D3D8E2732178B2BA00EA318C /* DocumentProperties.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,

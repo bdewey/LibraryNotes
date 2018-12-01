@@ -11,7 +11,7 @@ public protocol HashtagViewControllerDelegate: class {
 }
 
 public final class HashtagViewController: UIViewController {
-  public init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
+  public init(index: Notebook, stylesheet: Stylesheet) {
     self.dataSource = HashtagDataSource(index: index, stylesheet: stylesheet)
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
@@ -23,7 +23,7 @@ public final class HashtagViewController: UIViewController {
   }
 
   deinit {
-    dataSource.index.removeAdapter(documentListAdapter)
+    dataSource.index.removeListener(documentListAdapter)
   }
 
   private let dataSource: HashtagDataSource
@@ -34,7 +34,7 @@ public final class HashtagViewController: UIViewController {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.index.addAdapter(adapter)
+    dataSource.index.addListener(adapter)
     return adapter
   }()
 

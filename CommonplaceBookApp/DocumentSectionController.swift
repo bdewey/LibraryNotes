@@ -10,12 +10,12 @@ import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
 
-  init(index: DocumentPropertiesIndex, stylesheet: Stylesheet) {
+  init(index: Notebook, stylesheet: Stylesheet) {
     self.documentIndex = index
     self.stylesheet = stylesheet
   }
 
-  private let documentIndex: DocumentPropertiesIndex
+  private let documentIndex: Notebook
   private let stylesheet: Stylesheet
   private var properties: DocumentPropertiesListDiffable!
 

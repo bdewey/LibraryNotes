@@ -66,7 +66,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   deinit {
     propertiesDocument.close(completionHandler: nil)
 
-    dataSource.index.removeAdapter(documentListAdapter)
+    dataSource.index.removeListener(documentListAdapter)
   }
 
   private let notebook: ICloudFileMetadataProvider
@@ -119,7 +119,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.index.addAdapter(adapter)
+    dataSource.index.addListener(adapter)
     return adapter
   }()
 
