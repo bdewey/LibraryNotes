@@ -40,8 +40,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     studyHistory: TextBundleDocument,
     stylesheet: Stylesheet
   ) {
-    // This is a hack -- just trying to experiment with the Notebook interface.
-    self.notebook = ICloudFileMetadataProvider(container: propertiesDocument.fileURL.deletingLastPathComponent())
+    self.metadataProvider = ICloudFileMetadataProvider(
+      container: propertiesDocument.fileURL.deletingLastPathComponent()
+    )
+    self.metadataProvider.delegate = propertiesDocument.index
     self.propertiesDocument = propertiesDocument
     self.studyHistory = studyHistory
     self.stylesheet = stylesheet
@@ -69,7 +71,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     dataSource.index.removeListener(documentListAdapter)
   }
 
-  private let notebook: ICloudFileMetadataProvider
+  private let metadataProvider: ICloudFileMetadataProvider
   private let propertiesDocument: DocumentPropertiesIndexDocument
   private let studyHistory: TextBundleDocument
   public let stylesheet: Stylesheet
@@ -135,8 +137,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return collectionView
   }()
 
-  var metadataQuery: MetadataQuery?
-
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
@@ -150,11 +150,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.width.equalTo(56)
       make.height.equalTo(56)
     }
-    let predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
-      NSComparisonPredicate(conformingToUTI: "public.plain-text"),
-      NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
-      ])
-    metadataQuery = MetadataQuery(predicate: predicate, delegate: propertiesDocument.index)
     configureUI()
   }
 

@@ -22,7 +22,10 @@ public final class Notebook {
   /// - parameter containerURL: The URL of the directory that contains all of the indexed
   ///                           documents.
   /// - parameter parsingrules: The rules used to parse the text content of documents.
-  public init(containerURL: URL, parsingRules: ParsingRules) {
+  public init(
+    containerURL: URL,
+    parsingRules: ParsingRules
+  ) {
     self.containerURL = containerURL
     self.parsingRules = parsingRules
   }
@@ -83,7 +86,20 @@ extension ListAdapter: NotebookPageChangeListener {
   }
 }
 
-extension Notebook: MetadataQueryDelegate {
+extension Notebook: FileMetadataProviderDelegate {
+  public func fileMetadataProvider(
+    _ provider: FileMetadataProvider,
+    didUpdate metadata: [FileMetadata]
+  ) {
+    let specialNames: Set<String> = [StudyHistory.name, DocumentPropertiesIndexDocument.name]
+    let models = metadata
+      .filter { !specialNames.contains($0.fileName) }
+    for fileMetadata in models {
+      fileMetadata.downloadIfNeeded(in: containerURL)
+      updateProperties(for: fileMetadata)
+    }
+  }
+
   fileprivate func updateProperties(for fileMetadata: FileMetadata) {
     let name = fileMetadata.fileName
     if pages[name]?.fileMetadata.contentChangeDate ==
@@ -118,17 +134,5 @@ extension Notebook: MetadataQueryDelegate {
         DDLogError("Error loading properties: \(error)")
       }
     }
-  }
-
-  public func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem]) {
-    let specialNames: Set<String> = [StudyHistory.name, DocumentPropertiesIndexDocument.name]
-    let models = items
-      .map { FileMetadata(metadataItem: $0) }
-      .filter { !specialNames.contains($0.fileName) }
-    for fileMetadata in models {
-      fileMetadata.downloadIfNeeded(in: containerURL)
-      updateProperties(for: fileMetadata)
-    }
-    notifyListeners()
   }
 }
