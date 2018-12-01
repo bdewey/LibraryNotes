@@ -14,6 +14,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   var window: UIWindow?
   let useCloud = true
 
+  private enum Error: String, Swift.Error {
+    case noCloud = "Not signed in to iCloud"
+  }
+
   // This is here to force initialization of the CardTemplateType, which registers the class
   // with the type name. This has to be done before deserializing any card templates.
   private let knownCardTemplateTypes: [CardTemplateType] = [.vocabularyAssociation, .cloze]
@@ -41,14 +45,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
       at: StudyHistory.name,
       using: TextBundleDocumentFactory(useCloud: true)
     ) { (studyHistoryResult) in
-      CommonplaceBook.openDocument(
-        at: DocumentPropertiesIndexDocument.name,
-        using: DocumentPropertiesIndexDocument.Factory(parsingRules: LanguageDeck.parsingRules)
-      ) { (result) in
-        switch (studyHistoryResult, result) {
-        case (.success(let studyHistory), .success(let document)):
+      self.makeMetadataProvider(completion: { (metadataProviderResult) in
+        switch (studyHistoryResult, metadataProviderResult) {
+        case (.success(let studyHistory), .success(let metadataProvider)):
           self.window?.rootViewController = self.makeViewController(
-            propertiesDocument: document,
+            notebook: Notebook(parsingRules: LanguageDeck.parsingRules, metadataProvider: metadataProvider),
             studyHistory: studyHistory
           )
         case (.failure(let error), _), (_, .failure(let error)):
@@ -56,22 +57,39 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           let message = MDCSnackbarMessage(text: messageText)
           MDCSnackbarManager.show(message)
         }
-        print(result)
-      }
+
+      })
     }
     self.window = window
     return true
   }
 
+  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider>) -> Void) {
+    DispatchQueue.global(qos: .default).async {
+      if let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.org.brians-brain.commonplace-book") {
+        DispatchQueue.main.async {
+          let metadataProvider = ICloudFileMetadataProvider(
+            container: containerURL.appendingPathComponent("Documents")
+          )
+          completion(.success(metadataProvider))
+        }
+      } else {
+        DispatchQueue.main.async {
+          completion(.failure(Error.noCloud))
+        }
+      }
+    }
+  }
+
   private func makeViewController(
-    propertiesDocument: DocumentPropertiesIndexDocument,
+    notebook: Notebook,
     studyHistory: TextBundleDocument
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
-        propertiesDocument: propertiesDocument,
+        notebook: notebook,
         studyHistory: studyHistory,
         stylesheet: commonplaceBookStylesheet
       ),

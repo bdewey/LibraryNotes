@@ -6,6 +6,17 @@ import MiniMarkdown
 import TextBundleKit
 import UIKit
 
+public protocol DocumentPropertiesIndexDocumentDelegate: class {
+  func indexDocument(
+    _ document: DocumentPropertiesIndexDocument,
+    didLoadProperties: [DocumentProperties]
+  )
+
+  func indexDocumentPropertiesToSave(
+    _ document: DocumentPropertiesIndexDocument
+  ) -> [DocumentProperties]
+}
+
 public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError {
   enum Error: Swift.Error {
     case couldNotOpenDocument
@@ -13,39 +24,33 @@ public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError 
 
   public static let name = "properties.json"
 
-  public init(fileURL url: URL, parsingRules: ParsingRules) {
-    index = Notebook(
-      containerURL: url.deletingLastPathComponent(),
-      parsingRules: parsingRules
-    )
+  public init(
+    fileURL url: URL,
+    parsingRules: ParsingRules
+  ) {
+    self.parsingRules = parsingRules
     super.init(fileURL: url)
-    index.addListener(self)
   }
 
-  public let index: Notebook
+  private let parsingRules: ParsingRules
+  public weak var delegate: DocumentPropertiesIndexDocumentDelegate?
 
   public override func contents(forType typeName: String) throws -> Any {
     let jsonEncoder = JSONEncoder()
     jsonEncoder.dateEncodingStrategy = .iso8601
     jsonEncoder.outputFormatting = .prettyPrinted
-    return try jsonEncoder.encode(Array(index.pages.values))
+    let properties = delegate?.indexDocumentPropertiesToSave(self) ?? []
+    return try jsonEncoder.encode(properties)
   }
 
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {
     guard let data = contents as? Data else { return }
     let jsonDecoder = JSONDecoder()
     jsonDecoder.dateDecodingStrategy = .iso8601
-    jsonDecoder.userInfo[.markdownParsingRules] = index.parsingRules
+    jsonDecoder.userInfo[.markdownParsingRules] = parsingRules
     do {
       let encodedProperties = try jsonDecoder.decode([DocumentProperties].self, from: data)
-      let fullDictionary = encodedProperties.reduce(
-        into: [String: DocumentProperties]()
-      ) { (dictionary, properties) in
-        dictionary[properties.fileMetadata.fileName] = properties
-      }
-      DispatchQueue.main.async {
-        self.index.pages = fullDictionary
-      }
+      delegate?.indexDocument(self, didLoadProperties: encodedProperties)
     } catch {
       DDLogError("Error loading properties index: \(error)")
       throw error

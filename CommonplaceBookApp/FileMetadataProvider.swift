@@ -16,6 +16,8 @@ public protocol FileMetadataProviderDelegate: class {
 /// to a single container (e.g., iCloud container or documents folder)
 public protocol FileMetadataProvider {
 
+  var container: URL { get }
+
   /// The current array of metadata.
   var fileMetadata: [FileMetadata] { get }
 
@@ -30,6 +32,7 @@ public protocol FileMetadataProvider {
 public final class ICloudFileMetadataProvider: FileMetadataProvider {
 
   public init(container: URL) {
+    assert(Thread.isMainThread)
     self.container = container
     query = NSMetadataQuery()
     query.predicate = NSComparisonPredicate.page
@@ -61,10 +64,10 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
       delegate?.fileMetadataProvider(self, didUpdate: fileMetadata)
     }
   }
-  public var delegate: FileMetadataProviderDelegate?
+  public weak var delegate: FileMetadataProviderDelegate?
 
   /// the specific ubiquitous container we monitor.
-  private let container: URL
+  public let container: URL
 
   /// Our active query for documents
   private let query: NSMetadataQuery

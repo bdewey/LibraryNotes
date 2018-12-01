@@ -23,18 +23,32 @@ public final class Notebook {
   ///                           documents.
   /// - parameter parsingrules: The rules used to parse the text content of documents.
   public init(
-    containerURL: URL,
-    parsingRules: ParsingRules
+    parsingRules: ParsingRules,
+    metadataProvider: FileMetadataProvider
   ) {
-    self.containerURL = containerURL
     self.parsingRules = parsingRules
+    self.metadataProvider = metadataProvider
+    self.propertiesDocument = DocumentPropertiesIndexDocument(
+      fileURL: metadataProvider.container.appendingPathComponent(DocumentPropertiesIndexDocument.name),
+      parsingRules: parsingRules
+    )
+    self.propertiesDocument.delegate = self
+    // CODE SMELL. Need to process any existing file metadata.
+    // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
+    //       don't match what's in the metadata provider (which is truth)
+    self.metadataProvider.delegate = self
+    self.fileMetadataProvider(metadataProvider, didUpdate: metadataProvider.fileMetadata)
   }
-
-  /// The URL of the directory that contains all of the indexed documents.
-  public let containerURL: URL
 
   /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
+
+  private var metadataProvider: FileMetadataProvider
+
+  /// Provides access to the container URL
+  public var containerURL: URL { return metadataProvider.container }
+
+  private let propertiesDocument: DocumentPropertiesIndexDocument
 
   /// The pages of the notebook.
   public internal(set) var pages: [String: DocumentProperties] = [:] {
@@ -83,6 +97,27 @@ public final class Notebook {
 extension ListAdapter: NotebookPageChangeListener {
   public func notebookPagesDidChange(_ index: Notebook) {
     performUpdates(animated: true)
+  }
+}
+
+extension Notebook: DocumentPropertiesIndexDocumentDelegate {
+
+  public func indexDocument(
+    _ document: DocumentPropertiesIndexDocument,
+    didLoadProperties properties: [DocumentProperties]
+  ) {
+    // TODO: Will this race with getting properties from the metadata provider?
+    self.pages = properties.reduce(
+      into: [String: DocumentProperties]()
+    ) { (dictionary, properties) in
+      dictionary[properties.fileMetadata.fileName] = properties
+    }
+  }
+
+  public func indexDocumentPropertiesToSave(
+    _ document: DocumentPropertiesIndexDocument
+  ) -> [DocumentProperties] {
+    return Array(pages.values)
   }
 }
 

@@ -29,25 +29,16 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   /// Designated initializer.
   ///
-  /// - note: This object will "own" `propertiesDocument`. No other class should
-  ///         access this simultaneously, and the class will close the document when
-  ///         it is deallocated.
-  /// - parameter propertiesDocument: The cached extracted properties of all documents.
-  /// - parameter studyHistory: A metadocument that contains the records of all study sessions.
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    propertiesDocument: DocumentPropertiesIndexDocument,
+    notebook: Notebook,
     studyHistory: TextBundleDocument,
     stylesheet: Stylesheet
   ) {
-    self.metadataProvider = ICloudFileMetadataProvider(
-      container: propertiesDocument.fileURL.deletingLastPathComponent()
-    )
-    self.metadataProvider.delegate = propertiesDocument.index
-    self.propertiesDocument = propertiesDocument
+    self.notebook = notebook
     self.studyHistory = studyHistory
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(index: propertiesDocument.index, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(index: notebook, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
@@ -66,13 +57,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
-    propertiesDocument.close(completionHandler: nil)
-
     dataSource.index.removeListener(documentListAdapter)
   }
 
-  private let metadataProvider: ICloudFileMetadataProvider
-  private let propertiesDocument: DocumentPropertiesIndexDocument
+  private let notebook: Notebook
   private let studyHistory: TextBundleDocument
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
@@ -182,7 +170,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func didTapHashtagMenu() {
     let hashtagViewController = HashtagViewController(
-      index: propertiesDocument.index,
+      index: notebook,
       stylesheet: stylesheet
     )
     hamburgerPresentationController = CoverPartiallyPresentationController(
@@ -233,7 +221,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
 extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
   func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    let fileURL = propertiesDocument.index.containerURL.appendingPathComponent(name)
+    let fileURL = notebook.containerURL.appendingPathComponent(name)
     // TODO: Should I really do this based on path extension?
     switch fileURL.pathExtension {
     case "deck", "textbundle":
