@@ -45,4 +45,17 @@ final class FileMetadataTests: XCTestCase {
       XCTFail(String(describing: error))
     }
   }
+
+  func testLocalMetadataForJSON() {
+    do {
+      let url = directoryURL.appendingPathComponent("testLocalMetadata.json")
+      let sampleContent = "Hello world!\n"
+      try sampleContent.write(to: url, atomically: true, encoding: .utf8)
+      defer { try? FileManager.default.removeItem(at: url) }
+      let metadata = try FileMetadata(fileURL: url)
+      XCTAssertEqual(metadata.contentType, "public.json")
+    } catch {
+      XCTFail(String(describing: error))
+    }
+  }
 }

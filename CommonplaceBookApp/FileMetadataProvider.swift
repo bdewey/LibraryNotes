@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Foundation
+import TextBundleKit
 
 public protocol FileMetadataProviderDelegate: class {
 
@@ -23,6 +24,26 @@ public protocol FileMetadataProvider {
 
   /// Delegate that can receive notifications when `fileMetadata` changes.
   var delegate: FileMetadataProviderDelegate? { get set }
+
+  /// Gets the EditableDocument that corresponds to a particular piece of metadata.
+  func editableDocument(for metadata: FileMetadata) -> EditableDocument?
+}
+
+extension FileMetadataProvider {
+
+  /// Default implementation of editableDocument -- will work for any FileMetadataProvider
+  /// that is named by URLs that a UIDocument can open.
+  public func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
+    let fileURL = container.appendingPathComponent(metadata.fileName)
+    switch metadata.contentType {
+    case "public.plain-text", "public.json":
+      return PlainTextDocument(fileURL: fileURL)
+    case "org.textbundle.package", "org.brians-brain.swiftflash":
+      return TextBundleDocument(fileURL: fileURL)
+    default:
+      return nil
+    }
+  }
 }
 
 /// A FileMetadataProvider for the iCloud ubiquitous container.

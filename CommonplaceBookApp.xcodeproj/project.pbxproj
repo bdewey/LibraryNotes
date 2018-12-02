@@ -27,6 +27,7 @@
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
 		D37AFCB621ADF10D00A1154A /* StudyHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37AFCB521ADF10D00A1154A /* StudyHistory.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
+		D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38D9A1821B3426B00973E73 /* NotebookTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
@@ -116,6 +117,7 @@
 		D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextDocument.swift; sourceTree = "<group>"; };
 		D37AFCB521ADF10D00A1154A /* StudyHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyHistory.swift; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
+		D38D9A1821B3426B00973E73 /* NotebookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D3D11D502153CD3000B1EA09 /* PlaceholderTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
+				D38D9A1821B3426B00973E73 /* NotebookTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -556,6 +559,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D3D11D512153CD3000B1EA09 /* PlaceholderTests.swift in Sources */,
 			);

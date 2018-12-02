@@ -6,17 +6,8 @@ import MiniMarkdown
 import TextBundleKit
 import UIKit
 
-public protocol DocumentPropertiesIndexDocumentDelegate: class {
-  func indexDocument(
-    _ document: DocumentPropertiesIndexDocument,
-    didLoadProperties: [DocumentProperties]
-  )
-
-  func indexDocumentPropertiesToSave(
-    _ document: DocumentPropertiesIndexDocument
-  ) -> [DocumentProperties]
-}
-
+/// UIDocument that stores the extracted properties of a Notebook.
+/// Its intended lifetime is that of the notebook.
 public final class DocumentPropertiesIndexDocument: UIDocumentWithPreviousError {
   enum Error: Swift.Error {
     case couldNotOpenDocument
@@ -64,47 +55,29 @@ extension DocumentPropertiesIndexDocument: NotebookPageChangeListener {
   }
 }
 
-extension DocumentPropertiesIndexDocument {
-  public struct Factory: DocumentFactory {
-    public init(parsingRules: ParsingRules) {
-      self.parsingRules = parsingRules
-    }
+/// Protocol for communicating between the properties document and its owning Notebook.
+public protocol DocumentPropertiesIndexDocumentDelegate: class {
 
-    public let parsingRules: ParsingRules
-    public let useCloud = true
+  /// Sent when properties were loaded from disk.
+  ///
+  /// - parameter document: The document that loaded
+  /// - parameter properties: The properties that were loaded.
+  func indexDocument(
+    _ document: DocumentPropertiesIndexDocument,
+    didLoadProperties properties: [DocumentProperties]
+  )
 
-    public func openDocument(
-      at url: URL,
-      completion: @escaping (Result<DocumentPropertiesIndexDocument>) -> Void
-    ) {
-      let document = DocumentPropertiesIndexDocument(fileURL: url, parsingRules: parsingRules)
-      document.open { (success) in
-        if success {
-          completion(.success(document))
-        } else {
-          // Try creating the document
-          document.save(to: url, for: .forCreating, completionHandler: { (createSuccess) in
-            if createSuccess {
-              completion(.success(document))
-            } else {
-              completion(.failure(document.previousError ?? Error.couldNotOpenDocument))
-            }
-          })
-        }
-      }
-    }
-
-    public func merge(
-      source: DocumentPropertiesIndexDocument,
-      destination: DocumentPropertiesIndexDocument
-    ) {
-      // NOTHING
-    }
-
-    public func delete(_ document: DocumentPropertiesIndexDocument) {
-      document.close { (_) in
-        try? FileManager.default.removeItem(at: document.fileURL)
-      }
-    }
-  }
+  /// Called when we need to save the document to disk.
+  ///
+  /// - returns: The properties that need to be saved.
+  func indexDocumentPropertiesToSave(
+    _ document: DocumentPropertiesIndexDocument
+  ) -> [DocumentProperties]
 }
+
+// TODO: Find a better name
+public protocol DocumentPropertiesIndexProtocol: NotebookPageChangeListener {
+  var delegate: DocumentPropertiesIndexDocumentDelegate? { get set }
+}
+
+extension DocumentPropertiesIndexDocument: DocumentPropertiesIndexProtocol { }

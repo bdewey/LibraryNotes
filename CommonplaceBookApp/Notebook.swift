@@ -24,14 +24,12 @@ public final class Notebook {
   /// - parameter parsingrules: The rules used to parse the text content of documents.
   public init(
     parsingRules: ParsingRules,
+    propertiesDocument: DocumentPropertiesIndexProtocol,
     metadataProvider: FileMetadataProvider
   ) {
     self.parsingRules = parsingRules
     self.metadataProvider = metadataProvider
-    self.propertiesDocument = DocumentPropertiesIndexDocument(
-      fileURL: metadataProvider.container.appendingPathComponent(DocumentPropertiesIndexDocument.name),
-      parsingRules: parsingRules
-    )
+    self.propertiesDocument = propertiesDocument
     self.propertiesDocument.delegate = self
     // CODE SMELL. Need to process any existing file metadata.
     // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
@@ -43,12 +41,12 @@ public final class Notebook {
   /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
 
-  private var metadataProvider: FileMetadataProvider
+  public var metadataProvider: FileMetadataProvider
 
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
 
-  private let propertiesDocument: DocumentPropertiesIndexDocument
+  private let propertiesDocument: DocumentPropertiesIndexProtocol
 
   /// The pages of the notebook.
   public internal(set) var pages: [String: DocumentProperties] = [:] {
@@ -156,7 +154,7 @@ extension Notebook: FileMetadataProviderDelegate {
     }
     DocumentProperties.loadProperties(
       from: fileMetadata,
-      in: containerURL,
+      in: metadataProvider,
       parsingRules: parsingRules
     ) { (result) in
       switch result {

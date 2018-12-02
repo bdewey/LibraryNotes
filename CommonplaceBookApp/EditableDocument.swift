@@ -11,7 +11,9 @@ public protocol EditableDocument: class {
   var currentTextResult: Result<Tagged<String>> { get }
   var textSignal: Signal<Tagged<String>> { get }
   func applyTaggedModification(tag: Tag, modification: (String) -> String)
+  func open(completionHandler: ((Bool) -> Void)?)
   func close()
+  var previousError: Swift.Error? { get }
 }
 
 public protocol ConfiguresRenderers {

@@ -39,7 +39,7 @@ public struct FileMetadata: Equatable {
       forAttribute: NSMetadataUbiquitousItemIsUploadingKey
     ) as! NSNumber).boolValue
   }
-  
+
   /// Extract file metadata from the file system
   public init(fileURL: URL) throws {
     let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path) as NSDictionary
@@ -50,6 +50,23 @@ public struct FileMetadata: Equatable {
     self.displayName = FileManager.default.displayName(atPath: fileURL.path)
     self.downloadingStatus = NSMetadataUbiquitousItemDownloadingStatusCurrent
     self.fileName = fileURL.lastPathComponent
+    self.isDownloading = false
+    self.isUploading = false
+  }
+
+  /// Helpful initializer for testing.
+  public init(
+    fileName: String,
+    contentChangeDate: Date = Date(),
+    contentType: String = "public.plain-text"
+  ) {
+    self.fileName = fileName
+    self.contentChangeDate = contentChangeDate
+    self.contentType = contentType
+
+    self.contentTypeTree = []
+    self.displayName = fileName
+    self.downloadingStatus = NSMetadataUbiquitousItemDownloadingStatusCurrent
     self.isDownloading = false
     self.isUploading = false
   }

@@ -48,8 +48,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
       self.makeMetadataProvider(completion: { (metadataProviderResult) in
         switch (studyHistoryResult, metadataProviderResult) {
         case (.success(let studyHistory), .success(let metadataProvider)):
+          let parsingRules = LanguageDeck.parsingRules
+          let propertiesDocument = DocumentPropertiesIndexDocument(
+            fileURL: metadataProvider
+              .container
+              .appendingPathComponent(DocumentPropertiesIndexDocument.name),
+            parsingRules: parsingRules
+          )
           self.window?.rootViewController = self.makeViewController(
-            notebook: Notebook(parsingRules: LanguageDeck.parsingRules, metadataProvider: metadataProvider),
+            notebook: Notebook(
+              parsingRules: parsingRules,
+              propertiesDocument: propertiesDocument,
+              metadataProvider: metadataProvider
+            ),
             studyHistory: studyHistory
           )
         case (.failure(let error), _), (_, .failure(let error)):
