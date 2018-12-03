@@ -36,6 +36,14 @@ public final class Notebook {
     //       don't match what's in the metadata provider (which is truth)
     self.metadataProvider.delegate = self
     self.fileMetadataProvider(metadataProvider, didUpdate: metadataProvider.fileMetadata)
+
+    // TODO: Handle the "nil" case
+    let propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: "properties.json"))!
+    propertiesDocument.open { (success) in
+      // TODO: Handle the failure case here.
+      precondition(success)
+      propertiesDocument.close()
+    }
   }
 
   /// The rules used to parse the text content of documents.
