@@ -22,6 +22,8 @@
 		D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C02189D8DC0082396D /* HashtagViewController.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C72C52189E1340082396D /* MenuSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C42189E1340082396D /* MenuSectionController.swift */; };
+		D36BC17A21B571CA00935691 /* TestEditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17921B571CA00935691 /* TestEditableDocument.swift */; };
+		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
@@ -53,7 +55,6 @@
 		D3CA91A720ED84E300F6DF13 /* LibreFranklin-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875D20ED84330043F755 /* LibreFranklin-Regular.otf */; };
 		D3CA91A820ED84E300F6DF13 /* LibreFranklin-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875E20ED84330043F755 /* LibreFranklin-SemiBold.otf */; };
 		D3CA91A920ED84E300F6DF13 /* LibreFranklin-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875B20ED84330043F755 /* LibreFranklin-ThinItalic.otf */; };
-		D3D11D512153CD3000B1EA09 /* PlaceholderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D11D502153CD3000B1EA09 /* PlaceholderTests.swift */; };
 		D3D8E2732178B2BA00EA318C /* DocumentProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D8E2722178B2BA00EA318C /* DocumentProperties.swift */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
@@ -111,6 +112,8 @@
 		D35C72C02189D8DC0082396D /* HashtagViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagViewController.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C72C42189E1340082396D /* MenuSectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuSectionController.swift; sourceTree = "<group>"; };
+		D36BC17921B571CA00935691 /* TestEditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestEditableDocument.swift; sourceTree = "<group>"; };
+		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
@@ -125,7 +128,6 @@
 		D3C26BA6218F4B0300FEE85B /* DocumentPropertiesIndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPropertiesIndexDocument.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.otf"; sourceTree = "<group>"; };
-		D3D11D502153CD3000B1EA09 /* PlaceholderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceholderTests.swift; sourceTree = "<group>"; };
 		D3D8E2722178B2BA00EA318C /* DocumentProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentProperties.swift; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -271,10 +273,11 @@
 		D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
-				D3D11D502153CD3000B1EA09 /* PlaceholderTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
+				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D38D9A1821B3426B00973E73 /* NotebookTests.swift */,
+				D36BC17921B571CA00935691 /* TestEditableDocument.swift */,
+				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -559,9 +562,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
-				D3D11D512153CD3000B1EA09 /* PlaceholderTests.swift in Sources */,
+				D36BC17A21B571CA00935691 /* TestEditableDocument.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
