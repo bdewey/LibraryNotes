@@ -7,11 +7,18 @@ import Foundation
 /// instances.
 struct TestMetadataProvider: FileMetadataProvider {
 
+  /// A subset of `FileMetadata` that also includes file contents.
+  struct FileInfo {
+    let fileName: String
+    let contents: String
+  }
+
   /// Designated initializer.
   ///
   /// - parameter fileMetadata: The file metadata in this collection.
-  init(fileMetadata: [FileMetadata]) {
-    self.fileMetadata = fileMetadata
+  init(fileInfo: [FileInfo]) {
+    self.fileMetadata = fileInfo.map { FileMetadata(fileName: $0.fileName) }
+    self.fileContents = fileInfo.reduce(into: [String: String](), { $0[$1.fileName] = $1.contents })
   }
 
   /// A fake URL for this container.
@@ -19,6 +26,8 @@ struct TestMetadataProvider: FileMetadataProvider {
 
   /// The file metadata provided by this structure.
   let fileMetadata: [FileMetadata]
+
+  let fileContents: [String: String]
 
   /// A delegate to notify in the event of changes.
   /// - note: Currently unused as the metadata in this collection are immutable.
@@ -28,6 +37,7 @@ struct TestMetadataProvider: FileMetadataProvider {
   /// - note: Currently provides only dummy content. TODO: Associate different text with
   ///         different metadata.
   func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
-    return TestEditableDocument("Hello, world!")
+    guard let contents = fileContents[metadata.fileName] else { return nil }
+    return TestEditableDocument(contents)
   }
 }
