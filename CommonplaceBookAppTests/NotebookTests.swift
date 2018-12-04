@@ -12,25 +12,11 @@ final class NotebookTests: XCTestCase {
       ]
   )
 
-  func testSimpleNotebook() {
-    let propertiesDocument = TestPropertiesDocument()
-    let notebook = Notebook(
-      parsingRules: ParsingRules(),
-      propertiesDocument: propertiesDocument,
-      metadataProvider: metadataProvider
-    )
-    XCTAssert(notebook === propertiesDocument.delegate)
-    XCTAssertEqual(notebook.pages.count, 2)
-  }
-
   func testNotebookExtractsProperties() {
-    let propertiesDocument = TestPropertiesDocument()
     let notebook = Notebook(
       parsingRules: ParsingRules(),
-      propertiesDocument: propertiesDocument,
       metadataProvider: metadataProvider
     )
-    XCTAssert(notebook === propertiesDocument.delegate)
     XCTAssertEqual(notebook.pages.count, 2)
     let didGetNotified = expectation(description: "did get notified")
 
@@ -56,13 +42,10 @@ final class NotebookTests: XCTestCase {
         contents: cachedProperties
       )
     )
-    let propertiesDocument = TestPropertiesDocument()
     let notebook = Notebook(
       parsingRules: ParsingRules(),
-      propertiesDocument: propertiesDocument,
       metadataProvider: metadataProvider
     )
-    XCTAssert(notebook === propertiesDocument.delegate)
     XCTAssertEqual(notebook.pages.count, 2)
     // When we don't have persisted properties, we read and update each file in a serial
     // background queue. Thus, two notifications before we know we know we have the hashtags
@@ -87,15 +70,5 @@ final class TestListener: NotebookPageChangeListener {
 
   func notebookPagesDidChange(_ index: Notebook) {
     block()
-  }
-}
-
-final class TestPropertiesDocument: DocumentPropertiesIndexProtocol {
-  var changeCount = 0
-
-  weak var delegate: DocumentPropertiesIndexDocumentDelegate?
-
-  func notebookPagesDidChange(_ index: Notebook) {
-    changeCount += 1
   }
 }

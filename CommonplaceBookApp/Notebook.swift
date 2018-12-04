@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import CommonplaceBook
+import CwlSignal
 import Foundation
 import IGListKit
 import MiniMarkdown
@@ -24,27 +25,44 @@ public final class Notebook {
   /// - parameter parsingrules: The rules used to parse the text content of documents.
   public init(
     parsingRules: ParsingRules,
-    propertiesDocument: DocumentPropertiesIndexProtocol,
     metadataProvider: FileMetadataProvider
   ) {
     self.parsingRules = parsingRules
     self.metadataProvider = metadataProvider
-    self.propertiesDocument = propertiesDocument
-    self.propertiesDocument.delegate = self
+
+    // TODO: Handle the "nil" case
+    self.propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: "properties.json"))!
+    propertiesDocument.open { (success) in
+      // TODO: Handle the failure case here.
+      precondition(success)
+      self.propertiesEndpoint = self.propertiesDocument.textSignal.subscribeValues({ (taggedString) in
+        guard let properties = try? Notebook.decoder.decode([DocumentProperties].self, from: taggedString.value.data(using: .utf8)!) else { return }
+        self.pages = properties.reduce(
+          into: [String: DocumentProperties]()
+        ) { (dictionary, properties) in
+          dictionary[properties.fileMetadata.fileName] = properties
+        }
+      })
+    }
+
     // CODE SMELL. Need to process any existing file metadata.
     // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
     //       don't match what's in the metadata provider (which is truth)
     self.metadataProvider.delegate = self
     self.fileMetadataProvider(metadataProvider, didUpdate: metadataProvider.fileMetadata)
-
-    // TODO: Handle the "nil" case
-    let propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: "properties.json"))!
-    propertiesDocument.open { (success) in
-      // TODO: Handle the failure case here.
-      precondition(success)
-      propertiesDocument.close()
-    }
   }
+
+  deinit {
+    propertiesDocument.close()
+  }
+
+  private var propertiesEndpoint: Cancellable?
+
+  public static let decoder: JSONDecoder = {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    return decoder
+  }()
 
   /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
@@ -54,7 +72,7 @@ public final class Notebook {
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
 
-  private let propertiesDocument: DocumentPropertiesIndexProtocol
+  private let propertiesDocument: EditableDocument
 
   /// The pages of the notebook.
   public internal(set) var pages: [String: DocumentProperties] = [:] {
