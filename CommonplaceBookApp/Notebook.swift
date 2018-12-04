@@ -22,9 +22,8 @@ public final class Notebook {
 
   /// Designated initializer.
   ///
-  /// - parameter containerURL: The URL of the directory that contains all of the indexed
-  ///                           documents.
   /// - parameter parsingrules: The rules used to parse the text content of documents.
+  /// - parameter metadataProvider: Where we store all of the pages of the notebook (+ metadata)
   public init(
     parsingRules: ParsingRules,
     metadataProvider: FileMetadataProvider
@@ -32,30 +31,21 @@ public final class Notebook {
     self.parsingRules = parsingRules
     self.metadataProvider = metadataProvider
 
-    // TODO: Handle the "nil" case
-    self.propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: Notebook.cachedPropertiesName))!
-    propertiesDocument.open { (success) in
-      // TODO: Handle the failure case here.
-      precondition(success)
-      self.propertiesEndpoint = self.propertiesDocument.textSignal.subscribeValues({ (taggedString) in
-        guard let properties = try? Notebook.decoder.decode([DocumentProperties].self, from: taggedString.value.data(using: .utf8)!) else { return }
-        self.pages = properties.reduce(
-          into: [String: DocumentProperties]()
-        ) { (dictionary, properties) in
-          dictionary[properties.fileMetadata.fileName] = properties
-        }
-      })
-    }
+    self.propertiesDocument = metadataProvider.editableDocument(
+      for: FileMetadata(fileName: Notebook.cachedPropertiesName)
+    )
 
     // CODE SMELL. Need to process any existing file metadata.
     // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
     //       don't match what's in the metadata provider (which is truth)
     self.metadataProvider.delegate = self
     self.fileMetadataProvider(metadataProvider, didUpdate: metadataProvider.fileMetadata)
+
+    monitorPropertiesDocument(propertiesDocument)
   }
 
   deinit {
-    propertiesDocument.close()
+    propertiesDocument?.close()
   }
 
   private var propertiesEndpoint: Cancellable?
@@ -74,7 +64,26 @@ public final class Notebook {
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
 
-  private let propertiesDocument: EditableDocument
+  /// Where we cache our properties.
+  private let propertiesDocument: EditableDocument?
+
+  /// Set up the code to monitor for changes to cached properties on disk, plus propagate
+  /// cached changes to disk.
+  private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument?) {
+    guard let propertiesDocument = propertiesDocument else { return }
+    propertiesDocument.open { (success) in
+      // TODO: Handle the failure case here.
+      precondition(success)
+      self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
+        guard let properties = try? Notebook.decoder.decode([DocumentProperties].self, from: taggedString.value.data(using: .utf8)!) else { return }
+        self.pages = properties.reduce(
+          into: [String: DocumentProperties]()
+        ) { (dictionary, properties) in
+          dictionary[properties.fileMetadata.fileName] = properties
+        }
+      })
+    }
+  }
 
   /// The pages of the notebook.
   public internal(set) var pages: [String: DocumentProperties] = [:] {
@@ -113,6 +122,8 @@ public final class Notebook {
 
   /// Deletes a document and its properties.
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
+
+    // TODO: This should be done through the metadata provider
     let name = properties.value.fileMetadata.fileName
     try? FileManager.default.removeItem(at: containerURL.appendingPathComponent(name))
     self.pages[name] = nil

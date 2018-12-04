@@ -12,9 +12,11 @@ final class NotebookTests: XCTestCase {
       ]
   )
 
+  let parsingRules = ParsingRules()
+
   func testNotebookExtractsProperties() {
     let notebook = Notebook(
-      parsingRules: ParsingRules(),
+      parsingRules: parsingRules,
       metadataProvider: metadataProvider
     )
     XCTAssertEqual(notebook.pages.count, 2)
@@ -43,12 +45,40 @@ final class NotebookTests: XCTestCase {
       )
     )
     let notebook = Notebook(
-      parsingRules: ParsingRules(),
+      parsingRules: parsingRules,
       metadataProvider: metadataProvider
     )
     XCTAssertEqual(notebook.pages.count, 2)
     // When we don't have persisted properties, we read and update each file in a serial
     // background queue. Thus, two notifications before we know we know we have the hashtags
+    let didGetNotified = expectation(description: "did get notified")
+    var expectedNotifications = 1
+    let notebookListener = TestListener {
+      expectedNotifications -= 1
+      if expectedNotifications == 0 { didGetNotified.fulfill() }
+    }
+    notebook.addListener(notebookListener)
+    waitForExpectations(timeout: 3, handler: nil)
+    XCTAssertEqual(Set(notebook.pages["page1.txt"]!.hashtags), Set(["#hashtag", "#test1"]))
+    XCTAssertEqual(Set(notebook.pages["page2.txt"]!.hashtags), Set(["#hashtag", "#test2"]))
+  }
+
+  func testModifyDocumentWillUpdateProperties() {
+    var metadataProvider = self.metadataProvider
+    let cachedProperties = metadataProvider.documentPropertiesJSON
+    metadataProvider.addFileInfo(
+      TestMetadataProvider.FileInfo(
+        fileName: Notebook.cachedPropertiesName,
+        contents: cachedProperties
+      )
+    )
+    let notebook = Notebook(
+      parsingRules: parsingRules,
+      metadataProvider: metadataProvider
+    )
+    XCTAssertEqual(notebook.pages.count, 2)
+    // TODO: Perhaps announce a more well-defined state (loaded cached properties, synced with
+    // metadata provider, etc)
     let didGetNotified = expectation(description: "did get notified")
     var expectedNotifications = 1
     let notebookListener = TestListener {

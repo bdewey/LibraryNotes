@@ -18,27 +18,34 @@ struct TestMetadataProvider: FileMetadataProvider {
   ///
   /// - parameter fileMetadata: The file metadata in this collection.
   init(fileInfo: [FileInfo]) {
-    self.fileMetadata = fileInfo.map { FileMetadata(fileName: $0.fileName) }
+    self.fileNameToMetadata = fileInfo.reduce(
+      into: [String: FileMetadata](),
+      { $0[$1.fileName] = FileMetadata(fileName: $1.fileName) }
+    )
     self.fileContents = fileInfo.reduce(into: [String: String](), { $0[$1.fileName] = $1.contents })
   }
 
   mutating func addFileInfo(_ fileInfo: FileInfo) {
-    self.fileMetadata.append(FileMetadata(fileName: fileInfo.fileName))
+    self.fileNameToMetadata[fileInfo.fileName] = FileMetadata(fileName: fileInfo.fileName)
     self.fileContents[fileInfo.fileName] = fileInfo.contents
+    delegate?.fileMetadataProvider(self, didUpdate: self.fileMetadata)
   }
 
   /// A fake URL for this container.
   let container = URL(string: "test://metadata")!
 
-  /// The file metadata provided by this structure.
-  var fileMetadata: [FileMetadata]
+  /// Map of file name to file metadata (includes things like modified time)
+  var fileNameToMetadata: [String: FileMetadata]
 
+  var fileMetadata: [FileMetadata] { return Array(fileNameToMetadata.values) }
+
+  /// Map of file name to file contents
   var fileContents: [String: String]
 
   /// Get DocumentProperties for all of the FileMetadata.
   var documentProperties: [DocumentProperties] {
     let parsingRules = ParsingRules()
-    return fileMetadata.map {
+    return fileNameToMetadata.values.map {
       let text = fileContents[$0.fileName] ?? ""
       return DocumentProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
     }
