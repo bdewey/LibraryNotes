@@ -18,6 +18,8 @@ public protocol NotebookPageChangeListener: AnyObject {
 /// using a spaced repetition algorithm.
 public final class Notebook {
 
+  public static let cachedPropertiesName = "properties.json"
+
   /// Designated initializer.
   ///
   /// - parameter containerURL: The URL of the directory that contains all of the indexed
@@ -31,7 +33,7 @@ public final class Notebook {
     self.metadataProvider = metadataProvider
 
     // TODO: Handle the "nil" case
-    self.propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: "properties.json"))!
+    self.propertiesDocument = metadataProvider.editableDocument(for: FileMetadata(fileName: Notebook.cachedPropertiesName))!
     propertiesDocument.open { (success) in
       // TODO: Handle the failure case here.
       precondition(success)
@@ -124,33 +126,12 @@ extension ListAdapter: NotebookPageChangeListener {
   }
 }
 
-extension Notebook: DocumentPropertiesIndexDocumentDelegate {
-
-  public func indexDocument(
-    _ document: DocumentPropertiesIndexDocument,
-    didLoadProperties properties: [DocumentProperties]
-  ) {
-    // TODO: Will this race with getting properties from the metadata provider?
-    self.pages = properties.reduce(
-      into: [String: DocumentProperties]()
-    ) { (dictionary, properties) in
-      dictionary[properties.fileMetadata.fileName] = properties
-    }
-  }
-
-  public func indexDocumentPropertiesToSave(
-    _ document: DocumentPropertiesIndexDocument
-  ) -> [DocumentProperties] {
-    return Array(pages.values)
-  }
-}
-
 extension Notebook: FileMetadataProviderDelegate {
   public func fileMetadataProvider(
     _ provider: FileMetadataProvider,
     didUpdate metadata: [FileMetadata]
   ) {
-    let specialNames: Set<String> = [StudyHistory.name, DocumentPropertiesIndexDocument.name]
+    let specialNames: Set<String> = [StudyHistory.name, Notebook.cachedPropertiesName]
     let models = metadata
       .filter { !specialNames.contains($0.fileName) }
     for fileMetadata in models {

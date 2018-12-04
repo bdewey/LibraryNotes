@@ -57,7 +57,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
             studyHistory: studyHistory
           )
         case (.failure(let error), _), (_, .failure(let error)):
-          let messageText = "Error opening \(DocumentPropertiesIndexDocument.name): \(error.localizedDescription)"
+          let messageText = "Error opening \(StudyHistory.name): \(error.localizedDescription)"
           let message = MDCSnackbarMessage(text: messageText)
           MDCSnackbarManager.show(message)
         }

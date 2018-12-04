@@ -15,6 +15,7 @@ final class TestEditableDocument: EditableDocument {
     let (input, signal) = Signal<Tagged<String>>.create()
     textSignalInput = input
     textSignal = signal.continuous()
+    textSignalInput.send(result: .success(Tagged(tag: .document, value: text)))
   }
 
   /// The current text in the document.
@@ -34,7 +35,7 @@ final class TestEditableDocument: EditableDocument {
   /// Updates "text"
   func applyTaggedModification(tag: Tag, modification: (String) -> String) {
     text = modification(text)
-    textSignalInput.send(value: Tagged(tag: .memory, value: text))
+    textSignalInput.send(value: Tagged(tag: tag, value: text))
   }
 
   /// Stub function for opening a document.

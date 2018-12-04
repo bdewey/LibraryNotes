@@ -38,7 +38,7 @@ final class NotebookTests: XCTestCase {
     let cachedProperties = metadataProvider.documentPropertiesJSON
     metadataProvider.addFileInfo(
       TestMetadataProvider.FileInfo(
-        fileName: DocumentPropertiesIndexDocument.name,
+        fileName: Notebook.cachedPropertiesName,
         contents: cachedProperties
       )
     )
