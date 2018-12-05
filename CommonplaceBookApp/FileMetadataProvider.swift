@@ -15,7 +15,7 @@ public protocol FileMetadataProviderDelegate: class {
 
 /// A FileMetadataProvider knows how to obtain all of the FileMetadata structures corresponding
 /// to a single container (e.g., iCloud container or documents folder)
-public protocol FileMetadataProvider {
+public protocol FileMetadataProvider: class {
 
   var container: URL { get }
 

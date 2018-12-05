@@ -6,7 +6,7 @@ import MiniMarkdown
 
 /// Serves in-memory copy of FileMetadata object that are backed by TestEditableDocument
 /// instances.
-struct TestMetadataProvider: FileMetadataProvider {
+final class TestMetadataProvider: FileMetadataProvider {
 
   /// A subset of `FileMetadata` that also includes file contents.
   struct FileInfo {
@@ -25,7 +25,7 @@ struct TestMetadataProvider: FileMetadataProvider {
     self.fileContents = fileInfo.reduce(into: [String: String](), { $0[$1.fileName] = $1.contents })
   }
 
-  mutating func addFileInfo(_ fileInfo: FileInfo) {
+  func addFileInfo(_ fileInfo: FileInfo) {
     self.fileNameToMetadata[fileInfo.fileName] = FileMetadata(fileName: fileInfo.fileName)
     self.fileContents[fileInfo.fileName] = fileInfo.contents
     delegate?.fileMetadataProvider(self, didUpdate: self.fileMetadata)

@@ -66,7 +66,7 @@ public final class Notebook {
   /// The rules used to parse the text content of documents.
   public let parsingRules: ParsingRules
 
-  public var metadataProvider: FileMetadataProvider
+  public let metadataProvider: FileMetadataProvider
 
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
@@ -201,7 +201,6 @@ extension Notebook: FileMetadataProviderDelegate {
       case .success(let properties):
         self.pages[name] = Tagged(tag: .truth, value: properties)
         DDLogInfo("Successfully loaded: " + properties.title)
-        self.notifyListeners()
       case .failure(let error):
         self.pages[name] = nil
         DDLogError("Error loading properties: \(error)")
