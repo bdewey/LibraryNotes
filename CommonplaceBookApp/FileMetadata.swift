@@ -127,6 +127,7 @@ extension FileMetadata: Codable {
 
 extension FileMetadata {
   /// Triggers download from iCloud if needed.
+  /// - note: TODO: This should be part of the FileMetadataProvider.
   /// - parameter container: The URL of the directory that contains the item.
   public func downloadIfNeeded(in container: URL) {
     if downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {

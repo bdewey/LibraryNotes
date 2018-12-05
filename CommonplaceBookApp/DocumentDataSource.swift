@@ -28,7 +28,9 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   private var propertiesFilteredByHashtag: [DocumentProperties] {
     return index.pages.values
       // remove placeholders
-      .filter { !$0.placeholder }
+      .filter { $0.tag != .placeholder }
+      // Convert to just a DocumentProperties
+      .map { $0.value }
       // only show things with the right hashtag
       .filter {
         guard let hashtag = filteredHashtag else { return true }

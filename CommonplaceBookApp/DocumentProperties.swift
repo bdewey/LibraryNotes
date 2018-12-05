@@ -11,16 +11,20 @@ import enum TextBundleKit.Result
 public struct DocumentProperties: Codable {
   public var fileMetadata: FileMetadata
   public let hashtags: [String]
-  public let placeholder: Bool
   public let title: String
   public let cardTemplates: [CardTemplateSerializationWrapper]
 
   public init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
     self.hashtags = nodes.hashtags
-    self.placeholder = nodes.isEmpty
     self.title = String(nodes.title.split(separator: "\n").first ?? "")
     self.cardTemplates = nodes.cardTemplates
+  }
+
+  public func updatingFileMetadata(_ fileMetadata: FileMetadata) -> DocumentProperties {
+    var copy = self
+    copy.fileMetadata = fileMetadata
+    return copy
   }
 
   public static func loadProperties(
@@ -107,8 +111,7 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
     guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
     return value.title == otherWrapper.value.title &&
       value.hashtags == otherWrapper.value.hashtags &&
-      value.fileMetadata == otherWrapper.value.fileMetadata &&
-      value.placeholder == otherWrapper.value.placeholder
+      value.fileMetadata == otherWrapper.value.fileMetadata
   }
 }
 

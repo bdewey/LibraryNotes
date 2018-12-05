@@ -6,6 +6,13 @@ import CwlSignal
 import Foundation
 import IGListKit
 import MiniMarkdown
+import TextBundleKit
+
+extension Tag {
+  public static let fromCache = Tag(rawValue: "fromCache")
+  public static let placeholder = Tag(rawValue: "placeholder")
+  public static let truth = Tag(rawValue: "truth")
+}
 
 public protocol NotebookPageChangeListener: AnyObject {
 
@@ -77,16 +84,19 @@ public final class Notebook {
       self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
         guard let properties = try? Notebook.decoder.decode([DocumentProperties].self, from: taggedString.value.data(using: .utf8)!) else { return }
         self.pages = properties.reduce(
-          into: [String: DocumentProperties]()
+          into: [String: Tagged<DocumentProperties>]()
         ) { (dictionary, properties) in
-          dictionary[properties.fileMetadata.fileName] = properties
+          dictionary[properties.fileMetadata.fileName] = Tagged(
+            tag: .fromCache,
+            value: properties
+          )
         }
       })
     }
   }
 
   /// The pages of the notebook.
-  public internal(set) var pages: [String: DocumentProperties] = [:] {
+  public internal(set) var pages: [String: Tagged<DocumentProperties>] = [:] {
     didSet {
       notifyListeners()
     }
@@ -153,10 +163,14 @@ extension Notebook: FileMetadataProviderDelegate {
 
   fileprivate func updateProperties(for fileMetadata: FileMetadata) {
     let name = fileMetadata.fileName
-    if pages[name]?.fileMetadata.contentChangeDate ==
-      fileMetadata.contentChangeDate {
+    if let taggedProperties = pages[name],
+           taggedProperties.value.fileMetadata.contentChangeDate ==
+             fileMetadata.contentChangeDate {
       // Just update the fileMetadata structure without re-extracting document properties.
-      pages[name]?.fileMetadata = fileMetadata
+      pages[name] = Tagged(
+        tag: .truth,
+        value: taggedProperties.value.updatingFileMetadata(fileMetadata)
+      )
       return
     }
 
@@ -164,12 +178,20 @@ extension Notebook: FileMetadataProviderDelegate {
     // contentChangeDate. We'll replace it with something with the actual extracted
     // properties in the completion block below. This is needed to prevent multiple
     // loads for the same content.
-    if pages[name] == nil {
-      pages[name] = DocumentProperties(fileMetadata: fileMetadata, nodes: [])
-    } else {
+    if let taggedProperties = pages[name] {
       // Update change time to prevent multiple loads
-      pages[name]?.fileMetadata = fileMetadata
+      // TODO: this is copypasta from above. Code smell; can probably simplify
+      pages[name] = Tagged(
+        tag: .placeholder, // TODO: Should be called "pending"?
+        value: taggedProperties.value.updatingFileMetadata(fileMetadata)
+      )
+    } else {
+      pages[name] = Tagged(
+        tag: .placeholder,
+        value: DocumentProperties(fileMetadata: fileMetadata, nodes: [])
+      )
     }
+
     DocumentProperties.loadProperties(
       from: fileMetadata,
       in: metadataProvider,
@@ -177,7 +199,7 @@ extension Notebook: FileMetadataProviderDelegate {
     ) { (result) in
       switch result {
       case .success(let properties):
-        self.pages[name] = properties
+        self.pages[name] = Tagged(tag: .truth, value: properties)
         DDLogInfo("Successfully loaded: " + properties.title)
         self.notifyListeners()
       case .failure(let error):
