@@ -31,30 +31,18 @@ final class NotebookTests: XCTestCase {
   }
 
   func testNotebookHasJSONImmediately() {
-    let cachedProperties = metadataProvider.documentPropertiesJSON
-    metadataProvider.addFileInfo(
-      TestMetadataProvider.FileInfo(
-        fileName: Notebook.cachedPropertiesName,
-        contents: cachedProperties
-      )
-    )
+    metadataProvider.addPropertiesCache()
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     )
-    wait(for: allPagesAreCached, in: notebook)
+    wait(for: noPagesArePlaceholders, in: notebook)
     XCTAssertEqual(Set(notebook.pages["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
     XCTAssertEqual(Set(notebook.pages["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
   }
 
   func testModifyDocumentWillUpdateProperties() {
-    let cachedProperties = metadataProvider.documentPropertiesJSON
-    metadataProvider.addFileInfo(
-      TestMetadataProvider.FileInfo(
-        fileName: Notebook.cachedPropertiesName,
-        contents: cachedProperties
-      )
-    )
+    metadataProvider.addPropertiesCache()
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
@@ -69,11 +57,38 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(notebook.pages["page1.txt"]!.value.hashtags, ["#newhashtag"])
   }
 
+  func testUpdatingPropertiesUpdatesCache() {
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(
+      parsingRules: parsingRules,
+      metadataProvider: metadataProvider
+    )
+    XCTAssert(metadataProvider.delegate === notebook)
+    wait(for: allPagesAreTruth, in: notebook)
+    let didSaveCache = expectation(description: "did save cache")
+    metadataProvider.contentsChangeListener = { (name, text) in
+      if name == Notebook.cachedPropertiesName {
+        didSaveCache.fulfill()
+      }
+    }
+    metadataProvider.addFileInfo(
+      TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#newhashtag")
+    )
+    waitForExpectations(timeout: 3, handler: nil)
+    let deserializedPages = Notebook.pagesDictionary(
+      from: metadataProvider.fileContents[Notebook.cachedPropertiesName]!,
+      tag: .fromCache
+    )
+    XCTAssertEqual(deserializedPages["page1.txt"]?.value.hashtags, ["#newhashtag"])
+  }
+
   // MARK: - Helpers
 
   private let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
 
   private let allPagesAreCached = NotebookTests.notebookPagesAllHaveTag(.fromCache)
+
+  private let noPagesArePlaceholders = NotebookTests.notebookPagesNoneHaveTag(.placeholder)
 
   private static func notebookPagesAllHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
     return { (notebook) in
@@ -81,10 +96,17 @@ final class NotebookTests: XCTestCase {
     }
   }
 
+  private static func notebookPagesNoneHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
+    return { (notebook) in
+      return notebook.pages.allSatisfy( { $1.tag != tag })
+    }
+  }
+
   private func wait(for condition: @escaping (Notebook) -> Bool, in notebook: Notebook) {
     if condition(notebook) { return }
     let conditionSatisfied = expectation(description: "generic condition")
     let notebookListener = TestListener { (notebook) in
+      print("\(notebook.pages.values.map { $0.tag })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
       }

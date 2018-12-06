@@ -26,7 +26,12 @@ final class TestMetadataProvider: FileMetadataProvider {
   }
 
   func addFileInfo(_ fileInfo: FileInfo) {
-    self.fileNameToMetadata[fileInfo.fileName] = FileMetadata(fileName: fileInfo.fileName)
+    if var existingMetadata = fileNameToMetadata[fileInfo.fileName] {
+      existingMetadata.contentChangeDate.addTimeInterval(3)
+      fileNameToMetadata[fileInfo.fileName] = existingMetadata
+    } else {
+      fileNameToMetadata[fileInfo.fileName] = FileMetadata(fileName: fileInfo.fileName)
+    }
     self.fileContents[fileInfo.fileName] = fileInfo.contents
     delegate?.fileMetadataProvider(self, didUpdate: self.fileMetadata)
   }
@@ -42,22 +47,30 @@ final class TestMetadataProvider: FileMetadataProvider {
   /// Map of file name to file contents
   var fileContents: [String: String]
 
+  var contentsChangeListener: ((String, String) -> Void)?
+
   /// Get DocumentProperties for all of the FileMetadata.
   var documentProperties: [DocumentProperties] {
     let parsingRules = ParsingRules()
-    return fileNameToMetadata.values.map {
-      let text = fileContents[$0.fileName] ?? ""
-      return DocumentProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
-    }
+    return fileNameToMetadata
+      .values
+      .filter { $0.fileName != Notebook.cachedPropertiesName }
+      .map {
+        let text = fileContents[$0.fileName] ?? ""
+        return DocumentProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
+      }
   }
 
   /// Gets `documentProperties` as a serialized JSON string.
   var documentPropertiesJSON: String {
-    let encoder = JSONEncoder()
-    encoder.dateEncodingStrategy = .iso8601
-    encoder.outputFormatting = .prettyPrinted
-    let data = (try? encoder.encode(documentProperties)) ?? Data()
+    let data = (try? Notebook.encoder.encode(documentProperties)) ?? Data()
     return String(data: data, encoding: .utf8) ?? ""
+  }
+
+  /// Adds "properties.json" that contains cached `DocumentProperties` for all existing
+  /// file contents.
+  func addPropertiesCache() {
+    addFileInfo(FileInfo(fileName: Notebook.cachedPropertiesName, contents: documentPropertiesJSON))
   }
 
   /// A delegate to notify in the event of changes.
@@ -69,6 +82,15 @@ final class TestMetadataProvider: FileMetadataProvider {
   ///         different metadata.
   func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
     let contents = fileContents[metadata.fileName] ?? ""
-    return TestEditableDocument(contents)
+    let document = TestEditableDocument(name: metadata.fileName, text: contents)
+    document.delegate = self
+    return document
+  }
+}
+
+extension TestMetadataProvider: TestEditableDocumentDelegate {
+  func document(_ document: TestEditableDocument, didUpdate text: String) {
+    fileContents[document.name] = text
+    contentsChangeListener?(document.name, text)
   }
 }

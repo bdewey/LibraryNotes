@@ -72,7 +72,7 @@ public struct FileMetadata: Equatable {
   }
 
   // Persisted properties
-  public let contentChangeDate: Date
+  public var contentChangeDate: Date
   public let contentType: String
   public let contentTypeTree: [String]
   public let displayName: String

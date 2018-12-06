@@ -6,17 +6,26 @@ import Foundation
 import TextBundleKit
 import enum TextBundleKit.Result
 
+protocol TestEditableDocumentDelegate: class {
+  func document(_ document: TestEditableDocument, didUpdate text: String)
+}
+
 /// Test implementation of EditableDocument that keeps its values in memory.
 final class TestEditableDocument: EditableDocument {
 
   /// Initialize with default text.
-  init(_ text: String = "") {
+  init(name: String, text: String = "") {
+    self.name = name
     self.text = text
     let (input, signal) = Signal<Tagged<String>>.create()
     textSignalInput = input
     textSignal = signal.continuous()
     textSignalInput.send(result: .success(Tagged(tag: .document, value: text)))
   }
+
+  weak var delegate: TestEditableDocumentDelegate?
+
+  let name: String
 
   /// The current text in the document.
   var text: String
@@ -36,6 +45,7 @@ final class TestEditableDocument: EditableDocument {
   func applyTaggedModification(tag: Tag, modification: (String) -> String) {
     text = modification(text)
     textSignalInput.send(value: Tagged(tag: tag, value: text))
+    delegate?.document(self, didUpdate: text)
   }
 
   /// Stub function for opening a document.

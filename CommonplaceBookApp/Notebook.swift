@@ -46,9 +46,9 @@ public final class Notebook {
     // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
     //       don't match what's in the metadata provider (which is truth)
     self.metadataProvider.delegate = self
-    self.fileMetadataProvider(metadataProvider, didUpdate: metadataProvider.fileMetadata)
 
-    monitorPropertiesDocument(propertiesDocument)
+    monitorPropertiesDocument()
+    processMetadata(metadataProvider.fileMetadata)
   }
 
   deinit {
@@ -61,6 +61,13 @@ public final class Notebook {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     return decoder
+  }()
+
+  public static let encoder: JSONEncoder = {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    encoder.dateEncodingStrategy = .iso8601
+    return encoder
   }()
 
   /// The rules used to parse the text content of documents.
@@ -76,22 +83,48 @@ public final class Notebook {
 
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
-  private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument?) {
-    guard let propertiesDocument = propertiesDocument else { return }
+  private func monitorPropertiesDocument() {
+    guard let propertiesDocument = self.propertiesDocument else { return }
     propertiesDocument.open { (success) in
       // TODO: Handle the failure case here.
       precondition(success)
       self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
-        guard let properties = try? Notebook.decoder.decode([DocumentProperties].self, from: taggedString.value.data(using: .utf8)!) else { return }
-        self.pages = properties.reduce(
-          into: [String: Tagged<DocumentProperties>]()
-        ) { (dictionary, properties) in
-          dictionary[properties.fileMetadata.fileName] = Tagged(
-            tag: .fromCache,
-            value: properties
-          )
-        }
+        if taggedString.tag == .memory { return }
+        self.pages = Notebook.pagesDictionary(from: taggedString.value, tag: .fromCache)
       })
+    }
+  }
+
+  public static func pagesDictionary(
+    from seralizedString: String,
+    tag: Tag
+  ) -> [String: Tagged<DocumentProperties>] {
+    guard let data = seralizedString.data(using: .utf8),
+          let properties = try? Notebook.decoder.decode(
+            [DocumentProperties].self,
+            from: data
+          ) else { return [:] }
+    return properties.reduce(
+      into: [String: Tagged<DocumentProperties>]()
+    ) { (dictionary, properties) in
+      dictionary[properties.fileMetadata.fileName] = Tagged(
+        tag: tag,
+        value: properties
+      )
+    }
+  }
+
+  private func saveProperties() {
+    guard let propertiesDocument = propertiesDocument else { return }
+    // TODO: Move serialization off main thread?
+    do {
+      let properties = pages.values.map { $0.value }
+      let data = try Notebook.encoder.encode(properties)
+      propertiesDocument.applyTaggedModification(tag: .memory) { (_) -> String in
+        return String(data: data, encoding: .utf8) ?? ""
+      }
+    } catch {
+      DDLogError("\(error)")
     }
   }
 
@@ -130,6 +163,25 @@ public final class Notebook {
     }
   }
 
+  private func processMetadata(_ metadata: [FileMetadata]) {
+    let specialNames: Set<String> = [StudyHistory.name, Notebook.cachedPropertiesName]
+    let models = metadata
+      .filter { !specialNames.contains($0.fileName) }
+    let allUpdated = DispatchGroup()
+    var loadedProperties = 0
+    for fileMetadata in models {
+      allUpdated.enter()
+      fileMetadata.downloadIfNeeded(in: containerURL)
+      updateProperties(for: fileMetadata) { (didLoadNewProperties) in
+        if didLoadNewProperties { loadedProperties += 1 }
+        allUpdated.leave()
+      }
+    }
+    allUpdated.notify(queue: DispatchQueue.main) {
+      if loadedProperties > 0 { self.saveProperties() }
+    }
+  }
+
   /// Deletes a document and its properties.
   public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
 
@@ -152,25 +204,25 @@ extension Notebook: FileMetadataProviderDelegate {
     _ provider: FileMetadataProvider,
     didUpdate metadata: [FileMetadata]
   ) {
-    let specialNames: Set<String> = [StudyHistory.name, Notebook.cachedPropertiesName]
-    let models = metadata
-      .filter { !specialNames.contains($0.fileName) }
-    for fileMetadata in models {
-      fileMetadata.downloadIfNeeded(in: containerURL)
-      updateProperties(for: fileMetadata)
-    }
+    processMetadata(metadata)
   }
 
-  fileprivate func updateProperties(for fileMetadata: FileMetadata) {
+  fileprivate func updateProperties(
+    for fileMetadata: FileMetadata,
+    completion: @escaping (Bool) -> Void
+  ) {
     let name = fileMetadata.fileName
+
+    // TODO: Because of serialization, I won't re-parse changes that happen within a second.
+    // There's probably a better way.
     if let taggedProperties = pages[name],
-           taggedProperties.value.fileMetadata.contentChangeDate ==
-             fileMetadata.contentChangeDate {
+      abs(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince(fileMetadata.contentChangeDate)) < 1 {
       // Just update the fileMetadata structure without re-extracting document properties.
       pages[name] = Tagged(
         tag: .truth,
         value: taggedProperties.value.updatingFileMetadata(fileMetadata)
       )
+      completion(false)
       return
     }
 
@@ -205,6 +257,7 @@ extension Notebook: FileMetadataProviderDelegate {
         self.pages[name] = nil
         DDLogError("Error loading properties: \(error)")
       }
+      completion(true)
     }
   }
 }
