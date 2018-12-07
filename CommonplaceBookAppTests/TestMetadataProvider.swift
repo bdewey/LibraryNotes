@@ -17,12 +17,13 @@ final class TestMetadataProvider: FileMetadataProvider {
   /// Designated initializer.
   ///
   /// - parameter fileMetadata: The file metadata in this collection.
-  init(fileInfo: [FileInfo]) {
+  init(fileInfo: [FileInfo], parsingRules: ParsingRules) {
     self.fileNameToMetadata = fileInfo.reduce(
       into: [String: FileMetadata](),
       { $0[$1.fileName] = FileMetadata(fileName: $1.fileName) }
     )
     self.fileContents = fileInfo.reduce(into: [String: String](), { $0[$1.fileName] = $1.contents })
+    self.parsingRules = parsingRules
   }
 
   func addFileInfo(_ fileInfo: FileInfo) {
@@ -39,6 +40,8 @@ final class TestMetadataProvider: FileMetadataProvider {
   /// A fake URL for this container.
   let container = URL(string: "test://metadata")!
 
+  let parsingRules: ParsingRules
+
   /// Map of file name to file metadata (includes things like modified time)
   var fileNameToMetadata: [String: FileMetadata]
 
@@ -51,7 +54,6 @@ final class TestMetadataProvider: FileMetadataProvider {
 
   /// Get DocumentProperties for all of the FileMetadata.
   var documentProperties: [DocumentProperties] {
-    let parsingRules = ParsingRules()
     return fileNameToMetadata
       .values
       .filter { $0.fileName != Notebook.cachedPropertiesName }

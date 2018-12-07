@@ -53,7 +53,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
             notebook: Notebook(
               parsingRules: parsingRules,
               metadataProvider: metadataProvider
-            ),
+            ).loadCachedProperties().monitorMetadataProvider(),
             studyHistory: studyHistory
           )
         case (.failure(let error), _), (_, .failure(let error)):

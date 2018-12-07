@@ -1,6 +1,7 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
+import FlashcardKit
 import MiniMarkdown
 import TextBundleKit
 import XCTest
@@ -13,17 +14,22 @@ final class NotebookTests: XCTestCase {
       fileInfo: [
         TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#hashtag #test1"),
         TestMetadataProvider.FileInfo(fileName: "page2.txt", contents: "#hashtag #test2"),
-        ]
+        ],
+      parsingRules: parsingRules
     )
   }
 
-  let parsingRules = ParsingRules()
+  let parsingRules: ParsingRules = {
+    var parsingRules = ParsingRules()
+    parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
+    return parsingRules
+  }()
 
   func testNotebookExtractsProperties() {
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
-    )
+    ).loadCachedProperties().monitorMetadataProvider()
     XCTAssertEqual(notebook.pages.count, 2)
     wait(for: allPagesAreTruth, in: notebook)
     XCTAssertEqual(Set(notebook.pages["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
@@ -35,8 +41,8 @@ final class NotebookTests: XCTestCase {
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
-    )
-    wait(for: noPagesArePlaceholders, in: notebook)
+    ).loadCachedProperties()
+    wait(for: allPagesAreCached, in: notebook)
     XCTAssertEqual(Set(notebook.pages["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
     XCTAssertEqual(Set(notebook.pages["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
   }
@@ -46,7 +52,7 @@ final class NotebookTests: XCTestCase {
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
-    )
+    ).loadCachedProperties().monitorMetadataProvider()
     XCTAssert(metadataProvider.delegate === notebook)
     wait(for: allPagesAreTruth, in: notebook)
     metadataProvider.addFileInfo(
@@ -62,7 +68,7 @@ final class NotebookTests: XCTestCase {
     let notebook = Notebook(
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
-    )
+    ).loadCachedProperties().monitorMetadataProvider()
     XCTAssert(metadataProvider.delegate === notebook)
     wait(for: allPagesAreTruth, in: notebook)
     let didSaveCache = expectation(description: "did save cache")
@@ -75,11 +81,25 @@ final class NotebookTests: XCTestCase {
       TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#newhashtag")
     )
     waitForExpectations(timeout: 3, handler: nil)
-    let deserializedPages = Notebook.pagesDictionary(
+    let deserializedPages = notebook.pagesDictionary(
       from: metadataProvider.fileContents[Notebook.cachedPropertiesName]!,
       tag: .fromCache
     )
     XCTAssertEqual(deserializedPages["page1.txt"]?.value.hashtags, ["#newhashtag"])
+  }
+
+  func testLoadPropertiesWithClozes() {
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "cloze.txt",
+      contents: "- Here is text with a ?[cloze](thing that is removed) for you to study.\n"
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(
+      parsingRules: parsingRules,
+      metadataProvider: metadataProvider
+    ).loadCachedProperties()
+    wait(for: noPagesArePlaceholders, in: notebook)
+    XCTAssertEqual(notebook.pages["cloze.txt"]?.value.cardTemplates.count, 1)
   }
 
   // MARK: - Helpers
@@ -103,10 +123,13 @@ final class NotebookTests: XCTestCase {
   }
 
   private func wait(for condition: @escaping (Notebook) -> Bool, in notebook: Notebook) {
-    if condition(notebook) { return }
+    if condition(notebook) {
+      print("Condition immediately passed: \(notebook.pages.mapValues { $0.tag.rawValue })")
+      return
+    }
     let conditionSatisfied = expectation(description: "generic condition")
     let notebookListener = TestListener { (notebook) in
-      print("\(notebook.pages.values.map { $0.tag })")
+      print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
       }

@@ -38,17 +38,30 @@ public final class Notebook {
     self.parsingRules = parsingRules
     self.metadataProvider = metadataProvider
 
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    decoder.userInfo[.markdownParsingRules] = parsingRules
+    self.decoder = decoder
+
     self.propertiesDocument = metadataProvider.editableDocument(
       for: FileMetadata(fileName: Notebook.cachedPropertiesName)
     )
+    if self.propertiesDocument == nil {
+      DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
+    }
+  }
 
-    // CODE SMELL. Need to process any existing file metadata.
-    // TODO: Figure out and then WRITE TESTS FOR what's supposed to happen if the cached properties
-    //       don't match what's in the metadata provider (which is truth)
-    self.metadataProvider.delegate = self
-
+  @discardableResult
+  public func loadCachedProperties() -> Notebook {
     monitorPropertiesDocument()
+    return self
+  }
+
+  @discardableResult
+  public func monitorMetadataProvider() -> Notebook {
+    self.metadataProvider.delegate = self
     processMetadata(metadataProvider.fileMetadata)
+    return self
   }
 
   deinit {
@@ -57,11 +70,9 @@ public final class Notebook {
 
   private var propertiesEndpoint: Cancellable?
 
-  public static let decoder: JSONDecoder = {
-    let decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return decoder
-  }()
+  /// Decoder for this notebook. It depend on the parsing rules, which is why it is an instance
+  /// property and not a class property.
+  public let decoder: JSONDecoder
 
   public static let encoder: JSONEncoder = {
     let encoder = JSONEncoder()
@@ -90,28 +101,35 @@ public final class Notebook {
       precondition(success)
       self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
         if taggedString.tag == .memory { return }
-        self.pages = Notebook.pagesDictionary(from: taggedString.value, tag: .fromCache)
+        let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
+        DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
+        self.pages = pages
       })
     }
   }
 
-  public static func pagesDictionary(
+  public func pagesDictionary(
     from seralizedString: String,
     tag: Tag
   ) -> [String: Tagged<DocumentProperties>] {
-    guard let data = seralizedString.data(using: .utf8),
-          let properties = try? Notebook.decoder.decode(
-            [DocumentProperties].self,
-            from: data
-          ) else { return [:] }
-    return properties.reduce(
-      into: [String: Tagged<DocumentProperties>]()
-    ) { (dictionary, properties) in
-      dictionary[properties.fileMetadata.fileName] = Tagged(
-        tag: tag,
-        value: properties
+    guard let data = seralizedString.data(using: .utf8) else { return [:] }
+    do {
+      let properties = try decoder.decode(
+        [DocumentProperties].self,
+        from: data
       )
+      return properties.reduce(
+        into: [String: Tagged<DocumentProperties>]()
+      ) { (dictionary, properties) in
+        dictionary[properties.fileMetadata.fileName] = Tagged(
+          tag: tag,
+          value: properties
+        )
+      }
+    } catch {
+      DDLogError("Error parsing cached properties: \(error)")
     }
+    return [:]
   }
 
   private func saveProperties() {
@@ -218,6 +236,11 @@ extension Notebook: FileMetadataProviderDelegate {
     if let taggedProperties = pages[name],
       abs(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince(fileMetadata.contentChangeDate)) < 1 {
       // Just update the fileMetadata structure without re-extracting document properties.
+      DDLogInfo(
+        "File \(name): Not updating properties because timestamps close. " +
+        "Cache seconds: \(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince1970)" +
+        "  Metadata seconds: \(fileMetadata.contentChangeDate.timeIntervalSince1970)"
+      )
       pages[name] = Tagged(
         tag: .truth,
         value: taggedProperties.value.updatingFileMetadata(fileMetadata)
@@ -233,11 +256,17 @@ extension Notebook: FileMetadataProviderDelegate {
     if let taggedProperties = pages[name] {
       // Update change time to prevent multiple loads
       // TODO: this is copypasta from above. Code smell; can probably simplify
+      DDLogInfo(
+        "File \(name): **Updating properties** because timestamps differ by > 1s. " +
+          "Cache seconds: \(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince1970)" +
+        "  Metadata seconds: \(fileMetadata.contentChangeDate.timeIntervalSince1970)"
+      )
       pages[name] = Tagged(
         tag: .placeholder, // TODO: Should be called "pending"?
         value: taggedProperties.value.updatingFileMetadata(fileMetadata)
       )
     } else {
+      DDLogInfo("File \(name): Creating placeholder because no cache record")
       pages[name] = Tagged(
         tag: .placeholder,
         value: DocumentProperties(fileMetadata: fileMetadata, nodes: [])
