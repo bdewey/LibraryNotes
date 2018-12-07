@@ -87,6 +87,11 @@ final class TestMetadataProvider: FileMetadataProvider {
     document.delegate = self
     return document
   }
+
+  func delete(_ metadata: FileMetadata) throws {
+    fileNameToMetadata[metadata.fileName] = nil
+    fileContents[metadata.fileName] = nil
+  }
 }
 
 extension TestMetadataProvider: TestEditableDocumentDelegate {

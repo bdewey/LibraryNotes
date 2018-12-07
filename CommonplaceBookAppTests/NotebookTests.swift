@@ -72,12 +72,7 @@ final class NotebookTests: XCTestCase {
     ).loadCachedProperties().monitorMetadataProvider()
     waitForNotebook(notebook, condition: allPagesAreTruth)
     XCTAssert(metadataProvider.delegate === notebook)
-    let didSaveCache = expectation(description: "did save cache")
-    metadataProvider.contentsChangeListener = { (name, text) in
-      if name == Notebook.cachedPropertiesName {
-        didSaveCache.fulfill()
-      }
-    }
+    startMonitoringForCacheSave()
     metadataProvider.addFileInfo(
       TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#newhashtag")
     )
@@ -101,6 +96,28 @@ final class NotebookTests: XCTestCase {
     ).loadCachedProperties()
     waitForNotebook(notebook, condition: noPagesArePlaceholders)
     XCTAssertEqual(notebook.pages["cloze.txt"]?.value.cardTemplates.count, 1)
+  }
+
+  func testDeleteLiveNotebook() {
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .monitorMetadataProvider()
+    waitForNotebook(notebook) { (notebook) -> Bool in
+      return notebook.pages.count == 2 && notebook.pages.allSatisfy { $1.tag == .truth }
+    }
+    XCTAssertEqual(notebook.pages.count, 2)
+    // thought: Maybe startMonitoring through to waitForExpecations should be in a method that
+    // takes a block? expectCacheToSave(after: () -> Void)
+    startMonitoringForCacheSave()
+    notebook.deleteFileMetadata(notebook.pages["page1.txt"]!.value.fileMetadata)
+    XCTAssertEqual(notebook.pages.count, 1)
+    waitForExpectations(timeout: 3, handler: nil) // wait for cache save to happen
+    let deserializedPages = notebook.pagesDictionary(
+      from: metadataProvider.fileContents[Notebook.cachedPropertiesName]!,
+      tag: .fromCache
+    )
+    XCTAssertEqual(deserializedPages.count, 1)
   }
 
   // MARK: - Helpers
@@ -137,6 +154,15 @@ final class NotebookTests: XCTestCase {
     }
     notebook.addListener(notebookListener)
     waitForExpectations(timeout: 3, handler: nil)
+  }
+
+  private func startMonitoringForCacheSave() {
+    let didSaveCache = expectation(description: "did save cache")
+    metadataProvider.contentsChangeListener = { (name, text) in
+      if name == Notebook.cachedPropertiesName {
+        didSaveCache.fulfill()
+      }
+    }
   }
 }
 

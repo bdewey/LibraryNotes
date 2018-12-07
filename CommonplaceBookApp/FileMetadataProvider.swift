@@ -27,6 +27,8 @@ public protocol FileMetadataProvider: class {
 
   /// Gets the EditableDocument that corresponds to a particular piece of metadata.
   func editableDocument(for metadata: FileMetadata) -> EditableDocument?
+
+  func delete(_ metadata: FileMetadata) throws
 }
 
 extension FileMetadataProvider {
@@ -92,6 +94,10 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
 
   /// Our active query for documents
   private let query: NSMetadataQuery
+
+  public func delete(_ metadata: FileMetadata) throws {
+    try FileManager.default.removeItem(at: container.appendingPathComponent(metadata.fileName))
+  }
 
   @objc private func didFinishGatheringNotification(_ notification: NSNotification) {
     self.fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in

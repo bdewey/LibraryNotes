@@ -208,12 +208,10 @@ public final class Notebook {
   }
 
   /// Deletes a document and its properties.
-  public func deleteDocument(_ properties: DocumentPropertiesListDiffable) {
-
-    // TODO: This should be done through the metadata provider
-    let name = properties.value.fileMetadata.fileName
-    try? FileManager.default.removeItem(at: containerURL.appendingPathComponent(name))
-    self.pages[name] = nil
+  public func deleteFileMetadata(_ fileMetadata: FileMetadata) {
+    try? metadataProvider.delete(fileMetadata)
+    self.pages[fileMetadata.fileName] = nil
+    saveProperties()
   }
 }
 
