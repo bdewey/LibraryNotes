@@ -4,7 +4,7 @@ import CommonplaceBookApp
 import XCTest
 
 final class FileMetadataTests: XCTestCase {
-  
+
   let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
 
   func testLocalMetadataForTextFile() {

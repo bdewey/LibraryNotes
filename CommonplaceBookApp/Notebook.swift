@@ -59,14 +59,18 @@ public final class Notebook {
 
   @discardableResult
   public func monitorMetadataProvider() -> Notebook {
-    self.metadataProvider.delegate = self
-    processMetadata(metadataProvider.fileMetadata)
+    DispatchQueue.main.async(when: loadedCachedProperties) {
+      self.metadataProvider.delegate = self
+      self.processMetadata(self.metadataProvider.fileMetadata)
+    }
     return self
   }
 
   deinit {
     propertiesDocument?.close()
   }
+
+  private let loadedCachedProperties = Condition()
 
   private var propertiesEndpoint: Cancellable?
 
@@ -100,10 +104,13 @@ public final class Notebook {
       // TODO: Handle the failure case here.
       precondition(success)
       self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
-        if taggedString.tag == .memory { return }
-        let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
-        DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
-        self.pages = pages
+        // If we've already loaded information into memory, don't clobber it.
+        if self.pages.isEmpty {
+          let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
+          DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
+          self.pages = pages
+        }
+        self.loadedCachedProperties.condition = true
       })
     }
   }

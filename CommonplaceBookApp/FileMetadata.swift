@@ -11,7 +11,7 @@ import MobileCoreServices
 /// You can create this either from an NSMetadataItem (Spotlight for iCloud documents)
 /// or from a URL to a local file.
 public struct FileMetadata: Equatable {
-  
+
   /// Extract file metadata from an `NSMetadataItem`
   public init(metadataItem: NSMetadataItem) {
     self.contentChangeDate = metadataItem.value(

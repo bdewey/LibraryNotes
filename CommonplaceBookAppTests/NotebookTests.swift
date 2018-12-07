@@ -30,8 +30,9 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
-    XCTAssertEqual(notebook.pages.count, 2)
-    wait(for: allPagesAreTruth, in: notebook)
+    waitForNotebook(notebook) { (notebook) -> Bool in
+      return notebook.pages.count == 2 && notebook.pages.allSatisfy { $1.tag == .truth }
+    }
     XCTAssertEqual(Set(notebook.pages["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
     XCTAssertEqual(Set(notebook.pages["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
   }
@@ -42,7 +43,7 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties()
-    wait(for: allPagesAreCached, in: notebook)
+    waitForNotebook(notebook, condition: allPagesAreCached)
     XCTAssertEqual(Set(notebook.pages["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
     XCTAssertEqual(Set(notebook.pages["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
   }
@@ -53,13 +54,13 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
+    waitForNotebook(notebook, condition: allPagesAreTruth)
     XCTAssert(metadataProvider.delegate === notebook)
-    wait(for: allPagesAreTruth, in: notebook)
     metadataProvider.addFileInfo(
       TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#newhashtag")
     )
     XCTAssertEqual(notebook.pages["page1.txt"]?.tag.rawValue, Tag.placeholder.rawValue)
-    wait(for: allPagesAreTruth, in: notebook)
+    waitForNotebook(notebook, condition: allPagesAreTruth)
     XCTAssertEqual(notebook.pages["page1.txt"]!.value.hashtags, ["#newhashtag"])
   }
 
@@ -69,8 +70,8 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
+    waitForNotebook(notebook, condition: allPagesAreTruth)
     XCTAssert(metadataProvider.delegate === notebook)
-    wait(for: allPagesAreTruth, in: notebook)
     let didSaveCache = expectation(description: "did save cache")
     metadataProvider.contentsChangeListener = { (name, text) in
       if name == Notebook.cachedPropertiesName {
@@ -98,7 +99,7 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties()
-    wait(for: noPagesArePlaceholders, in: notebook)
+    waitForNotebook(notebook, condition: noPagesArePlaceholders)
     XCTAssertEqual(notebook.pages["cloze.txt"]?.value.cardTemplates.count, 1)
   }
 
@@ -112,17 +113,17 @@ final class NotebookTests: XCTestCase {
 
   private static func notebookPagesAllHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
     return { (notebook) in
-      return notebook.pages.allSatisfy( { $1.tag == tag })
+      return notebook.pages.allSatisfy({ $1.tag == tag })
     }
   }
 
   private static func notebookPagesNoneHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
     return { (notebook) in
-      return notebook.pages.allSatisfy( { $1.tag != tag })
+      return notebook.pages.allSatisfy({ $1.tag != tag })
     }
   }
 
-  private func wait(for condition: @escaping (Notebook) -> Bool, in notebook: Notebook) {
+  private func waitForNotebook(_ notebook: Notebook, condition: @escaping (Notebook) -> Bool) {
     if condition(notebook) {
       print("Condition immediately passed: \(notebook.pages.mapValues { $0.tag.rawValue })")
       return
