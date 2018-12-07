@@ -217,6 +217,44 @@ extension ListAdapter: NotebookPageChangeListener {
   }
 }
 
+extension Optional where Wrapped == Tagged<DocumentProperties> {
+
+  /// Given an optional Tagged<DocumentProperties>, computes a new Tagged<DocumentProperties>
+  /// for given metadata.
+  ///
+  /// If the receiver has no value, then the result is a Tag.placeholder
+  /// with empty DocumentProperties.
+  ///
+  /// If the receiver has a value, then the result updates the DocumentProperties with the new
+  /// FileMetadata (to handle things that change like uploading status). It will be marked
+  /// with Tag.truth (meaning no need to re-parse) if the timestamps are close.
+  fileprivate func updatingFileMetadata(
+    _ fileMetadata: FileMetadata
+  ) -> Tagged<DocumentProperties> {
+    switch self {
+    case .none:
+      return Tagged(
+        tag: .placeholder,
+        value: DocumentProperties(fileMetadata: fileMetadata, nodes: [])
+      )
+    case .some(let wrapped):
+      return Tagged(
+        tag: wrapped.value.fileMetadata.closeInTime(to: fileMetadata) ? .truth : .placeholder,
+        value: wrapped.value.updatingFileMetadata(fileMetadata)
+      )
+    }
+  }
+}
+
+extension FileMetadata {
+
+  /// Determine if two FileMetadata records are "close enough" that we don't have to
+  /// re-load and re-parse the file contents.
+  fileprivate func closeInTime(to other: FileMetadata) -> Bool {
+    return abs(contentChangeDate.timeIntervalSince(other.contentChangeDate)) < 1
+  }
+}
+
 extension Notebook: FileMetadataProviderDelegate {
   public func fileMetadataProvider(
     _ provider: FileMetadataProvider,
@@ -225,54 +263,21 @@ extension Notebook: FileMetadataProviderDelegate {
     processMetadata(metadata)
   }
 
-  fileprivate func updateProperties(
+  private func updateProperties(
     for fileMetadata: FileMetadata,
     completion: @escaping (Bool) -> Void
   ) {
     let name = fileMetadata.fileName
 
-    // TODO: Because of serialization, I won't re-parse changes that happen within a second.
-    // There's probably a better way.
-    if let taggedProperties = pages[name],
-      abs(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince(fileMetadata.contentChangeDate)) < 1 {
-      // Just update the fileMetadata structure without re-extracting document properties.
-      DDLogInfo(
-        "File \(name): Not updating properties because timestamps close. " +
-        "Cache seconds: \(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince1970)" +
-        "  Metadata seconds: \(fileMetadata.contentChangeDate.timeIntervalSince1970)"
-      )
-      pages[name] = Tagged(
-        tag: .truth,
-        value: taggedProperties.value.updatingFileMetadata(fileMetadata)
-      )
+    let newProperties = pages[name].updatingFileMetadata(fileMetadata)
+    pages[name] = newProperties
+    if newProperties.tag == .truth {
+      DDLogInfo("NOTEBOOK: Keeping cached properties for \(name).")
       completion(false)
       return
     }
 
-    // Put an entry in the properties dictionary that contains the current
-    // contentChangeDate. We'll replace it with something with the actual extracted
-    // properties in the completion block below. This is needed to prevent multiple
-    // loads for the same content.
-    if let taggedProperties = pages[name] {
-      // Update change time to prevent multiple loads
-      // TODO: this is copypasta from above. Code smell; can probably simplify
-      DDLogInfo(
-        "File \(name): **Updating properties** because timestamps differ by > 1s. " +
-          "Cache seconds: \(taggedProperties.value.fileMetadata.contentChangeDate.timeIntervalSince1970)" +
-        "  Metadata seconds: \(fileMetadata.contentChangeDate.timeIntervalSince1970)"
-      )
-      pages[name] = Tagged(
-        tag: .placeholder, // TODO: Should be called "pending"?
-        value: taggedProperties.value.updatingFileMetadata(fileMetadata)
-      )
-    } else {
-      DDLogInfo("File \(name): Creating placeholder because no cache record")
-      pages[name] = Tagged(
-        tag: .placeholder,
-        value: DocumentProperties(fileMetadata: fileMetadata, nodes: [])
-      )
-    }
-
+    DDLogInfo("NOTEBOOK: Loading new properties for \(name)")
     DocumentProperties.loadProperties(
       from: fileMetadata,
       in: metadataProvider,
