@@ -47,7 +47,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       .containerStudyMetadata
       .subscribe { (taggedMetadataResult) in
         self.currentDocumentNameToIdentifierToMetadata = taggedMetadataResult.value?.value
-          ?? [String: [String: StudyMetadata]]()
+          ?? NotebookStudyMetadata()
       }
   }
 
@@ -65,7 +65,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
   private var studyMetadataSubscription: AnySubscription?
-  private var currentDocumentNameToIdentifierToMetadata = [String: [String: StudyMetadata]]() {
+  private var currentDocumentNameToIdentifierToMetadata = NotebookStudyMetadata() {
     didSet { configureUI() }
   }
 

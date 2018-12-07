@@ -38,7 +38,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       }
   }
 
-  public func studySession(metadata: [String: [String: StudyMetadata]]) -> StudySession {
+  public func studySession(metadata: NotebookStudyMetadata) -> StudySession {
     // TODO: Should be a way to associate ParsingRules with each document
     return propertiesFilteredByHashtag.map { (diffableProperties) -> StudySession in
       let documentMetadata = metadata[diffableProperties.fileMetadata.fileName, default: [:]]

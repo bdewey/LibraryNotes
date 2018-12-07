@@ -5,7 +5,8 @@ import FlashcardKit
 import Foundation
 import TextBundleKit
 
-public typealias DocumentToIdentifierToStudyMetadata = [String: [String: StudyMetadata]]
+/// Two-level mapping: document name -> card identifier -> study metadata
+public typealias NotebookStudyMetadata = [String: [String: StudyMetadata]]
 
 /// Maintains a two-level mapping: document name -> card identifier -> study metadata
 /// TODO: Get rid of DocumentStudyMetadata when everything is migrated to this.
@@ -27,18 +28,18 @@ private enum ContainerStudyMetadata {
 
   private static func read(
     from document: TextBundleDocument
-  ) throws -> DocumentToIdentifierToStudyMetadata {
+  ) throws -> NotebookStudyMetadata {
     do {
       let data = try document.data(for: ContainerStudyMetadata.key)
-      return (try? decoder.decode(DocumentToIdentifierToStudyMetadata.self, from: data))
-        ?? DocumentToIdentifierToStudyMetadata()
+      return (try? decoder.decode(NotebookStudyMetadata.self, from: data))
+        ?? NotebookStudyMetadata()
     } catch TextBundleDocument.Error.noSuchDataKey(key: _) {
-      return DocumentToIdentifierToStudyMetadata()
+      return NotebookStudyMetadata()
     }
   }
 
   private static func writeValue(
-    _ value: DocumentToIdentifierToStudyMetadata,
+    _ value: NotebookStudyMetadata,
     to document: TextBundleDocument
   ) throws {
     let data = try ContainerStudyMetadata.encoder.encode(value)
@@ -47,7 +48,7 @@ private enum ContainerStudyMetadata {
 
   fileprivate static func makeProperty(
     for document: TextBundleDocument
-  ) -> DocumentProperty<DocumentToIdentifierToStudyMetadata> {
+  ) -> DocumentProperty<NotebookStudyMetadata> {
     return DocumentProperty(
       document: document,
       readFunction: read,
@@ -57,7 +58,7 @@ private enum ContainerStudyMetadata {
 }
 
 extension TextBundleDocument {
-  var containerStudyMetadata: DocumentProperty<DocumentToIdentifierToStudyMetadata> {
+  var containerStudyMetadata: DocumentProperty<NotebookStudyMetadata> {
     return listener(
       for: ContainerStudyMetadata.key,
       constructor: ContainerStudyMetadata.makeProperty
@@ -65,10 +66,10 @@ extension TextBundleDocument {
   }
 }
 
-extension DocumentProperty where Value == DocumentToIdentifierToStudyMetadata {
+extension DocumentProperty where Value == NotebookStudyMetadata {
   func update(with studySession: StudySession, on date: Date) {
     let day = DayComponents(date)
-    changeValue { (dictionary) -> DocumentToIdentifierToStudyMetadata in
+    changeValue { (dictionary) -> NotebookStudyMetadata in
       var dictionary = dictionary
       for (documentName, documentResults) in studySession.results {
         for (identifier, statistics) in documentResults {
