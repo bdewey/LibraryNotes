@@ -192,6 +192,7 @@ public final class Notebook {
     let specialNames: Set<String> = [StudyHistory.name, Notebook.cachedPropertiesName]
     let models = metadata
       .filter { !specialNames.contains($0.fileName) }
+    deletePages(except: models)
     let allUpdated = DispatchGroup()
     var loadedProperties = 0
     for fileMetadata in models {
@@ -204,6 +205,53 @@ public final class Notebook {
     }
     allUpdated.notify(queue: DispatchQueue.main) {
       if loadedProperties > 0 { self.saveProperties() }
+    }
+  }
+
+  /// Removes items "pages" except those referenced by `metadata`
+  /// - note: This does *not* save cached properties. That is the responsibility of the caller.
+  /// TODO: I should redesign the page manipulation APIs to be more foolproof.
+  ///       A method that takes a block, executes it, then notifies listeners & saves properties
+  ///       afterwards. That will batch saves as well as listener notifications.
+  ///       This implementation will send one notification per key.
+  private func deletePages(except metadata: [FileMetadata]) {
+    let existingKeys = Set<String>(pages.keys)
+    let metadataProviderKeys = Set<String>(metadata.map({ $0.fileName }))
+    let keysToDelete = existingKeys.subtracting(metadataProviderKeys)
+    for key in keysToDelete {
+      pages[key] = nil
+    }
+  }
+
+  private func updateProperties(
+    for fileMetadata: FileMetadata,
+    completion: @escaping (Bool) -> Void
+  ) {
+    let name = fileMetadata.fileName
+
+    let newProperties = pages[name].updatingFileMetadata(fileMetadata)
+    pages[name] = newProperties
+    if newProperties.tag == .truth {
+      DDLogInfo("NOTEBOOK: Keeping cached properties for \(name).")
+      completion(false)
+      return
+    }
+
+    DDLogInfo("NOTEBOOK: Loading new properties for \(name)")
+    DocumentProperties.loadProperties(
+      from: fileMetadata,
+      in: metadataProvider,
+      parsingRules: parsingRules
+    ) { (result) in
+      switch result {
+      case .success(let properties):
+        self.pages[name] = Tagged(tag: .truth, value: properties)
+        DDLogInfo("Successfully loaded: " + properties.title)
+      case .failure(let error):
+        self.pages[name] = nil
+        DDLogError("Error loading properties: \(error)")
+      }
+      completion(true)
     }
   }
 
@@ -266,37 +314,5 @@ extension Notebook: FileMetadataProviderDelegate {
     didUpdate metadata: [FileMetadata]
   ) {
     processMetadata(metadata)
-  }
-
-  private func updateProperties(
-    for fileMetadata: FileMetadata,
-    completion: @escaping (Bool) -> Void
-  ) {
-    let name = fileMetadata.fileName
-
-    let newProperties = pages[name].updatingFileMetadata(fileMetadata)
-    pages[name] = newProperties
-    if newProperties.tag == .truth {
-      DDLogInfo("NOTEBOOK: Keeping cached properties for \(name).")
-      completion(false)
-      return
-    }
-
-    DDLogInfo("NOTEBOOK: Loading new properties for \(name)")
-    DocumentProperties.loadProperties(
-      from: fileMetadata,
-      in: metadataProvider,
-      parsingRules: parsingRules
-    ) { (result) in
-      switch result {
-      case .success(let properties):
-        self.pages[name] = Tagged(tag: .truth, value: properties)
-        DDLogInfo("Successfully loaded: " + properties.title)
-      case .failure(let error):
-        self.pages[name] = nil
-        DDLogError("Error loading properties: \(error)")
-      }
-      completion(true)
-    }
   }
 }

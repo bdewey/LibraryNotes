@@ -120,6 +120,20 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(deserializedPages.count, 1)
   }
 
+  func testDeleteUnmonitoredNotebook() {
+    // Create a properties.json that has info about page1.txt and page2.txt
+    metadataProvider.addPropertiesCache()
+    // Now get rid of page1.txt
+    try! metadataProvider.delete(FileMetadata(fileName: "page1.txt")) // swiftlint:disable:this force_try
+    // Load the notebook and wait for it to reconcile
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .monitorMetadataProvider()
+    waitForNotebook(notebook, condition: allPagesAreTruth)
+    // there should be only one page.
+    XCTAssertEqual(notebook.pages.count, 1)
+  }
+
   // MARK: - Helpers
 
   private let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
