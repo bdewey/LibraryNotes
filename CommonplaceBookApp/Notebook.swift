@@ -42,24 +42,44 @@ public final class Notebook {
     decoder.dateDecodingStrategy = .iso8601
     decoder.userInfo[.markdownParsingRules] = parsingRules
     self.decoder = decoder
-
-    self.propertiesDocument = metadataProvider.editableDocument(
-      for: FileMetadata(fileName: Notebook.cachedPropertiesName)
-    )
-    if self.propertiesDocument == nil {
-      DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
-    }
   }
 
   @discardableResult
   public func loadCachedProperties() -> Notebook {
-    monitorPropertiesDocument()
+    if let propertiesDocument = metadataProvider.editableDocument(
+      for: FileMetadata(fileName: Notebook.cachedPropertiesName)
+    ) {
+      openMetadocuments[.notebookProperties] = propertiesDocument
+      monitorPropertiesDocument(propertiesDocument)
+    } else {
+      DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
+    }
     return self
+  }
+
+  /// Set up the code to monitor for changes to cached properties on disk, plus propagate
+  /// cached changes to disk.
+  private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument) {
+    propertiesDocument.open { (success) in
+      // TODO: Handle the failure case here.
+      precondition(success)
+      self.endpoints += propertiesDocument.textSignal.subscribeValues({ (taggedString) in
+        // If we've already loaded information into memory, don't clobber it.
+        if self.pages.isEmpty {
+          let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
+          DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
+          self.pages = pages
+        }
+        self.conditionForKey(.notebookProperties).condition = true
+      })
+    }
   }
 
   @discardableResult
   public func monitorMetadataProvider() -> Notebook {
-    DispatchQueue.main.async(when: loadedCachedProperties) {
+    DispatchQueue.main.async(
+      when: conditionForKey(.notebookProperties)
+    ) {
       self.metadataProvider.delegate = self
       self.processMetadata(self.metadataProvider.fileMetadata)
     }
@@ -67,12 +87,20 @@ public final class Notebook {
   }
 
   deinit {
-    propertiesDocument?.close()
+    openMetadocuments.forEach { $0.1.close() }
   }
 
-  private let loadedCachedProperties = Condition()
-
-  private var propertiesEndpoint: Cancellable?
+  private var metadocumentLoadedConditions = [MetadocumentKey: Condition]()
+  private func conditionForKey(_ key: MetadocumentKey) -> Condition {
+    if let condition = metadocumentLoadedConditions[key] {
+      return condition
+    } else {
+      let condition = Condition()
+      metadocumentLoadedConditions[key] = condition
+      return condition
+    }
+  }
+  private var endpoints: [Cancellable] = []
 
   /// Decoder for this notebook. It depend on the parsing rules, which is why it is an instance
   /// property and not a class property.
@@ -93,27 +121,18 @@ public final class Notebook {
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
 
-  /// Where we cache our properties.
-  private let propertiesDocument: EditableDocument?
-
-  /// Set up the code to monitor for changes to cached properties on disk, plus propagate
-  /// cached changes to disk.
-  private func monitorPropertiesDocument() {
-    guard let propertiesDocument = self.propertiesDocument else { return }
-    propertiesDocument.open { (success) in
-      // TODO: Handle the failure case here.
-      precondition(success)
-      self.propertiesEndpoint = propertiesDocument.textSignal.subscribeValues({ (taggedString) in
-        // If we've already loaded information into memory, don't clobber it.
-        if self.pages.isEmpty {
-          let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
-          DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
-          self.pages = pages
-        }
-        self.loadedCachedProperties.condition = true
-      })
+  public struct MetadocumentKey: RawRepresentable, Hashable {
+    public init(rawValue: String) {
+      self.rawValue = rawValue
     }
+
+    public let rawValue: String
+
+    public static let notebookProperties = MetadocumentKey(rawValue: "properties.json")
   }
+
+  /// Where we cache our properties.
+  private var openMetadocuments = [MetadocumentKey: EditableDocument]()
 
   public func pagesDictionary(
     from seralizedString: String,
@@ -140,7 +159,7 @@ public final class Notebook {
   }
 
   private func saveProperties() {
-    guard let propertiesDocument = propertiesDocument else { return }
+    guard let propertiesDocument = openMetadocuments[.notebookProperties] else { return }
     // TODO: Move serialization off main thread?
     do {
       let properties = pages.values.map { $0.value }
