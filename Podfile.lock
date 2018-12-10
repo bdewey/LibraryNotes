@@ -577,8 +577,8 @@ DEPENDENCIES:
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
-  - FlashcardKit/Tests (from `https://github.com/bdewey/FlashcardKit`)
+  - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit/Tests (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -589,7 +589,7 @@ DEPENDENCIES:
   - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - AFNetworking
     - CocoaLumberjack
     - DZNEmptyDataSet
@@ -615,7 +615,7 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :git: https://github.com/bdewey/FlashcardKit
+    :path: "../FlashcardKit"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -643,9 +643,6 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
-  FlashcardKit:
-    :commit: 2f695480062a1ee7e681c5d3874e9f8f67b90bf3
-    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
     :git: https://github.com/material-components/material-components-ios
@@ -672,7 +669,7 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 6244f0ad36ebcc81b923164cbfad13721d1cc44f
+  FlashcardKit: 45b39972afb62d2712d649b967675965ddb1a657
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
@@ -687,6 +684,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: 88a16d10b16e8a74b5b7d58dd4dc7142734a216d
+PODFILE CHECKSUM: db341ccce8996d2efd9ef454481edf3150f4cfc1
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.3

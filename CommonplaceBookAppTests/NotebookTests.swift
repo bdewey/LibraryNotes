@@ -134,6 +134,58 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(notebook.pages.count, 1)
   }
 
+  func testStudySession() {
+    // Create two documents with identical contents. This will guarantee that we have collisions
+    // in identifiers.
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish1.txt",
+      contents: textWithCards
+    ))
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish2.txt",
+      contents: textWithCards
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .loadStudyMetadata()
+      .monitorMetadataProvider()
+    let studySession = notebook.studySession()
+    // 6 cards per document times 2 documents == 12 cards
+    XCTAssertEqual(studySession.count, 12)
+
+    // make sure filtering works
+    let singleDocumentSession = notebook.studySession { (properties) -> Bool in
+      return properties.fileMetadata.fileName == "spanish1.txt"
+    }
+    XCTAssertEqual(singleDocumentSession.count, 6)
+  }
+
+  func testStudyingUpdatesMetadata() {
+    // Create two documents with identical contents. This will guarantee that we have collisions
+    // in identifiers.
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish1.txt",
+      contents: textWithCards
+    ))
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish2.txt",
+      contents: textWithCards
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .loadStudyMetadata()
+      .monitorMetadataProvider()
+    var studySession = notebook.studySession()
+    while studySession.currentCard != nil {
+      studySession.recordAnswer(correct: true)
+    }
+    notebook.updateStudySessionResults(studySession)
+    // Now there should be nothing to study
+    XCTAssertEqual(notebook.studySession().count, 0)
+  }
+
   // MARK: - Helpers
 
   private let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
@@ -160,14 +212,33 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener { (notebook) in
+    let notebookListener = TestListener(pageChangeBlock: { (notebook) in
       print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
       }
-    }
+    })
     notebook.addListener(notebookListener)
     waitForExpectations(timeout: 3, handler: nil)
+    notebook.removeListener(notebookListener)
+  }
+
+  // TODO: Is there a way to combine the two "wait for" functions?
+  private func waitForStudyMetadata(in notebook: Notebook, condition: @escaping (Notebook) -> Bool) {
+    if condition(notebook) {
+      print("Condition immediately passed: \(notebook.pages.mapValues { $0.tag.rawValue })")
+      return
+    }
+    let conditionSatisfied = expectation(description: "generic condition")
+    let notebookListener = TestListener(studyMetadataChangedBlock: { (notebook) in
+      print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
+      if condition(notebook) {
+        conditionSatisfied.fulfill()
+      }
+    })
+    notebook.addListener(notebookListener)
+    waitForExpectations(timeout: 3, handler: nil)
+    notebook.removeListener(notebookListener)
   }
 
   private func startMonitoringForCacheSave() {
@@ -182,11 +253,43 @@ final class NotebookTests: XCTestCase {
 
 final class TestListener: NotebookPageChangeListener {
 
-  init(block: @escaping (Notebook) -> Void) { self.block = block }
+  typealias NotebookNotificationBlock = (Notebook) -> Void
 
-  let block: (Notebook) -> Void
+  init(
+    pageChangeBlock: NotebookNotificationBlock? = nil,
+    studyMetadataChangedBlock: NotebookNotificationBlock? = nil
+  ) {
+    self.pageChangeBlock = pageChangeBlock
+    self.studyMetadataChangedBlock = studyMetadataChangedBlock
+  }
+
+  let pageChangeBlock: NotebookNotificationBlock?
+  let studyMetadataChangedBlock: NotebookNotificationBlock?
 
   func notebookPagesDidChange(_ notebook: Notebook) {
-    block(notebook)
+    pageChangeBlock?(notebook)
+  }
+
+  func notebookStudyMetadataChanged(_ notebook: Notebook) {
+    studyMetadataChangedBlock?(notebook)
   }
 }
+
+private let textWithCards = """
+# Vocabulary
+
+| Spanish           | Engish |
+| ----------------- | ------ |
+| tenedor #spelling | fork   |
+| hombre            | man    |
+
+# Mastering the verb "to be"
+
+In Spanish, there are two verbs "to be": *ser* and *estar*.
+
+1. *Ser* is used to identify a person, an animal, a concept, a thing, or any noun.
+2. *Estar* is used to show location.
+3. *Ser*, with an adjective, describes the "norm" of a thing.
+- La nieve ?[to be](es) blanca.
+4. *Estar* with an adjective shows a "change" or "condition."
+"""

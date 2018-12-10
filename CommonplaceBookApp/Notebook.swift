@@ -3,6 +3,7 @@
 import CocoaLumberjack
 import CommonplaceBook
 import CwlSignal
+import FlashcardKit
 import Foundation
 import IGListKit
 import MiniMarkdown
@@ -18,6 +19,9 @@ public protocol NotebookPageChangeListener: AnyObject {
 
   /// Properties in the index changed.
   func notebookPagesDidChange(_ index: Notebook)
+
+  /// study metadata changed
+  func notebookStudyMetadataChanged(_ notebook: Notebook)
 }
 
 /// A "notebook" is a directory that contains individual "pages" (either plain text files
@@ -55,6 +59,62 @@ public final class Notebook {
       DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
     }
     return self
+  }
+
+  @discardableResult
+  public func loadStudyMetadata() -> Notebook {
+    return self
+  }
+
+  public private(set) var studyMetadata = NotebookStudyMetadata() {
+    didSet {
+      for adapter in listeners {
+        adapter.listener?.notebookStudyMetadataChanged(self)
+      }
+    }
+  }
+
+  /// Returns a study session given the current notebook pages and study metadata (which indicates
+  /// what cards have been studied, and therefore don't need to be studied today).
+  ///
+  /// - parameter filter: An optional function that determines if a page should be included in
+  ///                     the study session. If no filter is given, the all pages will be used
+  ///                     to construct the session.
+  /// - returns: A StudySession!
+  public func studySession(filter: ((DocumentProperties) -> Bool)? = nil) -> StudySession {
+    let filter = filter ?? { (_) in return true }
+    return pages.values
+      .map { $0.value }
+      .filter(filter)
+      .map { (diffableProperties) -> StudySession in
+        let documentMetadata = self.studyMetadata[diffableProperties.fileMetadata.fileName, default: [:]]
+        return documentMetadata.studySession(
+          from: diffableProperties.cardTemplates.cards,
+          limit: 500,
+          documentName: diffableProperties.fileMetadata.fileName,
+          parsingRules: LanguageDeck.parsingRules
+        )
+      }
+      .reduce(into: StudySession(), { $0 += $1 })
+  }
+
+  /// Update the notebook with the result of a study session.
+  ///
+  /// - parameter studySession: The completed study session.
+  /// - parameter date: The date the study session took place.
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
+    let day = DayComponents(date)
+    var dictionary = self.studyMetadata
+    for (documentName, documentResults) in studySession.results {
+      for (identifier, statistics) in documentResults {
+        if let existingMetadata = dictionary[documentName]?[identifier] {
+          dictionary[documentName]![identifier] = existingMetadata.updatedMetadata(with: statistics, on: day)
+        } else {
+          dictionary[documentName, default: [:]][identifier] = StudyMetadata(day: day, lastAnswers: statistics)
+        }
+      }
+    }
+    self.studyMetadata = dictionary
   }
 
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
@@ -286,6 +346,10 @@ public final class Notebook {
 extension ListAdapter: NotebookPageChangeListener {
   public func notebookPagesDidChange(_ index: Notebook) {
     performUpdates(animated: true)
+  }
+
+  public func notebookStudyMetadataChanged(_ notebook: Notebook) {
+    // NOTHING
   }
 }
 
