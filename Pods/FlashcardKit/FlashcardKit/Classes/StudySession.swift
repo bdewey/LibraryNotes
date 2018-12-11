@@ -70,13 +70,13 @@ public struct StudySession {
   }
 
   /// The current card to study. Nil if we're done.
-  var currentCard: CardFromDocument? {
+  public var currentCard: CardFromDocument? {
     guard currentIndex < cards.endIndex else { return nil }
     return cards[currentIndex]
   }
 
   /// Record a correct or incorrect answer for the current card, and advance `currentCard`
-  mutating func recordAnswer(correct: Bool) {
+  public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
     let identifier = currentCard.card.identifier
     var statistics = results[currentCard.documentName, default: [:]][identifier, default: AnswerStatistics.empty]
@@ -93,7 +93,7 @@ public struct StudySession {
   }
 
   /// Number of cards remaining in the study session.
-  var remainingCards: Int {
+  public var remainingCards: Int {
     return cards.endIndex - currentIndex
   }
 

@@ -184,6 +184,11 @@ final class NotebookTests: XCTestCase {
     notebook.updateStudySessionResults(studySession)
     // Now there should be nothing to study
     XCTAssertEqual(notebook.studySession().count, 0)
+    // We saved the new metadata.
+    let fileLength = metadataProvider
+      .fileContents[Notebook.MetadocumentKey.studyMetadata.rawValue]?.count
+      ?? 0
+    XCTAssert(fileLength > 0)
   }
 
   // MARK: - Helpers

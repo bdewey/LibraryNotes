@@ -61,61 +61,8 @@ public final class Notebook {
     return self
   }
 
-  @discardableResult
-  public func loadStudyMetadata() -> Notebook {
-    return self
-  }
-
-  public private(set) var studyMetadata = NotebookStudyMetadata() {
-    didSet {
-      for adapter in listeners {
-        adapter.listener?.notebookStudyMetadataChanged(self)
-      }
-    }
-  }
-
-  /// Returns a study session given the current notebook pages and study metadata (which indicates
-  /// what cards have been studied, and therefore don't need to be studied today).
-  ///
-  /// - parameter filter: An optional function that determines if a page should be included in
-  ///                     the study session. If no filter is given, the all pages will be used
-  ///                     to construct the session.
-  /// - returns: A StudySession!
-  public func studySession(filter: ((DocumentProperties) -> Bool)? = nil) -> StudySession {
-    let filter = filter ?? { (_) in return true }
-    return pages.values
-      .map { $0.value }
-      .filter(filter)
-      .map { (diffableProperties) -> StudySession in
-        let documentMetadata = self.studyMetadata[diffableProperties.fileMetadata.fileName, default: [:]]
-        return documentMetadata.studySession(
-          from: diffableProperties.cardTemplates.cards,
-          limit: 500,
-          documentName: diffableProperties.fileMetadata.fileName,
-          parsingRules: LanguageDeck.parsingRules
-        )
-      }
-      .reduce(into: StudySession(), { $0 += $1 })
-  }
-
-  /// Update the notebook with the result of a study session.
-  ///
-  /// - parameter studySession: The completed study session.
-  /// - parameter date: The date the study session took place.
-  public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
-    let day = DayComponents(date)
-    var dictionary = self.studyMetadata
-    for (documentName, documentResults) in studySession.results {
-      for (identifier, statistics) in documentResults {
-        if let existingMetadata = dictionary[documentName]?[identifier] {
-          dictionary[documentName]![identifier] = existingMetadata.updatedMetadata(with: statistics, on: day)
-        } else {
-          dictionary[documentName, default: [:]][identifier] = StudyMetadata(day: day, lastAnswers: statistics)
-        }
-      }
-    }
-    self.studyMetadata = dictionary
-  }
+  /// Bag of arbitrary data keyed off of MetadocumentKey
+  internal var internalNotebookData = [MetadocumentKey: Any]()
 
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
@@ -151,7 +98,8 @@ public final class Notebook {
   }
 
   private var metadocumentLoadedConditions = [MetadocumentKey: Condition]()
-  private func conditionForKey(_ key: MetadocumentKey) -> Condition {
+
+  internal func conditionForKey(_ key: MetadocumentKey) -> Condition {
     if let condition = metadocumentLoadedConditions[key] {
       return condition
     } else {
@@ -160,7 +108,8 @@ public final class Notebook {
       return condition
     }
   }
-  private var endpoints: [Cancellable] = []
+  
+  internal var endpoints: [Cancellable] = []
 
   /// Decoder for this notebook. It depend on the parsing rules, which is why it is an instance
   /// property and not a class property.
@@ -184,15 +133,18 @@ public final class Notebook {
   public struct MetadocumentKey: RawRepresentable, Hashable {
     public init(rawValue: String) {
       self.rawValue = rawValue
+      MetadocumentKey.allKnownKeys.insert(self)
     }
 
     public let rawValue: String
 
     public static let notebookProperties = MetadocumentKey(rawValue: "properties.json")
+
+    public static var allKnownKeys = Set<MetadocumentKey>()
   }
 
   /// Where we cache our properties.
-  private var openMetadocuments = [MetadocumentKey: EditableDocument]()
+  internal var openMetadocuments = [MetadocumentKey: EditableDocument]()
 
   public func pagesDictionary(
     from seralizedString: String,
