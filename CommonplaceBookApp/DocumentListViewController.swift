@@ -32,23 +32,16 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
     notebook: Notebook,
-    studyHistory: TextBundleDocument,
     stylesheet: Stylesheet
   ) {
     self.notebook = notebook
-    self.studyHistory = studyHistory
     self.stylesheet = stylesheet
     self.dataSource = DocumentDataSource(index: notebook, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
-    self.studyMetadataSubscription = studyHistory
-      .containerStudyMetadata
-      .subscribe { (taggedMetadataResult) in
-        self.currentDocumentNameToIdentifierToMetadata = taggedMetadataResult.value?.value
-          ?? NotebookStudyMetadata()
-      }
+    notebook.addListener(self)
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -61,13 +54,8 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private let notebook: Notebook
-  private let studyHistory: TextBundleDocument
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
-  private var studyMetadataSubscription: AnySubscription?
-  private var currentDocumentNameToIdentifierToMetadata = NotebookStudyMetadata() {
-    didSet { configureUI() }
-  }
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     return UIBarButtonItem(
@@ -138,7 +126,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.width.equalTo(56)
       make.height.equalTo(56)
     }
-    configureUI()
+    studySession = notebook.studySession()
   }
 
   @objc private func didTapNewDocument() {
@@ -164,8 +152,15 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
 
-  private func configureUI() {
-    studyButton.isEnabled = !dataSource.studySession(metadata: currentDocumentNameToIdentifierToMetadata).isEmpty
+  /// Stuff we can study based on the current selected documents.
+  private var studySession: StudySession? {
+    didSet {
+      if let studySession = studySession {
+        studyButton.isEnabled = !studySession.isEmpty
+      } else {
+        studyButton.isEnabled = false
+      }
+    }
   }
 
   @objc private func didTapHashtagMenu() {
@@ -185,8 +180,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   @objc private func startStudySession() {
+    guard let studySession = studySession else { return }
     let studyVC = StudyViewController(
-      studySession: dataSource.studySession(metadata: currentDocumentNameToIdentifierToMetadata),
+      studySession: studySession,
       documentCache: ReadOnlyDocumentCache(delegate: self),
       stylesheet: stylesheet,
       delegate: self
@@ -201,7 +197,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = nil
     documentListAdapter.performUpdates(animated: true)
     title = "Interactive Notebook"
-    configureUI()
+    studySession = notebook.studySession()
     dismiss(animated: true, completion: nil)
   }
 
@@ -210,7 +206,9 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = hashtag
     documentListAdapter.performUpdates(animated: true)
     title = hashtag
-    configureUI()
+    studySession = notebook.studySession(filter: { (documentProperties) -> Bool in
+      return documentProperties.hashtags.contains(hashtag)
+    })
     dismiss(animated: true, completion: nil)
   }
 
@@ -237,11 +235,22 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    studyHistory.containerStudyMetadata.update(with: session, on: Date())
+    notebook.updateStudySessionResults(session)
     dismiss(animated: true, completion: nil)
   }
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+extension DocumentListViewController: NotebookPageChangeListener {
+  func notebookPagesDidChange(_ index: Notebook) { }
+
+  func notebookStudyMetadataChanged(_ notebook: Notebook) {
+    let filter: (DocumentProperties) -> Bool = (dataSource.filteredHashtag == nil)
+      ? { (_) in return true }
+      : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+    self.studySession = notebook.studySession(filter: filter)
   }
 }

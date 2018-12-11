@@ -6,6 +6,9 @@ import CwlSignal
 import FlashcardKit
 import Foundation
 
+/// Two-level mapping: document name -> card identifier -> study metadata
+public typealias NotebookStudyMetadata = [String: [String: StudyMetadata]]
+
 extension Notebook.MetadocumentKey {
   public static let studyMetadata = Notebook.MetadocumentKey(rawValue: "study-metadata.json")
 }

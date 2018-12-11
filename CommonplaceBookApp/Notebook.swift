@@ -133,14 +133,14 @@ public final class Notebook {
   public struct MetadocumentKey: RawRepresentable, Hashable {
     public init(rawValue: String) {
       self.rawValue = rawValue
-      MetadocumentKey.allKnownKeys.insert(self)
+      MetadocumentKey.allKnownKeys.insert(rawValue)
     }
 
     public let rawValue: String
 
     public static let notebookProperties = MetadocumentKey(rawValue: "properties.json")
 
-    public static var allKnownKeys = Set<MetadocumentKey>()
+    public static var allKnownKeys = Set<String>()
   }
 
   /// Where we cache our properties.
@@ -220,9 +220,8 @@ public final class Notebook {
   }
 
   private func processMetadata(_ metadata: [FileMetadata]) {
-    let specialNames: Set<String> = [StudyHistory.name, Notebook.cachedPropertiesName]
     let models = metadata
-      .filter { !specialNames.contains($0.fileName) }
+      .filter { !MetadocumentKey.allKnownKeys.contains($0.fileName) }
     deletePages(except: models)
     let allUpdated = DispatchGroup()
     var loadedProperties = 0

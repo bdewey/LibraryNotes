@@ -41,29 +41,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     let window = UIWindow(frame: UIScreen.main.bounds)
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
-    CommonplaceBook.openDocument(
-      at: StudyHistory.name,
-      using: TextBundleDocumentFactory(useCloud: true)
-    ) { (studyHistoryResult) in
-      self.makeMetadataProvider(completion: { (metadataProviderResult) in
-        switch (studyHistoryResult, metadataProviderResult) {
-        case (.success(let studyHistory), .success(let metadataProvider)):
-          let parsingRules = LanguageDeck.parsingRules
-          self.window?.rootViewController = self.makeViewController(
-            notebook: Notebook(
-              parsingRules: parsingRules,
-              metadataProvider: metadataProvider
-            ).loadCachedProperties().monitorMetadataProvider(),
-            studyHistory: studyHistory
-          )
-        case (.failure(let error), _), (_, .failure(let error)):
-          let messageText = "Error opening \(StudyHistory.name): \(error.localizedDescription)"
-          let message = MDCSnackbarMessage(text: messageText)
-          MDCSnackbarManager.show(message)
-        }
 
-      })
-    }
+    self.makeMetadataProvider(completion: { (metadataProviderResult) in
+      switch metadataProviderResult {
+      case .success(let metadataProvider):
+        let parsingRules = LanguageDeck.parsingRules
+        self.window?.rootViewController = self.makeViewController(
+          notebook: Notebook(
+            parsingRules: parsingRules,
+            metadataProvider: metadataProvider
+            ).loadCachedProperties().loadStudyMetadata().monitorMetadataProvider()
+        )
+      case .failure(let error):
+        let messageText = "Error opening Notebook: \(error.localizedDescription)"
+        let message = MDCSnackbarMessage(text: messageText)
+        MDCSnackbarManager.show(message)
+      }
+
+    })
     self.window = window
     return true
   }
@@ -86,15 +81,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeViewController(
-    notebook: Notebook,
-    studyHistory: TextBundleDocument
+    notebook: Notebook
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
         notebook: notebook,
-        studyHistory: studyHistory,
         stylesheet: commonplaceBookStylesheet
       ),
       animated: false
