@@ -219,12 +219,13 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener(pageChangeBlock: { (notebook) in
+    let notebookListener = TestListener() { (notebook, change) in
+      guard change is NotebookPagesDidChange else { return }
       print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
       }
-    })
+    }
     notebook.addListener(notebookListener)
     waitForExpectations(timeout: 3, handler: nil)
     notebook.removeListener(notebookListener)
@@ -237,12 +238,13 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener(studyMetadataChangedBlock: { (notebook) in
+    let notebookListener = TestListener() { (notebook, change) in
+      guard change is NotebookStudyMetadataChanged else { return }
       print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
       }
-    })
+    }
     notebook.addListener(notebookListener)
     waitForExpectations(timeout: 3, handler: nil)
     notebook.removeListener(notebookListener)
@@ -250,9 +252,10 @@ final class NotebookTests: XCTestCase {
 
   private func verifyStudyMetadataChanged(for notebook: Notebook, block: () -> Void) {
     var listenerBlockExecuted = false
-    let notebookListener = TestListener(studyMetadataChangedBlock: { (_) in
+    let notebookListener = TestListener() { (_, change) in
+      guard change is NotebookStudyMetadataChanged else { return }
       listenerBlockExecuted = true
-    })
+    }
     notebook.addListener(notebookListener)
     block()
     XCTAssert(listenerBlockExecuted, "Metadata listener should run")
@@ -269,27 +272,20 @@ final class NotebookTests: XCTestCase {
   }
 }
 
-final class TestListener: NotebookPageChangeListener {
+final class TestListener: NotebookChangeListener {
 
-  typealias NotebookNotificationBlock = (Notebook) -> Void
+  typealias NotebookNotificationBlock = (Notebook, NotebookChange) -> Void
 
   init(
-    pageChangeBlock: NotebookNotificationBlock? = nil,
-    studyMetadataChangedBlock: NotebookNotificationBlock? = nil
+    block: @escaping NotebookNotificationBlock
   ) {
-    self.pageChangeBlock = pageChangeBlock
-    self.studyMetadataChangedBlock = studyMetadataChangedBlock
+    self.block = block
   }
 
-  let pageChangeBlock: NotebookNotificationBlock?
-  let studyMetadataChangedBlock: NotebookNotificationBlock?
+  let block: NotebookNotificationBlock
 
-  func notebookPagesDidChange(_ notebook: Notebook) {
-    pageChangeBlock?(notebook)
-  }
-
-  func notebookStudyMetadataChanged(_ notebook: Notebook) {
-    studyMetadataChangedBlock?(notebook)
+  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
+    block(notebook, change)
   }
 }
 

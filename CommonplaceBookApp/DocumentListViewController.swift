@@ -244,13 +244,16 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   }
 }
 
-extension DocumentListViewController: NotebookPageChangeListener {
-  func notebookPagesDidChange(_ index: Notebook) { }
-
-  func notebookStudyMetadataChanged(_ notebook: Notebook) {
-    let filter: (DocumentProperties) -> Bool = (dataSource.filteredHashtag == nil)
-      ? { (_) in return true }
-      : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
-    self.studySession = notebook.studySession(filter: filter)
+extension DocumentListViewController: NotebookChangeListener {
+  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
+    switch change {
+    case is NotebookPagesDidChange:
+      let filter: (DocumentProperties) -> Bool = (dataSource.filteredHashtag == nil)
+        ? { (_) in return true }
+        : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+      self.studySession = notebook.studySession(filter: filter)
+    default:
+      break
+    }
   }
 }

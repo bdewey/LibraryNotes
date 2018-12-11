@@ -15,13 +15,18 @@ extension Tag {
   public static let truth = Tag(rawValue: "truth")
 }
 
-public protocol NotebookPageChangeListener: AnyObject {
+/// Empty protocol for structures that
+public protocol NotebookChange { }
 
-  /// Properties in the index changed.
-  func notebookPagesDidChange(_ index: Notebook)
+public struct NotebookPagesDidChange: NotebookChange {
+  let pages: [String: Tagged<DocumentProperties>]
+}
 
-  /// study metadata changed
-  func notebookStudyMetadataChanged(_ notebook: Notebook)
+public protocol NotebookChangeListener: AnyObject {
+  /// Sent when a significant change happened to the Notebook.
+  /// - parameter notebook: The notebook that changed.
+  /// - parameter change: A description of the change that happened.
+  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange)
 }
 
 /// A "notebook" is a directory that contains individual "pages" (either plain text files
@@ -187,35 +192,35 @@ public final class Notebook {
   /// The pages of the notebook.
   public internal(set) var pages: [String: Tagged<DocumentProperties>] = [:] {
     didSet {
-      notifyListeners()
+      notifyListeners(of: NotebookPagesDidChange(pages: pages))
     }
   }
 
   internal struct WeakListener {
-    weak var listener: NotebookPageChangeListener?
-    init(_ listener: NotebookPageChangeListener) { self.listener = listener }
+    weak var listener: NotebookChangeListener?
+    init(_ listener: NotebookChangeListener) { self.listener = listener }
   }
   internal var listeners: [WeakListener] = []
 
   /// Registers an NotebookPageChangeListener.
   ///
   /// - parameter listener: The listener to register. It will get notifications of changes.
-  public func addListener(_ listener: NotebookPageChangeListener) {
+  public func addListener(_ listener: NotebookChangeListener) {
     listeners.append(WeakListener(listener))
   }
 
   /// Removes the NotebookPageChangeListener. It will no longer get notifications of changes.
   ///
   /// - parameter listener: The listener to unregister.
-  public func removeListener(_ listener: NotebookPageChangeListener) {
+  public func removeListener(_ listener: NotebookChangeListener) {
     guard let index = listeners.firstIndex(where: { $0.listener === listener }) else { return }
     listeners.remove(at: index)
   }
 
   /// Tell all registered list adapters to perform updates.
-  private func notifyListeners() {
+  private func notifyListeners(of change: NotebookChange) {
     for adapter in listeners {
-      adapter.listener?.notebookPagesDidChange(self)
+      adapter.listener?.notebook(self, didChangeWith: change)
     }
   }
 
@@ -294,13 +299,9 @@ public final class Notebook {
 }
 
 /// Any IGListKit ListAdapter can be a NotebookPageChangeListener.
-extension ListAdapter: NotebookPageChangeListener {
-  public func notebookPagesDidChange(_ index: Notebook) {
+extension ListAdapter: NotebookChangeListener {
+  public func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
     performUpdates(animated: true)
-  }
-
-  public func notebookStudyMetadataChanged(_ notebook: Notebook) {
-    // NOTHING
   }
 }
 

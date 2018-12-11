@@ -13,6 +13,10 @@ extension Notebook.MetadocumentKey {
   public static let studyMetadata = Notebook.MetadocumentKey(rawValue: "study-metadata.json")
 }
 
+public struct NotebookStudyMetadataChanged: NotebookChange {
+  let studyMetadata: NotebookStudyMetadata
+}
+
 extension Notebook {
 
   public internal(set) var studyMetadata: NotebookStudyMetadata {
@@ -28,8 +32,9 @@ extension Notebook {
     set {
       internalNotebookData[.studyMetadata] = newValue
       // TODO: This should be in a method, and the protocol needs to be generic/extensible.
+      let change = NotebookStudyMetadataChanged(studyMetadata: newValue)
       for adapter in self.listeners {
-        adapter.listener?.notebookStudyMetadataChanged(self)
+        adapter.listener?.notebook(self, didChangeWith: change)
       }
     }
   }
