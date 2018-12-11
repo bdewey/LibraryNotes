@@ -7,10 +7,10 @@ import TextBundleKit
 /// A struct that combines a TextBundle with the parsing rules for interpreting the contents
 /// of the document.
 public struct ParseableDocument {
-  public let document: TextBundleDocument
+  public let document: UIDocument
   public let parsingRules: ParsingRules
 
-  public init(document: TextBundleDocument, parsingRules: ParsingRules) {
+  public init(document: UIDocument, parsingRules: ParsingRules) {
     self.document = document
     self.parsingRules = parsingRules
   }

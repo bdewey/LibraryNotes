@@ -29,10 +29,11 @@ struct VocabularyAssociationSpellingCard: Card {
   }
 
   func image(parseableDocument: ParseableDocument) -> UIImage? {
+    guard let document = parseableDocument.document as? TextBundleDocument else { return nil }
     let blocks = parseableDocument.parsingRules.parse(vocabularyAssociation.english)
     return blocks.map { $0.findNodes(where: { $0.type == .image }) }
       .joined()
-      .compactMap { parseableDocument.document.image(for: $0) }
+      .compactMap { document.image(for: $0) }
       .first
   }
 }

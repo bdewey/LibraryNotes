@@ -138,7 +138,7 @@ public final class StudyViewController: UIViewController {
   ) {
     guard let cardFromDocument = cardFromDocument else { completion(nil); return }
     documentCache.document(for: cardFromDocument.documentName) { (document) in
-      guard let document = document as? TextBundleDocument else { completion(nil); return }
+      guard let document = document else { completion(nil); return }
       let cardView = cardFromDocument.card.cardView(
         parseableDocument: ParseableDocument(
           document: document,

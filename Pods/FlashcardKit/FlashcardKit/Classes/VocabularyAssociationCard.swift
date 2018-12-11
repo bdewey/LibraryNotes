@@ -88,8 +88,10 @@ extension MarkdownAttributedStringRenderer {
     return renderer
   }
 
+  /// Retuerns a rendereer that knows how to render images IF `document` is a TextBundleDocument.
+  /// Otherwise, this will be a textRenderer.
   static func textAndImageRenderer(
-    document: TextBundleDocument,
+    document: UIDocument,
     stylesheet: Stylesheet,
     textStyle: Stylesheet.Style,
     captionStyle: Stylesheet.Style
@@ -98,6 +100,7 @@ extension MarkdownAttributedStringRenderer {
       stylesheet: stylesheet,
       style: textStyle
     )
+    guard let document = document as? TextBundleDocument else { return renderer }
     renderer.renderFunctions[.image] = { (node) in
       let results = NSMutableAttributedString()
       let imageNode = node as! MiniMarkdown.Image
@@ -122,7 +125,7 @@ extension MarkdownAttributedStringRenderer {
   }
 
   static func promptRenderer(
-    document: TextBundleDocument,
+    document: UIDocument,
     stylesheet: Stylesheet
   ) -> MarkdownAttributedStringRenderer {
     return MarkdownAttributedStringRenderer.textAndImageRenderer(
@@ -134,7 +137,7 @@ extension MarkdownAttributedStringRenderer {
   }
 
   static func answerRenderer(
-    document: TextBundleDocument,
+    document: UIDocument,
     stylesheet: Stylesheet
   ) -> MarkdownAttributedStringRenderer {
     return MarkdownAttributedStringRenderer.textAndImageRenderer(
