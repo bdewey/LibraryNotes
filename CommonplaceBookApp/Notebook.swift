@@ -15,18 +15,11 @@ extension Tag {
   public static let truth = Tag(rawValue: "truth")
 }
 
-/// Empty protocol for structures that
-public protocol NotebookChange { }
-
-public struct NotebookPagesDidChange: NotebookChange {
-  let pages: [String: Tagged<DocumentProperties>]
-}
-
 public protocol NotebookChangeListener: AnyObject {
   /// Sent when a significant change happened to the Notebook.
   /// - parameter notebook: The notebook that changed.
   /// - parameter change: A description of the change that happened.
-  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange)
+  func notebook(_ notebook: Notebook, didChange key: Notebook.Key)
 }
 
 /// A "notebook" is a directory that contains individual "pages" (either plain text files
@@ -35,6 +28,20 @@ public protocol NotebookChangeListener: AnyObject {
 public final class Notebook {
 
   public static let cachedPropertiesName = "properties.json"
+
+  /// Extensible enum that talks about the kind of data in the Notebook.
+  public struct Key: RawRepresentable, Hashable {
+    public init(rawValue: String) {
+      self.rawValue = rawValue
+      Key.allKnownKeys.insert(rawValue)
+    }
+
+    public let rawValue: String
+
+    public static let notebookProperties = Key(rawValue: "properties.json")
+
+    public static var allKnownKeys = Set<String>()
+  }
 
   /// Designated initializer.
   ///
@@ -67,7 +74,7 @@ public final class Notebook {
   }
 
   /// Bag of arbitrary data keyed off of MetadocumentKey
-  internal var internalNotebookData = [MetadocumentKey: Any]()
+  internal var internalNotebookData = [Key: Any]()
 
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
@@ -102,9 +109,9 @@ public final class Notebook {
     openMetadocuments.forEach { $0.1.close() }
   }
 
-  private var metadocumentLoadedConditions = [MetadocumentKey: Condition]()
+  private var metadocumentLoadedConditions = [Key: Condition]()
 
-  internal func conditionForKey(_ key: MetadocumentKey) -> Condition {
+  internal func conditionForKey(_ key: Key) -> Condition {
     if let condition = metadocumentLoadedConditions[key] {
       return condition
     } else {
@@ -135,21 +142,8 @@ public final class Notebook {
   /// Provides access to the container URL
   public var containerURL: URL { return metadataProvider.container }
 
-  public struct MetadocumentKey: RawRepresentable, Hashable {
-    public init(rawValue: String) {
-      self.rawValue = rawValue
-      MetadocumentKey.allKnownKeys.insert(rawValue)
-    }
-
-    public let rawValue: String
-
-    public static let notebookProperties = MetadocumentKey(rawValue: "properties.json")
-
-    public static var allKnownKeys = Set<String>()
-  }
-
   /// Where we cache our properties.
-  internal var openMetadocuments = [MetadocumentKey: EditableDocument]()
+  internal var openMetadocuments = [Key: EditableDocument]()
 
   public func pagesDictionary(
     from seralizedString: String,
@@ -192,7 +186,7 @@ public final class Notebook {
   /// The pages of the notebook.
   public internal(set) var pages: [String: Tagged<DocumentProperties>] = [:] {
     didSet {
-      notifyListeners(of: NotebookPagesDidChange(pages: pages))
+      notifyListeners(changed: .notebookProperties)
     }
   }
 
@@ -218,15 +212,15 @@ public final class Notebook {
   }
 
   /// Tell all registered list adapters to perform updates.
-  private func notifyListeners(of change: NotebookChange) {
+  private func notifyListeners(changed key: Key) {
     for adapter in listeners {
-      adapter.listener?.notebook(self, didChangeWith: change)
+      adapter.listener?.notebook(self, didChange: key)
     }
   }
 
   private func processMetadata(_ metadata: [FileMetadata]) {
     let models = metadata
-      .filter { !MetadocumentKey.allKnownKeys.contains($0.fileName) }
+      .filter { !Key.allKnownKeys.contains($0.fileName) }
     deletePages(except: models)
     let allUpdated = DispatchGroup()
     var loadedProperties = 0
@@ -300,8 +294,8 @@ public final class Notebook {
 
 /// Any IGListKit ListAdapter can be a NotebookPageChangeListener.
 extension ListAdapter: NotebookChangeListener {
-  public func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
-    performUpdates(animated: true)
+  public func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
+    if key == .notebookProperties { performUpdates(animated: true) }
   }
 }
 

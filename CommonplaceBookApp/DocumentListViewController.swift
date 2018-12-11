@@ -245,9 +245,9 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 }
 
 extension DocumentListViewController: NotebookChangeListener {
-  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
-    switch change {
-    case is NotebookPagesDidChange:
+  func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
+    switch key {
+    case .notebookProperties:
       let filter: (DocumentProperties) -> Bool = (dataSource.filteredHashtag == nil)
         ? { (_) in return true }
         : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }

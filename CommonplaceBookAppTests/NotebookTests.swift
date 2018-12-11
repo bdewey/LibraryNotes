@@ -188,7 +188,7 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(notebook.studySession().count, 0)
     // We saved the new metadata.
     let fileLength = metadataProvider
-      .fileContents[Notebook.MetadocumentKey.studyMetadata.rawValue]?.count
+      .fileContents[Notebook.Key.studyMetadata.rawValue]?.count
       ?? 0
     XCTAssert(fileLength > 0)
   }
@@ -219,8 +219,8 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener() { (notebook, change) in
-      guard change is NotebookPagesDidChange else { return }
+    let notebookListener = TestListener() { (notebook, key) in
+      guard key == .notebookProperties else { return }
       print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
@@ -238,8 +238,8 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener() { (notebook, change) in
-      guard change is NotebookStudyMetadataChanged else { return }
+    let notebookListener = TestListener() { (notebook, key) in
+      guard key == .studyMetadata else { return }
       print("Checking condition: \(notebook.pages.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
         conditionSatisfied.fulfill()
@@ -252,8 +252,8 @@ final class NotebookTests: XCTestCase {
 
   private func verifyStudyMetadataChanged(for notebook: Notebook, block: () -> Void) {
     var listenerBlockExecuted = false
-    let notebookListener = TestListener() { (_, change) in
-      guard change is NotebookStudyMetadataChanged else { return }
+    let notebookListener = TestListener() { (_, key) in
+      guard key == .studyMetadata else { return }
       listenerBlockExecuted = true
     }
     notebook.addListener(notebookListener)
@@ -274,7 +274,7 @@ final class NotebookTests: XCTestCase {
 
 final class TestListener: NotebookChangeListener {
 
-  typealias NotebookNotificationBlock = (Notebook, NotebookChange) -> Void
+  typealias NotebookNotificationBlock = (Notebook, Notebook.Key) -> Void
 
   init(
     block: @escaping NotebookNotificationBlock
@@ -284,8 +284,8 @@ final class TestListener: NotebookChangeListener {
 
   let block: NotebookNotificationBlock
 
-  func notebook(_ notebook: Notebook, didChangeWith change: NotebookChange) {
-    block(notebook, change)
+  func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
+    block(notebook, key)
   }
 }
 

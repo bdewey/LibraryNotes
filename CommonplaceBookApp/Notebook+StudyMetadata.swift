@@ -9,12 +9,8 @@ import Foundation
 /// Two-level mapping: document name -> card identifier -> study metadata
 public typealias NotebookStudyMetadata = [String: [String: StudyMetadata]]
 
-extension Notebook.MetadocumentKey {
-  public static let studyMetadata = Notebook.MetadocumentKey(rawValue: "study-metadata.json")
-}
-
-public struct NotebookStudyMetadataChanged: NotebookChange {
-  let studyMetadata: NotebookStudyMetadata
+extension Notebook.Key {
+  public static let studyMetadata = Notebook.Key(rawValue: "study-metadata.json")
 }
 
 extension Notebook {
@@ -32,9 +28,8 @@ extension Notebook {
     set {
       internalNotebookData[.studyMetadata] = newValue
       // TODO: This should be in a method, and the protocol needs to be generic/extensible.
-      let change = NotebookStudyMetadataChanged(studyMetadata: newValue)
       for adapter in self.listeners {
-        adapter.listener?.notebook(self, didChangeWith: change)
+        adapter.listener?.notebook(self, didChange: .studyMetadata)
       }
     }
   }
@@ -43,7 +38,7 @@ extension Notebook {
   @discardableResult
   public func loadStudyMetadata() -> Notebook {
     guard let studyMetadataDocument = metadataProvider.editableDocument(
-      for: FileMetadata(fileName: MetadocumentKey.studyMetadata.rawValue)
+      for: FileMetadata(fileName: Key.studyMetadata.rawValue)
     ) else {
       DDLogError("Cannot load study metadata.")
       return self
