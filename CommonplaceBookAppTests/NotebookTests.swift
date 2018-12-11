@@ -181,7 +181,9 @@ final class NotebookTests: XCTestCase {
     while studySession.currentCard != nil {
       studySession.recordAnswer(correct: true)
     }
-    notebook.updateStudySessionResults(studySession)
+    verifyStudyMetadataChanged(for: notebook) {
+      notebook.updateStudySessionResults(studySession)
+    }
     // Now there should be nothing to study
     XCTAssertEqual(notebook.studySession().count, 0)
     // We saved the new metadata.
@@ -243,6 +245,17 @@ final class NotebookTests: XCTestCase {
     })
     notebook.addListener(notebookListener)
     waitForExpectations(timeout: 3, handler: nil)
+    notebook.removeListener(notebookListener)
+  }
+
+  private func verifyStudyMetadataChanged(for notebook: Notebook, block: () -> Void) {
+    var listenerBlockExecuted = false
+    let notebookListener = TestListener(studyMetadataChangedBlock: { (_) in
+      listenerBlockExecuted = true
+    })
+    notebook.addListener(notebookListener)
+    block()
+    XCTAssert(listenerBlockExecuted, "Metadata listener should run")
     notebook.removeListener(notebookListener)
   }
 

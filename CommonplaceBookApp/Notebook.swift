@@ -191,11 +191,11 @@ public final class Notebook {
     }
   }
 
-  private struct WeakListener {
+  internal struct WeakListener {
     weak var listener: NotebookPageChangeListener?
     init(_ listener: NotebookPageChangeListener) { self.listener = listener }
   }
-  private var listeners: [WeakListener] = []
+  internal var listeners: [WeakListener] = []
 
   /// Registers an NotebookPageChangeListener.
   ///

@@ -27,6 +27,10 @@ extension Notebook {
     }
     set {
       internalNotebookData[.studyMetadata] = newValue
+      // TODO: This should be in a method, and the protocol needs to be generic/extensible.
+      for adapter in self.listeners {
+        adapter.listener?.notebookStudyMetadataChanged(self)
+      }
     }
   }
 
@@ -40,7 +44,7 @@ extension Notebook {
       return self
     }
     openMetadocuments[.studyMetadata] = studyMetadataDocument
-    studyMetadataDocument.open { (success) in
+    studyMetadataDocument.openOrCreate { (success) in
       precondition(success)
       self.endpoints += studyMetadataDocument.textSignal.subscribeValues({ (taggedString) in
         guard taggedString.tag == .document else { return }
