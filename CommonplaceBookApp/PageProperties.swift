@@ -8,7 +8,8 @@ import MiniMarkdown
 import TextBundleKit
 import enum TextBundleKit.Result
 
-public struct DocumentProperties: Codable {
+/// Metadata about pages in a Notebook.
+public struct PageProperties: Codable {
   public var fileMetadata: FileMetadata
   public let hashtags: [String]
   public let title: String
@@ -21,7 +22,7 @@ public struct DocumentProperties: Codable {
     self.cardTemplates = nodes.cardTemplates
   }
 
-  public func updatingFileMetadata(_ fileMetadata: FileMetadata) -> DocumentProperties {
+  public func updatingFileMetadata(_ fileMetadata: FileMetadata) -> PageProperties {
     var copy = self
     copy.fileMetadata = fileMetadata
     return copy
@@ -31,7 +32,7 @@ public struct DocumentProperties: Codable {
     from metadataWrapper: FileMetadata,
     in metadataProvider: FileMetadataProvider,
     parsingRules: ParsingRules,
-    completion: @escaping (Result<DocumentProperties>) -> Void
+    completion: @escaping (Result<PageProperties>) -> Void
   ) {
     guard let document = metadataProvider.editableDocument(for: metadataWrapper) else {
       completion(.failure(Error.noEditableDocument))
@@ -42,9 +43,9 @@ public struct DocumentProperties: Codable {
         let textResult = document.currentTextResult
         document.close()
         DispatchQueue.global(qos: .default).async {
-          let result = textResult.flatMap({ (taggedText) -> DocumentProperties in
+          let result = textResult.flatMap({ (taggedText) -> PageProperties in
             let nodes = parsingRules.parse(taggedText.value)
-            return DocumentProperties(
+            return PageProperties(
               fileMetadata: metadataWrapper,
               nodes: nodes
             )
@@ -61,14 +62,14 @@ public struct DocumentProperties: Codable {
   }
 }
 
-extension DocumentProperties {
+extension PageProperties {
   enum Error: Swift.Error {
     case noEditableDocument
     case cannotOpenDocument
   }
 }
 
-extension DocumentProperties: CustomStringConvertible {
+extension PageProperties: CustomStringConvertible {
   public var description: String {
     return "\(title) \(fileMetadata)"
   }
@@ -89,14 +90,14 @@ extension Array where Element == Node {
 }
 
 public final class DocumentPropertiesListDiffable: ListDiffable {
-  public private(set) var value: DocumentProperties
+  public private(set) var value: PageProperties
 
-  public init(_ value: DocumentProperties) {
+  public init(_ value: PageProperties) {
     self.value = value
   }
 
   public init(_ value: FileMetadata) {
-    self.value = DocumentProperties(fileMetadata: value, nodes: [])
+    self.value = PageProperties(fileMetadata: value, nodes: [])
   }
 
   public func updateMetadata(_ metadata: FileMetadata) {

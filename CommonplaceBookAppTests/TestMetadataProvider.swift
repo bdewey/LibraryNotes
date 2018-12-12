@@ -52,13 +52,13 @@ final class TestMetadataProvider: FileMetadataProvider {
   var contentsChangeListener: ((String, String) -> Void)?
 
   /// Get DocumentProperties for all of the FileMetadata.
-  var documentProperties: [DocumentProperties] {
+  var documentProperties: [PageProperties] {
     return fileNameToMetadata
       .values
       .filter { $0.fileName != Notebook.cachedPropertiesName }
       .map {
         let text = fileContents[$0.fileName] ?? ""
-        return DocumentProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
+        return PageProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
       }
   }
 

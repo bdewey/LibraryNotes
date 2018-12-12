@@ -73,7 +73,7 @@ extension Notebook {
   ///                     the study session. If no filter is given, the all pages will be used
   ///                     to construct the session.
   /// - returns: A StudySession!
-  public func studySession(filter: ((DocumentProperties) -> Bool)? = nil) -> StudySession {
+  public func studySession(filter: ((PageProperties) -> Bool)? = nil) -> StudySession {
     let filter = filter ?? { (_) in return true }
     return pages.values
       .map { $0.value }

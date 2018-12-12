@@ -148,15 +148,15 @@ public final class Notebook {
   public func pagesDictionary(
     from seralizedString: String,
     tag: Tag
-  ) -> [String: Tagged<DocumentProperties>] {
+  ) -> [String: Tagged<PageProperties>] {
     guard let data = seralizedString.data(using: .utf8) else { return [:] }
     do {
       let properties = try decoder.decode(
-        [DocumentProperties].self,
+        [PageProperties].self,
         from: data
       )
       return properties.reduce(
-        into: [String: Tagged<DocumentProperties>]()
+        into: [String: Tagged<PageProperties>]()
       ) { (dictionary, properties) in
         dictionary[properties.fileMetadata.fileName] = Tagged(
           tag: tag,
@@ -184,7 +184,7 @@ public final class Notebook {
   }
 
   /// The pages of the notebook.
-  public internal(set) var pages: [String: Tagged<DocumentProperties>] = [:] {
+  public internal(set) var pages: [String: Tagged<PageProperties>] = [:] {
     didSet {
       notifyListeners(changed: .notebookProperties)
     }
@@ -267,7 +267,7 @@ public final class Notebook {
     }
 
     DDLogInfo("NOTEBOOK: Loading new properties for \(name)")
-    DocumentProperties.loadProperties(
+    PageProperties.loadProperties(
       from: fileMetadata,
       in: metadataProvider,
       parsingRules: parsingRules
@@ -299,7 +299,7 @@ extension ListAdapter: NotebookChangeListener {
   }
 }
 
-extension Optional where Wrapped == Tagged<DocumentProperties> {
+extension Optional where Wrapped == Tagged<PageProperties> {
 
   /// Given an optional Tagged<DocumentProperties>, computes a new Tagged<DocumentProperties>
   /// for given metadata.
@@ -312,12 +312,12 @@ extension Optional where Wrapped == Tagged<DocumentProperties> {
   /// with Tag.truth (meaning no need to re-parse) if the timestamps are close.
   fileprivate func updatingFileMetadata(
     _ fileMetadata: FileMetadata
-  ) -> Tagged<DocumentProperties> {
+  ) -> Tagged<PageProperties> {
     switch self {
     case .none:
       return Tagged(
         tag: .placeholder,
-        value: DocumentProperties(fileMetadata: fileMetadata, nodes: [])
+        value: PageProperties(fileMetadata: fileMetadata, nodes: [])
       )
     case .some(let wrapped):
       return Tagged(
