@@ -573,12 +573,12 @@ PODS:
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
-  - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
+  - CommonplaceBook (from `../CommonplaceBook`)
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
-  - FlashcardKit/Tests (from `https://github.com/bdewey/FlashcardKit`)
+  - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit/Tests (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -589,7 +589,7 @@ DEPENDENCIES:
   - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  https://github.com/CocoaPods/Specs.git:
     - AFNetworking
     - CocoaLumberjack
     - DZNEmptyDataSet
@@ -607,7 +607,7 @@ EXTERNAL SOURCES:
   CollectionViewLayouts:
     :git: https://github.com/bdewey/CollectionViewLayouts.git
   CommonplaceBook:
-    :git: https://github.com/bdewey/CommonplaceBook.git
+    :path: "../CommonplaceBook"
   CwlSignal:
     :git: https://github.com/bdewey/CwlSignal
   CwlUtils:
@@ -615,7 +615,7 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :git: https://github.com/bdewey/FlashcardKit
+    :path: "../FlashcardKit"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -631,9 +631,6 @@ CHECKOUT OPTIONS:
   CollectionViewLayouts:
     :commit: eb323db65d8e9b7c4cbbc31b0dfa83f1ddc90302
     :git: https://github.com/bdewey/CollectionViewLayouts.git
-  CommonplaceBook:
-    :commit: f4a5b294896424083c7941489a7cf9bd168ee0a1
-    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :commit: c86edbc54c6613424f88782220b6c6c2771a166e
     :git: https://github.com/bdewey/CwlSignal
@@ -643,9 +640,6 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
-  FlashcardKit:
-    :commit: f9c38d959d1269960e57242f4572ba0e7f24f843
-    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: fe2b35ec833bdf889f165e987a97fdceeb2a94ea
     :git: https://github.com/material-components/material-components-ios
@@ -666,13 +660,13 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   CocoaLumberjack: db7cc9e464771f12054c22ff6947c5a58d43a0fd
   CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
-  CommonplaceBook: 9a82bdd29c99d0fb4e4d6b632982588092d5ddaf
+  CommonplaceBook: 345373ab246c18a9b2c360706baddf293e9210b1
   CwlSignal: 6b87ee172614a141ba06f2145f5a18bd7e66c983
   CwlUtils: c1ba508748e8000989df81730b153f4eaeaaa6c8
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 6244f0ad36ebcc81b923164cbfad13721d1cc44f
+  FlashcardKit: 45b39972afb62d2712d649b967675965ddb1a657
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: c01ef729dc7612f41667958c0dc0f84e81246e33
   MDFInternationalization: b5b8626628abf026e630e5ebaeee563037712cbb
@@ -687,6 +681,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: d8f2617538ce3021cb0a11d1b93856a06a2f2e20
   TextBundleKit: 21e73811dffed0980d6cdded3192d947f1498b8d
 
-PODFILE CHECKSUM: 88a16d10b16e8a74b5b7d58dd4dc7142734a216d
+PODFILE CHECKSUM: eb67eeed8fd00f1ff3a0aa2386d5f60858af2b26
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.5.0
