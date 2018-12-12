@@ -26,7 +26,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 
   private var propertiesFilteredByHashtag: [PageProperties] {
-    return index.pages.values
+    return index.pageProperties.values
       // remove placeholders
       .filter { $0.tag != .placeholder }
       // Convert to just a DocumentProperties

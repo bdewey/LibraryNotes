@@ -38,7 +38,7 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
         )
       ),
     ]
-    let hashtags = index.pages.values.reduce(into: Set<String>()) { (hashtags, props) in
+    let hashtags = index.pageProperties.values.reduce(into: Set<String>()) { (hashtags, props) in
       hashtags.formUnion(props.value.hashtags)
     }
     let hashtagDiffables = Array(hashtags).sorted().map { (hashtag) in

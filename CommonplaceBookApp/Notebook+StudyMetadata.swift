@@ -27,10 +27,7 @@ extension Notebook {
     }
     set {
       internalNotebookData[.studyMetadata] = newValue
-      // TODO: This should be in a method, and the protocol needs to be generic/extensible.
-      for adapter in self.listeners {
-        adapter.listener?.notebook(self, didChange: .studyMetadata)
-      }
+      notifyListeners(changed: .studyMetadata)
     }
   }
 
@@ -75,7 +72,7 @@ extension Notebook {
   /// - returns: A StudySession!
   public func studySession(filter: ((PageProperties) -> Bool)? = nil) -> StudySession {
     let filter = filter ?? { (_) in return true }
-    return pages.values
+    return pageProperties.values
       .map { $0.value }
       .filter(filter)
       .map { (diffableProperties) -> StudySession in

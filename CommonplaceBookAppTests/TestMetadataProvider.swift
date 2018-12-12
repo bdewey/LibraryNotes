@@ -55,7 +55,7 @@ final class TestMetadataProvider: FileMetadataProvider {
   var documentProperties: [PageProperties] {
     return fileNameToMetadata
       .values
-      .filter { $0.fileName != Notebook.Key.notebookProperties.rawValue }
+      .filter { $0.fileName != Notebook.Key.pageProperties.rawValue }
       .map {
         let text = fileContents[$0.fileName] ?? ""
         return PageProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
@@ -72,7 +72,7 @@ final class TestMetadataProvider: FileMetadataProvider {
   /// file contents.
   func addPropertiesCache() {
     addFileInfo(FileInfo(
-      fileName: Notebook.Key.notebookProperties.rawValue,
+      fileName: Notebook.Key.pageProperties.rawValue,
       contents: documentPropertiesJSON
     ))
   }
