@@ -27,8 +27,6 @@ public protocol NotebookChangeListener: AnyObject {
 /// using a spaced repetition algorithm.
 public final class Notebook {
 
-  public static let cachedPropertiesName = "properties.json"
-
   /// Extensible enum that talks about the kind of data in the Notebook.
   public struct Key: RawRepresentable, Hashable {
     public init(rawValue: String) {
@@ -63,7 +61,7 @@ public final class Notebook {
   @discardableResult
   public func loadCachedProperties() -> Notebook {
     if let propertiesDocument = metadataProvider.editableDocument(
-      for: FileMetadata(fileName: Notebook.cachedPropertiesName)
+      for: FileMetadata(fileName: Key.notebookProperties.rawValue)
     ) {
       openMetadocuments[.notebookProperties] = propertiesDocument
       monitorPropertiesDocument(propertiesDocument)

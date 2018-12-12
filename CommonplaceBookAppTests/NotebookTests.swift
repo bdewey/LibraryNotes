@@ -78,7 +78,7 @@ final class NotebookTests: XCTestCase {
     )
     waitForExpectations(timeout: 3, handler: nil)
     let deserializedPages = notebook.pagesDictionary(
-      from: metadataProvider.fileContents[Notebook.cachedPropertiesName]!,
+      from: metadataProvider.fileContents[Notebook.Key.notebookProperties.rawValue]!,
       tag: .fromCache
     )
     XCTAssertEqual(deserializedPages["page1.txt"]?.value.hashtags, ["#newhashtag"])
@@ -114,7 +114,7 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(notebook.pages.count, 1)
     waitForExpectations(timeout: 3, handler: nil) // wait for cache save to happen
     let deserializedPages = notebook.pagesDictionary(
-      from: metadataProvider.fileContents[Notebook.cachedPropertiesName]!,
+      from: metadataProvider.fileContents[Notebook.Key.notebookProperties.rawValue]!,
       tag: .fromCache
     )
     XCTAssertEqual(deserializedPages.count, 1)
@@ -265,7 +265,7 @@ final class NotebookTests: XCTestCase {
   private func startMonitoringForCacheSave() {
     let didSaveCache = expectation(description: "did save cache")
     metadataProvider.contentsChangeListener = { (name, text) in
-      if name == Notebook.cachedPropertiesName {
+      if name == Notebook.Key.notebookProperties.rawValue {
         didSaveCache.fulfill()
       }
     }
