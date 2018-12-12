@@ -134,4 +134,3 @@ extension ListAdapter: NotebookChangeListener {
     if key == .pageProperties { performUpdates(animated: true) }
   }
 }
-

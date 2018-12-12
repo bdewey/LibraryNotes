@@ -58,8 +58,11 @@ extension Notebook {
   private func saveStudyMetadata(_ studyMetadata: NotebookStudyMetadata) {
     guard let document = openMetadocuments[.studyMetadata] else { return }
     document.applyTaggedModification(tag: .memory) { (_) -> String in
-      let data = try! metadataEncoder.encode(studyMetadata)
-      return String(data: data, encoding: .utf8)!
+      if let data = try? metadataEncoder.encode(studyMetadata) {
+        return String(data: data, encoding: .utf8)!
+      } else {
+        return ""
+      }
     }
   }
 
