@@ -107,6 +107,7 @@ private let commonplaceBookStylesheet: Stylesheet = {
   stylesheet.colors.primaryColor = UIColor.white
   stylesheet.colors.onPrimaryColor = UIColor.black
   stylesheet.colors.secondaryColor = UIColor(rgb: 0x661FFF)
+  stylesheet.colors.onSecondaryColor = UIColor.white
   stylesheet.colors.surfaceColor = UIColor.white
   stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
   stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
