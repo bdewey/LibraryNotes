@@ -24,7 +24,7 @@ public final class StatisticsViewController: UIViewController {
     layout.monthHeaderHeight = 48
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.backgroundColor = Stylesheet.hablaEspanol.colorScheme.surfaceColor
+    collectionView.backgroundColor = Stylesheet.hablaEspanol.colors.surfaceColor
     collectionView.dataSource = dataSource
     dataSource.collectionView = collectionView
     return collectionView

@@ -83,7 +83,7 @@ final class VocabularyAssociationCardView: CardView {
 
   private lazy var gotItButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCContainedButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCContainedButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Got it", for: .normal)
     button.addTarget(self, action: #selector(didTapGotIt), for: .touchUpInside)
     return button
@@ -91,7 +91,7 @@ final class VocabularyAssociationCardView: CardView {
 
   private lazy var studyMoreButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Study More", for: .normal)
     button.addTarget(self, action: #selector(didTapStudyMore), for: .touchUpInside)
     return button
@@ -99,7 +99,7 @@ final class VocabularyAssociationCardView: CardView {
 
   private lazy var prounounceSpanishButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Pronounce", for: .normal)
     button.addTarget(self, action: #selector(didTapPronounce), for: .touchUpInside)
     return button
@@ -134,7 +134,7 @@ final class VocabularyAssociationCardView: CardView {
 
   @objc private func didTapPronounce() {
     let utterance = AVSpeechUtterance(string: card.pronunciation)
-    delegate?.cardView(self, didRequestSpeech: utterance)
+    delegate?.cardView(self, didRequestSpeech: utterance, language: "es-MX")
   }
 
   required init?(coder aDecoder: NSCoder) {

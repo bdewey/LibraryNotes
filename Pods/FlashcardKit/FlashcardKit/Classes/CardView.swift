@@ -6,7 +6,7 @@ import MaterialComponents
 
 protocol CardViewDelegate: class {
   func cardView(_ cardView: CardView, didAnswerCorrectly: Bool)
-  func cardView(_ cardView: CardView, didRequestSpeech: AVSpeechUtterance)
+  func cardView(_ cardView: CardView, didRequestSpeech: AVSpeechUtterance, language: String)
 }
 
 open class CardView: MDCCard {

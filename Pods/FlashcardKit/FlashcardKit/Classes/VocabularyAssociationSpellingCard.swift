@@ -21,7 +21,11 @@ struct VocabularyAssociationSpellingCard: Card {
   }
 
   func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
-    return VocabularyAssociationSpellingCardView(card: self, parseableDocument: parseableDocument)
+    return VocabularyAssociationSpellingCardView(
+      card: self,
+      parseableDocument: parseableDocument,
+      stylesheet: stylesheet
+    )
   }
 
   var spanish: String {

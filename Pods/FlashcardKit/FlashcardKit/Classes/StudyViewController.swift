@@ -70,7 +70,7 @@ public final class StudyViewController: UIViewController {
 
   private lazy var appBar: MDCAppBar = {
     let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colors.semanticColorScheme, to: appBar)
     MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
     return appBar
   }()
@@ -94,7 +94,7 @@ public final class StudyViewController: UIViewController {
     // TODO: this should probably be "caption" -- prototype inside Sketch
     cardsRemainingLabel.font = stylesheet.typographyScheme.body2
     appBar.addSubviewsToParent()
-    view.backgroundColor = stylesheet.colorScheme.darkSurfaceColor
+    view.backgroundColor = stylesheet.colors.darkSurfaceColor
     configureUI()
     appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
 
@@ -126,7 +126,10 @@ public final class StudyViewController: UIViewController {
     }
     alertController.addAction(discard)
     alertController.addAction(cancel)
-    MDCAlertColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: alertController)
+    MDCAlertColorThemer.applySemanticColorScheme(
+      stylesheet.colors.withDarkerColorAsPrimary().semanticColorScheme,
+      to: alertController
+    )
     MDCAlertTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: alertController)
     present(alertController, animated: true, completion: nil)
   }
@@ -167,7 +170,11 @@ extension StudyViewController: CardViewDelegate {
     }
   }
 
-  func cardView(_ cardView: CardView, didRequestSpeech utterance: AVSpeechUtterance) {
-    PersonalitySpeechSynthesizer.spanish.speak(utterance)
+  func cardView(
+    _ cardView: CardView,
+    didRequestSpeech utterance: AVSpeechUtterance,
+    language: String
+  ) {
+    PersonalitySpeechSynthesizer.make(with: language).speak(utterance)
   }
 }

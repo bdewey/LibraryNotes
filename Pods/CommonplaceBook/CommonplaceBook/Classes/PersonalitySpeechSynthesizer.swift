@@ -29,16 +29,26 @@ import AVFoundation
 
 extension PersonalitySpeechSynthesizer {
   public static let british: PersonalitySpeechSynthesizer = {
-    let voices = AVSpeechSynthesisVoice.speechVoices()
-    let voice = AVSpeechSynthesisVoice(language: "en-GB")!
-    return PersonalitySpeechSynthesizer(voice: voice)
+    return PersonalitySpeechSynthesizer.make(with: "en-GB")
   }()
 
   public static let spanish: PersonalitySpeechSynthesizer = {
-    let voices = AVSpeechSynthesisVoice.speechVoices()
-    let voice = AVSpeechSynthesisVoice(language: "es-MX")!
-    return PersonalitySpeechSynthesizer(voice: voice)
+    return PersonalitySpeechSynthesizer.make(with: "es-MX")
   }()
+
+  /// Maps from a language code to a PeronalitySpeechSynthesizer that ues that language.
+  private static var personalitySpeechSynthesizers = [String: PersonalitySpeechSynthesizer]()
+
+  public static func make(with language: String) -> PersonalitySpeechSynthesizer {
+    if let synthesizer = personalitySpeechSynthesizers[language] {
+      return synthesizer
+    } else {
+      let voice = AVSpeechSynthesisVoice(language: language)!
+      let synthesizer = PersonalitySpeechSynthesizer(voice: voice)
+      personalitySpeechSynthesizers[language] = synthesizer
+      return synthesizer
+    }
+  }
 }
 
 extension PersonalitySpeechSynthesizer: AVSpeechSynthesizerDelegate {

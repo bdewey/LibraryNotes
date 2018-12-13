@@ -5,6 +5,7 @@ import CommonplaceBook
 import MaterialComponents
 import MiniMarkdown
 import SnapKit
+import TextBundleKit
 import UIKit
 
 // TODO: Find commmon code with VocabularyAssociationCardView and create a single reusable class?
@@ -105,7 +106,7 @@ final class ClozeCardView: CardView {
 
   private lazy var gotItButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCContainedButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCContainedButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Got it", for: .normal)
     button.addTarget(self, action: #selector(didTapGotIt), for: .touchUpInside)
     return button
@@ -113,7 +114,7 @@ final class ClozeCardView: CardView {
 
   private lazy var studyMoreButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Study More", for: .normal)
     button.addTarget(self, action: #selector(didTapStudyMore), for: .touchUpInside)
     return button
@@ -121,7 +122,7 @@ final class ClozeCardView: CardView {
 
   private lazy var prounounceSpanishButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Say it", for: .normal)
     button.addTarget(self, action: #selector(didTapPronounce), for: .touchUpInside)
     return button
@@ -139,15 +140,29 @@ final class ClozeCardView: CardView {
     delegate?.cardView(self, didAnswerCorrectly: false)
   }
 
+  /// Returns the language we should use for utterances from this cloze.
+  /// TODO: Make this a real property of the document.
+  private var language: String? {
+    if parseableDocument.document is TextBundleDocument {
+      return "es-MX"
+    } else {
+      return nil
+    }
+  }
+
   @objc private func didTapPronounce() {
-    delegate?.cardView(self, didRequestSpeech: utterance)
+    if let language = language {
+      delegate?.cardView(self, didRequestSpeech: utterance, language: language)
+    }
   }
 }
 
 extension ClozeCardView {
   var utterance: AVSpeechUtterance {
     let phrase = clozeRenderer.render(node: node)
-    return AVSpeechUtterance(string: phrase)
+    let utterance = AVSpeechUtterance(string: phrase)
+    utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")
+    return utterance
   }
 
   var context: NSAttributedString {
@@ -195,7 +210,7 @@ extension Stylesheet {
   var textAttributes: [NSAttributedString.Key: Any] {
     return [
       .font: typographyScheme.body2,
-      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
+      .foregroundColor: colors.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
       .paragraphStyle: defaultParagraphStyle,
     ]
   }
@@ -203,7 +218,7 @@ extension Stylesheet {
   var clozeAttributes: [NSAttributedString.Key: Any] {
     return [
       .font: typographyScheme.body2,
-      .foregroundColor: colorScheme.onSurfaceColor
+      .foregroundColor: colors.onSurfaceColor
         .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
       .backgroundColor: UIColor(rgb: 0xf6e6f0),
       .paragraphStyle: defaultParagraphStyle,
@@ -213,7 +228,7 @@ extension Stylesheet {
   var captionAttributes: [NSAttributedString.Key: Any] {
     return [
       .font: typographyScheme.caption,
-      .foregroundColor: colorScheme.onSurfaceColor
+      .foregroundColor: colors.onSurfaceColor
         .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
       .kern: kern[.caption] ?? 1.0,
       .paragraphStyle: defaultParagraphStyle,

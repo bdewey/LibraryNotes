@@ -8,9 +8,14 @@ import SnapKit
 import UIKit
 
 final class VocabularyAssociationSpellingCardView: CardView {
-  init(card: VocabularyAssociationSpellingCard, parseableDocument: ParseableDocument) {
+  init(
+    card: VocabularyAssociationSpellingCard,
+    parseableDocument: ParseableDocument,
+    stylesheet: Stylesheet
+  ) {
     self.card = card
     self.parseableDocument = parseableDocument
+    self.stylesheet = stylesheet
     super.init(frame: .zero)
     addSubview(controlStack)
     controlStack.snp.makeConstraints { (make) in
@@ -37,6 +42,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
 
   private let card: VocabularyAssociationSpellingCard
   private let parseableDocument: ParseableDocument
+  private let stylesheet: Stylesheet
 
   override var introductoryUtterances: [AVSpeechUtterance]? {
     return [
@@ -54,7 +60,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
     let attributedString = NSAttributedString(
       string: "Deltrea esta palabra...",
       attributes: [
-        .font: Stylesheet.hablaEspanol.typographyScheme.overline,
+        .font: stylesheet.typographyScheme.overline,
         .kern: 2.0,
         .foregroundColor: UIColor(white: 0, alpha: 0.6),
       ])
@@ -72,7 +78,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
   }()
 
   private lazy var spellCheckField: TextFieldAndController = {
-    let spellCheckField = TextFieldAndController(placeholder: "Spell", stylesheet: Stylesheet.hablaEspanol)
+    let spellCheckField = TextFieldAndController(placeholder: "Spell", stylesheet: stylesheet)
     spellCheckField.field.autocorrectionType = .no
     spellCheckField.field.autocapitalizationType = .none
     spellCheckField.field.delegate = self
@@ -85,15 +91,15 @@ final class VocabularyAssociationSpellingCardView: CardView {
     return spellCheckField
   }()
 
-  private let correctSpellingLabel: UILabel = {
+  private lazy var correctSpellingLabel: UILabel = {
     let correctSpellingLabel = UILabel(frame: .zero)
-    correctSpellingLabel.font = Stylesheet.hablaEspanol.typographyScheme.subtitle1
+    correctSpellingLabel.font = stylesheet.typographyScheme.subtitle1
     return correctSpellingLabel
   }()
 
   private lazy var sayAgainButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCTextButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Repeat", for: .normal)
     button.addTarget(self, action: #selector(didTapRepeat), for: .touchUpInside)
     button.setContentHuggingPriority(.required, for: .horizontal)
@@ -102,7 +108,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
 
   private lazy var doneButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCContainedButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCContainedButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Done", for: .normal)
     button.addTarget(self, action: #selector(didTapDone), for: .touchUpInside)
     button.setContentHuggingPriority(.required, for: .horizontal)
@@ -111,7 +117,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
 
   private lazy var nextButton: MDCButton = {
     let button = MDCButton(frame: .zero)
-    MDCContainedButtonThemer.applyScheme(Stylesheet.hablaEspanol.buttonScheme, to: button)
+    MDCContainedButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.setTitle("Next", for: .normal)
     button.addTarget(self, action: #selector(didTapNext), for: .touchUpInside)
     button.setContentHuggingPriority(.required, for: .horizontal)
@@ -141,10 +147,10 @@ final class VocabularyAssociationSpellingCardView: CardView {
     let spelling = spelling.trimmingCharacters(in: CharacterSet.whitespaces)
     let correct = spelling.localizedCaseInsensitiveCompare(card.spanish) == .orderedSame
     if correct {
-      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "correcto"))
+      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "correcto"), language: "es-MX")
       delegate?.cardView(self, didAnswerCorrectly: true)
     } else {
-      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "Eso no está bien. Por favor, estudia la ortografía correcta."))
+      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "Eso no está bien. Por favor, estudia la ortografía correcta."), language: "es-MX")
       showAnswer()
     }
   }
@@ -171,7 +177,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
   }
 
   @objc private func didTapRepeat() {
-    delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: card.spanish))
+    delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: card.spanish), language: "es-MX")
   }
 }
 

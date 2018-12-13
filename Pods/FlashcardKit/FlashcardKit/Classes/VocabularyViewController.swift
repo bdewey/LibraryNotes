@@ -83,7 +83,7 @@ public final class VocabularyViewController: UIViewController {
     tableView.dataSource = dataSource
     dataSource.tableView = tableView
     tableView.delegate = self
-    tableView.backgroundColor = Stylesheet.hablaEspanol.colorScheme.backgroundColor
+    tableView.backgroundColor = Stylesheet.hablaEspanol.colors.backgroundColor
     tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     tableView.allowsMultipleSelection = true
     return tableView
@@ -243,7 +243,7 @@ private class SectionHeaderView: UIView {
       make.trailing.equalToSuperview().offset(-8)
       make.bottom.equalToSuperview().offset(-8)
     }
-    backgroundColor = Stylesheet.hablaEspanol.colorScheme.backgroundColor
+    backgroundColor = Stylesheet.hablaEspanol.colors.backgroundColor
   }
 
   var text: String {

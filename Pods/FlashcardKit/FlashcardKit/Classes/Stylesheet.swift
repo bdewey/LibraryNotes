@@ -9,9 +9,9 @@ extension Stylesheet {
   @available(*, deprecated)
   public static let hablaEspanol: Stylesheet = {
     var stylesheet = Stylesheet()
-    stylesheet.colorScheme.surfaceColor = UIColor.white
-    stylesheet.colorScheme.primaryColor = UIColor(rgb: 0x5D1049)
-    stylesheet.colorScheme.secondaryColor = UIColor(rgb: 0xFA3336)
+    stylesheet.colors.surfaceColor = UIColor.white
+    stylesheet.colors.primaryColor = UIColor(rgb: 0x5D1049)
+    stylesheet.colors.secondaryColor = UIColor(rgb: 0xFA3336)
     NunitoSans.loadAllFonts()
     stylesheet.typographyScheme.headline6 = UIFont.nunitoSansSemiBold(size: 21.65)
     stylesheet.typographyScheme.body2 = UIFont.nunitoSansRegular(size: 15.19)

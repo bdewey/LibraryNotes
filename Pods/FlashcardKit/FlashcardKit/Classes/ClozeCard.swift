@@ -83,10 +83,19 @@ extension MarkdownAttributedStringRenderer {
       let shouldHide = renderedCloze == index
       renderedCloze += 1
       if shouldHide {
-        return NSAttributedString(
-          string: String(cloze.hint),
-          attributes: stylesheet.clozeAttributes
-        )
+        if cloze.hint.strippingLeadingAndTrailingWhitespace.isEmpty {
+          // There is no real hint. So instead put the hidden text but render it using the
+          // background color. That way it takes up the correct amount of space in the string,
+          // but is still invisible.
+          var attributes = stylesheet.clozeAttributes
+          attributes[.foregroundColor] = attributes[.backgroundColor]
+          return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
+        } else {
+          return NSAttributedString(
+            string: String(cloze.hint),
+            attributes: stylesheet.clozeAttributes
+          )
+        }
       } else {
         return NSAttributedString(
           string: String(cloze.hiddenText),
@@ -104,7 +113,7 @@ extension MarkdownAttributedStringRenderer {
   ) -> MarkdownAttributedStringRenderer {
     var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
     var localClozeAttributes = stylesheet.clozeAttributes
-    localClozeAttributes[.foregroundColor] = stylesheet.colorScheme
+    localClozeAttributes[.foregroundColor] = stylesheet.colors
       .onSurfaceColor
       .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
     var renderedCloze = 0

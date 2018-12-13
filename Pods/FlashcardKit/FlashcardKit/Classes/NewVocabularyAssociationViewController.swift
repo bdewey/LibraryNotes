@@ -63,7 +63,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   private lazy var appBar: MDCAppBar = {
     let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: appBar)
+    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colors.semanticColorScheme, to: appBar)
     MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
     return appBar
   }()
@@ -166,7 +166,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   override func loadView() {
     let view = UIView(frame: .zero)
-    view.backgroundColor = stylesheet.colorScheme.backgroundColor
+    view.backgroundColor = stylesheet.colors.backgroundColor
     self.view = view
   }
 

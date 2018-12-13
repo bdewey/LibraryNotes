@@ -35,9 +35,9 @@ public final class LoadingViewController: UIViewController {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.200) {
       self.activityIndicator.startAnimating()
     }
-    view.backgroundColor = stylesheet.colorScheme.surfaceColor
+    view.backgroundColor = stylesheet.colors.surfaceColor
     let cycleColors = delegate?.loadingViewControllerCycleColors(self)
-      ?? [stylesheet.colorScheme.primaryColor]
+      ?? [stylesheet.colors.primaryColor]
     activityIndicator.cycleColors = cycleColors
   }
 

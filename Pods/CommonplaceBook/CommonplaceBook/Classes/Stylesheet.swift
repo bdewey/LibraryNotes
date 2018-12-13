@@ -11,6 +11,15 @@ extension UIColor {
               blue: CGFloat(rgb & 0xFF) / 255.0,
               alpha: alpha)
   }
+
+  public var brightness: CGFloat {
+    var red: CGFloat = 0
+    var green: CGFloat = 0
+    var blue: CGFloat = 0
+    self.getRed(&red, green: &green, blue: &blue, alpha: nil)
+    let brightness = ((red * 299) + (green * 587) + (blue * 114)) / 1000
+    return brightness
+  }
 }
 
 public struct Stylesheet {
@@ -40,7 +49,7 @@ public struct Stylesheet {
     case lightTextDisabled
   }
 
-  public final class Colors: MDCColorScheming {
+  public struct Colors {
 
     public init() { }
 
@@ -55,9 +64,35 @@ public struct Stylesheet {
     public var onSecondaryColor = UIColor(rgb: 0x000000)
     public var onSurfaceColor = UIColor(rgb: 0x000000)
     public var onBackgroundColor = UIColor(rgb: 0x000000)
+
+    public func withDarkerColorAsPrimary() -> Colors {
+      if primaryColor.brightness < secondaryColor.brightness {
+        return self
+      } else {
+        var copy = self
+        copy.primaryColor = secondaryColor
+        copy.onPrimaryColor = onSecondaryColor
+        return copy
+      }
+    }
+
+    public var semanticColorScheme: MDCSemanticColorScheme {
+      let scheme = MDCSemanticColorScheme()
+      scheme.primaryColor = primaryColor
+      scheme.primaryColorVariant = primaryColorVariant
+      scheme.secondaryColor = secondaryColor
+      scheme.errorColor = errorColor
+      scheme.surfaceColor = surfaceColor
+      scheme.backgroundColor = backgroundColor
+      scheme.onPrimaryColor = onPrimaryColor
+      scheme.onSecondaryColor = onSecondaryColor
+      scheme.onSurfaceColor = onSurfaceColor
+      scheme.onBackgroundColor = onBackgroundColor
+      return scheme
+    }
   }
 
-  public let colorScheme = Colors()
+  public var colors = Colors()
   public let typographyScheme = MDCTypographyScheme(defaults: .material201804)
   public var kern: [Style: CGFloat] = [:]
   public var alpha: [AlphaStyle: CGFloat] = [
@@ -75,7 +110,7 @@ public struct Stylesheet {
 extension Stylesheet {
   public var buttonScheme: MDCButtonScheme {
     let scheme = MDCButtonScheme()
-    scheme.colorScheme = self.colorScheme
+    scheme.colorScheme = self.colors.withDarkerColorAsPrimary().semanticColorScheme
     scheme.typographyScheme = self.typographyScheme
     scheme.cornerRadius = 8
     scheme.minimumHeight = 36
@@ -120,7 +155,7 @@ extension Stylesheet {
     return [
       .font: typographyScheme[style],
       .kern: kern[style] ?? 1.0,
-      .foregroundColor: colorScheme.onSurfaceColor.withAlphaComponent(alpha[emphasis] ?? 1),
+      .foregroundColor: colors.onSurfaceColor.withAlphaComponent(alpha[emphasis] ?? 1),
       .paragraphStyle: paragraphStyle,
     ]
   }

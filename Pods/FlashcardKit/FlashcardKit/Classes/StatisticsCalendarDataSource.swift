@@ -170,7 +170,7 @@ extension StatisticsCalendarDataSource {
     public var isToday: Bool = false {
       didSet {
         if isToday {
-          self.layer.borderColor = Stylesheet.hablaEspanol.colorScheme.primaryColor.cgColor
+          self.layer.borderColor = Stylesheet.hablaEspanol.colors.primaryColor.cgColor
           self.layer.borderWidth = 1.0
           self.layer.cornerRadius = 4.0
         } else {

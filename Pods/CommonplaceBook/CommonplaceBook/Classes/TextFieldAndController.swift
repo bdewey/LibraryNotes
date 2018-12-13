@@ -21,7 +21,10 @@ public struct TextFieldAndController {
     let field = MDCTextField(frame: .zero)
     field.placeholder = placeholder
     let controller = MDCTextInputControllerOutlined(textInput: field)
-    MDCOutlinedTextFieldColorThemer.applySemanticColorScheme(stylesheet.colorScheme, to: controller)
+    MDCOutlinedTextFieldColorThemer.applySemanticColorScheme(
+      stylesheet.colors.withDarkerColorAsPrimary().semanticColorScheme,
+      to: controller
+    )
     MDCTextFieldTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: controller)
     MDCTextFieldTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: field)
     self.init(field: field, controller: controller)

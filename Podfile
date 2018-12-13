@@ -9,13 +9,13 @@ target 'CommonplaceBookApp' do
 
   # Pods for remember
   pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
-  pod 'CommonplaceBook', :path => '../CommonplaceBook'
-  # pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
+  # pod 'CommonplaceBook', :path => '../CommonplaceBook'
+  pod 'CommonplaceBook', :git => 'https://github.com/bdewey/CommonplaceBook.git'
   pod 'CwlSignal', :git => 'https://github.com/bdewey/CwlSignal'
   pod 'CwlUtils', :git => 'https://github.com/bdewey/CwlUtils'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  pod 'FlashcardKit', :path => '../FlashcardKit', :testspecs => ['Tests']
-  # pod 'FlashcardKit', :git => 'https://github.com/bdewey/FlashcardKit', :testspecs => ['Tests']
+  # pod 'FlashcardKit', :path => '../FlashcardKit', :testspecs => ['Tests']
+  pod 'FlashcardKit', :git => 'https://github.com/bdewey/FlashcardKit', :testspecs => ['Tests']
   pod 'IGListKit', '~> 3.0'
   # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
   pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']

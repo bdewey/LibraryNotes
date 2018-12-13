@@ -33,7 +33,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     appBarViewController.topLayoutGuideViewController = self
     appBarViewController.isTopLayoutGuideAdjustmentEnabled = true
     MDCAppBarColorThemer.applyColorScheme(
-      Stylesheet.hablaEspanol.colorScheme,
+      Stylesheet.hablaEspanol.colors.semanticColorScheme,
       to: appBarViewController
     )
     MDCAppBarTypographyThemer.applyTypographyScheme(
@@ -46,7 +46,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
   private lazy var tabBar: MDCTabBar = {
     let tabBar = MDCTabBar(frame: .zero)
     tabBar.delegate = self
-    MDCTabBarColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colorScheme, toTabs: tabBar)
+    MDCTabBarColorThemer.applySemanticColorScheme(Stylesheet.hablaEspanol.colors.semanticColorScheme, toTabs: tabBar)
     MDCTabBarTypographyThemer.applyTypographyScheme(
       Stylesheet.hablaEspanol.typographyScheme,
       to: tabBar
@@ -59,7 +59,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     scrollView.scrollsToTop = false
     scrollView.isScrollEnabled = false
     scrollView.isPagingEnabled = true
-    scrollView.backgroundColor = Stylesheet.hablaEspanol.colorScheme.backgroundColor
+    scrollView.backgroundColor = Stylesheet.hablaEspanol.colors.backgroundColor
     scrollView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
     return scrollView
   }()
