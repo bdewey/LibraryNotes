@@ -181,14 +181,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
-    var stylesheetForAlert = stylesheet
-    stylesheetForAlert.colors.primaryColor = stylesheetForAlert.colors.secondaryColor
     let studyVC = StudyViewController(
       studySession: studySession,
       documentCache: ReadOnlyDocumentCache(delegate: self),
       stylesheet: stylesheet,
-      delegate: self,
-      stylesheetForAlert: stylesheetForAlert
+      delegate: self
     )
     studyVC.modalTransitionStyle = .crossDissolve
     present(studyVC, animated: true, completion: nil)
