@@ -44,7 +44,7 @@ public final class HashtagViewController: UIViewController {
       collectionViewLayout: UICollectionViewFlowLayout()
     )
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.backgroundColor = stylesheet.colorScheme.surfaceColor
+    collectionView.backgroundColor = stylesheet.colors.surfaceColor
     documentListAdapter.collectionView = collectionView
     return collectionView
   }()

@@ -108,7 +108,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       DocumentCollectionViewCell.self,
       forCellWithReuseIdentifier: reuseIdentifier
     )
-    collectionView.backgroundColor = stylesheet.colorScheme.surfaceColor
+    collectionView.backgroundColor = stylesheet.colors.surfaceColor
     documentListAdapter.collectionView = collectionView
     return collectionView
   }()
@@ -181,11 +181,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
+    var stylesheetForAlert = stylesheet
+    stylesheetForAlert.colors.primaryColor = stylesheetForAlert.colors.secondaryColor
     let studyVC = StudyViewController(
       studySession: studySession,
       documentCache: ReadOnlyDocumentCache(delegate: self),
       stylesheet: stylesheet,
-      delegate: self
+      delegate: self,
+      stylesheetForAlert: stylesheetForAlert
     )
     studyVC.modalTransitionStyle = .crossDissolve
     present(studyVC, animated: true, completion: nil)

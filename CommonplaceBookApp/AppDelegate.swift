@@ -96,7 +96,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor] {
-    return [commonplaceBookStylesheet.colorScheme.secondaryColor]
+    return [commonplaceBookStylesheet.colors.secondaryColor]
   }
 }
 
@@ -104,10 +104,10 @@ extension LoadingViewController: StylesheetContaining { }
 
 private let commonplaceBookStylesheet: Stylesheet = {
   var stylesheet = Stylesheet()
-  stylesheet.colorScheme.primaryColor = UIColor.white
-  stylesheet.colorScheme.onPrimaryColor = UIColor.black
-  stylesheet.colorScheme.secondaryColor = UIColor(rgb: 0x661FFF)
-  stylesheet.colorScheme.surfaceColor = UIColor.white
+  stylesheet.colors.primaryColor = UIColor.white
+  stylesheet.colors.onPrimaryColor = UIColor.black
+  stylesheet.colors.secondaryColor = UIColor(rgb: 0x661FFF)
+  stylesheet.colors.surfaceColor = UIColor.white
   stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
   stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
   stylesheet.typographyScheme.caption = UIFont(name: "Merriweather-Light", size: 11.4)!
@@ -122,7 +122,7 @@ private let commonplaceBookStylesheet: Stylesheet = {
 extension UIViewController {
   var semanticColorScheme: MDCColorScheming {
     if let container = self as? StylesheetContaining {
-      return container.stylesheet.colorScheme
+      return container.stylesheet.colors.semanticColorScheme
     } else {
       return MDCSemanticColorScheme(defaults: .material201804)
     }

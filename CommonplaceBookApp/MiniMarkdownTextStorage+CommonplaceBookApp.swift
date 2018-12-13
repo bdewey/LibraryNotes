@@ -24,7 +24,7 @@ extension MiniMarkdownTextStorage {
       stylesheet.typographyScheme.body2
     )
     defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
-    defaultAttributes.color = stylesheet.colorScheme
+    defaultAttributes.color = stylesheet.colors
       .onSurfaceColor
       .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
   }

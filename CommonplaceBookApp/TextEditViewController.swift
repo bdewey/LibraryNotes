@@ -91,15 +91,15 @@ final class TextEditViewController: UIViewController,
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { (_, attributes) in
-      attributes.color = stylesheet.colorScheme
+      attributes.color = stylesheet.colors
         .onSurfaceColor
         .withAlphaComponent(stylesheet.alpha[.darkTextDisabled] ?? 0.5)
     }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = stylesheet.colorScheme.darkSurfaceColor }
-    formatters[.hashtag] = { $1.backgroundColor = stylesheet.colorScheme.darkSurfaceColor }
+    formatters[.cloze] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
+    formatters[.hashtag] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
     return formatters
   }
 
@@ -131,7 +131,7 @@ final class TextEditViewController: UIViewController,
       stylesheet.typographyScheme.body2
     )
     textStorage.defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
-    textStorage.defaultAttributes.color = stylesheet.colorScheme
+    textStorage.defaultAttributes.color = stylesheet.colors
       .onSurfaceColor
       .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
     return textStorage
@@ -143,7 +143,7 @@ final class TextEditViewController: UIViewController,
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
     let textView = UITextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = stylesheet.colorScheme.surfaceColor
+    textView.backgroundColor = stylesheet.colors.surfaceColor
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()

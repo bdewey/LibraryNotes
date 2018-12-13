@@ -24,7 +24,7 @@ public final class MenuSectionController: ListSectionController {
       for: self,
       at: index
     ) as! TextCollectionViewCell // swiftlint:disable:this force_cast
-    cell.backgroundColor = stylesheet.colorScheme.surfaceColor
+    cell.backgroundColor = stylesheet.colors.surfaceColor
     cell.textLabel.attributedText = object!.label
     return cell
   }

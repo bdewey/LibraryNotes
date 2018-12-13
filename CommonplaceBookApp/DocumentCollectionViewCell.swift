@@ -30,8 +30,8 @@ final class DocumentCollectionViewCell: SwipeCollectionViewCell {
   var stylesheet: Stylesheet? {
     didSet {
       if let stylesheet = stylesheet {
-        self.backgroundColor = stylesheet.colorScheme.surfaceColor
-        divider.backgroundColor = stylesheet.colorScheme.onSurfaceColor.withAlphaComponent(0.12)
+        self.backgroundColor = stylesheet.colors.surfaceColor
+        divider.backgroundColor = stylesheet.colors.onSurfaceColor.withAlphaComponent(0.12)
       }
     }
   }
