@@ -26,7 +26,6 @@ extension Notebook {
     }
     set {
       internalNotebookData[.pageProperties] = newValue
-      notifyListeners(changed: .pageProperties)
     }
   }
 
@@ -90,6 +89,7 @@ extension Notebook {
           let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
           DDLogInfo("Loaded information about \(pages.count) page(s) from cache")
           self.pageProperties = pages
+          self.notifyListeners(changed: .pageProperties)
         }
         self.conditionForKey(.pageProperties).condition = true
       })
@@ -112,13 +112,14 @@ extension Notebook {
     }
     allUpdated.notify(queue: DispatchQueue.main) {
       if loadedProperties > 0 { self.saveProperties() }
+      self.notifyListeners(changed: .pageProperties)
     }
   }
 
   private func updateProperties(
     for fileMetadata: FileMetadata,
     completion: @escaping (Bool) -> Void
-    ) {
+  ) {
     let name = fileMetadata.fileName
 
     let newProperties = pageProperties[name].updatingFileMetadata(fileMetadata)
@@ -160,7 +161,6 @@ extension Notebook {
       DDLogError("\(error)")
     }
   }
-
 
   /// Removes items "pages" except those referenced by `metadata`
   /// - note: This does *not* save cached properties. That is the responsibility of the caller.

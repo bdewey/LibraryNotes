@@ -131,6 +131,6 @@ public final class Notebook {
 /// Any IGListKit ListAdapter can be a NotebookPageChangeListener.
 extension ListAdapter: NotebookChangeListener {
   public func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
-    if key == .pageProperties { performUpdates(animated: true) }
+    performUpdates(animated: true)
   }
 }

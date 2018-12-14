@@ -10,13 +10,15 @@ import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
 
-  init(index: Notebook, stylesheet: Stylesheet) {
-    self.notebook = index
+  init(notebook: Notebook, stylesheet: Stylesheet, cardsPerDocument: [String: Int]) {
+    self.notebook = notebook
     self.stylesheet = stylesheet
+    self.cardsPerDocument = cardsPerDocument
   }
 
   private let notebook: Notebook
   private let stylesheet: Stylesheet
+  private let cardsPerDocument: [String: Int]
   private var properties: DocumentPropertiesListDiffable!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
@@ -43,12 +45,14 @@ public final class DocumentSectionController: ListSectionController {
     } else {
       cell.statusIcon.image = nil
     }
-    let now = Date()
-    let dateDelta = now.timeIntervalSince(properties.value.fileMetadata.contentChangeDate)
-    cell.ageLabel.attributedText = NSAttributedString(
-      string: ageFormatter.string(from: dateDelta) ?? "",
-      attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
-    )
+    if let cardCount = cardsPerDocument[properties.value.fileMetadata.fileName] {
+      cell.ageLabel.attributedText = NSAttributedString(
+        string: String(cardCount),
+        attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
+      )
+    } else {
+      cell.ageLabel.attributedText = nil
+    }
     cell.delegate = self
     cell.setNeedsLayout()
     return cell
@@ -83,7 +87,7 @@ extension Notebook {
     parsingRules: ParsingRules,
     stylesheet: Stylesheet,
     completion: @escaping (UIViewController?) -> Void
-    ) {
+  ) {
     guard let document = metadataProvider.editableDocument(for: metadata) else {
       completion(nil)
       return
@@ -107,15 +111,6 @@ extension Notebook {
     }
   }
 }
-
-private let ageFormatter: DateComponentsFormatter = {
-  let ageFormatter = DateComponentsFormatter()
-  ageFormatter.maximumUnitCount = 1
-  ageFormatter.unitsStyle = .abbreviated
-  ageFormatter.allowsFractionalUnits = false
-  ageFormatter.allowedUnits = [.day, .hour, .minute]
-  return ageFormatter
-}()
 
 extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   public func collectionView(

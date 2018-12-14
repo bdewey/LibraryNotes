@@ -1,19 +1,28 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import CommonplaceBook
 import FlashcardKit
 import Foundation
 import IGListKit
 
 public final class DocumentDataSource: NSObject, ListAdapterDataSource {
-  public init(index: Notebook, stylesheet: Stylesheet) {
-    self.index = index
+  public init(notebook: Notebook, stylesheet: Stylesheet) {
+    self.notebook = notebook
     self.stylesheet = stylesheet
+    super.init()
+    notebook.addListener(self)
+    updateCardsPerDocument()
   }
 
-  public let index: Notebook
+  deinit {
+    notebook.removeListener(self)
+  }
+
+  public let notebook: Notebook
   private let stylesheet: Stylesheet
   public var filteredHashtag: String?
+  public var cardsPerDocument = [String: Int]()
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     return propertiesFilteredByHashtag
@@ -26,7 +35,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 
   private var propertiesFilteredByHashtag: [PageProperties] {
-    return index.pageProperties.values
+    return notebook.pageProperties.values
       // remove placeholders
       .filter { $0.tag != .placeholder }
       // Convert to just a DocumentProperties
@@ -56,10 +65,30 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
-    return DocumentSectionController(index: index, stylesheet: stylesheet)
+    return DocumentSectionController(
+      notebook: notebook,
+      stylesheet: stylesheet,
+      cardsPerDocument: cardsPerDocument
+    )
   }
 
   public func emptyView(for listAdapter: ListAdapter) -> UIView? {
     return nil
+  }
+
+  fileprivate func updateCardsPerDocument() {
+    let studySession = notebook.studySession()
+    self.cardsPerDocument = studySession
+      .reduce(into: [String: Int]()) { (cardsPerDocument, card) in
+        cardsPerDocument[card.documentName] = cardsPerDocument[card.documentName, default: 0] + 1
+      }
+    DDLogInfo("studySession.count = \(studySession.count). " +
+      "cardsPerDocument has \(cardsPerDocument.count) entries")
+  }
+}
+
+extension DocumentDataSource: NotebookChangeListener {
+  public func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
+    updateCardsPerDocument()
   }
 }

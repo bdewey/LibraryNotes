@@ -36,7 +36,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ) {
     self.notebook = notebook
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(index: notebook, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(notebook: notebook, stylesheet: stylesheet)
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
@@ -50,7 +50,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
-    dataSource.index.removeListener(documentListAdapter)
+    dataSource.notebook.removeListener(documentListAdapter)
   }
 
   private let notebook: Notebook
@@ -97,7 +97,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.index.addListener(adapter)
+    dataSource.notebook.addListener(adapter)
     return adapter
   }()
 
