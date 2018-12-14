@@ -31,7 +31,12 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       )
       // give IGLitstKit its own copy of the model objects to guard against mutations
       // TODO: Why do I store ListDiffable things if I just make new ListDiffable things?
-      .map { DocumentPropertiesListDiffable($0) }
+      .map {
+        PagePropertiesListDiffable(
+          $0,
+          cardCount: cardsPerDocument[$0.fileMetadata.fileName, default: 0]
+        )
+      }
   }
 
   private var propertiesFilteredByHashtag: [PageProperties] {
@@ -67,8 +72,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   ) -> ListSectionController {
     return DocumentSectionController(
       notebook: notebook,
-      stylesheet: stylesheet,
-      cardsPerDocument: cardsPerDocument
+      stylesheet: stylesheet
     )
   }
 

@@ -10,16 +10,14 @@ import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
 
-  init(notebook: Notebook, stylesheet: Stylesheet, cardsPerDocument: [String: Int]) {
+  init(notebook: Notebook, stylesheet: Stylesheet) {
     self.notebook = notebook
     self.stylesheet = stylesheet
-    self.cardsPerDocument = cardsPerDocument
   }
 
   private let notebook: Notebook
   private let stylesheet: Stylesheet
-  private let cardsPerDocument: [String: Int]
-  private var properties: DocumentPropertiesListDiffable!
+  private var properties: PagePropertiesListDiffable!
 
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
     let cell = collectionContext!.dequeueReusableCell(
@@ -45,9 +43,9 @@ public final class DocumentSectionController: ListSectionController {
     } else {
       cell.statusIcon.image = nil
     }
-    if let cardCount = cardsPerDocument[properties.value.fileMetadata.fileName] {
+    if properties.cardCount > 0 {
       cell.ageLabel.attributedText = NSAttributedString(
-        string: String(cardCount),
+        string: String(properties.cardCount),
         attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
       )
     } else {
@@ -64,7 +62,7 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didUpdate(to object: Any) {
     // swiftlint:disable:next force_cast
-    self.properties = (object as! DocumentPropertiesListDiffable)
+    self.properties = (object as! PagePropertiesListDiffable)
   }
 
   public override func didSelectItem(at index: Int) {

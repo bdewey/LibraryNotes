@@ -89,15 +89,13 @@ extension Array where Element == Node {
   }
 }
 
-public final class DocumentPropertiesListDiffable: ListDiffable {
+public final class PagePropertiesListDiffable: ListDiffable {
   public private(set) var value: PageProperties
+  public private(set) var cardCount: Int
 
-  public init(_ value: PageProperties) {
+  public init(_ value: PageProperties, cardCount: Int) {
     self.value = value
-  }
-
-  public init(_ value: FileMetadata) {
-    self.value = PageProperties(fileMetadata: value, nodes: [])
+    self.cardCount = cardCount
   }
 
   public func updateMetadata(_ metadata: FileMetadata) {
@@ -109,14 +107,15 @@ public final class DocumentPropertiesListDiffable: ListDiffable {
   }
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
-    guard let otherWrapper = object as? DocumentPropertiesListDiffable else { return false }
+    guard let otherWrapper = object as? PagePropertiesListDiffable else { return false }
     return value.title == otherWrapper.value.title &&
       value.hashtags == otherWrapper.value.hashtags &&
-      value.fileMetadata == otherWrapper.value.fileMetadata
+      value.fileMetadata == otherWrapper.value.fileMetadata &&
+      cardCount == otherWrapper.cardCount
   }
 }
 
-extension DocumentPropertiesListDiffable: CustomStringConvertible, CustomDebugStringConvertible {
+extension PagePropertiesListDiffable: CustomStringConvertible, CustomDebugStringConvertible {
   public var description: String { return value.description }
   public var debugDescription: String {
     return "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) " + value.description
