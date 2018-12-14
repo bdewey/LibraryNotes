@@ -181,6 +181,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
+    presentStudySessionViewController(for: studySession)
+  }
+
+  public func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession,
       documentCache: ReadOnlyDocumentCache(delegate: self),

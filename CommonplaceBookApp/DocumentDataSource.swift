@@ -30,7 +30,6 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
         by: { $0.fileMetadata.contentChangeDate > $1.fileMetadata.contentChangeDate }
       )
       // give IGLitstKit its own copy of the model objects to guard against mutations
-      // TODO: Why do I store ListDiffable things if I just make new ListDiffable things?
       .map {
         PagePropertiesListDiffable(
           $0,

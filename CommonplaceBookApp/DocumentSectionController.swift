@@ -69,7 +69,8 @@ public final class DocumentSectionController: ListSectionController {
     notebook.loadEditingViewController(
       for: properties.value.fileMetadata,
       parsingRules: notebook.parsingRules,
-      stylesheet: stylesheet) { (editingViewController) in
+      stylesheet: stylesheet
+    ) { (editingViewController) in
       guard let editingViewController = editingViewController else { return }
       self.viewController?.navigationController?.pushViewController(
         editingViewController,
@@ -119,19 +120,34 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
     guard orientation == .right else { return nil }
 
     let dataSource = self.notebook
-    if let propertiesToDelete = self.properties {
+    var actions = [SwipeAction]()
+    if let properties = self.properties {
+      if properties.cardCount > 0,
+         let viewController = self.viewController as? DocumentListViewController {
+        let studyAction = SwipeAction(style: .default, title: "Study") { (action, _) in
+          let studySession = self.notebook.studySession(
+            filter: { $0.fileMetadata.fileName == properties.value.fileMetadata.fileName }
+          )
+          viewController.presentStudySessionViewController(for: studySession)
+          action.fulfill(with: ExpansionFulfillmentStyle.reset)
+        }
+        studyAction.image = UIImage(named: "round_school_black_24pt")
+        studyAction.hidesWhenSelected = true
+        studyAction.backgroundColor = stylesheet.colors.secondaryColor
+        studyAction.textColor = stylesheet.colors.onSecondaryColor
+        actions.append(studyAction)
+      }
+
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-        dataSource.deleteFileMetadata(propertiesToDelete.value.fileMetadata)
+        dataSource.deleteFileMetadata(properties.value.fileMetadata)
         // handle action by updating model with deletion
         action.fulfill(with: .delete)
       }
-      // TODO: customize the action appearance
-      deleteAction.image = UIImage(named: "delete")
+      deleteAction.image = UIImage(named: "round_delete_forever_black_24pt")
       deleteAction.hidesWhenSelected = true
-      return [deleteAction]
-    } else {
-      return []
+      actions.append(deleteAction)
     }
+    return actions
   }
 }
 
