@@ -27,11 +27,15 @@ extension UIDocument {
   /// - parameter completionHandler: Optional handler to be called with a Bool indicating success.
   public func openOrCreate(completionHandler: ((Bool) -> Void)?) {
     self.open { (success) in
+      // "the completion handler is called on the main queue" for open
       if success {
         completionHandler?(success)
       } else {
         self.save(to: self.fileURL, for: .forCreating, completionHandler: { (success) in
-          completionHandler?(success)
+          // "the completion handler is called on the calling queue" for save
+          DispatchQueue.main.async {
+            completionHandler?(success)
+          }
         })
       }
     }

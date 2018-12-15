@@ -95,6 +95,10 @@ final class TestMetadataProvider: FileMetadataProvider {
     fileNameToMetadata[metadata.fileName] = nil
     fileContents[metadata.fileName] = nil
   }
+
+  func itemExists(with pathComponent: String) throws -> Bool {
+    return fileNameToMetadata[pathComponent] != nil
+  }
 }
 
 extension TestMetadataProvider: TestEditableDocumentDelegate {

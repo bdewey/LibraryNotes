@@ -1,5 +1,6 @@
 // Copyright © 2018 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import CommonplaceBook
 import CoreServices
 import FlashcardKit
@@ -131,21 +132,26 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   @objc private func didTapNewDocument() {
     DispatchQueue.global(qos: .default).async {
-      let day = DayComponents(Date())
-      var pathComponent = "\(day).deck"
-      var counter = 0
-      var url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
-      while (try? url.checkPromisedItemIsReachable()) ?? false {
-        counter += 1
-        pathComponent = "\(day) \(counter).deck"
-        url = CommonplaceBook.ubiquityContainerURL.appendingPathComponent(pathComponent)
+      let name = FileNameGenerator(
+        baseName: DayComponents(Date()).description,
+        pathExtension: "txt"
+      ).firstName(notIn: self.notebook.metadataProvider)
+      let fileMetadata = FileMetadata(fileName: name)
+      guard let document = self.notebook.metadataProvider.editableDocument(for: fileMetadata) else {
+        DDLogError("Could not get an editable document for \(name). WHY OH WHY?")
+        return
       }
-      LanguageDeck.open(at: pathComponent, completion: { (result) in
-        _ = result.flatMap({ (deck) -> Void in
-          deck.document.save(to: url, for: .forCreating, completionHandler: { (success) in
-            print(success)
-          })
-        })
+      document.openOrCreate(completionHandler: { (success) in
+        guard success else {
+          DDLogError("Unexpected error creating new document \(name)")
+          return
+        }
+        let viewController = TextEditViewController(
+          document: document,
+          parsingRules: self.notebook.parsingRules,
+          stylesheet: self.stylesheet
+        )
+        self.navigationController?.pushViewController(viewController, animated: true)
       })
     }
   }
@@ -259,5 +265,41 @@ extension DocumentListViewController: NotebookChangeListener {
     default:
       break
     }
+  }
+}
+
+struct FileNameGenerator: Sequence {
+  let baseName: String
+  let pathExtension: String
+
+  struct Iterator: IteratorProtocol {
+    let generator: FileNameGenerator
+    var counter: Int
+
+    var currentName: String {
+      if counter == 0 {
+        return generator.baseName + "." + generator.pathExtension
+      } else {
+        return generator.baseName + " " + String(counter) + "." + generator.pathExtension
+      }
+    }
+
+    mutating func next() -> String? {
+      let returnValue = currentName
+      counter += 1
+      return returnValue
+    }
+  }
+
+  func makeIterator() -> FileNameGenerator.Iterator {
+    return Iterator(generator: self, counter: 0)
+  }
+
+  func firstName(notIn metadataProvider: FileMetadataProvider) -> String {
+    for name in self {
+      let itemExists = (try? metadataProvider.itemExists(with: name)) ?? false
+      if !itemExists { return name }
+    }
+    preconditionFailure("Unreachable: self is infinite sequence")
   }
 }
