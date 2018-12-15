@@ -26,9 +26,6 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     return propertiesFilteredByHashtag
-      .sorted(
-        by: { $0.fileMetadata.contentChangeDate > $1.fileMetadata.contentChangeDate }
-      )
       // give IGLitstKit its own copy of the model objects to guard against mutations
       .map {
         PagePropertiesListDiffable(
@@ -36,6 +33,9 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
           cardCount: cardsPerDocument[$0.fileMetadata.fileName, default: 0]
         )
       }
+      .sorted(
+        by: { $0.cardCount > $1.cardCount }
+      )
   }
 
   private var propertiesFilteredByHashtag: [PageProperties] {
