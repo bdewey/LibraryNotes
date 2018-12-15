@@ -48,10 +48,16 @@ static UIScrollView *MDCBottomSheetGetPrimaryScrollView(UIViewController *viewCo
 
 @implementation MDCBottomSheetPresentationController {
   UIView *_dimmingView;
-  @private BOOL _scrimIsAccessibilityElement;
-  @private NSString *_scrimAccessibilityLabel;
-  @private NSString *_scrimAccessibilityHint;
-  @private UIAccessibilityTraits _scrimAccessibilityTraits;
+ @private
+  UIColor *_scrimColor;
+ @private
+  BOOL _scrimIsAccessibilityElement;
+ @private
+  NSString *_scrimAccessibilityLabel;
+ @private
+  NSString *_scrimAccessibilityHint;
+ @private
+  UIAccessibilityTraits _scrimAccessibilityTraits;
 }
 
 @synthesize delegate;
@@ -84,7 +90,7 @@ static UIScrollView *MDCBottomSheetGetPrimaryScrollView(UIViewController *viewCo
   UIView *containerView = [self containerView];
 
   _dimmingView = [[UIView alloc] initWithFrame:self.containerView.bounds];
-  _dimmingView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.4f];
+  _dimmingView.backgroundColor = [UIColor colorWithWhite:0 alpha:(CGFloat)0.4];
   _dimmingView.translatesAutoresizingMaskIntoConstraints = NO;
   _dimmingView.autoresizingMask =
       UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -180,7 +186,7 @@ static UIScrollView *MDCBottomSheetGetPrimaryScrollView(UIViewController *viewCo
 - (void)updatePreferredSheetHeight {
   // If |preferredSheetHeight| has not been specified, use half of the current height.
   CGFloat preferredSheetHeight;
-  if (self.preferredSheetHeight > 0.f) {
+  if (self.preferredSheetHeight > 0) {
     preferredSheetHeight = self.preferredSheetHeight;
   } else {
     preferredSheetHeight = self.presentedViewController.preferredContentSize.height;
@@ -212,6 +218,15 @@ static UIScrollView *MDCBottomSheetGetPrimaryScrollView(UIViewController *viewCo
 }
 
 #pragma mark - Properties
+
+- (void)setScrimColor:(UIColor *)scrimColor {
+  _scrimColor = scrimColor;
+  _dimmingView.backgroundColor = scrimColor;
+}
+
+- (UIColor *)scrimColor {
+  return _scrimColor;
+}
 
 - (void)setIsScrimAccessibilityElement:(BOOL)isScrimAccessibilityElement {
   _scrimIsAccessibilityElement = isScrimAccessibilityElement;

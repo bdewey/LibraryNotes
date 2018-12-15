@@ -12,14 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "MDCSelfSizingStereoCellTypographyThemer.h"
-
-@implementation MDCSelfSizingStereoCellTypographyThemer
-
-+ (void)applyTypographyScheme:(id<MDCTypographyScheming>)typographyScheme
-       toSelfSizingStereoCell:(MDCSelfSizingStereoCell *)cell {
-  cell.titleLabel.font = typographyScheme.subtitle1;
-  cell.detailLabel.font = typographyScheme.body2;
-}
-
-@end
+#import "MDCListScheme.h"
+#import "MDCListThemer.h"

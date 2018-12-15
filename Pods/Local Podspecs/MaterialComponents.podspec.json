@@ -1,13 +1,13 @@
 {
   "name": "MaterialComponents",
-  "version": "65.0.0",
+  "version": "72.2.0",
   "authors": "The Material Components authors.",
   "summary": "A collection of stand-alone production-ready UI libraries focused on design details.",
   "homepage": "https://github.com/material-components/material-components-ios",
   "license": "Apache 2.0",
   "source": {
     "git": "https://github.com/material-components/material-components-ios.git",
-    "tag": "v65.0.0"
+    "tag": "v72.2.0"
   },
   "platforms": {
     "ios": "8.0"
@@ -460,7 +460,12 @@
                 "components/Buttons/tests/unit/*.{h,m,swift}",
                 "components/Buttons/tests/unit/supplemental/*.{h,m,swift}"
               ],
-              "resources": "components/Buttons/tests/unit/resources/*"
+              "resources": "components/Buttons/tests/unit/resources/*",
+              "dependencies": {
+                "MaterialComponentsBeta/Buttons+Theming": [
+
+                ]
+              }
             }
           ]
         }
@@ -594,7 +599,12 @@
                 "components/ButtonBar/tests/unit/*.{h,m,swift}",
                 "components/ButtonBar/tests/unit/supplemental/*.{h,m,swift}"
               ],
-              "resources": "components/ButtonBar/tests/unit/resources/*"
+              "resources": "components/ButtonBar/tests/unit/resources/*",
+              "dependencies": {
+                "MaterialComponentsBeta/ButtonBar+Theming": [
+
+                ]
+              }
             }
           ]
         }
@@ -1069,7 +1079,12 @@
                 "components/Dialogs/tests/unit/*.{h,m,swift}",
                 "components/Dialogs/tests/unit/supplemental/*.{h,m,swift}"
               ],
-              "resources": "components/Dialogs/tests/unit/resources/*"
+              "resources": "components/Dialogs/tests/unit/resources/*",
+              "dependencies": {
+                "MaterialComponentsBeta/Dialogs+Theming": [
+
+                ]
+              }
             }
           ]
         }
@@ -1088,6 +1103,9 @@
         ],
         "MaterialComponents/Themes": [
 
+        ],
+        "MaterialComponents/Buttons+ColorThemer": [
+
         ]
       }
     },
@@ -1103,6 +1121,9 @@
 
         ],
         "MaterialComponents/schemes/Typography": [
+
+        ],
+        "MaterialComponents/Buttons+TypographyThemer": [
 
         ]
       }
@@ -1122,6 +1143,9 @@
 
         ],
         "MaterialComponents/Dialogs+TypographyThemer": [
+
+        ],
+        "MaterialComponents/Buttons+ButtonThemer": [
 
         ]
       }
@@ -1502,6 +1526,28 @@
       }
     },
     {
+      "name": "List+ListThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/List/src/ListThemer/*.h",
+      "source_files": [
+        "components/List/src/ListThemer/*.{h,m}",
+        "components/List/src/ListThemer/private/*.{h,m}"
+      ],
+      "dependencies": {
+        "MaterialComponents/List": [
+
+        ],
+        "MaterialComponents/List+ColorThemer": [
+
+        ],
+        "MaterialComponents/List+TypographyThemer": [
+
+        ]
+      }
+    },
+    {
       "name": "MaskedTransition",
       "platforms": {
         "ios": "8.0"
@@ -1615,6 +1661,66 @@
       }
     },
     {
+      "name": "NavigationDrawer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/NavigationDrawer/src/*.h",
+      "source_files": [
+        "components/NavigationDrawer/src/*.{h,m}",
+        "components/NavigationDrawer/src/private/*.{h,m}"
+      ],
+      "dependencies": {
+        "MaterialComponents/Palettes": [
+
+        ],
+        "MaterialComponents/ShadowLayer": [
+
+        ],
+        "MaterialComponents/private/Math": [
+
+        ],
+        "MaterialComponents/private/UIMetrics": [
+
+        ]
+      },
+      "testspecs": [
+        {
+          "name": "tests",
+          "test_type": "unit",
+          "testspecs": [
+            {
+              "name": "unit",
+              "test_type": "unit",
+              "source_files": [
+                "components/NavigationDrawer/tests/unit/*.{h,m,swift}",
+                "components/NavigationDrawer/tests/unit/supplemental/*.{h,m,swift}"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NavigationDrawer+ColorThemer",
+      "platforms": {
+        "ios": "8.0"
+      },
+      "public_header_files": "components/NavigationDrawer/src/ColorThemer/*.h",
+      "source_files": [
+        "components/NavigationDrawer/src/ColorThemer/*.{h,m}",
+        "components/NavigationDrawer/src/ColorThemer/private/*.{h,m}"
+      ],
+      "dependencies": {
+        "MaterialComponents/NavigationDrawer": [
+
+        ],
+        "MaterialComponents/schemes/Color": [
+
+        ]
+      }
+    },
+    {
       "name": "OverlayWindow",
       "platforms": {
         "ios": "8.0"
@@ -1660,6 +1766,11 @@
       "resources": [
         "components/PageControl/src/MaterialPageControl.bundle"
       ],
+      "dependencies": {
+        "MDFInternationalization": [
+
+        ]
+      },
       "testspecs": [
         {
           "name": "tests",

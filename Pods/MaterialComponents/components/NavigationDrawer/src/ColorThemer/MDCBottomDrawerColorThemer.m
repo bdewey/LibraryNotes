@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "MDCSelfSizingStereoCellColorThemer.h"
+#import "MDCBottomDrawerColorThemer.h"
 
-static const CGFloat kHighAlpha = 0.87f;
-static const CGFloat kInkAlpha = 0.16f;
+static const CGFloat kScrimAlpha = (CGFloat)0.32;
 
-@implementation MDCSelfSizingStereoCellColorThemer
+@implementation MDCBottomDrawerColorThemer
 
 + (void)applySemanticColorScheme:(id<MDCColorScheming>)colorScheme
-          toSelfSizingStereoCell:(MDCSelfSizingStereoCell *)cell {
-  cell.titleLabel.textColor = colorScheme.onSurfaceColor;
-  cell.detailLabel.textColor = colorScheme.onSurfaceColor;
-  cell.leadingImageView.tintColor = [colorScheme.onSurfaceColor colorWithAlphaComponent:kHighAlpha];
-  cell.trailingImageView.tintColor =
-      [colorScheme.onSurfaceColor colorWithAlphaComponent:kHighAlpha];
-  cell.inkColor = [colorScheme.onSurfaceColor colorWithAlphaComponent:kInkAlpha];
+                  toBottomDrawer:(nonnull MDCBottomDrawerViewController *)bottomDrawer {
+  bottomDrawer.headerViewController.view.backgroundColor = colorScheme.surfaceColor;
+  bottomDrawer.contentViewController.view.backgroundColor = colorScheme.surfaceColor;
+  bottomDrawer.scrimColor = [colorScheme.onSurfaceColor colorWithAlphaComponent:kScrimAlpha];
 }
 
 @end

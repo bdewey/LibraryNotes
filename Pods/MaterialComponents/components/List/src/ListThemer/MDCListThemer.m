@@ -12,23 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#import "MDCSelfSizingStereoCell.h"
-#import "MaterialColorScheme.h"
+#import "MDCListThemer.h"
 
-#import <Foundation/Foundation.h>
+#import "MaterialList+ColorThemer.h"
+#import "MaterialList+TypographyThemer.h"
 
-/**
- The Material Design color system's themer for instances of MDCSelfSizingStereoCellController.
- */
-@interface MDCSelfSizingStereoCellColorThemer : NSObject
+@implementation MDCListThemer
 
-/**
- Applies a color scheme's properties to an MDCSelfSizingStereoCellController
++ (void)applyScheme:(id<MDCListScheming>)scheme
+    toSelfSizingStereoCell:(MDCSelfSizingStereoCell *)cell {
+  [MDCListColorThemer applySemanticColorScheme:scheme.colorScheme toSelfSizingStereoCell:cell];
+  [MDCListTypographyThemer applyTypographyScheme:scheme.typographyScheme
+                          toSelfSizingStereoCell:cell];
+}
 
- @param colorScheme The color scheme to apply to the component instance.
- @param cell A component instance to which the olor scheme should be applied.
- */
-+ (void)applySemanticColorScheme:(id<MDCColorScheming>)colorScheme
-          toSelfSizingStereoCell:(MDCSelfSizingStereoCell *)cell;
++ (void)applyScheme:(id<MDCListScheming>)scheme toBaseCell:(MDCBaseCell *)cell {
+  [MDCListColorThemer applySemanticColorScheme:scheme.colorScheme toBaseCell:cell];
+}
 
 @end
