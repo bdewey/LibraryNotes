@@ -81,6 +81,34 @@ public struct PageProperties: Codable {
       }
     }
   }
+
+  private static let commonWords: Set<String> = [
+    "of",
+    "the",
+    "a",
+    "an",
+  ]
+
+  /// The "desired" base file name for this page.
+  ///
+  /// - note: The desired name comes from the first 5 words of the title, excluding
+  ///         common words like "of", "a", "the", concatenated and separated by hyphens.
+  public var desiredBaseFileName: String? {
+    guard !title.strippingLeadingAndTrailingWhitespace.isEmpty else { return nil }
+    return title
+      .lowercased()
+      .split(whereSeparator: { $0.isWhitespace })
+      .map { String($0) }
+      .filter { !PageProperties.commonWords.contains($0) }
+      .prefix(5)
+      .joined(separator: "-")
+  }
+
+  /// Whether this page conforms to the desired base file name.
+  public var hasDesiredBaseFileName: Bool {
+    guard let name = desiredBaseFileName else { return true }
+    return fileMetadata.fileName.hasPrefix(name)
+  }
 }
 
 extension PageProperties {

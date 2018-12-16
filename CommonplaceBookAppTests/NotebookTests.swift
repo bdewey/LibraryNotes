@@ -12,8 +12,8 @@ final class NotebookTests: XCTestCase {
   override func setUp() {
     metadataProvider = TestMetadataProvider(
       fileInfo: [
-        TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#hashtag #test1"),
-        TestMetadataProvider.FileInfo(fileName: "page2.txt", contents: "#hashtag #test2"),
+        TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "Sample #hashtag #test1"),
+        TestMetadataProvider.FileInfo(fileName: "page2.txt", contents: "Sample #hashtag #test2"),
         ],
       parsingRules: parsingRules
     )
@@ -217,6 +217,31 @@ final class NotebookTests: XCTestCase {
     XCTAssertNotNil(notebook.pageProperties["spanish-new.txt"])
     XCTAssertNotNil(metadataProvider.fileNameToMetadata["spanish-new.txt"])
     XCTAssertNil(metadataProvider.fileNameToMetadata["spanish1.txt"])
+  }
+
+  func testDetectDesiredRenames() {
+    // Create one page where the file name matches the content.
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "my-sample-page.txt",
+      contents: "# My sample page\n\nThis is my sample page!"
+    ))
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "2018-12-16.txt",
+      contents: "#nocontent #onlyhashtags #notitle #anyfilenameworks"
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .loadStudyMetadata()
+      .monitorMetadataProvider()
+    let desiredBaseNameForPage = notebook.desiredBaseNameForPage
+    XCTAssertEqual(desiredBaseNameForPage.count, 2)
+    XCTAssertEqual(
+      notebook.pageProperties["page1.txt"]?.value.desiredBaseFileName,
+      "sample"
+    )
+    XCTAssertEqual(desiredBaseNameForPage["page1.txt"], "sample")
+    XCTAssertNil(desiredBaseNameForPage["2018-12-16.txt"])
   }
 
   // MARK: - Helpers

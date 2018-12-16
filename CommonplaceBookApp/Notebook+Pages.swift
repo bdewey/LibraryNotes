@@ -170,6 +170,18 @@ extension Notebook {
     }
   }
 
+  /// The list of pages where the name does not match the desired base name.
+  /// The keys are existing file names. The values are desired *base* names
+  /// (no extensions, no uniqifiers).
+  public var desiredBaseNameForPage: [String: String] {
+    var results = [String: String]()
+    for (page, taggedProperties) in pageProperties
+      where !taggedProperties.value.hasDesiredBaseFileName {
+      results[page] = taggedProperties.value.desiredBaseFileName
+    }
+    return results
+  }
+
   /// Removes items "pages" except those referenced by `metadata`
   /// - note: This does *not* save cached properties. That is the responsibility of the caller.
   /// TODO: I should redesign the page manipulation APIs to be more foolproof.
