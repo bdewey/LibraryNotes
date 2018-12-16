@@ -51,6 +51,13 @@ extension Notebook {
         self.conditionForKey(.studyMetadata).condition = true
       })
     }
+    renameBlocks[.studyMetadata] = { [weak self](oldName, newName) in
+      guard let self = self else { return }
+      self.studyMetadata[newName] = self.studyMetadata[oldName]
+      self.studyMetadata[oldName] = nil
+      self.notifyListeners(changed: .studyMetadata)
+      self.saveStudyMetadata(self.studyMetadata)
+    }
     return self
   }
 

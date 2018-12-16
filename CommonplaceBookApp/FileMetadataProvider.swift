@@ -28,10 +28,14 @@ public protocol FileMetadataProvider: class {
   /// Gets the EditableDocument that corresponds to a particular piece of metadata.
   func editableDocument(for metadata: FileMetadata) -> EditableDocument?
 
+  /// Delete an item.
   func delete(_ metadata: FileMetadata) throws
 
   /// Tests if there is currently an item with a given path component in this container.
   func itemExists(with pathComponent: String) throws -> Bool
+
+  /// Renames an item associated with metadata.
+  func renameMetadata(_ metadata: FileMetadata, to name: String) throws
 }
 
 extension FileMetadataProvider {
@@ -105,6 +109,12 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
   public func itemExists(with pathComponent: String) throws -> Bool {
     let url = container.appendingPathComponent(pathComponent)
     return try url.checkPromisedItemIsReachable()
+  }
+
+  public func renameMetadata(_ metadata: FileMetadata, to name: String) throws {
+    let url = container.appendingPathComponent(metadata.fileName)
+    let destinationURL = container.appendingPathComponent(name)
+    try FileManager.default.moveItem(at: url, to: destinationURL)
   }
 
   @objc private func didFinishGatheringNotification(_ notification: NSNotification) {

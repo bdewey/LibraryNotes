@@ -193,6 +193,32 @@ final class NotebookTests: XCTestCase {
     XCTAssert(fileLength > 0)
   }
 
+  func testCanRenamePage() {
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish1.txt",
+      contents: textWithCards
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .loadStudyMetadata()
+      .monitorMetadataProvider()
+    var studySession = notebook.studySession()
+    while studySession.currentCard != nil {
+      studySession.recordAnswer(correct: true)
+    }
+    verifyStudyMetadataChanged(for: notebook) {
+      notebook.updateStudySessionResults(studySession)
+    }
+    verifyStudyMetadataChanged(for: notebook) {
+       // swiftlint:disable:next force_try
+      try! notebook.renamePage(from: "spanish1.txt", to: "spanish-new.txt")
+    }
+    XCTAssertNotNil(notebook.pageProperties["spanish-new.txt"])
+    XCTAssertNotNil(metadataProvider.fileNameToMetadata["spanish-new.txt"])
+    XCTAssertNil(metadataProvider.fileNameToMetadata["spanish1.txt"])
+  }
+
   // MARK: - Helpers
 
   private let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
@@ -238,7 +264,7 @@ final class NotebookTests: XCTestCase {
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener() { (notebook, key) in
+    let notebookListener = TestListener { (notebook, key) in
       guard key == .studyMetadata else { return }
       print("Checking condition: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
@@ -252,7 +278,7 @@ final class NotebookTests: XCTestCase {
 
   private func verifyStudyMetadataChanged(for notebook: Notebook, block: () -> Void) {
     var listenerBlockExecuted = false
-    let notebookListener = TestListener() { (_, key) in
+    let notebookListener = TestListener { (_, key) in
       guard key == .studyMetadata else { return }
       listenerBlockExecuted = true
     }

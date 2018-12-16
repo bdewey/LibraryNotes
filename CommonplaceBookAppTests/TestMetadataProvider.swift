@@ -99,6 +99,13 @@ final class TestMetadataProvider: FileMetadataProvider {
   func itemExists(with pathComponent: String) throws -> Bool {
     return fileNameToMetadata[pathComponent] != nil
   }
+
+  func renameMetadata(_ metadata: FileMetadata, to name: String) throws {
+    fileNameToMetadata[name] = fileNameToMetadata[metadata.fileName]
+    fileContents[name] = fileContents[metadata.fileName]
+    fileNameToMetadata[metadata.fileName] = nil
+    fileContents[metadata.fileName] = nil
+  }
 }
 
 extension TestMetadataProvider: TestEditableDocumentDelegate {

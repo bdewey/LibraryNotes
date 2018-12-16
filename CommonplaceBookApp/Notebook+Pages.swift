@@ -63,6 +63,14 @@ extension Notebook {
     } else {
       DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
     }
+    self.renameBlocks[.pageProperties] = { [weak self](oldName, newName) in
+      guard let self = self else { return }
+      try self.metadataProvider.renameMetadata(FileMetadata(fileName: oldName), to: newName)
+      self.pageProperties[newName] = self.pageProperties[oldName]
+      self.pageProperties[oldName] = nil
+      self.notifyListeners(changed: .pageProperties)
+      self.saveProperties()
+    }
     return self
   }
 

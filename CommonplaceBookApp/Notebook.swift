@@ -65,6 +65,22 @@ public final class Notebook {
 
   private var metadocumentLoadedConditions = [Key: Condition]()
 
+  /// A block that takes an old page name and a new page name, updating any internal
+  /// data structures as necessary to reflect the rename.
+  internal typealias RenameBlock = (String, String) throws -> Void
+
+  internal var renameBlocks = [Key: RenameBlock]()
+
+  /// Rename a page.
+  ///
+  /// - parameter oldName: The old name of the page.
+  /// - parameter newName: The new name of the page.
+  public func renamePage(from oldName: String, to newName: String) throws {
+    for (_, block) in renameBlocks {
+      try block(oldName, newName)
+    }
+  }
+
   internal func conditionForKey(_ key: Key) -> Condition {
     if let condition = metadocumentLoadedConditions[key] {
       return condition
@@ -74,7 +90,7 @@ public final class Notebook {
       return condition
     }
   }
-  
+
   internal var endpoints: [Cancellable] = []
 
   /// Decoder for this notebook. It depend on the parsing rules, which is why it is an instance
