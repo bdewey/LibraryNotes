@@ -146,11 +146,23 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
           DDLogError("Unexpected error creating new document \(name)")
           return
         }
+        var initialText = "# "
+        let initialOffset = initialText.count
+        initialText += "\n"
+        if let hashtag = self.dataSource.filteredHashtag {
+          initialText += hashtag
+          initialText += "\n"
+        }
+        document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
+          return initialText
+        })
         let viewController = TextEditViewController(
           document: document,
           parsingRules: self.notebook.parsingRules,
           stylesheet: self.stylesheet
         )
+        viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+        viewController.autoFirstResponder = true
         self.navigationController?.pushViewController(viewController, animated: true)
       })
     }

@@ -148,6 +148,15 @@ final class TextEditViewController: UIViewController,
     return textView
   }()
 
+  public var selectedRange: NSRange {
+    get {
+      return textView.selectedRange
+    }
+    set {
+      textView.selectedRange = newValue
+    }
+  }
+
   // MARK: - Lifecycle
   override func loadView() {
     self.view = textView
@@ -158,9 +167,17 @@ final class TextEditViewController: UIViewController,
     textView.delegate = self
   }
 
+  /// If true, the text view will become first responder upon becoming visible.
+  public var autoFirstResponder = false
+
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     textView.contentOffset = CGPoint(x: 0, y: -1 * textView.adjustedContentInset.top)
+    if autoFirstResponder {
+      textView.becomeFirstResponder()
+      // We only do this behavior on first appearance.
+      autoFirstResponder = false
+    }
   }
 
   // MARK: - Keyboard
