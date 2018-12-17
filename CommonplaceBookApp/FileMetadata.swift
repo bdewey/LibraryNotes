@@ -77,7 +77,7 @@ public struct FileMetadata: Equatable {
   public let contentTypeTree: [String]
   public let displayName: String
   public let downloadingStatus: String
-  public let fileName: String
+  public var fileName: String
 
   // Transient properties
   public let isDownloading: Bool

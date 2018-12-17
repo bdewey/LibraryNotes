@@ -42,6 +42,12 @@ public struct PageProperties: Codable {
     return copy
   }
 
+  public func renaming(to newName: String) -> PageProperties {
+    var copy = self
+    copy.fileMetadata.fileName = newName
+    return copy
+  }
+
   /// Loads PageProperties from an item in a FileMetadataProvider.
   ///
   /// - parameter metadataWrapper: The FileMetadata identifying the page.
@@ -89,13 +95,25 @@ public struct PageProperties: Codable {
     "an",
   ]
 
+  private static let allowedNameCharacters: CharacterSet = {
+    var allowedNameCharacters = CharacterSet.alphanumerics
+    allowedNameCharacters.insert(" ")
+    return allowedNameCharacters
+  }()
+
   /// The "desired" base file name for this page.
   ///
   /// - note: The desired name comes from the first 5 words of the title, excluding
   ///         common words like "of", "a", "the", concatenated and separated by hyphens.
   public var desiredBaseFileName: String? {
-    guard !title.strippingLeadingAndTrailingWhitespace.isEmpty else { return nil }
-    return title
+    let sanitizedTitle = title
+      .strippingLeadingAndTrailingWhitespace
+      .filter {
+        $0.unicodeScalars.count == 1
+          && PageProperties.allowedNameCharacters.contains($0.unicodeScalars.first!)
+      }
+    guard !sanitizedTitle.isEmpty else { return nil }
+    return sanitizedTitle
       .lowercased()
       .split(whereSeparator: { $0.isWhitespace })
       .map { String($0) }

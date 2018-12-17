@@ -9,6 +9,10 @@ extension Notebook.Key {
   public static let pageProperties = Notebook.Key(rawValue: "properties.json")
 }
 
+extension Tag {
+  public static let renamedCopy = Tag(rawValue: "renamedCopy")
+}
+
 /// Notebook functionality responsible for the "pages" data -- mapping of name to PageProperties.
 extension Notebook {
   public typealias TaggedPageDictionary = [String: Tagged<PageProperties>]
@@ -66,8 +70,13 @@ extension Notebook {
     self.renameBlocks[.pageProperties] = { [weak self](oldName, newName) in
       guard let self = self else { return }
       try self.metadataProvider.renameMetadata(FileMetadata(fileName: oldName), to: newName)
-      self.pageProperties[newName] = self.pageProperties[oldName]
-      self.pageProperties[oldName] = nil
+      if let existingProperties = self.pageProperties[oldName]?.value {
+        self.pageProperties[newName] = Tagged<PageProperties>(
+          tag: Tag.renamedCopy,
+          value: existingProperties.renaming(to: newName)
+        )
+        self.pageProperties[oldName] = nil
+      }
       self.notifyListeners(changed: .pageProperties)
       self.saveProperties()
     }
@@ -180,6 +189,19 @@ extension Notebook {
       results[page] = taggedProperties.value.desiredBaseFileName
     }
     return results
+  }
+
+  public func performRenames(_ desiredBaseNameForPage: [String: String]) throws {
+    guard !desiredBaseNameForPage.isEmpty else { return }
+    try performBatchUpdates {
+      for (existingPage, baseName) in desiredBaseNameForPage {
+        let pathExtension = (existingPage as NSString).pathExtension
+        let newName = FileNameGenerator(baseName: baseName, pathExtension: pathExtension)
+          .firstName(notIn: metadataProvider)
+        DDLogInfo("Renaming \(existingPage) to \(newName)")
+        try self.renamePage(from: existingPage, to: newName)
+      }
+    }
   }
 
   /// Removes items "pages" except those referenced by `metadata`

@@ -136,8 +136,27 @@ public final class Notebook {
     listeners.remove(at: index)
   }
 
+  var currentBatchUpdates = 0
+  var pendingNotificationKeys = Set<Key>()
+
+  internal func performBatchUpdates(block: () throws -> Void) rethrows {
+    currentBatchUpdates += 1
+    try block()
+    currentBatchUpdates -= 1
+    if currentBatchUpdates == 0 {
+      for key in pendingNotificationKeys {
+        notifyListeners(changed: key)
+      }
+      pendingNotificationKeys.removeAll()
+    }
+  }
+
   /// Tell all registered list adapters to perform updates.
   internal func notifyListeners(changed key: Key) {
+    guard currentBatchUpdates == 0 else {
+      pendingNotificationKeys.insert(key)
+      return
+    }
     for adapter in listeners {
       adapter.listener?.notebook(self, didChange: key)
     }
