@@ -199,13 +199,8 @@ final class NotebookTests: XCTestCase {
     verifyStudyMetadataChanged(for: notebook) {
       notebook.updateStudySessionResults(studySession)
     }
-    // Now there should be nothing to study
-    XCTAssertEqual(notebook.studySession().count, 0)
-    // We saved the new metadata.
-    let fileLength = metadataProvider
-      .fileContents[Notebook.Key.studyMetadata.rawValue]?.count
-      ?? 0
-    XCTAssert(fileLength > 0)
+    assertNoCardsToStudy(in: notebook)
+    XCTAssertGreaterThan(savedStudyMetadataLength, 1)
   }
 
   func testCanRenamePage() {
@@ -218,13 +213,7 @@ final class NotebookTests: XCTestCase {
       .loadCachedProperties()
       .loadStudyMetadata()
       .monitorMetadataProvider()
-    var studySession = notebook.studySession()
-    while studySession.currentCard != nil {
-      studySession.recordAnswer(correct: true)
-    }
-    verifyStudyMetadataChanged(for: notebook) {
-      notebook.updateStudySessionResults(studySession)
-    }
+    XCTAssertEqual(studyAllCards(in: notebook), 6)
     verifyStudyMetadataChanged(for: notebook) {
        // swiftlint:disable:next force_try
       try! notebook.renamePage(from: "spanish1.txt", to: "spanish-new.txt")
@@ -257,6 +246,32 @@ final class NotebookTests: XCTestCase {
     )
     XCTAssertEqual(desiredBaseNameForPage["page1.txt"], "sample")
     XCTAssertNil(desiredBaseNameForPage["2018-12-16.txt"])
+  }
+
+  func testRenameWithStudyHistory() {
+    let oldName = "spanish1.txt"
+    let newName = "vocabulary.txt"
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: oldName,
+      contents: textWithCards
+    ))
+    metadataProvider.addPropertiesCache()
+    let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
+      .loadCachedProperties()
+      .loadStudyMetadata()
+      .monitorMetadataProvider()
+    XCTAssertEqual(studyAllCards(in: notebook), 6)
+    assertNoCardsToStudy(in: notebook)
+    let originalMetadata = savedStudyMetadata
+    XCTAssertGreaterThan(originalMetadata?.count ?? 0, 1000)
+    let desiredNames = notebook.desiredBaseNameForPage
+    XCTAssertEqual(desiredNames.count, 3)
+    try! notebook.performRenames(desiredNames) // swiftlint:disable:this force_try
+    XCTAssertNotEqual(originalMetadata, savedStudyMetadata)
+    XCTAssertGreaterThan(savedStudyMetadataLength, 1000)
+    assertNoCardsToStudy(in: notebook)
+    let properties = notebook.pageProperties[newName]!
+    XCTAssertEqual(properties.tag.rawValue, Tag.renamedCopy.rawValue)
   }
 }
 
@@ -342,6 +357,34 @@ extension NotebookTests {
         didSaveCache.fulfill()
       }
     }
+  }
+
+  /// Studies all available cards in the notebook.
+  /// - returns: The number of cards studied.
+  @discardableResult
+  private func studyAllCards(in notebook: Notebook) -> Int {
+    var studySession = notebook.studySession()
+    var studiedCards = 0
+    while studySession.currentCard != nil {
+      studySession.recordAnswer(correct: true)
+      studiedCards += 1
+    }
+    verifyStudyMetadataChanged(for: notebook) {
+      notebook.updateStudySessionResults(studySession)
+    }
+    return studiedCards
+  }
+
+  private func assertNoCardsToStudy(in notebook: Notebook) {
+    XCTAssertEqual(notebook.studySession().count, 0)
+  }
+
+  private var savedStudyMetadataLength: Int {
+    return savedStudyMetadata?.count ?? 0
+  }
+
+  private var savedStudyMetadata: String? {
+    return metadataProvider.fileContents[Notebook.Key.studyMetadata.rawValue]
   }
 }
 
