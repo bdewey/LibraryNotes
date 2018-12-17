@@ -31,10 +31,17 @@ final class NotebookTests: XCTestCase {
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
     waitForNotebook(notebook) { (notebook) -> Bool in
-      return notebook.pageProperties.count == 2 && notebook.pageProperties.allSatisfy { $1.tag == .truth }
+      return notebook.pageProperties.count == 2
+        && notebook.pageProperties.allSatisfy { $1.tag == .truth }
     }
-    XCTAssertEqual(Set(notebook.pageProperties["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
-    XCTAssertEqual(Set(notebook.pageProperties["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
+    XCTAssertEqual(
+      Set(notebook.pageProperties["page1.txt"]!.value.hashtags),
+      Set(["#hashtag", "#test1"])
+    )
+    XCTAssertEqual(
+      Set(notebook.pageProperties["page2.txt"]!.value.hashtags),
+      Set(["#hashtag", "#test2"])
+    )
   }
 
   func testNotebookHasJSONImmediately() {
@@ -43,9 +50,15 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties()
-    waitForNotebook(notebook, condition: allPagesAreCached)
-    XCTAssertEqual(Set(notebook.pageProperties["page1.txt"]!.value.hashtags), Set(["#hashtag", "#test1"]))
-    XCTAssertEqual(Set(notebook.pageProperties["page2.txt"]!.value.hashtags), Set(["#hashtag", "#test2"]))
+    waitForNotebook(notebook, condition: NotebookTests.allPagesAreCached)
+    XCTAssertEqual(
+      Set(notebook.pageProperties["page1.txt"]!.value.hashtags),
+      Set(["#hashtag", "#test1"])
+    )
+    XCTAssertEqual(
+      Set(notebook.pageProperties["page2.txt"]!.value.hashtags),
+      Set(["#hashtag", "#test2"])
+    )
   }
 
   func testModifyDocumentWillUpdateProperties() {
@@ -54,13 +67,13 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
-    waitForNotebook(notebook, condition: allPagesAreTruth)
+    waitForNotebook(notebook, condition: NotebookTests.allPagesAreTruth)
     XCTAssert(metadataProvider.delegate === notebook)
     metadataProvider.addFileInfo(
       TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "#newhashtag")
     )
     XCTAssertEqual(notebook.pageProperties["page1.txt"]?.tag.rawValue, Tag.placeholder.rawValue)
-    waitForNotebook(notebook, condition: allPagesAreTruth)
+    waitForNotebook(notebook, condition: NotebookTests.allPagesAreTruth)
     XCTAssertEqual(notebook.pageProperties["page1.txt"]!.value.hashtags, ["#newhashtag"])
   }
 
@@ -70,7 +83,7 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
-    waitForNotebook(notebook, condition: allPagesAreTruth)
+    waitForNotebook(notebook, condition: NotebookTests.allPagesAreTruth)
     XCTAssert(metadataProvider.delegate === notebook)
     startMonitoringForCacheSave()
     metadataProvider.addFileInfo(
@@ -94,7 +107,7 @@ final class NotebookTests: XCTestCase {
       parsingRules: parsingRules,
       metadataProvider: metadataProvider
     ).loadCachedProperties()
-    waitForNotebook(notebook, condition: noPagesArePlaceholders)
+    waitForNotebook(notebook, condition: NotebookTests.noPagesArePlaceholders)
     XCTAssertEqual(notebook.pageProperties["cloze.txt"]?.value.cardTemplates.count, 1)
   }
 
@@ -104,7 +117,8 @@ final class NotebookTests: XCTestCase {
       .loadCachedProperties()
       .monitorMetadataProvider()
     waitForNotebook(notebook) { (notebook) -> Bool in
-      return notebook.pageProperties.count == 2 && notebook.pageProperties.allSatisfy { $1.tag == .truth }
+      return notebook.pageProperties.count == 2
+        && notebook.pageProperties.allSatisfy { $1.tag == .truth }
     }
     XCTAssertEqual(notebook.pageProperties.count, 2)
     // thought: Maybe startMonitoring through to waitForExpecations should be in a method that
@@ -124,12 +138,13 @@ final class NotebookTests: XCTestCase {
     // Create a properties.json that has info about page1.txt and page2.txt
     metadataProvider.addPropertiesCache()
     // Now get rid of page1.txt
-    try! metadataProvider.delete(FileMetadata(fileName: "page1.txt")) // swiftlint:disable:this force_try
+    // swiftlint:disable:next force_try
+    try! metadataProvider.delete(FileMetadata(fileName: "page1.txt"))
     // Load the notebook and wait for it to reconcile
     let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
       .loadCachedProperties()
       .monitorMetadataProvider()
-    waitForNotebook(notebook, condition: allPagesAreTruth)
+    waitForNotebook(notebook, condition: NotebookTests.allPagesAreTruth)
     // there should be only one page.
     XCTAssertEqual(notebook.pageProperties.count, 1)
   }
@@ -243,14 +258,16 @@ final class NotebookTests: XCTestCase {
     XCTAssertEqual(desiredBaseNameForPage["page1.txt"], "sample")
     XCTAssertNil(desiredBaseNameForPage["2018-12-16.txt"])
   }
+}
 
-  // MARK: - Helpers
+/// Helpers.
+extension NotebookTests {
 
-  private let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
+  private static let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
 
-  private let allPagesAreCached = NotebookTests.notebookPagesAllHaveTag(.fromCache)
+  private static let allPagesAreCached = NotebookTests.notebookPagesAllHaveTag(.fromCache)
 
-  private let noPagesArePlaceholders = NotebookTests.notebookPagesNoneHaveTag(.placeholder)
+  private static let noPagesArePlaceholders = NotebookTests.notebookPagesNoneHaveTag(.placeholder)
 
   private static func notebookPagesAllHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
     return { (notebook) in
@@ -266,11 +283,12 @@ final class NotebookTests: XCTestCase {
 
   private func waitForNotebook(_ notebook: Notebook, condition: @escaping (Notebook) -> Bool) {
     if condition(notebook) {
-      print("Condition immediately passed: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
+      print("Condition immediately passed: "
+        + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener() { (notebook, key) in
+    let notebookListener = TestListener { (notebook, key) in
       guard key == .pageProperties else { return }
       print("Checking condition: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
@@ -283,9 +301,13 @@ final class NotebookTests: XCTestCase {
   }
 
   // TODO: Is there a way to combine the two "wait for" functions?
-  private func waitForStudyMetadata(in notebook: Notebook, condition: @escaping (Notebook) -> Bool) {
+  private func waitForStudyMetadata(
+    in notebook: Notebook,
+    condition: @escaping (Notebook) -> Bool
+  ) {
     if condition(notebook) {
-      print("Condition immediately passed: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
+      print("Condition immediately passed: "
+        + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
