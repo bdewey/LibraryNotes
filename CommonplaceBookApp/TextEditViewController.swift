@@ -216,6 +216,8 @@ extension TextEditViewController: UITextViewDelegate {
     shouldChangeTextIn range: NSRange,
     replacementText text: String
   ) -> Bool {
+    // We do syntax highlighting. Don't do typing attributes, ever.
+    textView.typingAttributes = [:]
     guard range.length == 0 else { return true }
     if text == "\n" {
       if let currentNode = textStorage.node(at: range.location),
