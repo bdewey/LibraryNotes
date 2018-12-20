@@ -255,18 +255,27 @@ final class NotebookTests: XCTestCase {
       fileName: oldName,
       contents: textWithCards
     ))
+    // Another copy of the file will have the same title and same "desired" filename
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: "spanish2.txt",
+      contents: textWithCards
+    ))
     metadataProvider.addPropertiesCache()
     let notebook = Notebook(parsingRules: parsingRules, metadataProvider: metadataProvider)
       .loadCachedProperties()
       .loadStudyMetadata()
       .monitorMetadataProvider()
-    XCTAssertEqual(studyAllCards(in: notebook), 6)
+    XCTAssertEqual(studyAllCards(in: notebook), 12)
     assertNoCardsToStudy(in: notebook)
     let originalMetadata = savedStudyMetadata
     XCTAssertGreaterThan(originalMetadata?.count ?? 0, 1000)
     let desiredNames = notebook.desiredBaseNameForPage
-    XCTAssertEqual(desiredNames.count, 3)
+    XCTAssertEqual(desiredNames.count, 4)
+    // study information for cards in 2 different pages
+    XCTAssertEqual(notebook.studyMetadata.count, 2)
     try! notebook.performRenames(desiredNames) // swiftlint:disable:this force_try
+    // still have study information for cards in 2 different pages
+    XCTAssertEqual(notebook.studyMetadata.count, 2)
     XCTAssertNotEqual(originalMetadata, savedStudyMetadata)
     XCTAssertGreaterThan(savedStudyMetadataLength, 1000)
     assertNoCardsToStudy(in: notebook)
