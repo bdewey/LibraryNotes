@@ -570,9 +570,9 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (2.0.0)
   - MDFTextAccessibility (2.0.0)
-  - MiniMarkdown (0.9.2):
+  - MiniMarkdown (0.9.3):
     - CocoaLumberjack/Swift (>= 3.4)
-  - MiniMarkdown/Tests (0.9.2):
+  - MiniMarkdown/Tests (0.9.3):
     - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
@@ -669,7 +669,7 @@ CHECKOUT OPTIONS:
     :commit: bc4596247995de4d12952f9f1bb1a0d4bb117b50
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :commit: d9cdd61d4ec4fb689f50e72cddda13d33e1d66e3
+    :commit: 6191818508f6b4dae3ce28fe4b7c62d23fecf114
     :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
     :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
@@ -696,7 +696,7 @@ SPEC CHECKSUMS:
   MaterialComponents: a4f9846006f3ee213ca6cff65a545e01298cb4a9
   MDFInternationalization: 010097556d6b09d2c4ea38e0820ea6d37be6a314
   MDFTextAccessibility: 85c09a1bd9c321f494348e632a25063bcda35a53
-  MiniMarkdown: 2c4ddae1323268e6b72e8c7d0f74fb66d486c218
+  MiniMarkdown: 83b09dd40407cae2f1222014a71b9e8e846930dc
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a

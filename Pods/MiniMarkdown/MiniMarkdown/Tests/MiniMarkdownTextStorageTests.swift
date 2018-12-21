@@ -215,6 +215,25 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     XCTAssertEqual(range, headingRange)
   }
 
+  func testInsertTextAfterHeading() {
+    var range = NSRange(location: NSNotFound, length: 0)
+    let headingFont = textStorage.expectedAttributes(for: .heading).font
+    textStorage.append(NSAttributedString(string: "#hashtag"))
+    let hashtagFont = textStorage
+      .attributes(at: textStorage.length - 1, effectiveRange: &range)
+      .font
+    XCTAssertNotEqual(hashtagFont, headingFont)
+    textStorage.replaceCharacters(
+      in: NSRange(location: 0, length: textStorage.length),
+      with: NSAttributedString(string: "# Headin")
+    )
+    XCTAssertEqual(textStorage.length, 8)
+    textStorage.insert(NSAttributedString(string: "g"), at: 8)
+    let lastCharacterFont = textStorage.attributes(at: 8, effectiveRange: &range).font
+    XCTAssertEqual(lastCharacterFont, headingFont)
+    XCTAssertEqual(range, NSRange(location: 0, length: 9))
+  }
+
   func testCompleteTheImage() {
     let textStorageMessageRecorder = TextStorageMessageRecorder()
     textStorage.delegate = textStorageMessageRecorder

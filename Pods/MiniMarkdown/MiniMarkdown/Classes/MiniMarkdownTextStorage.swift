@@ -18,6 +18,8 @@
 import CocoaLumberjack
 import UIKit
 
+private let debugLogging = false
+
 extension NSNotification.Name {
   public static let miniMarkdownTextStorageNodesDidChange = NSNotification.Name(
     rawValue: "miniMarkdownTextStorageNodesDidChange"
@@ -100,14 +102,18 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
   }
 
   override public func replaceCharacters(in range: NSRange, with str: String) {
-    DDLogDebug(
-      "MiniMarkdownTextStorage.replaceCharacters " +
-      "length = \(String(describing: memoizedAttributedString?.length)) " +
-      "range = \(range) replacement = " + str.debugDescription
-    )
+    if debugLogging {
+      DDLogDebug(
+        "MiniMarkdownTextStorage.replaceCharacters " +
+          "length = \(String(describing: memoizedAttributedString?.length)) " +
+          "range = \(range) replacement = " + str.debugDescription
+      )
+    }
     memoizedAttributedString = nil
     let change = storage.replaceCharacters(in: range, with: str)
-    DDLogDebug("Change = \(change)")
+    if debugLogging {
+      DDLogDebug("Change = \(change)")
+    }
     self.edited(
       NSTextStorage.EditActions.editedCharacters,
       range: change.changedCharacterRange,
@@ -133,7 +139,9 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
 
   override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
     guard let attrs = attrs, attrs.count > 0 else {
-      DDLogDebug("Ignoring call to clear attributes at range \(range)")
+      if debugLogging {
+        DDLogDebug("Ignoring call to clear attributes at range \(range)")
+      }
       return
     }
     getAttributedString().setAttributes(attrs, range: range)
