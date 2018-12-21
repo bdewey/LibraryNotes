@@ -59,9 +59,13 @@ final class TextEditViewController: UIViewController,
     fatalError("init(coder:) has not been implemented")
   }
 
+  /// Block that's run when the controller is deallocated.
+  public var onDealloc: (() -> ())?
+
   deinit {
     NotificationCenter.default.removeObserver(self)
     document.close()
+    onDealloc?()
   }
 
   // Init-time state.

@@ -128,6 +128,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.height.equalTo(56)
     }
     studySession = notebook.studySession()
+    try? notebook.performRenames(notebook.desiredBaseNameForPage)
   }
 
   @objc private func didTapNewDocument() {
@@ -141,6 +142,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
         DDLogError("Could not get an editable document for \(name). WHY OH WHY?")
         return
       }
+      let notebook = self.notebook
       document.openOrCreate(completionHandler: { (success) in
         guard success else {
           DDLogError("Unexpected error creating new document \(name)")
@@ -161,6 +163,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
           parsingRules: self.notebook.parsingRules,
           stylesheet: self.stylesheet
         )
+        viewController.onDealloc = {
+          try? notebook.performRenames(notebook.desiredBaseNameForPage)
+        }
         viewController.selectedRange = NSRange(location: initialOffset, length: 0)
         viewController.autoFirstResponder = true
         self.navigationController?.pushViewController(viewController, animated: true)
@@ -277,6 +282,5 @@ extension DocumentListViewController: NotebookChangeListener {
     default:
       break
     }
-    try? notebook.performRenames(notebook.desiredBaseNameForPage)
   }
 }
