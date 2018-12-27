@@ -4,9 +4,20 @@ import XCTest
 
 private enum Identifiers {
   static let backButton = "Back"
+  static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"
   static let newDocumentButton = "new-document"
   static let studyButton = "study-button"
+}
+
+private enum TestContent {
+  static let singleCloze = """
+Cloze test
+
+#testing
+
+- This is a file with a ?[](cloze).
+"""
 }
 
 final class CommonplaceBookAppUITests: XCTestCase {
@@ -39,18 +50,22 @@ final class CommonplaceBookAppUITests: XCTestCase {
   }
 
   func testStudyButtonEnabledAfterCreatingClozeContent() {
-    createDocument(with: "Cloze test\n\n#testing\n\n- This is a file with a ?[](cloze).")
-    wait(
-      for: NSPredicate(format: "isEnabled == true"),
-      evaluatedWith: application.buttons[Identifiers.studyButton],
-      message: "Study button did not become enabled"
-    )
+    createDocument(with: TestContent.singleCloze)
+    waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
   }
 
   func testStudyButtonStartsDisabled() {
     let studyButton = application.buttons[Identifiers.studyButton]
     waitUntilElementExists(studyButton)
     XCTAssertFalse(studyButton.isEnabled)
+  }
+
+  func testTableHasSingleRowAfterClozeContent() {
+    createDocument(with: TestContent.singleCloze)
+    waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
+    let documentList = application.collectionViews[Identifiers.documentList]
+    waitUntilElementExists(documentList)
+    XCTAssertEqual(documentList.cells.count, 1)
   }
 }
 
@@ -68,7 +83,23 @@ extension CommonplaceBookAppUITests {
     wait(
       for: NSPredicate(format: "exists == true"),
       evaluatedWith: element,
-      message: "Failed to find \(element) after 5 seconds"
+      message: "Failed to find \(element) after 5 seconds",
+      file: file,
+      line: line
+    )
+  }
+
+  private func waitUntilElementEnabled(
+    _ element: XCUIElement,
+    file: String = #file,
+    line: Int = #line
+  ) {
+    wait(
+      for: NSPredicate(format: "isEnabled == true"),
+      evaluatedWith: element,
+      message: "\(element) did not become enabled",
+      file: file,
+      line: line
     )
   }
 

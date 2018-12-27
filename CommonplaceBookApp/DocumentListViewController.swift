@@ -114,6 +114,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     )
     collectionView.backgroundColor = stylesheet.colors.surfaceColor
     documentListAdapter.collectionView = collectionView
+    collectionView.accessibilityIdentifier = "document-list"
     return collectionView
   }()
 
@@ -131,7 +132,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.height.equalTo(56)
     }
     studySession = notebook.studySession()
-    try? notebook.performRenames(notebook.desiredBaseNameForPage)
+    do {
+      try notebook.performRenames(notebook.desiredBaseNameForPage)
+    } catch {
+      DDLogError("Unexpected error performing renames in load: \(error)")
+    }
   }
 
   @objc private func didTapNewDocument() {
@@ -167,7 +172,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
           stylesheet: self.stylesheet
         )
         viewController.onDealloc = {
-          try? notebook.performRenames(notebook.desiredBaseNameForPage)
+          do {
+            try notebook.performRenames(notebook.desiredBaseNameForPage)
+          } catch {
+            DDLogError("Unexpected error on rename: \(error)")
+          }
         }
         viewController.selectedRange = NSRange(location: initialOffset, length: 0)
         viewController.autoFirstResponder = true
