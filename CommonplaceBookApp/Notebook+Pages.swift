@@ -61,7 +61,7 @@ extension Notebook {
   public func loadCachedProperties() -> Notebook {
     if let propertiesDocument = metadataProvider.editableDocument(
       for: FileMetadata(fileName: Key.pageProperties.rawValue)
-      ) {
+    ) {
       openMetadocuments[.pageProperties] = propertiesDocument
       monitorPropertiesDocument(propertiesDocument)
     } else {
@@ -97,7 +97,7 @@ extension Notebook {
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
   private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument) {
-    propertiesDocument.open { (success) in
+    propertiesDocument.openOrCreate { (success) in
       // TODO: Handle the failure case here.
       precondition(success)
       self.endpoints += propertiesDocument.textSignal.subscribeValues({ (taggedString) in

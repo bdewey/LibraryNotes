@@ -168,6 +168,7 @@ final class TextEditViewController: UIViewController,
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
   }
 

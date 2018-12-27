@@ -46,11 +46,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
       switch metadataProviderResult {
       case .success(let metadataProvider):
         let parsingRules = LanguageDeck.parsingRules
-        self.window?.rootViewController = self.makeViewController(
+        window.rootViewController = self.makeViewController(
           notebook: Notebook(
             parsingRules: parsingRules,
             metadataProvider: metadataProvider
-            ).loadCachedProperties().loadStudyMetadata().monitorMetadataProvider()
+          ).loadCachedProperties().loadStudyMetadata().monitorMetadataProvider()
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
@@ -64,17 +64,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider>) -> Void) {
-    DispatchQueue.global(qos: .default).async {
-      if let containerURL = FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.org.brians-brain.commonplace-book") {
-        DispatchQueue.main.async {
-          let metadataProvider = ICloudFileMetadataProvider(
-            container: containerURL.appendingPathComponent("Documents")
-          )
-          completion(.success(metadataProvider))
-        }
-      } else {
-        DispatchQueue.main.async {
-          completion(.failure(Error.noCloud))
+    if CommandLine.arguments.contains("--uitesting") {
+      do {
+        let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
+        let metadataProvider = try DirectoryMetadataProvider(
+          container: container,
+          deleteExistingContents: true
+        )
+        completion(.success(metadataProvider))
+      } catch {
+        completion(.failure(error))
+      }
+    } else {
+      DispatchQueue.global(qos: .default).async {
+        if let containerURL = FileManager.default.url(
+          forUbiquityContainerIdentifier: "iCloud.org.brians-brain.commonplace-book"
+        ) {
+          DispatchQueue.main.async {
+            let metadataProvider = ICloudFileMetadataProvider(
+              container: containerURL.appendingPathComponent("Documents")
+            )
+            completion(.success(metadataProvider))
+          }
+        } else {
+          DispatchQueue.main.async {
+            completion(.failure(Error.noCloud))
+          }
         }
       }
     }

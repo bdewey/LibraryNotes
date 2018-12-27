@@ -71,6 +71,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
     let button = MDCFloatingButton(frame: .zero)
     button.setImage(icon, for: .normal)
+    button.accessibilityIdentifier = "new-document"
     MDCFloatingActionButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
     button.addTarget(self, action: #selector(didTapNewDocument), for: .touchUpInside)
     return button

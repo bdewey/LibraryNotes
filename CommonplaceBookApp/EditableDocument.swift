@@ -34,6 +34,7 @@ extension UIDocument {
         self.save(to: self.fileURL, for: .forCreating, completionHandler: { (success) in
           // "the completion handler is called on the calling queue" for save
           DispatchQueue.main.async {
+            try? self.load(fromContents: Data(), ofType: nil)
             completionHandler?(success)
           }
         })
