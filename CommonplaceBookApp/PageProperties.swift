@@ -68,7 +68,7 @@ public struct PageProperties: Codable {
     document.open { (success) in
       if success {
         let textResult = document.currentTextResult
-        document.close()
+        document.close(completionHandler: nil)
         DispatchQueue.global(qos: .default).async {
           let result = textResult.flatMap({ (taggedText) -> PageProperties in
             let nodes = parsingRules.parse(taggedText.value)

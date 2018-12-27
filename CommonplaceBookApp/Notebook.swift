@@ -57,7 +57,7 @@ public final class Notebook {
   }
 
   deinit {
-    openMetadocuments.forEach { $0.1.close() }
+    openMetadocuments.forEach { $0.1.close(completionHandler: nil) }
   }
 
   /// Bag of arbitrary data keyed off of MetadocumentKey

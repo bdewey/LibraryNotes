@@ -13,7 +13,7 @@ public protocol EditableDocument: class {
   func applyTaggedModification(tag: Tag, modification: (String) -> String)
   func open(completionHandler: ((Bool) -> Void)?)
   func openOrCreate(completionHandler: ((Bool) -> Void)?)
-  func close()
+  func close(completionHandler: ((Bool) -> Void)?)
   var previousError: Swift.Error? { get }
 }
 

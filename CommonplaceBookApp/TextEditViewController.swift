@@ -60,12 +60,11 @@ final class TextEditViewController: UIViewController,
   }
 
   /// Block that's run when the controller is deallocated.
-  public var onDealloc: (() -> ())?
+  public var onDocumentClose: ((Bool) -> Void)?
 
   deinit {
     NotificationCenter.default.removeObserver(self)
-    document.close()
-    onDealloc?()
+    document.close(completionHandler: onDocumentClose)
   }
 
   // Init-time state.

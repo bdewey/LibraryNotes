@@ -171,7 +171,8 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
           parsingRules: self.notebook.parsingRules,
           stylesheet: self.stylesheet
         )
-        viewController.onDealloc = {
+        viewController.onDocumentClose = { (success) in
+          if !success { DDLogError("Failure closing document? Why oh why?") }
           do {
             try notebook.performRenames(notebook.desiredBaseNameForPage)
           } catch {

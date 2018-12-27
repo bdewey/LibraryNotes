@@ -58,8 +58,8 @@ final class TestEditableDocument: EditableDocument {
   }
 
   /// Stub function for closing the document.
-  func close() {
-    // NOTHING
+  func close(completionHandler: ((Bool) -> Void)?) {
+    completionHandler?(true)
   }
 
   /// Stub for holding what the error would be when opening the document, if we could have errors.
