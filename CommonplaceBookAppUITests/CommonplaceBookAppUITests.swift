@@ -6,6 +6,7 @@ private enum Identifiers {
   static let backButton = "Back"
   static let editDocumentView = "edit-document-view"
   static let newDocumentButton = "new-document"
+  static let studyButton = "study-button"
 }
 
 final class CommonplaceBookAppUITests: XCTestCase {
@@ -29,17 +30,27 @@ final class CommonplaceBookAppUITests: XCTestCase {
   func testNewDocumentButtonWorks() {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     newDocumentButton.tap()
-    wait(for: application.textViews[Identifiers.editDocumentView])
+    waitUntilElementExists(application.textViews[Identifiers.editDocumentView])
   }
 
   func testNewDocumentCanBeEdited() {
-    application.buttons[Identifiers.newDocumentButton].tap()
-    let editView = application.textViews[Identifiers.editDocumentView]
-    wait(for: editView)
-    let text = "Test Document"
-    editView.typeText(text)
-    editView.buttons[Identifiers.backButton].tap()
-    wait(for: application.staticTexts[text])
+    createDocument(with: "Test Document")
+    waitUntilElementExists(application.staticTexts["Test Document"])
+  }
+
+  func testStudyButtonEnabledAfterCreatingClozeContent() {
+    createDocument(with: "Cloze test\n\n#testing\n\n- This is a file with a ?[](cloze).")
+    wait(
+      for: NSPredicate(format: "isEnabled == true"),
+      evaluatedWith: application.buttons[Identifiers.studyButton],
+      message: "Study button did not become enabled"
+    )
+  }
+
+  func testStudyButtonStartsDisabled() {
+    let studyButton = application.buttons[Identifiers.studyButton]
+    waitUntilElementExists(studyButton)
+    XCTAssertFalse(studyButton.isEnabled)
   }
 }
 
@@ -49,20 +60,28 @@ extension CommonplaceBookAppUITests {
   /// Waits for an element to exist in the hierarchy.
   /// - parameter element: The element to test for.
   /// - note: From http://masilotti.com/xctest-helpers/
-  private func wait(
-    for element: XCUIElement,
+  private func waitUntilElementExists(
+    _ element: XCUIElement,
     file: String = #file,
     line: Int = #line
   ) {
-    expectation(
+    wait(
       for: NSPredicate(format: "exists == true"),
       evaluatedWith: element,
-      handler: nil
+      message: "Failed to find \(element) after 5 seconds"
     )
+  }
 
+  private func wait(
+    for predicate: NSPredicate,
+    evaluatedWith object: Any,
+    message: String,
+    file: String = #file,
+    line: Int = #line
+  ) {
+    expectation(for: predicate, evaluatedWith: object, handler: nil)
     waitForExpectations(timeout: 5) { (error) -> Void in
       if error != nil {
-        let message = "Failed to find \(element) after 5 seconds."
         self.recordFailure(
           withDescription: message,
           inFile: file,
@@ -71,5 +90,13 @@ extension CommonplaceBookAppUITests {
         )
       }
     }
+  }
+
+  private func createDocument(with text: String) {
+    application.buttons[Identifiers.newDocumentButton].tap()
+    let editView = application.textViews[Identifiers.editDocumentView]
+    waitUntilElementExists(editView)
+    editView.typeText(text)
+    editView.buttons[Identifiers.backButton].tap()
   }
 }

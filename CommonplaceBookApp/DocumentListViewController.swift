@@ -78,12 +78,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }()
 
   private lazy var studyButton: UIBarButtonItem = {
-    return UIBarButtonItem(
+    let button = UIBarButtonItem(
       title: "Study",
       style: .plain,
       target: self,
       action: #selector(startStudySession)
     )
+    button.accessibilityIdentifier = "study-button"
+    return button
   }()
 
   private lazy var layout: UICollectionViewFlowLayout = {
