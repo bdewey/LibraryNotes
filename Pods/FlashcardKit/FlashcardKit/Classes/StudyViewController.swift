@@ -53,6 +53,7 @@ public final class StudyViewController: UIViewController {
   private var currentCardView: CardView? {
     didSet {
       currentCardView?.alpha = 0
+      oldValue?.accessibilityIdentifier = nil
       UIView.animate(withDuration: 0.2, animations: {
         self.currentCardView?.alpha = 1
         oldValue?.alpha = 0
@@ -64,6 +65,7 @@ public final class StudyViewController: UIViewController {
           }
         }
         self.currentCardView?.becomeFirstResponder()
+        self.currentCardView?.accessibilityIdentifier = "current-card"
       }
     }
   }

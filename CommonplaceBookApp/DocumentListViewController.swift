@@ -220,6 +220,13 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     presentStudySessionViewController(for: studySession)
   }
 
+  private func updateStudySession() {
+    let filter: (PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+      ? { (_) in return true }
+      : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+    self.studySession = notebook.studySession(filter: filter)
+  }
+
   public func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession,
@@ -237,7 +244,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = nil
     documentListAdapter.performUpdates(animated: true)
     title = "Interactive Notebook"
-    studySession = notebook.studySession()
+    updateStudySession()
     dismiss(animated: true, completion: nil)
   }
 
@@ -246,9 +253,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
     dataSource.filteredHashtag = hashtag
     documentListAdapter.performUpdates(animated: true)
     title = hashtag
-    studySession = notebook.studySession(filter: { (documentProperties) -> Bool in
-      return documentProperties.hashtags.contains(hashtag)
-    })
+    updateStudySession()
     dismiss(animated: true, completion: nil)
   }
 
@@ -276,6 +281,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     notebook.updateStudySessionResults(session)
+    updateStudySession()
     dismiss(animated: true, completion: nil)
   }
 
@@ -288,10 +294,7 @@ extension DocumentListViewController: NotebookChangeListener {
   func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
     switch key {
     case .pageProperties:
-      let filter: (PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
-        ? { (_) in return true }
-        : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
-      self.studySession = notebook.studySession(filter: filter)
+      updateStudySession()
     default:
       break
     }

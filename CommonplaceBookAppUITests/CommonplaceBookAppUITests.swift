@@ -4,6 +4,7 @@ import XCTest
 
 private enum Identifiers {
   static let backButton = "Back"
+  static let currentCardView = "current-card"
   static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"
   static let newDocumentButton = "new-document"
@@ -15,6 +16,24 @@ private enum TestContent {
 Cloze test
 #testing
 - This is a file with a ?[](cloze).
+"""
+
+  static func pickleText(title: String) -> String {
+    let text = """
+    \(title)
+    #testing
+    - Peter Piper picked a ?[unit of pickles](peck) of pickled peppers.
+    """
+    return text
+  }
+
+  static let doubleCloze = """
+Two cloze document
+#testing
+- Cards with a fill-in-the-blank is called a ?[](cloze).
+The 45th President of the United States is ?[cheeto](Donald Trump).
+
+The question about Trump should be in an auto-continue list.
 """
 }
 
@@ -69,13 +88,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
   func testCreateMultipleFiles() {
     let numberOfFiles = 5
     for i in 1 ... numberOfFiles {
-      let title = "Document \(i)"
-      let text = """
-\(title)
-#testing #doc\(i)
-- Peter Piper picked a ?[unit of pickles](peck) of pickled peppers.
-"""
-      createDocument(with: text)
+      createDocument(with: TestContent.pickleText(title: "Document \(i)"))
     }
     let finalTitle = "Document \(numberOfFiles)"
     let finalTitleLabel = application.staticTexts[finalTitle]
@@ -84,6 +97,28 @@ final class CommonplaceBookAppUITests: XCTestCase {
       for: NSPredicate(format: "cells.count == \(numberOfFiles)"),
       evaluatedWith: application.collectionViews[Identifiers.documentList],
       message: "Expected \(numberOfFiles) rows"
+    )
+  }
+
+  func testStudyFromASingleDocument() {
+    createDocument(with: TestContent.doubleCloze)
+    let studyButton = application.buttons[Identifiers.studyButton]
+    waitUntilElementEnabled(studyButton)
+    studyButton.tap()
+    let currentCard = application.otherElements[Identifiers.currentCardView]
+    let gotIt = application.buttons["Got it"]
+    for _ in 0 ..< 2 {
+      waitUntilElementExists(currentCard)
+      currentCard.tap()
+      waitUntilElementExists(gotIt)
+      gotIt.tap()
+    }
+    // After going through all clozes we should automatically go back to the document list.
+    waitUntilElementExists(studyButton)
+    wait(
+      for: NSPredicate(format: "isEnabled == false"),
+      evaluatedWith: studyButton,
+      message: "Studying should be disabled"
     )
   }
 }
