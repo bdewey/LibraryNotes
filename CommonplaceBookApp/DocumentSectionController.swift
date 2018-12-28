@@ -30,6 +30,7 @@ public final class DocumentSectionController: ListSectionController {
       string: properties.value.title,
       attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
     )
+    cell.accessibilityLabel = properties.value.title
     cell.detailLabel.attributedText = NSAttributedString(
       string: properties.value.hashtags.joined(separator: ", "),
       attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)

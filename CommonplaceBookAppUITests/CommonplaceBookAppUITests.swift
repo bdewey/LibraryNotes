@@ -13,9 +13,7 @@ private enum Identifiers {
 private enum TestContent {
   static let singleCloze = """
 Cloze test
-
 #testing
-
 - This is a file with a ?[](cloze).
 """
 }
@@ -66,6 +64,27 @@ final class CommonplaceBookAppUITests: XCTestCase {
     let documentList = application.collectionViews[Identifiers.documentList]
     waitUntilElementExists(documentList)
     XCTAssertEqual(documentList.cells.count, 1)
+  }
+
+  func testCreateMultipleFiles() {
+    let numberOfFiles = 5
+    for i in 1 ... numberOfFiles {
+      let title = "Document \(i)"
+      let text = """
+\(title)
+#testing #doc\(i)
+- Peter Piper picked a ?[unit of pickles](peck) of pickled peppers.
+"""
+      createDocument(with: text)
+    }
+    let finalTitle = "Document \(numberOfFiles)"
+    let finalTitleLabel = application.staticTexts[finalTitle]
+    waitUntilElementExists(finalTitleLabel)
+    wait(
+      for: NSPredicate(format: "cells.count == \(numberOfFiles)"),
+      evaluatedWith: application.collectionViews[Identifiers.documentList],
+      message: "Expected \(numberOfFiles) rows"
+    )
   }
 }
 
