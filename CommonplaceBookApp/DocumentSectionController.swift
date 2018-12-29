@@ -39,19 +39,18 @@ public final class DocumentSectionController: ListSectionController {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
     } else if properties.value.fileMetadata.isDownloading {
       cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if properties.value.fileMetadata.downloadingStatus != NSMetadataUbiquitousItemDownloadingStatusCurrent {
+    } else if properties.value.fileMetadata.downloadingStatus
+      != NSMetadataUbiquitousItemDownloadingStatusCurrent {
       cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
     } else {
       cell.statusIcon.image = nil
     }
-    if properties.cardCount > 0 {
-      cell.ageLabel.attributedText = NSAttributedString(
-        string: String(properties.cardCount),
-        attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
-      )
-    } else {
-      cell.ageLabel.attributedText = nil
-    }
+    let now = Date()
+    let dateDelta = now.timeIntervalSince(properties.value.fileMetadata.contentChangeDate)
+    cell.ageLabel.attributedText = NSAttributedString(
+      string: ageFormatter.string(from: dateDelta) ?? "",
+      attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
+    )
     cell.delegate = self
     cell.setNeedsLayout()
     return cell
@@ -111,6 +110,15 @@ extension Notebook {
     }
   }
 }
+
+private let ageFormatter: DateComponentsFormatter = {
+  let ageFormatter = DateComponentsFormatter()
+  ageFormatter.maximumUnitCount = 1
+  ageFormatter.unitsStyle = .abbreviated
+  ageFormatter.allowsFractionalUnits = false
+  ageFormatter.allowedUnits = [.day, .hour, .minute]
+  return ageFormatter
+}()
 
 extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   public func collectionView(

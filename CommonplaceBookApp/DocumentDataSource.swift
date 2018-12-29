@@ -34,7 +34,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
         )
       }
       .sorted(
-        by: { $0.cardCount > $1.cardCount }
+        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
       )
   }
 
