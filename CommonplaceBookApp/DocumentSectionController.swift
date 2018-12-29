@@ -31,8 +31,17 @@ public final class DocumentSectionController: ListSectionController {
       attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
     )
     cell.accessibilityLabel = properties.value.title
+    var detailString = properties.value.hashtags.joined(separator: ", ")
+    if properties.cardCount > 0 {
+      if !detailString.isEmpty { detailString += ". " }
+      if properties.cardCount == 1 {
+        detailString += "1 card."
+      } else {
+        detailString += "\(properties.cardCount) cards."
+      }
+    }
     cell.detailLabel.attributedText = NSAttributedString(
-      string: properties.value.hashtags.joined(separator: ", "),
+      string: detailString,
       attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
     )
     if properties.value.fileMetadata.isUploading {
