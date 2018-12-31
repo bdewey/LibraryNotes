@@ -55,6 +55,12 @@ public extension NSAttributedString {
     /// If true, create a tab stop and appropriate indentation for the "hanging indent" of a list.
     public var listLevel = 0
 
+    public var headIndent: CGFloat = 0
+
+    public var tailIndent: CGFloat = 0
+
+    public var firstLineHeadIndent: CGFloat = 0
+
     /// Initializer.
     /// - parameter font: The UIFont that determines the base values of this set of attributes.
     public init(_ font: UIFont) {
@@ -98,20 +104,37 @@ public extension NSAttributedString {
       if kern != 0 {
         result[.kern] = kern
       }
+      var didCustomizeParagraphStyle = false
+      let paragraphStyle = NSMutableParagraphStyle()
+      if headIndent != 0 {
+        paragraphStyle.headIndent = headIndent
+        didCustomizeParagraphStyle = true
+      }
+      if tailIndent != 0 {
+        paragraphStyle.tailIndent = tailIndent
+        didCustomizeParagraphStyle = true
+      }
+      if firstLineHeadIndent != 0 {
+        paragraphStyle.firstLineHeadIndent = firstLineHeadIndent
+        didCustomizeParagraphStyle = true
+      }
       if listLevel > 0 {
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.headIndent = 16 * CGFloat(listLevel)
-        paragraphStyle.firstLineHeadIndent = 16 * CGFloat(listLevel - 1)
+        let indentAmountPerLevel: CGFloat = headIndent > 0 ? headIndent : 16
+        paragraphStyle.headIndent = indentAmountPerLevel * CGFloat(listLevel)
+        paragraphStyle.firstLineHeadIndent = indentAmountPerLevel * CGFloat(listLevel - 1)
         var tabStops: [NSTextTab] = []
         for i in 0 ..< 4 {
           let listTab = NSTextTab(
             textAlignment: .natural,
-            location: paragraphStyle.headIndent + CGFloat(i * 16),
+            location: paragraphStyle.headIndent + CGFloat(i) * indentAmountPerLevel,
             options: [:]
           )
           tabStops.append(listTab)
         }
         paragraphStyle.tabStops = tabStops
+        didCustomizeParagraphStyle = true
+      }
+      if didCustomizeParagraphStyle {
         result[.paragraphStyle] = paragraphStyle
       }
       return result

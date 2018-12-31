@@ -91,6 +91,7 @@ final class TextEditViewController: UIViewController,
         $1.fontSize = 16
         $1.kern = 0.15
       }
+      $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { (_, attributes) in
@@ -116,6 +117,16 @@ final class TextEditViewController: UIViewController,
         : text.replacingOccurrences(of: " ", with: "\t")
       return NSAttributedString(string: replacement, attributes: attributes.attributes)
     }
+    renderers[.delimiter] = { (node, attributes) in
+      var text = String(node.slice.substring)
+      if node.parent is Heading {
+        text = text.replacingOccurrences(of: " ", with: "\t")
+      }
+      return NSAttributedString(
+        string: text,
+        attributes: attributes.attributes
+      )
+    }
     return renderers
   }()
 
@@ -137,6 +148,8 @@ final class TextEditViewController: UIViewController,
     textStorage.defaultAttributes.color = stylesheet.colors
       .onSurfaceColor
       .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    textStorage.defaultAttributes.headIndent = 28
+    textStorage.defaultAttributes.firstLineHeadIndent = 28
     return textStorage
   }
 

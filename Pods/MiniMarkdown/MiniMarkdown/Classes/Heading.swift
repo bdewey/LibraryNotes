@@ -36,7 +36,7 @@ public final class Heading: InlineContainingNode, LineParseable {
     headerDelimiter.parent = self
   }
 
-  private let headerDelimiter: Delimiter
+  public let headerDelimiter: Delimiter
 
   public override var memoizedChildrenPrefix: [Node] {
     return [headerDelimiter]
