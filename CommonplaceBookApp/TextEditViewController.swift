@@ -195,6 +195,26 @@ final class TextEditViewController: UIViewController,
       // We only do this behavior on first appearance.
       autoFirstResponder = false
     }
+    adjustMargins(size: view!.bounds.size)
+  }
+
+  override func viewWillTransition(
+    to size: CGSize,
+    with coordinator: UIViewControllerTransitionCoordinator
+  ) {
+    super.viewWillTransition(to: size, with: coordinator)
+    adjustMargins(size: size)
+  }
+
+  private func adjustMargins(size: CGSize) {
+    let delta = size.width - 440
+    let horizontalInset = max(delta / 2, 0)
+    textView.textContainerInset = UIEdgeInsets(
+      top: 8,
+      left: horizontalInset,
+      bottom: 8,
+      right: horizontalInset
+    )
   }
 
   // MARK: - Keyboard
