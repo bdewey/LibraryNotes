@@ -104,6 +104,10 @@ final class TextEditViewController: UIViewController,
     formatters[.table] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
     formatters[.hashtag] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
+    formatters[.blockQuote] = {
+      $1.backgroundColor = stylesheet.colors.darkSurfaceColor
+      $1.listLevel += 1
+    }
     return formatters
   }
 
@@ -119,7 +123,7 @@ final class TextEditViewController: UIViewController,
     }
     renderers[.delimiter] = { (node, attributes) in
       var text = String(node.slice.substring)
-      if node.parent is Heading {
+      if node.parent is Heading || node.parent is BlockQuote {
         text = text.replacingOccurrences(of: " ", with: "\t")
       }
       return NSAttributedString(

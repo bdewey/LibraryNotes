@@ -26,7 +26,6 @@ open class BlockContainingNode: Node {
 
   private var memoizedChildren: [Node]?
 
-  // TODO: Memoize the results
   open override var children: [Node] {
     if let memoizedChildren = memoizedChildren {
       return memoizedChildren

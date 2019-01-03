@@ -18,7 +18,7 @@ struct ExpectedNode {
       case let .typeDoesNotMatch(expectedType: expected, actualType: actual):
         return "Type mismatch: Expected \(expected.rawValue), got \(actual.rawValue)"
       case let .stringDoesNotMatch(expectedString: expected, actualString: actual):
-        return "String does not match: Expected \(expected), got \(actual)"
+        return "String does not match: Expected \(expected.debugDescription), got \(actual.debugDescription)"
       case let .childCountDoesNotMatch(text: text, expectedCount: expected, actualCount: actual):
         return "Child count does not match: Expected \(expected), got: \(actual)\n\n\"\(text)\""
       case let .invalidChild(childIndex: index, validationError: error):
@@ -232,6 +232,37 @@ final class MiniMarkdownProtocolTests: XCTestCase {
       ])
     do {
       try expectedStructure.validateNode(blocks[0])
+    } catch {
+      XCTFail(String(describing: error))
+    }
+  }
+
+  func testBlockQuote() {
+    let example = """
+> # Foo
+> bar
+"""
+    let blocks = ParsingRules().parse(example)
+    let expectedStructure = [
+      ExpectedNode(type: .blockQuote, children: [
+        ExpectedNode(type: .delimiter, string: "> "),
+        ExpectedNode(type: .heading, children: [
+          ExpectedNode(type: .delimiter, string: "# "),
+          ExpectedNode(type: .text, string: "Foo\n"),
+          ]),
+        ]),
+      ExpectedNode(type: .blockQuote, children: [
+        ExpectedNode(type: .delimiter, string: "> "),
+        ExpectedNode(type: .paragraph, children: [
+          ExpectedNode(type: .text, string: "bar"),
+          ]),
+        ]),
+    ]
+    XCTAssertEqual(blocks.count, expectedStructure.count)
+    do {
+      for (block, structure) in zip(blocks, expectedStructure) {
+        try structure.validateNode(block)
+      }
     } catch {
       XCTFail(String(describing: error))
     }

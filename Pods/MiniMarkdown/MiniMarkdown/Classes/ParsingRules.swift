@@ -30,6 +30,7 @@ public struct ParsingRules {
     Heading.nodeParser,
     List.nodeParser,
     Table.nodeParser,
+    BlockQuote.nodeParser,
     BlankLine.nodeParser,
     Paragraph.nodeParser
     ])
