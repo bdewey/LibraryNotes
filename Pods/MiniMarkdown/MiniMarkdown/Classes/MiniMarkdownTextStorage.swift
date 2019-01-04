@@ -42,6 +42,13 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     super.init()
   }
 
+  /// Do not use -- just here to make paste work
+  @available(*, deprecated)
+  public override init() {
+    self.storage = RenderedMarkdown(parsingRules: ParsingRules(), formatters: [:], renderers: [:])
+    super.init()
+  }
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
