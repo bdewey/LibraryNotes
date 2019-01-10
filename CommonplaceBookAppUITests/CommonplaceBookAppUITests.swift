@@ -48,6 +48,8 @@ final class CommonplaceBookAppUITests: XCTestCase {
     application = XCUIApplication()
     application.launchArguments.append("--uitesting")
     application.launch()
+
+    XCUIDevice.shared.orientation = .portrait
   }
 
   func testHasNewDocumentButton() {
@@ -120,6 +122,20 @@ final class CommonplaceBookAppUITests: XCTestCase {
       evaluatedWith: studyButton,
       message: "Studying should be disabled"
     )
+  }
+
+  func testRotation() {
+    createDocument(with: TestContent.doubleCloze)
+    let collectionView = application.collectionViews[Identifiers.documentList]
+    let cell = collectionView.cells["Two cloze document"]
+    waitUntilElementExists(cell)
+    let expectedWidthAfterRotation = collectionView.frame.height
+    XCTAssertEqual(collectionView.frame.width, cell.frame.width)
+    XCUIDevice.shared.orientation = .landscapeLeft
+    XCTAssertTrue(collectionView.exists)
+    waitUntilElementExists(cell)
+    XCTAssertEqual(collectionView.frame.width, cell.frame.width)
+    XCTAssertEqual(expectedWidthAfterRotation, cell.frame.width)
   }
 }
 

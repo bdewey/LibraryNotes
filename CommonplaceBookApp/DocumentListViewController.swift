@@ -124,7 +124,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     super.viewDidLoad()
     view.addSubview(documentCollectionView)
     view.addSubview(newDocumentButton)
-    documentCollectionView.frame = view.bounds
+    documentCollectionView.snp.makeConstraints { (make) in
+      make.top.bottom.left.right.equalToSuperview()
+    }
     newDocumentButton.snp.makeConstraints { (make) in
       make.trailing.equalToSuperview().offset(-16)
       make.bottom.equalToSuperview().offset(-16)
