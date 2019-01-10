@@ -162,7 +162,7 @@ final class TextEditViewController: UIViewController,
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
-    let textView = UITextView(frame: .zero, textContainer: textContainer)
+    let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
     textView.backgroundColor = stylesheet.colors.surfaceColor
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView

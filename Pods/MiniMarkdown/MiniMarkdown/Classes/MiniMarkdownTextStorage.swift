@@ -56,6 +56,15 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
   /// The core storage
   private let storage: RenderedMarkdown
 
+  public func markdownRange(for range: NSRange) -> Range<String.Index>? {
+    let startLocation = storage.markdownLocation(for: range.lowerBound)
+    let endLocation = storage.markdownLocation(for: range.upperBound)
+    return Range(
+      NSRange(location: startLocation, length: endLocation - startLocation),
+      in: markdown
+    )
+  }
+
   /// Default text attributes
   public var defaultAttributes: NSAttributedString.Attributes {
     get {

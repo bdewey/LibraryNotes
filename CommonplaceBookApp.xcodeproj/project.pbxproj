@@ -64,6 +64,7 @@
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
 		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
+		D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */; };
 		D5654BD721C08F1500C98C09 /* Notebook+Pages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5654BD621C08F1500C98C09 /* Notebook+Pages.swift */; };
 		D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */; };
 		D5F7222721BF1B3B00194CFF /* Notebook+StudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5F7222621BF1B3B00194CFF /* Notebook+StudyMetadata.swift */; };
@@ -155,6 +156,7 @@
 		D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonplaceBookAppUITests.swift; sourceTree = "<group>"; };
 		D3E98F0721D470B2008445DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
+		D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditingTextView.swift; sourceTree = "<group>"; };
 		D5654BD621C08F1500C98C09 /* Notebook+Pages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notebook+Pages.swift"; sourceTree = "<group>"; };
 		D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataProvider.swift; sourceTree = "<group>"; };
 		D5F7222621BF1B3B00194CFF /* Notebook+StudyMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notebook+StudyMetadata.swift"; sourceTree = "<group>"; };
@@ -297,6 +299,7 @@
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
+				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -621,6 +624,7 @@
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */,
+				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
