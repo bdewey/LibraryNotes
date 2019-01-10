@@ -88,9 +88,18 @@ public final class StudyViewController: UIViewController {
     studySession.studySessionStartDate = Date()
     cardsRemainingLabel = UILabel(frame: .zero)
     view.addSubview(cardsRemainingLabel)
-    cardsRemainingLabel.bottomAnchor.constraint(lessThanOrEqualToSystemSpacingBelow: view.safeAreaLayoutGuide.bottomAnchor, multiplier: -1).isActive = true
-    cardsRemainingLabel.leadingAnchor.constraint(greaterThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor, multiplier: 1).isActive = true
-    cardsRemainingLabel.trailingAnchor.constraint(lessThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.trailingAnchor, multiplier: -1).isActive = true
+    cardsRemainingLabel.bottomAnchor.constraint(
+      lessThanOrEqualToSystemSpacingBelow: view.safeAreaLayoutGuide.bottomAnchor,
+      multiplier: -1
+    ).isActive = true
+    cardsRemainingLabel.leadingAnchor.constraint(
+      greaterThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor,
+      multiplier: 1
+    ).isActive = true
+    cardsRemainingLabel.trailingAnchor.constraint(
+      lessThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.trailingAnchor,
+      multiplier: -1
+    ).isActive = true
     cardsRemainingLabel.textAlignment = .center
     cardsRemainingLabel.translatesAutoresizingMaskIntoConstraints = false
     // TODO: this should probably be "caption" -- prototype inside Sketch
@@ -98,10 +107,20 @@ public final class StudyViewController: UIViewController {
     appBar.addSubviewsToParent()
     view.backgroundColor = stylesheet.colors.darkSurfaceColor
     configureUI()
-    appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
+    appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(
+      title: "DONE",
+      style: .plain,
+      target: self,
+      action: #selector(didTapDone)
+    )
 
     // TODO: Get rid of the option to cancel once I have multi-document support
-    appBar.navigationBar.leadingBarButtonItem = UIBarButtonItem(title: "Discard", style: .plain, target: self, action: #selector(didTapCancel))
+    appBar.navigationBar.leadingBarButtonItem = UIBarButtonItem(
+      title: "Discard",
+      style: .plain,
+      target: self,
+      action: #selector(didTapCancel)
+    )
   }
 
   private func configureUI() {
@@ -118,7 +137,11 @@ public final class StudyViewController: UIViewController {
   }
 
   @objc private func didTapCancel() {
-    let alertController = MDCAlertController(title: "Discard study session?", message: "Are you sure you want to discard your study session? If you do this, the app will not remember what questions you answered correctly.")
+    let alertController = MDCAlertController(
+      title: "Discard study session?",
+      message: "Are you sure you want to discard your study session? " +
+        "If you do this, the app will not remember what questions you answered correctly."
+    )
     let cancel = MDCAlertAction(title: "Cancel") { (_) in
       // Nothing
     }
@@ -135,6 +158,8 @@ public final class StudyViewController: UIViewController {
     MDCAlertTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: alertController)
     present(alertController, animated: true, completion: nil)
   }
+
+  public var maximumCardWidth: CGFloat?
 
   /// Creates a card view for a card.
   private func makeCardView(
@@ -154,7 +179,20 @@ public final class StudyViewController: UIViewController {
       cardView.delegate = self
       self.view.addSubview(cardView)
       cardView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-      cardView.widthAnchor.constraint(equalTo: self.view.widthAnchor, multiplier: 1, constant: -32).isActive = true
+      let widthConstraint = cardView.widthAnchor.constraint(
+        equalTo: self.view.widthAnchor,
+        multiplier: 1,
+        constant: -32
+      )
+      widthConstraint.priority = .defaultHigh
+      widthConstraint.isActive = true
+      if let maximumCardWidth = self.maximumCardWidth {
+        let maximumWidthConstraint = cardView
+          .widthAnchor
+          .constraint(lessThanOrEqualToConstant: maximumCardWidth)
+        maximumWidthConstraint.priority = .required
+        maximumWidthConstraint.isActive = true
+      }
       cardView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
       cardView.translatesAutoresizingMaskIntoConstraints = false
       completion(cardView)

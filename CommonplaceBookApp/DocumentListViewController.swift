@@ -237,6 +237,8 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       delegate: self
     )
     studyVC.modalTransitionStyle = .crossDissolve
+    studyVC.maximumCardWidth = 440
+    studyVC.title = self.navigationItem.title
     present(studyVC, animated: true, completion: nil)
   }
 }
