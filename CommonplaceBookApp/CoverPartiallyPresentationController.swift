@@ -87,19 +87,21 @@ UIViewControllerTransitioningDelegate {
       return CGRect()
     }
 
+    let horizontalWidth = min(containerView.bounds.width - margin, 400)
+
     switch coverDirection {
     case .left:
       return CGRect(
         x: 0,
         y: 0,
-        width: containerView.bounds.width-margin,
+        width: horizontalWidth,
         height: containerView.bounds.height
       )
     case .right:
       return CGRect(
-        x: margin,
+        x: containerView.bounds.width - horizontalWidth,
         y: 0,
-        width: containerView.bounds.width-margin,
+        width: horizontalWidth,
         height: containerView.bounds.height
       )
     case .up:

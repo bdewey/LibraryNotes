@@ -285,6 +285,7 @@
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
+				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D3187CAD218DF7AB00815772 /* MenuItem.swift */,
 				D35C72C42189E1340082396D /* MenuSectionController.swift */,
 				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
@@ -299,7 +300,6 @@
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
-				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
