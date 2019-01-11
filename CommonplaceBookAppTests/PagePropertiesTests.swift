@@ -48,4 +48,28 @@ final class PagePropertiesTests: XCTestCase {
     }
     waitForExpectations(timeout: 3, handler: nil)
   }
+
+  func testFormattedTitle() {
+    let existingName = "test.txt"
+    metadataProvider.addFileInfo(TestMetadataProvider.FileInfo(
+      fileName: existingName,
+      contents: "# *Emma*, Jane Austen"
+    ))
+
+    let didLoad = expectation(description: "did load properties")
+    PageProperties.loadProperties(
+      from: metadataProvider.fileNameToMetadata[existingName]!,
+      in: metadataProvider,
+      parsingRules: parsingRules
+    ) { (results) in
+      switch results {
+      case .failure(let error):
+        XCTFail("Unexpected error: \(error)")
+      case .success(let properties):
+        XCTAssertEqual("emma-jane-austen", properties.desiredBaseFileName)
+      }
+      didLoad.fulfill()
+    }
+    waitForExpectations(timeout: 3, handler: nil)
+  }
 }
