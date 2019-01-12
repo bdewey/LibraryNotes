@@ -67,6 +67,7 @@ final class PagePropertiesTests: XCTestCase {
         XCTFail("Unexpected error: \(error)")
       case .success(let properties):
         XCTAssertEqual("emma-jane-austen", properties.desiredBaseFileName)
+        XCTAssertEqual("*Emma*, Jane Austen", properties.title)
       }
       didLoad.fulfill()
     }

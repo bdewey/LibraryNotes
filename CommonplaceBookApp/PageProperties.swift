@@ -17,8 +17,18 @@ public struct PageProperties: Codable {
   /// Hashtags present in the page.
   public let hashtags: [String]
 
-  /// Title of the page.
+  /// Title of the page. May include Markdown formatting.
   public let title: String
+
+  /// Parsing rules used when interpreting any formatting that may appear in `title`
+  static var parsingRules = ParsingRules()
+
+  /// Title with all markdown characters removed
+  public var plainTextTitle: String {
+    return PageProperties.parsingRules.parse(title).reduce(into: "") { (string, node) in
+      string.append(MarkdownStringRenderer.textOnly.render(node: node))
+    }
+  }
 
   /// All card templates in the page.
   public let cardTemplates: [CardTemplateSerializationWrapper]
@@ -106,7 +116,7 @@ public struct PageProperties: Codable {
   /// - note: The desired name comes from the first 5 words of the title, excluding
   ///         common words like "of", "a", "the", concatenated and separated by hyphens.
   public var desiredBaseFileName: String? {
-    let sanitizedTitle = title
+    let sanitizedTitle = plainTextTitle
       .strippingLeadingAndTrailingWhitespace
       .filter {
         $0.unicodeScalars.count == 1
@@ -173,12 +183,14 @@ extension Array where Element == Node {
   /// - note: If there is a heading anywhere in the nodes, the contents of the first heading
   ///         is the title. Otherwise, the contents of the first non-blank line is the title.
   var title: String {
-    if let heading = self.lazy.compactMap({ $0.first(where: { $0.type == .heading }) }).first {
-      return MarkdownStringRenderer.textOnly.render(node: heading)
+    if let heading = self.lazy.compactMap(
+      { $0.first(where: { $0.type == .heading }) }
+    ).first as? Heading {
+      return String(heading.inlineSlice.substring)
     } else if let notBlank = self.lazy.compactMap({
       $0.first(where: { $0.type != .blank })
     }).first {
-      return MarkdownStringRenderer.textOnly.render(node: notBlank)
+      return notBlank.allMarkdown
     } else {
       return ""
     }

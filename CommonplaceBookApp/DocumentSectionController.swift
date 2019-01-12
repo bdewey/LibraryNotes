@@ -19,6 +19,28 @@ public final class DocumentSectionController: ListSectionController {
   private let stylesheet: Stylesheet
   private var properties: PagePropertiesListDiffable!
 
+  /// Used to create attributed strings from page titles.
+  ///
+  /// Right now, this:
+  ///
+  /// - applies italics
+  /// - removes any Markdown delimiters
+  private lazy var titleRenderer: RenderedMarkdown = {
+    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
+    formatters[.emphasis] = { $1.italic = true }
+    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
+    renderers[.delimiter] = { (_, _) in return NSAttributedString() }
+    let renderer = RenderedMarkdown(
+      parsingRules: ParsingRules(),
+      formatters: formatters,
+      renderers: renderers
+    )
+    renderer.defaultAttributes = NSAttributedString.Attributes(
+      stylesheet.typographyScheme.subtitle1
+    )
+    return renderer
+  }()
+
   public override func cellForItem(at index: Int) -> UICollectionViewCell {
     let cell = collectionContext!.dequeueReusableCell(
       of: DocumentCollectionViewCell.self,
@@ -26,10 +48,8 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    cell.titleLabel.attributedText = NSAttributedString(
-      string: properties.value.title,
-      attributes: stylesheet.attributes(style: .subtitle1, emphasis: .darkTextHighEmphasis)
-    )
+    titleRenderer.markdown = properties.value.title
+    cell.titleLabel.attributedText = titleRenderer.attributedString
     cell.accessibilityLabel = properties.value.title
     var detailString = properties.value.hashtags.joined(separator: ", ")
     if properties.cardCount > 0 {
