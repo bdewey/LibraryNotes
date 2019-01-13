@@ -35,10 +35,14 @@ public struct CardTemplateType: RawRepresentable {
 /// the English word and one card that prompts with the Spanish word.
 open class CardTemplate: Codable {
   /// Subclasses should override and return their particular type.
+  /// This is a computed, rather than a stored, property so it does not get serialized.
   open var type: CardTemplateType { return .unknown }
 
   /// The specific cards from this template.
   open var cards: [Card] { return [] }
+
+  /// Public initializer so we can subclass this outside of this module.
+  public init() { }
 }
 
 extension Array where Element: CardTemplate {

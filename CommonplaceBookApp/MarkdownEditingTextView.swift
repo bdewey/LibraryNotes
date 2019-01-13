@@ -8,6 +8,7 @@ import UIKit
 public final class MarkdownEditingTextView: UITextView {
 
   override public func copy(_ sender: Any?) {
+    // swiftlint:disable:next force_cast
     let markdownTextStorage = textStorage as! MiniMarkdownTextStorage
     guard let range = markdownTextStorage.markdownRange(for: selectedRange) else { return }
     UIPasteboard.general.string = String(markdownTextStorage.markdown[range])

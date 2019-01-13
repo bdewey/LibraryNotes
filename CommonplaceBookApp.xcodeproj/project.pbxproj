@@ -17,6 +17,8 @@
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D32C8B5C214ACC2F0048BF80 /* Notebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B5B214ACC2F0048BF80 /* Notebook.swift */; };
+		D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuoteTemplate.swift */; };
+		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D348A97C21C6CFF1005CA937 /* PagePropertiesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97B21C6CFF1005CA937 /* PagePropertiesTests.swift */; };
 		D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */; };
@@ -109,6 +111,8 @@
 		D31FA12C20ED847A00224FCD /* Merriweather-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Black.otf"; sourceTree = "<group>"; };
 		D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSectionController.swift; sourceTree = "<group>"; };
 		D32C8B5B214ACC2F0048BF80 /* Notebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notebook.swift; sourceTree = "<group>"; };
+		D339C6FD21EB928700924178 /* QuoteTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplate.swift; sourceTree = "<group>"; };
+		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D348A97B21C6CFF1005CA937 /* PagePropertiesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagePropertiesTests.swift; sourceTree = "<group>"; };
 		D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StylesheetContaining.swift; sourceTree = "<group>"; };
@@ -294,6 +298,7 @@
 				D5F7222621BF1B3B00194CFF /* Notebook+StudyMetadata.swift */,
 				D3D8E2722178B2BA00EA318C /* PageProperties.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
+				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
 				D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */,
@@ -313,6 +318,7 @@
 				D348A97B21C6CFF1005CA937 /* PagePropertiesTests.swift */,
 				D36BC17921B571CA00935691 /* TestEditableDocument.swift */,
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
+				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -611,6 +617,7 @@
 				D32C8B5C214ACC2F0048BF80 /* Notebook.swift in Sources */,
 				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
 				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
+				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D5F7222721BF1B3B00194CFF /* Notebook+StudyMetadata.swift in Sources */,
 				D3C1F407210E776000F92E85 /* TextBundleEditableDocument.swift in Sources */,
@@ -640,6 +647,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D348A97C21C6CFF1005CA937 /* PagePropertiesTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */,

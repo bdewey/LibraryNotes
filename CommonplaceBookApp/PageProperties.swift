@@ -173,7 +173,12 @@ extension Array where Element == Node {
         .map { CardTemplateSerializationWrapper($0) }
     )
     results.append(
-      contentsOf: ClozeTemplate.extract(from: self).map { CardTemplateSerializationWrapper($0) }
+      contentsOf: ClozeTemplate.extract(from: self)
+        .map { CardTemplateSerializationWrapper($0) }
+    )
+    results.append(
+      contentsOf: QuoteTemplate.extract(from: self)
+        .map { CardTemplateSerializationWrapper($0) }
     )
     return results
   }
