@@ -31,6 +31,7 @@
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
+		D38726F721ED0F7C00DF37A0 /* NSAttributedString+ChapterAndVerse.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38726F621ED0F7C00DF37A0 /* NSAttributedString+ChapterAndVerse.swift */; };
 		D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38D9A1821B3426B00973E73 /* NotebookTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
@@ -137,6 +138,7 @@
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextDocument.swift; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
+		D38726F621ED0F7C00DF37A0 /* NSAttributedString+ChapterAndVerse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+ChapterAndVerse.swift"; sourceTree = "<group>"; };
 		D38D9A1821B3426B00973E73 /* NotebookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
@@ -296,6 +298,7 @@
 				D32C8B5B214ACC2F0048BF80 /* Notebook.swift */,
 				D5654BD621C08F1500C98C09 /* Notebook+Pages.swift */,
 				D5F7222621BF1B3B00194CFF /* Notebook+StudyMetadata.swift */,
+				D38726F621ED0F7C00DF37A0 /* NSAttributedString+ChapterAndVerse.swift */,
 				D3D8E2722178B2BA00EA318C /* PageProperties.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
@@ -638,6 +641,7 @@
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D35C72C52189E1340082396D /* MenuSectionController.swift in Sources */,
+				D38726F721ED0F7C00DF37A0 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D5654BD721C08F1500C98C09 /* Notebook+Pages.swift in Sources */,
 			);

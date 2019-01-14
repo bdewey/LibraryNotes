@@ -41,7 +41,7 @@ The question about Trump should be in an auto-continue list.
 
 ## Quotes
 
-> It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence. (26)
+> It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence.
 > Ain’t nothin’ funnier than real life, I tell you what. (34)
 """
 }

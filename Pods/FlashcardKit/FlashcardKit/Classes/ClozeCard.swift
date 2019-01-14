@@ -65,6 +65,7 @@ extension ClozeCard: Card {
     cardView.context = context(stylesheet: stylesheet)
     cardView.front = cardFront(node: node, stylesheet: stylesheet)
     cardView.back = cardBack(node: node, stylesheet: stylesheet)
+    cardView.stylesheet = stylesheet
     return cardView
   }
 

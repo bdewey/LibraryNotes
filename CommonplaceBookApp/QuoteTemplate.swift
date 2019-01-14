@@ -96,16 +96,18 @@ extension QuoteTemplate: Card {
       parsingRules: parseableDocument.parsingRules
     )
     quoteRenderer.markdown = quote.allMarkdown
-    view.front = quoteRenderer.attributedString
+    let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
+    let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
+    view.front = front
     let attributionRenderer = makeQuoteRenderer(
       stylesheet: stylesheet,
       style: .caption,
       parsingRules: parseableDocument.parsingRules
     )
     let back = NSMutableAttributedString()
-    back.append(quoteRenderer.attributedString)
+    back.append(front)
     back.append(NSAttributedString(string: "\n"))
-    attributionRenderer.markdown = "—" + attributionMarkdown
+    attributionRenderer.markdown = "—" + attributionMarkdown + " " + chapterAndVerse
     back.append(attributionRenderer.attributedString)
     view.back = back
     view.stylesheet = stylesheet
