@@ -20,7 +20,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
   // This is here to force initialization of the CardTemplateType, which registers the class
   // with the type name. This has to be done before deserializing any card templates.
-  private let knownCardTemplateTypes: [CardTemplateType] = [.vocabularyAssociation, .cloze]
+  private let knownCardTemplateTypes: [CardTemplateType] = [
+    .vocabularyAssociation,
+    .cloze,
+    .quote,
+  ]
 
   private lazy var loadingViewController: UIViewController = {
     let loadingViewController = LoadingViewController(stylesheet: commonplaceBookStylesheet)
