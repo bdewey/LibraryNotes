@@ -61,6 +61,8 @@ public extension NSAttributedString {
 
     public var firstLineHeadIndent: CGFloat = 0
 
+    public var alignment: NSTextAlignment?
+
     /// Initializer.
     /// - parameter font: The UIFont that determines the base values of this set of attributes.
     public init(_ font: UIFont) {
@@ -116,6 +118,10 @@ public extension NSAttributedString {
       }
       if firstLineHeadIndent != 0 {
         paragraphStyle.firstLineHeadIndent = firstLineHeadIndent
+        didCustomizeParagraphStyle = true
+      }
+      if let alignment = alignment {
+        paragraphStyle.alignment = alignment
         didCustomizeParagraphStyle = true
       }
       if listLevel > 0 {

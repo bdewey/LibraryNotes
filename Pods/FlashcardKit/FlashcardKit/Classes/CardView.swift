@@ -4,13 +4,13 @@ import AVFoundation
 import Foundation
 import MaterialComponents
 
-protocol CardViewDelegate: class {
+public protocol CardViewDelegate: class {
   func cardView(_ cardView: CardView, didAnswerCorrectly: Bool)
   func cardView(_ cardView: CardView, didRequestSpeech: AVSpeechUtterance, language: String)
 }
 
 open class CardView: MDCCard {
-  weak var delegate: CardViewDelegate?
+  public weak var delegate: CardViewDelegate?
 
   var introductoryUtterances: [AVSpeechUtterance]? { return nil }
 }

@@ -1,5 +1,6 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
+import CommonplaceBook
 import FlashcardKit
 import Foundation
 import MiniMarkdown
@@ -20,13 +21,14 @@ public final class QuoteTemplate: CardTemplate {
     case markdownParseError
   }
 
-  public init(quote: BlockQuote) {
+  public init(quote: BlockQuote, attributionMarkdown: String) {
     self.quote = quote
+    self.attributionMarkdown = attributionMarkdown
     super.init()
   }
 
   enum CodingKeys: String, CodingKey {
-    /// Encodes/decodes markdown text associated with `node`
+    case attribution
     case quote
   }
 
@@ -36,9 +38,10 @@ public final class QuoteTemplate: CardTemplate {
     }
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let markdown = try container.decode(String.self, forKey: .quote)
+    let attributionMarkdown = try container.decode(String.self, forKey: .attribution)
     let nodes = parsingRules.parse(markdown)
     if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
-      self.init(quote: quote)
+      self.init(quote: quote, attributionMarkdown: attributionMarkdown)
     } else {
       throw Error.markdownParseError
     }
@@ -47,18 +50,90 @@ public final class QuoteTemplate: CardTemplate {
   public override func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(quote.allMarkdown, forKey: .quote)
+    try container.encode(attributionMarkdown, forKey: .attribution)
   }
 
   override public var type: CardTemplateType { return .quote }
 
-  public let quote: BlockQuote
+  /// The quote template is itself a card.
+  public override var cards: [Card] { return [self] }
 
-  public static func extract(from markdown: [Node]) -> [QuoteTemplate] {
+  public let quote: BlockQuote
+  public let attributionMarkdown: String
+
+  public static func extract(
+    from markdown: [Node],
+    attributionMarkdown: String
+  ) -> [QuoteTemplate] {
     return markdown
       .map { $0.findNodes(where: { $0.type == .blockQuote }) }
       .joined()
-      .map { QuoteTemplate(quote: $0 as! BlockQuote) } // swiftlint:disable:this force_cast
+      .map {
+        // swiftlint:disable:next force_cast
+        QuoteTemplate(quote: $0 as! BlockQuote, attributionMarkdown: attributionMarkdown)
+      }
   }
+}
+
+extension QuoteTemplate: Card {
+  public var identifier: String {
+    return quote.allMarkdown
+  }
+
+  public func cardView(
+    parseableDocument: ParseableDocument,
+    stylesheet: Stylesheet
+  ) -> CardView {
+    let view = TwoSidedCardView(frame: .zero)
+    view.context = stylesheet.attributedString(
+      "Identify the source".uppercased(),
+      style: .overline,
+      emphasis: .darkTextMediumEmphasis
+    )
+    let quoteRenderer = makeQuoteRenderer(
+      stylesheet: stylesheet,
+      style: .body2,
+      parsingRules: parseableDocument.parsingRules
+    )
+    quoteRenderer.markdown = quote.allMarkdown
+    view.front = quoteRenderer.attributedString
+    let attributionRenderer = makeQuoteRenderer(
+      stylesheet: stylesheet,
+      style: .caption,
+      parsingRules: parseableDocument.parsingRules
+    )
+    let back = NSMutableAttributedString()
+    back.append(quoteRenderer.attributedString)
+    back.append(NSAttributedString(string: "\n"))
+    attributionRenderer.markdown = "—" + attributionMarkdown
+    back.append(attributionRenderer.attributedString)
+    view.back = back
+    view.stylesheet = stylesheet
+    return view
+  }
+}
+
+private func makeQuoteRenderer(
+  stylesheet: Stylesheet,
+  style: Stylesheet.Style,
+  parsingRules: ParsingRules
+) -> RenderedMarkdown {
+  var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
+  formatters[.emphasis] = { $1.italic = true }
+  formatters[.bold] = { $1.bold = true }
+  var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
+  renderers[.delimiter] = { (_, _) in return NSAttributedString() }
+  let renderer = RenderedMarkdown(
+    parsingRules: ParsingRules(),
+    formatters: formatters,
+    renderers: renderers
+  )
+  renderer.defaultAttributes = NSAttributedString.Attributes(
+    stylesheet.typographyScheme[style]
+  )
+  renderer.defaultAttributes.kern = stylesheet.kern[style] ?? 1.0
+  renderer.defaultAttributes.alignment = .left
+  return renderer
 }
 
 extension QuoteTemplate: Equatable {

@@ -41,8 +41,9 @@ public struct PageProperties: Codable {
   public init(fileMetadata: FileMetadata, nodes: [Node]) {
     self.fileMetadata = fileMetadata
     self.hashtags = nodes.hashtags
-    self.title = String(nodes.title.split(separator: "\n").first ?? "")
-    self.cardTemplates = nodes.cardTemplates
+    let title = String(nodes.title.split(separator: "\n").first ?? "")
+    self.title = title
+    self.cardTemplates = nodes.cardTemplates(attributionMarkdown: title)
   }
 
   /// Returns a copy of the PageProperties with the file metadata changed.
@@ -166,7 +167,7 @@ extension Array where Element == Node {
   /// For an array of Nodes, return all VocabularyAssociations and ClozeTemplates found in
   /// the nodes.
   /// TODO: Make this extensible for other card template types.
-  var cardTemplates: [CardTemplateSerializationWrapper] {
+  func cardTemplates(attributionMarkdown: String) -> [CardTemplateSerializationWrapper] {
     var results = [CardTemplateSerializationWrapper]()
     results.append(
       contentsOf: VocabularyAssociation.makeAssociations(from: self).0
@@ -177,7 +178,7 @@ extension Array where Element == Node {
         .map { CardTemplateSerializationWrapper($0) }
     )
     results.append(
-      contentsOf: QuoteTemplate.extract(from: self)
+      contentsOf: QuoteTemplate.extract(from: self, attributionMarkdown: attributionMarkdown)
         .map { CardTemplateSerializationWrapper($0) }
     )
     return results

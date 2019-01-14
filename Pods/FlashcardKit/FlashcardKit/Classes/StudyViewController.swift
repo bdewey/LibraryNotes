@@ -201,7 +201,7 @@ public final class StudyViewController: UIViewController {
 }
 
 extension StudyViewController: CardViewDelegate {
-  func cardView(_ cardView: CardView, didAnswerCorrectly: Bool) {
+  public func cardView(_ cardView: CardView, didAnswerCorrectly: Bool) {
     studySession.recordAnswer(correct: didAnswerCorrectly)
     configureUI()
     if studySession.remainingCards == 0 {
@@ -210,7 +210,7 @@ extension StudyViewController: CardViewDelegate {
     }
   }
 
-  func cardView(
+  public func cardView(
     _ cardView: CardView,
     didRequestSpeech utterance: AVSpeechUtterance,
     language: String

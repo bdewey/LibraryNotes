@@ -30,13 +30,15 @@ private let testContent = """
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
     let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes)
+    let quoteTemplates = QuoteTemplate.extract(from: nodes, attributionMarkdown: "Test")
     XCTAssertEqual(quoteTemplates.count, 5)
+    let cards = quoteTemplates.map({ $0.cards }).joined()
+    XCTAssertEqual(cards.count, 5)
   }
 
   func testSerialization() {
     let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes)
+    let quoteTemplates = QuoteTemplate.extract(from: nodes, attributionMarkdown: "Test")
     let data = try! JSONEncoder().encode(quoteTemplates)
     let decoder = JSONDecoder()
     decoder.userInfo[.markdownParsingRules] = ParsingRules()

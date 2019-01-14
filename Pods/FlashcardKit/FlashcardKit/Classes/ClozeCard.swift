@@ -54,8 +54,48 @@ extension ClozeCard: Card {
     return markdown + suffix
   }
 
-  public func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
-    return ClozeCardView(card: self, parseableDocument: parseableDocument, stylesheet: stylesheet)
+  public func cardView(
+    parseableDocument: ParseableDocument,
+    stylesheet: Stylesheet
+  ) -> CardView {
+    let cardView = TwoSidedCardView(frame: .zero)
+    let nodes = parseableDocument.parsingRules.parse(markdown)
+    assert(nodes.count == 1)
+    let node = nodes[0]
+    cardView.context = context(stylesheet: stylesheet)
+    cardView.front = cardFront(node: node, stylesheet: stylesheet)
+    cardView.back = cardBack(node: node, stylesheet: stylesheet)
+    return cardView
+  }
+
+  func utterance(node: Node, stylesheet: Stylesheet) -> AVSpeechUtterance {
+    let phrase = clozeRenderer.render(node: node)
+    let utterance = AVSpeechUtterance(string: phrase)
+    utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")
+    return utterance
+  }
+
+  func context(stylesheet: Stylesheet) -> NSAttributedString {
+    let font = stylesheet.typographyScheme.overline
+    let contextString = "Fill in the blank"
+    return NSAttributedString(
+      string: contextString.localizedUppercase,
+      attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor(white: 0, alpha: 0.6)]
+    )
+  }
+
+  func cardFront(node: Node, stylesheet: Stylesheet) -> NSAttributedString {
+    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
+      stylesheet: stylesheet,
+      hideClozeAt: clozeIndex
+    )
+    return cardFrontRenderer.render(node: node)
+  }
+
+  func cardBack(node: Node, stylesheet: Stylesheet) -> NSAttributedString {
+    return MarkdownAttributedStringRenderer
+      .cardBackRenderer(stylesheet: stylesheet, revealingClozeAt: clozeIndex)
+      .render(node: node)
   }
 }
 
@@ -124,5 +164,52 @@ extension MarkdownAttributedStringRenderer {
       return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
     }
     return renderer
+  }
+}
+
+private let clozeRenderer: MarkdownStringRenderer = {
+  var renderer = MarkdownStringRenderer()
+  renderer.renderFunctions[.text] = { return String($0.slice.substring) }
+  renderer.renderFunctions[.cloze] = { (node) in
+    guard let cloze = node as? Cloze else { return "" }
+    return String(cloze.hiddenText)
+  }
+  return renderer
+}()
+
+private let defaultParagraphStyle: NSParagraphStyle = {
+  let paragraphStyle = NSMutableParagraphStyle()
+  paragraphStyle.alignment = .left
+  return paragraphStyle
+}()
+
+extension Stylesheet {
+
+  var textAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colors.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
+  }
+
+  var clozeAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.body2,
+      .foregroundColor: colors.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .backgroundColor: UIColor(rgb: 0xf6e6f0),
+      .paragraphStyle: defaultParagraphStyle,
+    ]
+  }
+
+  var captionAttributes: [NSAttributedString.Key: Any] {
+    return [
+      .font: typographyScheme.caption,
+      .foregroundColor: colors.onSurfaceColor
+        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
+      .kern: kern[.caption] ?? 1.0,
+      .paragraphStyle: defaultParagraphStyle,
+    ]
   }
 }

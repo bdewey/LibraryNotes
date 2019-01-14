@@ -127,7 +127,7 @@ extension NSParagraphStyle {
 }
 
 extension MDCTypographyScheme {
-  subscript(style: Stylesheet.Style) -> UIFont {
+  public subscript(style: Stylesheet.Style) -> UIFont {
     switch style {
     case .headline1: return headline1
     case .headline2: return headline2
@@ -147,6 +147,7 @@ extension MDCTypographyScheme {
 }
 
 extension Stylesheet {
+  /// Creates an attributed string attributes dictionary for the specified style.
   public func attributes(
     style: Stylesheet.Style,
     emphasis: AlphaStyle = .darkTextHighEmphasis,
@@ -158,6 +159,19 @@ extension Stylesheet {
       .foregroundColor: colors.onSurfaceColor.withAlphaComponent(alpha[emphasis] ?? 1),
       .paragraphStyle: paragraphStyle,
     ]
+  }
+
+  /// Creates an attributed string with the given contents and styling.
+  public func attributedString(
+    _ contents: String,
+    style: Stylesheet.Style,
+    emphasis: AlphaStyle = .darkTextHighEmphasis,
+    paragraphStyle: NSParagraphStyle = NSParagraphStyle.leftAlign
+  ) -> NSAttributedString {
+    return NSAttributedString(
+      string: contents,
+      attributes: attributes(style: style, emphasis: emphasis, paragraphStyle: paragraphStyle)
+    )
   }
 }
 

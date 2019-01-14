@@ -35,6 +35,15 @@ The 45th President of the United States is ?[cheeto](Donald Trump).
 
 The question about Trump should be in an auto-continue list.
 """
+
+  static let quote = """
+*Educated*, Tara Westover
+
+## Quotes
+
+> It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence. (26)
+> Ain’t nothin’ funnier than real life, I tell you what. (34)
+"""
 }
 
 final class CommonplaceBookAppUITests: XCTestCase {
@@ -104,6 +113,28 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testStudyFromASingleDocument() {
     createDocument(with: TestContent.doubleCloze)
+    let studyButton = application.buttons[Identifiers.studyButton]
+    waitUntilElementEnabled(studyButton)
+    studyButton.tap()
+    let currentCard = application.otherElements[Identifiers.currentCardView]
+    let gotIt = application.buttons["Got it"]
+    for _ in 0 ..< 2 {
+      waitUntilElementExists(currentCard)
+      currentCard.tap()
+      waitUntilElementExists(gotIt)
+      gotIt.tap()
+    }
+    // After going through all clozes we should automatically go back to the document list.
+    waitUntilElementExists(studyButton)
+    wait(
+      for: NSPredicate(format: "isEnabled == false"),
+      evaluatedWith: studyButton,
+      message: "Studying should be disabled"
+    )
+  }
+
+  func testStudyQuotes() {
+    createDocument(with: TestContent.quote)
     let studyButton = application.buttons[Identifiers.studyButton]
     waitUntilElementEnabled(studyButton)
     studyButton.tap()
