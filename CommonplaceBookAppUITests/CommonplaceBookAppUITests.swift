@@ -42,7 +42,7 @@ The question about Trump should be in an auto-continue list.
 ## Quotes
 
 > It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence.
-> Ain’t nothin’ funnier than real life, I tell you what. (34)
+> Ain’t nothin’ ?[](funnier) than real life, I tell you what. (34)
 """
 }
 
@@ -140,7 +140,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
     studyButton.tap()
     let currentCard = application.otherElements[Identifiers.currentCardView]
     let gotIt = application.buttons["Got it"]
-    for _ in 0 ..< 2 {
+    for _ in 0 ..< 3 {
       waitUntilElementExists(currentCard)
       currentCard.tap()
       waitUntilElementExists(gotIt)

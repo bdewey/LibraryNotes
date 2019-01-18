@@ -2,7 +2,9 @@
 // swiftlint:disable line_length
 // swiftlint:disable force_try
 
+import CommonplaceBook
 import CommonplaceBookApp
+import FlashcardKit
 import MiniMarkdown
 import XCTest
 
@@ -27,6 +29,10 @@ private let testContent = """
 
 """
 
+private let contentWithCloze = """
+> We had to learn for ourselves and, furthermore, we had to teach the despairing men, that ?[](it did not really matter what we expected from life, but rather what life expected from us).
+"""
+
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
     let nodes = ParsingRules().parse(testContent)
@@ -44,5 +50,24 @@ final class QuoteTemplateTests: XCTestCase {
     decoder.userInfo[.markdownParsingRules] = ParsingRules()
     let decodedTemplates = try! decoder.decode([QuoteTemplate].self, from: data)
     XCTAssertEqual(decodedTemplates, quoteTemplates)
+  }
+
+  func testRenderCloze() {
+    let parsingRules = LanguageDeck.parsingRules
+    let nodes = parsingRules.parse(contentWithCloze)
+    let quoteTemplates = QuoteTemplate.extract(
+      from: nodes,
+      attributionMarkdown: "_Man's Search for Meaning_, Viktor E. Frankl"
+    )
+    let renderer = QuoteTemplate.makeQuoteRenderer(
+      stylesheet: Stylesheet(),
+      style: .body1,
+      parsingRules: parsingRules
+    )
+    let (front, _) = quoteTemplates[0].renderCardFront(with: renderer)
+    XCTAssertEqual(
+      front.string,
+      "We had to learn for ourselves and, furthermore, we had to teach the despairing men, that it did not really matter what we expected from life, but rather what life expected from us."
+    )
   }
 }

@@ -90,16 +90,14 @@ extension QuoteTemplate: Card {
       style: .overline,
       emphasis: .darkTextMediumEmphasis
     )
-    let quoteRenderer = makeQuoteRenderer(
+    let quoteRenderer = QuoteTemplate.makeQuoteRenderer(
       stylesheet: stylesheet,
       style: .body2,
       parsingRules: parseableDocument.parsingRules
     )
-    quoteRenderer.markdown = quote.allMarkdown
-    let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
-    let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
+    let (front, chapterAndVerse) = renderCardFront(with: quoteRenderer)
     view.front = front
-    let attributionRenderer = makeQuoteRenderer(
+    let attributionRenderer = QuoteTemplate.makeQuoteRenderer(
       stylesheet: stylesheet,
       style: .caption,
       parsingRules: parseableDocument.parsingRules
@@ -113,29 +111,48 @@ extension QuoteTemplate: Card {
     view.stylesheet = stylesheet
     return view
   }
-}
 
-private func makeQuoteRenderer(
-  stylesheet: Stylesheet,
-  style: Stylesheet.Style,
-  parsingRules: ParsingRules
-) -> RenderedMarkdown {
-  var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-  formatters[.emphasis] = { $1.italic = true }
-  formatters[.bold] = { $1.bold = true }
-  var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-  renderers[.delimiter] = { (_, _) in return NSAttributedString() }
-  let renderer = RenderedMarkdown(
-    parsingRules: ParsingRules(),
-    formatters: formatters,
-    renderers: renderers
-  )
-  renderer.defaultAttributes = NSAttributedString.Attributes(
-    stylesheet.typographyScheme[style]
-  )
-  renderer.defaultAttributes.kern = stylesheet.kern[style] ?? 1.0
-  renderer.defaultAttributes.alignment = .left
-  return renderer
+  public static func makeQuoteRenderer(
+    stylesheet: Stylesheet,
+    style: Stylesheet.Style,
+    parsingRules: ParsingRules
+  ) -> RenderedMarkdown {
+    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
+    formatters[.emphasis] = { $1.italic = true }
+    formatters[.bold] = { $1.bold = true }
+    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
+    renderers[.delimiter] = { (_, _) in return NSAttributedString() }
+    renderers[.cloze] = { (node, attributes) in
+      guard let cloze = node as? Cloze else {
+        assertionFailure()
+        return NSAttributedString()
+      }
+      return NSAttributedString(
+        string: String(cloze.hiddenText),
+        attributes: attributes.attributes
+      )
+    }
+    let renderer = RenderedMarkdown(
+      parsingRules: parsingRules,
+      formatters: formatters,
+      renderers: renderers
+    )
+    renderer.defaultAttributes = NSAttributedString.Attributes(
+      stylesheet.typographyScheme[style]
+    )
+    renderer.defaultAttributes.kern = stylesheet.kern[style] ?? 1.0
+    renderer.defaultAttributes.alignment = .left
+    return renderer
+  }
+
+  public func renderCardFront(
+    with quoteRenderer: RenderedMarkdown
+  ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
+    quoteRenderer.markdown = quote.allMarkdown
+    let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
+    let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
+    return (front: front, chapterAndVerse: chapterAndVerse)
+  }
 }
 
 extension QuoteTemplate: Equatable {
