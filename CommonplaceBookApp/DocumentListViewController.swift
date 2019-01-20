@@ -231,7 +231,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   public func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
-      studySession: studySession,
+      studySession: studySession.limiting(to: 20),
       documentCache: ReadOnlyDocumentCache(delegate: self),
       stylesheet: stylesheet,
       delegate: self

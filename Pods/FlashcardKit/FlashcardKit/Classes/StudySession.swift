@@ -92,6 +92,16 @@ public struct StudySession {
     currentIndex += 1
   }
 
+  public mutating func limit(to cardCount: Int) {
+    cards = Array(cards.prefix(cardCount))
+  }
+
+  public func limiting(to cardCount: Int) -> StudySession {
+    var copy = self
+    copy.limit(to: cardCount)
+    return copy
+  }
+
   /// Number of cards remaining in the study session.
   public var remainingCards: Int {
     return cards.endIndex - currentIndex

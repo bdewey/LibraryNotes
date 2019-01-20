@@ -113,46 +113,12 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testStudyFromASingleDocument() {
     createDocument(with: TestContent.doubleCloze)
-    let studyButton = application.buttons[Identifiers.studyButton]
-    waitUntilElementEnabled(studyButton)
-    studyButton.tap()
-    let currentCard = application.otherElements[Identifiers.currentCardView]
-    let gotIt = application.buttons["Got it"]
-    for _ in 0 ..< 2 {
-      waitUntilElementExists(currentCard)
-      currentCard.tap()
-      waitUntilElementExists(gotIt)
-      gotIt.tap()
-    }
-    // After going through all clozes we should automatically go back to the document list.
-    waitUntilElementExists(studyButton)
-    wait(
-      for: NSPredicate(format: "isEnabled == false"),
-      evaluatedWith: studyButton,
-      message: "Studying should be disabled"
-    )
+    study(expectedCards: 2)
   }
 
   func testStudyQuotes() {
     createDocument(with: TestContent.quote)
-    let studyButton = application.buttons[Identifiers.studyButton]
-    waitUntilElementEnabled(studyButton)
-    studyButton.tap()
-    let currentCard = application.otherElements[Identifiers.currentCardView]
-    let gotIt = application.buttons["Got it"]
-    for _ in 0 ..< 3 {
-      waitUntilElementExists(currentCard)
-      currentCard.tap()
-      waitUntilElementExists(gotIt)
-      gotIt.tap()
-    }
-    // After going through all clozes we should automatically go back to the document list.
-    waitUntilElementExists(studyButton)
-    wait(
-      for: NSPredicate(format: "isEnabled == false"),
-      evaluatedWith: studyButton,
-      message: "Studying should be disabled"
-    )
+    study(expectedCards: 3)
   }
 
   func testRotation() {
@@ -167,6 +133,18 @@ final class CommonplaceBookAppUITests: XCTestCase {
     waitUntilElementExists(cell)
     XCTAssertEqual(collectionView.frame.width, cell.frame.width)
     XCTAssertEqual(expectedWidthAfterRotation, cell.frame.width)
+  }
+
+  func testLimitStudySessionToTwenty() {
+    var lines = [String]()
+    lines.append("The Shining\n* ")
+    for i in 0 ..< 25 {
+      lines.append("All work and no play makes ?[who?](Jack) a dull boy. \(i)\n")
+    }
+    createDocument(with: lines)
+    waitUntilElementExists(application.staticTexts["25 cards."])
+    study(expectedCards: 20, noCardsLeft: false)
+    waitUntilElementExists(application.staticTexts["5 cards."])
   }
 }
 
@@ -230,5 +208,38 @@ extension CommonplaceBookAppUITests {
     waitUntilElementExists(editView)
     editView.typeText(text)
     editView.buttons[Identifiers.backButton].tap()
+  }
+
+  private func createDocument(with text: [String]) {
+    application.buttons[Identifiers.newDocumentButton].tap()
+    let editView = application.textViews[Identifiers.editDocumentView]
+    waitUntilElementExists(editView)
+    for line in text {
+      editView.typeText(line)
+    }
+    editView.buttons[Identifiers.backButton].tap()
+  }
+
+  private func study(expectedCards: Int, noCardsLeft: Bool = true) {
+    let studyButton = application.buttons[Identifiers.studyButton]
+    waitUntilElementEnabled(studyButton)
+    studyButton.tap()
+    let currentCard = application.otherElements[Identifiers.currentCardView]
+    let gotIt = application.buttons["Got it"]
+    for _ in 0 ..< expectedCards {
+      waitUntilElementExists(currentCard)
+      currentCard.tap()
+      waitUntilElementExists(gotIt)
+      gotIt.tap()
+    }
+    if noCardsLeft {
+      // After going through all clozes we should automatically go back to the document list.
+      waitUntilElementExists(studyButton)
+      wait(
+        for: NSPredicate(format: "isEnabled == false"),
+        evaluatedWith: studyButton,
+        message: "Studying should be disabled"
+      )
+    }
   }
 }
