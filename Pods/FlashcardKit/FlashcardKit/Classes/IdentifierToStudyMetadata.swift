@@ -12,15 +12,14 @@ extension Dictionary where Key == String, Value == StudyMetadata {
   public func studySession(
     from cards: [Card],
     limit: Int,
-    documentName: String,
-    parsingRules: ParsingRules,
+    properties: CardDocumentProperties,
     date: Date = Date()
   ) -> StudySession {
     let studyCards = cards
       .filter { self.eligibleForStudy(identifier: $0.identifier, on: date) }
       .shuffled()
       .prefix(limit)
-    return StudySession(studyCards, documentName: documentName, documentRules: parsingRules)
+    return StudySession(studyCards, properties: properties)
   }
 
   private func eligibleForStudy(identifier: String, on date: Date) -> Bool {

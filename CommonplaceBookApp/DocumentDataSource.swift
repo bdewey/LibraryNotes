@@ -58,8 +58,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       return documentMetadata.studySession(
         from: diffableProperties.cardTemplates.cards,
         limit: 500,
-        documentName: diffableProperties.fileMetadata.fileName,
-        parsingRules: LanguageDeck.parsingRules
+        properties: CardDocumentProperties(documentName: diffableProperties.fileMetadata.fileName, attributionMarkdown: diffableProperties.title, parsingRules: LanguageDeck.parsingRules)
       )
     }
     .reduce(into: StudySession(), { $0 += $1 })
@@ -83,7 +82,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
     let studySession = notebook.studySession()
     self.cardsPerDocument = studySession
       .reduce(into: [String: Int]()) { (cardsPerDocument, card) in
-        cardsPerDocument[card.documentName] = cardsPerDocument[card.documentName, default: 0] + 1
+        cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
       }
     DDLogInfo("studySession.count = \(studySession.count). " +
       "cardsPerDocument has \(cardsPerDocument.count) entries")

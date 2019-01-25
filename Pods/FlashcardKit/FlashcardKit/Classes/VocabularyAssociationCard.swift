@@ -27,11 +27,20 @@ struct VocabularyAssociationCard: Card {
     ].joined(separator: ":")
   }
 
-  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
-    return VocabularyAssociationCardView(card: self, parseableDocument: parseableDocument, stylesheet: stylesheet)
+  func cardView(
+    document: UIDocument,
+    properties: CardDocumentProperties,
+    stylesheet: Stylesheet
+  ) -> CardView {
+    return VocabularyAssociationCardView(
+      card: self,
+      document: document,
+      properties: properties,
+      stylesheet: stylesheet
+    )
   }
 
-  func context(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
+  func context(stylesheet: Stylesheet) -> NSAttributedString {
     let font = stylesheet.typographyScheme.overline
     let contextString = promptWithSpanish
       ? "How do you say this in English?"
@@ -42,25 +51,33 @@ struct VocabularyAssociationCard: Card {
     )
   }
 
-  func prompt(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
+  func prompt(
+    document: UIDocument,
+    properties: CardDocumentProperties,
+    stylesheet: Stylesheet
+  ) -> NSAttributedString {
     let phrase = promptWithSpanish
       ? vocabularyAssociation.spanish
       : vocabularyAssociation.english
-    let blocks = parseableDocument.parsingRules.parse(phrase)
+    let blocks = properties.parsingRules.parse(phrase)
     let renderer = MarkdownAttributedStringRenderer.promptRenderer(
-      document: parseableDocument.document,
+      document: document,
       stylesheet: stylesheet
     )
     return blocks.map({ renderer.render(node: $0) }).joined()
   }
 
-  func answer(document: ParseableDocument, stylesheet: Stylesheet) -> NSAttributedString {
+  func answer(
+    document: UIDocument,
+    properties: CardDocumentProperties,
+    stylesheet: Stylesheet
+  ) -> NSAttributedString {
     let phrase = promptWithSpanish
       ? vocabularyAssociation.english
       : vocabularyAssociation.spanish
-    let blocks = document.parsingRules.parse(phrase)
+    let blocks = properties.parsingRules.parse(phrase)
     let renderer = MarkdownAttributedStringRenderer.answerRenderer(
-      document: document.document,
+      document: document,
       stylesheet: stylesheet
     )
     return blocks.map({ renderer.render(node: $0) }).joined()

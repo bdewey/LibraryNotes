@@ -10,10 +10,12 @@ import UIKit
 final class VocabularyAssociationSpellingCardView: CardView {
   init(
     card: VocabularyAssociationSpellingCard,
-    parseableDocument: ParseableDocument,
+    document: UIDocument,
+    parseableDocument: CardDocumentProperties,
     stylesheet: Stylesheet
   ) {
     self.card = card
+    self.document = document
     self.parseableDocument = parseableDocument
     self.stylesheet = stylesheet
     super.init(frame: .zero)
@@ -41,7 +43,8 @@ final class VocabularyAssociationSpellingCardView: CardView {
   }
 
   private let card: VocabularyAssociationSpellingCard
-  private let parseableDocument: ParseableDocument
+  private let document: UIDocument
+  private let parseableDocument: CardDocumentProperties
   private let stylesheet: Stylesheet
 
   override var introductoryUtterances: [AVSpeechUtterance]? {
@@ -70,7 +73,7 @@ final class VocabularyAssociationSpellingCardView: CardView {
 
   private lazy var imageView: UIImageView = {
     let imageView = UIImageView()
-    if let image = card.image(parseableDocument: parseableDocument) {
+    if let image = card.image(document: document, parseableDocument: parseableDocument) {
       imageView.image = image
       imageView.contentMode = .scaleAspectFit
     }

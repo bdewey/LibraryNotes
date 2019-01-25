@@ -6,20 +6,18 @@ import MiniMarkdown
 
 public struct StudySession {
 
-  public struct CardFromDocument {
+  public struct AttributedCard {
     public let card: Card
-    public let documentName: String
-    public let documentRules: ParsingRules
+    public let properties: CardDocumentProperties
 
-    public init(card: Card, documentName: String, documentRules: ParsingRules) {
+    public init(card: Card, attributes: CardDocumentProperties) {
       self.card = card
-      self.documentName = documentName
-      self.documentRules = documentRules
+      self.properties = attributes
     }
   }
 
   /// The current set of cards to study.
-  private var cards: [CardFromDocument]
+  private var cards: [AttributedCard]
 
   /// The current position in `cards`
   private var currentIndex: Int
@@ -53,11 +51,10 @@ public struct StudySession {
   /// Creates a study session where all cards come from a single document.
   public init<Cards: Sequence>(
     _ cards: Cards,
-    documentName: String,
-    documentRules: ParsingRules
+    properties: CardDocumentProperties
   ) where Cards.Element == Card {
     let documentCards = cards.shuffled().map {
-      CardFromDocument(card: $0, documentName: documentName, documentRules: documentRules)
+      AttributedCard(card: $0, attributes: properties)
     }
     self.cards = documentCards
     currentIndex = self.cards.startIndex
@@ -70,7 +67,7 @@ public struct StudySession {
   }
 
   /// The current card to study. Nil if we're done.
-  public var currentCard: CardFromDocument? {
+  public var currentCard: AttributedCard? {
     guard currentIndex < cards.endIndex else { return nil }
     return cards[currentIndex]
   }
@@ -79,7 +76,7 @@ public struct StudySession {
   public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
     let identifier = currentCard.card.identifier
-    var statistics = results[currentCard.documentName, default: [:]][identifier, default: AnswerStatistics.empty]
+    var statistics = results[currentCard.properties.documentName, default: [:]][identifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1
@@ -88,7 +85,7 @@ public struct StudySession {
       cards.append(currentCard)
       statistics.incorrect += 1
     }
-    results[currentCard.documentName, default: [:]][identifier] = statistics
+    results[currentCard.properties.documentName, default: [:]][identifier] = statistics
     currentIndex += 1
   }
 
@@ -120,7 +117,7 @@ extension StudySession: Collection {
   public func index(after i: Int) -> Int {
     return cards.index(after: i)
   }
-  public subscript(position: Int) -> CardFromDocument {
+  public subscript(position: Int) -> AttributedCard {
     return cards[position]
   }
 }
@@ -146,7 +143,7 @@ extension StudySession {
   }
 }
 
-extension Sequence where Element == StudySession.CardFromDocument {
+extension Sequence where Element == StudySession.AttributedCard {
 
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<String> {

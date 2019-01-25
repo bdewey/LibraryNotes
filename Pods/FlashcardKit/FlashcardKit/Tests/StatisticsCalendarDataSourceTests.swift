@@ -58,7 +58,14 @@ final class StatisticsCalendarDataSourceTests: LanguageDeckBase {
       XCTFail("No cards?")
       return
     }
-    var studySession = StudySession(vocabularyAssociations.cards, documentName: languageDeck.document.fileURL.lastPathComponent, documentRules: LanguageDeck.parsingRules)
+    var studySession = StudySession(
+      vocabularyAssociations.cards,
+      properties: CardDocumentProperties(
+        documentName: languageDeck.document.fileURL.lastPathComponent,
+        attributionMarkdown: "",
+        parsingRules: LanguageDeck.parsingRules
+      )
+    )
     // Answer everything correctly.
     let today = Date()
     studySession.studySessionStartDate = today

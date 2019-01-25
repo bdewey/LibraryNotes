@@ -10,16 +10,19 @@ import UIKit
 final class VocabularyAssociationCardView: CardView {
 
   let card: VocabularyAssociationCard
-  let parseableDocument: ParseableDocument
+  let document: UIDocument
+  let properties: CardDocumentProperties
   let stylesheet: Stylesheet
 
   init(
     card: VocabularyAssociationCard,
-    parseableDocument: ParseableDocument,
+    document: UIDocument,
+    properties: CardDocumentProperties,
     stylesheet: Stylesheet
   ) {
     self.card = card
-    self.parseableDocument = parseableDocument
+    self.document = document
+    self.properties = properties
     self.stylesheet = stylesheet
     super.init(frame: .zero)
     self.addSubview(columnStack)
@@ -29,12 +32,17 @@ final class VocabularyAssociationCardView: CardView {
 
     self.addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
 
-    contextLabel.attributedText = card.context(document: parseableDocument, stylesheet: stylesheet)
+    contextLabel.attributedText = card.context(stylesheet: stylesheet)
     frontLabel.attributedText = card.prompt(
-      parseableDocument: parseableDocument,
+      document: document,
+      properties: properties,
       stylesheet: stylesheet
     )
-    backLabel.attributedText = card.answer(document: parseableDocument, stylesheet: stylesheet)
+    backLabel.attributedText = card.answer(
+      document: document,
+      properties: properties,
+      stylesheet: stylesheet
+    )
     setAnswerVisible(false, animated: false)
   }
 

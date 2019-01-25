@@ -36,15 +36,6 @@ public struct ClozeCard: Codable {
       hideClozeAt: clozeIndex
     )
   }
-
-  /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex`
-  /// present and highlighted.
-  public func cardBackRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
-    return MarkdownAttributedStringRenderer.cardBackRenderer(
-      stylesheet: stylesheet,
-      revealingClozeAt: clozeIndex
-    )
-  }
 }
 
 extension ClozeCard: Card {
@@ -55,16 +46,31 @@ extension ClozeCard: Card {
   }
 
   public func cardView(
-    parseableDocument: ParseableDocument,
+    document: UIDocument,
+    properties: CardDocumentProperties,
     stylesheet: Stylesheet
   ) -> CardView {
     let cardView = TwoSidedCardView(frame: .zero)
-    let nodes = parseableDocument.parsingRules.parse(markdown)
+    let nodes = properties.parsingRules.parse(markdown)
     assert(nodes.count == 1)
     let node = nodes[0]
     cardView.context = context(stylesheet: stylesheet)
-    cardView.front = cardFront(node: node, stylesheet: stylesheet)
-    cardView.back = cardBack(node: node, stylesheet: stylesheet)
+    let (front, chapterAndVerse) = cardFront(node: node, stylesheet: stylesheet)
+      .decomposedChapterAndVerseAnnotation
+    cardView.front = front
+    let back = NSMutableAttributedString()
+    back.append(cardBack(node: node, stylesheet: stylesheet).removingChapterAndVerseAnnotation())
+    if !properties.attributionMarkdown.isEmpty {
+      back.append(NSAttributedString(string: "\n"))
+      let attributionRenderer = RenderedMarkdown(
+        stylesheet: stylesheet,
+        style: .caption,
+        parsingRules: properties.parsingRules
+      )
+      attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
+      back.append(attributionRenderer.attributedString)
+    }
+    cardView.back = back
     cardView.stylesheet = stylesheet
     return cardView
   }
@@ -86,11 +92,7 @@ extension ClozeCard: Card {
   }
 
   func cardFront(node: Node, stylesheet: Stylesheet) -> NSAttributedString {
-    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
-      stylesheet: stylesheet,
-      hideClozeAt: clozeIndex
-    )
-    return cardFrontRenderer.render(node: node)
+    return cardFrontRenderer(stylesheet: stylesheet).render(node: node)
   }
 
   func cardBack(node: Node, stylesheet: Stylesheet) -> NSAttributedString {

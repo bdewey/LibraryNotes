@@ -34,8 +34,11 @@ public final class LanguageDeck {
         return documentValue.value.studySession(
           from: cards,
           limit: 500,
-          documentName: document.fileURL.lastPathComponent,
-          parsingRules: LanguageDeck.parsingRules
+          properties: CardDocumentProperties(
+            documentName: document.fileURL.lastPathComponent,
+            attributionMarkdown: "",
+            parsingRules: LanguageDeck.parsingRules
+          )
         )
       })
   }

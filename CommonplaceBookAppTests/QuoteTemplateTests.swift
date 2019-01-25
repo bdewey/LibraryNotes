@@ -36,7 +36,7 @@ private let contentWithCloze = """
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
     let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes, attributionMarkdown: "Test")
+    let quoteTemplates = QuoteTemplate.extract(from: nodes)
     XCTAssertEqual(quoteTemplates.count, 5)
     let cards = quoteTemplates.map({ $0.cards }).joined()
     XCTAssertEqual(cards.count, 5)
@@ -44,7 +44,7 @@ final class QuoteTemplateTests: XCTestCase {
 
   func testSerialization() {
     let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes, attributionMarkdown: "Test")
+    let quoteTemplates = QuoteTemplate.extract(from: nodes)
     let data = try! JSONEncoder().encode(quoteTemplates)
     let decoder = JSONDecoder()
     decoder.userInfo[.markdownParsingRules] = ParsingRules()
@@ -55,11 +55,8 @@ final class QuoteTemplateTests: XCTestCase {
   func testRenderCloze() {
     let parsingRules = LanguageDeck.parsingRules
     let nodes = parsingRules.parse(contentWithCloze)
-    let quoteTemplates = QuoteTemplate.extract(
-      from: nodes,
-      attributionMarkdown: "_Man's Search for Meaning_, Viktor E. Frankl"
-    )
-    let renderer = QuoteTemplate.makeQuoteRenderer(
+    let quoteTemplates = QuoteTemplate.extract(from: nodes)
+    let renderer = RenderedMarkdown(
       stylesheet: Stylesheet(),
       style: .body1,
       parsingRules: parsingRules

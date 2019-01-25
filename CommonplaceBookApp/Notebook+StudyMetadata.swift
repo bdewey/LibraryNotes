@@ -90,8 +90,7 @@ extension Notebook {
         return documentMetadata.studySession(
           from: diffableProperties.cardTemplates.cards,
           limit: 500,
-          documentName: diffableProperties.fileMetadata.fileName,
-          parsingRules: LanguageDeck.parsingRules
+          properties: CardDocumentProperties(documentName: diffableProperties.fileMetadata.fileName, attributionMarkdown: diffableProperties.title, parsingRules: LanguageDeck.parsingRules)
         )
       }
       .reduce(into: StudySession(), { $0 += $1 })

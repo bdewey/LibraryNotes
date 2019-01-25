@@ -9,6 +9,11 @@
 			<key>orderHint</key>
 			<integer>1</integer>
 		</dict>
+		<key>CommonplaceBookApp.xcscheme_^#shared#^_</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>UITesting.xcscheme</key>
 		<dict>
 			<key>orderHint</key>

@@ -20,10 +20,15 @@ struct VocabularyAssociationSpellingCard: Card {
     ].joined(separator: ":")
   }
 
-  func cardView(parseableDocument: ParseableDocument, stylesheet: Stylesheet) -> CardView {
+  func cardView(
+    document: UIDocument,
+    properties: CardDocumentProperties,
+    stylesheet: Stylesheet
+  ) -> CardView {
     return VocabularyAssociationSpellingCardView(
       card: self,
-      parseableDocument: parseableDocument,
+      document: document,
+      parseableDocument: properties,
       stylesheet: stylesheet
     )
   }
@@ -32,8 +37,8 @@ struct VocabularyAssociationSpellingCard: Card {
     return vocabularyAssociation.spanish
   }
 
-  func image(parseableDocument: ParseableDocument) -> UIImage? {
-    guard let document = parseableDocument.document as? TextBundleDocument else { return nil }
+  func image(document: UIDocument, parseableDocument: CardDocumentProperties) -> UIImage? {
+    guard let document = document as? TextBundleDocument else { return nil }
     let blocks = parseableDocument.parsingRules.parse(vocabularyAssociation.english)
     return blocks.map { $0.findNodes(where: { $0.type == .image }) }
       .joined()

@@ -80,13 +80,15 @@ final class StudyMetadataSessionTests: XCTestCase {
       throw Error.cannotLoadStudySession
     }
     let identifierToStudyMetadata =
-      document.documentStudyMetadata.taggedResult.value!.value ??
-        IdentifierToStudyMetadata.empty
+      document.documentStudyMetadata.taggedResult.value!.value
     var studySession = identifierToStudyMetadata.studySession(
       from: associations.cards,
       limit: 500,
-      documentName: document.fileURL.lastPathComponent,
-      parsingRules: LanguageDeck.parsingRules,
+      properties: CardDocumentProperties(
+        documentName: document.fileURL.lastPathComponent,
+        attributionMarkdown: "",
+        parsingRules: LanguageDeck.parsingRules
+      ),
       date: date
     )
     XCTAssertEqual(identifiers, studySession.allIdentifiers)

@@ -21,14 +21,12 @@ public final class QuoteTemplate: CardTemplate {
     case markdownParseError
   }
 
-  public init(quote: BlockQuote, attributionMarkdown: String) {
+  public init(quote: BlockQuote) {
     self.quote = quote
-    self.attributionMarkdown = attributionMarkdown
     super.init()
   }
 
   enum CodingKeys: String, CodingKey {
-    case attribution
     case quote
   }
 
@@ -38,10 +36,9 @@ public final class QuoteTemplate: CardTemplate {
     }
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let markdown = try container.decode(String.self, forKey: .quote)
-    let attributionMarkdown = try container.decode(String.self, forKey: .attribution)
     let nodes = parsingRules.parse(markdown)
     if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
-      self.init(quote: quote, attributionMarkdown: attributionMarkdown)
+      self.init(quote: quote)
     } else {
       throw Error.markdownParseError
     }
@@ -50,7 +47,6 @@ public final class QuoteTemplate: CardTemplate {
   public override func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(quote.allMarkdown, forKey: .quote)
-    try container.encode(attributionMarkdown, forKey: .attribution)
   }
 
   override public var type: CardTemplateType { return .quote }
@@ -59,18 +55,16 @@ public final class QuoteTemplate: CardTemplate {
   public override var cards: [Card] { return [self] }
 
   public let quote: BlockQuote
-  public let attributionMarkdown: String
 
   public static func extract(
-    from markdown: [Node],
-    attributionMarkdown: String
+    from markdown: [Node]
   ) -> [QuoteTemplate] {
     return markdown
       .map { $0.findNodes(where: { $0.type == .blockQuote }) }
       .joined()
       .map {
         // swiftlint:disable:next force_cast
-        QuoteTemplate(quote: $0 as! BlockQuote, attributionMarkdown: attributionMarkdown)
+        QuoteTemplate(quote: $0 as! BlockQuote)
       }
   }
 }
@@ -81,7 +75,8 @@ extension QuoteTemplate: Card {
   }
 
   public func cardView(
-    parseableDocument: ParseableDocument,
+    document: UIDocument,
+    properties: CardDocumentProperties,
     stylesheet: Stylesheet
   ) -> CardView {
     let view = TwoSidedCardView(frame: .zero)
@@ -90,59 +85,26 @@ extension QuoteTemplate: Card {
       style: .overline,
       emphasis: .darkTextMediumEmphasis
     )
-    let quoteRenderer = QuoteTemplate.makeQuoteRenderer(
+    let quoteRenderer = RenderedMarkdown(
       stylesheet: stylesheet,
       style: .body2,
-      parsingRules: parseableDocument.parsingRules
+      parsingRules: properties.parsingRules
     )
     let (front, chapterAndVerse) = renderCardFront(with: quoteRenderer)
     view.front = front
-    let attributionRenderer = QuoteTemplate.makeQuoteRenderer(
+    let attributionRenderer = RenderedMarkdown(
       stylesheet: stylesheet,
       style: .caption,
-      parsingRules: parseableDocument.parsingRules
+      parsingRules: properties.parsingRules
     )
     let back = NSMutableAttributedString()
     back.append(front)
     back.append(NSAttributedString(string: "\n"))
-    attributionRenderer.markdown = "—" + attributionMarkdown + " " + chapterAndVerse
+    attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
     back.append(attributionRenderer.attributedString)
     view.back = back
     view.stylesheet = stylesheet
     return view
-  }
-
-  public static func makeQuoteRenderer(
-    stylesheet: Stylesheet,
-    style: Stylesheet.Style,
-    parsingRules: ParsingRules
-  ) -> RenderedMarkdown {
-    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-    formatters[.emphasis] = { $1.italic = true }
-    formatters[.bold] = { $1.bold = true }
-    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.delimiter] = { (_, _) in return NSAttributedString() }
-    renderers[.cloze] = { (node, attributes) in
-      guard let cloze = node as? Cloze else {
-        assertionFailure()
-        return NSAttributedString()
-      }
-      return NSAttributedString(
-        string: String(cloze.hiddenText),
-        attributes: attributes.attributes
-      )
-    }
-    let renderer = RenderedMarkdown(
-      parsingRules: parsingRules,
-      formatters: formatters,
-      renderers: renderers
-    )
-    renderer.defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme[style]
-    )
-    renderer.defaultAttributes.kern = stylesheet.kern[style] ?? 1.0
-    renderer.defaultAttributes.alignment = .left
-    return renderer
   }
 
   public func renderCardFront(

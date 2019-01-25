@@ -163,17 +163,15 @@ public final class StudyViewController: UIViewController {
 
   /// Creates a card view for a card.
   private func makeCardView(
-    for cardFromDocument: StudySession.CardFromDocument?,
+    for cardFromDocument: StudySession.AttributedCard?,
     completion: @escaping (CardView?) -> Void
   ) {
     guard let cardFromDocument = cardFromDocument else { completion(nil); return }
-    documentCache.document(for: cardFromDocument.documentName) { (document) in
+    documentCache.document(for: cardFromDocument.properties.documentName) { (document) in
       guard let document = document else { completion(nil); return }
       let cardView = cardFromDocument.card.cardView(
-        parseableDocument: ParseableDocument(
-          document: document,
-          parsingRules: cardFromDocument.documentRules
-        ),
+        document: document,
+        properties: cardFromDocument.properties,
         stylesheet: self.stylesheet
       )
       cardView.delegate = self
