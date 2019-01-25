@@ -20,91 +20,146 @@ extension Character {
   }
 }
 
-extension String {
-  private struct TypographyScanner {
-    var string: String
-    var index: String.Index
+private protocol Scannable: BidirectionalCollection where Element == Character {
+  mutating func replaceSubrange<C: Collection>(_ bounds: ClosedRange<Index>, with: C) where C.Element == Character
+  func string(from range: ClosedRange<Index>) -> String
+}
 
-    init(_ string: String) {
-      self.string = string
-      self.index = string.startIndex
-    }
+private struct TypographyScanner<S: Scannable> {
+  var scannable: S
+  var index: S.Index
 
-    mutating func advance() {
-      index = string.index(after: index)
-    }
-
-    var current: Character? {
-      return string.safeCharacter(at: index)
-    }
-
-    var previous: Character? {
-      if index == string.startIndex {
-        return nil
-      } else {
-        return string[string.index(before: index)]
-      }
-    }
-
-    var next: Character? {
-      if index == string.endIndex {
-        return nil
-      } else {
-        return string.safeCharacter(at: string.index(after: index))
-      }
-    }
-
-    mutating func replaceCurrent(with character: Character) {
-      string.replaceSubrange(index ... index, with: [character])
-    }
-
-    mutating func replaceCurrent(if match: String, with replacement: String) {
-      if string.distance(from: string.startIndex, to: index) < match.count - 1 {
-        return
-      }
-      let potentialStartIndex = string.index(index, offsetBy: -1 * (match.count - 1))
-      if string[potentialStartIndex ... index] == match {
-        string.replaceSubrange(potentialStartIndex ... index, with: replacement)
-        index = string.index(potentialStartIndex, offsetBy: replacement.count - 1)
-      }
-    }
+  init(_ string: S) {
+    self.scannable = string
+    self.index = string.startIndex
   }
 
-  func safeCharacter(at index: String.Index) -> Character? {
-    if index == endIndex {
+  mutating func advance() {
+    index = scannable.index(after: index)
+  }
+
+  var current: Character? {
+    return safeCharacter(at: index)
+  }
+
+  var previous: Character? {
+    if index == scannable.startIndex {
       return nil
     } else {
-      return self[index]
+      return scannable[scannable.index(before: index)]
     }
   }
 
-  var withTypographySubstitutions: String {
-    var scanner = TypographyScanner(self)
-    while let current = scanner.current {
+  var next: Character? {
+    if index == scannable.endIndex {
+      return nil
+    } else {
+      return safeCharacter(at: scannable.index(after: index))
+    }
+  }
+
+  mutating func replaceCurrent(with character: Character) {
+    scannable.replaceSubrange(index ... index, with: [character])
+  }
+
+  mutating func replaceCurrent(if match: String, with replacement: String) {
+    if scannable.distance(from: scannable.startIndex, to: index) < match.count - 1 {
+      return
+    }
+    let potentialStartIndex = scannable.index(index, offsetBy: -1 * (match.count - 1))
+    if scannable.string(from: potentialStartIndex ... index) == match {
+      scannable.replaceSubrange(potentialStartIndex ... index, with: replacement)
+      index = scannable.index(potentialStartIndex, offsetBy: replacement.count - 1)
+    }
+  }
+
+  private func safeCharacter(at index: S.Index) -> Character? {
+    if index == scannable.endIndex {
+      return nil
+    } else {
+      return scannable[index]
+    }
+  }
+
+  mutating func makeTypographySubstitutions() {
+    while let current = self.current {
       if current == "\"" {
         // Open quote if the next thing is non-space.
-        if scanner.next?.isNonWhitespace ?? false {
-          scanner.replaceCurrent(with: TypographyConstants.openCurlyDoubleQuote)
+        if self.next?.isNonWhitespace ?? false {
+          self.replaceCurrent(with: TypographyConstants.openCurlyDoubleQuote)
         }
 
         // Close quote if the previous thing is non-space.
-        if scanner.previous?.isNonWhitespace ?? false {
-          scanner.replaceCurrent(with: TypographyConstants.closeCurlyDoubleQuote)
+        if self.previous?.isNonWhitespace ?? false {
+          self.replaceCurrent(with: TypographyConstants.closeCurlyDoubleQuote)
         }
       }
       if current == "'" {
-        if scanner.next?.isNonWhitespace ?? false {
-          scanner.replaceCurrent(with: TypographyConstants.openCurlySingleQuote)
+        if self.next?.isNonWhitespace ?? false {
+          self.replaceCurrent(with: TypographyConstants.openCurlySingleQuote)
         }
-        if scanner.previous?.isNonWhitespace ?? false {
-          scanner.replaceCurrent(with: TypographyConstants.closeCurlySingleQuote)
+        if self.previous?.isNonWhitespace ?? false {
+          self.replaceCurrent(with: TypographyConstants.closeCurlySingleQuote)
         }
       }
-      scanner.replaceCurrent(if: "--", with: TypographyConstants.emDash)
-      scanner.replaceCurrent(if: "...", with: TypographyConstants.elipses)
-      scanner.replaceCurrent(if: "….", with: TypographyConstants.elipses)
-      scanner.advance()
+      self.replaceCurrent(if: "--", with: TypographyConstants.emDash)
+      self.replaceCurrent(if: "...", with: TypographyConstants.elipses)
+      self.replaceCurrent(if: "….", with: TypographyConstants.elipses)
+      self.advance()
     }
-    return scanner.string
+  }
+}
+
+extension String: Scannable {
+  func string(from range: ClosedRange<String.Index>) -> String {
+    return String(self[range])
+  }
+}
+
+extension NSMutableAttributedString: Scannable {
+  public var startIndex: String.Index {
+    return string.startIndex
+  }
+
+  public var endIndex: String.Index {
+    return string.endIndex
+  }
+
+  public subscript(i: String.Index) -> Character {
+    return string[i]
+  }
+
+  public func index(after i: String.Index) -> String.Index {
+    return string.index(after: i)
+  }
+
+  public func index(before i: String.Index) -> String.Index {
+    return string.index(before: i)
+  }
+
+  func string(from range: ClosedRange<String.Index>) -> String {
+    return String(string[range])
+  }
+
+  func replaceSubrange<C>(_ bounds: ClosedRange<String.Index>, with replacement: C) where C : Collection, C.Element == Character {
+    let nsrange = NSRange(bounds, in: string)
+    replaceCharacters(in: nsrange, with: String(replacement))
+  }
+}
+
+extension String {
+  public var withTypographySubstitutions: String {
+    var scanner = TypographyScanner(self)
+    scanner.makeTypographySubstitutions()
+    return scanner.scannable
+  }
+}
+
+extension NSAttributedString {
+  public var withTypographySubstitutions: NSAttributedString {
+    let copy = self.mutableCopy() as! NSMutableAttributedString
+    var scanner = TypographyScanner(copy)
+    scanner.makeTypographySubstitutions()
+    return scanner.scannable
   }
 }

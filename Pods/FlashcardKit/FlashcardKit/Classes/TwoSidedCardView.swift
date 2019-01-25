@@ -54,13 +54,13 @@ public final class TwoSidedCardView: CardView {
   /// The contents of the card front.
   public var front: NSAttributedString? {
     get { return frontLabel.attributedText }
-    set { frontLabel.attributedText = newValue }
+    set { frontLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 
   /// The contents of the card back.
   public var back: NSAttributedString? {
     get { return backLabel.attributedText }
-    set { backLabel.attributedText = newValue }
+    set { backLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 
   /// Something to say upon showing the card back.

@@ -63,6 +63,8 @@ public extension NSAttributedString {
 
     public var alignment: NSTextAlignment?
 
+    public var lineHeightMultiple: CGFloat? = 1.2
+
     /// Initializer.
     /// - parameter font: The UIFont that determines the base values of this set of attributes.
     public init(_ font: UIFont) {
@@ -108,6 +110,10 @@ public extension NSAttributedString {
       }
       var didCustomizeParagraphStyle = false
       let paragraphStyle = NSMutableParagraphStyle()
+      if let lineHeightMultiple = lineHeightMultiple {
+        paragraphStyle.lineHeightMultiple = lineHeightMultiple
+        didCustomizeParagraphStyle = true
+      }
       if headIndent != 0 {
         paragraphStyle.headIndent = headIndent
         didCustomizeParagraphStyle = true

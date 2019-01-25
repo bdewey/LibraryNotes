@@ -22,4 +22,13 @@ final class String_TypographyTests: XCTestCase {
       XCTAssertEqual(testCase.key.withTypographySubstitutions, testCase.value)
     }
   }
+
+  func testAttributedString() {
+    for testCase in examples {
+      let attributedString = NSAttributedString(string: testCase.key)
+      let afterSubtitution = attributedString.withTypographySubstitutions
+      XCTAssertEqual(attributedString.string, testCase.key)
+      XCTAssertEqual(afterSubtitution.string, testCase.value)
+    }
+  }
 }
