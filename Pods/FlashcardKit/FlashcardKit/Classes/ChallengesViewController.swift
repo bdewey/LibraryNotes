@@ -1,15 +1,14 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import TextBundleKit
 import UIKit
 
 public final class ChallengesViewController: UIViewController {
-
   public init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
     self.studyStatistics = studyStatistics
     super.init(nibName: nil, bundle: nil)
-    subscription = studyStatistics.subscribe { [weak self](result) in
+    self.subscription = studyStatistics.subscribe { [weak self] result in
       switch result {
       case .success(let statistics):
         self?.processStatistics(statistics.value)
@@ -46,7 +45,7 @@ public final class ChallengesViewController: UIViewController {
   }()
 
   public override func loadView() {
-    self.view = collectionView
+    view = collectionView
   }
 
   public override func viewWillAppear(_ animated: Bool) {
@@ -148,6 +147,7 @@ extension ChallengesViewController {
       self.streaks = streaks
       self.maxStreak = maxStreak
     }
+
     let streaks: [ClosedRange<Date>]
     let maxStreak: Int
 
@@ -162,7 +162,7 @@ extension ChallengesViewController {
 
     var currentStreakFragment: String {
       guard let currentStreak = streaks.last,
-            currentStreak.contains(Calendar.current.startOfDay(for: Date())) else {
+        currentStreak.contains(Calendar.current.startOfDay(for: Date())) else {
         return ""
       }
       let days = currentStreak.daysInRange

@@ -608,7 +608,7 @@ DEPENDENCIES:
   - TextBundleKit/Tests (from `https://github.com/bdewey/textbundle-swift`)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - AFNetworking
     - CocoaLumberjack
     - DZNEmptyDataSet
@@ -663,7 +663,7 @@ CHECKOUT OPTIONS:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :commit: a750e9ccf6c8e82559ca44e284aab4ed35fd648b
+    :commit: f7f8f5c5a904b7502ba93c9e1cac3cc036f0610b
     :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: bc4596247995de4d12952f9f1bb1a0d4bb117b50
@@ -708,4 +708,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 88a16d10b16e8a74b5b7d58dd4dc7142734a216d
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.3

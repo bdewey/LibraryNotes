@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
 import MiniMarkdown
 
 public struct StudySession {
-
   public struct AttributedCard {
     public let card: Card
     public let properties: CardDocumentProperties
@@ -34,7 +33,7 @@ public struct StudySession {
   /// When the person ended this particular study session.
   public var studySessionEndDate: Date?
 
-  private(set) public var results = [String: [String: AnswerStatistics]]()
+  public private(set) var results = [String: [String: AnswerStatistics]]()
 
   /// Identifiers of cards that weren't answered at all in the study session.
   var didNotAnswerAtAll: Set<String> {
@@ -132,21 +131,20 @@ extension StudySession {
 
   var statistics: Statistics? {
     guard let startDate = self.studySessionStartDate,
-          let endDate = self.studySessionEndDate
-          else { return nil }
+      let endDate = self.studySessionEndDate
+    else { return nil }
     return Statistics(
       startDate: startDate,
       duration: endDate.timeIntervalSince(startDate),
-      answeredCorrectly: self.answeredCorrectly.count,
-      answeredIncorrectly: self.answeredIncorrectly.count
+      answeredCorrectly: answeredCorrectly.count,
+      answeredIncorrectly: answeredIncorrectly.count
     )
   }
 }
 
 extension Sequence where Element == StudySession.AttributedCard {
-
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<String> {
-    return self.reduce(into: Set<String>(), { $0.insert($1.card.identifier ) })
+    return reduce(into: Set<String>(), { $0.insert($1.card.identifier) })
   }
 }

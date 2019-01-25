@@ -1,9 +1,8 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import Foundation
 
 extension ClosedRange where Bound == Date {
-
   /// The number of complete days contained in the range.
   public var daysInRange: Int {
     return Calendar.current.dateComponents([.day], from: lowerBound, to: upperBound).day!
@@ -11,7 +10,6 @@ extension ClosedRange where Bound == Date {
 }
 
 extension ClosedRange {
-
   /// Returns the combination of this range with another range.
   ///
   /// - note: It is not possible to express the combination of disjoint ranges with

@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -20,17 +20,17 @@ final class VocabularyAssociationSpellingCardView: CardView {
     self.stylesheet = stylesheet
     super.init(frame: .zero)
     addSubview(controlStack)
-    controlStack.snp.makeConstraints { (make) in
+    controlStack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(8)
     }
-    spellCheckField.field.snp.makeConstraints { (make) in
+    spellCheckField.field.snp.makeConstraints { make in
       make.leading.equalToSuperview()
       make.trailing.equalToSuperview()
     }
     controlStack.setArrangedSubviews([contextLabel, imageView, spellCheckField.field, buttonStack], animated: false)
     buttonStack.setArrangedSubviews([doneButton, sayAgainButton], animated: false)
     if imageView.image != nil {
-      imageView.snp.makeConstraints { (make) in
+      imageView.snp.makeConstraints { make in
         make.height.equalTo(100)
         make.width.equalTo(100)
       }
@@ -66,7 +66,8 @@ final class VocabularyAssociationSpellingCardView: CardView {
         .font: stylesheet.typographyScheme.overline,
         .kern: 2.0,
         .foregroundColor: UIColor(white: 0, alpha: 0.6),
-      ])
+      ]
+    )
     contextLabel.attributedText = attributedString
     return contextLabel
   }()

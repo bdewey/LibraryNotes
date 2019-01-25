@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -8,9 +8,8 @@ import TextBundleKit
 import UIKit
 
 /// A specific card for a vocabulary association.
-/// TODO: Don't hard-code the fonts in here.
+// TODO: Don't hard-code the fonts in here.
 struct VocabularyAssociationCard: Card {
-
   private let vocabularyAssociation: VocabularyAssociation
   private let promptWithSpanish: Bool
 
@@ -96,8 +95,8 @@ extension MarkdownAttributedStringRenderer {
     style: Stylesheet.Style
   ) -> MarkdownAttributedStringRenderer {
     var renderer = MarkdownAttributedStringRenderer()
-    renderer.renderFunctions[.text] = { (node) in
-      return NSAttributedString(
+    renderer.renderFunctions[.text] = { node in
+      NSAttributedString(
         string: String(node.slice.substring),
         attributes: stylesheet.attributes(style: style)
       )
@@ -118,7 +117,7 @@ extension MarkdownAttributedStringRenderer {
       style: textStyle
     )
     guard let document = document as? TextBundleDocument else { return renderer }
-    renderer.renderFunctions[.image] = { (node) in
+    renderer.renderFunctions[.image] = { node in
       let results = NSMutableAttributedString()
       let imageNode = node as! MiniMarkdown.Image
       if let image = document.image(for: node) {

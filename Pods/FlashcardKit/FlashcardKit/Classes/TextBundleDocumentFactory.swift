@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
@@ -9,7 +9,6 @@ import TextBundleKit
 
 /// Knows how to open TextBundleDocument documents from the CommonplaceBook document store.
 public struct TextBundleDocumentFactory: DocumentFactory {
-
   /// Initializer.
   public init(useCloud: Bool) {
     self.useCloud = useCloud
@@ -36,12 +35,12 @@ public struct TextBundleDocumentFactory: DocumentFactory {
     completion: @escaping (Result<TextBundleDocument>) -> Void
   ) {
     let document = TextBundleDocument(fileURL: url)
-    document.open { (success) in
+    document.open { success in
       if success {
         completion(.success(document))
       } else {
         // Try creating a new document.
-        document.save(to: url, for: .forCreating, completionHandler: { (createSuccess) in
+        document.save(to: url, for: .forCreating, completionHandler: { createSuccess in
           if createSuccess {
             completion(.success(document))
           } else {
@@ -63,4 +62,3 @@ public struct TextBundleDocumentFactory: DocumentFactory {
     try? FileManager.default.removeItem(at: document.fileURL)
   }
 }
-

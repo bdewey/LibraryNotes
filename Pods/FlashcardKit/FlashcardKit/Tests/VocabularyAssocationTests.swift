@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 @testable import FlashcardKit
 import TextBundleKit
@@ -32,7 +32,6 @@ private let sampleAssociations = [
 ]
 
 final class VocabularyAssocationTests: XCTestCase {
-
   func testMakeMarkdown() {
     let markdown = sampleAssociations.makeTable()
     XCTAssertEqual(markdown, expectedMarkdown)
@@ -41,7 +40,7 @@ final class VocabularyAssocationTests: XCTestCase {
   func testLoadMarkdown() {
     let cards = VocabularyAssociation.makeAssociations(
       from: expectedMarkdown
-      ).0
+    ).0
     XCTAssertEqual(cards, sampleAssociations)
   }
 
@@ -54,7 +53,7 @@ final class VocabularyAssocationTests: XCTestCase {
   func testLoadSpelling() {
     let cards = VocabularyAssociation.makeAssociations(
       from: spellingMarkdown
-      ).0
+    ).0
     let expectedCards = [
       VocabularyAssociation(spanish: "tenedor", english: "fork", testSpelling: true),
       VocabularyAssociation(spanish: "hombre", english: "man"),
@@ -66,17 +65,17 @@ final class VocabularyAssocationTests: XCTestCase {
     let associations = [
       VocabularyAssociation(spanish: "tenedor", english: "fork", testSpelling: true),
       VocabularyAssociation(spanish: "hombre", english: "man"),
-      ]
+    ]
     XCTAssertEqual(associations.makeTable(), spellingMarkdown)
   }
 
   func testParseImage() {
     let markdown = """
-| Spanish           | Engish |
-| ----------------- | ------ |
-| tenedor #spelling | fork   |
-| hombre            | ![man](assets/hombre.png) |
-"""
+    | Spanish           | Engish |
+    | ----------------- | ------ |
+    | tenedor #spelling | fork   |
+    | hombre            | ![man](assets/hombre.png) |
+    """
     let cards = VocabularyAssociation.makeAssociations(
       from: markdown
     ).0

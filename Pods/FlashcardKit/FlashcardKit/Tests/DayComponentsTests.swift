@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 // swiftlint:disable force_try
 
@@ -12,7 +12,6 @@ struct JsonWrapper: Codable {
 
 // TODO: Move this to CommonplaceBook.
 final class DayComponentsTests: XCTestCase {
-
   func testSimpleConversion() {
     guard let day = DayComponents("2006-03-19") else { XCTFail(); return }
     XCTAssertEqual(day.year, 2006)
@@ -37,10 +36,10 @@ final class DayComponentsTests: XCTestCase {
     let data = try! encoder.encode(wrapper)
     let encoded = String(data: data, encoding: .utf8)!
     let expectedEncoding = """
-{
-  "day" : "2008-06-09"
-}
-"""
+    {
+      "day" : "2008-06-09"
+    }
+    """
     XCTAssertEqual(expectedEncoding, encoded)
 
     let decoder = JSONDecoder()

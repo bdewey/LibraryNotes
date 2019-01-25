@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
 import MiniMarkdown
 
 extension RenderedMarkdown {
-
   /// Convenience initializer for a RenderedMarkdown that uses a style in a Stylesheet.
   /// Knows how to render clozes, etc.
   public convenience init(
@@ -17,8 +16,8 @@ extension RenderedMarkdown {
     formatters[.emphasis] = { $1.italic = true }
     formatters[.bold] = { $1.bold = true }
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.delimiter] = { (_, _) in return NSAttributedString() }
-    renderers[.cloze] = { (node, attributes) in
+    renderers[.delimiter] = { _, _ in NSAttributedString() }
+    renderers[.cloze] = { node, attributes in
       guard let cloze = node as? Cloze else {
         assertionFailure()
         return NSAttributedString()
@@ -40,4 +39,3 @@ extension RenderedMarkdown {
     defaultAttributes.alignment = .left
   }
 }
-

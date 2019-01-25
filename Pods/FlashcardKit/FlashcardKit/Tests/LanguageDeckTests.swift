@@ -1,15 +1,14 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 @testable import FlashcardKit
 import XCTest
 
 final class LanguageDeckTests: LanguageDeckBase {
-
   func testStudySessionHasCloze() {
     let didGetValue = expectation(description: "did get value")
     let stylesheet = Stylesheet()
-    let endpoint = languageDeck.studySessionSignal.subscribeValues { (studySession) in
+    let endpoint = languageDeck.studySessionSignal.subscribeValues { studySession in
       var studySession = studySession
       var didGetCloze = false
       while let card = studySession.currentCard {

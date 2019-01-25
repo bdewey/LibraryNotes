@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
@@ -17,7 +17,6 @@ extension CodingUserInfoKey {
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
 public final class ClozeTemplate: CardTemplate {
-
   public enum Error: Swift.Error {
     /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
     /// when decoding a ClozeTemplate.

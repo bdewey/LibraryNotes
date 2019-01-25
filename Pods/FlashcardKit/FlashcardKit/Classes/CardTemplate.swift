@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -42,19 +42,18 @@ open class CardTemplate: Codable {
   open var cards: [Card] { return [] }
 
   /// Public initializer so we can subclass this outside of this module.
-  public init() { }
+  public init() {}
 }
 
 extension Array where Element: CardTemplate {
   /// Returns the cards from all of the associations in the array.
   public var cards: [Card] {
-    return Array<Card>(self.map { $0.cards }.joined())
+    return Array<Card>(map { $0.cards }.joined())
   }
 }
 
 /// Wraps CardTemplate instances to allow Codable heterogenous collections of CardTemplate objects.
 public final class CardTemplateSerializationWrapper: Codable {
-
   /// The wrapped CardTemplate.
   public let value: CardTemplate
 
@@ -97,9 +96,8 @@ public final class CardTemplateSerializationWrapper: Codable {
 }
 
 extension Array where Element == CardTemplateSerializationWrapper {
-
   /// Convenience: Returns the cards made from all wrapped templates.
   public var cards: [Card] {
-    return Array<Card>(self.map { $0.value.cards }.joined())
+    return Array<Card>(map { $0.value.cards }.joined())
   }
 }

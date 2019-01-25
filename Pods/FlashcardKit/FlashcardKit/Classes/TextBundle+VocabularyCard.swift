@@ -1,36 +1,35 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CwlSignal
 import Foundation
 import TextBundleKit
 
 extension TextBundleDocument {
-
   var vocabularyAssocationsPublisher: Signal<[VocabularyAssociation]> {
     let signalBridge = text.signal
     let result = signalBridge.map({ (valueDescription) -> [VocabularyAssociation] in
-      return VocabularyAssociation.makeAssociations(
+      VocabularyAssociation.makeAssociations(
         from: valueDescription.value
-        ).0
+      ).0
     }).continuous()
     return result
   }
 
   var vocabularyAssociations: TextBundleKit.Result<[VocabularyAssociation]> {
     return text.taggedResult.flatMap({ (taggedText) -> [VocabularyAssociation] in
-      return VocabularyAssociation.makeAssociations(from: taggedText.value).0
+      VocabularyAssociation.makeAssociations(from: taggedText.value).0
     })
   }
 
   func setVocabularyAssociations(_ vocabularyAssociations: [VocabularyAssociation]) {
-    /// TODO: This overwrites the entire document.
+    // TODO: This overwrites the entire document.
     /// What it *should* do is find the vocabulary table in the document
     /// and just replace that.
-    self.text.setValue(vocabularyAssociations.makeTable())
+    text.setValue(vocabularyAssociations.makeTable())
   }
 
   func appendVocabularyAssociation(_ vocabularyAssociation: VocabularyAssociation) {
-    self.text.changeValue { (initialText) -> String in
+    text.changeValue { (initialText) -> String in
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
         from: initialText
@@ -45,7 +44,7 @@ extension TextBundleDocument {
     _ vocabularyAssociation: VocabularyAssociation,
     with newAssociation: VocabularyAssociation
   ) {
-    self.text.changeValue { (initialText) -> String in
+    text.changeValue { (initialText) -> String in
       var text = initialText
       var (existingAssociations, range) = VocabularyAssociation.makeAssociations(
         from: initialText

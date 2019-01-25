@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -13,7 +13,6 @@ public protocol StudyViewControllerDelegate: class {
 
 /// Presents a stack of cards for studying.
 public final class StudyViewController: UIViewController {
-
   /// Designated initializer.
   ///
   /// - parameter studySession: The stack of cards to present for studying.
@@ -57,7 +56,7 @@ public final class StudyViewController: UIViewController {
       UIView.animate(withDuration: 0.2, animations: {
         self.currentCardView?.alpha = 1
         oldValue?.alpha = 0
-      }) { (_) in
+      }) { _ in
         oldValue?.removeFromSuperview()
         if let utterances = self.currentCardView?.introductoryUtterances {
           for utterance in utterances {
@@ -77,13 +76,13 @@ public final class StudyViewController: UIViewController {
     return appBar
   }()
 
-  override public var childForStatusBarStyle: UIViewController? {
+  public override var childForStatusBarStyle: UIViewController? {
     return appBar.headerViewController
   }
 
   private var cardsRemainingLabel: UILabel!
 
-  override public func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     studySession.studySessionStartDate = Date()
     cardsRemainingLabel = UILabel(frame: .zero)
@@ -125,7 +124,7 @@ public final class StudyViewController: UIViewController {
 
   private func configureUI() {
     guard isViewLoaded else { return }
-    makeCardView(for: studySession.currentCard) { (cardView) in
+    makeCardView(for: studySession.currentCard) { cardView in
       self.currentCardView = cardView
     }
     cardsRemainingLabel.text = "Cards remaining: \(studySession.remainingCards)"
@@ -142,10 +141,10 @@ public final class StudyViewController: UIViewController {
       message: "Are you sure you want to discard your study session? " +
         "If you do this, the app will not remember what questions you answered correctly."
     )
-    let cancel = MDCAlertAction(title: "Cancel") { (_) in
+    let cancel = MDCAlertAction(title: "Cancel") { _ in
       // Nothing
     }
-    let discard = MDCAlertAction(title: "Discard") { (_) in
+    let discard = MDCAlertAction(title: "Discard") { _ in
       self.studySession.studySessionEndDate = Date()
       self.delegate?.studyViewControllerDidCancel(self)
     }
@@ -167,7 +166,7 @@ public final class StudyViewController: UIViewController {
     completion: @escaping (CardView?) -> Void
   ) {
     guard let cardFromDocument = cardFromDocument else { completion(nil); return }
-    documentCache.document(for: cardFromDocument.properties.documentName) { (document) in
+    documentCache.document(for: cardFromDocument.properties.documentName) { document in
       guard let document = document else { completion(nil); return }
       let cardView = cardFromDocument.card.cardView(
         document: document,

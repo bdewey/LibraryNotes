@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 @testable import FlashcardKit
@@ -7,13 +7,13 @@ import XCTest
 
 final class TestCollectionView: StatisticsCalendarCollectionView {
   var reloadCount = 0
-  func register(_ cellClass: AnyClass?, forCellWithReuseIdentifier identifier: String) { }
+  func register(_ cellClass: AnyClass?, forCellWithReuseIdentifier identifier: String) {}
 
   func register(
     _ viewClass: AnyClass?,
     forSupplementaryViewOfKind elementKind: String,
     withReuseIdentifier identifier: String
-  ) { }
+  ) {}
 
   func reloadData() {
     reloadCount += 1
@@ -21,7 +21,6 @@ final class TestCollectionView: StatisticsCalendarCollectionView {
 }
 
 final class StatisticsCalendarDataSourceTests: LanguageDeckBase {
-
   var dataSource: StatisticsCalendarDataSource!
   let collectionView = UICollectionView(
     frame: .zero,

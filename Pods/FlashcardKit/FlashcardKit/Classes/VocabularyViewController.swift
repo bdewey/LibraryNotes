@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -9,7 +9,6 @@ import MaterialComponents
 import TextBundleKit
 
 extension VocabularyAssociation: StudyItem {
-
   public var tableViewTitle: NSAttributedString {
     return NSAttributedString(
       string: spanish,
@@ -23,7 +22,7 @@ extension VocabularyAssociation: StudyItem {
       .map { identifierToStudyMetadata[
         $0.identifier,
         default: StudyMetadata(day: today, lastAnswers: AnswerStatistics.empty)
-        ]
+      ]
       }
       .min(by: { $0.dayForNextReview < $1.dayForNextReview })!
   }
@@ -41,20 +40,19 @@ extension VocabularyAssociation: StudyItem {
 /// Allows creation of new VocabularyAssocations as well as editing existing associations.
 /// Also allows the student to start a study session.
 public final class VocabularyViewController: UIViewController {
-
   public init(
     languageDeck: LanguageDeck
   ) {
     self.document = languageDeck.document
     super.init(nibName: nil, bundle: nil)
     self.title = "Vocabulary"
-    subscriptions += languageDeck.studySessionSignal.subscribeValues({ [weak self](studySession) in
+    subscriptions += languageDeck.studySessionSignal.subscribeValues({ [weak self] studySession in
       self?.nextStudySession = studySession
     })
     subscriptions += document.documentStudyMetadata.signal
-      .map { return $0.value }
-      .combineLatest(languageDeck.vocabularyAssociationsSignal) { return ($0, $1) }
-      .subscribeValues({ [weak self](tuple) in
+      .map { $0.value }
+      .combineLatest(languageDeck.vocabularyAssociationsSignal) { ($0, $1) }
+      .subscribeValues({ [weak self] tuple in
         let (studyMetadata, vocabularyAssociations) = tuple
         self?.dataSource.update(items: vocabularyAssociations, studyMetadata: studyMetadata)
       })
@@ -96,7 +94,7 @@ public final class VocabularyViewController: UIViewController {
   }
 
   private lazy var studyButton: UIBarButtonItem = {
-    return UIBarButtonItem(
+    UIBarButtonItem(
       title: "STUDY",
       style: .plain,
       target: self,
@@ -118,7 +116,7 @@ public final class VocabularyViewController: UIViewController {
     navigationItem.rightBarButtonItem = studyButton
 
     view.addSubview(addVocabularyAssociationButton)
-    addVocabularyAssociationButton.snp.makeConstraints { (make) in
+    addVocabularyAssociationButton.snp.makeConstraints { make in
       make.trailing.equalToSuperview().offset(-16)
       make.bottom.equalToSuperview().offset(-16)
       make.width.equalTo(56)
@@ -192,7 +190,7 @@ extension VocabularyViewController: NewVocabularyAssociationViewControllerDelega
     var association = association
     // TODO: What if this was an unchanged image (it's already in the document)?
     if let image = image,
-       let data = image.pngData() {
+      let data = image.pngData() {
       // TODO: Make this a meaningful ID
       let uuid = UUID().uuidString
       do {
@@ -228,7 +226,6 @@ extension VocabularyViewController: DocumentCache {
 }
 
 private class SectionHeaderView: UIView {
-
   private let label: UILabel = {
     let label = UILabel(frame: .zero)
     label.translatesAutoresizingMaskIntoConstraints = false
@@ -238,7 +235,7 @@ private class SectionHeaderView: UIView {
   override init(frame: CGRect) {
     super.init(frame: frame)
     addSubview(label)
-    label.snp.makeConstraints { (make) in
+    label.snp.makeConstraints { make in
       make.leading.equalToSuperview().offset(20)
       make.trailing.equalToSuperview().offset(-8)
       make.bottom.equalToSuperview().offset(-8)
@@ -254,7 +251,7 @@ private class SectionHeaderView: UIView {
       label.attributedText = NSAttributedString(string: newValue.localizedUppercase, attributes: [
         .font: Stylesheet.hablaEspanol.typographyScheme.overline,
         .kern: 2.0,
-        .foregroundColor: UIColor.init(white: 0, alpha: 0.6),
+        .foregroundColor: UIColor(white: 0, alpha: 0.6),
       ])
       setNeedsLayout()
     }
@@ -266,12 +263,11 @@ private class SectionHeaderView: UIView {
 }
 
 extension VocabularyViewController: UITableViewDelegate {
-
   public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
     guard let string = dataSource.tableView(
       tableView,
       titleForHeaderInSection: section
-      ) else { return nil }
+    ) else { return nil }
     let label = SectionHeaderView(frame: .zero)
     label.text = string
     return label

@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CwlSignal
 import Foundation
@@ -19,7 +19,6 @@ extension CwlSignal.Result {
 private var subscriptionKey = "textBundleSubscription"
 
 extension Signal {
-
   /// If we are bridging a Publisher to a Signal, we need a way to keep the Publisher subscription
   /// alive. That way is setting an associated property.
   fileprivate var textBundleSubscription: AnySubscription? {
@@ -33,10 +32,9 @@ extension Signal {
 }
 
 extension DocumentProperty {
-
   public var signal: Signal<Tagged<Value>> {
     let channel = Signal<Tagged<Value>>.channel().continuous()
-    let subscription = self.subscribe { (result) in
+    let subscription = subscribe { result in
       channel.input.send(result: CwlSignal.Result(result))
     }
     channel.signal.textBundleSubscription = subscription

@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -8,7 +8,6 @@ import TextBundleKit
 import UIKit
 
 final class VocabularyAssociationCardView: CardView {
-
   let card: VocabularyAssociationCard
   let document: UIDocument
   let properties: CardDocumentProperties
@@ -26,7 +25,7 @@ final class VocabularyAssociationCardView: CardView {
     self.stylesheet = stylesheet
     super.init(frame: .zero)
     self.addSubview(columnStack)
-    columnStack.snp.makeConstraints { (make) in
+    columnStack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(16)
     }
 
@@ -57,7 +56,7 @@ final class VocabularyAssociationCardView: CardView {
       if animated { self.layoutIfNeeded() }
     }
     if animated {
-      UIView.animate(withDuration: 0.2, animations: animations, completion: { (_) in
+      UIView.animate(withDuration: 0.2, animations: animations, completion: { _ in
         self.didTapPronounce()
       })
     } else {

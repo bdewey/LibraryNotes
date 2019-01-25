@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CollectionViewLayouts
 import CommonplaceBook
@@ -29,7 +29,8 @@ public final class StatisticsMonthHeaderReusableView: UICollectionReusableView {
           .font: Stylesheet.hablaEspanol.typographyScheme.overline,
           .kern: 2.0,
           .foregroundColor: UIColor(white: 0, alpha: 0.6),
-        ])
+        ]
+      )
       label.attributedText = attributedString
     }
   }

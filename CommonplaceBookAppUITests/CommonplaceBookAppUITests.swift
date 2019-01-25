@@ -30,7 +30,7 @@ Cloze test
   static let doubleCloze = """
 Two cloze document
 #testing
-- Cards with a fill-in-the-blank is called a ?[](cloze).
+- Cards with a fill-in-the-blank -- is called a "?[](cloze)".
 The 45th President of the United States is ?[cheeto](Donald Trump).
 
 The question about Trump should be in an auto-continue list.

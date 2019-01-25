@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 @testable import FlashcardKit
@@ -14,16 +14,16 @@ final class ClozeTests: XCTestCase {
 
   func testFindClozeInText() {
     let example = """
-# Mastering the verb "to be"
+    # Mastering the verb "to be"
 
-In Spanish, there are two verbs "to be": *ser* and *estar*.
+    In Spanish, there are two verbs "to be": *ser* and *estar*.
 
-1. *Ser* is used to identify a person, an animal, a concept, a thing, or any noun.
-2. *Estar* is used to show location.
-3. *Ser*, with an adjective, describes the "norm" of a thing.
-   - La nieve ?[to be](es) blanca.
-4. *Estar* with an adjective shows a "change" or "condition."
-"""
+    1. *Ser* is used to identify a person, an animal, a concept, a thing, or any noun.
+    2. *Estar* is used to show location.
+    3. *Ser*, with an adjective, describes the "norm" of a thing.
+       - La nieve ?[to be](es) blanca.
+    4. *Estar* with an adjective shows a "change" or "condition."
+    """
     let blocks = parsingRules.parse(example)
     XCTAssertEqual(blocks[4].type, .list)
     let clozeNodes = blocks.map({ $0.findNodes(where: { $0.type == .cloze }) }).joined()
@@ -37,8 +37,8 @@ In Spanish, there are two verbs "to be": *ser* and *estar*.
 
   func testMultipleClozesInAnItem() {
     let example = """
-* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
-"""
+    * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
+    """
     let blocks = parsingRules.parse(example)
     XCTAssertEqual(blocks.count, 1)
     let clozeCards = ClozeTemplate.extract(from: blocks).cards as! [ClozeCard]

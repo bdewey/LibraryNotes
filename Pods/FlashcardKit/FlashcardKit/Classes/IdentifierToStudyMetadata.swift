@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
 import MiniMarkdown
 
 extension Dictionary where Key == String, Value == StudyMetadata {
-
   public static let empty: [String: StudyMetadata] = [:]
 
   /// Builds a study session from vocabulary associations.

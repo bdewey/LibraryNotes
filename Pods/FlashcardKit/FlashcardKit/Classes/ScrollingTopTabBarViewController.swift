@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import MaterialComponents
@@ -10,7 +10,6 @@ public protocol UIScrollViewForTracking {
 
 /// Displays an MDCAppBar that contains an MDCTabBar inside the flexible header.
 public final class ScrollingTopTabBarViewController: UIViewController {
-
   public var viewControllers: [UIViewController] = [] {
     didSet {
       if isViewLoaded {
@@ -27,7 +26,7 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     // Since we're adding a tab bar as a bottom bar, we need to adjust the minimum height.
     // 56 is the default height for a navigation bar. It's not provided as a constant though.
     appBarViewController.headerView.minimumHeight =
-        56.0 + MDCTabBar.defaultHeight(for: .top, itemAppearance: .titles)
+      56.0 + MDCTabBar.defaultHeight(for: .top, itemAppearance: .titles)
     appBarViewController.headerView.sharedWithManyScrollViews = true
     appBarViewController.headerStackView.bottomBar = tabBar
     appBarViewController.topLayoutGuideViewController = self
@@ -76,13 +75,13 @@ public final class ScrollingTopTabBarViewController: UIViewController {
     configureScrollView()
   }
 
-  override public var childForStatusBarStyle: UIViewController? {
+  public override var childForStatusBarStyle: UIViewController? {
     return appBarViewController
   }
 
   private func configureTabBar() {
     tabBar.items = viewControllers.map { (viewController) -> UITabBarItem in
-      return UITabBarItem(title: viewController.title, image: nil, tag: 0)
+      UITabBarItem(title: viewController.title, image: nil, tag: 0)
     }
     tabBar.alignment = tabBar.items.count <= 3 ? .justified : .leading
   }
@@ -143,8 +142,8 @@ public final class ScrollingTopTabBarViewController: UIViewController {
 extension ScrollingTopTabBarViewController: MDCTabBarDelegate {
   public func tabBar(_ tabBar: MDCTabBar, didSelect item: UITabBarItem) {
     guard let index = tabBar.items.firstIndex(of: item),
-          viewControllers.completeRange.contains(index)
-          else { return }
+      viewControllers.completeRange.contains(index)
+    else { return }
     setSelectedViewController(viewControllers[index], animated: true)
   }
 }

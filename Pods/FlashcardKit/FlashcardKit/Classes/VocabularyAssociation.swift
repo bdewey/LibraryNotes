@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -14,7 +14,6 @@ extension Node {
 
 /// Helpers that extract VocabularyAssociation data from a table row.
 extension MiniMarkdown.TableRow {
-
   /// Returns the Spanish word in the row.
   fileprivate var spanish: String {
     return String(
@@ -50,7 +49,6 @@ extension CardTemplateType {
 /// - Given the Engish word, what is the Spanish word?
 /// - How do you spell the Spanish word? (optional)
 public final class VocabularyAssociation: CardTemplate {
-
   public override var type: CardTemplateType { return .vocabularyAssociation }
 
   /// The Spanish word.
@@ -162,10 +160,8 @@ extension VocabularyAssociation {
 }
 
 extension Array where Element == VocabularyAssociation {
-
   /// Formats the cards as a Markdown string.
   func makeTable() -> String {
-
     let columnHeaders = ["Spanish", "Engish"]
     var columnWidths = columnHeaders.map { $0.count }
     for card in self {

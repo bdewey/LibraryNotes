@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CollectionViewLayouts
 import CommonplaceBook
@@ -8,7 +8,7 @@ import UIKit
 
 public final class StatisticsViewController: UIViewController {
   public init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
-    dataSource = StatisticsCalendarDataSource(studyStatistics: studyStatistics)
+    self.dataSource = StatisticsCalendarDataSource(studyStatistics: studyStatistics)
     super.init(nibName: nil, bundle: nil)
     self.title = "Calendar"
   }
@@ -31,7 +31,7 @@ public final class StatisticsViewController: UIViewController {
   }()
 
   private lazy var closeButton: UIBarButtonItem = {
-    return UIBarButtonItem(
+    UIBarButtonItem(
       image: UIImage(named: "round_close_black_24pt")!.withRenderingMode(.alwaysTemplate),
       style: .plain,
       target: self,

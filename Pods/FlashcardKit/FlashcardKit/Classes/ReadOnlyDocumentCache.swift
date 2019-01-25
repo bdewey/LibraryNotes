@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -16,7 +16,6 @@ public protocol ReadOnlyDocumentCacheDelegate: class {
 /// Maintains a cache of open UIDocuments. The intent is that we only read through these documents,
 /// though nothing stops writing. Upon deallocating this instance, all documents will be closed.
 public final class ReadOnlyDocumentCache: DocumentCache {
-
   /// Designated initializer.
   ///
   /// - parameter delegate: Cache delegate. Will be weakly held.
@@ -50,7 +49,7 @@ public final class ReadOnlyDocumentCache: DocumentCache {
       completion(nil)
       return
     }
-    document.open { (success) in
+    document.open { success in
       if success {
         self.nameToDocumentMap[name] = document
         completion(document)

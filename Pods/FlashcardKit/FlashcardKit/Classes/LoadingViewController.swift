@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import MaterialComponents.MaterialActivityIndicator
@@ -12,7 +12,6 @@ public protocol LoadingViewControllerDelegate: class {
 /// Simple view controller that just displays an indeterminate progress indicator in the middle
 /// of its view. Intended to be used for mock UI prior to loading real model data.
 public final class LoadingViewController: UIViewController {
-
   public init(stylesheet: Stylesheet) {
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
@@ -29,7 +28,7 @@ public final class LoadingViewController: UIViewController {
     super.viewDidLoad()
 
     view.addSubview(activityIndicator)
-    activityIndicator.snp.makeConstraints { (make) in
+    activityIndicator.snp.makeConstraints { make in
       make.center.equalToSuperview()
     }
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.200) {

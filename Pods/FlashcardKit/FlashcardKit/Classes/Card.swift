@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -8,7 +8,6 @@ import TextBundleKit
 
 /// A specific thing to recall.
 public protocol Card {
-
   /// Every card needs a unique identifier. This serves as an key to associate this card
   /// with statistics describing how well the person remembers the information associated
   /// with this card over time.

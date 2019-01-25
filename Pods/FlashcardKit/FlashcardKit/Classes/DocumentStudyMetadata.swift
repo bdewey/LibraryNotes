@@ -1,4 +1,4 @@
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
@@ -25,7 +25,7 @@ private enum DocumentStudyMetadata {
       let data = try document.data(for: DocumentStudyMetadata.key)
       return (try? decoder.decode(IdentifierToStudyMetadata.self, from: data)) ?? IdentifierToStudyMetadata.empty
     } catch {
-      if case TextBundleDocument.Error.noSuchDataKey(_) = error {
+      if case TextBundleDocument.Error.noSuchDataKey = error {
         return IdentifierToStudyMetadata.empty
       } else {
         throw error

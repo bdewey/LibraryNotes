@@ -1,4 +1,4 @@
-// Copyright 2004-present Facebook. All Rights Reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import Foundation
 import TextBundleKit
@@ -7,7 +7,6 @@ private let encoder = JSONEncoder()
 private let decoder = JSONDecoder()
 
 final class BingTranslation: NSObject {
-
   public enum Error: Swift.Error {
     case cannotParseResponse
   }
@@ -39,7 +38,7 @@ final class BingTranslation: NSObject {
     let phrases = [RequestText(phrase)]
     let dataResult = Result<Data> { try encoder.encode(phrases) }
     guard case .success(let data) = dataResult else {
-      let stringResult = dataResult.flatMap({ (_) in "" })
+      let stringResult = dataResult.flatMap({ _ in "" })
       completion(stringResult)
       return
     }
@@ -57,13 +56,13 @@ final class BingTranslation: NSObject {
       }
     }
 
-    URLSession.shared.uploadTask(with: request, from: data) { (responseData, response, error) in
+    URLSession.shared.uploadTask(with: request, from: data) { responseData, response, error in
       if let error = error {
         completeOnMainThread(.failure(error))
       } else if let responseData = responseData {
         if let response = try? decoder.decode([Response].self, from: responseData),
-           let firstPhraseTranslation = response.first,
-           let firstTranslation = firstPhraseTranslation.translations.first {
+          let firstPhraseTranslation = response.first,
+          let firstTranslation = firstPhraseTranslation.translations.first {
           completeOnMainThread(.success(firstTranslation.text.lowercased()))
         } else {
           completeOnMainThread(.failure(Error.cannotParseResponse))

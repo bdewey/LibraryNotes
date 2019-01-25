@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -24,7 +24,7 @@ public final class ChallengesDataSource: NSObject {
     }
   }
 
-  weak public var collectionView: UICollectionView? {
+  public weak var collectionView: UICollectionView? {
     didSet {
       collectionView?.register(Card.self, forCellWithReuseIdentifier: Card.reuseIdentifier)
     }
@@ -50,7 +50,7 @@ extension ChallengesDataSource {
     override init(frame: CGRect) {
       super.init(frame: frame)
       contentView.addSubview(controlStack)
-      controlStack.snp.makeConstraints { (make) in
+      controlStack.snp.makeConstraints { make in
         make.edges.equalToSuperview().inset(8)
         self.widthConstraint = make.width.equalTo(targetWidth).constraint
       }
@@ -71,21 +71,24 @@ extension ChallengesDataSource {
             .font: Stylesheet.hablaEspanol.typographyScheme.headline6,
             .kern: 0.25,
             .foregroundColor: textColor,
-          ])
+          ]
+        )
         bodyLabel.attributedText = NSAttributedString(
           string: challenge.body,
           attributes: [
             .font: Stylesheet.hablaEspanol.typographyScheme.body2,
             .kern: 0.25,
             .foregroundColor: textColor,
-            ])
+          ]
+        )
         captionLabel.attributedText = NSAttributedString(
           string: challenge.caption,
           attributes: [
             .font: Stylesheet.hablaEspanol.typographyScheme.caption,
             .kern: 0.4,
             .foregroundColor: UIColor(white: 0, alpha: 0.6),
-            ])
+          ]
+        )
         imageView.sd_setImage(with: challenge.trophyURL, completed: nil)
         captionLabel.isHidden = !challenge.achieved
         imageView.isHidden = !challenge.achieved

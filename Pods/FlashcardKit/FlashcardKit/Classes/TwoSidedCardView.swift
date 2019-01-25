@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import CommonplaceBook
@@ -13,9 +13,8 @@ import UIKit
 /// The view initially shows the card front with no buttons. When you tap the card, it will
 /// show the card back and two buttons: "Got it" and "study more."
 ///
-/// TODO: What happened to "pronounce"??
+// TODO: What happened to "pronounce"??
 public final class TwoSidedCardView: CardView {
-
   public override init(frame: CGRect) {
     super.init(frame: frame)
     commonInit()
@@ -28,7 +27,7 @@ public final class TwoSidedCardView: CardView {
 
   private func commonInit() {
     addSubview(columnStack)
-    columnStack.snp.makeConstraints { (make) in
+    columnStack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(16)
     }
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
@@ -68,7 +67,7 @@ public final class TwoSidedCardView: CardView {
   public var utterance: AVSpeechUtterance?
 
   /// The language of `utterance`
-  /// TODO: Get rid of this and just carry the language in `utterance`
+  // TODO: Get rid of this and just carry the language in `utterance`
   public var language: String?
 
   private lazy var columnStack: UIStackView = {
@@ -126,7 +125,7 @@ public final class TwoSidedCardView: CardView {
     return button
   }()
 
-  /// TODO: Whoa, I don't actually use this?
+  // TODO: Whoa, I don't actually use this?
   private lazy var prounounceSpanishButton: MDCButton = {
     let button = MDCButton(frame: .zero)
     button.setTitle("Say it", for: .normal)
@@ -148,7 +147,7 @@ public final class TwoSidedCardView: CardView {
       if animated { self.layoutIfNeeded() }
     }
     if animated {
-      UIView.animate(withDuration: 0.2, animations: animations, completion: { (_) in
+      UIView.animate(withDuration: 0.2, animations: animations, completion: { _ in
         self.didTapPronounce()
       })
     } else {

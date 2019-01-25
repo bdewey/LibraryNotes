@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 // swiftlint:disable force_try
 
@@ -8,7 +8,6 @@ import TextBundleKit
 import XCTest
 
 final class StudyMetadataSessionTests: XCTestCase {
-
   enum Error: Swift.Error {
     case cannotLoadStudySession
   }
@@ -23,13 +22,13 @@ final class StudyMetadataSessionTests: XCTestCase {
     VocabularyAssociation(spanish: "mujer", english: "woman"),
     VocabularyAssociation(spanish: "niño", english: "boy"),
     VocabularyAssociation(spanish: "niña", english: "girl"),
-    ]
+  ]
 
   var allCards: Set<String> {
     return associations
       .map({ $0.cards })
       .joined()
-      .reduce(into: Set<String>(), { (results, card) in
+      .reduce(into: Set<String>(), { results, card in
         results.insert(card.identifier)
       })
   }
@@ -46,7 +45,7 @@ final class StudyMetadataSessionTests: XCTestCase {
     super.setUp()
     document = TextBundleDocument(fileURL: testDocumentURL)
     let didOpen = expectation(description: "did open")
-    document.save(to: testDocumentURL, for: .forCreating) { (success) in
+    document.save(to: testDocumentURL, for: .forCreating) { success in
       XCTAssert(success)
       didOpen.fulfill()
     }
@@ -59,7 +58,7 @@ final class StudyMetadataSessionTests: XCTestCase {
   override func tearDown() {
     super.tearDown()
     let didClose = expectation(description: "did close")
-    document.close { (_) in
+    document.close { _ in
       try? FileManager.default.removeItem(at: self.testDocumentURL)
       didClose.fulfill()
     }
@@ -74,7 +73,6 @@ final class StudyMetadataSessionTests: XCTestCase {
     doNotAnswer: Set<String> = [],
     date: Date
   ) throws -> StudySession {
-
     guard let associations = document.vocabularyAssociations.value else {
       XCTFail("Expected associations")
       throw Error.cannotLoadStudySession

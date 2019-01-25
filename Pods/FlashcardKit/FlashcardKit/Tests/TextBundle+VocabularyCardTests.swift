@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 @testable import FlashcardKit
 import TextBundleKit
@@ -30,7 +30,6 @@ private let sampleAssociations = [
 ]
 
 final class TextBundleVocabularyCardTests: XCTestCase {
-
   var document: TextBundleDocument!
 
   override func setUp() {
@@ -39,7 +38,7 @@ final class TextBundleVocabularyCardTests: XCTestCase {
     let url = FileManager.default.temporaryDirectory.appendingPathComponent(uniqueComponent)
     document = TextBundleDocument(fileURL: url)
     let didCreate = expectation(description: "did create document")
-    document.save(to: url, for: .forCreating) { (success) in
+    document.save(to: url, for: .forCreating) { success in
       precondition(success)
       didCreate.fulfill()
     }
@@ -49,7 +48,7 @@ final class TextBundleVocabularyCardTests: XCTestCase {
 
   override func tearDown() {
     let didClose = expectation(description: "did close")
-    document.close { (_) in
+    document.close { _ in
       try? FileManager.default.removeItem(at: self.document.fileURL)
       didClose.fulfill()
     }
@@ -69,22 +68,22 @@ final class TextBundleVocabularyCardTests: XCTestCase {
     let expected = sampleAssociations.appending(newAssociation)
     XCTAssertEqual(associations, expected)
     let expectedText = """
-# Unit One Vocabulary
+    # Unit One Vocabulary
 
-| Spanish | Engish |
-| ------- | ------ |
-| tenedor | fork   |
-| hombre  | man    |
-| mujer   | woman  |
-| niño    | boy    |
-| niña    | girl   |
-| bosque  | forest |
+    | Spanish | Engish |
+    | ------- | ------ |
+    | tenedor | fork   |
+    | hombre  | man    |
+    | mujer   | woman  |
+    | niño    | boy    |
+    | niña    | girl   |
+    | bosque  | forest |
 
-## Notes
+    ## Notes
 
-- I should be able make notes and not lose them when I save vocabulary.
+    - I should be able make notes and not lose them when I save vocabulary.
 
-"""
+    """
     let actualText = document.text.taggedResult.value!.value
     XCTAssertEqual(actualText, expectedText)
   }
@@ -96,21 +95,21 @@ final class TextBundleVocabularyCardTests: XCTestCase {
     replacement.testSpelling = true
     document.replaceVocabularyAssociation(victim, with: replacement)
     let expectedText = """
-# Unit One Vocabulary
+    # Unit One Vocabulary
 
-| Spanish         | Engish |
-| --------------- | ------ |
-| tenedor         | fork   |
-| hombre          | man    |
-| mujer #spelling | woman  |
-| niño            | boy    |
-| niña            | girl   |
+    | Spanish         | Engish |
+    | --------------- | ------ |
+    | tenedor         | fork   |
+    | hombre          | man    |
+    | mujer #spelling | woman  |
+    | niño            | boy    |
+    | niña            | girl   |
 
-## Notes
+    ## Notes
 
-- I should be able make notes and not lose them when I save vocabulary.
+    - I should be able make notes and not lose them when I save vocabulary.
 
-"""
+    """
     let actualText = document.text.taggedResult.value!.value
     XCTAssertEqual(actualText, expectedText)
   }

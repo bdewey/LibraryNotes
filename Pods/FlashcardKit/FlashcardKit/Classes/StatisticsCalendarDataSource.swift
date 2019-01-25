@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CollectionViewLayouts
 import CommonplaceBook
@@ -33,19 +33,18 @@ protocol StatisticsCalendarCollectionView: class {
   func reloadData()
 }
 
-extension UICollectionView: StatisticsCalendarCollectionView { }
+extension UICollectionView: StatisticsCalendarCollectionView {}
 
 /// A UICollectionViewDataSource that vends calendar cells configured to show if the person
 /// studied on that day.
 final class StatisticsCalendarDataSource: NSObject {
-
   /// Initializer.
   init(studyStatistics: DocumentProperty<[StudySession.Statistics]>) {
     let today = Date()
     startDate = calendar.startOfMonth(containing: today)
     endDate = calendar.endOfMonth(containing: today)
     super.init()
-    subscription = studyStatistics.subscribe { [weak self](result) in
+    subscription = studyStatistics.subscribe { [weak self] result in
       guard let value = result.value else { return }
       self?.processStatistics(value.value)
     }
@@ -68,6 +67,7 @@ final class StatisticsCalendarDataSource: NSObject {
       )
     }
   }
+
   let calendar = Calendar.current
   var startDate: Date
   var endDate: Date
@@ -76,7 +76,7 @@ final class StatisticsCalendarDataSource: NSObject {
 
   private func processStatistics(_ statistics: [StudySession.Statistics]) {
     currentStatistics = statistics.sorted(by: { (lhs, rhs) -> Bool in
-      return lhs.startDate < rhs.startDate
+      lhs.startDate < rhs.startDate
     })
     if let first = currentStatistics.first {
       startDate = calendar.startOfMonth(containing: first.startDate)
@@ -129,7 +129,7 @@ extension StatisticsCalendarDataSource: CalendarDataSource {
     ) as! DateCell // swiftlint:disable:this force_cast
     let date = dateForIndexPath(indexPath)
     let statisticsOnDate = currentStatistics.first(where: { (statistics) -> Bool in
-      return calendar.startOfDay(for: statistics.startDate) == calendar.startOfDay(for: date)
+      calendar.startOfDay(for: statistics.startDate) == calendar.startOfDay(for: date)
     })
     if statisticsOnDate != nil {
       cell.text = String(happyEmojis.randomElement()!)
@@ -144,7 +144,6 @@ extension StatisticsCalendarDataSource: CalendarDataSource {
 }
 
 extension StatisticsCalendarDataSource {
-
   /// The specific calendar cell.
   class DateCell: UICollectionViewCell {
     override init(frame: CGRect) {
@@ -170,11 +169,11 @@ extension StatisticsCalendarDataSource {
     public var isToday: Bool = false {
       didSet {
         if isToday {
-          self.layer.borderColor = Stylesheet.hablaEspanol.colors.primaryColor.cgColor
-          self.layer.borderWidth = 1.0
-          self.layer.cornerRadius = 4.0
+          layer.borderColor = Stylesheet.hablaEspanol.colors.primaryColor.cgColor
+          layer.borderWidth = 1.0
+          layer.cornerRadius = 4.0
         } else {
-          self.layer.borderWidth = 0.0
+          layer.borderWidth = 0.0
         }
       }
     }

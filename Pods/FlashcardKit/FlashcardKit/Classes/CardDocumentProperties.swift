@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -7,7 +7,6 @@ import TextBundleKit
 /// A struct that combines a TextBundle with the parsing rules for interpreting the contents
 /// of the document.
 public struct CardDocumentProperties {
-
   /// The document name that the card came from.
   public let documentName: String
 

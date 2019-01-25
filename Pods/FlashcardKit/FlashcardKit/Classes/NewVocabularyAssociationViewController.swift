@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -31,7 +31,6 @@ extension Optional where Wrapped: Collection {
 }
 
 final class NewVocabularyAssociationViewController: UIViewController {
-
   init(
     vocabularyAssociation: VocabularyAssociation?,
     image: UIImage?,
@@ -161,7 +160,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
   }()
 
   private lazy var doneButton: UIBarButtonItem = {
-    return UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
+    UIBarButtonItem(title: "DONE", style: .plain, target: self, action: #selector(didTapDone))
   }()
 
   override func loadView() {
@@ -181,15 +180,16 @@ final class NewVocabularyAssociationViewController: UIViewController {
         spellingRow,
         buttonStack,
         imageView,
-      ])
+      ]
+    )
     stack.axis = .vertical
     view.addSubview(stack)
-    stack.snp.makeConstraints { (make) in
+    stack.snp.makeConstraints { make in
       make.top.equalTo(view.safeAreaLayoutGuide.snp.topMargin).offset(16)
       make.left.equalToSuperview().offset(16)
       make.right.equalToSuperview().offset(-16)
     }
-    imageView.snp.makeConstraints { (make) in
+    imageView.snp.makeConstraints { make in
       make.width.equalTo(200)
       make.height.equalTo(200)
     }
@@ -248,7 +248,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   @objc private func didTapTranslateSpanishToEnglish(button: UIButton) {
     guard let phrase = spanishTextField.field.text, !phrase.isEmpty else { return }
-    translationService.requestTranslation(of: phrase, from: .spanish, to: .english) { (result) in
+    translationService.requestTranslation(of: phrase, from: .spanish, to: .english) { result in
       if let translation = result.value {
         self.englishTextField.field.text = translation
         self.configureUI()
@@ -258,7 +258,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
 
   @objc private func didTapTranslateEnglishToSpanish(button: UIButton) {
     guard let phrase = englishTextField.field.text, !phrase.isEmpty else { return }
-    translationService.requestTranslation(of: phrase, from: .english, to: .spanish) { (result) in
+    translationService.requestTranslation(of: phrase, from: .english, to: .spanish) { result in
       if let translation = result.value {
         self.spanishTextField.field.text = translation
         self.configureUI()
@@ -287,9 +287,7 @@ final class NewVocabularyAssociationViewController: UIViewController {
   }
 }
 
-extension NewVocabularyAssociationViewController: UINavigationControllerDelegate {
-
-}
+extension NewVocabularyAssociationViewController: UINavigationControllerDelegate {}
 
 extension NewVocabularyAssociationViewController: DZNPhotoPickerControllerDelegate {
   func photoPickerController(
@@ -298,7 +296,7 @@ extension NewVocabularyAssociationViewController: DZNPhotoPickerControllerDelega
   ) {
     let attributes = userInfo[DZNPhotoPickerControllerPhotoMetadata] as? NSDictionary
     if let thumbnailURL = attributes?["thumb_url"] as? URL {
-      SDWebImageDownloader.shared().downloadImage(with: thumbnailURL, options: [], progress: nil, completed: { (image, _, _, _) in
+      SDWebImageDownloader.shared().downloadImage(with: thumbnailURL, options: [], progress: nil, completed: { image, _, _, _ in
         DispatchQueue.main.async {
           self.imageView.image = image
           self.configureUI()

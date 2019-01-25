@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2018-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import CwlSignal
@@ -10,7 +10,6 @@ import enum TextBundleKit.Result
 /// This class is the model layer for a single "language deck" (flashcards & study statistics).
 /// It is backed by a single UIDocument.
 public final class LanguageDeck {
-
   /// Initializer.
   ///
   /// - parameter document: The document that stores all of the models
@@ -21,17 +20,17 @@ public final class LanguageDeck {
 
     vocabularyAssociationsSignal = miniMarkdownSignal
       .map { (blocks) -> [VocabularyAssociation] in
-        return VocabularyAssociation.makeAssociations(from: blocks).0
+        VocabularyAssociation.makeAssociations(from: blocks).0
       }
-    .continuous()
+      .continuous()
     let clozeTemplateSignal = miniMarkdownSignal.map { ClozeTemplate.extract(from: $0) }
     let combinedCards = vocabularyAssociationsSignal
       .combineLatest(clozeTemplateSignal) { (vocabularyAssociations, clozeTemplates) -> [Card] in
-        return Array([vocabularyAssociations.cards, clozeTemplates.cards].joined())
+        Array([vocabularyAssociations.cards, clozeTemplates.cards].joined())
       }
     self.studySessionSignal = document.documentStudyMetadata.signal
       .combineLatest(combinedCards, { (documentValue, cards) -> StudySession in
-        return documentValue.value.studySession(
+        documentValue.value.studySession(
           from: cards,
           limit: 500,
           properties: CardDocumentProperties(
@@ -76,7 +75,7 @@ public final class LanguageDeck {
   ) {
     // TODO: useCloud should be a user setting.
     let factory = TextBundleDocumentFactory(useCloud: true)
-    CommonplaceBook.openDocument(at: pathComponent, using: factory) { (documentResult) in
+    CommonplaceBook.openDocument(at: pathComponent, using: factory) { documentResult in
       let deckResult = documentResult.flatMap({ (document) -> LanguageDeck in
         let deck = LanguageDeck(document: document)
         deck.populateEmptyDocument()
