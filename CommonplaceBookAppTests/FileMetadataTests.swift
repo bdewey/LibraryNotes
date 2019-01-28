@@ -1,10 +1,9 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import XCTest
 
 final class FileMetadataTests: XCTestCase {
-
   let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
 
   func testLocalMetadataForTextFile() {

@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import CwlSignal
@@ -31,7 +31,7 @@ extension TextBundleDocument: EditableDocument {
 
 extension TextBundleDocument: ConfiguresRenderers {
   public func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { (_, attributes) in
+    renderers[.image] = { _, _ in
       let attachment = NSTextAttachment()
       attachment.image = placeholderImage
       attachment.bounds = CGRect(x: 0, y: 0, width: 24, height: 24)

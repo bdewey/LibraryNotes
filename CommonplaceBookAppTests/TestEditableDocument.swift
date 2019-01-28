@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import CwlSignal
@@ -12,7 +12,6 @@ protocol TestEditableDocumentDelegate: class {
 
 /// Test implementation of EditableDocument that keeps its values in memory.
 final class TestEditableDocument: EditableDocument {
-
   /// Initialize with default text.
   init(name: String, text: String = "") {
     self.name = name

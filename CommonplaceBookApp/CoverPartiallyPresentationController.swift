@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -18,16 +18,15 @@ enum Direction {
 }
 
 class CoverPartiallyPresentationController:
-UIPresentationController,
-UIViewControllerTransitioningDelegate {
-
+  UIPresentationController,
+  UIViewControllerTransitioningDelegate {
   var dismissInteractionController: PanGestureInteractionController?
   var interactiveDismissal: Bool = false
   let coverDirection: Direction
 
   private let margin: CGFloat = 56.0
 
-  lazy private var backgroundView: UIView = {
+  private lazy var backgroundView: UIView = {
     let view = UIView(frame: .zero)
     view.frame = self.containerView?.bounds ?? CGRect()
     view.backgroundColor = UIColor(white: 0, alpha: 0.32)
@@ -52,13 +51,13 @@ UIViewControllerTransitioningDelegate {
     backgroundView.alpha = 0
     presentingViewController.transitionCoordinator?.animate(alongsideTransition: { [weak self] _ in
       self?.backgroundView.alpha = 1
-      }, completion: nil)
+    }, completion: nil)
   }
 
   override func dismissalTransitionWillBegin() {
     presentingViewController.transitionCoordinator?.animate(alongsideTransition: { [weak self] _ in
       self?.backgroundView.alpha = 0
-      }, completion: nil)
+    }, completion: nil)
   }
 
   override func presentationTransitionDidEnd(_ completed: Bool) {
@@ -109,14 +108,14 @@ UIViewControllerTransitioningDelegate {
         x: 0,
         y: 0,
         width: containerView.bounds.width,
-        height: containerView.bounds.height-margin
+        height: containerView.bounds.height - margin
       )
     case .down:
       return CGRect(
         x: 0,
         y: margin,
         width: containerView.bounds.width,
-        height: containerView.bounds.height-margin
+        height: containerView.bounds.height - margin
       )
     }
   }
@@ -163,6 +162,7 @@ class PanGestureInteractionController: UIPercentDrivenInteractiveTransition {
   struct Callbacks {
     var didBeginPanning: (() -> Void)?
   }
+
   var callbacks = Callbacks()
 
   let gestureRecognizer: UIPanGestureRecognizer
@@ -173,7 +173,7 @@ class PanGestureInteractionController: UIPercentDrivenInteractiveTransition {
 
   init(view: UIView, direction: Direction) {
     self.direction = direction
-    gestureRecognizer = UIPanGestureRecognizer()
+    self.gestureRecognizer = UIPanGestureRecognizer()
     view.addGestureRecognizer(gestureRecognizer)
 
     super.init()
@@ -182,6 +182,7 @@ class PanGestureInteractionController: UIPercentDrivenInteractiveTransition {
   }
 
   // MARK: User interaction
+
   @objc func viewPanned(sender: UIPanGestureRecognizer) {
     switch sender.state {
     case .began:
@@ -189,7 +190,7 @@ class PanGestureInteractionController: UIPercentDrivenInteractiveTransition {
     case .changed:
       update(percentCompleteForTranslation(translation: sender.translation(in: sender.view)))
     case .ended:
-      if sender.shouldRecognizeForDirection(direction: direction) && percentComplete > 0.25 {
+      if sender.shouldRecognizeForDirection(direction: direction), percentComplete > 0.25 {
         finish()
       } else {
         cancel()
@@ -228,7 +229,6 @@ private extension Direction {
 }
 
 class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
-
   let duration: TimeInterval = 0.3
   let reverse: Bool
   let interactive: Bool
@@ -241,7 +241,6 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
   }
 
   func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-
     let viewControllerKey = reverse
       ? UITransitionContextViewControllerKey.from
       : UITransitionContextViewControllerKey.to
@@ -275,7 +274,8 @@ class SlideInTransition: NSObject, UIViewControllerAnimatedTransitioning {
       },
       completion: { _ in
         transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
-      })
+      }
+    )
   }
 
   func transitionDuration(
@@ -319,12 +319,11 @@ extension UIPanGestureRecognizer {
 }
 
 func angle(_ pointA: CGPoint, _ pointB: CGPoint) -> CGFloat {
-  // TODO | - Not sure if this is correct
+  // TODO: | - Not sure if this is correct
   return atan2(pointA.y, pointA.x) - atan2(pointB.y, pointB.x)
 }
 
 extension CGPoint {
-
   static func * (left: CGPoint, right: CGPoint) -> CGFloat {
     return left.x * right.x + left.y * right.y
   }

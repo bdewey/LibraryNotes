@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import FlashcardKit
@@ -14,7 +14,7 @@ final class NotebookTests: XCTestCase {
       fileInfo: [
         TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "Sample #hashtag #test1"),
         TestMetadataProvider.FileInfo(fileName: "page2.txt", contents: "Sample #hashtag #test2"),
-        ],
+      ],
       parsingRules: parsingRules
     )
   }
@@ -31,7 +31,7 @@ final class NotebookTests: XCTestCase {
       metadataProvider: metadataProvider
     ).loadCachedProperties().monitorMetadataProvider()
     waitForNotebook(notebook) { (notebook) -> Bool in
-      return notebook.pageProperties.count == 2
+      notebook.pageProperties.count == 2
         && notebook.pageProperties.allSatisfy { $1.tag == .truth }
     }
     XCTAssertEqual(
@@ -117,7 +117,7 @@ final class NotebookTests: XCTestCase {
       .loadCachedProperties()
       .monitorMetadataProvider()
     waitForNotebook(notebook) { (notebook) -> Bool in
-      return notebook.pageProperties.count == 2
+      notebook.pageProperties.count == 2
         && notebook.pageProperties.allSatisfy { $1.tag == .truth }
     }
     XCTAssertEqual(notebook.pageProperties.count, 2)
@@ -171,7 +171,7 @@ final class NotebookTests: XCTestCase {
 
     // make sure filtering works
     let singleDocumentSession = notebook.studySession { (properties) -> Bool in
-      return properties.fileMetadata.fileName == "spanish1.txt"
+      properties.fileMetadata.fileName == "spanish1.txt"
     }
     XCTAssertEqual(singleDocumentSession.count, 6)
   }
@@ -215,7 +215,7 @@ final class NotebookTests: XCTestCase {
       .monitorMetadataProvider()
     XCTAssertEqual(studyAllCards(in: notebook), 6)
     verifyStudyMetadataChanged(for: notebook) {
-       // swiftlint:disable:next force_try
+      // swiftlint:disable:next force_try
       try! notebook.renamePage(from: "spanish1.txt", to: "spanish-new.txt")
     }
     XCTAssertNotNil(notebook.pageProperties["spanish-new.txt"])
@@ -286,7 +286,6 @@ final class NotebookTests: XCTestCase {
 
 /// Helpers.
 extension NotebookTests {
-
   private static let allPagesAreTruth = NotebookTests.notebookPagesAllHaveTag(.truth)
 
   private static let allPagesAreCached = NotebookTests.notebookPagesAllHaveTag(.fromCache)
@@ -294,25 +293,27 @@ extension NotebookTests {
   private static let noPagesArePlaceholders = NotebookTests.notebookPagesNoneHaveTag(.placeholder)
 
   private static func notebookPagesAllHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
-    return { (notebook) in
-      return notebook.pageProperties.allSatisfy({ $1.tag == tag })
+    return { notebook in
+      notebook.pageProperties.allSatisfy({ $1.tag == tag })
     }
   }
 
   private static func notebookPagesNoneHaveTag(_ tag: Tag) -> (Notebook) -> Bool {
-    return { (notebook) in
-      return notebook.pageProperties.allSatisfy({ $1.tag != tag })
+    return { notebook in
+      notebook.pageProperties.allSatisfy({ $1.tag != tag })
     }
   }
 
   private func waitForNotebook(_ notebook: Notebook, condition: @escaping (Notebook) -> Bool) {
     if condition(notebook) {
-      print("Condition immediately passed: "
-        + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })")
+      print(
+        "Condition immediately passed: "
+          + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })"
+      )
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener { (notebook, key) in
+    let notebookListener = TestListener { notebook, key in
       guard key == .pageProperties else { return }
       print("Checking condition: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
@@ -330,12 +331,14 @@ extension NotebookTests {
     condition: @escaping (Notebook) -> Bool
   ) {
     if condition(notebook) {
-      print("Condition immediately passed: "
-        + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })")
+      print(
+        "Condition immediately passed: "
+          + "\(notebook.pageProperties.mapValues { $0.tag.rawValue })"
+      )
       return
     }
     let conditionSatisfied = expectation(description: "generic condition")
-    let notebookListener = TestListener { (notebook, key) in
+    let notebookListener = TestListener { notebook, key in
       guard key == .studyMetadata else { return }
       print("Checking condition: \(notebook.pageProperties.mapValues { $0.tag.rawValue })")
       if condition(notebook) {
@@ -349,7 +352,7 @@ extension NotebookTests {
 
   private func verifyStudyMetadataChanged(for notebook: Notebook, block: () -> Void) {
     var listenerBlockExecuted = false
-    let notebookListener = TestListener { (_, key) in
+    let notebookListener = TestListener { _, key in
       guard key == .studyMetadata else { return }
       listenerBlockExecuted = true
     }
@@ -361,7 +364,7 @@ extension NotebookTests {
 
   private func startMonitoringForCacheSave() {
     let didSaveCache = expectation(description: "did save cache")
-    metadataProvider.contentsChangeListener = { (name, text) in
+    metadataProvider.contentsChangeListener = { name, _ in
       if name == Notebook.Key.pageProperties.rawValue {
         didSaveCache.fulfill()
       }
@@ -398,7 +401,6 @@ extension NotebookTests {
 }
 
 final class TestListener: NotebookChangeListener {
-
   typealias NotebookNotificationBlock = (Notebook, Notebook.Key) -> Void
 
   init(

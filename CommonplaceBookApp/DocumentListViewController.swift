@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -27,7 +27,6 @@ extension NSComparisonPredicate {
 
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController, StylesheetContaining {
-
   /// Designated initializer.
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
@@ -59,7 +58,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private let dataSource: DocumentDataSource
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
-    return UIBarButtonItem(
+    UIBarButtonItem(
       image: UIImage(named: "round_menu_black_24pt")?.withRenderingMode(.alwaysTemplate),
       style: .plain,
       target: self,
@@ -124,10 +123,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     super.viewDidLoad()
     view.addSubview(documentCollectionView)
     view.addSubview(newDocumentButton)
-    documentCollectionView.snp.makeConstraints { (make) in
+    documentCollectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    newDocumentButton.snp.makeConstraints { (make) in
+    newDocumentButton.snp.makeConstraints { make in
       make.trailing.equalToSuperview().offset(-16)
       make.bottom.equalToSuperview().offset(-16)
       make.width.equalTo(56)
@@ -153,7 +152,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
         return
       }
       let notebook = self.notebook
-      document.openOrCreate(completionHandler: { (success) in
+      document.openOrCreate(completionHandler: { success in
         guard success else {
           DDLogError("Unexpected error creating new document \(name)")
           return
@@ -166,14 +165,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
           initialText += "\n"
         }
         document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
-          return initialText
+          initialText
         })
         let viewController = TextEditViewController(
           document: document,
           parsingRules: self.notebook.parsingRules,
           stylesheet: self.stylesheet
         )
-        viewController.onDocumentClose = { (success) in
+        viewController.onDocumentClose = { success in
           if !success { DDLogError("Failure closing document? Why oh why?") }
           do {
             try notebook.performRenames(notebook.desiredBaseNameForPage)
@@ -224,9 +223,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private func updateStudySession() {
     let filter: (PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
-      ? { (_) in return true }
-      : { (properties) in return properties.hashtags.contains(self.dataSource.filteredHashtag!) }
-    self.studySession = notebook.studySession(filter: filter)
+      ? { _ in true }
+      : { properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+    studySession = notebook.studySession(filter: filter)
   }
 
   public func presentStudySessionViewController(for studySession: StudySession) {
@@ -238,7 +237,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     )
     studyVC.modalTransitionStyle = .crossDissolve
     studyVC.maximumCardWidth = 440
-    studyVC.title = self.navigationItem.title
+    studyVC.title = navigationItem.title
     present(studyVC, animated: true, completion: nil)
   }
 }

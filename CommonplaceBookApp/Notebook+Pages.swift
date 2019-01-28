@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CwlSignal
@@ -45,7 +45,7 @@ extension Notebook {
       )
       return properties.reduce(
         into: [String: Tagged<PageProperties>]()
-      ) { (dictionary, properties) in
+      ) { dictionary, properties in
         dictionary[properties.fileMetadata.fileName] = Tagged(
           tag: tag,
           value: properties
@@ -67,7 +67,7 @@ extension Notebook {
     } else {
       DDLogError("Unexpected error: Unable to load cached properties. Continuing without cache.")
     }
-    self.renameBlocks[.pageProperties] = { [weak self](oldName, newName) in
+    renameBlocks[.pageProperties] = { [weak self] oldName, newName in
       guard let self = self else { return }
       try self.metadataProvider.renameMetadata(FileMetadata(fileName: oldName), to: newName)
       if let existingProperties = self.pageProperties[oldName]?.value {
@@ -97,10 +97,10 @@ extension Notebook {
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
   private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument) {
-    propertiesDocument.openOrCreate { (success) in
+    propertiesDocument.openOrCreate { success in
       // TODO: Handle the failure case here.
       precondition(success)
-      self.endpoints += propertiesDocument.textSignal.subscribeValues({ (taggedString) in
+      self.endpoints += propertiesDocument.textSignal.subscribeValues({ taggedString in
         // If we've already loaded information into memory, don't clobber it.
         if self.pageProperties.isEmpty {
           let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
@@ -122,7 +122,7 @@ extension Notebook {
     for fileMetadata in models {
       allUpdated.enter()
       fileMetadata.downloadIfNeeded(in: containerURL)
-      updateProperties(for: fileMetadata) { (didLoadNewProperties) in
+      updateProperties(for: fileMetadata) { didLoadNewProperties in
         if didLoadNewProperties { loadedProperties += 1 }
         allUpdated.leave()
       }
@@ -152,7 +152,7 @@ extension Notebook {
       from: fileMetadata,
       in: metadataProvider,
       parsingRules: parsingRules
-    ) { (result) in
+    ) { result in
       switch result {
       case .success(let properties):
         self.pageProperties[name] = Tagged(tag: .truth, value: properties)
@@ -172,7 +172,7 @@ extension Notebook {
       let properties = pageProperties.values.map { $0.value }
       let data = try Notebook.encoder.encode(properties)
       propertiesDocument.applyTaggedModification(tag: .memory) { (_) -> String in
-        return String(data: data, encoding: .utf8) ?? ""
+        String(data: data, encoding: .utf8) ?? ""
       }
     } catch {
       DDLogError("\(error)")
@@ -206,7 +206,7 @@ extension Notebook {
 
   /// Removes items "pages" except those referenced by `metadata`
   /// - note: This does *not* save cached properties. That is the responsibility of the caller.
-  /// TODO: I should redesign the page manipulation APIs to be more foolproof.
+  // TODO: I should redesign the page manipulation APIs to be more foolproof.
   ///       A method that takes a block, executes it, then notifies listeners & saves properties
   ///       afterwards. That will batch saves as well as listener notifications.
   ///       This implementation will send one notification per key.
@@ -222,13 +222,12 @@ extension Notebook {
   /// Deletes a document and its properties.
   public func deleteFileMetadata(_ fileMetadata: FileMetadata) {
     try? metadataProvider.delete(fileMetadata)
-    self.pageProperties[fileMetadata.fileName] = nil
+    pageProperties[fileMetadata.fileName] = nil
     saveProperties()
   }
 }
 
 extension Optional where Wrapped == Tagged<PageProperties> {
-
   /// Given an optional Tagged<DocumentProperties>, computes a new Tagged<DocumentProperties>
   /// for given metadata.
   ///
@@ -240,7 +239,7 @@ extension Optional where Wrapped == Tagged<PageProperties> {
   /// with Tag.truth (meaning no need to re-parse) if the timestamps are close.
   fileprivate func updatingFileMetadata(
     _ fileMetadata: FileMetadata
-    ) -> Tagged<PageProperties> {
+  ) -> Tagged<PageProperties> {
     switch self {
     case .none:
       return Tagged(
@@ -257,7 +256,6 @@ extension Optional where Wrapped == Tagged<PageProperties> {
 }
 
 extension FileMetadata {
-
   /// Determine if two FileMetadata records are "close enough" that we don't have to
   /// re-load and re-parse the file contents.
   fileprivate func closeInTime(to other: FileMetadata) -> Bool {
@@ -269,7 +267,7 @@ extension Notebook: FileMetadataProviderDelegate {
   public func fileMetadataProvider(
     _ provider: FileMetadataProvider,
     didUpdate metadata: [FileMetadata]
-    ) {
+  ) {
     processMetadata(metadata)
   }
 }

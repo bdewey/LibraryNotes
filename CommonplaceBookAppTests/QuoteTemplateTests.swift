@@ -1,12 +1,12 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
-// swiftlint:disable line_length
-// swiftlint:disable force_try
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import CommonplaceBookApp
 import FlashcardKit
 import MiniMarkdown
 import XCTest
+
+// swiftlint:disable force_try
 
 private let testContent = """
 # *Educated*, Tara Westover

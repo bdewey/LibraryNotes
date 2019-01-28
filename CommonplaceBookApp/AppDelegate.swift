@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -10,7 +10,6 @@ import UIKit
 
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControllerDelegate {
-
   var window: UIWindow?
   let useCloud = true
 
@@ -46,7 +45,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
 
-    self.makeMetadataProvider(completion: { (metadataProviderResult) in
+    makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
         let parsingRules = LanguageDeck.parsingRules
@@ -119,7 +118,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 }
 
-extension LoadingViewController: StylesheetContaining { }
+extension LoadingViewController: StylesheetContaining {}
 
 private let commonplaceBookStylesheet: Stylesheet = {
   var stylesheet = Stylesheet()

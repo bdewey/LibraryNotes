@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CwlSignal
 import FlashcardKit
@@ -10,7 +10,6 @@ import enum TextBundleKit.Result
 
 /// Metadata about pages in a Notebook.
 public struct PageProperties: Codable {
-
   /// FileMetadata identifying this page in a FileMetadatProvider.
   public var fileMetadata: FileMetadata
 
@@ -25,7 +24,7 @@ public struct PageProperties: Codable {
 
   /// Title with all markdown characters removed
   public var plainTextTitle: String {
-    return PageProperties.parsingRules.parse(title).reduce(into: "") { (string, node) in
+    return PageProperties.parsingRules.parse(title).reduce(into: "") { string, node in
       string.append(MarkdownStringRenderer.textOnly.render(node: node))
     }
   }
@@ -76,7 +75,7 @@ public struct PageProperties: Codable {
       completion(.failure(Error.noEditableDocument))
       return
     }
-    document.open { (success) in
+    document.open { success in
       if success {
         let textResult = document.currentTextResult
         document.close(completionHandler: nil)
@@ -141,10 +140,8 @@ public struct PageProperties: Codable {
 }
 
 extension PageProperties {
-
   /// Kinds of errors when loading properties.
   enum Error: Swift.Error {
-
     /// Cannot get an EditableDocument for a specific FileMetadata.
     case noEditableDocument
 
@@ -154,19 +151,17 @@ extension PageProperties {
 }
 
 extension PageProperties: CustomStringConvertible {
-
   /// For debugging: A string representation of the properties.
-  /// TODO: Consider making this a mirror instead.
+  // TODO: Consider making this a mirror instead.
   public var description: String {
     return "\(title) \(fileMetadata)"
   }
 }
 
 extension Array where Element == Node {
-
   /// For an array of Nodes, return all VocabularyAssociations and ClozeTemplates found in
   /// the nodes.
-  /// TODO: Make this extensible for other card template types.
+  // TODO: Make this extensible for other card template types.
   func cardTemplates() -> [CardTemplateSerializationWrapper] {
     var results = [CardTemplateSerializationWrapper]()
     results.append(
@@ -214,7 +209,6 @@ extension Array where Element == Node {
 
 /// Wrapper around PageProperties for IGListKit.
 public final class PagePropertiesListDiffable: ListDiffable {
-
   /// The wrapped PageProperties.
   public private(set) var value: PageProperties
 

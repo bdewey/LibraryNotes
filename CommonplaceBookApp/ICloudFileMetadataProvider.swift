@@ -1,15 +1,14 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
 
 /// A FileMetadataProvider for the iCloud ubiquitous container.
 public final class ICloudFileMetadataProvider: FileMetadataProvider {
-
   public init(container: URL) {
     assert(Thread.isMainThread)
     self.container = container
-    query = NSMetadataQuery()
+    self.query = NSMetadataQuery()
     query.predicate = NSComparisonPredicate.page
     query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
     query.searchItems = [container]
@@ -39,6 +38,7 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
       delegate?.fileMetadataProvider(self, didUpdate: fileMetadata)
     }
   }
+
   public weak var delegate: FileMetadataProviderDelegate?
 
   /// the specific ubiquitous container we monitor.
@@ -63,7 +63,7 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
   }
 
   @objc private func didFinishGatheringNotification(_ notification: NSNotification) {
-    self.fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
+    fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
       guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
       return FileMetadata(metadataItem: metadataItem)
     })
@@ -71,7 +71,7 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
 
   @objc private func didUpdateNotification(_ notification: NSNotification) {
     DDLogInfo("Received notification: " + String(describing: notification.userInfo))
-    self.fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
+    fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
       guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
       return FileMetadata(metadataItem: metadataItem)
     })
@@ -79,7 +79,6 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
 }
 
 extension NSComparisonPredicate {
-
   /// Convenience initializer that finds items that conform to a UTI.
   fileprivate convenience init(conformingToUTI uti: String) {
     self.init(
@@ -95,5 +94,5 @@ extension NSComparisonPredicate {
   fileprivate static let page = NSCompoundPredicate(orPredicateWithSubpredicates: [
     NSComparisonPredicate(conformingToUTI: "public.plain-text"),
     NSComparisonPredicate(conformingToUTI: "org.textbundle.package"),
-    ])
+  ])
 }

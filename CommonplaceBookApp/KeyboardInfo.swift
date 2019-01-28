@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -14,14 +14,14 @@ extension KeyboardInfo {
   init?(_ notification: Notification) {
     guard notification.name == UIResponder.keyboardWillShowNotification ||
       notification.name == UIResponder.keyboardWillChangeFrameNotification else {
-        return nil
+      return nil
     }
     let userInfo = notification.userInfo!
 
     // swiftlint:disable force_cast
     animationCurve = UIView.AnimationCurve(
       rawValue: userInfo[UIWindow.keyboardAnimationCurveUserInfoKey] as! Int
-      )!
+    )!
     animationDuration = userInfo[UIWindow.keyboardAnimationDurationUserInfoKey] as! Double
     isLocal = userInfo[UIWindow.keyboardIsLocalUserInfoKey] as! Bool
     frameBegin = userInfo[UIWindow.keyboardFrameBeginUserInfoKey] as! CGRect

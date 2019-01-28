@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import XCTest
 
@@ -13,10 +13,10 @@ private enum Identifiers {
 
 private enum TestContent {
   static let singleCloze = """
-Cloze test
-#testing
-- This is a file with a ?[](cloze).
-"""
+  Cloze test
+  #testing
+  - This is a file with a ?[](cloze).
+  """
 
   static func pickleText(title: String) -> String {
     let text = """
@@ -28,26 +28,25 @@ Cloze test
   }
 
   static let doubleCloze = """
-Two cloze document
-#testing
-- Cards with a fill-in-the-blank -- is called a "?[](cloze)".
-The 45th President of the United States is ?[cheeto](Donald Trump).
+  Two cloze document
+  #testing
+  - Cards with a fill-in-the-blank -- is called a "?[](cloze)".
+  The 45th President of the United States is ?[cheeto](Donald Trump).
 
-The question about Trump should be in an auto-continue list.
-"""
+  The question about Trump should be in an auto-continue list.
+  """
 
   static let quote = """
-*Educated*, Tara Westover
+  *Educated*, Tara Westover
 
-## Quotes
+  ## Quotes
 
-> It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence.
-> Ain’t nothin’ ?[](funnier) than real life, I tell you what. (34)
-"""
+  > It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence.
+  > Ain’t nothin’ ?[](funnier) than real life, I tell you what. (34)
+  """
 }
 
 final class CommonplaceBookAppUITests: XCTestCase {
-
   var application: XCUIApplication!
 
   override func setUp() {
@@ -150,7 +149,6 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
 // Helpers
 extension CommonplaceBookAppUITests {
-
   /// Waits for an element to exist in the hierarchy.
   /// - parameter element: The element to test for.
   /// - note: From http://masilotti.com/xctest-helpers/

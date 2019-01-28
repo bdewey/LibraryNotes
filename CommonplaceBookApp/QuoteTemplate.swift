@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import FlashcardKit
@@ -10,7 +10,6 @@ extension CardTemplateType {
 }
 
 public final class QuoteTemplate: CardTemplate {
-
   // TODO: I should be able to share this with ClozeTemplate
   public enum Error: Swift.Error {
     /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
@@ -49,7 +48,7 @@ public final class QuoteTemplate: CardTemplate {
     try container.encode(quote.allMarkdown, forKey: .quote)
   }
 
-  override public var type: CardTemplateType { return .quote }
+  public override var type: CardTemplateType { return .quote }
 
   /// The quote template is itself a card.
   public override var cards: [Card] { return [self] }

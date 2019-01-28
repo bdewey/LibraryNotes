@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import FlashcardKit
@@ -9,7 +9,6 @@ import SwipeCellKit
 import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
-
   init(notebook: Notebook, stylesheet: Stylesheet) {
     self.notebook = notebook
     self.stylesheet = stylesheet
@@ -29,7 +28,7 @@ public final class DocumentSectionController: ListSectionController {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.emphasis] = { $1.italic = true }
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.delimiter] = { (_, _) in return NSAttributedString() }
+    renderers[.delimiter] = { _, _ in NSAttributedString() }
     let renderer = RenderedMarkdown(
       parsingRules: ParsingRules(),
       formatters: formatters,
@@ -91,7 +90,7 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didUpdate(to object: Any) {
     // swiftlint:disable:next force_cast
-    self.properties = (object as! PagePropertiesListDiffable)
+    properties = (object as! PagePropertiesListDiffable)
   }
 
   public override func didSelectItem(at index: Int) {
@@ -99,7 +98,7 @@ public final class DocumentSectionController: ListSectionController {
       for: properties.value.fileMetadata,
       parsingRules: notebook.parsingRules,
       stylesheet: stylesheet
-    ) { (editingViewController) in
+    ) { editingViewController in
       guard let editingViewController = editingViewController else { return }
       self.viewController?.navigationController?.pushViewController(
         editingViewController,
@@ -120,7 +119,7 @@ extension Notebook {
       completion(nil)
       return
     }
-    document.open { (success) in
+    document.open { success in
       guard success else { completion(nil); return }
       if metadata.contentTypeTree.contains("org.brians-brain.swiftflash") {
         completion(metadata.languageViewController(
@@ -157,12 +156,12 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
   ) -> [SwipeAction]? {
     guard orientation == .right else { return nil }
 
-    let dataSource = self.notebook
+    let dataSource = notebook
     var actions = [SwipeAction]()
     if let properties = self.properties {
       if properties.cardCount > 0,
-         let viewController = self.viewController as? DocumentListViewController {
-        let studyAction = SwipeAction(style: .default, title: "Study") { (action, _) in
+        let viewController = self.viewController as? DocumentListViewController {
+        let studyAction = SwipeAction(style: .default, title: "Study") { action, _ in
           let studySession = self.notebook.studySession(
             filter: { $0.fileMetadata.fileName == properties.value.fileMetadata.fileName }
           )

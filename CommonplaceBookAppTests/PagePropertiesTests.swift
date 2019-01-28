@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import FlashcardKit
@@ -13,7 +13,7 @@ final class PagePropertiesTests: XCTestCase {
       fileInfo: [
         TestMetadataProvider.FileInfo(fileName: "page1.txt", contents: "Sample #hashtag #test1"),
         TestMetadataProvider.FileInfo(fileName: "page2.txt", contents: "Sample #hashtag #test2"),
-        ],
+      ],
       parsingRules: parsingRules
     )
   }
@@ -36,7 +36,7 @@ final class PagePropertiesTests: XCTestCase {
       from: metadataProvider.fileNameToMetadata[existingName]!,
       in: metadataProvider,
       parsingRules: parsingRules
-    ) { (results) in
+    ) { results in
       switch results {
       case .failure(let error):
         XCTFail("Unexpected error: \(error)")
@@ -61,7 +61,7 @@ final class PagePropertiesTests: XCTestCase {
       from: metadataProvider.fileNameToMetadata[existingName]!,
       in: metadataProvider,
       parsingRules: parsingRules
-    ) { (results) in
+    ) { results in
       switch results {
       case .failure(let error):
         XCTFail("Unexpected error: \(error)")

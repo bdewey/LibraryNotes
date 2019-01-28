@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -20,7 +20,6 @@ extension Tag {
 final class TextEditViewController: UIViewController,
   MDCScrollEventForwarder,
   StylesheetContaining {
-
   /// Designated initializer.
   init(document: EditableDocument, parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.document = document
@@ -37,22 +36,26 @@ final class TextEditViewController: UIViewController,
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
-    self.endpoint = document.textSignal.subscribeValues { [weak self](taggedString) in
+    self.endpoint = document.textSignal.subscribeValues { [weak self] taggedString in
       guard taggedString.tag != Tag.textEditViewController,
-            let textStorage = self?.textStorage else {
+        let textStorage = self?.textStorage else {
         return
       }
       textStorage.markdown = taggedString.value
     }
     textStorage.delegate = self
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(handleKeyboardNotification(_:)),
-                                           name: UIResponder.keyboardWillHideNotification,
-                                           object: nil)
-    NotificationCenter.default.addObserver(self,
-                                           selector: #selector(handleKeyboardNotification(_:)),
-                                           name: UIResponder.keyboardWillChangeFrameNotification,
-                                           object: nil)
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleKeyboardNotification(_:)),
+      name: UIResponder.keyboardWillHideNotification,
+      object: nil
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleKeyboardNotification(_:)),
+      name: UIResponder.keyboardWillChangeFrameNotification,
+      object: nil
+    )
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -94,7 +97,7 @@ final class TextEditViewController: UIViewController,
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
-    formatters[.delimiter] = { (_, attributes) in
+    formatters[.delimiter] = { _, attributes in
       attributes.color = stylesheet.colors
         .onSurfaceColor
         .withAlphaComponent(stylesheet.alpha[.darkTextDisabled] ?? 0.5)
@@ -113,7 +116,7 @@ final class TextEditViewController: UIViewController,
 
   private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { (node, attributes) in
+    renderers[.listItem] = { node, attributes in
       let listItem = node as! ListItem // swiftlint:disable:this force_cast
       let text = String(listItem.slice.string[listItem.markerRange])
       let replacement = listItem.listType == .unordered
@@ -121,7 +124,7 @@ final class TextEditViewController: UIViewController,
         : text.replacingOccurrences(of: " ", with: "\t")
       return NSAttributedString(string: replacement, attributes: attributes.attributes)
     }
-    renderers[.delimiter] = { (node, attributes) in
+    renderers[.delimiter] = { node, attributes in
       var text = String(node.slice.substring)
       if node.parent is Heading || node.parent is BlockQuote {
         text = text.replacingOccurrences(of: " ", with: "\t")
@@ -178,8 +181,9 @@ final class TextEditViewController: UIViewController,
   }
 
   // MARK: - Lifecycle
+
   override func loadView() {
-    self.view = textView
+    view = textView
   }
 
   override func viewDidLoad() {
@@ -239,14 +243,13 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    document.applyTaggedModification(tag: .textEditViewController) { (_) in
+    document.applyTaggedModification(tag: .textEditViewController) { _ in
       self.textStorage.markdown
     }
   }
 }
 
 extension TextEditViewController: UITextViewDelegate {
-
   func replaceCharacters(in range: NSRange, with str: String) {
     textStorage.replaceCharacters(in: range, with: str)
     textView.selectedRange = NSRange(location: range.location + str.count, length: 0)
@@ -262,9 +265,9 @@ extension TextEditViewController: UITextViewDelegate {
     guard range.length == 0 else { return true }
     if text == "\n" {
       if let currentNode = textStorage.node(at: range.location),
-         let listItem = currentNode.findFirstAncestor(
+        let listItem = currentNode.findFirstAncestor(
           where: { $0.type == .listItem }
-          ) as? ListItem {
+        ) as? ListItem {
         if listItem.isEmpty {
           // List termination! Someone's hitting return on a list item that contains nothing.
           // Erase this marker.

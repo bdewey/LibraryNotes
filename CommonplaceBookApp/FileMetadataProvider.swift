@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
 import TextBundleKit
 
 public protocol FileMetadataProviderDelegate: class {
-
   /// Sent when there are new FileMetadata items in the provider.
   ///
   /// - parameter provider: The file metadata provider
@@ -16,7 +15,6 @@ public protocol FileMetadataProviderDelegate: class {
 /// A FileMetadataProvider knows how to obtain all of the FileMetadata structures corresponding
 /// to a single container (e.g., iCloud container or documents folder)
 public protocol FileMetadataProvider: class {
-
   var container: URL { get }
 
   /// The current array of metadata.
@@ -39,7 +37,6 @@ public protocol FileMetadataProvider: class {
 }
 
 extension FileMetadataProvider {
-
   /// Default implementation of editableDocument -- will work for any FileMetadataProvider
   /// that is named by URLs that a UIDocument can open.
   public func editableDocument(for metadata: FileMetadata) -> EditableDocument? {

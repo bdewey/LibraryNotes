@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -14,7 +14,6 @@ extension Notebook.Key {
 }
 
 extension Notebook {
-
   public internal(set) var studyMetadata: NotebookStudyMetadata {
     get {
       if let studyMetadata = internalNotebookData[.studyMetadata] as? NotebookStudyMetadata {
@@ -41,9 +40,9 @@ extension Notebook {
       return self
     }
     openMetadocuments[.studyMetadata] = studyMetadataDocument
-    studyMetadataDocument.openOrCreate { (success) in
+    studyMetadataDocument.openOrCreate { success in
       precondition(success)
-      self.endpoints += studyMetadataDocument.textSignal.subscribeValues({ (taggedString) in
+      self.endpoints += studyMetadataDocument.textSignal.subscribeValues({ taggedString in
         guard taggedString.tag == .document else { return }
         let data = taggedString.value.data(using: .utf8)!
         self.studyMetadata = (try? metadataDecoder.decode(NotebookStudyMetadata.self, from: data))
@@ -51,7 +50,7 @@ extension Notebook {
         self.conditionForKey(.studyMetadata).condition = true
       })
     }
-    renameBlocks[.studyMetadata] = { [weak self](oldName, newName) in
+    renameBlocks[.studyMetadata] = { [weak self] oldName, newName in
       guard let self = self else { return }
       self.studyMetadata[newName] = self.studyMetadata[oldName]
       self.studyMetadata[oldName] = nil
@@ -81,7 +80,7 @@ extension Notebook {
   ///                     to construct the session.
   /// - returns: A StudySession!
   public func studySession(filter: ((PageProperties) -> Bool)? = nil) -> StudySession {
-    let filter = filter ?? { (_) in return true }
+    let filter = filter ?? { _ in true }
     return pageProperties.values
       .map { $0.value }
       .filter(filter)
@@ -102,7 +101,7 @@ extension Notebook {
   /// - parameter date: The date the study session took place.
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     let day = DayComponents(date)
-    var dictionary = self.studyMetadata
+    var dictionary = studyMetadata
     for (documentName, documentResults) in studySession.results {
       for (identifier, statistics) in documentResults {
         if let existingMetadata = dictionary[documentName]?[identifier] {
@@ -112,7 +111,7 @@ extension Notebook {
         }
       }
     }
-    self.studyMetadata = dictionary
+    studyMetadata = dictionary
     saveStudyMetadata(dictionary)
   }
 }

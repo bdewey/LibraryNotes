@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import Foundation
@@ -7,7 +7,6 @@ import MiniMarkdown
 /// Serves in-memory copy of FileMetadata object that are backed by TestEditableDocument
 /// instances.
 final class TestMetadataProvider: FileMetadataProvider {
-
   /// A subset of `FileMetadata` that also includes file contents.
   struct FileInfo {
     let fileName: String
@@ -32,8 +31,8 @@ final class TestMetadataProvider: FileMetadataProvider {
     } else {
       fileNameToMetadata[fileInfo.fileName] = FileMetadata(fileName: fileInfo.fileName)
     }
-    self.fileContents[fileInfo.fileName] = fileInfo.contents
-    delegate?.fileMetadataProvider(self, didUpdate: self.fileMetadata)
+    fileContents[fileInfo.fileName] = fileInfo.contents
+    delegate?.fileMetadataProvider(self, didUpdate: fileMetadata)
   }
 
   /// A fake URL for this container.

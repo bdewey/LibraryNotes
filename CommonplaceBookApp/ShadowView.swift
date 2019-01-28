@@ -1,11 +1,11 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import MaterialComponents.MDCShadowLayer
 import UIKit
 
 /// A view with a shadow.
 open class ShadowView: UIView {
-  override open class var layerClass: AnyClass {
+  open override class var layerClass: AnyClass {
     return MDCShadowLayer.self
   }
 

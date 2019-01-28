@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -26,7 +26,6 @@ public protocol NotebookChangeListener: AnyObject {
 /// or textbundle bundles). Each page may contain "cards", which are individual facts to review
 /// using a spaced repetition algorithm.
 public final class Notebook {
-
   /// Extensible enum that talks about the kind of data in the Notebook.
   public struct Key: RawRepresentable, Hashable {
     public init(rawValue: String) {
@@ -119,6 +118,7 @@ public final class Notebook {
     weak var listener: NotebookChangeListener?
     init(_ listener: NotebookChangeListener) { self.listener = listener }
   }
+
   private var listeners: [WeakListener] = []
 
   /// Registers an NotebookPageChangeListener.

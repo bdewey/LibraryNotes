@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
 import IGListKit
 
 public final class MenuSectionController: ListSectionController {
-
   public init(stylesheet: Stylesheet) {
     self.stylesheet = stylesheet
     super.init()

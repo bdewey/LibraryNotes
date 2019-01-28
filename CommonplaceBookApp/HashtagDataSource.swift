@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import Foundation
@@ -38,10 +38,10 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
         )
       ),
     ]
-    let hashtags = index.pageProperties.values.reduce(into: Set<String>()) { (hashtags, props) in
+    let hashtags = index.pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
       hashtags.formUnion(props.value.hashtags)
     }
-    let hashtagDiffables = Array(hashtags).sorted().map { (hashtag) in
+    let hashtagDiffables = Array(hashtags).sorted().map { hashtag in
       MenuItem(
         label: NSAttributedString(
           string: hashtag,

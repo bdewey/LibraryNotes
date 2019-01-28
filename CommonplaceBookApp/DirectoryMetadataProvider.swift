@@ -1,11 +1,10 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
 
 /// Exposes the files in a directory as a FileMetadataProvider.
 public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
-
   /// Designated initializer.
   ///
   /// - parameter container: The URL to the directory
@@ -61,8 +60,8 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
       options: []
     )
     DDLogInfo("Found \(items.count) items in the container")
-    self.fileMetadata = try items.map({ (url) -> FileMetadata in
-      return try FileMetadata(fileURL: url)
+    fileMetadata = try items.map({ (url) -> FileMetadata in
+      try FileMetadata(fileURL: url)
     })
   }
 

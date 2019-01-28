@@ -1,0 +1,12 @@
+--binarygrouping none
+--decimalgrouping none
+--exclude Pods
+--header "Copyright © 2017-present Brian's Brain. All rights reserved."
+--hexgrouping none
+--indent 2
+--octalgrouping none
+--patternlet inline
+--stripunusedargs closure-only
+--wraparguments beforefirst
+--wrapcollections beforefirst
+--self init-only

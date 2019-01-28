@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 // swiftlint:disable force_cast
 
@@ -11,7 +11,6 @@ import MobileCoreServices
 /// You can create this either from an NSMetadataItem (Spotlight for iCloud documents)
 /// or from a URL to a local file.
 public struct FileMetadata: Equatable {
-
   /// Extract file metadata from an `NSMetadataItem`
   public init(metadataItem: NSMetadataItem) {
     self.contentChangeDate = metadataItem.value(
@@ -22,14 +21,14 @@ public struct FileMetadata: Equatable {
     )
     let nsStringArray = metadataItem.value(
       forAttribute: NSMetadataItemContentTypeTreeKey
-      ) as! [NSString]
+    ) as! [NSString]
     self.contentTypeTree = nsStringArray.map { String($0) }
     self.displayName = String(
       metadataItem.value(forAttribute: NSMetadataItemDisplayNameKey) as! NSString
     )
     self.downloadingStatus = String(metadataItem.value(
       forAttribute: NSMetadataUbiquitousItemDownloadingStatusKey
-      ) as! NSString)
+    ) as! NSString)
     let fileURL = metadataItem.value(forAttribute: NSMetadataItemURLKey) as! URL
     self.fileName = fileURL.lastPathComponent
     self.isDownloading = (metadataItem.value(

@@ -1,10 +1,9 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
 /// A synchronization primitive that asynchronously executes blocks when a condition is true.
 public final class Condition {
-
   /// Public access to the condition.
   ///
   /// It is safe to **set** the condition. If you set the condition true, then any previously
@@ -64,10 +63,10 @@ public final class Condition {
   /// Internal helper -- performs all queued work and clears the queue.
   /// Must be called on synchronizationQueue.
   private func performAndClearWorkQueue() {
-    for (queue, block) in self.workQueue {
+    for (queue, block) in workQueue {
       queue.async(execute: block)
     }
-    self.workQueue = []
+    workQueue = []
   }
 }
 

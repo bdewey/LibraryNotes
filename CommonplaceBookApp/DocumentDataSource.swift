@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import CommonplaceBook
@@ -80,12 +80,14 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
 
   fileprivate func updateCardsPerDocument() {
     let studySession = notebook.studySession()
-    self.cardsPerDocument = studySession
-      .reduce(into: [String: Int]()) { (cardsPerDocument, card) in
+    cardsPerDocument = studySession
+      .reduce(into: [String: Int]()) { cardsPerDocument, card in
         cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
       }
-    DDLogInfo("studySession.count = \(studySession.count). " +
-      "cardsPerDocument has \(cardsPerDocument.count) entries")
+    DDLogInfo(
+      "studySession.count = \(studySession.count). " +
+        "cardsPerDocument has \(cardsPerDocument.count) entries"
+    )
   }
 }
 

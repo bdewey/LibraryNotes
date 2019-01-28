@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -9,7 +9,6 @@ import TextBundleKit
 import enum TextBundleKit.Result
 
 final class PlainTextDocument: UIDocumentWithPreviousError {
-
   enum Error: Swift.Error {
     case internalInconsistency
     case couldNotOpenDocument
@@ -43,8 +42,8 @@ final class PlainTextDocument: UIDocumentWithPreviousError {
     guard
       let data = contents as? Data,
       let string = String(data: data, encoding: .utf8)
-      else {
-        throw Error.internalInconsistency
+    else {
+      throw Error.internalInconsistency
     }
     text = string
     textSignalInput.send(value: Tagged(tag: .document, value: text))
@@ -69,7 +68,6 @@ extension PlainTextDocument: EditableDocument {
 }
 
 extension PlainTextDocument {
-
   struct Factory: DocumentFactory {
     var useCloud: Bool = true
 
@@ -77,7 +75,7 @@ extension PlainTextDocument {
 
     func openDocument(at url: URL, completion: @escaping (Result<PlainTextDocument>) -> Void) {
       let document = PlainTextDocument(fileURL: url)
-      document.open { (success) in
+      document.open { success in
         if success {
           completion(.success(document))
         } else {
@@ -86,10 +84,10 @@ extension PlainTextDocument {
       }
     }
 
-    func merge(source: PlainTextDocument, destination: PlainTextDocument) { }
+    func merge(source: PlainTextDocument, destination: PlainTextDocument) {}
 
     func delete(_ document: PlainTextDocument) {
-      document.close { (_) in
+      document.close { _ in
         try? FileManager.default.removeItem(at: document.fileURL)
       }
     }

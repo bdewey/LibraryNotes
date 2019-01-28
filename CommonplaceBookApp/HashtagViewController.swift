@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBook
 import IGListKit
@@ -52,7 +52,7 @@ public final class HashtagViewController: UIViewController {
   public override func loadView() {
     let shadowView = ShadowView()
     shadowView.shadowElevation = .menu
-    self.view = shadowView
+    view = shadowView
   }
 
   public override func viewDidLoad() {
