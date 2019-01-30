@@ -26,6 +26,10 @@ final class TestEditableDocument: EditableDocument {
 
   let name: String
 
+  var fileURL: URL {
+    return URL(fileURLWithPath: name)
+  }
+
   /// The current text in the document.
   var text: String
 
@@ -61,6 +65,13 @@ final class TestEditableDocument: EditableDocument {
     completionHandler?(true)
   }
 
+  func revert(toContentsOf url: URL, completionHandler: ((Bool) -> Void)?) {
+    completionHandler?(true)
+  }
+
   /// Stub for holding what the error would be when opening the document, if we could have errors.
   var previousError: Error?
+
+  /// Stub for document state
+  let documentState =  UIDocument.State.normal
 }

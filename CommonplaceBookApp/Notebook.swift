@@ -57,6 +57,7 @@ public final class Notebook {
 
   deinit {
     openMetadocuments.forEach { $0.1.close(completionHandler: nil) }
+    observerTokens.forEach { NotificationCenter.default.removeObserver($0) }
   }
 
   /// Bag of arbitrary data keyed off of MetadocumentKey
@@ -113,6 +114,26 @@ public final class Notebook {
 
   /// Where we cache our properties.
   internal var openMetadocuments = [Key: EditableDocument]()
+
+  /// Any tokens created via NotificationCenter; removed in deinit
+  internal var observerTokens = [NSObjectProtocol]()
+
+  /// Creates an observer for the document state.
+  /// - parameter handler: A handler that gets called each time the document state changes.
+  /// - note: handler also gets called immediately to respond to the initial document state.
+  internal func observeDocumentState(
+    for editableDocument: EditableDocument,
+    handler: @escaping () -> Void
+  ) {
+    handler()
+    self.observerTokens += NotificationCenter.default.addObserver(
+      forName: UIDocument.stateChangedNotification,
+      object: editableDocument,
+      queue: OperationQueue.main
+    ) { (_) in
+      handler()
+    }
+  }
 
   internal struct WeakListener {
     weak var listener: NotebookChangeListener?

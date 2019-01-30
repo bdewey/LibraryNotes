@@ -94,6 +94,38 @@ extension Notebook {
     return self
   }
 
+  private func handleConflictIfNeeded(for propertiesDocument: EditableDocument) {
+    guard propertiesDocument.documentState.contains(.inConflict) else { return }
+    // For the properties document, we can just do pick-the-latest-version resolution.
+    // We should wind up automatically reconciling the cached properties with the real state.
+    DDLogInfo("Handling conflict for \(propertiesDocument.fileURL.lastPathComponent)")
+    let versions = NSFileVersion.unresolvedConflictVersionsOfItem(
+      at: propertiesDocument.fileURL
+      ) ?? []
+    if let latest = versions.max(by: { (version1, version2) -> Bool in
+      let date1 = version1.modificationDate ?? Date.distantPast
+      let date2 = version2.modificationDate ?? Date.distantPast
+      return date1 < date2
+    }) {
+      DDLogInfo("Winning version: \(String(describing: latest.localizedNameOfSavingComputer))")
+      do {
+        try latest.replaceItem(at: propertiesDocument.fileURL, options: [])
+        propertiesDocument.revert(
+          toContentsOf: propertiesDocument.fileURL,
+          completionHandler: nil
+        )
+        try NSFileVersion.removeOtherVersionsOfItem(at: propertiesDocument.fileURL)
+        for version in versions where version.isConflict {
+          version.isResolved = true
+          try version.remove()
+        }
+        DDLogInfo("Finished resolving document conflict")
+      } catch {
+        DDLogError("Unexpected error resolving conflict: \(error.localizedDescription)")
+      }
+    }
+  }
+
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
   private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument) {
@@ -110,6 +142,14 @@ extension Notebook {
         }
         self.conditionForKey(.pageProperties).condition = true
       })
+      if propertiesDocument.documentState.contains(.inConflict) {
+        DDLogInfo("In open completion handler, I see properties document is in conflict")
+      }
+      DispatchQueue.main.async {
+        self.observeDocumentState(for: propertiesDocument, handler: {
+          self.handleConflictIfNeeded(for: propertiesDocument)
+        })
+      }
     }
   }
 

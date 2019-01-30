@@ -49,6 +49,11 @@ extension Notebook {
           ?? NotebookStudyMetadata()
         self.conditionForKey(.studyMetadata).condition = true
       })
+      DispatchQueue.main.async {
+        self.observeDocumentState(for: studyMetadataDocument, handler: {
+          self.handleConflictIfNeeded(for: studyMetadataDocument)
+        })
+      }
     }
     renameBlocks[.studyMetadata] = { [weak self] oldName, newName in
       guard let self = self else { return }
@@ -58,6 +63,47 @@ extension Notebook {
       self.saveStudyMetadata(self.studyMetadata)
     }
     return self
+  }
+
+  private func handleConflictIfNeeded(for document: EditableDocument) {
+    guard document.documentState.contains(.inConflict) else { return }
+    let versions = NSFileVersion.unresolvedConflictVersionsOfItem(
+      at: document.fileURL
+    ) ?? []
+    DDLogInfo("Study metadata document has \(versions.count) conflicting version(s).")
+    let noComputer = "(no computer)"
+    DispatchQueue.global(qos: .default).async {
+      for version in versions {
+        DDLogDebug("\(version.isConflict) \(version.localizedNameOfSavingComputer ?? noComputer) \(String(describing: version.modificationDate))")
+        if let contents = try? Data(contentsOf: version.url),
+          let versionMetadata = try? metadataDecoder.decode(
+            NotebookStudyMetadata.self,
+            from: contents
+          ) {
+          DDLogInfo("Loaded conflicting study metadata; merging into existing data")
+          DispatchQueue.main.async {
+            self.mergeConflictingMetadata(versionMetadata)
+          }
+          version.isResolved = true
+          try? version.remove()
+        } else {
+          DDLogError("Unable to load conflicting metadata for \(version.localizedNameOfSavingComputer ?? noComputer)")
+        }
+      }
+    }
+  }
+
+  private func mergeConflictingMetadata(_ conflictingMetadata: NotebookStudyMetadata) {
+    assert(Thread.isMainThread)
+    let merged = studyMetadata.merging(conflictingMetadata) { (originalDocument, conflictingDocument) -> [String : StudyMetadata] in
+      return originalDocument.merging(conflictingDocument, uniquingKeysWith: { (originalMetadata, conflictingMetadata) -> StudyMetadata in
+        if originalMetadata.day >= conflictingMetadata.day { return originalMetadata }
+        DDLogInfo("Conflict! \(conflictingDocument) \(originalMetadata.day) \(conflictingMetadata.day)")
+        return conflictingMetadata
+      })
+    }
+    studyMetadata = merged
+    saveStudyMetadata(merged)
   }
 
   /// Saves notebook study metadata to disk.
