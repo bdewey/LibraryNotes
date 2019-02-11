@@ -122,7 +122,7 @@ final class TextEditViewController: UIViewController,
       let replacement = listItem.listType == .unordered
         ? "\u{2022}\t"
         : text.replacingOccurrences(of: " ", with: "\t")
-      return NSAttributedString(string: replacement, attributes: attributes.attributes)
+      return NSAttributedString(string: replacement, attributes: attributes)
     }
     renderers[.delimiter] = { node, attributes in
       var text = String(node.slice.substring)
@@ -131,7 +131,7 @@ final class TextEditViewController: UIViewController,
       }
       return NSAttributedString(
         string: text,
-        attributes: attributes.attributes
+        attributes: attributes
       )
     }
     return renderers
@@ -148,13 +148,7 @@ final class TextEditViewController: UIViewController,
       formatters: formatters,
       renderers: renderers
     )
-    textStorage.defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme.body2
-    )
-    textStorage.defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
-    textStorage.defaultAttributes.color = stylesheet.colors
-      .onSurfaceColor
-      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    textStorage.defaultAttributes = stylesheet.attributes(style: .body2)
     textStorage.defaultAttributes.headIndent = 28
     textStorage.defaultAttributes.firstLineHeadIndent = 28
     return textStorage

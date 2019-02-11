@@ -20,13 +20,7 @@ extension MiniMarkdownTextStorage {
       formatters: formatters,
       renderers: renderers
     )
-    defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme.body2
-    )
-    defaultAttributes.kern = stylesheet.kern[.body2] ?? 1.0
-    defaultAttributes.color = stylesheet.colors
-      .onSurfaceColor
-      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    defaultAttributes = stylesheet.attributes(style: .body2)
   }
 
   internal var markdownSignal: Signal<[Node]> {

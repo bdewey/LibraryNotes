@@ -34,9 +34,7 @@ public final class DocumentSectionController: ListSectionController {
       formatters: formatters,
       renderers: renderers
     )
-    renderer.defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme.subtitle1
-    )
+    renderer.defaultAttributes = stylesheet.attributes(style: .subtitle1)
     return renderer
   }()
 
