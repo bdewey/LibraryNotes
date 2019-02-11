@@ -25,7 +25,7 @@ public struct PageProperties: Codable {
   /// Title with all markdown characters removed
   public var plainTextTitle: String {
     return PageProperties.parsingRules.parse(title).reduce(into: "") { string, node in
-      string.append(MarkdownStringRenderer.textOnly.render(node: node))
+      string.append(MarkdownAttributedStringRenderer.textOnly.render(node: node).string)
     }
   }
 
