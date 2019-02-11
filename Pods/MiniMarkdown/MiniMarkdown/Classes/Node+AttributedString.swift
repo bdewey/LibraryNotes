@@ -19,7 +19,6 @@ import Foundation
 
 /// Defines the location of this node in a Markdown document.
 public struct LocationPair {
-
   /// The location of this node in the Markdown string.
   public var markdown: Int
 

@@ -24,20 +24,18 @@ extension NodeType {
 
 /// Emphasis: https://spec.commonmark.org/0.28/#emphasis-and-strong-emphasis
 public final class Emphasis: DelimitedText, CharacterParseable {
-
   public init(delimitedSlice: DelimitedSlice) {
     super.init(type: .emphasis, delimitedSlice: delimitedSlice)
   }
 
   public static let parser = Emphasis.init <^> (
     CharacterParsers.slice(delimitedBy: "_") ||
-    CharacterParsers.slice(delimitedBy: "*")
+      CharacterParsers.slice(delimitedBy: "*")
   )
 }
 
 /// Strong emphasis: https://spec.commonmark.org/0.28/#emphasis-and-strong-emphasis
 public final class StrongEmphasis: DelimitedText, CharacterParseable {
-
   public init(slice: DelimitedSlice) {
     super.init(type: .bold, delimitedSlice: slice)
   }

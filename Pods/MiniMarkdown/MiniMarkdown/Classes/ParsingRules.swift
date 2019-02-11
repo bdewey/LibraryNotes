@@ -19,9 +19,8 @@ import Foundation
 
 /// This structure encapsulates how to parse a MiniMarkdown document.
 public struct ParsingRules {
-
   // Does nothing; just allows public construction.
-  public init() { }
+  public init() {}
 
   /// An ordered list of block-level parsers.
   ///
@@ -32,8 +31,8 @@ public struct ParsingRules {
     Table.nodeParser,
     BlockQuote.nodeParser,
     BlankLine.nodeParser,
-    Paragraph.nodeParser
-    ])
+    Paragraph.nodeParser,
+  ])
 
   /// An ordered list of inline parsers.
   ///
@@ -43,8 +42,8 @@ public struct ParsingRules {
     StrongEmphasis.nodeParser,
     Image.nodeParser,
     Hashtag.nodeParser,
-    Text.nodeParser
-    ])
+    Text.nodeParser,
+  ])
 
   /// Parses a sequence of lines for block structures.
   public func parse(_ lines: ArraySlice<StringSlice>) -> [Node] {
@@ -64,7 +63,7 @@ public struct ParsingRules {
   }
 
   public func parse(_ markdown: String) -> [Node] {
-    let results = self.parse(ArraySlice(LineSequence(markdown)))
+    let results = parse(ArraySlice(LineSequence(markdown)))
     assert(results.allMarkdown == markdown)
     return results
   }

@@ -24,7 +24,7 @@ extension RenderedMarkdown {
       }
       return NSAttributedString(
         string: String(cloze.hiddenText),
-        attributes: attributes.attributes
+        attributes: attributes
       )
     }
     self.init(
@@ -32,10 +32,31 @@ extension RenderedMarkdown {
       formatters: formatters,
       renderers: renderers
     )
-    defaultAttributes = NSAttributedString.Attributes(
-      stylesheet.typographyScheme[style]
-    )
-    defaultAttributes.kern = stylesheet.kern[style] ?? 1.0
-    defaultAttributes.alignment = .left
+    defaultAttributes = stylesheet.attributes(style: style)
+    defaultAttributes.lineHeightMultiple = 1.2
+  }
+}
+
+extension MarkdownAttributedStringRenderer {
+  public init(
+    stylesheet: Stylesheet,
+    style: Stylesheet.Style
+  ) {
+    self.init()
+    formattingFunctions[.emphasis] = { $1.italic = true }
+    formattingFunctions[.bold] = { $1.bold = true }
+    renderFunctions[.delimiter] = { _, _ in NSAttributedString() }
+    renderFunctions[.cloze] = { node, attributes in
+      guard let cloze = node as? Cloze else {
+        assertionFailure()
+        return NSAttributedString()
+      }
+      return NSAttributedString(
+        string: String(cloze.hiddenText),
+        attributes: attributes
+      )
+    }
+    defaultAttributes = stylesheet.attributes(style: style)
+    defaultAttributes.lineHeightMultiple = 1.2
   }
 }

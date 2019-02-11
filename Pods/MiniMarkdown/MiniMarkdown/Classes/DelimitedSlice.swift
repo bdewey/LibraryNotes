@@ -19,7 +19,6 @@ import Foundation
 
 /// A slice flanked by optional left and right delimiters.
 public struct DelimitedSlice {
-
   public init(
     leftDelimiter: Delimiter,
     slice: StringSlice?,

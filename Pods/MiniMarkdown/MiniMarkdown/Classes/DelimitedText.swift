@@ -19,7 +19,6 @@ import Foundation
 
 /// A node that consists of a left delimiter, a right delimiter, and optional text in between.
 public class DelimitedText: Node {
-
   public init(type: NodeType, delimitedSlice: DelimitedSlice) {
     self.memoizedChildren = delimitedSlice.nodes
     let slice = delimitedSlice.completeSlice
@@ -52,4 +51,3 @@ extension DelimitedSlice {
     }
   }
 }
-

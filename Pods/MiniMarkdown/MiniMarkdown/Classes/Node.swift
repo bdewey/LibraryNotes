@@ -27,7 +27,6 @@ public struct NodeType: Hashable, RawRepresentable {
 
 /// Nodes demark parts of the input stream.
 open class Node: Combinable {
-
   /// Extensible Key type for node properties.
   public struct Key: Hashable, RawRepresentable {
     public let rawValue: String
@@ -122,13 +121,12 @@ extension Node: CustomReflectable {
         "markdown": markdown,
         "properties": properties,
         "children": children,
-        ]
+      ]
     )
   }
 }
 
 extension Node {
-
   /// Returns all nodes in the tree that pass `predicate`.
   public func findNodes(where predicate: (Node) -> Bool) -> [Node] {
     var results = Array(children.map { $0.findNodes(where: predicate) }.joined())
@@ -141,15 +139,13 @@ extension Node {
   /// Returns the first node on the path from the current node to its root that passes `predicate`.
   public func findFirstAncestor(where predicate: (Node) -> Bool) -> Node? {
     if predicate(self) { return self }
-    return self.parent?.findFirstAncestor(where: predicate)
+    return parent?.findFirstAncestor(where: predicate)
   }
 }
 
 /// Does a preorder traversal of the tree of nodes.
 extension Node: Sequence {
-
   public struct Iterator: IteratorProtocol {
-
     /// The *next* node.
     var node: Node?
 
@@ -174,6 +170,6 @@ extension Node: Sequence {
 
 extension Sequence where Element == Node {
   public var allMarkdown: String {
-    return self.map({ $0.allMarkdown }).reduce(into: "", { $0 += $1 })
+    return map({ $0.allMarkdown }).reduce(into: "", { $0 += $1 })
   }
 }

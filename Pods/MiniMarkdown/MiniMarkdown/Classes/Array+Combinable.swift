@@ -19,7 +19,6 @@ import Foundation
 
 /// Represents structures that are potentially combinable.
 public protocol Combinable {
-
   /// If possible, combine one structure with another.
   ///
   /// - parameter other: The other structure to combine with.
@@ -29,7 +28,6 @@ public protocol Combinable {
 }
 
 extension Array where Element: Combinable {
-
   /// Combine sequential elements in array where possible.
   ///
   /// - returns: A new array where any sequential run

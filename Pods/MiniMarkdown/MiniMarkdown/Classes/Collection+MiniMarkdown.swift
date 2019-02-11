@@ -18,9 +18,8 @@
 import Foundation
 
 public extension Collection {
-
   /// A range that emcompasses the entire collection.
   public var completeRange: Range<Index> {
-    return self.startIndex ..< self.endIndex
+    return startIndex ..< endIndex
   }
 }

@@ -19,7 +19,6 @@ import MiniMarkdown
 import XCTest
 
 final class MiniMarkdownRendererTests: XCTestCase {
-
   private static let formatters: [NodeType: RenderedMarkdown.FormattingFunction] = {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.heading] = { $1.fontSize = 24 }
@@ -31,10 +30,10 @@ final class MiniMarkdownRendererTests: XCTestCase {
 
   private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { (_, attributes) in
-      return NSAttributedString(string: "*\t", attributes: attributes.attributes)
+    renderers[.listItem] = { _, attributes in
+      NSAttributedString(string: "*\t", attributes: attributes)
     }
-    renderers[.image] = { (_, _) in
+    renderers[.image] = { _, _ in
       let attachment = NSTextAttachment()
       return NSAttributedString(attachment: attachment)
     }
@@ -49,16 +48,16 @@ final class MiniMarkdownRendererTests: XCTestCase {
 
   func testRenderWholeEnchilada() {
     let text = """
-# Heading
+    # Heading
 
-This is text with *emphasis* and **bold.**
+    This is text with *emphasis* and **bold.**
 
-- I have a list
-- With multiple items
+    - I have a list
+    - With multiple items
 
-And now I have text with an inline image ![alt text](assets/image.png) and **more stuff.**
+    And now I have text with an inline image ![alt text](assets/image.png) and **more stuff.**
 
-"""
+    """
 
     renderedMarkdown.markdown = text
     XCTAssertEqual(renderedMarkdown.markdown, text)
@@ -77,18 +76,18 @@ And now I have text with an inline image ![alt text](assets/image.png) and **mor
 
   func testRenderWithNestedLists() {
     let text = """
-* This is the first list item.
-  This is part of the same paragraph.
+    * This is the first list item.
+      This is part of the same paragraph.
 
-  This is a new paragraph that is part of the list item.
+      This is a new paragraph that is part of the list item.
 
-* This is the second list item in the same list.
+    * This is the second list item in the same list.
 
-  1. A nested ordered list.
-  2. With multiple items.
+      1. A nested ordered list.
+      2. With multiple items.
 
-And back to a normal paragraph outside the list.
-"""
+    And back to a normal paragraph outside the list.
+    """
 
     renderedMarkdown.markdown = text
     XCTAssertEqual(renderedMarkdown.markdown, text)
@@ -142,10 +141,10 @@ And back to a normal paragraph outside the list.
 
   func testEditFirstParagraph() {
     let text = """
-First paragraph.
+    First paragraph.
 
-Second paragraph.
-"""
+    Second paragraph.
+    """
     renderedMarkdown.markdown = text
     let replaceRange = NSRange(location: 0, length: 5)
     let range = renderedMarkdown.replaceCharacters(
@@ -160,10 +159,10 @@ Second paragraph.
 
   func testEditSecondParagraph() {
     let text = """
-First paragraph with image: ![alt text](assets/image.png).
+    First paragraph with image: ![alt text](assets/image.png).
 
-Second paragraph.
-"""
+    Second paragraph.
+    """
     renderedMarkdown.markdown = text
     let renderedString = renderedMarkdown.attributedString.string
     let replaceRange = NSRange(renderedString.range(of: "Second")!, in: renderedString)
@@ -179,36 +178,36 @@ Second paragraph.
 
   func testEditsCanCombineParagraphs() {
     let text = """
-First paragraph with image: ![alt text](assets/image.png).
+    First paragraph with image: ![alt text](assets/image.png).
 
-Second paragraph.
-"""
+    Second paragraph.
+    """
     renderedMarkdown.markdown = text
     let renderedString = renderedMarkdown.attributedString.string
     let paragraphBoundary = NSRange(renderedString.range(of: "\n\n")!, in: renderedString)
     let range = renderedMarkdown.replaceCharacters(in: paragraphBoundary, with: "\n")
     let expectedText = """
-First paragraph with image: ![alt text](assets/image.png).
-Second paragraph.
-"""
+    First paragraph with image: ![alt text](assets/image.png).
+    Second paragraph.
+    """
     XCTAssertEqual(renderedMarkdown.markdown, expectedText)
     XCTAssertEqual(range.changedAttributesRange, NSRange(location: 0, length: 48))
   }
 
   func testEditsCanSplitParagraphs() {
     let text = """
-First paragraph with image: ![alt text](assets/image.png).
-Second paragraph.
-"""
+    First paragraph with image: ![alt text](assets/image.png).
+    Second paragraph.
+    """
     renderedMarkdown.markdown = text
     let renderedString = renderedMarkdown.attributedString.string
     let paragraphBoundary = NSRange(renderedString.range(of: "\n")!, in: renderedString)
     let range = renderedMarkdown.replaceCharacters(in: paragraphBoundary, with: "\n\n")
     let expectedText = """
-First paragraph with image: ![alt text](assets/image.png).
+    First paragraph with image: ![alt text](assets/image.png).
 
-Second paragraph.
-"""
+    Second paragraph.
+    """
     XCTAssertEqual(renderedMarkdown.markdown, expectedText)
     XCTAssertEqual(range.changedAttributesRange, NSRange(location: 0, length: 49))
   }
@@ -250,7 +249,6 @@ Second paragraph.
     XCTAssertEqual(NSRange(location: 0, length: 8), range.changedAttributesRange)
   }
 
-
   func testCompleteTheImageSequence() {
     renderedMarkdown.markdown = "![alt text](assets/image.png)"
     XCTAssertEqual(renderedMarkdown.attributedString.string.count, 1)
@@ -271,6 +269,6 @@ extension RenderedMarkdown {
   func expectedAttributes(for nodeType: NodeType) -> [NSAttributedString.Key: Any] {
     var attributes = defaultAttributes
     formatters[nodeType]?(Node(type: nodeType, slice: StringSlice("")), &attributes)
-    return attributes.attributes
+    return attributes
   }
 }

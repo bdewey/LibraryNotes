@@ -19,7 +19,6 @@ import Foundation
 
 /// A type that can be parsed from an input stream of lines.
 public protocol LineParseable {
-
   /// Input stream: A sequence of lines.
   typealias Stream = ArraySlice<StringSlice>
 
@@ -28,7 +27,6 @@ public protocol LineParseable {
 }
 
 extension LineParseable where Self: Node {
-
   /// Type-erasing: For nodes that are BlockParseable, have a parser that just
   /// parses a MiniMarkdownNode instead of the specific type.
   public static var nodeParser: Parser<Node, Stream> {

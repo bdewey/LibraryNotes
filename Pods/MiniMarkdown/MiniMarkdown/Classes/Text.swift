@@ -23,7 +23,6 @@ extension NodeType {
 
 /// Plain text: https://spec.commonmark.org/0.28/#textual-content
 public final class Text: Node, CharacterParseable {
-
   public init(slice: StringSlice) {
     super.init(type: .text, slice: slice, markdown: String(slice.substring))
   }

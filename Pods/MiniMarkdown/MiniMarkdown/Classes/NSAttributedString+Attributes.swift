@@ -18,138 +18,206 @@
 import CocoaLumberjack
 import UIKit
 
-extension Dictionary where Key == NSAttributedString.Key {
-  public var font: UIFont? {
-    return self[.font] as? UIFont
+public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
+
+/// Convenience extensions for working with an NSAttributedString attributes dictionary.
+extension Dictionary where Key == NSAttributedString.Key, Value == Any {
+  /// The font attribute.
+  public var font: UIFont {
+    get { return (self[.font] as? UIFont) ?? UIFont.preferredFont(forTextStyle: .body) }
+    set { self[.font] = newValue }
   }
-}
 
-public extension NSAttributedString {
-
-  /// An abstract description of NSAttributedString attributes.
-  public struct Attributes {
-
-    /// The family name of the NSAttributedStringKey.font attribute.
-    public var familyName: String
-
-    /// If true, use a bold variant of the font.
-    public var bold: Bool
-
-    /// If true, use an italic variant of the font.
-    public var italic: Bool
-
-    /// The desired font size.
-    public var fontSize: CGFloat
-
-    /// Desired letter spacing.
-    public var kern: CGFloat = 0
-
-    /// The value for NSAttributedStringKey.color. If nil, this attribute will not
-    /// be present.
-    public var color: UIColor?
-
-    /// The value for NSAttributedStringKey.backgroundColor. If nil, the attribute
-    /// will not be present.
-    public var backgroundColor: UIColor?
-
-    /// If true, create a tab stop and appropriate indentation for the "hanging indent" of a list.
-    public var listLevel = 0
-
-    public var headIndent: CGFloat = 0
-
-    public var tailIndent: CGFloat = 0
-
-    public var firstLineHeadIndent: CGFloat = 0
-
-    public var alignment: NSTextAlignment?
-
-    public var lineHeightMultiple: CGFloat? = 1.2
-
-    /// Initializer.
-    /// - parameter font: The UIFont that determines the base values of this set of attributes.
-    public init(_ font: UIFont) {
-      self.color = nil
-      self.familyName = font.familyName
-      self.fontSize = font.pointSize
-      let fontDescriptor = font.fontDescriptor
-      self.italic = fontDescriptor.symbolicTraits.contains(.traitItalic)
-      self.bold = fontDescriptor.symbolicTraits.contains(.traitBold)
+  /// the font family name
+  public var familyName: String {
+    get {
+      return font.familyName
     }
+    set {
+      font = UIFont(descriptor: font.fontDescriptor.withFamily(newValue), size: 0)
+    }
+  }
 
-    public static let keys: [NSAttributedString.Key] = [
-      .foregroundColor,
-      .font,
-      .paragraphStyle
-    ]
+  public var fontSize: CGFloat {
+    get {
+      return font.pointSize
+    }
+    set {
+      font = UIFont(descriptor: font.fontDescriptor.withSize(newValue), size: 0)
+    }
+  }
 
-    /// An NSAttributedString attributes dictionary based on the values of the structure.
-    public var attributes: [NSAttributedString.Key: Any] {
-      var result: [NSAttributedString.Key: Any] = [:]
-      if let color = self.color {
-        result[.foregroundColor] = color
-      }
-      if let backgroundColor = backgroundColor {
-        result[.backgroundColor] = backgroundColor
-      }
-      var traits = UIFontDescriptor.SymbolicTraits()
-      if italic {
-        traits.formUnion(.traitItalic)
-      }
-      if bold {
-        traits.formUnion(.traitBold)
-      }
-      let baseDescriptor = UIFontDescriptor(name: familyName, size: fontSize)
-      if let descriptor = baseDescriptor.withSymbolicTraits(traits) {
-        result[.font] = UIFont(descriptor: descriptor, size: 0)
+  /// Text foreground color.
+  public var color: UIColor? {
+    get { return self[.foregroundColor] as? UIColor }
+    set { self[.foregroundColor] = newValue }
+  }
+
+  /// Text background color.
+  public var backgroundColor: UIColor? {
+    get { return self[.backgroundColor] as? UIColor }
+    set { self[.backgroundColor] = newValue }
+  }
+
+  /// Desired letter spacing.
+  public var kern: CGFloat {
+    get { return self[.kern] as? CGFloat ?? 0 }
+    set { self[.kern] = newValue }
+  }
+
+  /// Whether the font is bold.
+  public var bold: Bool {
+    get { return containsSymbolicTrait(.traitBold) }
+    set {
+      if newValue {
+        symbolicTraitFormUnion(.traitBold)
       } else {
-        DDLogWarn("Couldn't find a font with traits for \(familyName), size = \(fontSize), traits = \(traits)")
-        result[.font] = UIFont(descriptor: baseDescriptor, size: 0)
+        symbolicTraitSubtract(.traitBold)
       }
-      if kern != 0 {
-        result[.kern] = kern
+    }
+  }
+
+  /// Whether the font is italic.
+  public var italic: Bool {
+    get { return containsSymbolicTrait(.traitItalic) }
+    set {
+      if newValue {
+        symbolicTraitFormUnion(.traitItalic)
+      } else {
+        symbolicTraitSubtract(.traitItalic)
       }
-      var didCustomizeParagraphStyle = false
-      let paragraphStyle = NSMutableParagraphStyle()
-      if let lineHeightMultiple = lineHeightMultiple {
-        paragraphStyle.lineHeightMultiple = lineHeightMultiple
-        didCustomizeParagraphStyle = true
+    }
+  }
+
+  /// Tests if the font contains a given symbolic trait.
+  public func containsSymbolicTrait(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) -> Bool {
+    return font.fontDescriptor.symbolicTraits.contains(symbolicTrait)
+  }
+
+  /// Sets a symbolic trait.
+  public mutating func symbolicTraitFormUnion(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
+    symbolicTraits = font.fontDescriptor.symbolicTraits.union(symbolicTrait)
+  }
+
+  /// Clears a symbolic trait.
+  public mutating func symbolicTraitSubtract(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
+    symbolicTraits = font.fontDescriptor.symbolicTraits.subtracting(symbolicTrait)
+  }
+
+  /// The symbolic traits for the font. Can be nil if there is no font.
+  /// Attempts to set the symbolic traits to nil will be ignored.
+  public var symbolicTraits: UIFontDescriptor.SymbolicTraits {
+    get {
+      return font.fontDescriptor.symbolicTraits
+    }
+    set {
+      guard let descriptor = font.fontDescriptor.withSymbolicTraits(newValue)
+        else {
+          DDLogError("Unable to set \(String(describing: newValue)) on font: \(String(describing: font))")
+          return
       }
-      if headIndent != 0 {
-        paragraphStyle.headIndent = headIndent
-        didCustomizeParagraphStyle = true
-      }
-      if tailIndent != 0 {
-        paragraphStyle.tailIndent = tailIndent
-        didCustomizeParagraphStyle = true
-      }
-      if firstLineHeadIndent != 0 {
-        paragraphStyle.firstLineHeadIndent = firstLineHeadIndent
-        didCustomizeParagraphStyle = true
-      }
-      if let alignment = alignment {
-        paragraphStyle.alignment = alignment
-        didCustomizeParagraphStyle = true
-      }
+      font = UIFont(descriptor: descriptor, size: 0)
+    }
+  }
+
+  public var paragraphStyle: NSParagraphStyle? {
+    get { return self[.paragraphStyle] as? NSParagraphStyle }
+    set { self[.paragraphStyle] = newValue }
+  }
+
+  private var mutableParagraphStyle: NSMutableParagraphStyle {
+    if let paragraphStyle = paragraphStyle {
+      // swiftlint:disable:next force_cast
+      return paragraphStyle.mutableCopy() as! NSMutableParagraphStyle
+    } else {
+      return NSMutableParagraphStyle()
+    }
+  }
+
+  public var headIndent: CGFloat {
+    get { return paragraphStyle?.headIndent ?? 0 }
+    set {
+      let style = mutableParagraphStyle
+      style.headIndent = newValue
+      paragraphStyle = style
+    }
+  }
+
+  public var tailIndent: CGFloat {
+    get { return paragraphStyle?.tailIndent ?? 0 }
+    set {
+      let style = mutableParagraphStyle
+      style.tailIndent = newValue
+      paragraphStyle = style
+    }
+  }
+
+  public var firstLineHeadIndent: CGFloat {
+    get { return paragraphStyle?.firstLineHeadIndent ?? 0 }
+    set {
+      let style = mutableParagraphStyle
+      style.firstLineHeadIndent = newValue
+      paragraphStyle = style
+    }
+  }
+
+  public var alignment: NSTextAlignment {
+    get { return paragraphStyle?.alignment ?? NSParagraphStyle.default.alignment }
+    set {
+      let style = mutableParagraphStyle
+      style.alignment = newValue
+      paragraphStyle = style
+    }
+  }
+
+  public var lineHeightMultiple: CGFloat {
+    get { return paragraphStyle?.lineHeightMultiple ?? 0 }
+    set {
+      let style = mutableParagraphStyle
+      style.lineHeightMultiple = newValue
+      paragraphStyle = style
+    }
+  }
+
+
+  public var listLevel: Int {
+    get { return self[.listLevel] as? Int ?? 0 }
+    set {
+      self[.listLevel] = newValue
+      let indentAmountPerLevel: CGFloat = headIndent > 0 ? headIndent : 16
+      let listStyling = mutableParagraphStyle
       if listLevel > 0 {
-        let indentAmountPerLevel: CGFloat = headIndent > 0 ? headIndent : 16
-        paragraphStyle.headIndent = indentAmountPerLevel * CGFloat(listLevel)
-        paragraphStyle.firstLineHeadIndent = indentAmountPerLevel * CGFloat(listLevel - 1)
+        listStyling.headIndent = indentAmountPerLevel * CGFloat(listLevel)
+        listStyling.firstLineHeadIndent = indentAmountPerLevel * CGFloat(listLevel - 1)
         var tabStops: [NSTextTab] = []
         for i in 0 ..< 4 {
           let listTab = NSTextTab(
             textAlignment: .natural,
-            location: paragraphStyle.headIndent + CGFloat(i) * indentAmountPerLevel,
+            location: listStyling.headIndent + CGFloat(i) * indentAmountPerLevel,
             options: [:]
           )
           tabStops.append(listTab)
         }
-        paragraphStyle.tabStops = tabStops
-        didCustomizeParagraphStyle = true
+        listStyling.tabStops = tabStops
+      } else {
+        listStyling.headIndent = 0
+        listStyling.firstLineHeadIndent = 0
+        listStyling.tabStops = []
       }
-      if didCustomizeParagraphStyle {
-        result[.paragraphStyle] = paragraphStyle
-      }
-      return result
+      paragraphStyle = listStyling
     }
+  }
+}
+
+extension NSAttributedString.Key {
+  fileprivate static let listLevel = NSAttributedString.Key(rawValue: "org.brians-brain.list-level")
+}
+
+extension UIFont {
+  public var attributesDictionary: [NSAttributedString.Key: Any] {
+    var attributes = [NSAttributedString.Key: Any]()
+    attributes.font = self
+    attributes.lineHeightMultiple = 1.2
+    return attributes
   }
 }

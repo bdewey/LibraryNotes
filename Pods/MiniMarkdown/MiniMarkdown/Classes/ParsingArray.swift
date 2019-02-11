@@ -20,7 +20,6 @@ import Foundation
 /// An ordered array of parsers, where each parser operates on the same kind of input stream
 /// (e.g., characters or lines).
 public struct ParsingArray<Stream: Collection> where Stream.SubSequence == Stream {
-
   public typealias ChunkParser = Parser<Node, Stream>
   public var parsers: [ChunkParser]
 

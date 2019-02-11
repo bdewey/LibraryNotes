@@ -35,9 +35,7 @@ public struct LineSequence {
 }
 
 extension LineSequence: Sequence {
-
   public struct Iterator: IteratorProtocol {
-
     /// The string that we are iterating through.
     private let slice: StringSlice
 
@@ -52,8 +50,8 @@ extension LineSequence: Sequence {
     public mutating func next() -> StringSlice? {
       guard index < slice.range.upperBound else { return nil }
       let savedIndex = index
-      self.index = nextIndex
-      return StringSlice(string: slice.string, range: savedIndex ..< self.index)
+      index = nextIndex
+      return StringSlice(string: slice.string, range: savedIndex ..< index)
     }
 
     /// Computes the next position of `index`
@@ -67,12 +65,11 @@ extension LineSequence: Sequence {
   }
 
   public func makeIterator() -> Iterator {
-    return Iterator(slice: self.slice, index: self.slice.range.lowerBound)
+    return Iterator(slice: slice, index: slice.range.lowerBound)
   }
 }
 
 extension LineSequence {
-
   public var decomposed: (StringSlice, LineSequence)? {
     var iterator = makeIterator()
     guard let firstLine = iterator.next() else { return nil }

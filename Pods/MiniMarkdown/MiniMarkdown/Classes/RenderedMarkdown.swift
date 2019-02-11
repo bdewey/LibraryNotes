@@ -18,8 +18,8 @@
 import Foundation
 
 public final class RenderedMarkdown {
-  public typealias FormattingFunction = (Node, inout NSAttributedString.Attributes) -> Void
-  public typealias RenderFunction = (Node, NSAttributedString.Attributes) -> NSAttributedString
+  public typealias FormattingFunction = (Node, inout AttributedStringAttributes) -> Void
+  public typealias RenderFunction = (Node, AttributedStringAttributes) -> NSAttributedString
 
   public struct ChangeDescription {
     public let changedCharacterRange: NSRange
@@ -47,9 +47,7 @@ public final class RenderedMarkdown {
   /// and each top-level block will be a node in this array.
   internal var nodes: [Node] = []
 
-  public var defaultAttributes = NSAttributedString.Attributes(
-    UIFont.preferredFont(forTextStyle: .body)
-  )
+  public var defaultAttributes = UIFont.preferredFont(forTextStyle: .body).attributesDictionary
 
   /// The raw markdown
   public var markdown: String {
@@ -114,7 +112,7 @@ public final class RenderedMarkdown {
     let markdownRange = Range(
       self.markdownRange(for: range, relativeTo: nodesToReplace.first),
       in: markdown
-      )!
+    )!
     markdown.replaceSubrange(markdownRange, with: characters)
     let (replacementNodes, _) = nodes(for: markdown)
     assert(
@@ -208,12 +206,12 @@ public final class RenderedMarkdown {
 
   private func render(
     node: Node,
-    attributes: NSAttributedString.Attributes
+    attributes: AttributedStringAttributes
   ) {
     var attributes = attributes
     formatters[node.type]?(node, &attributes)
-    let defaultRenderFunction: RenderFunction = { (node, attributes) in
-      NSAttributedString(string: node.markdown, attributes: attributes.attributes)
+    let defaultRenderFunction: RenderFunction = { node, attributes in
+      NSAttributedString(string: node.markdown, attributes: attributes)
     }
     let renderFunction = renderers[node.type] ?? defaultRenderFunction
     node.attributedString = renderFunction(node, attributes)
@@ -237,7 +235,7 @@ extension NSRange {
 extension StringProtocol where SubSequence == Substring {
   func changedRange<S: StringProtocol>(from other: S) -> NSRange {
     let prefix = commonPrefix(with: other)
-    let suffix = String(self.dropFirst(prefix.count).reversed()).commonPrefix(
+    let suffix = String(dropFirst(prefix.count).reversed()).commonPrefix(
       with: String(other.dropFirst(prefix.count).reversed())
     )
     let lowerBound = index(startIndex, offsetBy: prefix.count)
@@ -248,8 +246,7 @@ extension StringProtocol where SubSequence == Substring {
 
 extension Sequence where Element == Node {
   var allRenderedResults: NSAttributedString {
-    return self
-      .map { $0.attributedString }
+    return map { $0.attributedString }
       .reduce(into: NSMutableAttributedString(), { $0.append($1) })
   }
 }

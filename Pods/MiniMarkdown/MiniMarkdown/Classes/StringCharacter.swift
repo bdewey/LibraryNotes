@@ -21,7 +21,6 @@ import Foundation
 /// By remembering the string and the index, StringCharacter structures can be efficiently
 /// built up into StringSlice structures.
 public struct StringCharacter {
-
   /// The underlying string.
   public let string: String
 
@@ -45,7 +44,7 @@ public struct StringCharacter {
   /// Adds two string characters, returning a StringSlice.
   /// - precondition: The characters must be from the same string and come sequentially
   ///                 in the string with no gaps.
-  static public func + (lhs: StringCharacter, rhs: StringCharacter) -> StringSlice {
+  public static func + (lhs: StringCharacter, rhs: StringCharacter) -> StringSlice {
     return StringSlice(lhs) + StringSlice(rhs)
   }
 }

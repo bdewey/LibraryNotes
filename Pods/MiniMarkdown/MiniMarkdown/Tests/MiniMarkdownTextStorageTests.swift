@@ -1,4 +1,19 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import XCTest
 
@@ -15,9 +30,9 @@ fileprivate enum TextOperation {
 
   func apply(to textStorage: NSTextStorage) {
     switch self {
-    case let .append(text: str):
+    case .append(let str):
       textStorage.append(NSAttributedString(string: str))
-    case let .replace(range: range, replacement: replacement):
+    case .replace(let range, let replacement):
       textStorage.replaceCharacters(in: range, with: replacement)
     }
   }
@@ -32,10 +47,10 @@ fileprivate extension MiniMarkdownTextStorage {
     formatters[.emphasis] = { $1.italic = true }
 
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { (_, attributes) in
-      return NSAttributedString(string: "\u{2022}\t", attributes: attributes.attributes)
+    renderers[.listItem] = { _, attributes in
+      NSAttributedString(string: "\u{2022}\t", attributes: attributes)
     }
-    renderers[.image] = { (_, attributes) in
+    renderers[.image] = { _, _ in
       let attachment = NSTextAttachment()
       return NSAttributedString(attachment: attachment)
     }
@@ -49,7 +64,6 @@ fileprivate extension MiniMarkdownTextStorage {
 }
 
 final class MiniMarkdownTextStorageTests: XCTestCase {
-  
   var textStorage: MiniMarkdownTextStorage!
 
   override func setUp() {
@@ -96,7 +110,7 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     )
     XCTAssertEqual(miniMarkdownTextStorage.string, plainTextStorage.string)
   }
-  
+
   func testPlainTextHasPlainAttributes() {
     MiniMarkdownTextStorageTests.validateDelegateMessagesMatch(for: [.append(text: "Plain text")])
   }
@@ -163,18 +177,18 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
     XCTAssertEqual(actualFont, expectedFont)
     XCTAssertEqual(range, NSRange(location: 0, length: 9))
   }
-  
+
   func testDeleteHashAndNowPlainText() {
     textStorage.append(NSAttributedString(string: "# Heading"))
     textStorage.deleteCharacters(in: NSRange(location: 0, length: 2))
     XCTAssertEqual(textStorage.length, 7)
     var range = NSRange(location: NSNotFound, length: 0)
     let actualFont = textStorage.attributes(at: 0, effectiveRange: &range)[.font] as! UIFont
-    let expectedFont = textStorage.defaultAttributes.attributes[.font] as! UIFont
+    let expectedFont = textStorage.defaultAttributes[.font] as! UIFont
     XCTAssertEqual(actualFont, expectedFont)
     XCTAssertEqual(range, NSRange(location: 0, length: 7))
   }
-  
+
   func testTextWithEmphasis() {
     textStorage.append(NSAttributedString(string: "This text has *emphasis*, baby!"))
     var range = NSRange(location: NSNotFound, length: 0)
@@ -253,30 +267,30 @@ final class MiniMarkdownTextStorageTests: XCTestCase {
 
   func testRoundTripTable() {
     let text = """
-| Spanish                  | Engish                                                              |
-| ------------------------ | ------------------------------------------------------------------- |
-| tenedor                  | fork                                                                |
-| hombre                   | man                                                                 |
-| mujer                    | woman                                                               |
-| niño                     | boy                                                                 |
-| niña                     | girl                                                                |
+    | Spanish                  | Engish                                                              |
+    | ------------------------ | ------------------------------------------------------------------- |
+    | tenedor                  | fork                                                                |
+    | hombre                   | man                                                                 |
+    | mujer                    | woman                                                               |
+    | niño                     | boy                                                                 |
+    | niña                     | girl                                                                |
 
-"""
+    """
     textStorage.markdown = text
     XCTAssertEqual(text, textStorage.markdown)
   }
 
   func testAppendAfterTable() {
     let text = """
-| Spanish                  | Engish                                                              |
-| ------------------------ | ------------------------------------------------------------------- |
-| tenedor                  | fork                                                                |
-| hombre                   | man                                                                 |
-| mujer                    | woman                                                               |
-| niño                     | boy                                                                 |
-| niña                     | girl                                                                |
+    | Spanish                  | Engish                                                              |
+    | ------------------------ | ------------------------------------------------------------------- |
+    | tenedor                  | fork                                                                |
+    | hombre                   | man                                                                 |
+    | mujer                    | woman                                                               |
+    | niño                     | boy                                                                 |
+    | niña                     | girl                                                                |
 
-"""
+    """
     textStorage.markdown = text
     textStorage.append(NSAttributedString(string: "Hello, world\n"))
     XCTAssertEqual(text + "Hello, world\n", textStorage.markdown)
@@ -296,7 +310,7 @@ internal final class TextStorageMessageRecorder: NSObject, NSTextStorageDelegate
       changeInLength: Int
     ) -> [DelegateMessage] {
       return ["willProcessEditing", "didProcessEditing"].map {
-        return DelegateMessage(
+        DelegateMessage(
           message: $0,
           editedMask: editedMask,
           editedRange: editedRange,

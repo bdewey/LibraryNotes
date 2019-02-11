@@ -50,7 +50,7 @@ public final class Table: Node, LineParseable {
     self.header = header
     self.delimiter = delimiter
     self.rows = rows
-    columnCount = delimiter.cells.count
+    self.columnCount = delimiter.cells.count
     let partialSlice = header.slice + delimiter.slice
     let completeSlice = rows.reduce(into: partialSlice, { $0 += $1.slice })
     super.init(type: .table, slice: completeSlice)
@@ -61,10 +61,12 @@ public final class Table: Node, LineParseable {
     }
   }
 
-  public static let parser = (curry(Table.init)
-    <^> TableRow.parser(type: .tableHeader)
-    <*> TableDelimiter.parser
-    <*> TableRow.parser(type: .tableRow).many).unwrapped
+  public static let parser = (
+    curry(Table.init)
+      <^> TableRow.parser(type: .tableHeader)
+      <*> TableDelimiter.parser
+      <*> TableRow.parser(type: .tableRow).many
+  ).unwrapped
 }
 
 public final class TablePipe: Node, CharacterParseable {
@@ -113,6 +115,7 @@ public final class TableRow: Node {
       for child in children { child.parsingRules = parsingRules }
     }
   }
+
   public let cells: [TableCell]
   private let nodes: [Node]
   public override var children: [Node] {
@@ -158,7 +161,7 @@ public final class TableDelimiter: Node, LineParseable {
   }
 
   public static let parser = TableDelimiter.init <^>
-    LineParsers.line(where: { (slice) in
+    LineParsers.line(where: { slice in
       let cells = slice.tableCells
       return !cells.isEmpty && cells.allSatisfy({ $0.substring.isTableDelimiterCell })
     })

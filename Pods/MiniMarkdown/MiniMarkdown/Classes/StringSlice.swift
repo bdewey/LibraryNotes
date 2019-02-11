@@ -21,7 +21,6 @@ import Foundation
 /// However, unlike a substring, adjacent StringSlice instances from the same string can
 /// be efficiently combined.
 public struct StringSlice: Equatable {
-
   /// The underlying substring.
   public let string: String
 
@@ -74,12 +73,12 @@ public struct StringSlice: Equatable {
 
   /// Checks if the specified slices cover every element of this slice
   public func covered(by subslices: [StringSlice]) -> Bool {
-    var expectedBound = self.range.lowerBound
+    var expectedBound = range.lowerBound
     for subslice in subslices {
       if subslice.range.lowerBound != expectedBound { return false }
       expectedBound = subslice.range.upperBound
     }
-    return expectedBound == self.range.upperBound
+    return expectedBound == range.upperBound
   }
 
   public func dropFirst(_ countToDrop: Int) -> StringSlice {
@@ -95,7 +94,7 @@ public struct StringSlice: Equatable {
   /// - precondition: The slices must come from the same string and must follow each other,
   ///                 sequentially. If there is a gap between lhs and rhs, it must contain only
   ///                 whitespace.
-  static public func + (lhs: StringSlice, rhs: StringSlice) -> StringSlice {
+  public static func + (lhs: StringSlice, rhs: StringSlice) -> StringSlice {
     precondition(lhs.string == rhs.string)
     precondition(
       lhs
@@ -105,18 +104,17 @@ public struct StringSlice: Equatable {
     return StringSlice(string: lhs.string, range: lhs.range.lowerBound ..< rhs.range.upperBound)
   }
 
-  static public func += (lhs: inout StringSlice, rhs: StringSlice) {
+  public static func += (lhs: inout StringSlice, rhs: StringSlice) {
     lhs = lhs + rhs // swiftlint:disable:this shorthand_operator
   }
 
-  static public func + (lhs: StringSlice, rhs: StringCharacter) -> StringSlice {
+  public static func + (lhs: StringSlice, rhs: StringCharacter) -> StringSlice {
     return lhs + StringSlice(rhs)
   }
 }
 
 /// A StringSlice is a collection of StringCharacters.
 extension StringSlice: Collection {
-
   public var startIndex: String.Index {
     return range.lowerBound
   }
@@ -135,9 +133,8 @@ extension StringSlice: Collection {
 }
 
 extension Optional where Wrapped == StringSlice {
-
   /// Convenience: Adds a string slice to an optional string slice.
-  static public func + (lhs: StringSlice?, rhs: StringSlice) -> StringSlice {
+  public static func + (lhs: StringSlice?, rhs: StringSlice) -> StringSlice {
     if let lhs = lhs {
       return lhs + rhs
     } else {
@@ -146,16 +143,15 @@ extension Optional where Wrapped == StringSlice {
   }
 
   /// Convenience: Increments a string slice.
-  static public func += (lhs: inout StringSlice?, rhs: StringSlice) {
+  public static func += (lhs: inout StringSlice?, rhs: StringSlice) {
     lhs = lhs + rhs // swiftlint:disable:this shorthand_operator
   }
 }
 
 extension Array where Array.Element == StringCharacter {
-
   var stringSlice: StringSlice? {
-    return self.reduce(nil) { (slice: StringSlice?, character: StringCharacter) -> StringSlice in
-      return slice + StringSlice(character)
+    return reduce(nil) { (slice: StringSlice?, character: StringCharacter) -> StringSlice in
+      slice + StringSlice(character)
     }
   }
 }

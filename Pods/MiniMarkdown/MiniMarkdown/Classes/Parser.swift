@@ -23,13 +23,12 @@ precedencegroup SequencePrecedence {
 }
 
 infix operator <*>: SequencePrecedence
-infix operator  *>: SequencePrecedence
-infix operator <* : SequencePrecedence
+infix operator *>: SequencePrecedence
+infix operator <*: SequencePrecedence
 infix operator <^>: SequencePrecedence
 
 /// A generic stream parser.
 public struct Parser<T, Stream: Sequence> where Stream.SubSequence == Stream {
-
   public typealias ParseFunction = (Stream) -> (T, Stream)?
 
   /// The parse function: Given an input stream, returns the parsed type plus the remaining
@@ -54,7 +53,7 @@ public struct Parser<T, Stream: Sequence> where Stream.SubSequence == Stream {
       array.insert(element, at: 0)
       return array
     }
-    return curry(prepend) <^> self <*> self.many
+    return curry(prepend) <^> self <*> many
   }
 
   /// Matches zero or more of the receiver.
@@ -88,7 +87,7 @@ public struct Parser<T, Stream: Sequence> where Stream.SubSequence == Stream {
     return Parser<(T, U), Stream> { (stream: Stream) -> ((T, U), Stream)? in
       guard let (firstResult, next) = self.parse(stream),
         let (secondResult, remainder) = parser.parse(next)
-        else { return nil }
+      else { return nil }
       return ((firstResult, secondResult), remainder)
     }
   }
@@ -105,14 +104,14 @@ public struct Parser<T, Stream: Sequence> where Stream.SubSequence == Stream {
   }
 }
 
-protocol AnyOptional {
+public protocol AnyOptional {
   associatedtype Value
 
   var value: Value? { get }
 }
 
 extension Optional: AnyOptional {
-  var value: Wrapped? {
+  public var value: Wrapped? {
     switch self {
     case .none:
       return nil
@@ -123,14 +122,13 @@ extension Optional: AnyOptional {
 }
 
 extension Parser where T: AnyOptional {
-
   /// For parsers of the form <T?, Stream>, constructs a parser of form <T, Stream>
-  var unwrapped: Parser<T.Value, Stream> {
-    return Parser<T.Value, Stream> { (stream) in
+  public var unwrapped: Parser<T.Value, Stream> {
+    return Parser<T.Value, Stream> { stream in
       guard
         let (results, remainder) = self.parse(stream),
         let value = results.value
-        else { return nil }
+      else { return nil }
       return (value, remainder)
     }
   }
@@ -150,7 +148,7 @@ public func any<T, Stream>(of parsers: [Parser<T, Stream>]) -> Parser<T, Stream>
 }
 
 /// Sequence operator
-public func <*> <A, B, Stream> (
+public func <*> <A, B, Stream>(
   lhs: Parser<(A) -> B, Stream>,
   rhs: Parser<A, Stream>
 ) -> Parser<B, Stream> {
@@ -158,7 +156,7 @@ public func <*> <A, B, Stream> (
 }
 
 /// Sequence, discarding the output of the first operator.
-public func *> <A, B, Stream> (
+public func *> <A, B, Stream>(
   lhs: Parser<A, Stream>,
   rhs: Parser<B, Stream>
 ) -> Parser<B, Stream> {
@@ -169,7 +167,7 @@ public func *> <A, B, Stream> (
 }
 
 /// Sequence, discarding the output of the second operator.
-public func <* <A, B, Stream> (
+public func <* <A, B, Stream>(
   lhs: Parser<A, Stream>,
   rhs: Parser<B, Stream>
 ) -> Parser<A, Stream> {
@@ -177,7 +175,7 @@ public func <* <A, B, Stream> (
 }
 
 /// Map operator
-public func <^> <A, B, Stream> (
+public func <^> <A, B, Stream>(
   lhs: @escaping (A) -> B,
   rhs: Parser<A, Stream>
 ) -> Parser<B, Stream> {

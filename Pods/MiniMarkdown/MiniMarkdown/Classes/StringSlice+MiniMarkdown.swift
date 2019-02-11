@@ -18,7 +18,6 @@
 import Foundation
 
 extension StringSlice {
-
   /// Interprets the slice as a row in a table, and returns the subslices representing each cell.
   internal var tableCells: [StringSlice] {
     var cellContents = substring.split(
@@ -29,7 +28,7 @@ extension StringSlice {
     if cellContents.first?.isWhitespace ?? false { cellContents.removeFirst() }
     if cellContents.last?.isWhitespace ?? false { cellContents.removeLast() }
     return cellContents.map({ (substring) -> StringSlice in
-      return StringSlice(string: self.string, range: substring.startIndex ..< substring.endIndex)
+      StringSlice(string: self.string, range: substring.startIndex ..< substring.endIndex)
     })
   }
 }

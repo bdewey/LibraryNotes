@@ -57,16 +57,16 @@ public final class ListItem: BlockContainingNode, LineParseable {
 
   public var orderedListNumber: Int? {
     guard listType == .ordered,
-          let match = orderedRegex.firstMatch(
-            in: markdown,
-            options: [], range: NSRange(markdown.completeRange, in: markdown)
-          ), let numberRange = Range(match.range(at: 1), in: markdown) else { return nil }
+      let match = orderedRegex.firstMatch(
+        in: markdown,
+        options: [], range: NSRange(markdown.completeRange, in: markdown)
+    ), let numberRange = Range(match.range(at: 1), in: markdown) else { return nil }
     return Int(markdown[numberRange])
   }
 
   public static let parser =
     listItemParser(type: .ordered, itemRecognizer: orderedRecognizer) ||
-      listItemParser(type: .unordered, itemRecognizer: unorderedRecognizer)
+    listItemParser(type: .unordered, itemRecognizer: unorderedRecognizer)
 
   private static func listItemParser(
     type: ListType,
@@ -74,7 +74,7 @@ public final class ListItem: BlockContainingNode, LineParseable {
   ) -> Parser<ListItem, ArraySlice<StringSlice>> {
     return Parser { (stream) -> (ListItem, LineParseable.Stream)? in
       guard let line = stream.first,
-            let markerRange = itemRecognizer(line.substring) else { return nil }
+        let markerRange = itemRecognizer(line.substring) else { return nil }
       let markerNSRange = NSRange(markerRange, in: line.string)
       let continuationParser = LineParsers.line(where: { (slice) -> Bool in
         let leadingWhitespace = slice.substring.prefix(while: { $0.isWhitespaceOrNewline })
@@ -87,13 +87,17 @@ public final class ListItem: BlockContainingNode, LineParseable {
       }).many
       if let continuationLines = continuationParser.parse(stream.dropFirst()) {
         let combinedSlice = continuationLines.0.reduce(line, { (result, slice) -> StringSlice in
-          return result + slice
+          result + slice
         })
-        return (ListItem(listType: type, markerRange: markerRange, slice: combinedSlice),
-                continuationLines.1)
+        return (
+          ListItem(listType: type, markerRange: markerRange, slice: combinedSlice),
+          continuationLines.1
+        )
       } else {
-        return (ListItem(listType: type, markerRange: markerRange, slice: line),
-                stream.dropFirst())
+        return (
+          ListItem(listType: type, markerRange: markerRange, slice: line),
+          stream.dropFirst()
+        )
       }
     }
   }

@@ -94,13 +94,8 @@ extension MarkdownAttributedStringRenderer {
     stylesheet: Stylesheet,
     style: Stylesheet.Style
   ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer()
-    renderer.renderFunctions[.text] = { node in
-      NSAttributedString(
-        string: String(node.slice.substring),
-        attributes: stylesheet.attributes(style: style)
-      )
-    }
+    var renderer = MarkdownAttributedStringRenderer.textOnly
+    renderer.defaultAttributes = stylesheet.attributes(style: style)
     return renderer
   }
 
@@ -117,7 +112,7 @@ extension MarkdownAttributedStringRenderer {
       style: textStyle
     )
     guard let document = document as? TextBundleDocument else { return renderer }
-    renderer.renderFunctions[.image] = { node in
+    renderer.renderFunctions[.image] = { node, _ in
       let results = NSMutableAttributedString()
       let imageNode = node as! MiniMarkdown.Image
       if let image = document.image(for: node) {

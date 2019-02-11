@@ -18,7 +18,6 @@
 import Foundation
 
 fileprivate extension CharacterSet {
-
   /// Checks if a character belongs to this CharacterSet.
   ///
   /// - parameter character: The character to test.
@@ -27,14 +26,13 @@ fileprivate extension CharacterSet {
     guard character.unicodeScalars.count == 1, let scalar = character.unicodeScalars.first else {
       return false
     }
-    return self.contains(scalar)
+    return contains(scalar)
   }
 }
 
 /// Utility methods that helps Character work with the misnamed CharacterSet
 /// (which really works with UnicodeScalar values).
 public extension Character {
-
   /// `true` if CharacterSet.whitespacesAndNewlines contains `self`.
   public var isWhitespaceOrNewline: Bool {
     return CharacterSet.whitespacesAndNewlines.contains(self)

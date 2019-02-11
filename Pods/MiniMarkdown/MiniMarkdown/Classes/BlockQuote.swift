@@ -25,7 +25,6 @@ extension NodeType {
 /// - note: This implementation does not handle continuations. Each line of a block quote
 /// is parsed separately and lexical structures like paragraphs cannot span lines.
 public final class BlockQuote: Node, LineParseable {
-
   public init(delimiter: Delimiter, remainder: StringSlice) {
     self.delimiter = delimiter
     self.remainder = remainder
@@ -53,13 +52,12 @@ public final class BlockQuote: Node, LineParseable {
     }
   }
 
-  public static let parser = Parser<BlockQuote, ArraySlice<StringSlice>>
-  { (stream) -> (BlockQuote, ArraySlice<StringSlice>)? in
+  public static let parser = Parser<BlockQuote, ArraySlice<StringSlice>> { (stream) -> (BlockQuote, ArraySlice<StringSlice>)? in
     guard let line = stream.first,
-          let delimiterRange = line.substring.range(
-            of: "^\\s{0,3}>\\s?",
-            options: .regularExpression
-      ) else { return nil }
+      let delimiterRange = line.substring.range(
+        of: "^\\s{0,3}>\\s?",
+        options: .regularExpression
+    ) else { return nil }
     let delimiter = Delimiter(StringSlice(string: line.string, range: delimiterRange))
     let remainder = StringSlice(
       string: line.string,
@@ -67,6 +65,7 @@ public final class BlockQuote: Node, LineParseable {
     )
     return (BlockQuote(delimiter: delimiter, remainder: remainder), stream.dropFirst())
   }
+
 //
 //  public static let parser = BlockQuote.init <^> LineParsers.line(where: { (line) -> Bool in
 //    return line.decomposedBlockQuote != nil
@@ -74,7 +73,6 @@ public final class BlockQuote: Node, LineParseable {
 }
 
 extension StringSlice {
-
   /// If the line starts with a block quote delimiter, returns the decomposition of the line
   /// as a delimiter slice and a remainder slice. Otherwise returns nil.
   fileprivate var decomposedBlockQuote: (delimiter: StringSlice, remainder: StringSlice)? {
@@ -85,8 +83,8 @@ extension StringSlice {
       return nil
     }
     return (
-      StringSlice(string: self.string, range: delimiterRange),
-      StringSlice(string: self.string, range: delimiterRange.upperBound ..< self.range.upperBound)
+      StringSlice(string: string, range: delimiterRange),
+      StringSlice(string: string, range: delimiterRange.upperBound ..< range.upperBound)
     )
   }
 }

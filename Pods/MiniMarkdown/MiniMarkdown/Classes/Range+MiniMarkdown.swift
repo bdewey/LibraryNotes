@@ -18,14 +18,13 @@
 import Foundation
 
 public extension Range {
-
   /// Returns a new range that combines the current range with an adjacent range.
   ///
   /// - parameter other: The adjacent range
   /// - precondition: `other` is adjacent to `self`; i.e., self.upperBound == other.lowerBound
   /// - returns: A new range that encompasses both `self` and `other`
   public func concat(_ other: Range) -> Range {
-    precondition(self.upperBound == other.lowerBound)
-    return self.lowerBound ..< other.upperBound
+    precondition(upperBound == other.lowerBound)
+    return lowerBound ..< other.upperBound
   }
 }

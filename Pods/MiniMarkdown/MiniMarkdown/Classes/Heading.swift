@@ -54,9 +54,9 @@ public final class Heading: InlineContainingNode, LineParseable {
       guard
         let line = stream.first,
         let headerPrefix = line.substring.headerPrefix,
-        (1...6).contains(headerPrefix.headingLevel)
-        else {
-          return nil
+        (1 ... 6).contains(headerPrefix.headingLevel)
+      else {
+        return nil
       }
       return (
         Heading(
@@ -84,7 +84,7 @@ extension StringProtocol where Self.SubSequence == Substring {
       !remainder[leadingHashes.endIndex].isWhitespace {
       return nil
     }
-    if (1...6).contains(leadingHashes.count) {
+    if (1 ... 6).contains(leadingHashes.count) {
       let delimterTrailingWhitespace = self[leadingHashes.endIndex...]
         .prefix(while: { $0.isWhitespace })
       return (index: delimterTrailingWhitespace.endIndex, headingLevel: leadingHashes.count)

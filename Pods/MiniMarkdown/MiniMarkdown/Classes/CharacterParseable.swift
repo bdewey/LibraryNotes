@@ -19,14 +19,12 @@ import Foundation
 
 /// A type that can be parsed from an input stream of characters.
 public protocol CharacterParseable {
-
   typealias Stream = ArraySlice<StringCharacter>
 
   static var parser: Parser<Self, Stream> { get }
 }
 
 extension CharacterParseable where Self: Node {
-
   /// Type-erasing: Eliminate knowledge that we parse Self and replace with knowledge
   ///               that we have parsed a MiniMarkdownNode
   public static var nodeParser: Parser<Node, Stream> {
@@ -42,32 +40,32 @@ public enum CharacterParsers {
   public typealias Stream = ArraySlice<StringCharacter>
 
   /// Parses a sequence of characters out of a stream.
-  public static func characters<S: Sequence> (_ characters: S) -> Parser<StringSlice, Stream>
+  public static func characters<S: Sequence>(_ characters: S) -> Parser<StringSlice, Stream>
     where S.Element == Character {
-      return Parser { (stream: Stream) -> (StringSlice, Stream)? in
-        var slice: StringSlice?
-        var stream = stream
-        for character in characters {
-          guard let first = stream.first, character == first.character else { return nil }
-          slice += StringSlice(first)
-          stream = stream.dropFirst()
-        }
-        if let slice = slice {
-          return (slice, stream)
-        } else {
-          return nil
-        }
+    return Parser { (stream: Stream) -> (StringSlice, Stream)? in
+      var slice: StringSlice?
+      var stream = stream
+      for character in characters {
+        guard let first = stream.first, character == first.character else { return nil }
+        slice += StringSlice(first)
+        stream = stream.dropFirst()
       }
+      if let slice = slice {
+        return (slice, stream)
+      } else {
+        return nil
+      }
+    }
   }
 
   /// Parses a single character out of a stream.
   /// - parameter predicate: Returns true if the character should be parsed.
   public static func character(where predicate: @escaping (Character) -> Bool) ->
     Parser<StringCharacter, Stream> {
-      return Parser { (stream: Stream) -> (StringCharacter, Stream)? in
-        guard let character = stream.first, predicate(character.character) else { return nil }
-        return (character, stream.dropFirst())
-      }
+    return Parser { (stream: Stream) -> (StringCharacter, Stream)? in
+      guard let character = stream.first, predicate(character.character) else { return nil }
+      return (character, stream.dropFirst())
+    }
   }
 
   /// This is like a backwards peek. It will look at the *previous* character in the stream
@@ -156,11 +154,13 @@ public enum CharacterParsers {
     openingDelimiter: Character
   ) -> Parser<StringSlice, Stream> {
     return curry(makeSlice)
-      <^> (preceedingCharacter(
-        where: { $0.isWhitespaceOrNewline },
-        parseSucceedsAtStreamStart: true
+      <^> (
+        preceedingCharacter(
+          where: { $0.isWhitespaceOrNewline },
+          parseSucceedsAtStreamStart: true
         )
-       *> character(where: { $0 == openingDelimiter }))
+          *> character(where: { $0 == openingDelimiter })
+      )
       <*> character(where: { !$0.isWhitespaceOrNewline }).oneOrMore
   }
 }

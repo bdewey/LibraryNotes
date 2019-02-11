@@ -74,7 +74,7 @@ extension ClozeCard: Card {
   }
 
   func utterance(node: Node, stylesheet: Stylesheet) -> AVSpeechUtterance {
-    let phrase = clozeRenderer.render(node: node)
+    let phrase = clozeRenderer.render(node: node).string
     let utterance = AVSpeechUtterance(string: phrase)
     utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")
     return utterance
@@ -101,25 +101,15 @@ extension ClozeCard: Card {
 }
 
 extension MarkdownAttributedStringRenderer {
-  init(stylesheet: Stylesheet) {
-    self.init()
-    renderFunctions[.text] = { node in
-      NSAttributedString(
-        string: String(node.slice.substring),
-        attributes: stylesheet.textAttributes
-      )
-    }
-  }
-
   /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
   /// highlight the cloze.
   static func cardFront(
     stylesheet: Stylesheet,
     hideClozeAt index: Int
   ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
+    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet, style: .body2)
     var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node in
+    renderer.renderFunctions[.cloze] = { node, _ in
       guard let cloze = node as? Cloze else { return NSAttributedString() }
       let shouldHide = renderedCloze == index
       renderedCloze += 1
@@ -152,13 +142,13 @@ extension MarkdownAttributedStringRenderer {
     stylesheet: Stylesheet,
     revealingClozeAt index: Int
   ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet)
+    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet, style: .body2)
     var localClozeAttributes = stylesheet.clozeAttributes
     localClozeAttributes[.foregroundColor] = stylesheet.colors
       .onSurfaceColor
       .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
     var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node in
+    renderer.renderFunctions[.cloze] = { node, _ in
       let attributes = renderedCloze == index ? localClozeAttributes : stylesheet.textAttributes
       renderedCloze += 1
       guard let cloze = node as? Cloze else { return NSAttributedString() }
@@ -168,12 +158,11 @@ extension MarkdownAttributedStringRenderer {
   }
 }
 
-private let clozeRenderer: MarkdownStringRenderer = {
-  var renderer = MarkdownStringRenderer()
-  renderer.renderFunctions[.text] = { String($0.slice.substring) }
-  renderer.renderFunctions[.cloze] = { node in
-    guard let cloze = node as? Cloze else { return "" }
-    return String(cloze.hiddenText)
+private let clozeRenderer: MarkdownAttributedStringRenderer = {
+  var renderer = MarkdownAttributedStringRenderer.textOnly
+  renderer.renderFunctions[.cloze] = { node, _ in
+    guard let cloze = node as? Cloze else { return NSAttributedString() }
+    return NSAttributedString(string: String(cloze.hiddenText))
   }
   return renderer
 }()

@@ -19,7 +19,6 @@ import Foundation
 
 /// A node that contains inline elements as children.
 open class InlineContainingNode: Node {
-
   open var inlineSlice: StringSlice {
     return slice
   }

@@ -49,22 +49,23 @@ public final class List: Node, LineParseable {
       if let combinedSlice = results
         .map({ $0.slice })
         .reduce(nil, { (result: StringSlice?, slice: StringSlice) in
-          return result + slice
+          result + slice
         }) {
-        return (List(listType: .unordered, items: results, slice: combinedSlice),
-                remainder)
+        return (
+          List(listType: .unordered, items: results, slice: combinedSlice),
+          remainder
+        )
       } else {
         return nil
       }
     }
 
-  override public var children: [Node] {
+  public override var children: [Node] {
     return items
   }
 }
 
 extension Node {
-
   public func isList(type: ListType) -> Bool {
     guard let list = self as? List else { return false }
     return list.listType == type

@@ -141,7 +141,7 @@ extension NSMutableAttributedString: Scannable {
     return String(string[range])
   }
 
-  func replaceSubrange<C>(_ bounds: ClosedRange<String.Index>, with replacement: C) where C : Collection, C.Element == Character {
+  func replaceSubrange<C>(_ bounds: ClosedRange<String.Index>, with replacement: C) where C: Collection, C.Element == Character {
     let nsrange = NSRange(bounds, in: string)
     replaceCharacters(in: nsrange, with: String(replacement))
   }

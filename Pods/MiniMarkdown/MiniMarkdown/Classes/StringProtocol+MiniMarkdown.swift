@@ -18,17 +18,16 @@
 import Foundation
 
 public extension StringProtocol where Self.SubSequence == Substring {
-
   public typealias SubstringPair = (prefix: Substring, suffix: Substring)
 
   /// True if every unicode scalar in the string is either a whitespace or newline.
   public var isWhitespace: Bool {
-    return self.unicodeScalars.allSatisfy { CharacterSet.whitespacesAndNewlines.contains($0) }
+    return unicodeScalars.allSatisfy { CharacterSet.whitespacesAndNewlines.contains($0) }
   }
 
   public func prefixAndSuffix(
     where predicate: (Character) -> Bool
-    ) -> SubstringPair {
+  ) -> SubstringPair {
     let prefix = self.prefix(while: predicate)
     return (prefix: prefix, suffix: self[prefix.endIndex...])
   }
@@ -38,7 +37,7 @@ public extension StringProtocol where Self.SubSequence == Substring {
     // TODO: what i *want* to do is just call prefix on the reversed string, but the type
     // checker complains about the indexes not matching. Figure out how to coerce Swift later.
     var index = self.index(before: endIndex)
-    while index != startIndex && predicate(self[index]) {
+    while index != startIndex, predicate(self[index]) {
       index = self.index(before: index)
     }
     index = self.index(after: index)
@@ -47,27 +46,27 @@ public extension StringProtocol where Self.SubSequence == Substring {
 
   public func suffixAndPrefix(
     where predicate: (Character) -> Bool
-    ) -> SubstringPair {
+  ) -> SubstringPair {
     let suffix = self.suffix(where: predicate)
     return (prefix: self[startIndex ..< suffix.startIndex], suffix: suffix)
   }
 
   public var leadingWhitespace: SubstringPair {
-    return self.prefixAndSuffix(where: { $0.isWhitespace })
+    return prefixAndSuffix(where: { $0.isWhitespace })
   }
 
   /// The substring of `self` that excludes any leading whitespace.
   public var strippingLeadingWhitespace: Substring {
-    return self.leadingWhitespace.suffix
+    return leadingWhitespace.suffix
   }
 
   /// The substring of `self` that excludes any leading and trailing whitespace
   public var strippingLeadingAndTrailingWhitespace: Substring {
-    return self.strippingLeadingWhitespace.suffixAndPrefix(where: { $0.isWhitespace }).prefix
+    return strippingLeadingWhitespace.suffixAndPrefix(where: { $0.isWhitespace }).prefix
   }
 
   /// True if the entire contents of the string is a valid table delimiter cell
   public var isTableDelimiterCell: Bool {
-    return self.range(of: "^\\s*:?-+:?\\s*$", options: .regularExpression) != nil
+    return range(of: "^\\s*:?-+:?\\s*$", options: .regularExpression) != nil
   }
 }

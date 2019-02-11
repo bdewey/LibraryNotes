@@ -23,7 +23,6 @@ extension NodeType {
 
 /// A region of markdown that is a delimiter of some sort of meaning, like "*" or "##".
 public final class Delimiter: Node {
-
   public init(_ slice: StringSlice) {
     super.init(type: .delimiter, slice: slice, markdown: String(slice.substring))
   }

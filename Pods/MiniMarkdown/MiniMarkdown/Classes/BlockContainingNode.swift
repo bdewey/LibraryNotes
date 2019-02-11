@@ -19,7 +19,6 @@ import Foundation
 
 /// A node that contains blocks as children.
 open class BlockContainingNode: Node {
-
   open var containedLines: [StringSlice] {
     fatalError("Subclasses must override")
   }

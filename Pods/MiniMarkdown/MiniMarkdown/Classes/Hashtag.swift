@@ -22,7 +22,6 @@ extension NodeType {
 }
 
 public final class Hashtag: Node, CharacterParseable {
-
   public init(slice: StringSlice) {
     super.init(type: .hashtag, slice: slice, markdown: String(slice.substring))
   }

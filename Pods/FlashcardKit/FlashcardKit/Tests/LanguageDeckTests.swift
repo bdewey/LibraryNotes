@@ -2,6 +2,7 @@
 
 import CommonplaceBook
 @testable import FlashcardKit
+import MiniMarkdown
 import XCTest
 
 final class LanguageDeckTests: LanguageDeckBase {

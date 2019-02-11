@@ -23,7 +23,6 @@ extension NodeType {
 
 /// A blank line: https://spec.commonmark.org/0.28/#blank-lines
 public final class BlankLine: Node, LineParseable {
-
   public init(slice: StringSlice) {
     super.init(type: .blank, slice: slice, markdown: String(slice.substring))
   }

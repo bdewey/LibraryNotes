@@ -28,7 +28,6 @@ extension NSNotification.Name {
 
 /// Text storage with syntax highlighting.
 public final class MiniMarkdownTextStorage: NSTextStorage {
-
   public init(
     parsingRules: ParsingRules,
     formatters: [NodeType: RenderedMarkdown.FormattingFunction],
@@ -66,7 +65,7 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
   }
 
   /// Default text attributes
-  public var defaultAttributes: NSAttributedString.Attributes {
+  public var defaultAttributes: AttributedStringAttributes {
     get {
       return storage.defaultAttributes
     }
@@ -75,10 +74,10 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     }
   }
 
-  public func expectedAttributes(for nodeType: NodeType) -> [NSAttributedString.Key: Any] {
+  public func expectedAttributes(for nodeType: NodeType) -> AttributedStringAttributes {
     var attributes = defaultAttributes
     storage.formatters[nodeType]?(Node(type: nodeType, slice: StringSlice("")), &attributes)
-    return attributes.attributes
+    return attributes
   }
 
   // MARK: - Required overrides
@@ -90,11 +89,11 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
       return memoizedString
     }
     let memoizedString = NSMutableAttributedString(attributedString: storage.attributedString)
-    self.memoizedAttributedString = memoizedString
+    memoizedAttributedString = memoizedString
     return memoizedString
   }
 
-  override public var string: String {
+  public override var string: String {
     return getAttributedString().string
   }
 
@@ -110,14 +109,14 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
 
   public var nodes: [Node] { return storage.nodes }
 
-  override public func attributes(
+  public override func attributes(
     at location: Int,
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
     return getAttributedString().attributes(at: location, effectiveRange: range)
   }
 
-  override public func replaceCharacters(in range: NSRange, with str: String) {
+  public override func replaceCharacters(in range: NSRange, with str: String) {
     if debugLogging {
       DDLogDebug(
         "MiniMarkdownTextStorage.replaceCharacters " +
@@ -130,13 +129,13 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     if debugLogging {
       DDLogDebug("Change = \(change)")
     }
-    self.edited(
+    edited(
       NSTextStorage.EditActions.editedCharacters,
       range: change.changedCharacterRange,
       changeInLength: change.sizeChange
     )
     if change.changedAttributesRange.length > 0 {
-      self.edited(
+      edited(
         NSTextStorage.EditActions.editedAttributes,
         range: change.changedAttributesRange,
         changeInLength: 0
@@ -153,7 +152,7 @@ public final class MiniMarkdownTextStorage: NSTextStorage {
     return storage.findNode(containing: location)
   }
 
-  override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
+  public override func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
     guard let attrs = attrs, attrs.count > 0 else {
       if debugLogging {
         DDLogDebug("Ignoring call to clear attributes at range \(range)")

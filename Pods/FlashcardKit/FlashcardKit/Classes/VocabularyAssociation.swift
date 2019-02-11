@@ -17,7 +17,8 @@ extension MiniMarkdown.TableRow {
   /// Returns the Spanish word in the row.
   fileprivate var spanish: String {
     return String(
-      MarkdownStringRenderer.textOnly.render(node: cells[0]).strippingLeadingAndTrailingWhitespace
+      MarkdownAttributedStringRenderer.textOnly
+        .render(node: cells[0]).string.strippingLeadingAndTrailingWhitespace
     )
   }
 
@@ -138,6 +139,18 @@ public final class VocabularyAssociation: CardTemplate {
       cards.append(VocabularyAssociationSpellingCard(vocabularyAssociation: self))
     }
     return cards
+  }
+}
+
+extension VocabularyAssociation: CustomReflectable {
+  public var customMirror: Mirror {
+    return Mirror(
+      VocabularyAssociation.self,
+      children: [
+      "spanish": spanish,
+      "english": english,
+      "testSpelling": testSpelling,
+    ])
   }
 }
 
