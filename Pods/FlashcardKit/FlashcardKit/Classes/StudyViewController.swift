@@ -49,7 +49,7 @@ public final class StudyViewController: UIViewController {
 
   /// The view displaying the current card.
   /// - note: Changing this value will animate away the old card view and animate in the new.
-  private var currentCardView: CardView? {
+  private var currentCardView: ChallengeView? {
     didSet {
       currentCardView?.alpha = 0
       oldValue?.accessibilityIdentifier = nil
@@ -163,12 +163,12 @@ public final class StudyViewController: UIViewController {
   /// Creates a card view for a card.
   private func makeCardView(
     for cardFromDocument: StudySession.AttributedCard?,
-    completion: @escaping (CardView?) -> Void
+    completion: @escaping (ChallengeView?) -> Void
   ) {
     guard let cardFromDocument = cardFromDocument else { completion(nil); return }
     documentCache.document(for: cardFromDocument.properties.documentName) { document in
       guard let document = document else { completion(nil); return }
-      let cardView = cardFromDocument.card.cardView(
+      let cardView = cardFromDocument.card.challengeView(
         document: document,
         properties: cardFromDocument.properties,
         stylesheet: self.stylesheet
@@ -197,9 +197,9 @@ public final class StudyViewController: UIViewController {
   }
 }
 
-extension StudyViewController: CardViewDelegate {
-  public func cardView(_ cardView: CardView, didAnswerCorrectly: Bool) {
-    studySession.recordAnswer(correct: didAnswerCorrectly)
+extension StudyViewController: ChallengeViewDelegate {
+  public func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool) {
+    studySession.recordAnswer(correct: didRespondCorrectly)
     configureUI()
     if studySession.remainingCards == 0 {
       studySession.studySessionEndDate = Date()
@@ -207,8 +207,8 @@ extension StudyViewController: CardViewDelegate {
     }
   }
 
-  public func cardView(
-    _ cardView: CardView,
+  public func challengeView(
+    _ cardView: ChallengeView,
     didRequestSpeech utterance: AVSpeechUtterance,
     language: String
   ) {

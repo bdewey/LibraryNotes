@@ -25,7 +25,7 @@ public final class LanguageDeck {
       .continuous()
     let clozeTemplateSignal = miniMarkdownSignal.map { ClozeTemplate.extract(from: $0) }
     let combinedCards = vocabularyAssociationsSignal
-      .combineLatest(clozeTemplateSignal) { (vocabularyAssociations, clozeTemplates) -> [Card] in
+      .combineLatest(clozeTemplateSignal) { (vocabularyAssociations, clozeTemplates) -> [Challenge] in
         Array([vocabularyAssociations.cards, clozeTemplates.cards].joined())
       }
     self.studySessionSignal = document.documentStudyMetadata.signal

@@ -37,17 +37,17 @@ public struct ClozeCard: Codable {
   }
 }
 
-extension ClozeCard: Card {
+extension ClozeCard: Challenge {
   public var identifier: String {
     let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
     return markdown + suffix
   }
 
-  public func cardView(
+  public func challengeView(
     document: UIDocument,
     properties: CardDocumentProperties,
     stylesheet: Stylesheet
-  ) -> CardView {
+  ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)
     let nodes = properties.parsingRules.parse(markdown)
     assert(nodes.count == 1)

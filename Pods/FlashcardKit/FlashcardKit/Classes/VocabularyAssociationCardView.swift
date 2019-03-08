@@ -7,7 +7,7 @@ import SnapKit
 import TextBundleKit
 import UIKit
 
-final class VocabularyAssociationCardView: CardView {
+final class VocabularyAssociationCardView: ChallengeView {
   let card: VocabularyAssociationCard
   let document: UIDocument
   let properties: CardDocumentProperties
@@ -132,16 +132,16 @@ final class VocabularyAssociationCardView: CardView {
   }
 
   @objc private func didTapGotIt() {
-    delegate?.cardView(self, didAnswerCorrectly: true)
+    delegate?.challengeView(self, didRespondCorrectly: true)
   }
 
   @objc private func didTapStudyMore() {
-    delegate?.cardView(self, didAnswerCorrectly: false)
+    delegate?.challengeView(self, didRespondCorrectly: false)
   }
 
   @objc private func didTapPronounce() {
     let utterance = AVSpeechUtterance(string: card.pronunciation)
-    delegate?.cardView(self, didRequestSpeech: utterance, language: "es-MX")
+    delegate?.challengeView(self, didRequestSpeech: utterance, language: "es-MX")
   }
 
   required init?(coder aDecoder: NSCoder) {

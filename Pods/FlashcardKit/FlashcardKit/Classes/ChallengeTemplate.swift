@@ -5,7 +5,7 @@ import Foundation
 /// Extensible enum for the different types of card templates.
 /// Also maintains a mapping between each type and the specific CardTemplate class
 /// associated with that type.
-public struct CardTemplateType: RawRepresentable {
+public struct ChallengeTemplateType: RawRepresentable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way
@@ -18,46 +18,46 @@ public struct CardTemplateType: RawRepresentable {
   ///
   /// - parameter rawValue: The string name for the type.
   /// - parameter templateClass: The CardTemplate associated with this type.
-  public init(rawValue: String, class templateClass: CardTemplate.Type) {
+  public init(rawValue: String, class templateClass: ChallengeTemplate.Type) {
     self.rawValue = rawValue
-    CardTemplateType.classMap[rawValue] = templateClass
+    ChallengeTemplateType.classMap[rawValue] = templateClass
   }
 
   /// Type used for the "abstract" base class.
-  internal static let unknown = CardTemplateType(rawValue: "unknown", class: CardTemplate.self)
+  internal static let unknown = ChallengeTemplateType(rawValue: "unknown", class: ChallengeTemplate.self)
 
   /// Mapping between rawValue and CardTemplate classes.
-  fileprivate static var classMap = [String: CardTemplate.Type]()
+  fileprivate static var classMap = [String: ChallengeTemplate.Type]()
 }
 
-/// A CardTemplate is a serializable thing that knows how to generate one or more Cards.
+/// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-open class CardTemplate: Codable {
+open class ChallengeTemplate: Codable {
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.
-  open var type: CardTemplateType { return .unknown }
+  open var type: ChallengeTemplateType { return .unknown }
 
   /// The specific cards from this template.
-  open var cards: [Card] { return [] }
+  open var challenges: [Challenge] { return [] }
 
   /// Public initializer so we can subclass this outside of this module.
   public init() {}
 }
 
-extension Array where Element: CardTemplate {
-  /// Returns the cards from all of the associations in the array.
-  public var cards: [Card] {
-    return Array<Card>(map { $0.cards }.joined())
+extension Array where Element: ChallengeTemplate {
+  /// Returns the challenges from all of the associations in the array.
+  public var cards: [Challenge] {
+    return Array<Challenge>(map { $0.challenges }.joined())
   }
 }
 
-/// Wraps CardTemplate instances to allow Codable heterogenous collections of CardTemplate objects.
+/// Wraps ChallengeTemplate instances to allow Codable heterogenous collections of ChallengeTemplate objects.
 public final class CardTemplateSerializationWrapper: Codable {
-  /// The wrapped CardTemplate.
-  public let value: CardTemplate
+  /// The wrapped ChallengeTemplate.
+  public let value: ChallengeTemplate
 
-  public init(_ value: CardTemplate) { self.value = value }
+  public init(_ value: ChallengeTemplate) { self.value = value }
 
   enum CodingKeys: String, CodingKey {
     /// Used to encode `value.type`
@@ -73,7 +73,7 @@ public final class CardTemplateSerializationWrapper: Codable {
     // Step 1: Get the encoded type name and look up the corresponding CardTemplate class.
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let typeName = try container.decode(String.self, forKey: .type)
-    guard let templateClass = CardTemplateType.classMap[typeName] else {
+    guard let templateClass = ChallengeTemplateType.classMap[typeName] else {
       throw Error.noClassForType(type: typeName)
     }
 
@@ -97,7 +97,7 @@ public final class CardTemplateSerializationWrapper: Codable {
 
 extension Array where Element == CardTemplateSerializationWrapper {
   /// Convenience: Returns the cards made from all wrapped templates.
-  public var cards: [Card] {
-    return Array<Card>(map { $0.value.cards }.joined())
+  public var cards: [Challenge] {
+    return Array<Challenge>(map { $0.value.challenges }.joined())
   }
 }

@@ -7,7 +7,7 @@ import MaterialComponents
 import SnapKit
 import UIKit
 
-final class VocabularyAssociationSpellingCardView: CardView {
+final class VocabularyAssociationSpellingCardView: ChallengeView {
   init(
     card: VocabularyAssociationSpellingCard,
     document: UIDocument,
@@ -151,10 +151,10 @@ final class VocabularyAssociationSpellingCardView: CardView {
     let spelling = spelling.trimmingCharacters(in: CharacterSet.whitespaces)
     let correct = spelling.localizedCaseInsensitiveCompare(card.spanish) == .orderedSame
     if correct {
-      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "correcto"), language: "es-MX")
-      delegate?.cardView(self, didAnswerCorrectly: true)
+      delegate?.challengeView(self, didRequestSpeech: AVSpeechUtterance(string: "correcto"), language: "es-MX")
+      delegate?.challengeView(self, didRespondCorrectly: true)
     } else {
-      delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: "Eso no está bien. Por favor, estudia la ortografía correcta."), language: "es-MX")
+      delegate?.challengeView(self, didRequestSpeech: AVSpeechUtterance(string: "Eso no está bien. Por favor, estudia la ortografía correcta."), language: "es-MX")
       showAnswer()
     }
   }
@@ -177,11 +177,11 @@ final class VocabularyAssociationSpellingCardView: CardView {
   }
 
   @objc private func didTapNext() {
-    delegate?.cardView(self, didAnswerCorrectly: false)
+    delegate?.challengeView(self, didRespondCorrectly: false)
   }
 
   @objc private func didTapRepeat() {
-    delegate?.cardView(self, didRequestSpeech: AVSpeechUtterance(string: card.spanish), language: "es-MX")
+    delegate?.challengeView(self, didRequestSpeech: AVSpeechUtterance(string: card.spanish), language: "es-MX")
   }
 }
 

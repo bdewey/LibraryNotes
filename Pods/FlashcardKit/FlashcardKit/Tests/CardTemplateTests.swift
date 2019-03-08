@@ -31,7 +31,7 @@ private let parsingRules: MiniMarkdown.ParsingRules = {
 final class CardTemplateTests: XCTestCase {
   func testHeterogenousSerialization() {
     let nodes = parsingRules.parse(mixedExample)
-    var templates = [CardTemplate]()
+    var templates = [ChallengeTemplate]()
     templates.append(contentsOf: VocabularyAssociation.makeAssociations(from: nodes).0)
     templates.append(contentsOf: ClozeTemplate.extract(from: nodes))
 

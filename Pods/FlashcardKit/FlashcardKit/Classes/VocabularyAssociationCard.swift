@@ -9,7 +9,7 @@ import UIKit
 
 /// A specific card for a vocabulary association.
 // TODO: Don't hard-code the fonts in here.
-struct VocabularyAssociationCard: Card {
+struct VocabularyAssociationCard: Challenge {
   private let vocabularyAssociation: VocabularyAssociation
   private let promptWithSpanish: Bool
 
@@ -26,11 +26,11 @@ struct VocabularyAssociationCard: Card {
     ].joined(separator: ":")
   }
 
-  func cardView(
+  func challengeView(
     document: UIDocument,
     properties: CardDocumentProperties,
     stylesheet: Stylesheet
-  ) -> CardView {
+  ) -> ChallengeView {
     return VocabularyAssociationCardView(
       card: self,
       document: document,

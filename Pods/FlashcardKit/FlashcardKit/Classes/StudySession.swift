@@ -6,10 +6,10 @@ import MiniMarkdown
 
 public struct StudySession {
   public struct AttributedCard {
-    public let card: Card
+    public let card: Challenge
     public let properties: CardDocumentProperties
 
-    public init(card: Card, attributes: CardDocumentProperties) {
+    public init(card: Challenge, attributes: CardDocumentProperties) {
       self.card = card
       self.properties = attributes
     }
@@ -51,7 +51,7 @@ public struct StudySession {
   public init<Cards: Sequence>(
     _ cards: Cards,
     properties: CardDocumentProperties
-  ) where Cards.Element == Card {
+  ) where Cards.Element == Challenge {
     let documentCards = cards.shuffled().map {
       AttributedCard(card: $0, attributes: properties)
     }

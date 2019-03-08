@@ -5,8 +5,8 @@ import Foundation
 import MiniMarkdown
 import UIKit
 
-extension CardTemplateType {
-  public static let cloze = CardTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
+extension ChallengeTemplateType {
+  public static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
 }
 
 extension CodingUserInfoKey {
@@ -16,7 +16,7 @@ extension CodingUserInfoKey {
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
-public final class ClozeTemplate: CardTemplate {
+public final class ClozeTemplate: ChallengeTemplate {
   public enum Error: Swift.Error {
     /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
     /// when decoding a ClozeTemplate.
@@ -26,7 +26,7 @@ public final class ClozeTemplate: CardTemplate {
     case markdownParseError
   }
 
-  public override var type: CardTemplateType { return .cloze }
+  public override var type: ChallengeTemplateType { return .cloze }
 
   /// Designated initializer.
   /// - parameter node: MiniMarkdown node that contains at least one cloze.
@@ -62,7 +62,7 @@ public final class ClozeTemplate: CardTemplate {
 
   // MARK: - CardTemplate conformance
 
-  public override var cards: [Card] {
+  public override var challenges: [Challenge] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
     let markdown = node.allMarkdown
     return (0 ..< clozeCount).map { ClozeCard(markdown: markdown, clozeIndex: $0) }

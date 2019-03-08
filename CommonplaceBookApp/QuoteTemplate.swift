@@ -5,11 +5,11 @@ import FlashcardKit
 import Foundation
 import MiniMarkdown
 
-extension CardTemplateType {
-  public static let quote = CardTemplateType(rawValue: "quote", class: QuoteTemplate.self)
+extension ChallengeTemplateType {
+  public static let quote = ChallengeTemplateType(rawValue: "quote", class: QuoteTemplate.self)
 }
 
-public final class QuoteTemplate: CardTemplate {
+public final class QuoteTemplate: ChallengeTemplate {
   // TODO: I should be able to share this with ClozeTemplate
   public enum Error: Swift.Error {
     /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
@@ -48,10 +48,10 @@ public final class QuoteTemplate: CardTemplate {
     try container.encode(quote.allMarkdown, forKey: .quote)
   }
 
-  public override var type: CardTemplateType { return .quote }
+  public override var type: ChallengeTemplateType { return .quote }
 
   /// The quote template is itself a card.
-  public override var cards: [Card] { return [self] }
+  public override var challenges: [Challenge] { return [self] }
 
   public let quote: BlockQuote
 
@@ -68,16 +68,16 @@ public final class QuoteTemplate: CardTemplate {
   }
 }
 
-extension QuoteTemplate: Card {
+extension QuoteTemplate: Challenge {
   public var identifier: String {
     return quote.allMarkdown
   }
 
-  public func cardView(
+  public func challengeView(
     document: UIDocument,
     properties: CardDocumentProperties,
     stylesheet: Stylesheet
-  ) -> CardView {
+  ) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = stylesheet.attributedString(
       "Identify the source".uppercased(),

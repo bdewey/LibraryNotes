@@ -9,7 +9,7 @@ extension Dictionary where Key == String, Value == StudyMetadata {
 
   /// Builds a study session from vocabulary associations.
   public func studySession(
-    from cards: [Card],
+    from cards: [Challenge],
     limit: Int,
     properties: CardDocumentProperties,
     date: Date = Date()

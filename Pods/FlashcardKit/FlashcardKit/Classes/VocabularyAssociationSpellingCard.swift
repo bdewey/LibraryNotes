@@ -5,7 +5,7 @@ import CommonplaceBook
 import TextBundleKit
 import UIKit
 
-struct VocabularyAssociationSpellingCard: Card {
+struct VocabularyAssociationSpellingCard: Challenge {
   init(vocabularyAssociation: VocabularyAssociation) {
     self.vocabularyAssociation = vocabularyAssociation
   }
@@ -20,11 +20,11 @@ struct VocabularyAssociationSpellingCard: Card {
     ].joined(separator: ":")
   }
 
-  func cardView(
+  func challengeView(
     document: UIDocument,
     properties: CardDocumentProperties,
     stylesheet: Stylesheet
-  ) -> CardView {
+  ) -> ChallengeView {
     return VocabularyAssociationSpellingCardView(
       card: self,
       document: document,

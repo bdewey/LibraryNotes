@@ -26,7 +26,7 @@ final class StudyMetadataSessionTests: XCTestCase {
 
   var allCards: Set<String> {
     return associations
-      .map({ $0.cards })
+      .map({ $0.challenges })
       .joined()
       .reduce(into: Set<String>(), { results, card in
         results.insert(card.identifier)

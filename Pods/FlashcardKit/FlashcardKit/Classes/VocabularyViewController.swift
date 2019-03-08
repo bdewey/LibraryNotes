@@ -18,7 +18,7 @@ extension VocabularyAssociation: StudyItem {
 
   public func studyMetadata(from identifierToStudyMetadata: IdentifierToStudyMetadata) -> StudyMetadata {
     let today = DayComponents(Date())
-    return cards
+    return challenges
       .map { identifierToStudyMetadata[
         $0.identifier,
         default: StudyMetadata(day: today, lastAnswers: AnswerStatistics.empty)

@@ -36,8 +36,8 @@ extension MiniMarkdown.TableRow {
   }
 }
 
-extension CardTemplateType {
-  public static let vocabularyAssociation = CardTemplateType(
+extension ChallengeTemplateType {
+  public static let vocabularyAssociation = ChallengeTemplateType(
     rawValue: "vocabularyAssociation",
     class: VocabularyAssociation.self
   )
@@ -49,8 +49,8 @@ extension CardTemplateType {
 /// - Given the Spanish word, what is the English word?
 /// - Given the Engish word, what is the Spanish word?
 /// - How do you spell the Spanish word? (optional)
-public final class VocabularyAssociation: CardTemplate {
-  public override var type: CardTemplateType { return .vocabularyAssociation }
+public final class VocabularyAssociation: ChallengeTemplate {
+  public override var type: ChallengeTemplateType { return .vocabularyAssociation }
 
   /// The Spanish word.
   let spanish: String
@@ -130,8 +130,8 @@ public final class VocabularyAssociation: CardTemplate {
   }
 
   /// Creates cards from this association.
-  public override var cards: [Card] {
-    var cards: [Card] = [
+  public override var challenges: [Challenge] {
+    var cards: [Challenge] = [
       VocabularyAssociationCard(vocabularyAssociation: self, promptWithSpanish: true),
       VocabularyAssociationCard(vocabularyAssociation: self, promptWithSpanish: false),
     ]

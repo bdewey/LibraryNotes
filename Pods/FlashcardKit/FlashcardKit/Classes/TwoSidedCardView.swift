@@ -14,7 +14,7 @@ import UIKit
 /// show the card back and two buttons: "Got it" and "study more."
 ///
 // TODO: What happened to "pronounce"??
-public final class TwoSidedCardView: CardView {
+public final class TwoSidedCardView: ChallengeView {
   public override init(frame: CGRect) {
     super.init(frame: frame)
     commonInit()
@@ -160,16 +160,16 @@ public final class TwoSidedCardView: CardView {
   }
 
   @objc private func didTapGotIt() {
-    delegate?.cardView(self, didAnswerCorrectly: true)
+    delegate?.challengeView(self, didRespondCorrectly: true)
   }
 
   @objc private func didTapStudyMore() {
-    delegate?.cardView(self, didAnswerCorrectly: false)
+    delegate?.challengeView(self, didRespondCorrectly: false)
   }
 
   @objc private func didTapPronounce() {
     if let language = language, let utterance = utterance {
-      delegate?.cardView(self, didRequestSpeech: utterance, language: language)
+      delegate?.challengeView(self, didRequestSpeech: utterance, language: language)
     }
   }
 }
