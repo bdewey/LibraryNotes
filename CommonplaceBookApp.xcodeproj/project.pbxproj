@@ -515,7 +515,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework",
 				"${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework",
 				"${BUILT_PRODUCTS_DIR}/CollectionViewLayouts/CollectionViewLayouts.framework",
@@ -568,7 +568,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D318C0FC2148707D00B035A1 /* ShellScript */ = {

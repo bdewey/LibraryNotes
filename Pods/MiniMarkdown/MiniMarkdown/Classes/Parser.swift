@@ -28,7 +28,7 @@ infix operator <*: SequencePrecedence
 infix operator <^>: SequencePrecedence
 
 /// A generic stream parser.
-public struct Parser<T, Stream: Sequence> where Stream.SubSequence == Stream {
+public struct Parser<T, Stream: Sequence> {
   public typealias ParseFunction = (Stream) -> (T, Stream)?
 
   /// The parse function: Given an input stream, returns the parsed type plus the remaining

@@ -21,7 +21,7 @@ public struct FileMetadata: Equatable {
     )
     let nsStringArray = metadataItem.value(
       forAttribute: NSMetadataItemContentTypeTreeKey
-    ) as! [NSString]
+    ) as? [NSString] ?? []
     self.contentTypeTree = nsStringArray.map { String($0) }
     self.displayName = String(
       metadataItem.value(forAttribute: NSMetadataItemDisplayNameKey) as! NSString

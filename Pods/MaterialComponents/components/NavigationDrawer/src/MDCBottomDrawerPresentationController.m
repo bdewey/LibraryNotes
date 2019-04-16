@@ -52,6 +52,7 @@ static CGFloat kTopHandleTopMargin = (CGFloat)5.0;
                        presentingViewController:presentingViewController];
   if (self) {
     _topHandleHidden = YES;
+    _maximumInitialDrawerHeight = 0;
   }
   return self;
 }
@@ -71,6 +72,10 @@ static CGFloat kTopHandleTopMargin = (CGFloat)5.0;
       [[MDCBottomDrawerContainerViewController alloc]
           initWithOriginalPresentingViewController:self.presentingViewController
                                 trackingScrollView:self.trackingScrollView];
+  if (self.maximumInitialDrawerHeight > 0) {
+    bottomDrawerContainerViewController.maximumInitialDrawerHeight =
+        self.maximumInitialDrawerHeight;
+  }
   if ([self.presentedViewController isKindOfClass:[MDCBottomDrawerViewController class]]) {
     // If in fact the presentedViewController is an MDCBottomDrawerViewController,
     // we then know there is a content and an (optional) header view controller.
@@ -167,7 +172,7 @@ static CGFloat kTopHandleTopMargin = (CGFloat)5.0;
 - (void)presentationTransitionDidEnd:(BOOL)completed {
   // Set up the tap recognizer to dimiss the drawer by.
   UITapGestureRecognizer *tapGestureRecognizer =
-  [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideDrawer)];
+      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hideDrawer)];
   [self.containerView addGestureRecognizer:tapGestureRecognizer];
   tapGestureRecognizer.delegate = self;
 
@@ -192,6 +197,10 @@ static CGFloat kTopHandleTopMargin = (CGFloat)5.0;
 - (void)dismissalTransitionDidEnd:(BOOL)completed {
   if (completed) {
     if ([self.presentedViewController isKindOfClass:[MDCBottomDrawerViewController class]]) {
+      CGRect newFrame = CGRectStandardize(
+          self.bottomDrawerContainerViewController.contentViewController.view.frame);
+      newFrame.size.height -= self.bottomDrawerContainerViewController.addedHeight;
+      self.bottomDrawerContainerViewController.contentViewController.view.frame = newFrame;
       [self.bottomDrawerContainerViewController removeFromParentViewController];
     }
     [self.scrimView removeFromSuperview];
@@ -206,7 +215,7 @@ static CGFloat kTopHandleTopMargin = (CGFloat)5.0;
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size
-       withTransitionCoordinator:(id <UIViewControllerTransitionCoordinator>)coordinator {
+       withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
   [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
   [self.bottomDrawerContainerViewController viewWillTransitionToSize:size
                                            withTransitionCoordinator:coordinator];

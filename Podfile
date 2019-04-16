@@ -14,16 +14,16 @@ target 'CommonplaceBookApp' do
   pod 'CwlSignal', :git => 'https://github.com/bdewey/CwlSignal'
   pod 'CwlUtils', :git => 'https://github.com/bdewey/CwlUtils'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  # pod 'FlashcardKit', :path => '../FlashcardKit', :testspecs => ['Tests']
-  pod 'FlashcardKit', :git => 'https://github.com/bdewey/FlashcardKit', :testspecs => ['Tests']
+  # pod 'FlashcardKit', :path => '../FlashcardKit', :testspecs => ['unit']
+  pod 'FlashcardKit', :git => 'https://github.com/bdewey/FlashcardKit', :testspecs => ['unit']
   pod 'IGListKit', '~> 3.0'
   # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
   pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'NunitoSans', :git => 'https://github.com/bdewey/NunitoSans'
   pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
-  # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['Tests']
-  pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['Tests']
+  # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['unit']
+  pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['unit']
 
   target 'CommonplaceBookAppTests' do
     inherit! :search_paths

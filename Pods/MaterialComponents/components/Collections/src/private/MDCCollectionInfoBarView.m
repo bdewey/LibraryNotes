@@ -80,8 +80,8 @@ static inline UIColor *CollectionInfoBarRedColor(void) {
 
   [self addSubview:_backgroundView];
 
-  _tapGesture =
-      [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGesture:)];
+  _tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                        action:@selector(handleTapGesture:)];
   [_backgroundView addGestureRecognizer:_tapGesture];
 }
 
@@ -89,17 +89,18 @@ static inline UIColor *CollectionInfoBarRedColor(void) {
   [super layoutSubviews];
 
   UIEdgeInsets collectionViewSafeAreaInsets = UIEdgeInsetsZero;
-    if (@available(iOS 11.0, *)) {
-      if (self.superview) {
-        collectionViewSafeAreaInsets = self.superview.safeAreaInsets;
-      }
+  if (@available(iOS 11.0, *)) {
+    if (self.superview) {
+      collectionViewSafeAreaInsets = self.superview.safeAreaInsets;
     }
-  CGFloat leftInset = MAX(MDCCollectionInfoBarLabelHorizontalPadding,
-                          collectionViewSafeAreaInsets.left);
-  CGFloat rightInset = MAX(MDCCollectionInfoBarLabelHorizontalPadding,
-                           collectionViewSafeAreaInsets.right);
-  CGFloat height = [_kind isEqualToString:MDCCollectionInfoBarKindHeader] ?
-      MDCCollectionInfoBarHeaderHeight : MDCCollectionInfoBarFooterHeight;
+  }
+  CGFloat leftInset =
+      MAX(MDCCollectionInfoBarLabelHorizontalPadding, collectionViewSafeAreaInsets.left);
+  CGFloat rightInset =
+      MAX(MDCCollectionInfoBarLabelHorizontalPadding, collectionViewSafeAreaInsets.right);
+  CGFloat height = [_kind isEqualToString:MDCCollectionInfoBarKindHeader]
+                       ? MDCCollectionInfoBarHeaderHeight
+                       : MDCCollectionInfoBarFooterHeight;
   _titleLabel.frame =
       CGRectMake(leftInset, 0, CGRectGetWidth(self.bounds) - (leftInset + rightInset), height);
 
@@ -134,7 +135,7 @@ static inline UIColor *CollectionInfoBarRedColor(void) {
   _kind = kind;
   _backgroundTransformY = CGRectGetHeight(self.bounds);
   if ([kind isEqualToString:MDCCollectionInfoBarKindHeader]) {
-    _backgroundTransformY *= -1.0;
+    _backgroundTransformY *= -1;
   }
   _backgroundView.transform = CGAffineTransformMakeTranslation(0, _backgroundTransformY);
 }
@@ -207,7 +208,8 @@ static inline UIColor *CollectionInfoBarRedColor(void) {
         self.userInteractionEnabled = self.allowsTap;
 
         // Notify delegate.
-        if ([self.delegate respondsToSelector:@selector(infoBar:didShowAnimated:willAutoDismiss:)]) {
+        if ([self.delegate respondsToSelector:@selector(infoBar:
+                                                  didShowAnimated:willAutoDismiss:)]) {
           [self.delegate infoBar:self
                  didShowAnimated:animated
                  willAutoDismiss:[self shouldAutoDismiss]];
@@ -236,10 +238,11 @@ static inline UIColor *CollectionInfoBarRedColor(void) {
         self.backgroundView.hidden = YES;
 
         // Notify delegate.
-        if ([self.delegate respondsToSelector:@selector(infoBar:didDismissAnimated:didAutoDismiss:)]) {
+        if ([self.delegate respondsToSelector:@selector(infoBar:
+                                                  didDismissAnimated:didAutoDismiss:)]) {
           [self.delegate infoBar:self
-                didDismissAnimated:animated
-                    didAutoDismiss:[self shouldAutoDismiss]];
+              didDismissAnimated:animated
+                  didAutoDismiss:[self shouldAutoDismiss]];
         }
       }];
 }

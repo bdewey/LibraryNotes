@@ -115,6 +115,22 @@
 @property(nonatomic, readonly) BOOL contentReachesFullscreen;
 
 /**
+ The height added to the bottom of the navigation drawer to hide the scrim.
+ Defaults to 0.
+ */
+@property(nonatomic, assign) CGFloat addedHeight;
+
+/**
+ The height of the drawer at initial layout. This is an absolute point-based value.
+
+ Defaults to 50% of the screens height.
+
+ @note In VoiceOver, SwitchControl, and UIUserInterfaceSizeClassCompact (mobile landscape) the
+ value will equal to 100% of the screens height.
+ */
+@property(nonatomic, assign) CGFloat maximumInitialDrawerHeight;
+
+/**
  Sets the content offset Y of the drawer's content. If contentOffsetY is set to 0, the
  drawer will scroll to the start of its content.
 

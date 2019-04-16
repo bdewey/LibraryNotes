@@ -20,7 +20,6 @@
  */
 @protocol MDCTypographyScheming
 
-
 /**
  The headline 1 font.
  */
@@ -86,6 +85,14 @@
  */
 @property(nonatomic, nonnull, readonly, copy) UIFont *overline;
 
+/**
+ Whether user interface elements should automatically resize based on the device's setting.
+
+ This can be used by client to communicate whether they support dynamic type to both our theming
+ functionality and embedded frameworks that also render UI.
+*/
+@property(nonatomic, readonly) BOOL mdc_adjustsFontForContentSizeCategory;
+
 @end
 
 /**
@@ -95,7 +102,16 @@ typedef NS_ENUM(NSInteger, MDCTypographySchemeDefaults) {
   /**
    The Material defaults, circa April 2018.
    */
-  MDCTypographySchemeDefaultsMaterial201804
+  MDCTypographySchemeDefaultsMaterial201804,
+
+  /**
+   The Material defaults, circa February 2019.
+
+   This scheme implements fonts with the similar metrics as
+   MDCTypographySchemeDefaultsMaterial201804 with the addition that vended fonts will have
+   appropriate scalingCurves attached.
+   */
+  MDCTypographySchemeDefaultsMaterial201902,
 };
 
 /**
@@ -118,6 +134,7 @@ typedef NS_ENUM(NSInteger, MDCTypographySchemeDefaults) {
 @property(nonatomic, nonnull, readwrite, copy) UIFont *caption;
 @property(nonatomic, nonnull, readwrite, copy) UIFont *button;
 @property(nonatomic, nonnull, readwrite, copy) UIFont *overline;
+@property(nonatomic, readwrite) BOOL mdc_adjustsFontForContentSizeCategory;
 
 /**
  Initializes the typography scheme with the latest material defaults.

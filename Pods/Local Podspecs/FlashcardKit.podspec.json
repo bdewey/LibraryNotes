@@ -1,6 +1,6 @@
 {
   "name": "FlashcardKit",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "summary": "A short description of FlashcardKit.",
   "description": "TODO: Add long description of the pod here.",
   "homepage": "https://github.com/bdewey@gmail.com/FlashcardKit",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/bdewey@gmail.com/FlashcardKit.git",
-    "tag": "0.10.0"
+    "tag": "0.10.1"
   },
   "platforms": {
     "ios": "11.0"
@@ -64,7 +64,7 @@
   },
   "testspecs": [
     {
-      "name": "Tests",
+      "name": "unit",
       "test_type": "unit",
       "source_files": "FlashcardKit/Tests/**/*"
     }

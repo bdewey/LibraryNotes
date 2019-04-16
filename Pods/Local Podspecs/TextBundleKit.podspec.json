@@ -1,6 +1,6 @@
 {
   "name": "TextBundleKit",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "summary": "A Swift library for manipulating Textbundle packages (http://textbundle.org).",
   "swift_version": "4.0",
   "description": "textbundle-swift is a pure-Swift library for reading and writing Textbundle packages.\nSee http://textbundle.org\nPlease note this is INCREDIBLY early in its development :-)",
@@ -14,7 +14,7 @@
   },
   "source": {
     "git": "https://github.com/bdewey/textbundle-swift.git",
-    "tag": "0.5.0"
+    "tag": "0.5.1"
   },
   "platforms": {
     "ios": "11.0"
@@ -22,7 +22,7 @@
   "source_files": "textbundle-swift/Classes/**/*",
   "testspecs": [
     {
-      "name": "Tests",
+      "name": "unit",
       "test_type": "unit",
       "source_files": "textbundle-swift/Tests/**/*",
       "resource_bundles": {
