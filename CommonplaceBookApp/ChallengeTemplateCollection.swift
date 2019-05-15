@@ -9,6 +9,8 @@ public struct ChallengeTemplateCollection {
 
   private var data: [String: String] = [:]
 
+  /// Inserts a ChallengeTemplate into the collection.
+  /// - returns: A string you can use to retrieve this ChallengeTemplate later.
   @discardableResult
   public mutating func insert(_ cardTemplate: ChallengeTemplate) throws -> String {
     let wrapped = CardTemplateSerializationWrapper(cardTemplate)
@@ -25,9 +27,38 @@ public struct ChallengeTemplateCollection {
     self.data[key] = String(data: data, encoding: .utf8)!
     return key
   }
+
+  public subscript(key: String) -> String? {
+    return data[key]
+  }
 }
 
+extension ChallengeTemplateCollection: Collection {
+  public var startIndex: Dictionary<String, String>.Index {
+    return data.startIndex
+  }
+
+  public var endIndex: Dictionary<String, String>.Index {
+    return data.endIndex
+  }
+
+  public var count: Int {
+    return data.count
+  }
+
+  public func index(after i: Dictionary<String, String>.Index) -> Dictionary<String, String>.Index {
+    return data.index(after: i)
+  }
+
+  public subscript (position: Dictionary<String, String>.Index) -> (key: String, value: String) {
+    return data[position]
+  }
+}
+
+// Provide custom encoding; we don't want to encode the "data=" in JSON.
 extension ChallengeTemplateCollection: Codable {
+
+  // Just use strings as coding keys.
   private struct CodingKey: Swift.CodingKey {
     var stringValue: String
 
