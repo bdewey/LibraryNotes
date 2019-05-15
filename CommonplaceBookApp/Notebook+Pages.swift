@@ -13,6 +13,10 @@ extension Tag {
   public static let renamedCopy = Tag(rawValue: "renamedCopy")
 }
 
+private let challengeTemplateCollectionQueue = DispatchQueue(
+  label: "org.brians-brain.commonplacebook.challengetemplate"
+)
+
 /// Notebook functionality responsible for the "pages" data -- mapping of name to PageProperties.
 extension Notebook {
   public typealias TaggedPageDictionary = [String: Tagged<PageProperties>]
@@ -30,6 +34,19 @@ extension Notebook {
     }
     set {
       internalNotebookData[.pageProperties] = newValue
+      challengeTemplateCollectionQueue.async {
+        var collection = ChallengeTemplateCollection()
+        for pageProperties in newValue.values {
+          for template in pageProperties.value.cardTemplates {
+            try! collection.insert(template.value) // swiftlint:disable:this force_try
+          }
+        }
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        let encoded = try! encoder.encode(collection) // swiftlint:disable:this force_try
+        let encodedString = String(data: encoded, encoding: .utf8)!
+        print(encodedString)
+      }
     }
   }
 
@@ -129,10 +146,13 @@ extension Notebook {
   /// Set up the code to monitor for changes to cached properties on disk, plus propagate
   /// cached changes to disk.
   private func monitorPropertiesDocument(_ propertiesDocument: EditableDocument) {
+    DDLogInfo("Opening properties document")
     propertiesDocument.openOrCreate { success in
       // TODO: Handle the failure case here.
       precondition(success)
+      DDLogInfo("Properties document opened. Getting data.")
       self.endpoints += propertiesDocument.textSignal.subscribeValues({ taggedString in
+        DDLogInfo("Properties changed.")
         // If we've already loaded information into memory, don't clobber it.
         if self.pageProperties.isEmpty {
           let pages = self.pagesDictionary(from: taggedString.value, tag: .fromCache)
