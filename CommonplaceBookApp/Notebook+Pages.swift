@@ -31,9 +31,7 @@ extension Notebook {
     set {
       internalNotebookData[.pageProperties] = newValue
       for pageProperties in newValue.values {
-        for template in pageProperties.value.cardTemplates {
-          _ = try? reviewBundleDocument?.insert(template.value)
-        }
+        reviewBundleDocument?.updatePage(for: pageProperties.value.fileMetadata, in: metadataProvider, completion: nil)
       }
     }
   }

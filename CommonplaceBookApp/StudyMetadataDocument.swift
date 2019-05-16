@@ -1,6 +1,8 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import FlashcardKit
+import MiniMarkdown
 import UIKit
 
 public protocol StudyMetadataDocumentObserver: AnyObject {
@@ -14,17 +16,92 @@ public final class StudyMetadataDocument: UIDocument {
     case documentKeyNotFound
   }
 
+  public init(fileURL url: URL, parsingRules: ParsingRules) {
+    self.parsingRules = parsingRules
+    super.init(fileURL: url)
+  }
+
+  private let parsingRules: ParsingRules
+
+  /// All notebook pages we know about. Maps the lastPathComponent of the file to relevant properties.
+  public private(set) var pageProperties: [String: ReviewPageProperties] = [:]
+
   /// All challenge templates across all pages.
   public private(set) var challengeTemplates = ChallengeTemplateCollection()
 
+  /// Logs all changes.
   public private(set) var log = [ChangeRecord]()
 
   /// All things watching the document lifecycle.
   private var observers: [WeakObserver] = []
 
+  /// Updates information about a page.
+  /// - parameter fileMetadata: FileMetadata identifying the page in the metadata provider.
+  /// - parameter metadataProvider: Container for pages.
+  /// - parameter completion: Called after updating page properties. Will pass true if we had
+  ///             to load properties from disk; false if we kept cached properties.
+  public func updatePage(
+    for fileMetadata: FileMetadata,
+    in metadataProvider: FileMetadataProvider,
+    completion: ((Bool) -> Void)?
+  ) {
+    assert(Thread.isMainThread)
+    if let existing = pageProperties[fileMetadata.fileName],
+      existing.timestamp.closeEnough(to: fileMetadata.contentChangeDate) {
+      completion?(false)
+      return
+    }
+    guard let document = metadataProvider.editableDocument(for: fileMetadata) else {
+      completion?(false)
+      return
+    }
+    document.open { success in
+      guard success else { completion?(false); return }
+      let textResult = document.currentTextResult
+      document.close(completionHandler: nil)
+      DispatchQueue.global(qos: .default).async {
+        let result = textResult.flatMap({ taggedText -> (ReviewPageProperties, ChallengeTemplateCollection) in
+          let digest = taggedText.value.sha1Digest()
+          let nodes = self.parsingRules.parse(taggedText.value)
+          // TODO: Bubble up the error
+          let challengeTemplates = (try? nodes.challengeTemplates()) ?? ChallengeTemplateCollection()
+          let properties = ReviewPageProperties(
+            sha1Digest: digest,
+            timestamp: fileMetadata.contentChangeDate,
+            hashtags: nodes.hashtags,
+            title: nodes.title,
+            cardTemplates: challengeTemplates.keys
+          )
+          return (properties, challengeTemplates)
+        })
+        DispatchQueue.main.async {
+          switch result {
+          case .success(let tuple):
+            self.injest(fileName: fileMetadata.fileName, pageProperties: tuple.0, challengeTemplates: tuple.1)
+          case .failure(let error):
+            DDLogError("Unexpected error importing document: \(error)")
+          }
+          completion?(true)
+        }
+      }
+    }
+  }
+
+  private func injest(
+    fileName: String,
+    pageProperties: ReviewPageProperties,
+    challengeTemplates: ChallengeTemplateCollection
+  ) {
+    if let existing = self.pageProperties[fileName],
+      existing.sha1Digest == pageProperties.sha1Digest {
+      return
+    }
+
+  }
+
   /// Inserts a ChallengeTemplate into the document.
   /// - returns: The key that can be used to retrieve this template from `challengeTemplates`
-  public func insert(_ challengeTemplate: ChallengeTemplate) throws -> String {
+  private func insert(_ challengeTemplate: ChallengeTemplate) throws -> String {
     assert(Thread.isMainThread)
     let (key, didChange) = try challengeTemplates.insert(challengeTemplate)
     if didChange {
@@ -42,6 +119,7 @@ public final class StudyMetadataDocument: UIDocument {
     }
     challengeTemplates = try directory.loadChallengeTemplateCollection()
     log = try directory.loadLog()
+    pageProperties = try directory.loadPages()
     for wrapper in observers {
       wrapper.observer?.studyMetadataDocumentDidLoad(self)
     }
@@ -51,10 +129,14 @@ public final class StudyMetadataDocument: UIDocument {
   public override func contents(forType typeName: String) throws -> Any {
     let logString = log.map { $0.description }.joined(separator: "\n")
     let logWrapper = FileWrapper(regularFileWithContents: logString.data(using: .utf8)!)
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = .prettyPrinted
+    let pageData = try encoder.encode(pageProperties)
     return FileWrapper(
       directoryWithFileWrappers: [
         BundleKey.challengeTemplates: try challengeTemplates.fileWrapper(),
         BundleKey.log: logWrapper,
+        BundleKey.pages: FileWrapper(regularFileWithContents: pageData),
       ]
     )
   }
@@ -85,6 +167,8 @@ public extension StudyMetadataDocument {
     /// We added a template to the document.
     case addedChallengeTemplate(id: String)
 
+    case addedPage(name: String, digest: String)
+
     /// Decode a change from a string.
     public init?(_ description: String) {
       if let id = description.removingPrefix("add template ") {
@@ -99,6 +183,8 @@ public extension StudyMetadataDocument {
       switch self {
       case .addedChallengeTemplate(let id):
         return "add template " + id
+      case .addedPage(name: let name, digest: let digest):
+        return "add page " + digest + " " + name
       }
     }
   }
@@ -137,6 +223,7 @@ public extension StudyMetadataDocument {
 private enum BundleKey {
   static let challengeTemplates = "challenge-templates.json"
   static let log = "change.log"
+  static let pages = "pages.json"
 }
 
 /// Loading properties.
@@ -159,6 +246,16 @@ private extension FileWrapper {
     }
     return str.split(separator: "\n").compactMap { StudyMetadataDocument.ChangeRecord(String($0)) }
   }
+
+  func loadPages() throws -> [String: ReviewPageProperties] {
+    guard
+      let wrapper = fileWrappers?[BundleKey.challengeTemplates],
+      let data = wrapper.regularFileContents
+      else {
+        throw StudyMetadataDocument.Error.documentKeyNotFound
+    }
+    return try JSONDecoder().decode([String: ReviewPageProperties].self, from: data)
+  }
 }
 
 private extension ChallengeTemplateCollection {
@@ -174,3 +271,11 @@ private struct WeakObserver {
   weak var observer: StudyMetadataDocumentObserver?
   init(_ observer: StudyMetadataDocumentObserver) { self.observer = observer }
 }
+
+private extension Date {
+  /// True if the receiver and `other` are "close enough"
+  func closeEnough(to other: Date) -> Bool {
+    return abs(timeIntervalSince(other)) < 1
+  }
+}
+

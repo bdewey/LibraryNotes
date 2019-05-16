@@ -179,6 +179,14 @@ extension Array where Element == Node {
     return results
   }
 
+  func challengeTemplates() throws -> ChallengeTemplateCollection {
+    var challengeTemplates = ChallengeTemplateCollection()
+    try challengeTemplates.insert(contentsOf: VocabularyAssociation.makeAssociations(from: self).0)
+    try challengeTemplates.insert(contentsOf: ClozeTemplate.extract(from: self))
+    try challengeTemplates.insert(contentsOf: QuoteTemplate.extract(from: self))
+    return challengeTemplates
+  }
+
   /// Extracts the title from an array of nodes.
   ///
   /// - note: If there is a heading anywhere in the nodes, the contents of the first heading

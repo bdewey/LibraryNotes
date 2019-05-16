@@ -12,6 +12,10 @@ public struct ChallengeTemplateCollection {
 
   private var data: [String: String] = [:]
 
+  var keys: [String] {
+    return Array(data.keys)
+  }
+
   /// Inserts a ChallengeTemplate into the collection.
   /// - returns: A string you can use to retrieve this ChallengeTemplate later.
   @discardableResult
@@ -21,19 +25,18 @@ public struct ChallengeTemplateCollection {
     let wrapped = CardTemplateSerializationWrapper(cardTemplate)
     let encoder = JSONEncoder()
     let data = try encoder.encode(wrapped)
-    var digest = Data(repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
-
-    data.withUnsafeBytes { dataPtr -> Void in
-      digest.withUnsafeMutableBytes({ digestPtr -> Void in
-        CC_SHA1(dataPtr, CC_LONG(data.count), digestPtr)
-      })
-    }
-    let key = digest.toHexString()
+    let key = data.sha1Digest()
     if self.data[key] == nil {
       self.data[key] = String(data: data, encoding: .utf8)!
       return (key, true)
     } else {
       return (key, false)
+    }
+  }
+
+  public mutating func insert<S: Sequence>(contentsOf templates: S) throws where S.Element == ChallengeTemplate {
+    for template in templates {
+      try insert(template)
     }
   }
 
@@ -101,14 +104,5 @@ extension ChallengeTemplateCollection: Codable {
       data[key.stringValue] = try container.decode(String.self, forKey: key)
     }
     self.data = data
-  }
-}
-
-private extension Data {
-
-  func toHexString() -> String {
-    return lazy.map { (byte) in
-      (byte <= 0xF ? "0" : "") + String(byte, radix: 16)
-    }.joined()
   }
 }
