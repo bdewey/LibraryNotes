@@ -56,7 +56,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           ).loadCachedProperties()
             .loadStudyMetadata()
             .monitorMetadataProvider()
-            .loadChallengeTemplates()
+            .loadReviewBundle()
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"

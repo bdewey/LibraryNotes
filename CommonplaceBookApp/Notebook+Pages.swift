@@ -32,7 +32,7 @@ extension Notebook {
       internalNotebookData[.pageProperties] = newValue
       for pageProperties in newValue.values {
         for template in pageProperties.value.cardTemplates {
-          _ = try? challengeTemplateDocument?.insert(template.value)
+          _ = try? reviewBundleDocument?.insert(template.value)
         }
       }
     }

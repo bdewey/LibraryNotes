@@ -57,6 +57,7 @@ public final class Notebook {
 
   deinit {
     openMetadocuments.forEach { $0.1.close(completionHandler: nil) }
+    reviewBundleDocument?.close(completionHandler: nil)
     observerTokens.forEach { NotificationCenter.default.removeObserver($0) }
   }
 
@@ -114,6 +115,19 @@ public final class Notebook {
 
   /// Where we cache our properties.
   internal var openMetadocuments = [Key: EditableDocument]()
+
+  /// Holds all review metadata.
+  public private(set) var reviewBundleDocument: StudyMetadataDocument?
+
+  @discardableResult
+  public func loadReviewBundle() -> Notebook {
+    let document = StudyMetadataDocument(
+      fileURL: metadataProvider.container.appendingPathComponent("notebook.review")
+    )
+    reviewBundleDocument = document
+    document.openOrCreate(completionHandler: nil)
+    return self
+  }
 
   /// Any tokens created via NotificationCenter; removed in deinit
   internal var observerTokens = [NSObjectProtocol]()
