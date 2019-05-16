@@ -13,10 +13,6 @@ extension Tag {
   public static let renamedCopy = Tag(rawValue: "renamedCopy")
 }
 
-private let challengeTemplateCollectionQueue = DispatchQueue(
-  label: "org.brians-brain.commonplacebook.challengetemplate"
-)
-
 /// Notebook functionality responsible for the "pages" data -- mapping of name to PageProperties.
 extension Notebook {
   public typealias TaggedPageDictionary = [String: Tagged<PageProperties>]
@@ -34,18 +30,10 @@ extension Notebook {
     }
     set {
       internalNotebookData[.pageProperties] = newValue
-      challengeTemplateCollectionQueue.async {
-        var collection = ChallengeTemplateCollection()
-        for pageProperties in newValue.values {
-          for template in pageProperties.value.cardTemplates {
-            try! collection.insert(template.value) // swiftlint:disable:this force_try
-          }
+      for pageProperties in newValue.values {
+        for template in pageProperties.value.cardTemplates {
+          _ = try? challengeTemplateDocument?.insert(template.value)
         }
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
-        let encoded = try! encoder.encode(collection) // swiftlint:disable:this force_try
-        let encodedString = String(data: encoded, encoding: .utf8)!
-        print(encodedString)
       }
     }
   }

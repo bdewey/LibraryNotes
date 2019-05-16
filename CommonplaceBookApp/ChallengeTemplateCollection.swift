@@ -4,6 +4,9 @@ import CommonCrypto
 import FlashcardKit
 import Foundation
 
+/// An append-only, content-addressable collection of ChallengeTemplate objects.
+/// When challenge templates are inserted into the collection, you get a key you can use
+/// to retrieve that template later. The key persists across saving/restoring the collection.
 public struct ChallengeTemplateCollection {
   public init() { }
 
@@ -12,7 +15,9 @@ public struct ChallengeTemplateCollection {
   /// Inserts a ChallengeTemplate into the collection.
   /// - returns: A string you can use to retrieve this ChallengeTemplate later.
   @discardableResult
-  public mutating func insert(_ cardTemplate: ChallengeTemplate) throws -> String {
+  public mutating func insert(
+    _ cardTemplate: ChallengeTemplate
+  ) throws -> (key: String, wasInserted: Bool) {
     let wrapped = CardTemplateSerializationWrapper(cardTemplate)
     let encoder = JSONEncoder()
     let data = try encoder.encode(wrapped)
@@ -24,12 +29,21 @@ public struct ChallengeTemplateCollection {
       })
     }
     let key = digest.toHexString()
-    self.data[key] = String(data: data, encoding: .utf8)!
-    return key
+    if self.data[key] == nil {
+      self.data[key] = String(data: data, encoding: .utf8)!
+      return (key, true)
+    } else {
+      return (key, false)
+    }
   }
 
-  public subscript(key: String) -> String? {
-    return data[key]
+  public func template(for key: String) throws -> ChallengeTemplate? {
+    guard let encodedString = data[key],
+      let data = encodedString.data(using: .utf8)
+      else { return nil }
+    let decoder = JSONDecoder()
+    let wrapper = try decoder.decode(CardTemplateSerializationWrapper.self, from: data)
+    return wrapper.value
   }
 }
 

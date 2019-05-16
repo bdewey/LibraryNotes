@@ -53,7 +53,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           notebook: Notebook(
             parsingRules: parsingRules,
             metadataProvider: metadataProvider
-          ).loadCachedProperties().loadStudyMetadata().monitorMetadataProvider()
+          ).loadCachedProperties()
+            .loadStudyMetadata()
+            .monitorMetadataProvider()
+            .loadChallengeTemplates()
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
