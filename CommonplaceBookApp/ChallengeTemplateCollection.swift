@@ -40,6 +40,18 @@ public struct ChallengeTemplateCollection {
     }
   }
 
+  /// Merges another ChallengeTemplateCollection into this one.
+  /// - returns: An array of keys added to the receiver.
+  @discardableResult
+  public mutating func merge(_ other: ChallengeTemplateCollection) -> [String] {
+    var addedKeys: [String] = []
+    for (key, value) in other where data[key] == nil {
+      data[key] = value
+      addedKeys.append(key)
+    }
+    return addedKeys
+  }
+
   public func template(for key: String) throws -> ChallengeTemplate? {
     guard let encodedString = data[key],
       let data = encodedString.data(using: .utf8)

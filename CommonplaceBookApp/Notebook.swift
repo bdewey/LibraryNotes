@@ -122,7 +122,8 @@ public final class Notebook {
   @discardableResult
   public func loadReviewBundle() -> Notebook {
     let document = StudyMetadataDocument(
-      fileURL: metadataProvider.container.appendingPathComponent("notebook.review")
+      fileURL: metadataProvider.container.appendingPathComponent("notebook.review"),
+      parsingRules: parsingRules
     )
     reviewBundleDocument = document
     document.openOrCreate(completionHandler: nil)

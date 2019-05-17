@@ -35,6 +35,8 @@ public final class StudyMetadataDocument: UIDocument {
   /// All things watching the document lifecycle.
   private var observers: [WeakObserver] = []
 
+  private var loadPendingFilenames = Set<String>()
+
   /// Updates information about a page.
   /// - parameter fileMetadata: FileMetadata identifying the page in the metadata provider.
   /// - parameter metadataProvider: Container for pages.
@@ -46,6 +48,10 @@ public final class StudyMetadataDocument: UIDocument {
     completion: ((Bool) -> Void)?
   ) {
     assert(Thread.isMainThread)
+    guard !loadPendingFilenames.contains(fileMetadata.fileName) else {
+      completion?(false)
+      return
+    }
     if let existing = pageProperties[fileMetadata.fileName],
       existing.timestamp.closeEnough(to: fileMetadata.contentChangeDate) {
       completion?(false)
@@ -55,6 +61,7 @@ public final class StudyMetadataDocument: UIDocument {
       completion?(false)
       return
     }
+    loadPendingFilenames.insert(fileMetadata.fileName)
     document.open { success in
       guard success else { completion?(false); return }
       let textResult = document.currentTextResult
@@ -81,6 +88,7 @@ public final class StudyMetadataDocument: UIDocument {
           case .failure(let error):
             DDLogError("Unexpected error importing document: \(error)")
           }
+          self.loadPendingFilenames.remove(fileMetadata.fileName)
           completion?(true)
         }
       }
@@ -92,11 +100,20 @@ public final class StudyMetadataDocument: UIDocument {
     pageProperties: ReviewPageProperties,
     challengeTemplates: ChallengeTemplateCollection
   ) {
+    assert(Thread.isMainThread)
     if let existing = self.pageProperties[fileName],
       existing.sha1Digest == pageProperties.sha1Digest {
+      DDLogInfo("Skipping \(fileName) -- already have properties for \(pageProperties.sha1Digest)")
       return
     }
-
+    log.append(ChangeRecord(timestamp: Date(), change: .addedPage(name: fileName, digest: pageProperties.sha1Digest)))
+    self.pageProperties[fileName] = pageProperties
+    let addedTemplateKeys = self.challengeTemplates.merge(challengeTemplates)
+    for key in addedTemplateKeys {
+      log.append(ChangeRecord(timestamp: Date(), change: .addedChallengeTemplate(id: key)))
+    }
+    DDLogInfo("Added information about \(addedTemplateKeys.count) challenges from \(fileName) (\(pageProperties.sha1Digest))")
+    updateChangeCount(.done)
   }
 
   /// Inserts a ChallengeTemplate into the document.
@@ -173,6 +190,14 @@ public extension StudyMetadataDocument {
     public init?(_ description: String) {
       if let id = description.removingPrefix("add template ") {
         self = .addedChallengeTemplate(id: String(id))
+      } else if let digestAndName = description.removingPrefix("add page ") {
+        let components = digestAndName.split(separator: " ")
+        if components.count > 1 {
+          let name = String(components[1...].joined(separator: " "))
+          self = .addedPage(name: name, digest: String(components[0]))
+        } else {
+          return nil
+        }
       } else {
         return nil
       }
