@@ -128,6 +128,33 @@ public final class StudyMetadataDocument: UIDocument {
     return key
   }
 
+  /// Returns a study session given the current notebook pages and study metadata (which indicates
+  /// what cards have been studied, and therefore don't need to be studied today).
+  ///
+  /// - parameter filter: An optional function that determines if a page should be included in
+  ///                     the study session. If no filter is given, the all pages will be used
+  ///                     to construct the session.
+  /// - returns: A StudySession!
+  public func studySession(filter: ((ReviewPageProperties) -> Bool)? = nil) -> StudySession {
+    let filter = filter ?? { _ in true }
+    return pageProperties
+      .filter { filter($0.value) }
+      .map { (name, reviewProperties) -> StudySession in
+        let challengeTemplates = reviewProperties.cardTemplates.compactMap {
+          self.challengeTemplates[$0]
+        }
+        return StudySession(
+          challengeTemplates.cards,
+          properties: CardDocumentProperties(
+            documentName: name,
+            attributionMarkdown: reviewProperties.title,
+            parsingRules: self.parsingRules
+          )
+        )
+      }
+      .reduce(into: StudySession(), { $0 += $1 })
+  }
+
   /// Loads document data.
   /// The document is a bundle of different data streams.
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {

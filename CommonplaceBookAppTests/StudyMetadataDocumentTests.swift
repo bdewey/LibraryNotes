@@ -59,6 +59,18 @@ final class StudyMetadataDocumentTests: XCTestCase {
     )
     closeDocument(roundTripDocument)
   }
+
+  func testLoadStudySessions() {
+    let file = try! TemporaryFile(creatingTempDirectoryForFilename: "notebook.review")
+    defer { try? file.deleteDirectory() }
+    let document = openDocument(fileURL: file.fileURL)
+    loadAllPages(into: document)
+    XCTAssertEqual(document.studySession().count, 11)
+    XCTAssertEqual(
+      document.studySession(filter: { $0.hashtags.contains("#inspiration")}).count,
+      2
+    )
+  }
 }
 
 extension StudyMetadataDocumentTests {
@@ -120,6 +132,8 @@ extension StudyMetadataDocumentTests {
 private let educatedText = """
 # *Educated*, Tara Westover
 
+#books
+
 * The author of *Educated* is ?[](Tara Westover).
 * *Educated* takes place at ?[mountain name](Buck’s Peak), in ?[state](Idaho).
 * Tara Westover did her undergraduate education at ?[collage](BYU).
@@ -140,6 +154,8 @@ private let educatedText = """
 
 private let msfmText = """
 # *Man's Search for Meaning*, Viktor E. Frankl
+
+#books #inspiration
 
 > We had to learn for ourselves and, furthermore, we had to teach the despairing men, that ?[](it did not really matter what we expected from life, but rather what life expected from us).
 """
