@@ -43,6 +43,19 @@ public final class QuoteTemplate: ChallengeTemplate {
     }
   }
 
+  required convenience init(markdown description: String, parsingRules: ParsingRules) throws {
+    let nodes = parsingRules.parse(description)
+    if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
+      self.init(quote: quote)
+    } else {
+      throw Error.markdownParseError
+    }
+  }
+
+  public override var asMarkdown: String {
+    return quote.allMarkdown
+  }
+
   public override func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(quote.allMarkdown, forKey: .quote)
@@ -72,6 +85,8 @@ extension QuoteTemplate: Challenge {
   public var identifier: String {
     return quote.allMarkdown
   }
+
+  public var templateIndex: Int { return 0 }
 
   public func challengeView(
     document: UIDocument,

@@ -11,6 +11,7 @@ public protocol Challenge {
   /// Every challenge needs a unique identifier. This serves as an key to associate this card
   /// with statistics describing how well the person handles the challenge over time.
   var identifier: String { get }
+  
 
   /// Returns a view that can quiz a person about the thing to remember.
   ///

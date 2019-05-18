@@ -44,11 +44,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     let window = UIWindow(frame: UIScreen.main.bounds)
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
+    let parsingRules = LanguageDeck.parsingRules
 
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
-        let parsingRules = LanguageDeck.parsingRules
         window.rootViewController = self.makeViewController(
           notebook: Notebook(
             parsingRules: parsingRules,

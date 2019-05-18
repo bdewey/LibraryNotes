@@ -134,7 +134,7 @@ public final class StudyMetadataDocument: UIDocument {
     guard let directory = contents as? FileWrapper else {
       throw NSError(domain: NSCocoaErrorDomain, code: NSFileReadCorruptFileError, userInfo: nil)
     }
-    challengeTemplates = try directory.loadChallengeTemplateCollection()
+    challengeTemplates = try directory.loadChallengeTemplateCollection(using: parsingRules)
     log = try directory.loadLog()
     pageProperties = try directory.loadPages()
     for wrapper in observers {
@@ -151,7 +151,7 @@ public final class StudyMetadataDocument: UIDocument {
     let pageData = try encoder.encode(pageProperties)
     return FileWrapper(
       directoryWithFileWrappers: [
-        BundleKey.challengeTemplates: try challengeTemplates.fileWrapper(),
+        BundleKey.challengeTemplates: challengeTemplates.fileWrapper(),
         BundleKey.log: logWrapper,
         BundleKey.pages: FileWrapper(regularFileWithContents: pageData),
       ]
@@ -188,9 +188,9 @@ public extension StudyMetadataDocument {
 
     /// Decode a change from a string.
     public init?(_ description: String) {
-      if let id = description.removingPrefix("add template ") {
-        self = .addedChallengeTemplate(id: String(id))
-      } else if let digestAndName = description.removingPrefix("add page ") {
+      if let digest = description.removingPrefix(Prefix.addChallengeTemplate) {
+        self = .addedChallengeTemplate(id: String(digest))
+      } else if let digestAndName = description.removingPrefix(Prefix.addPage) {
         let components = digestAndName.split(separator: " ")
         if components.count > 1 {
           let name = String(components[1...].joined(separator: " "))
@@ -206,11 +206,16 @@ public extension StudyMetadataDocument {
     /// Turn a change into a string.
     public var description: String {
       switch self {
-      case .addedChallengeTemplate(let id):
-        return "add template " + id
+      case .addedChallengeTemplate(let digest):
+        return Prefix.addChallengeTemplate + digest
       case .addedPage(name: let name, digest: let digest):
-        return "add page " + digest + " " + name
+        return Prefix.addPage + digest + " " + name
       }
+    }
+
+    private enum Prefix {
+      static let addChallengeTemplate = "add-template        "
+      static let addPage              = "add-page            "
     }
   }
 
@@ -246,21 +251,21 @@ public extension StudyMetadataDocument {
 
 /// The names of the different streams inside our bundle.
 private enum BundleKey {
-  static let challengeTemplates = "challenge-templates.json"
+  static let challengeTemplates = "challenge-templates.tdat"
   static let log = "change.log"
   static let pages = "pages.json"
 }
 
 /// Loading properties.
 private extension FileWrapper {
-  func loadChallengeTemplateCollection() throws -> ChallengeTemplateCollection {
+  func loadChallengeTemplateCollection(using parsingRules: ParsingRules) throws -> ChallengeTemplateCollection {
     guard
       let wrapper = fileWrappers?[BundleKey.challengeTemplates],
       let data = wrapper.regularFileContents
       else {
         throw StudyMetadataDocument.Error.documentKeyNotFound
     }
-    return try JSONDecoder().decode(ChallengeTemplateCollection.self, from: data)
+    return try ChallengeTemplateCollection(parsingRules: parsingRules, data: data)
   }
 
   func loadLog() throws -> [StudyMetadataDocument.ChangeRecord] {
@@ -284,11 +289,8 @@ private extension FileWrapper {
 }
 
 private extension ChallengeTemplateCollection {
-  func fileWrapper() throws -> FileWrapper {
-    let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    let data = try encoder.encode(self)
-    return FileWrapper(regularFileWithContents: data)
+  func fileWrapper() -> FileWrapper {
+    return FileWrapper(regularFileWithContents: data())
   }
 }
 

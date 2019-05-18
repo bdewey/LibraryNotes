@@ -3,6 +3,7 @@
 import CommonCrypto
 import FlashcardKit
 import Foundation
+import MiniMarkdown
 
 /// An append-only, content-addressable collection of ChallengeTemplate objects.
 /// When challenge templates are inserted into the collection, you get a key you can use
@@ -10,10 +11,10 @@ import Foundation
 public struct ChallengeTemplateCollection {
   public init() { }
 
-  private var data: [String: String] = [:]
+  private var challengeTemplates: [String: ChallengeTemplate] = [:]
 
-  var keys: [String] {
-    return Array(data.keys)
+  public var keys: [String] {
+    return Array(challengeTemplates.keys)
   }
 
   /// Inserts a ChallengeTemplate into the collection.
@@ -21,22 +22,19 @@ public struct ChallengeTemplateCollection {
   @discardableResult
   public mutating func insert(
     _ cardTemplate: ChallengeTemplate
-  ) throws -> (key: String, wasInserted: Bool) {
-    let wrapped = CardTemplateSerializationWrapper(cardTemplate)
-    let encoder = JSONEncoder()
-    let data = try encoder.encode(wrapped)
-    let key = data.sha1Digest()
-    if self.data[key] == nil {
-      self.data[key] = String(data: data, encoding: .utf8)!
+  ) -> (key: String, wasInserted: Bool) {
+    let key = cardTemplate.asMarkdown.sha1Digest()
+    if self.challengeTemplates[key] == nil {
+      self.challengeTemplates[key] = cardTemplate
       return (key, true)
     } else {
       return (key, false)
     }
   }
 
-  public mutating func insert<S: Sequence>(contentsOf templates: S) throws where S.Element == ChallengeTemplate {
+  public mutating func insert<S: Sequence>(contentsOf templates: S) where S.Element == ChallengeTemplate {
     for template in templates {
-      try insert(template)
+      insert(template)
     }
   }
 
@@ -45,76 +43,109 @@ public struct ChallengeTemplateCollection {
   @discardableResult
   public mutating func merge(_ other: ChallengeTemplateCollection) -> [String] {
     var addedKeys: [String] = []
-    for (key, value) in other where data[key] == nil {
-      data[key] = value
+    for (key, value) in other where challengeTemplates[key] == nil {
+      challengeTemplates[key] = value
       addedKeys.append(key)
     }
     return addedKeys
   }
 
-  public func template(for key: String) throws -> ChallengeTemplate? {
-    guard let encodedString = data[key],
-      let data = encodedString.data(using: .utf8)
-      else { return nil }
-    let decoder = JSONDecoder()
-    let wrapper = try decoder.decode(CardTemplateSerializationWrapper.self, from: data)
-    return wrapper.value
+  public subscript(key: String) -> ChallengeTemplate? {
+    return challengeTemplates[key]
   }
 }
 
 extension ChallengeTemplateCollection: Collection {
-  public var startIndex: Dictionary<String, String>.Index {
-    return data.startIndex
+  public var startIndex: Dictionary<String, ChallengeTemplate>.Index {
+    return challengeTemplates.startIndex
   }
 
-  public var endIndex: Dictionary<String, String>.Index {
-    return data.endIndex
+  public var endIndex: Dictionary<String, ChallengeTemplate>.Index {
+    return challengeTemplates.endIndex
   }
 
   public var count: Int {
-    return data.count
+    return challengeTemplates.count
   }
 
-  public func index(after i: Dictionary<String, String>.Index) -> Dictionary<String, String>.Index {
-    return data.index(after: i)
+  public func index(after i: Dictionary<String, ChallengeTemplate>.Index) -> Dictionary<String, ChallengeTemplate>.Index {
+    return challengeTemplates.index(after: i)
   }
 
-  public subscript (position: Dictionary<String, String>.Index) -> (key: String, value: String) {
-    return data[position]
+  public subscript (position: Dictionary<String, ChallengeTemplate>.Index) -> (key: String, value: ChallengeTemplate) {
+    return challengeTemplates[position]
   }
 }
 
-// Provide custom encoding; we don't want to encode the "data=" in JSON.
-extension ChallengeTemplateCollection: Codable {
+// swiftlint:disable:next force_try
+private let headerRegularExpression = try! NSRegularExpression(
+  pattern: "^([0-9a-f]{40}) (\\w+) (\\d+)$",
+  options: []
+)
 
-  // Just use strings as coding keys.
-  private struct CodingKey: Swift.CodingKey {
-    var stringValue: String
-
-    init?(stringValue: String) {
-      self.stringValue = stringValue
-    }
-
-    var intValue: Int? { return nil }
-
-    init?(intValue: Int) {
-      return nil
-    }
+extension ChallengeTemplateCollection {
+  enum Error: Swift.Error {
+    case invalidDigest
+    case headerFailedRegex
   }
 
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKey.self)
-    for (key, value) in data {
-      try container.encode(value, forKey: CodingKey(stringValue: key)!)
+  public init(parsingRules: ParsingRules, data: Data) throws {
+    var challengeTemplates: [String: ChallengeTemplate] = [:]
+    let lines = String(data: data, encoding: .utf8)!
+      .split(separator: "\n", omittingEmptySubsequences: false)
+      .dropLast() // The final "\n" gets interpreted as having an empty line after; ignore
+    var currentSlice = ArraySlice(lines)
+    while let (key, template, remainder) = try ChallengeTemplateCollection.parseChallengeTemplate(
+      parsingRules: parsingRules,
+      lines: currentSlice
+    ) {
+      challengeTemplates[key] = template
+      currentSlice = remainder
     }
+    self.challengeTemplates = challengeTemplates
   }
 
-  public init(from decoder: Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKey.self)
-    var data: [String: String] = [:]
-    for key in container.allKeys {
-      data[key.stringValue] = try container.decode(String.self, forKey: key)
+  /// Returns a single (key, ChallengeTemplate) pair from the start of `lines`
+  private static func parseChallengeTemplate(
+    parsingRules: ParsingRules,
+    lines: ArraySlice<Substring>
+  ) throws -> (String, ChallengeTemplate, ArraySlice<Substring>)? {
+    guard let header = lines.first.flatMap(String.init) else { return nil }
+    let remainder = lines.dropFirst()
+    let range = NSRange(header.startIndex ..< header.endIndex, in: header)
+    guard let result = headerRegularExpression.matches(in: header, options: [], range: range).first,
+      result.numberOfRanges == 4
+      else {
+        throw Error.headerFailedRegex
     }
-    self.data = data
+    let digest = String(header[Range(result.range(at: 1), in: header)!])
+    let typeIdentifier = String(header[Range(result.range(at: 2), in: header)!])
+    guard
+      let templateClass = ChallengeTemplateType.classMap[typeIdentifier],
+      let lineCount = Int(header[Range(result.range(at: 3), in: header)!]) else {
+      throw Error.headerFailedRegex
+    }
+    let templateLines = remainder[remainder.startIndex ..< (remainder.startIndex + lineCount)].joined()
+    let template = try templateClass.init(markdown: templateLines, parsingRules: parsingRules)
+    // +1 for the extra line at the end
+    return (digest, template, remainder.dropFirst(lineCount))
+  }
+
+  public func data() -> Data {
+    var results = String()
+    for key in challengeTemplates.keys.sorted() {
+      let template = challengeTemplates[key]!
+      results.append(key)
+      results.append(" ")
+      results.append(template.type.rawValue)
+      results.append(" ")
+      let lineCount = template.asMarkdown
+        .split(separator: "\n", omittingEmptySubsequences: false).count
+      results.append(String(lineCount))
+      results.append("\n")
+      results.append(template.asMarkdown)
+      results.append("\n")
+    }
+    return results.data(using: .utf8)!
   }
 }

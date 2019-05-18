@@ -611,8 +611,8 @@ DEPENDENCIES:
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `https://github.com/bdewey/FlashcardKit`)
-  - FlashcardKit/unit (from `https://github.com/bdewey/FlashcardKit`)
+  - FlashcardKit (from `../FlashcardKit`)
+  - FlashcardKit/unit (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
@@ -649,7 +649,7 @@ EXTERNAL SOURCES:
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   FlashcardKit:
-    :git: https://github.com/bdewey/FlashcardKit
+    :path: "../FlashcardKit"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -677,9 +677,6 @@ CHECKOUT OPTIONS:
   DZNPhotoPickerController:
     :commit: f57d768578af762226932b6ed63ebecc0de45f64
     :git: https://github.com/bdewey/DZNPhotoPickerController
-  FlashcardKit:
-    :commit: b38bd559cd9ea1758c0383c2b6ff9c7b7ce42d6a
-    :git: https://github.com/bdewey/FlashcardKit
   MaterialComponents:
     :commit: c5c237fd0f98ca1312e854998133fc9a19ccfb2f
     :git: https://github.com/material-components/material-components-ios
@@ -721,6 +718,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   TextBundleKit: c2e3251330543318b55f7e4f7c53a17751fef941
 
-PODFILE CHECKSUM: 5955ba0b9681503d19a8eb58822632f7da152cce
+PODFILE CHECKSUM: 9dfb7e30c6209497ea5c7ae05b18133bc42eaf1d
 
 COCOAPODS: 1.6.0
