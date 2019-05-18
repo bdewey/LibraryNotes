@@ -19,7 +19,7 @@ public extension Data {
   private func toHexString() -> String {
     return lazy.map { (byte) in
       (byte <= 0xF ? "0" : "") + String(byte, radix: 16)
-      }.joined()
+    }.joined()
   }
 }
 

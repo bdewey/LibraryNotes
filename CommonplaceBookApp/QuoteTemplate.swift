@@ -87,6 +87,7 @@ extension QuoteTemplate: Challenge {
   }
 
   public var templateIndex: Int { return 0 }
+  public var templateDigest: String { return quote.allMarkdown.sha1Digest() }
 
   public func challengeView(
     document: UIDocument,
