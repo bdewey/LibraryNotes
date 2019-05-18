@@ -67,7 +67,7 @@ final class StudyMetadataDocumentTests: XCTestCase {
     loadAllPages(into: document)
     XCTAssertEqual(document.studySession().count, 11)
     XCTAssertEqual(
-      document.studySession(filter: { $0.hashtags.contains("#inspiration")}).count,
+      document.studySession(filter: { $0.hashtags.contains("#inspiration") }).count,
       2
     )
   }
