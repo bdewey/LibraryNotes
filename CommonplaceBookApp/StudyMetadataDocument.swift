@@ -279,7 +279,7 @@ private extension FileWrapper {
 
   func loadPages() throws -> [String: ReviewPageProperties] {
     guard
-      let wrapper = fileWrappers?[BundleKey.challengeTemplates],
+      let wrapper = fileWrappers?[BundleKey.pages],
       let data = wrapper.regularFileContents
       else {
         throw StudyMetadataDocument.Error.documentKeyNotFound

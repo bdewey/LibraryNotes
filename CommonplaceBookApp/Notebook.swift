@@ -125,8 +125,13 @@ public final class Notebook {
       fileURL: metadataProvider.container.appendingPathComponent("notebook.review"),
       parsingRules: parsingRules
     )
-    reviewBundleDocument = document
-    document.openOrCreate(completionHandler: nil)
+    document.openOrCreate { success in
+      if success {
+        self.reviewBundleDocument = document
+      } else {
+        DDLogError("Unable to open review document")
+      }
+    }
     return self
   }
 
