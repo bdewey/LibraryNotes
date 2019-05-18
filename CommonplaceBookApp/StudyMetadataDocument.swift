@@ -1,6 +1,7 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import CommonplaceBook
 import FlashcardKit
 import MiniMarkdown
 import UIKit
@@ -155,6 +156,20 @@ public final class StudyMetadataDocument: UIDocument {
       .reduce(into: StudySession(), { $0 += $1 })
   }
 
+  /// Update the notebook with the result of a study session.
+  ///
+  /// - parameter studySession: The completed study session.
+  /// - parameter date: The date the study session took place.
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
+    for (identifier, statistics) in studySession.nextGenResults {
+      let entry = ChangeRecord(
+        timestamp: date,
+        change: .study(identifier: identifier, statistics: statistics)
+      )
+      log.append(entry)
+    }
+  }
+
   /// Loads document data.
   /// The document is a bundle of different data streams.
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {
@@ -205,13 +220,33 @@ private extension String {
   }
 }
 
+private extension NSRegularExpression {
+  static let studyRecord: NSRegularExpression? = {
+    return try? NSRegularExpression(pattern: "^^([0-9a-f]{40}) (\\d+) correct (\\d+) incorrect (\\d+)$", options: [])
+  }()
+}
+
+// TODO: Put this someplace sharable
+private extension String {
+  func string(at range: NSRange) -> String {
+    return String(self[Range(range, in: self)!])
+  }
+
+  func int(at range: NSRange) -> Int? {
+    return Int(string(at: range))
+  }
+}
+
 public extension StudyMetadataDocument {
   enum Change: LosslessStringConvertible {
 
     /// We added a template to the document.
     case addedChallengeTemplate(id: String)
 
+    /// Added a page to the document.
     case addedPage(name: String, digest: String)
+
+    case study(identifier: ChallengeIdentifier, statistics: AnswerStatistics)
 
     /// Decode a change from a string.
     public init?(_ description: String) {
@@ -225,6 +260,27 @@ public extension StudyMetadataDocument {
         } else {
           return nil
         }
+      } else if let remainder = description.removingPrefix(Prefix.study).flatMap(String.init) {
+        guard let regex = NSRegularExpression.studyRecord else { return nil }
+        let range = NSRange(remainder.startIndex ..< remainder.endIndex, in: remainder)
+        guard
+          let result = regex.matches(in: remainder, options: [], range: range).first,
+          result.numberOfRanges == 5,
+          let index = remainder.int(at: result.range(at: 2)),
+          let correct = remainder.int(at: result.range(at: 3)),
+          let incorrect = remainder.int(at: result.range(at: 4))
+          else {
+            return nil
+        }
+        let digest = remainder.string(at: result.range(at: 1))
+        // TODO: AnswerStatistics needs a public constructor!
+        var statistics = AnswerStatistics.empty
+        statistics.correct = correct
+        statistics.incorrect = incorrect
+        self = .study(
+          identifier: ChallengeIdentifier(templateDigest: digest, index: index),
+          statistics: statistics
+        )
       } else {
         return nil
       }
@@ -237,12 +293,15 @@ public extension StudyMetadataDocument {
         return Prefix.addChallengeTemplate + digest
       case .addedPage(name: let name, digest: let digest):
         return Prefix.addPage + digest + " " + name
+      case .study(identifier: let identifier, statistics: let statistics):
+        return Prefix.study + "\(identifier.templateDigest) \(identifier.index) correct \(statistics.correct) incorrect \(statistics.incorrect)"
       }
     }
 
     private enum Prefix {
       static let addChallengeTemplate = "add-template        "
       static let addPage              = "add-page            "
+      static let study                = "study               "
     }
   }
 

@@ -22,6 +22,10 @@ public final class QuoteTemplate: ChallengeTemplate {
 
   public init(quote: BlockQuote) {
     self.quote = quote
+    self.challengeIdentifier = ChallengeIdentifier(
+      templateDigest: quote.allMarkdown.sha1Digest(),
+      index: 0
+    )
     super.init()
   }
 
@@ -67,6 +71,7 @@ public final class QuoteTemplate: ChallengeTemplate {
   public override var challenges: [Challenge] { return [self] }
 
   public let quote: BlockQuote
+  public var challengeIdentifier: ChallengeIdentifier
 
   public static func extract(
     from markdown: [Node]
@@ -85,9 +90,6 @@ extension QuoteTemplate: Challenge {
   public var identifier: String {
     return quote.allMarkdown
   }
-
-  public var templateIndex: Int { return 0 }
-  public var templateDigest: String { return quote.allMarkdown.sha1Digest() }
 
   public func challengeView(
     document: UIDocument,

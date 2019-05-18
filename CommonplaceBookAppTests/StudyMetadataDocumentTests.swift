@@ -71,6 +71,26 @@ final class StudyMetadataDocumentTests: XCTestCase {
       2
     )
   }
+
+  func testCreateStudyRecords() {
+    let file = try! TemporaryFile(creatingTempDirectoryForFilename: "notebook.review")
+    defer { try? file.deleteDirectory() }
+    let document = openDocument(fileURL: file.fileURL)
+    loadAllPages(into: document)
+    let previousLogCount = document.log.count
+    var studySession = document.studySession()
+    XCTAssertEqual(studySession.count, 11)
+    while studySession.currentCard != nil {
+      studySession.recordAnswer(correct: true)
+    }
+    document.updateStudySessionResults(studySession)
+    XCTAssertEqual(document.log.count, previousLogCount + studySession.count)
+
+    // Make sure the study records round-trip.
+    closeDocument(document)
+    let newDocument = openDocument(fileURL: file.fileURL)
+    XCTAssertEqual(newDocument.log.count, previousLogCount + studySession.count)
+  }
 }
 
 extension StudyMetadataDocumentTests {
