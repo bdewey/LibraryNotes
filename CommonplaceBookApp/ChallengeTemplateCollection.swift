@@ -26,6 +26,7 @@ public struct ChallengeTemplateCollection {
     let key = cardTemplate.asMarkdown.sha1Digest()
     if self.challengeTemplates[key] == nil {
       self.challengeTemplates[key] = cardTemplate
+      cardTemplate.templateIdentifier = key
       return (key, true)
     } else {
       return (key, false)
@@ -100,6 +101,7 @@ extension ChallengeTemplateCollection {
       lines: currentSlice
     ) {
       challengeTemplates[key] = template
+      template.templateIdentifier = key
       currentSlice = remainder
     }
     self.challengeTemplates = challengeTemplates

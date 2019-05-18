@@ -90,6 +90,10 @@ final class StudyMetadataDocumentTests: XCTestCase {
     closeDocument(document)
     let newDocument = openDocument(fileURL: file.fileURL)
     XCTAssertEqual(newDocument.log.count, previousLogCount + studySession.count)
+
+    // Shouldn't have anything new to study today.
+    let repeatSession = newDocument.studySession()
+    XCTAssertEqual(repeatSession.count, 0)
   }
 }
 

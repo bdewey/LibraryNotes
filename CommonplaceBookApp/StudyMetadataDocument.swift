@@ -121,12 +121,33 @@ public final class StudyMetadataDocument: UIDocument {
   /// - returns: The key that can be used to retrieve this template from `challengeTemplates`
   private func insert(_ challengeTemplate: ChallengeTemplate) throws -> String {
     assert(Thread.isMainThread)
-    let (key, didChange) = try challengeTemplates.insert(challengeTemplate)
+    let (key, didChange) = challengeTemplates.insert(challengeTemplate)
     if didChange {
       updateChangeCount(.done)
       log.append(ChangeRecord(timestamp: Date(), change: .addedChallengeTemplate(id: key)))
     }
     return key
+  }
+
+  /// Reduces the log to compute a StudyMetadata for a particular challenge.
+  private func studyMetadata(for challengeIdentifier: ChallengeIdentifier) -> StudyMetadata? {
+    return log
+      .compactMap { changeRecord -> (Date, AnswerStatistics)? in
+        if case let .study(recordIdentifier, statistics) = changeRecord.change,
+          recordIdentifier == challengeIdentifier {
+          return (changeRecord.timestamp, statistics)
+        } else {
+          return nil
+        }
+      }
+      .reduce(nil, { studyMetadata, tuple -> StudyMetadata? in
+        let (timestamp, statistics) = tuple
+        if let studyMetadata = studyMetadata {
+          return studyMetadata.updatedMetadata(with: statistics, on: DayComponents(timestamp))
+        } else {
+          return StudyMetadata(day: DayComponents(timestamp), lastAnswers: statistics)
+        }
+      })
   }
 
   /// Returns a study session given the current notebook pages and study metadata (which indicates
@@ -135,8 +156,12 @@ public final class StudyMetadataDocument: UIDocument {
   /// - parameter filter: An optional function that determines if a page should be included in
   ///                     the study session. If no filter is given, the all pages will be used
   ///                     to construct the session.
+  /// - parameter date: The date of the study session, used for spaced repetition
   /// - returns: A StudySession!
-  public func studySession(filter: ((ReviewPageProperties) -> Bool)? = nil) -> StudySession {
+  public func studySession(
+    filter: ((ReviewPageProperties) -> Bool)? = nil,
+    date: Date = Date()
+  ) -> StudySession {
     let filter = filter ?? { _ in true }
     return pageProperties
       .filter { filter($0.value) }
@@ -144,8 +169,15 @@ public final class StudyMetadataDocument: UIDocument {
         let challengeTemplates = reviewProperties.cardTemplates.compactMap {
           self.challengeTemplates[$0]
         }
+        let eligibleCards = challengeTemplates.cards.filter { challenge -> Bool in
+          if let metadata = self.studyMetadata(for: challenge.challengeIdentifier) {
+            return metadata.eligibleForStudy(on: DayComponents(date))
+          } else {
+            return true
+          }
+        }
         return StudySession(
-          challengeTemplates.cards,
+          eligibleCards,
           properties: CardDocumentProperties(
             documentName: name,
             attributionMarkdown: reviewProperties.title,
@@ -294,7 +326,7 @@ public extension StudyMetadataDocument {
       case .addedPage(name: let name, digest: let digest):
         return Prefix.addPage + digest + " " + name
       case .study(identifier: let identifier, statistics: let statistics):
-        return Prefix.study + "\(identifier.templateDigest) \(identifier.index) correct \(statistics.correct) incorrect \(statistics.incorrect)"
+        return Prefix.study + "\(identifier.templateDigest!) \(identifier.index) correct \(statistics.correct) incorrect \(statistics.incorrect)"
       }
     }
 
