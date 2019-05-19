@@ -2,8 +2,8 @@
 
 import Foundation
 
-/// Metadata about pages in a Notebook.
-public struct ReviewPageProperties: Codable {
+/// Metadata about pages in a NoteBundle.
+public struct NoteBundlePageProperties: Codable {
   /// SHA-1 digest of the contents of the page.
   public let sha1Digest: String
 

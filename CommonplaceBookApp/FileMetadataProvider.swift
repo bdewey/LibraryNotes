@@ -36,10 +36,16 @@ public protocol FileMetadataProvider: class {
   func renameMetadata(_ metadata: FileMetadata, to name: String) throws
 }
 
-extension FileMetadataProvider {
+enum FileMetadataProviderError: Error {
+  case cannotGetDocument
+  case cannotOpenDocument
+}
+
+/// I/O routines that work for all implementations of FileMetadataProvider
+public extension FileMetadataProvider {
   /// Default implementation of editableDocument -- will work for any FileMetadataProvider
   /// that is named by URLs that a UIDocument can open.
-  public func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
+  func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
     let fileURL = container.appendingPathComponent(metadata.fileName)
     switch metadata.contentType {
     case "public.plain-text", "public.json":
@@ -48,6 +54,32 @@ extension FileMetadataProvider {
       return TextBundleDocument(fileURL: fileURL)
     default:
       return nil
+    }
+  }
+
+  /// Loads the text from a specific FileMetadata.
+  ///
+  /// - note: FileMetadata may refer to either a plain text file -or- a textbundle,
+  ///         and this method knows how to read from either.
+  ///
+  /// - parameter fileMetadata: The FileMetadata specifying the file to read from.
+  /// - parameter completion: Completion block with the result of reading.
+  func loadText(
+    from fileMetadata: FileMetadata,
+    completion: @escaping (Result<String>) -> Void
+  ) {
+    guard let document = editableDocument(for: fileMetadata) else {
+      completion(.failure(FileMetadataProviderError.cannotGetDocument))
+      return
+    }
+    document.open { success in
+      guard success else {
+        completion(.failure(FileMetadataProviderError.cannotOpenDocument))
+        return
+      }
+      let textResult = document.currentTextResult.flatMap { $0.value }
+      document.close(completionHandler: nil)
+      completion(textResult)
     }
   }
 }

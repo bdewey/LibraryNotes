@@ -28,12 +28,16 @@
 		D35C72C52189E1340082396D /* MenuSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C42189E1340082396D /* MenuSectionController.swift */; };
 		D36BC17A21B571CA00935691 /* TestEditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17921B571CA00935691 /* TestEditableDocument.swift */; };
 		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
+		D374AB4A2290A67100F54561 /* NoteBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB492290A67100F54561 /* NoteBundle.swift */; };
+		D374AB4C2290AC1E00F54561 /* NoteBundle+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB4B2290AC1E00F54561 /* NoteBundle+Logging.swift */; };
+		D374AB4E2290ADE400F54561 /* NoteBundle+Pages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */; };
+		D374AB502291976D00F54561 /* NoteBundle+StudySession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB4F2291976D00F54561 /* NoteBundle+StudySession.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
 		D37E6D32228D780E006CD0FA /* StudyMetadataDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D31228D780E006CD0FA /* StudyMetadataDocument.swift */; };
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
-		D37E6D36228D9DD8006CD0FA /* ReviewPageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* ReviewPageProperties.swift */; };
+		D37E6D36228D9DD8006CD0FA /* NoteBundlePageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* NoteBundlePageProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
 		D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38D9A1821B3426B00973E73 /* NotebookTests.swift */; };
@@ -140,13 +144,17 @@
 		D35C72C42189E1340082396D /* MenuSectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuSectionController.swift; sourceTree = "<group>"; };
 		D36BC17921B571CA00935691 /* TestEditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestEditableDocument.swift; sourceTree = "<group>"; };
 		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
+		D374AB492290A67100F54561 /* NoteBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundle.swift; sourceTree = "<group>"; };
+		D374AB4B2290AC1E00F54561 /* NoteBundle+Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteBundle+Logging.swift"; sourceTree = "<group>"; };
+		D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteBundle+Pages.swift"; sourceTree = "<group>"; };
+		D374AB4F2291976D00F54561 /* NoteBundle+StudySession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteBundle+StudySession.swift"; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextDocument.swift; sourceTree = "<group>"; };
 		D37E6D31228D780E006CD0FA /* StudyMetadataDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyMetadataDocument.swift; sourceTree = "<group>"; };
 		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
-		D37E6D35228D9DD8006CD0FA /* ReviewPageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewPageProperties.swift; sourceTree = "<group>"; };
+		D37E6D35228D9DD8006CD0FA /* NoteBundlePageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundlePageProperties.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
 		D38D9A1821B3426B00973E73 /* NotebookTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookTests.swift; sourceTree = "<group>"; };
@@ -312,12 +320,16 @@
 				D32C8B5B214ACC2F0048BF80 /* Notebook.swift */,
 				D5654BD621C08F1500C98C09 /* Notebook+Pages.swift */,
 				D5F7222621BF1B3B00194CFF /* Notebook+StudyMetadata.swift */,
+				D374AB492290A67100F54561 /* NoteBundle.swift */,
+				D374AB4B2290AC1E00F54561 /* NoteBundle+Logging.swift */,
+				D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */,
+				D374AB4F2291976D00F54561 /* NoteBundle+StudySession.swift */,
+				D37E6D35228D9DD8006CD0FA /* NoteBundlePageProperties.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
 				D3D8E2722178B2BA00EA318C /* PageProperties.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
-				D37E6D35228D9DD8006CD0FA /* ReviewPageProperties.swift */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
 				D37E6D31228D780E006CD0FA /* StudyMetadataDocument.swift */,
 				D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */,
@@ -646,24 +658,28 @@
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
 				D3187CB0218DFBBC00815772 /* HashtagDataSource.swift in Sources */,
 				D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */,
+				D374AB502291976D00F54561 /* NoteBundle+StudySession.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D3D8E2732178B2BA00EA318C /* PageProperties.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
+				D374AB4E2290ADE400F54561 /* NoteBundle+Pages.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
+				D374AB4C2290AC1E00F54561 /* NoteBundle+Logging.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
 				D305DAFC228C86E300B41EE7 /* ChallengeTemplateCollection.swift in Sources */,
-				D37E6D36228D9DD8006CD0FA /* ReviewPageProperties.swift in Sources */,
+				D37E6D36228D9DD8006CD0FA /* NoteBundlePageProperties.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D35C72C52189E1340082396D /* MenuSectionController.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
+				D374AB4A2290A67100F54561 /* NoteBundle.swift in Sources */,
 				D37E6D32228D780E006CD0FA /* StudyMetadataDocument.swift in Sources */,
 				D5654BD721C08F1500C98C09 /* Notebook+Pages.swift in Sources */,
 			);

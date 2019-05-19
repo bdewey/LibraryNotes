@@ -1,7 +1,7 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 // swiftlint:disable force_try
 
-import CommonplaceBookApp
+@testable import CommonplaceBookApp
 import FlashcardKit
 import MiniMarkdown
 import XCTest
@@ -65,9 +65,9 @@ final class StudyMetadataDocumentTests: XCTestCase {
     defer { try? file.deleteDirectory() }
     let document = openDocument(fileURL: file.fileURL)
     loadAllPages(into: document)
-    XCTAssertEqual(document.studySession().count, 11)
+    XCTAssertEqual(document.noteBundle.studySession().count, 11)
     XCTAssertEqual(
-      document.studySession(filter: { $0.hashtags.contains("#inspiration") }).count,
+      document.noteBundle.studySession(filter: { $0.hashtags.contains("#inspiration") }).count,
       2
     )
   }
@@ -77,22 +77,22 @@ final class StudyMetadataDocumentTests: XCTestCase {
     defer { try? file.deleteDirectory() }
     let document = openDocument(fileURL: file.fileURL)
     loadAllPages(into: document)
-    let previousLogCount = document.log.count
-    var studySession = document.studySession()
+    let previousLogCount = document.noteBundle.log.count
+    var studySession = document.noteBundle.studySession()
     XCTAssertEqual(studySession.count, 11)
     while studySession.currentCard != nil {
       studySession.recordAnswer(correct: true)
     }
     document.updateStudySessionResults(studySession)
-    XCTAssertEqual(document.log.count, previousLogCount + studySession.count)
+    XCTAssertEqual(document.noteBundle.log.count, previousLogCount + studySession.count)
 
     // Make sure the study records round-trip.
     closeDocument(document)
     let newDocument = openDocument(fileURL: file.fileURL)
-    XCTAssertEqual(newDocument.log.count, previousLogCount + studySession.count)
+    XCTAssertEqual(newDocument.noteBundle.log.count, previousLogCount + studySession.count)
 
     // Shouldn't have anything new to study today.
-    let repeatSession = newDocument.studySession()
+    let repeatSession = newDocument.noteBundle.studySession()
     XCTAssertEqual(repeatSession.count, 0)
   }
 }
@@ -104,9 +104,9 @@ extension StudyMetadataDocumentTests {
     challengeTemplateCount: Int,
     logCount: Int
   ) {
-    XCTAssertEqual(document.pageProperties.count, pageCount)
-    XCTAssertEqual(document.challengeTemplates.count, challengeTemplateCount)
-    XCTAssertEqual(document.log.count, logCount)
+    XCTAssertEqual(document.noteBundle.pageProperties.count, pageCount)
+    XCTAssertEqual(document.noteBundle.challengeTemplates.count, challengeTemplateCount)
+    XCTAssertEqual(document.noteBundle.log.count, logCount)
   }
 
   private func openDocument(fileURL: URL) -> StudyMetadataDocument {
@@ -218,13 +218,13 @@ extension FileManager {
   ///
   /// - Note: You should not rely on the existence of the temporary directory
   ///   after the app is exited.
-  func urlForUniqueTemporaryDirectory(preferredName: String? = nil) throws
-    -> (url: URL, deleteDirectory: () throws -> Void)
-  {
+  func urlForUniqueTemporaryDirectory(
+    preferredName: String? = nil
+  ) throws -> (url: URL, deleteDirectory: () throws -> Void) {
     let basename = preferredName ?? UUID().uuidString
 
     var counter = 0
-    var createdSubdirectory: URL? = nil
+    var createdSubdirectory: URL?
     repeat {
       do {
         let subdirName = counter == 0 ? basename : "\(basename)-\(counter)"
