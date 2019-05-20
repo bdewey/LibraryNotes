@@ -14,16 +14,18 @@ public extension NoteBundle {
   /// - parameter fileName: The name of the page.
   /// - parameter pageProperties: Properties of the page (excluding name)
   /// - parameter challengeTemplates: The challenges associated with this page.
+  /// - returns: True if the structure changed, false if we already had the information and
+  ///            no update was required.
   mutating func addChallengesFromPage(
     named fileName: String,
     pageProperties: NoteBundlePageProperties,
     challengeTemplates: ChallengeTemplateCollection
-  ) {
+  ) -> Bool {
     assert(Thread.isMainThread)
     if let existing = self.pageProperties[fileName],
       existing.sha1Digest == pageProperties.sha1Digest {
       DDLogInfo("Skipping \(fileName) -- already have properties for \(pageProperties.sha1Digest)")
-      return
+      return false
     }
     log.append(
       ChangeRecord(
@@ -40,6 +42,7 @@ public extension NoteBundle {
       "Added information about \(addedTemplateKeys.count) challenges"
       + " from \(fileName) (\(pageProperties.sha1Digest))"
     )
+    return true
   }
 
   /// Synchronously extract properties & challenge templates from the contents of a file.
@@ -53,7 +56,7 @@ public extension NoteBundle {
       sha1Digest: text.sha1Digest(),
       timestamp: fileMetadata.contentChangeDate,
       hashtags: nodes.hashtags,
-      title: nodes.title,
+      title: String(nodes.title.split(separator: "\n").first ?? ""),
       cardTemplates: challengeTemplates.keys
     )
     return (properties, challengeTemplates)

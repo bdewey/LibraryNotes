@@ -31,17 +31,23 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: Notebook,
+    notebook: NoteBundleDocument,
+    metadataProvider: FileMetadataProvider,
     stylesheet: Stylesheet
   ) {
     self.notebook = notebook
+    self.metadataProvider = metadataProvider
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(notebook: notebook, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(
+      notebook: notebook,
+      fileMetadataProvider: metadataProvider,
+      stylesheet: stylesheet
+    )
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
-    notebook.addListener(self)
+    notebook.addObserver(self)
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -50,10 +56,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
-    dataSource.notebook.removeListener(documentListAdapter)
+    dataSource.notebook.removeObserver(documentListAdapter)
   }
 
-  private let notebook: Notebook
+  private let notebook: NoteBundleDocument
+  private let metadataProvider: FileMetadataProvider
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
 
@@ -100,7 +107,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.notebook.addListener(adapter)
+    dataSource.notebook.addObserver(adapter)
     return adapter
   }()
 
@@ -132,12 +139,14 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.width.equalTo(56)
       make.height.equalTo(56)
     }
-    studySession = notebook.studySession()
-    do {
-      try notebook.performRenames(notebook.desiredBaseNameForPage)
-    } catch {
-      DDLogError("Unexpected error performing renames in load: \(error)")
-    }
+    studySession = notebook.noteBundle.studySession()
+
+    // TODO: Bring this functionality back, but in a better place.
+//    do {
+//      try notebook.performRenames(notebook.noteBundle.desiredBaseNameForPage)
+//    } catch {
+//      DDLogError("Unexpected error performing renames in load: \(error)")
+//    }
   }
 
   @objc private func didTapNewDocument() {
@@ -145,9 +154,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       let name = FileNameGenerator(
         baseName: DayComponents(Date()).description,
         pathExtension: "txt"
-      ).firstName(notIn: self.notebook.metadataProvider)
+      ).firstName(notIn: self.metadataProvider)
       let fileMetadata = FileMetadata(fileName: name)
-      guard let document = self.notebook.metadataProvider.editableDocument(for: fileMetadata) else {
+      guard let document = self.metadataProvider.editableDocument(for: fileMetadata) else {
         DDLogError("Could not get an editable document for \(name). WHY OH WHY?")
         return
       }
@@ -169,16 +178,17 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
         })
         let viewController = TextEditViewController(
           document: document,
-          parsingRules: self.notebook.parsingRules,
+          parsingRules: self.notebook.noteBundle.parsingRules,
           stylesheet: self.stylesheet
         )
         viewController.onDocumentClose = { success in
           if !success { DDLogError("Failure closing document? Why oh why?") }
-          do {
-            try notebook.performRenames(notebook.desiredBaseNameForPage)
-          } catch {
-            DDLogError("Unexpected error on rename: \(error)")
-          }
+          // TODO: Bring back
+//          do {
+//            try notebook.performRenames(notebook.desiredBaseNameForPage)
+//          } catch {
+//            DDLogError("Unexpected error on rename: \(error)")
+//          }
         }
         viewController.selectedRange = NSRange(location: initialOffset, length: 0)
         viewController.autoFirstResponder = true
@@ -222,10 +232,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private func updateStudySession() {
-    let filter: (PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
-      ? { _ in true }
-      : { properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
-    studySession = notebook.studySession(filter: filter)
+    let filter: (String, NoteBundlePageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+      ? { _, _ in true }
+      : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+    studySession = notebook.noteBundle.studySession(filter: filter)
   }
 
   public func presentStudySessionViewController(for studySession: StudySession) {
@@ -267,7 +277,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
 extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
   func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    let fileURL = notebook.containerURL.appendingPathComponent(name)
+    let fileURL = metadataProvider.container.appendingPathComponent(name)
     // TODO: Should I really do this based on path extension?
     switch fileURL.pathExtension {
     case "deck", "textbundle":
@@ -293,13 +303,12 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   }
 }
 
-extension DocumentListViewController: NotebookChangeListener {
-  func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
-    switch key {
-    case .pageProperties:
-      updateStudySession()
-    default:
-      break
-    }
+extension DocumentListViewController: NoteBundleDocumentObserver {
+  func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
+    updateStudySession()
+  }
+
+  func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
+    updateStudySession()
   }
 }

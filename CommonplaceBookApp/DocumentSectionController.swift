@@ -9,14 +9,20 @@ import SwipeCellKit
 import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
-  init(notebook: Notebook, stylesheet: Stylesheet) {
+  init(
+    notebook: NoteBundleDocument,
+    metadataProvider: FileMetadataProvider,
+    stylesheet: Stylesheet
+  ) {
     self.notebook = notebook
+    self.metadataProvider = metadataProvider
     self.stylesheet = stylesheet
   }
 
-  private let notebook: Notebook
+  private let notebook: NoteBundleDocument
+  private let metadataProvider: FileMetadataProvider
   private let stylesheet: Stylesheet
-  private var properties: PagePropertiesListDiffable!
+  private var object: NoteBundlePagePropertiesListDiffable!
 
   /// Used to create attributed strings from page titles.
   ///
@@ -45,34 +51,34 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    titleRenderer.markdown = properties.value.title
+    titleRenderer.markdown = object.properties.title
     cell.titleLabel.attributedText = titleRenderer.attributedString
-    cell.accessibilityLabel = properties.value.title
-    var detailString = properties.value.hashtags.joined(separator: ", ")
-    if properties.cardCount > 0 {
+    cell.accessibilityLabel = object.properties.title
+    var detailString = object.properties.hashtags.joined(separator: ", ")
+    if object.cardCount > 0 {
       if !detailString.isEmpty { detailString += ". " }
-      if properties.cardCount == 1 {
+      if object.cardCount == 1 {
         detailString += "1 card."
       } else {
-        detailString += "\(properties.cardCount) cards."
+        detailString += "\(object.cardCount) cards."
       }
     }
     cell.detailLabel.attributedText = NSAttributedString(
       string: detailString,
       attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
     )
-    if properties.value.fileMetadata.isUploading {
+    if object.fileMetadata.isUploading {
       cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
-    } else if properties.value.fileMetadata.isDownloading {
+    } else if object.fileMetadata.isDownloading {
       cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if properties.value.fileMetadata.downloadingStatus
+    } else if object.fileMetadata.downloadingStatus
       != NSMetadataUbiquitousItemDownloadingStatusCurrent {
       cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
     } else {
       cell.statusIcon.image = nil
     }
     let now = Date()
-    let dateDelta = now.timeIntervalSince(properties.value.fileMetadata.contentChangeDate)
+    let dateDelta = now.timeIntervalSince(object.properties.timestamp)
     cell.ageLabel.attributedText = NSAttributedString(
       string: ageFormatter.string(from: dateDelta) ?? "",
       attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
@@ -88,13 +94,13 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didUpdate(to object: Any) {
     // swiftlint:disable:next force_cast
-    properties = (object as! PagePropertiesListDiffable)
+    self.object = (object as! NoteBundlePagePropertiesListDiffable)
   }
 
   public override func didSelectItem(at index: Int) {
-    notebook.loadEditingViewController(
-      for: properties.value.fileMetadata,
-      parsingRules: notebook.parsingRules,
+    metadataProvider.loadEditingViewController(
+      for: object.fileMetadata,
+      parsingRules: notebook.noteBundle.parsingRules,
       stylesheet: stylesheet
     ) { editingViewController in
       guard let editingViewController = editingViewController else { return }
@@ -106,14 +112,14 @@ public final class DocumentSectionController: ListSectionController {
   }
 }
 
-extension Notebook {
+extension FileMetadataProvider {
   func loadEditingViewController(
     for metadata: FileMetadata,
     parsingRules: ParsingRules,
     stylesheet: Stylesheet,
     completion: @escaping (UIViewController?) -> Void
   ) {
-    guard let document = metadataProvider.editableDocument(for: metadata) else {
+    guard let document = editableDocument(for: metadata) else {
       completion(nil)
       return
     }
@@ -156,12 +162,12 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 
     let dataSource = notebook
     var actions = [SwipeAction]()
-    if let properties = self.properties {
+    if let properties = self.object {
       if properties.cardCount > 0,
         let viewController = self.viewController as? DocumentListViewController {
         let studyAction = SwipeAction(style: .default, title: "Study") { action, _ in
-          let studySession = self.notebook.studySession(
-            filter: { $0.fileMetadata.fileName == properties.value.fileMetadata.fileName }
+          let studySession = self.notebook.noteBundle.studySession(
+            filter: { name, _ in name == properties.fileMetadata.fileName }
           )
           viewController.presentStudySessionViewController(for: studySession)
           action.fulfill(with: ExpansionFulfillmentStyle.reset)
@@ -174,7 +180,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
       }
 
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-        dataSource.deleteFileMetadata(properties.value.fileMetadata)
+        dataSource.deleteFileMetadata(properties.fileMetadata)
         // handle action by updating model with deletion
         action.fulfill(with: .delete)
       }

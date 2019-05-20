@@ -117,11 +117,11 @@ public final class Notebook {
   internal var openMetadocuments = [Key: EditableDocument]()
 
   /// Holds all review metadata.
-  public private(set) var reviewBundleDocument: StudyMetadataDocument?
+  public private(set) var reviewBundleDocument: NoteBundleDocument?
 
   @discardableResult
   public func loadReviewBundle() -> Notebook {
-    let document = StudyMetadataDocument(
+    let document = NoteBundleDocument(
       fileURL: metadataProvider.container.appendingPathComponent("notebook.review"),
       parsingRules: parsingRules
     )

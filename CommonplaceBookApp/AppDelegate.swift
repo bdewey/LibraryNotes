@@ -35,6 +35,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     return navigationController
   }()
 
+  var documentMirror: NoteBundleFileMetadataMirror?
+
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -49,14 +51,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
+        let noteBundleDocument = NoteBundleDocument(
+          fileURL: metadataProvider.container.appendingPathComponent("commonplace.notebundle"),
+          parsingRules: parsingRules
+        )
+        self.documentMirror = NoteBundleFileMetadataMirror(
+          document: noteBundleDocument,
+          metadataProvider: metadataProvider
+        )
         window.rootViewController = self.makeViewController(
-          notebook: Notebook(
-            parsingRules: parsingRules,
-            metadataProvider: metadataProvider
-          ).loadCachedProperties()
-            .loadStudyMetadata()
-            .monitorMetadataProvider()
-            .loadReviewBundle()
+          notebook: noteBundleDocument,
+          metadataProvider: metadataProvider
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
@@ -102,13 +107,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeViewController(
-    notebook: Notebook
+    notebook: NoteBundleDocument,
+    metadataProvider: FileMetadataProvider
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
         notebook: notebook,
+        metadataProvider: metadataProvider,
         stylesheet: commonplaceBookStylesheet
       ),
       animated: false

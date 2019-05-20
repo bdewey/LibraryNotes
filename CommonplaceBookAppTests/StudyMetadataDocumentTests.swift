@@ -67,7 +67,7 @@ final class StudyMetadataDocumentTests: XCTestCase {
     loadAllPages(into: document)
     XCTAssertEqual(document.noteBundle.studySession().count, 11)
     XCTAssertEqual(
-      document.noteBundle.studySession(filter: { $0.hashtags.contains("#inspiration") }).count,
+      document.noteBundle.studySession(filter: { $1.hashtags.contains("#inspiration") }).count,
       2
     )
   }
@@ -99,7 +99,7 @@ final class StudyMetadataDocumentTests: XCTestCase {
 
 extension StudyMetadataDocumentTests {
   private func verifyDocument(
-    _ document: StudyMetadataDocument,
+    _ document: NoteBundleDocument,
     pageCount: Int,
     challengeTemplateCount: Int,
     logCount: Int
@@ -109,8 +109,8 @@ extension StudyMetadataDocumentTests {
     XCTAssertEqual(document.noteBundle.log.count, logCount)
   }
 
-  private func openDocument(fileURL: URL) -> StudyMetadataDocument {
-    let document = StudyMetadataDocument(
+  private func openDocument(fileURL: URL) -> NoteBundleDocument {
+    let document = NoteBundleDocument(
       fileURL: fileURL,
       parsingRules: parsingRules
     )
@@ -123,7 +123,7 @@ extension StudyMetadataDocumentTests {
     return document
   }
 
-  private func closeDocument(_ document: StudyMetadataDocument) {
+  private func closeDocument(_ document: NoteBundleDocument) {
     let didClose = expectation(description: "did close")
     document.close { success in
       XCTAssertTrue(success)
@@ -132,7 +132,7 @@ extension StudyMetadataDocumentTests {
     waitForExpectations(timeout: 3, handler: nil)
   }
 
-  private func loadAllPages(into document: StudyMetadataDocument, expectToLoad: Bool = true) {
+  private func loadAllPages(into document: NoteBundleDocument, expectToLoad: Bool = true) {
     let group = DispatchGroup()
     for fileInfo in metadataProvider.fileMetadata {
       group.enter()

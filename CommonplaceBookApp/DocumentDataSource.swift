@@ -6,20 +6,27 @@ import FlashcardKit
 import Foundation
 import IGListKit
 
+/// ListKit data source for the pages in a NoteBundleDocument
 public final class DocumentDataSource: NSObject, ListAdapterDataSource {
-  public init(notebook: Notebook, stylesheet: Stylesheet) {
+  public init(
+    notebook: NoteBundleDocument,
+    fileMetadataProvider: FileMetadataProvider,
+    stylesheet: Stylesheet
+  ) {
     self.notebook = notebook
+    self.fileMetadataProvider = fileMetadataProvider
     self.stylesheet = stylesheet
     super.init()
-    notebook.addListener(self)
+    notebook.addObserver(self)
     updateCardsPerDocument()
   }
 
   deinit {
-    notebook.removeListener(self)
+    notebook.removeObserver(self)
   }
 
-  public let notebook: Notebook
+  public let notebook: NoteBundleDocument
+  public let fileMetadataProvider: FileMetadataProvider
   private let stylesheet: Stylesheet
   public var filteredHashtag: String?
   public var cardsPerDocument = [String: Int]()
@@ -27,49 +34,47 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     return propertiesFilteredByHashtag
       // give IGLitstKit its own copy of the model objects to guard against mutations
-      .map {
-        PagePropertiesListDiffable(
-          $0,
-          cardCount: cardsPerDocument[$0.fileMetadata.fileName, default: 0]
+      .map { tuple -> NoteBundlePagePropertiesListDiffable in
+        let fileMetadata = self.fileMetadataProvider.fileMetadata.first(where: { $0.fileName == tuple.key })!
+        return NoteBundlePagePropertiesListDiffable(
+          fileMetadata: fileMetadata,
+          properties: tuple.value,
+          cardCount: cardsPerDocument[tuple.key, default: 0]
         )
       }
       .sorted(
-        by: { $0.value.fileMetadata.contentChangeDate > $1.value.fileMetadata.contentChangeDate }
+        by: { $0.properties.timestamp > $1.properties.timestamp }
       )
   }
 
-  private var propertiesFilteredByHashtag: [PageProperties] {
-    return notebook.pageProperties.values
-      // remove placeholders
-      .filter { $0.tag != .placeholder }
-      // Convert to just a DocumentProperties
-      .map { $0.value }
-      // only show things with the right hashtag
+  private var propertiesFilteredByHashtag: [String: NoteBundlePageProperties] {
+    return notebook.noteBundle.pageProperties
       .filter {
         guard let hashtag = filteredHashtag else { return true }
-        return $0.hashtags.contains(hashtag)
+        return $0.value.hashtags.contains(hashtag)
       }
   }
 
-  public func studySession(metadata: NotebookStudyMetadata) -> StudySession {
-    // TODO: Should be a way to associate ParsingRules with each document
-    return propertiesFilteredByHashtag.map { (diffableProperties) -> StudySession in
-      let documentMetadata = metadata[diffableProperties.fileMetadata.fileName, default: [:]]
-      return documentMetadata.studySession(
-        from: diffableProperties.cardTemplates.cards,
-        limit: 500,
-        properties: CardDocumentProperties(documentName: diffableProperties.fileMetadata.fileName, attributionMarkdown: diffableProperties.title, parsingRules: LanguageDeck.parsingRules)
-      )
-    }
-    .reduce(into: StudySession(), { $0 += $1 })
-  }
-
+//  public func studySession(metadata: NotebookStudyMetadata) -> StudySession {
+//    // TODO: Should be a way to associate ParsingRules with each document
+//    return propertiesFilteredByHashtag.map { (keyValue) -> StudySession in
+//      let documentMetadata = metadata[keyValue.key, default: [:]]
+//      return documentMetadata.studySession(
+//        from: keyValue.cardTemplates.cards,
+//        limit: 500,
+//        properties: CardDocumentProperties(documentName: keyValue.fileMetadata.fileName, attributionMarkdown: keyValue.title, parsingRules: LanguageDeck.parsingRules)
+//      )
+//    }
+//    .reduce(into: StudySession(), { $0 += $1 })
+//  }
+//
   public func listAdapter(
     _ listAdapter: ListAdapter,
     sectionControllerFor object: Any
   ) -> ListSectionController {
     return DocumentSectionController(
       notebook: notebook,
+      metadataProvider: fileMetadataProvider,
       stylesheet: stylesheet
     )
   }
@@ -79,7 +84,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 
   fileprivate func updateCardsPerDocument() {
-    let studySession = notebook.studySession()
+    let studySession = notebook.noteBundle.studySession()
     cardsPerDocument = studySession
       .reduce(into: [String: Int]()) { cardsPerDocument, card in
         cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
@@ -91,8 +96,12 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   }
 }
 
-extension DocumentDataSource: NotebookChangeListener {
-  public func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
+extension DocumentDataSource: NoteBundleDocumentObserver {
+  public func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
+    updateCardsPerDocument()
+  }
+
+  public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
     updateCardsPerDocument()
   }
 }

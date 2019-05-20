@@ -3,6 +3,7 @@
 import CocoaLumberjack
 import CommonplaceBook
 import FlashcardKit
+import IGListKit
 import MiniMarkdown
 import UIKit
 
@@ -22,12 +23,24 @@ extension Result {
   }
 }
 
-public protocol StudyMetadataDocumentObserver: AnyObject {
-  func studyMetadataDocumentDidLoad(_ document: StudyMetadataDocument)
+public protocol NoteBundleDocumentObserver: AnyObject {
+  func noteBundleDocumentDidLoad(_ document: NoteBundleDocument)
+  func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument)
+}
+
+/// Any IGListKit ListAdapter can listen to notebook changes.
+extension ListAdapter: NoteBundleDocumentObserver {
+  public func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
+    performUpdates(animated: true)
+  }
+
+  public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
+    performUpdates(animated: true)
+  }
 }
 
 /// Holds all of the information needed to conduct study sessions.
-public final class StudyMetadataDocument: UIDocument {
+public final class NoteBundleDocument: UIDocument {
 
   public enum Error: Swift.Error {
     case documentKeyNotFound
@@ -60,6 +73,7 @@ public final class StudyMetadataDocument: UIDocument {
     completion: ((Bool) -> Void)?
   ) {
     assert(Thread.isMainThread)
+    assert(documentState.intersection([.closed, .editingDisabled]).isEmpty)
     guard !loadPendingFilenames.contains(fileMetadata.fileName) else {
       completion?(false)
       return
@@ -80,11 +94,14 @@ public final class StudyMetadataDocument: UIDocument {
         DispatchQueue.main.async {
           switch propertiesResult {
           case .success(let tuple):
-            self.noteBundle.addChallengesFromPage(
+            let didChange = self.noteBundle.addChallengesFromPage(
               named: fileMetadata.fileName,
               pageProperties: tuple.0,
               challengeTemplates: tuple.1
             )
+            if didChange {
+              self.notifyObserversOfChange()
+            }
           case .failure(let error):
             DDLogError("Unexpected error importing document: \(error)")
           }
@@ -102,8 +119,18 @@ public final class StudyMetadataDocument: UIDocument {
   /// - parameter date: The date the study session took place.
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     assert(Thread.isMainThread)
+    assert(documentState.intersection([.closed, .editingDisabled]).isEmpty)
     noteBundle.updateStudySessionResults(studySession, on: date)
     updateChangeCount(.done)
+    self.notifyObserversOfChange()
+  }
+
+  public func deleteFileMetadata(_ fileMetadata: FileMetadata) {
+    assertionFailure()
+  }
+
+  public func performRenames(_ desiredBaseNameForPage: [String: String]) throws {
+    assertionFailure()
   }
 
   /// Loads document data.
@@ -115,7 +142,7 @@ public final class StudyMetadataDocument: UIDocument {
     let newNoteBundle = try NoteBundle(parsingRules: parsingRules, fileWrapper: directory)
     self.noteBundle = newNoteBundle
     for wrapper in observers {
-      wrapper.observer?.studyMetadataDocumentDidLoad(self)
+      wrapper.observer?.noteBundleDocumentDidLoad(self)
     }
   }
 
@@ -126,21 +153,27 @@ public final class StudyMetadataDocument: UIDocument {
   }
 }
 
-extension StudyMetadataDocument: Observable {
-  public func addObserver(_ observer: StudyMetadataDocumentObserver) {
+extension NoteBundleDocument: Observable {
+  public func addObserver(_ observer: NoteBundleDocumentObserver) {
     observers.append(WeakObserver(observer))
   }
 
-  public func removeObserver(_ observer: StudyMetadataDocumentObserver) {
+  public func removeObserver(_ observer: NoteBundleDocumentObserver) {
     observers.removeAll { wrapped -> Bool in
       wrapped.observer === observer
+    }
+  }
+
+  private func notifyObserversOfChange() {
+    for observerWrapper in observers {
+      observerWrapper.observer?.noteBundleDocumentDidUpdatePages(self)
     }
   }
 }
 
 private struct WeakObserver {
-  weak var observer: StudyMetadataDocumentObserver?
-  init(_ observer: StudyMetadataDocumentObserver) { self.observer = observer }
+  weak var observer: NoteBundleDocumentObserver?
+  init(_ observer: NoteBundleDocumentObserver) { self.observer = observer }
 }
 
 private extension Date {

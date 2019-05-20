@@ -17,12 +17,12 @@ public extension NoteBundle {
   /// - parameter date: The date of the study session, used for spaced repetition
   /// - returns: A StudySession!
   func studySession(
-    filter: ((NoteBundlePageProperties) -> Bool)? = nil,
+    filter: ((String, NoteBundlePageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
-    let filter = filter ?? { _ in true }
+    let filter = filter ?? { _, _ in true }
     return pageProperties
-      .filter { filter($0.value) }
+      .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
         let challengeTemplates = reviewProperties.cardTemplates.compactMap {
           self.challengeTemplates[$0]
