@@ -24,14 +24,17 @@ extension Result {
 }
 
 public protocol NoteBundleDocumentObserver: AnyObject {
-  func noteBundleDocumentDidLoad(_ document: NoteBundleDocument)
+  func noteBundleDocument(_ document: NoteBundleDocument, didChangeToState state: UIDocument.State)
   func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument)
 }
 
 /// Any IGListKit ListAdapter can listen to notebook changes.
 extension ListAdapter: NoteBundleDocumentObserver {
-  public func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
-    performUpdates(animated: true)
+  public func noteBundleDocument(
+    _ document: NoteBundleDocument,
+    didChangeToState state: UIDocument.State
+  ) {
+    // nothing
   }
 
   public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
@@ -50,6 +53,18 @@ public final class NoteBundleDocument: UIDocument {
     self.parsingRules = parsingRules
     noteBundle = NoteBundle(parsingRules: parsingRules)
     super.init(fileURL: url)
+    self.observerToken = NotificationCenter.default.addObserver(
+      forName: UIDocument.stateChangedNotification,
+      object: self,
+      queue: OperationQueue.main,
+      using: { [weak self] _ in
+        self?.documentStateChanged()
+      }
+    )
+  }
+
+  deinit {
+    observerToken.flatMap(NotificationCenter.default.removeObserver)
   }
 
   private let parsingRules: ParsingRules
@@ -61,6 +76,8 @@ public final class NoteBundleDocument: UIDocument {
   private var observers: [WeakObserver] = []
 
   private var loadPendingFilenames = Set<String>()
+
+  private var observerToken: NSObjectProtocol?
 
   /// Updates information about a page.
   /// - parameter fileMetadata: FileMetadata identifying the page in the metadata provider.
@@ -141,9 +158,6 @@ public final class NoteBundleDocument: UIDocument {
     }
     let newNoteBundle = try NoteBundle(parsingRules: parsingRules, fileWrapper: directory)
     self.noteBundle = newNoteBundle
-    for wrapper in observers {
-      wrapper.observer?.noteBundleDocumentDidLoad(self)
-    }
   }
 
   /// Generates a bundle containing all of the current data.
@@ -155,18 +169,28 @@ public final class NoteBundleDocument: UIDocument {
 
 extension NoteBundleDocument: Observable {
   public func addObserver(_ observer: NoteBundleDocumentObserver) {
+    assert(Thread.isMainThread)
     observers.append(WeakObserver(observer))
   }
 
   public func removeObserver(_ observer: NoteBundleDocumentObserver) {
+    assert(Thread.isMainThread)
     observers.removeAll { wrapped -> Bool in
       wrapped.observer === observer
     }
   }
 
   private func notifyObserversOfChange() {
+    assert(Thread.isMainThread)
     for observerWrapper in observers {
       observerWrapper.observer?.noteBundleDocumentDidUpdatePages(self)
+    }
+  }
+
+  private func documentStateChanged() {
+    assert(Thread.isMainThread)
+    for observerWrapper in observers {
+      observerWrapper.observer?.noteBundleDocument(self, didChangeToState: documentState)
     }
   }
 }

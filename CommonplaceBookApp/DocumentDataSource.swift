@@ -97,8 +97,11 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
 }
 
 extension DocumentDataSource: NoteBundleDocumentObserver {
-  public func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
-    updateCardsPerDocument()
+  public func noteBundleDocument(
+    _ document: NoteBundleDocument,
+    didChangeToState state: UIDocument.State
+  ) {
+    // nothing
   }
 
   public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {

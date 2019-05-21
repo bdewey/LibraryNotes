@@ -304,8 +304,11 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 }
 
 extension DocumentListViewController: NoteBundleDocumentObserver {
-  func noteBundleDocumentDidLoad(_ document: NoteBundleDocument) {
-    updateStudySession()
+  func noteBundleDocument(
+    _ document: NoteBundleDocument,
+    didChangeToState state: UIDocument.State
+  ) {
+    // nothing
   }
 
   func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {

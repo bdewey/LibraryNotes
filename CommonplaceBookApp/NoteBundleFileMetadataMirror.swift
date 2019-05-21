@@ -1,6 +1,7 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import MiniMarkdown
 import UIKit
 
 /// This class watches content in a FileMetadataProvider. As content changes, it updates
@@ -20,16 +21,7 @@ public final class NoteBundleFileMetadataMirror {
     self.document = document
     self.metadataProvider = metadataProvider
 
-    observerTokens.append(
-      NotificationCenter.default.addObserver(
-        forName: UIDocument.stateChangedNotification,
-        object: document,
-        queue: OperationQueue.main,
-        using: { [weak self] _ in
-          self?.documentStateChanged()
-        }
-      )
-    )
+    document.addObserver(self)
     document.openOrCreate { success in
       DDLogDebug("Opened note bundle: \(success), state = \(document.documentState)")
     }
@@ -37,12 +29,11 @@ public final class NoteBundleFileMetadataMirror {
   }
 
   deinit {
-    observerTokens.forEach { NotificationCenter.default.removeObserver($0) }
+    document.removeObserver(self)
   }
 
   private let document: NoteBundleDocument
   private let metadataProvider: FileMetadataProvider
-  private var observerTokens = [NSObjectProtocol]()
 
   /// Responds to changes in document state.
   private func documentStateChanged() {
@@ -54,6 +45,80 @@ public final class NoteBundleFileMetadataMirror {
     } else {
       processMetadata(metadataProvider.fileMetadata)
     }
+  }
+}
+
+/// Extensions for making the file names in the MetadataProvider match the properties
+/// extracted from those files and stored in the NoteBundle.
+public extension NoteBundleFileMetadataMirror {
+  /// The list of pages where the name does not match the desired base name.
+  /// The keys are existing file names. The values are desired *base* names
+  /// (no extensions, no uniqifiers).
+  var desiredBaseNameForPage: [String: String] {
+    var results = [String: String]()
+    for (fileName, properties) in document.noteBundle.pageProperties {
+      guard let desiredName = self.desiredBaseFileName(for: properties) else { continue }
+      if !fileName.hasPrefix(desiredName) {
+        results[fileName] = desiredName
+      }
+    }
+    return results
+  }
+
+  func performRenames(_ desiredBaseNameForPage: [String: String]) throws {
+//    guard !desiredBaseNameForPage.isEmpty else { return }
+//    try performBatchUpdates {
+//      for (existingPage, baseName) in desiredBaseNameForPage {
+//        let pathExtension = (existingPage as NSString).pathExtension
+//        let newName = FileNameGenerator(baseName: baseName, pathExtension: pathExtension)
+//          .firstName(notIn: metadataProvider)
+//        DDLogInfo("Renaming \(existingPage) to \(newName)")
+//        try self.renamePage(from: existingPage, to: newName)
+//      }
+//    }
+  }
+
+  private static let commonWords: Set<String> = [
+    "of",
+    "the",
+    "a",
+    "an",
+  ]
+
+  private static let allowedNameCharacters: CharacterSet = {
+    var allowedNameCharacters = CharacterSet.alphanumerics
+    allowedNameCharacters.insert(" ")
+    return allowedNameCharacters
+  }()
+
+  /// The "desired" base file name for this page.
+  ///
+  /// - note: The desired name comes from the first 5 words of the title, excluding
+  ///         common words like "of", "a", "the", concatenated and separated by hyphens.
+  private func desiredBaseFileName(for properties: NoteBundlePageProperties) -> String? {
+    let sanitizedTitle = plainTextTitle(for: properties)
+      .strippingLeadingAndTrailingWhitespace
+      .filter {
+        $0.unicodeScalars.count == 1
+          && NoteBundleFileMetadataMirror.allowedNameCharacters.contains($0.unicodeScalars.first!)
+      }
+    guard !sanitizedTitle.isEmpty else { return nil }
+    return sanitizedTitle
+      .lowercased()
+      .split(whereSeparator: { $0.isWhitespace })
+      .map { String($0) }
+      .filter { !NoteBundleFileMetadataMirror.commonWords.contains($0) }
+      .prefix(5)
+      .joined(separator: "-")
+  }
+
+  /// Title with all markdown characters removed
+  private func plainTextTitle(for properties: NoteBundlePageProperties) -> String {
+    return document.noteBundle.parsingRules
+      .parse(properties.title)
+      .reduce(into: "") { string, node in
+        string.append(MarkdownAttributedStringRenderer.textOnly.render(node: node).string)
+      }
   }
 }
 
@@ -72,5 +137,15 @@ extension NoteBundleFileMetadataMirror: FileMetadataProviderDelegate {
       fileMetadata.downloadIfNeeded(in: metadataProvider.container)
       document.updatePage(for: fileMetadata, in: metadataProvider, completion: nil)
     }
+  }
+}
+
+extension NoteBundleFileMetadataMirror: NoteBundleDocumentObserver {
+  public func noteBundleDocument(_ document: NoteBundleDocument, didChangeToState state: UIDocument.State) {
+    documentStateChanged()
+  }
+
+  public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
+    try? performRenames(desiredBaseNameForPage)
   }
 }

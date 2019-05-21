@@ -33,6 +33,8 @@
 		D374AB4E2290ADE400F54561 /* NoteBundle+Pages.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */; };
 		D374AB502291976D00F54561 /* NoteBundle+StudySession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB4F2291976D00F54561 /* NoteBundle+StudySession.swift */; };
 		D374AB5222926AE500F54561 /* NoteBundleFileMetadataMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */; };
+		D374AB5422937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */; };
+		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
@@ -150,6 +152,8 @@
 		D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteBundle+Pages.swift"; sourceTree = "<group>"; };
 		D374AB4F2291976D00F54561 /* NoteBundle+StudySession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteBundle+StudySession.swift"; sourceTree = "<group>"; };
 		D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirror.swift; sourceTree = "<group>"; };
+		D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirrorTests.swift; sourceTree = "<group>"; };
+		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
@@ -350,9 +354,11 @@
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D38D9A1821B3426B00973E73 /* NotebookTests.swift */,
+				D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */,
 				D348A97B21C6CFF1005CA937 /* PagePropertiesTests.swift */,
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
 				D39015C1229025EA0097B182 /* StudyMetadataDocumentTests.swift */,
+				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D36BC17921B571CA00935691 /* TestEditableDocument.swift */,
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 			);
@@ -694,7 +700,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
+				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D348A97C21C6CFF1005CA937 /* PagePropertiesTests.swift in Sources */,
+				D374AB5422937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D38D9A1921B3426B00973E73 /* NotebookTests.swift in Sources */,
 				D39015C0228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift in Sources */,

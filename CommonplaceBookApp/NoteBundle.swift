@@ -30,7 +30,7 @@ public struct NoteBundle {
   internal var log: [ChangeRecord] = []
 
   /// Page properties, indexed by page name.
-  internal var pageProperties: [String: NoteBundlePageProperties] = [:]
+  public internal(set) var pageProperties: [String: NoteBundlePageProperties] = [:]
 }
 
 /// Data serialization for non-primitive types in the NoteBundle
