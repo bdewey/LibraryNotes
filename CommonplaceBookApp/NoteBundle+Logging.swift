@@ -15,6 +15,8 @@ extension NoteBundle {
     /// Added a page to the document.
     case addedPage(name: String, digest: String)
 
+    case renamedPage(from: String, to: String)
+
     case study(identifier: ChallengeIdentifier, statistics: AnswerStatistics)
 
     /// Decode a change from a string.
@@ -50,6 +52,13 @@ extension NoteBundle {
           identifier: ChallengeIdentifier(templateDigest: digest, index: index),
           statistics: statistics
         )
+      } else if let namePair = description.removingPrefix(Prefix.renamedPage) {
+        let components = namePair.split(separator: "\n")
+        if components.count == 2 {
+          self = .renamedPage(from: String(components[0]), to: String(components[1]))
+        } else {
+          return nil
+        }
       } else {
         return nil
       }
@@ -62,6 +71,8 @@ extension NoteBundle {
         return Prefix.addChallengeTemplate + digest
       case .addedPage(name: let name, digest: let digest):
         return Prefix.addPage + digest + " " + name
+      case .renamedPage(from: let fromName, to: let toName):
+        return Prefix.renamedPage + "\(fromName)\t\(toName)"
       case .study(identifier: let identifier, statistics: let statistics):
         return Prefix.study + "\(identifier.templateDigest!) \(identifier.index) correct \(statistics.correct) incorrect \(statistics.incorrect)"
       }
@@ -70,6 +81,7 @@ extension NoteBundle {
     private enum Prefix {
       static let addChallengeTemplate = "add-template        "
       static let addPage              = "add-page            "
+      static let renamedPage          = "rename-page         "
       static let study                = "study               "
     }
   }

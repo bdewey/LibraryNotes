@@ -75,7 +75,10 @@ public final class NoteBundleDocument: UIDocument {
   /// All things watching the document lifecycle.
   private var observers: [WeakObserver] = []
 
-  private var loadPendingFilenames = Set<String>()
+  /// Remembers all pending property loads.
+  /// To handle overlapping renames, key = original file name, value = final file name.
+  /// Access only on the main thead.
+  private var pendingPropertyLoads: [String: String] = [:]
 
   private var observerToken: NSObjectProtocol?
 
@@ -91,7 +94,7 @@ public final class NoteBundleDocument: UIDocument {
   ) {
     assert(Thread.isMainThread)
     assert(documentState.intersection([.closed, .editingDisabled]).isEmpty)
-    guard !loadPendingFilenames.contains(fileMetadata.fileName) else {
+    guard pendingPropertyLoads[fileMetadata.fileName] == nil else {
       completion?(false)
       return
     }
@@ -100,7 +103,7 @@ public final class NoteBundleDocument: UIDocument {
       completion?(false)
       return
     }
-    loadPendingFilenames.insert(fileMetadata.fileName)
+    pendingPropertyLoads[fileMetadata.fileName] = fileMetadata.fileName
     metadataProvider.loadText(from: fileMetadata) { textResult in
       DispatchQueue.global(qos: .default).async {
         let propertiesResult = textResult.realFlatMap({ (text) -> Result<(NoteBundlePageProperties, ChallengeTemplateCollection)> in
@@ -122,7 +125,12 @@ public final class NoteBundleDocument: UIDocument {
           case .failure(let error):
             DDLogError("Unexpected error importing document: \(error)")
           }
-          self.loadPendingFilenames.remove(fileMetadata.fileName)
+          if let newName = self.pendingPropertyLoads[fileMetadata.fileName],
+            fileMetadata.fileName != newName {
+            self.noteBundle.renamePage(from: fileMetadata.fileName, to: newName)
+            self.notifyObserversOfChange()
+          }
+          self.pendingPropertyLoads[fileMetadata.fileName] = nil
           self.updateChangeCount(.done)
           completion?(true)
         }
@@ -147,11 +155,16 @@ public final class NoteBundleDocument: UIDocument {
   }
 
   public func performRenames(_ oldNameToNewName: [String: String]) {
+    assert(Thread.isMainThread)
     for (oldName, newName) in oldNameToNewName {
-      guard let existing = noteBundle.pageProperties[oldName] else { continue }
-      noteBundle.pageProperties[oldName] = nil
-      noteBundle.pageProperties[newName] = existing
+      if pendingPropertyLoads[oldName] != nil {
+        pendingPropertyLoads[oldName] = newName
+      } else {
+        noteBundle.renamePage(from: oldName, to: newName)
+      }
     }
+    notifyObserversOfChange()
+    updateChangeCount(.done)
   }
 
   /// Loads document data.

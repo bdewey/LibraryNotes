@@ -21,7 +21,6 @@ public extension NoteBundle {
     pageProperties: NoteBundlePageProperties,
     challengeTemplates: ChallengeTemplateCollection
   ) -> Bool {
-    assert(Thread.isMainThread)
     if let existing = self.pageProperties[fileName],
       existing.sha1Digest == pageProperties.sha1Digest {
       DDLogInfo("Skipping \(fileName) -- already have properties for \(pageProperties.sha1Digest)")
@@ -43,6 +42,15 @@ public extension NoteBundle {
       + " from \(fileName) (\(pageProperties.sha1Digest))"
     )
     return true
+  }
+
+  mutating func renamePage(from originalName: String, to newName: String) {
+    guard let existing = pageProperties[originalName] else { return }
+    pageProperties[originalName] = nil
+    pageProperties[newName] = existing
+    log.append(
+      ChangeRecord(timestamp: Date(), change: .renamedPage(from: originalName, to: newName))
+    )
   }
 
   /// Synchronously extract properties & challenge templates from the contents of a file.

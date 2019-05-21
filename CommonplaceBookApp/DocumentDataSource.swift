@@ -91,6 +91,9 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       .reduce(into: [String: Int]()) { cardsPerDocument, card in
         cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
       }
+    if cardsPerDocument.count > 1 {
+      print("WTF?")
+    }
     DDLogInfo(
       "studySession.count = \(studySession.count). " +
         "cardsPerDocument has \(cardsPerDocument.count) entries"

@@ -31,11 +31,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteBundleDocument,
+    notebookMirror: NoteBundleFileMetadataMirror,
     metadataProvider: FileMetadataProvider,
     stylesheet: Stylesheet
   ) {
-    self.notebook = notebook
+    self.notebookMirror = notebookMirror
+    self.notebook = notebookMirror.document
     self.metadataProvider = metadataProvider
     self.stylesheet = stylesheet
     self.dataSource = DocumentDataSource(
@@ -59,6 +60,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     dataSource.notebook.removeObserver(documentListAdapter)
   }
 
+  private let notebookMirror: NoteBundleFileMetadataMirror
   private let notebook: NoteBundleDocument
   private let metadataProvider: FileMetadataProvider
   public let stylesheet: Stylesheet
@@ -141,12 +143,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     }
     studySession = notebook.noteBundle.studySession()
 
-    // TODO: Bring this functionality back, but in a better place.
-//    do {
-//      try notebook.performRenames(notebook.noteBundle.desiredBaseNameForPage)
-//    } catch {
-//      DDLogError("Unexpected error performing renames in load: \(error)")
-//    }
+    do {
+      try notebookMirror.performRenames(notebookMirror.desiredBaseNameForPage)
+    } catch {
+      DDLogError("Unexpected error performing renames in load: \(error)")
+    }
   }
 
   @objc private func didTapNewDocument() {
@@ -183,12 +184,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
         )
         viewController.onDocumentClose = { success in
           if !success { DDLogError("Failure closing document? Why oh why?") }
-          // TODO: Bring back
-//          do {
-//            try notebook.performRenames(notebook.desiredBaseNameForPage)
-//          } catch {
-//            DDLogError("Unexpected error on rename: \(error)")
-//          }
+          do {
+            try self.notebookMirror.performRenames(self.notebookMirror.desiredBaseNameForPage)
+          } catch {
+            DDLogError("Unexpected error on rename: \(error)")
+          }
         }
         viewController.selectedRange = NSRange(location: initialOffset, length: 0)
         viewController.autoFirstResponder = true

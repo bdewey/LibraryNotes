@@ -55,12 +55,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           fileURL: metadataProvider.container.appendingPathComponent("commonplace.notebundle"),
           parsingRules: parsingRules
         )
-        self.documentMirror = NoteBundleFileMetadataMirror(
+        let documentMirror = NoteBundleFileMetadataMirror(
           document: noteBundleDocument,
           metadataProvider: metadataProvider
         )
+        self.documentMirror = documentMirror
         window.rootViewController = self.makeViewController(
-          notebook: noteBundleDocument,
+          notebookMirror: documentMirror,
           metadataProvider: metadataProvider
         )
       case .failure(let error):
@@ -107,14 +108,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeViewController(
-    notebook: NoteBundleDocument,
+    notebookMirror: NoteBundleFileMetadataMirror,
     metadataProvider: FileMetadataProvider
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
-        notebook: notebook,
+        notebookMirror: notebookMirror,
         metadataProvider: metadataProvider,
         stylesheet: commonplaceBookStylesheet
       ),

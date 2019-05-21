@@ -36,8 +36,8 @@ public final class NoteBundleFileMetadataMirror {
     document.removeObserver(self)
   }
 
-  private let document: NoteBundleDocument
-  private let metadataProvider: FileMetadataProvider
+  public let document: NoteBundleDocument
+  public let metadataProvider: FileMetadataProvider
 
   /// Responds to changes in document state.
   private func documentStateChanged() {

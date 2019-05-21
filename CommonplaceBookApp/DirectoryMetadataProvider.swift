@@ -51,6 +51,7 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
       at: container.appendingPathComponent(metadata.fileName),
       to: container.appendingPathComponent(name)
     )
+    try extractMetadata()
   }
 
   fileprivate func extractMetadata() throws {
