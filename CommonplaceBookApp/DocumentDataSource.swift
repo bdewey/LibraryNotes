@@ -34,8 +34,10 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
     return propertiesFilteredByHashtag
       // give IGLitstKit its own copy of the model objects to guard against mutations
-      .map { tuple -> NoteBundlePagePropertiesListDiffable in
-        let fileMetadata = self.fileMetadataProvider.fileMetadata.first(where: { $0.fileName == tuple.key })!
+      .compactMap { tuple -> NoteBundlePagePropertiesListDiffable? in
+        guard let fileMetadata = self.fileMetadataProvider.fileMetadata.first(where: { $0.fileName == tuple.key }) else {
+          return nil
+        }
         return NoteBundlePagePropertiesListDiffable(
           fileMetadata: fileMetadata,
           properties: tuple.value,

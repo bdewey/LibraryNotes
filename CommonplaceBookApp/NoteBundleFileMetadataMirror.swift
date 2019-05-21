@@ -15,7 +15,11 @@ public final class NoteBundleFileMetadataMirror {
   /// - precondition: `document` is closed. It will get opened by the mirror.
   /// - precondition: `metadataProvider` must not have a delegate.
   ///                  This instance will be the delegate.
-  public init(document: NoteBundleDocument, metadataProvider: FileMetadataProvider) {
+  public init(
+    document: NoteBundleDocument,
+    metadataProvider: FileMetadataProvider,
+    automaticallyRenameFiles: Bool = true
+  ) {
     precondition(document.documentState == .closed)
     precondition(metadataProvider.delegate == nil)
     self.document = document
@@ -66,16 +70,34 @@ public extension NoteBundleFileMetadataMirror {
   }
 
   func performRenames(_ desiredBaseNameForPage: [String: String]) throws {
-//    guard !desiredBaseNameForPage.isEmpty else { return }
-//    try performBatchUpdates {
-//      for (existingPage, baseName) in desiredBaseNameForPage {
-//        let pathExtension = (existingPage as NSString).pathExtension
-//        let newName = FileNameGenerator(baseName: baseName, pathExtension: pathExtension)
-//          .firstName(notIn: metadataProvider)
-//        DDLogInfo("Renaming \(existingPage) to \(newName)")
-//        try self.renamePage(from: existingPage, to: newName)
-//      }
-//    }
+    guard !desiredBaseNameForPage.isEmpty else { return }
+
+    // HACK: Avoid processing metadata provider notifications until this batch is done
+    precondition(metadataProvider.delegate === self)
+    metadataProvider.delegate = nil
+    defer { metadataProvider.delegate = self }
+
+    let successfulRenames = renameFileMetadata(desiredBaseNameForPage: desiredBaseNameForPage)
+      .compactMapValues { try? $0.get() }
+    document.performRenames(successfulRenames)
+  }
+
+  /// Given a mapping of existing file name to desired base name (no extension), determines
+  /// an actual unique file name and does the rename. For all successful renames, returns
+  /// the actual file name in the result.
+  private func renameFileMetadata(desiredBaseNameForPage: [String: String]) -> [String: Result<String, Error>] {
+    var results = [String: Result<String, Error>]()
+    for (existingPage, baseName) in desiredBaseNameForPage {
+      let pathExtension = (existingPage as NSString).pathExtension
+      let newName = FileNameGenerator(baseName: baseName, pathExtension: pathExtension)
+        .firstName(notIn: metadataProvider)
+      DDLogInfo("Renaming \(existingPage) to \(newName)")
+      results[existingPage] = Result { () throws -> String in
+        try metadataProvider.renameMetadata(FileMetadata(fileName: existingPage), to: newName)
+        return newName
+      }
+    }
+    return results
   }
 
   private static let commonWords: Set<String> = [
@@ -146,6 +168,6 @@ extension NoteBundleFileMetadataMirror: NoteBundleDocumentObserver {
   }
 
   public func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
-    try? performRenames(desiredBaseNameForPage)
+    // nothing
   }
 }

@@ -146,8 +146,12 @@ public final class NoteBundleDocument: UIDocument {
     assertionFailure()
   }
 
-  public func performRenames(_ desiredBaseNameForPage: [String: String]) throws {
-    assertionFailure()
+  public func performRenames(_ oldNameToNewName: [String: String]) {
+    for (oldName, newName) in oldNameToNewName {
+      guard let existing = noteBundle.pageProperties[oldName] else { continue }
+      noteBundle.pageProperties[oldName] = nil
+      noteBundle.pageProperties[newName] = existing
+    }
   }
 
   /// Loads document data.
