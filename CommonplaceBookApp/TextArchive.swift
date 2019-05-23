@@ -104,6 +104,7 @@ extension TextArchive {
     case expectedDigest
     case expectedInteger
     case invalidHash
+    case invalidHeader
     case invalidPrefix(expected: String)
     case wrongNumberOfLines(expected: Int, actual: Int)
   }
@@ -137,68 +138,47 @@ public extension TextArchive.Chunk {
   }
 
   internal static func parse(_ input: Substring) throws -> (TextArchive.Chunk, Substring) {
-    let afterPrefix = try parsePrefix("+++ ", in: input)
-    let (hash, afterHash) = try parseHash(in: afterPrefix)
-    let afterSpace = try parsePrefix(" ", in: afterHash)
-    let (lineCount, afterLineCount) = try parseInt(in: afterSpace)
-    let afterNewline = try parsePrefix("\n", in: afterLineCount)
-    let (text, remainder) = try parse(lineCount: lineCount, in: afterNewline)
-    let chunk = TextArchive.Chunk(text: text, sha1Digest: hash, lineCount: lineCount)
+    guard let (chunk, remainder) = parseChunkWithoutParent(from: input) else {
+      throw TextArchive.SerializationError.invalidHeader
+    }
     return (chunk, remainder)
   }
 
-  private static func parseHash(in substring: Substring) throws -> (String, Substring) {
-    let hashPrefix = substring.prefix(40)
-    if hashPrefix.count != 40 {
-      throw TextArchive.SerializationError.expectedDigest
+  private static func parseChunkWithoutParent(
+    from input: Substring
+  ) -> (TextArchive.Chunk, Substring)? {
+    guard
+      let index = input.firstIndex(of: "\n").flatMap({ input.index(after: $0) })
+      else {
+        return nil
     }
-    return (String(hashPrefix), substring[hashPrefix.endIndex...])
-  }
-
-  private static func parseInt(in substring: Substring) throws -> (Int, Substring) {
-    let (prefix, suffix) = substring.prefixAndSuffix(where: { $0.isHexDigit })
-    if prefix.isEmpty {
-      throw TextArchive.SerializationError.expectedInteger
+    let header = String(input[input.startIndex ..< index])
+    guard
+      let match = NSRegularExpression.noParentChunkHeader.matches(in: header, options: [], range: header.completeRange).first,
+      match.numberOfRanges == 3,
+      let lineCount = header.int(at: match.range(at: 2)),
+      let splitIndex = input[index...].index(after: lineCount, character: "\n")
+      else {
+        return nil
     }
-    if let value = Int(String(prefix)) {
-      return (value, suffix)
-    } else {
-      throw TextArchive.SerializationError.expectedInteger
-    }
-  }
-
-  private static func parse(lineCount: Int, in substring: Substring) throws -> (String, Substring) {
-    var newlineCount = 0
-    var index = substring.startIndex
-    while index != substring.endIndex {
-      if substring[index] == "\n" { newlineCount += 1 }
-      index = substring.index(after: index)
-      if newlineCount == lineCount {
-        return (String(substring[substring.startIndex ..< index]), substring[index...])
-      }
-    }
-    throw TextArchive.SerializationError.wrongNumberOfLines(
-      expected: lineCount,
-      actual: newlineCount
+    let digest = header.string(at: match.range(at: 1))
+    return (
+      TextArchive.Chunk(
+        text: String(input[index ..< splitIndex]),
+        sha1Digest: digest,
+        lineCount: lineCount
+      ),
+      input[splitIndex...]
     )
   }
+}
 
-  private static func parsePrefix(_ text: String, in substring: Substring) throws -> Substring {
-    var textIndex = text.startIndex
-    var substringIndex = substring.startIndex
-    while textIndex != text.endIndex, substringIndex != substring.endIndex {
-      if text[textIndex] != substring[substringIndex] {
-        throw TextArchive.SerializationError.invalidPrefix(expected: text)
-      }
-      textIndex = text.index(after: textIndex)
-      substringIndex = substring.index(after: substringIndex)
-    }
-    // We didn't consume the whole prefix
-    if textIndex != text.endIndex {
-      throw TextArchive.SerializationError.invalidPrefix(expected: text)
-    }
-    return substring[substringIndex...]
-  }
+private extension NSRegularExpression {
+  // swiftlint:disable:next force_try
+  static let noParentChunkHeader = try! NSRegularExpression(
+    pattern: "^\\+\\+\\+ ([0-9a-f]{40}) (\\d+)$",
+    options: []
+  )
 }
 
 extension TextArchive.Chunk: Equatable {
@@ -216,5 +196,33 @@ private extension String {
     } else {
       return self.appending("\n")
     }
+  }
+
+  func string(at range: NSRange) -> String {
+    return String(self[Range(range, in: self)!])
+  }
+
+  func int(at range: NSRange) -> Int? {
+    return Int(string(at: range))
+  }
+
+  var completeRange: NSRange {
+    return NSRange(startIndex ..< endIndex, in: self)
+  }
+}
+
+private extension StringProtocol {
+  /// Returns the index that is *after* the `count` occurence of `character` in the receiver.
+  func index(after count: Int, character: Character) -> String.Index? {
+    var index = startIndex
+    var newlineCount = 0
+    while index != endIndex {
+      if self[index] == character { newlineCount += 1 }
+      index = self.index(after: index)
+      if newlineCount == count {
+        return index
+      }
+    }
+    return nil
   }
 }
