@@ -30,14 +30,7 @@ public struct NoteBundle {
   internal var log: [ChangeRecord] = []
 
   /// Page properties, indexed by page name.
-  public internal(set) var pageProperties: [String: NoteBundlePageProperties] = [:] {
-    didSet {
-      print("Changed page properties")
-      if pageProperties.count > 1 {
-        print("More than one set of properties in this test, wtf?")
-      }
-    }
-  }
+  public internal(set) var pageProperties: [String: NoteBundlePageProperties] = [:]
 }
 
 /// Data serialization for non-primitive types in the NoteBundle
