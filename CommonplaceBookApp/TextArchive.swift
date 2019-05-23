@@ -16,6 +16,12 @@ public struct TextArchive: Equatable {
     return chunk
   }
 
+  public mutating func append(_ text: String, parent: Chunk) -> Chunk {
+    let chunk = Chunk(text: text, parent: parent)
+    chunks.append(chunk)
+    return chunk
+  }
+
   public func textSerialized() -> String {
     return chunks.map { $0.textSerialized() }.joined()
   }
@@ -47,12 +53,34 @@ public struct TextArchive: Equatable {
           return count
         }
       })
+      self.parent = nil
     }
 
-    private init(text: String, sha1Digest: String, lineCount: Int) {
+    public init(text: String, parent: Chunk) {
+      let text = text.appendingNewlineIfNecessary()
+      let dmp = DiffMatchPatch()
+      let diff = dmp.diff_main(ofOldString: parent.text, andNewString: text)
+      dmp.diff_cleanupSemantic(diff)
+      let patch = dmp.patch_make(fromOldString: parent.text, andDiffs: diff)
+      let patchText = dmp.patch_(toText: patch)!
+
+      self.text = patchText
+      self.lineCount = patchText.reduce(0, { count, character in
+        if character == "\n" {
+        return count + 1
+        } else {
+        return count
+        }
+      })
+      self.parent = parent
+      self.sha1Digest = text.sha1Digest()
+    }
+
+    private init(text: String, sha1Digest: String, lineCount: Int, parent: Chunk? = nil) {
       self.text = text
       self.sha1Digest = sha1Digest
       self.lineCount = lineCount
+      self.parent = parent
     }
 
     /// The text in this chunk. Guaranteed to end in a "\n"
@@ -63,6 +91,10 @@ public struct TextArchive: Equatable {
 
     /// How many lines in this chunk.
     public let lineCount: Int
+
+    /// Optional: A parent TextChunk. If present, `text` is a diff operation that, when applied
+    /// to the ...
+    public let parent: Chunk?
   }
 }
 
@@ -97,7 +129,11 @@ public extension TextArchive.Chunk {
 
   /// Returns plain-text serialization of this chunk.
   func textSerialized() -> String {
-    return "+++ \(sha1Digest) \(lineCount)\n\(text)"
+    if let parent = parent {
+      return "+++ \(sha1Digest) \(parent.sha1Digest) \(lineCount)\n\(text)"
+    } else {
+      return "+++ \(sha1Digest) \(lineCount)\n\(text)"
+    }
   }
 
   internal static func parse(_ input: Substring) throws -> (TextArchive.Chunk, Substring) {
@@ -141,7 +177,10 @@ public extension TextArchive.Chunk {
         return (String(substring[substring.startIndex ..< index]), substring[index...])
       }
     }
-    throw TextArchive.SerializationError.wrongNumberOfLines(expected: lineCount, actual: newlineCount)
+    throw TextArchive.SerializationError.wrongNumberOfLines(
+      expected: lineCount,
+      actual: newlineCount
+    )
   }
 
   private static func parsePrefix(_ text: String, in substring: Substring) throws -> Substring {

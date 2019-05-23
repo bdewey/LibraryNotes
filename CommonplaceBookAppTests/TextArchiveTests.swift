@@ -43,4 +43,12 @@ final class TextArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testCanSerializeAsDiff() {
+    var archive = TextArchive()
+    let parent = archive.append("This is the original text.")
+    let child = archive.append("This is the modified text.", parent: parent)
+    let serialized = archive.textSerialized()
+    print(serialized)
+  }
 }
