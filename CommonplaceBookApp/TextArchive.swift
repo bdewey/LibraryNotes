@@ -34,7 +34,7 @@ public struct TextArchive: Equatable {
   /// A chunk of text to store in the archive.
   /// Since the archive is line-based, each chunk *must* end with a newline (\n)
   /// If you try to create a chunk that does not end with a newline, we add one.
-  public struct Chunk: Equatable {
+  public final class Chunk {
 
     /// Designated initalizer.
     public init(_ text: String) {
@@ -71,6 +71,7 @@ extension TextArchive {
     case excessInput
     case expectedDigest
     case expectedInteger
+    case invalidHash
     case invalidPrefix(expected: String)
     case wrongNumberOfLines(expected: Int, actual: Int)
   }
@@ -79,14 +80,19 @@ extension TextArchive {
 /// Serialization / deserialization of the chunk.
 public extension TextArchive.Chunk {
 
-  init<S: StringProtocol>(textSerialization: S) throws where S.SubSequence == Substring {
+  convenience init<S: StringProtocol>(
+    textSerialization: S
+  ) throws where S.SubSequence == Substring {
     let (chunk, remainder) = try TextArchive.Chunk.parse(
       textSerialization[textSerialization.startIndex...]
     )
     if !remainder.isEmpty {
       throw TextArchive.SerializationError.excessInput
     }
-    self = chunk
+    if chunk.sha1Digest != chunk.text.sha1Digest() {
+      throw TextArchive.SerializationError.invalidHash
+    }
+    self.init(text: chunk.text, sha1Digest: chunk.sha1Digest, lineCount: chunk.lineCount)
   }
 
   /// Returns plain-text serialization of this chunk.
@@ -153,6 +159,14 @@ public extension TextArchive.Chunk {
       throw TextArchive.SerializationError.invalidPrefix(expected: text)
     }
     return substring[substringIndex...]
+  }
+}
+
+extension TextArchive.Chunk: Equatable {
+  public static func == (lhs: TextArchive.Chunk, rhs: TextArchive.Chunk) -> Bool {
+    // don't have to compare text if the digests match!
+    return lhs.sha1Digest == rhs.sha1Digest &&
+      lhs.lineCount == rhs.lineCount
   }
 }
 
