@@ -35,6 +35,8 @@
 		D374AB5222926AE500F54561 /* NoteBundleFileMetadataMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */; };
 		D374AB5422937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
+		D374AB6B229655BA00F54561 /* TextArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextArchive.swift */; };
+		D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6C229657C900F54561 /* TextArchiveTests.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
@@ -154,6 +156,8 @@
 		D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirror.swift; sourceTree = "<group>"; };
 		D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirrorTests.swift; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
+		D374AB6A229655BA00F54561 /* TextArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextArchive.swift; sourceTree = "<group>"; };
+		D374AB6C229657C900F54561 /* TextArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextArchiveTests.swift; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
@@ -343,6 +347,7 @@
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
+				D374AB6A229655BA00F54561 /* TextArchive.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -361,6 +366,7 @@
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D36BC17921B571CA00935691 /* TestEditableDocument.swift */,
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
+				D374AB6C229657C900F54561 /* TextArchiveTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -652,6 +658,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */,
+				D374AB6B229655BA00F54561 /* TextArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
@@ -701,6 +708,7 @@
 			files = (
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
+				D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */,
 				D348A97C21C6CFF1005CA937 /* PagePropertiesTests.swift in Sources */,
 				D374AB5422937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
