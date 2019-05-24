@@ -50,16 +50,6 @@ final class TestMetadataProvider: FileMetadataProvider {
 
   var contentsChangeListener: ((String, String) -> Void)?
 
-  /// Get DocumentProperties for all of the FileMetadata.
-  var documentProperties: [PageProperties] {
-    return fileNameToMetadata
-      .values
-      .map {
-        let text = fileContents[$0.fileName] ?? ""
-        return PageProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
-      }
-  }
-
   /// A delegate to notify in the event of changes.
   /// - note: Currently unused as the metadata in this collection are immutable.
   weak var delegate: FileMetadataProviderDelegate?
