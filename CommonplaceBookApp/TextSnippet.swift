@@ -16,26 +16,34 @@ public final class TextSnippet {
     self._parent = .none
   }
 
-  public init(text: String, parent: TextSnippet) {
-    let text = text.appendingNewlineIfNecessary()
-    let dmp = DiffMatchPatch()
-    let diff = dmp.diff_main(ofOldString: parent.text, andNewString: text)
-    dmp.diff_cleanupSemantic(diff)
-    let patch = dmp.patch_make(fromOldString: parent.text, andDiffs: diff)
-    let patchText = dmp.patch_(toText: patch)!
+  /// Changes the encoding of a snippet to be as a diff based on another snippet,
+  /// assuming that encoding actually saves space.
+  public func encodeAsDiff(from other: TextSnippet?) {
+    if let parent = other {
+      let dmp = DiffMatchPatch()
+      let parentText = parent.text
+      let diff = dmp.diff_main(ofOldString: parentText, andNewString: text)
+      dmp.diff_cleanupSemantic(diff)
+      let patch = dmp.patch_make(fromOldString: parentText, andDiffs: diff)
+      let patchText = dmp.patch_(toText: patch)!
 
-    // Only use the patch encoding if it's smaller than the text, including the header
-    // space we need for storing an extra digest
-    if patchText.count + 41 < text.count {
-      self._text = patchText
-      self.lineCount = patchText.count(of: "\n")
-      self._parent = .direct(parent)
-      self.sha1Digest = text.sha1Digest()
+      // Only use the patch encoding if it's smaller than the text, including the header
+      // space we need for storing an extra digest
+      if patchText.count + 41 < text.count {
+        encodingQueue.sync(flags: .barrier) {
+          _text = patchText
+          lineCount = patchText.count(of: "\n")
+          _parent = .direct(parent)
+        }
+      }
     } else {
-      self._text = text
-      self.lineCount = text.count(of: "\n")
-      self._parent = .none
-      self.sha1Digest = text.sha1Digest()
+      let text = self.text
+      let lineCount = text.count(of: "\n")
+      encodingQueue.sync(flags: .barrier) {
+        _text = text
+        self.lineCount = lineCount
+        _parent = .none
+      }
     }
   }
 
@@ -62,30 +70,42 @@ public final class TextSnippet {
     guard let chunk = chunkForId[digest] else {
       throw SerializationError.noChunk(withDigest: digest)
     }
-    _parent = .direct(chunk)
+    encodingQueue.sync(flags: DispatchWorkItemFlags.barrier) {
+      _parent = .direct(chunk)
+    }
   }
 
-  private let _text: String
+  /// Synchronization for the encoding of this text snippet.
+  /// Accessing "parent" and "_text" should happen on this queue.
+  private let encodingQueue = DispatchQueue(
+    label: "org.brians-brain.encoding",
+    qos: .default,
+    attributes: [.concurrent]
+  )
+
+  private var _text: String
 
   /// The text in this chunk. Guaranteed to end in a "\n"
   public var text: String {
-    if let parent = parent {
-      let dmp = DiffMatchPatch()
-      do {
-        if let patches = try dmp.patch_(fromText: _text) as? [Any],
-          let results = dmp.patch_apply(patches, to: parent.text),
-          let result = results[0] as? String {
-          return result
-        } else {
-          throw SerializationError.invalidPatch(patch: _text)
+    return encodingQueue.sync {
+      if let parent = parent {
+        let dmp = DiffMatchPatch()
+        do {
+          if let patches = try dmp.patch_(fromText: _text) as? [Any],
+            let results = dmp.patch_apply(patches, to: parent.text),
+            let result = results[0] as? String {
+            return result
+          } else {
+            throw SerializationError.invalidPatch(patch: _text)
+          }
+        } catch {
+          DDLogError("Unexpected error applying patch: \(error)")
         }
-      } catch {
-        DDLogError("Unexpected error applying patch: \(error)")
+        assertionFailure()
+        return ""
+      } else {
+        return _text
       }
-      assertionFailure()
-      return ""
-    } else {
-      return _text
     }
   }
 
@@ -93,7 +113,7 @@ public final class TextSnippet {
   public let sha1Digest: String
 
   /// How many lines in this chunk.
-  public let lineCount: Int
+  public private(set) var lineCount: Int
 
   private var _parent: ParentChunkReference
 

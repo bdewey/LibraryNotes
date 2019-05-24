@@ -11,18 +11,20 @@ public struct TextSnippetArchive: Equatable {
   public init() { }
 
   /// The chunks that make up this archive.
-  public var snippets: [TextSnippet] = []
+  public private(set) var snippets: [TextSnippet] = []
 
-  public mutating func append(_ text: String) -> TextSnippet {
-    let chunk = TextSnippet(text)
-    snippets.append(chunk)
-    return chunk
-  }
+  /// Indexes snippets by the sha1 digest
+  public private(set) var snippetDigestIndex: [String: TextSnippet] = [:]
 
-  public mutating func append(_ text: String, parent: TextSnippet) -> TextSnippet {
-    let chunk = TextSnippet(text: text, parent: parent)
-    snippets.append(chunk)
-    return chunk
+  public mutating func insert(_ text: String) -> TextSnippet {
+    let snippet = TextSnippet(text)
+    if let existingSnippet = snippetDigestIndex[snippet.sha1Digest] {
+      return existingSnippet
+    } else {
+      snippets.append(snippet)
+      snippetDigestIndex[snippet.sha1Digest] = snippet
+      return snippet
+    }
   }
 
   public func textSerialized() -> String {
@@ -51,5 +53,6 @@ public struct TextSnippetArchive: Equatable {
       try chunk.resolveParentReference(using: chunkForId)
     }
     self.snippets = chunks
+    self.snippetDigestIndex = chunkForId
   }
 }

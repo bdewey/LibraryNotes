@@ -31,7 +31,7 @@ final class TextArchiveTests: XCTestCase {
       "abc\n123",
     ]
     var archive = TextSnippetArchive()
-    let chunks = texts.map { archive.append($0) }
+    let chunks = texts.map { archive.insert($0) }
     XCTAssertEqual(chunks[0].sha1Digest, "5baa7f79aea31cf9d11147282faac9f95dff4a27")
     XCTAssertEqual(chunks[1].sha1Digest, texts[1].sha1Digest())
     do {
@@ -46,9 +46,10 @@ final class TextArchiveTests: XCTestCase {
 
   func testCanSerializeAsDiff() {
     var archive = TextSnippetArchive()
-    let parent = archive.append(testContent)
+    let parent = archive.insert(testContent)
     let modifiedContent = testContent + "\n> This is a fake new quote\n"
-    let child = archive.append(modifiedContent, parent: parent)
+    let child = archive.insert(modifiedContent)
+    child.encodeAsDiff(from: parent)
     XCTAssertEqual(child.text, modifiedContent)
     let serialized = archive.textSerialized()
     do {
@@ -62,13 +63,32 @@ final class TextArchiveTests: XCTestCase {
   /// We only use delta encoding if it actually saves space.
   func testDeltaOptimization() {
     let parent = TextSnippet("dog")
-    let child = TextSnippet(text: "cat", parent: parent)
+    let child = TextSnippet("cat")
+    child.encodeAsDiff(from: parent)
     let expectedSerialization = """
 +++ 8f6abfbac8c81b55f9005f7ec09e32d29e40eb40 1
 cat
 
 """
     XCTAssertEqual(child.textSerialized(), expectedSerialization)
+  }
+
+  func testSingleInstanceStorage() {
+    var archive = TextSnippetArchive()
+    _ = archive.insert("sample")
+    _ = archive.insert("sample")
+    XCTAssertEqual(archive.snippets.count, 1)
+  }
+
+  func testCreateSnippetDelta() {
+    let parent = TextSnippet(testContent)
+    let childText = parent.text + "> Test quote!\n"
+    let child = TextSnippet(childText)
+    XCTAssert(child.textSerialized().count > childText.count)
+    XCTAssertEqual(child.text, childText)
+    child.encodeAsDiff(from: parent)
+    XCTAssert(child.textSerialized().count < childText.count)
+    XCTAssertEqual(child.text, childText)
   }
 }
 
