@@ -37,7 +37,6 @@ final class NoteBundleFileMetadataMirrorTests: XCTestCase {
       fileName: "2018-12-16.txt",
       contents: "#nocontent #onlyhashtags #notitle #anyfilenameworks"
     ))
-    metadataProvider.addPropertiesCache()
     let tempDocument = try! TemporaryFile(creatingTempDirectoryForFilename: "test.notebundle")
     let document = NoteBundleDocument(
       fileURL: tempDocument.fileURL,

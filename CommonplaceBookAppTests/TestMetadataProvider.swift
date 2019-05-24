@@ -54,26 +54,10 @@ final class TestMetadataProvider: FileMetadataProvider {
   var documentProperties: [PageProperties] {
     return fileNameToMetadata
       .values
-      .filter { $0.fileName != Notebook.Key.pageProperties.rawValue }
       .map {
         let text = fileContents[$0.fileName] ?? ""
         return PageProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
       }
-  }
-
-  /// Gets `documentProperties` as a serialized JSON string.
-  var documentPropertiesJSON: String {
-    let data = (try? Notebook.encoder.encode(documentProperties)) ?? Data()
-    return String(data: data, encoding: .utf8) ?? ""
-  }
-
-  /// Adds "properties.json" that contains cached `DocumentProperties` for all existing
-  /// file contents.
-  func addPropertiesCache() {
-    addFileInfo(FileInfo(
-      fileName: Notebook.Key.pageProperties.rawValue,
-      contents: documentPropertiesJSON
-    ))
   }
 
   /// A delegate to notify in the event of changes.
