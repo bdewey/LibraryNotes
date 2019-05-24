@@ -17,7 +17,7 @@ public extension NoteBundle {
   /// - parameter date: The date of the study session, used for spaced repetition
   /// - returns: A StudySession!
   func studySession(
-    filter: ((String, NoteBundlePageProperties) -> Bool)? = nil,
+    filter: ((String, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }

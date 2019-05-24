@@ -76,7 +76,7 @@ final class NoteBundleFileMetadataMirrorTests: XCTestCase {
 
 private class NoteBundleDocumentBlockObserver: NoteBundleDocumentObserver {
   var didChangeToState: ((UIDocument.State) -> Void)?
-  var didUpdatePages: (([String: NoteBundlePageProperties]) -> Void)?
+  var didUpdatePages: (([String: PageProperties]) -> Void)?
 
   func noteBundleDocument(
     _ document: NoteBundleDocument,

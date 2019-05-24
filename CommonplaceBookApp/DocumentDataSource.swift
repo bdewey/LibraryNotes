@@ -49,7 +49,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       )
   }
 
-  private var propertiesFilteredByHashtag: [String: NoteBundlePageProperties] {
+  private var propertiesFilteredByHashtag: [String: PageProperties] {
     return notebook.noteBundle.pageProperties
       .filter {
         guard let hashtag = filteredHashtag else { return true }

@@ -30,7 +30,7 @@ public struct NoteBundle {
   internal var log: [ChangeRecord] = []
 
   /// Page properties, indexed by page name.
-  public internal(set) var pageProperties: [String: NoteBundlePageProperties] = [:]
+  public internal(set) var pageProperties: [String: PageProperties] = [:]
 }
 
 /// Data serialization for non-primitive types in the NoteBundle
@@ -53,10 +53,10 @@ internal extension NoteBundle {
     return pageData
   }
 
-  static func makePages(from data: Data) throws -> [String: NoteBundlePageProperties] {
+  static func makePages(from data: Data) throws -> [String: PageProperties] {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
-    return try decoder.decode([String: NoteBundlePageProperties].self, from: data)
+    return try decoder.decode([String: PageProperties].self, from: data)
   }
 }
 

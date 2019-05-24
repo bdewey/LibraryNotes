@@ -106,7 +106,7 @@ public final class NoteBundleDocument: UIDocument {
     pendingPropertyLoads[fileMetadata.fileName] = fileMetadata.fileName
     metadataProvider.loadText(from: fileMetadata) { textResult in
       DispatchQueue.global(qos: .default).async {
-        let propertiesResult = textResult.realFlatMap({ (text) -> Result<(NoteBundlePageProperties, ChallengeTemplateCollection)> in
+        let propertiesResult = textResult.realFlatMap({ (text) -> Result<(PageProperties, ChallengeTemplateCollection)> in
           return Result {
             try self.noteBundle.extractPropertiesAndTemplates(from: text, loadedFrom: fileMetadata)
           }

@@ -117,7 +117,7 @@ public extension NoteBundleFileMetadataMirror {
   ///
   /// - note: The desired name comes from the first 5 words of the title, excluding
   ///         common words like "of", "a", "the", concatenated and separated by hyphens.
-  private func desiredBaseFileName(for properties: NoteBundlePageProperties) -> String? {
+  private func desiredBaseFileName(for properties: PageProperties) -> String? {
     let sanitizedTitle = plainTextTitle(for: properties)
       .strippingLeadingAndTrailingWhitespace
       .filter {
@@ -135,7 +135,7 @@ public extension NoteBundleFileMetadataMirror {
   }
 
   /// Title with all markdown characters removed
-  private func plainTextTitle(for properties: NoteBundlePageProperties) -> String {
+  private func plainTextTitle(for properties: PageProperties) -> String {
     return document.noteBundle.parsingRules
       .parse(properties.title)
       .reduce(into: "") { string, node in

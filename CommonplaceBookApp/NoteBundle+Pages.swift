@@ -18,7 +18,7 @@ public extension NoteBundle {
   ///            no update was required.
   mutating func addChallengesFromPage(
     named fileName: String,
-    pageProperties: NoteBundlePageProperties,
+    pageProperties: PageProperties,
     challengeTemplates: ChallengeTemplateCollection
   ) -> Bool {
     if let existing = self.pageProperties[fileName],
@@ -57,10 +57,10 @@ public extension NoteBundle {
   func extractPropertiesAndTemplates(
     from text: String,
     loadedFrom fileMetadata: FileMetadata
-  ) throws -> (NoteBundlePageProperties, ChallengeTemplateCollection) {
+  ) throws -> (PageProperties, ChallengeTemplateCollection) {
     let nodes = parsingRules.parse(text)
     let challengeTemplates = try nodes.challengeTemplates()
-    let properties = NoteBundlePageProperties(
+    let properties = PageProperties(
       sha1Digest: text.sha1Digest(),
       timestamp: fileMetadata.contentChangeDate,
       hashtags: nodes.hashtags,

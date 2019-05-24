@@ -232,7 +232,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private func updateStudySession() {
-    let filter: (String, NoteBundlePageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+    let filter: (String, PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
     studySession = notebook.noteBundle.studySession(filter: filter)
