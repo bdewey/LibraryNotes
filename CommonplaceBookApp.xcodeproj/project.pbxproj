@@ -35,7 +35,7 @@
 		D374AB5222926AE500F54561 /* NoteBundleFileMetadataMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */; };
 		D374AB5422937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
-		D374AB6B229655BA00F54561 /* TextArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextArchive.swift */; };
+		D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */; };
 		D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6C229657C900F54561 /* TextArchiveTests.swift */; };
 		D374AB7E2296CC2600F54561 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D374AB7D2296CC2600F54561 /* DiffMatchPatch.framework */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
@@ -157,7 +157,7 @@
 		D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirror.swift; sourceTree = "<group>"; };
 		D374AB5322937C9C00F54561 /* NoteBundleFileMetadataMirrorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBundleFileMetadataMirrorTests.swift; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
-		D374AB6A229655BA00F54561 /* TextArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextArchive.swift; sourceTree = "<group>"; };
+		D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippetArchive.swift; sourceTree = "<group>"; };
 		D374AB6C229657C900F54561 /* TextArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextArchiveTests.swift; sourceTree = "<group>"; };
 		D374AB7D2296CC2600F54561 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D374AB7F2296D3C200F54561 /* CommonplaceBookApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CommonplaceBookApp-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -310,6 +310,7 @@
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D305DAFB228C86E300B41EE7 /* ChallengeTemplateCollection.swift */,
 				D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */,
+				D374AB7F2296D3C200F54561 /* CommonplaceBookApp-Bridging-Header.h */,
 				D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */,
 				D3B5B50721BA55E9009B3EB5 /* Condition.swift */,
 				D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */,
@@ -352,8 +353,7 @@
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
-				D374AB6A229655BA00F54561 /* TextArchive.swift */,
-				D374AB7F2296D3C200F54561 /* CommonplaceBookApp-Bridging-Header.h */,
+				D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -665,7 +665,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */,
-				D374AB6B229655BA00F54561 /* TextArchive.swift in Sources */,
+				D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
