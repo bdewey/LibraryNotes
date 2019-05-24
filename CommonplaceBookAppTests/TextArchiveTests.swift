@@ -6,18 +6,18 @@ import XCTest
 final class TextArchiveTests: XCTestCase {
 
   func testSimpleChunks() {
-    let chunk = TextSnippetArchive.Snippet("no newline")
+    let chunk = TextSnippet("no newline")
     XCTAssertEqual(chunk.text, "no newline\n")
     XCTAssertEqual(chunk.sha1Digest, "5baa7f79aea31cf9d11147282faac9f95dff4a27")
     XCTAssertEqual(chunk.text.sha1Digest(), chunk.sha1Digest)
   }
 
   func testSerializeOneChunk() {
-    let chunk = TextSnippetArchive.Snippet("This is two lines\nof text.\n")
+    let chunk = TextSnippet("This is two lines\nof text.\n")
     let serializedForm = chunk.textSerialized()
     print(serializedForm)
     do {
-      let roundTrip = try TextSnippetArchive.Snippet(textSerialization: serializedForm)
+      let roundTrip = try TextSnippet(textSerialization: serializedForm)
       XCTAssertEqual(roundTrip, chunk)
     } catch {
       XCTFail("Unexpected parse error: \(error)")
@@ -61,8 +61,8 @@ final class TextArchiveTests: XCTestCase {
 
   /// We only use delta encoding if it actually saves space.
   func testDeltaOptimization() {
-    let parent = TextSnippetArchive.Snippet("dog")
-    let child = TextSnippetArchive.Snippet(text: "cat", parent: parent)
+    let parent = TextSnippet("dog")
+    let child = TextSnippet(text: "cat", parent: parent)
     let expectedSerialization = """
 +++ 8f6abfbac8c81b55f9005f7ec09e32d29e40eb40 1
 cat
