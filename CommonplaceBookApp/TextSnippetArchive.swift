@@ -80,10 +80,19 @@ public struct TextSnippetArchive: Equatable {
       let patch = dmp.patch_make(fromOldString: parent.text, andDiffs: diff)
       let patchText = dmp.patch_(toText: patch)!
 
-      self._text = patchText
-      self.lineCount = patchText.count(of: "\n")
-      self._parent = .direct(parent)
-      self.sha1Digest = text.sha1Digest()
+      // Only use the patch encoding if it's smaller than the text, including the header
+      // space we need for storing an extra digest
+      if patchText.count + 41 < text.count {
+        self._text = patchText
+        self.lineCount = patchText.count(of: "\n")
+        self._parent = .direct(parent)
+        self.sha1Digest = text.sha1Digest()
+      } else {
+        self._text = text
+        self.lineCount = text.count(of: "\n")
+        self._parent = .none
+        self.sha1Digest = text.sha1Digest()
+      }
     }
 
     private init(

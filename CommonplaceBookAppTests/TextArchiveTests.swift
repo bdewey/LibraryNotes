@@ -58,6 +58,18 @@ final class TextArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  /// We only use delta encoding if it actually saves space.
+  func testDeltaOptimization() {
+    let parent = TextSnippetArchive.Snippet("dog")
+    let child = TextSnippetArchive.Snippet(text: "cat", parent: parent)
+    let expectedSerialization = """
++++ 8f6abfbac8c81b55f9005f7ec09e32d29e40eb40 1
+cat
+
+"""
+    XCTAssertEqual(child.textSerialized(), expectedSerialization)
+  }
 }
 
 private let testContent = """
