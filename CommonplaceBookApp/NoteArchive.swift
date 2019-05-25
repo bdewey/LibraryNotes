@@ -38,6 +38,14 @@ public struct NoteArchive {
     self.parsingRules = parsingRules
     self.archive = try TextSnippetArchive(textSerialization: textSerialization)
     self.pagePropertiesVersionHistory = try NoteArchive.getVersionHistory(from: archive)
+    if let identifier = pagePropertiesVersionHistory.last?.digest {
+      self.pageProperties = try NoteArchive.getPageManifest(
+        from: archive,
+        manifestIdentifier: identifier
+      )
+    } else {
+      self.pageProperties = [:]
+    }
   }
 
   /// Rules used to parse challenge templates.
@@ -54,6 +62,11 @@ public struct NoteArchive {
     case noVersionReference
   }
 
+  public enum RetrievalError: Error {
+    case noSuchPage(String)
+    case noSuchText(String)
+  }
+
   public var versions: [Date] {
     return pagePropertiesVersionHistory.map { $0.timestamp }
   }
@@ -62,10 +75,28 @@ public struct NoteArchive {
     return archive.textSerialized()
   }
 
-  mutating public func insertNote(_ text: String, timestamp: Date) throws {
+  /// Creates a new page with the given text.
+  /// - returns: An identifier that can be used to return the current version of this page
+  ///            at any point in time.
+  @discardableResult
+  mutating public func insertNote(_ text: String, timestamp: Date) throws -> String {
     let propertiesDigest = try archivePageProperties(from: text, timestamp: timestamp)
-    pageProperties[UUID().uuidString] = propertiesDigest
+    let key = UUID().uuidString
+    pageProperties[key] = propertiesDigest
     try archivePageManifestVersion(timestamp: timestamp)
+    return key
+  }
+
+  public func note(for pageIdentifier: String) throws -> String {
+    guard let propertiesDigest = pageProperties[pageIdentifier],
+      let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
+      throw RetrievalError.noSuchPage(pageIdentifier)
+    }
+    let properties = try PageProperties(propertiesSnippet)
+    guard let noteSnippet = archive.snippetDigestIndex[properties.sha1Digest] else {
+      throw RetrievalError.noSuchText(properties.sha1Digest)
+    }
+    return noteSnippet.text
   }
 
   private mutating func archivePageManifestVersion(timestamp: Date) throws {
@@ -110,15 +141,33 @@ public struct NoteArchive {
     return manifestSnippet.sha1Digest
   }
 
+  private static func getPageManifest(
+    from archive: TextSnippetArchive,
+    manifestIdentifier: String
+  ) throws -> [String: String] {
+    guard let manifestSnippet = archive.snippetDigestIndex[manifestIdentifier] else {
+      throw RetrievalError.noSuchPage(manifestIdentifier)
+    }
+    let keyValuePairs = manifestSnippet.text
+      .split(separator: "\n")
+      .compactMap { line -> (String, String)? in
+        let components = line.split(separator: " ")
+        guard components.count == 2 else { return nil }
+        return (String(components[0]), String(components[1]))
+      }
+    return Dictionary(uniqueKeysWithValues: keyValuePairs)
+  }
+
   /// Synchronously extract properties & challenge templates from the contents of a file.
   mutating func archivePageProperties(
     from text: String,
     timestamp: Date
   ) throws -> String {
+    let textSnippet = archive.insert(text)
     let nodes = parsingRules.parse(text)
     let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
     let properties = PageProperties(
-      sha1Digest: text.sha1Digest(),
+      sha1Digest: textSnippet.sha1Digest,
       timestamp: timestamp,
       hashtags: nodes.hashtags,
       title: String(nodes.title.split(separator: "\n").first ?? ""),
@@ -126,6 +175,6 @@ public struct NoteArchive {
     )
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
-    return properties.sha1Digest
+    return propertiesSnippet.sha1Digest
   }
 }

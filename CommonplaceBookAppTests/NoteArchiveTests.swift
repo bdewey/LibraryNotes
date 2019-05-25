@@ -32,6 +32,24 @@ final class NoteArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testRetrievePageText() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    do {
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let serialized = archive.textSerialized()
+      print(serialized)
+      let retrievedText = try archive.note(for: noteIdentifier)
+      XCTAssertEqual(retrievedText, Examples.vocabulary.rawValue)
+
+      let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
+      let roundTripRetrieved = try roundTrip.note(for: noteIdentifier)
+      XCTAssertEqual(roundTripRetrieved, Examples.vocabulary.rawValue)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private enum Examples: String {
