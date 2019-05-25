@@ -42,6 +42,7 @@ public struct TextSnippetArchive: Equatable {
 
   /// Removes a snippet from the archive.
   /// - returns: True if the snippet was in the archive in the first place.
+  @discardableResult
   public mutating func removeSnippet(withDigest digest: String) -> Bool {
     guard snippetDigestIndex.removeValue(forKey: digest) != nil else { return false }
     snippets.removeAll(where: { $0.sha1Digest == digest })
