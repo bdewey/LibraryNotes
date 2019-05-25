@@ -34,6 +34,12 @@ public struct NoteArchive {
     self.parsingRules = parsingRules
   }
 
+  public init(parsingRules: ParsingRules, textSerialization: String) throws {
+    self.parsingRules = parsingRules
+    self.archive = try TextSnippetArchive(textSerialization: textSerialization)
+    self.pagePropertiesVersionHistory = try NoteArchive.getVersionHistory(from: archive)
+  }
+
   /// Rules used to parse challenge templates.
   public let parsingRules: ParsingRules
 
@@ -41,11 +47,12 @@ public struct NoteArchive {
 
   private var pagePropertiesVersionHistory: [NoteArchiveVersion] = []
 
-  /// All challenge templates in the bundle.
-  internal var challengeTemplates = ChallengeTemplateCollection()
-
   /// Mapping of page UUID (constant across revisions) to the current page properties digest
   public internal(set) var pageProperties: [String: String] = [:]
+
+  public enum SerializationError: Error {
+    case noVersionReference
+  }
 
   public var versions: [Date] {
     return pagePropertiesVersionHistory.map { $0.timestamp }
@@ -79,6 +86,19 @@ public struct NoteArchive {
     }
     let historySnippet = archive.insert(history)
     try archive.insertSymbolicReference(key: "versions", value: historySnippet.sha1Digest)
+  }
+
+  private static func getVersionHistory(
+    from archive: TextSnippetArchive
+  ) throws -> [NoteArchiveVersion] {
+    guard
+      let versionDigest = archive.symbolicReferences["versions"],
+      let versionSnippet = archive.snippetDigestIndex[versionDigest] else {
+      throw SerializationError.noVersionReference
+    }
+    return versionSnippet.text.split(separator: "\n")
+      .map(String.init)
+      .compactMap(NoteArchiveVersion.init)
   }
 
   private mutating func archivePageManifest() -> String {

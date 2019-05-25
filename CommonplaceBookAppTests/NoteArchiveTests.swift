@@ -21,6 +21,13 @@ final class NoteArchiveTests: XCTestCase {
       XCTAssertEqual(archive.versions.count, 2)
       let serialized = archive.textSerialized()
       print(serialized)
+      let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
+      // Have to compare formatted timestamps because we lose precision in serialization
+      let dateFormatter = ISO8601DateFormatter()
+      XCTAssertEqual(
+        roundTrip.versions.map(dateFormatter.string),
+        archive.versions.map(dateFormatter.string)
+      )
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
