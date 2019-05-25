@@ -90,6 +90,20 @@ cat
     XCTAssert(child.textSerialized().count < childText.count)
     XCTAssertEqual(child.text, childText)
   }
+
+  func testCreateSymbolicReferences() {
+    var archive = TextSnippetArchive()
+    let snippet = archive.insert("This is important text")
+    do {
+      try archive.insertSymbolicReference(key: "HEAD", value: snippet.sha1Digest)
+      let serialized = archive.textSerialized()
+      print(serialized)
+      let roundTrip = try TextSnippetArchive(textSerialization: serialized)
+      XCTAssertEqual(roundTrip, archive)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private let testContent = """

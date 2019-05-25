@@ -128,14 +128,3 @@ private extension NSRegularExpression {
     return try? NSRegularExpression(pattern: "^^([0-9a-f]{40}) (\\d+) correct (\\d+) incorrect (\\d+)$", options: [])
   }()
 }
-
-// TODO: Put this someplace sharable
-private extension String {
-  func string(at range: NSRange) -> String {
-    return String(self[Range(range, in: self)!])
-  }
-
-  func int(at range: NSRange) -> Int? {
-    return Int(string(at: range))
-  }
-}
