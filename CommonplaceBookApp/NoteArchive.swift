@@ -34,6 +34,7 @@ public struct NoteArchive {
     self.parsingRules = parsingRules
   }
 
+  /// Deserialize an archive.
   public init(parsingRules: ParsingRules, textSerialization: String) throws {
     self.parsingRules = parsingRules
     self.archive = try TextSnippetArchive(textSerialization: textSerialization)
@@ -67,10 +68,12 @@ public struct NoteArchive {
     case noSuchText(String)
   }
 
+  /// Timestamps of all of the versions stored in this archive.
   public var versions: [Date] {
     return pagePropertiesVersionHistory.map { $0.timestamp }
   }
 
+  /// Text version of the archive, suitable for storing to disk.
   public func textSerialized() -> String {
     return archive.textSerialized()
   }
@@ -80,23 +83,49 @@ public struct NoteArchive {
   ///            at any point in time.
   @discardableResult
   mutating public func insertNote(_ text: String, timestamp: Date) throws -> String {
-    let propertiesDigest = try archivePageProperties(from: text, timestamp: timestamp)
+    let (propertiesSnippet, _) = try archivePageProperties(from: text, timestamp: timestamp)
     let key = UUID().uuidString
-    pageProperties[key] = propertiesDigest
+    pageProperties[key] = propertiesSnippet.sha1Digest
     try archivePageManifestVersion(timestamp: timestamp)
     return key
   }
 
-  public func note(for pageIdentifier: String) throws -> String {
-    guard let propertiesDigest = pageProperties[pageIdentifier],
-      let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
-      throw RetrievalError.noSuchPage(pageIdentifier)
-    }
-    let properties = try PageProperties(propertiesSnippet)
+  /// Gets the current version of the text for a particular page.
+  public func currentText(for pageIdentifier: String) throws -> String {
+    let properties = try currentPageProperties(for: pageIdentifier).properties
     guard let noteSnippet = archive.snippetDigestIndex[properties.sha1Digest] else {
       throw RetrievalError.noSuchText(properties.sha1Digest)
     }
     return noteSnippet.text
+  }
+
+  private func currentPageProperties(
+    for pageIdentifier: String
+  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
+    guard let propertiesDigest = pageProperties[pageIdentifier],
+      let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
+        throw RetrievalError.noSuchPage(pageIdentifier)
+    }
+    return (propertiesSnippet, try PageProperties(propertiesSnippet))
+  }
+
+  public mutating func updateText(
+    for pageIdentifier: String,
+    to text: String,
+    at timestamp: Date
+  ) throws {
+    let (existingSnippet, existingProperties) = try currentPageProperties(for: pageIdentifier)
+    let (newSnippet, newProperties) = try archivePageProperties(from: text, timestamp: timestamp)
+    existingSnippet.encodeAsDiff(from: newSnippet)
+    guard let existingTextSnippet = archive.snippetDigestIndex[existingProperties.sha1Digest] else {
+      throw RetrievalError.noSuchPage(existingProperties.sha1Digest)
+    }
+    guard let newTextSnippet = archive.snippetDigestIndex[newProperties.sha1Digest] else {
+      throw RetrievalError.noSuchPage(newProperties.sha1Digest)
+    }
+    existingTextSnippet.encodeAsDiff(from: newTextSnippet)
+    pageProperties[pageIdentifier] = newSnippet.sha1Digest
+    try archivePageManifestVersion(timestamp: timestamp)
   }
 
   private mutating func archivePageManifestVersion(timestamp: Date) throws {
@@ -162,7 +191,7 @@ public struct NoteArchive {
   mutating func archivePageProperties(
     from text: String,
     timestamp: Date
-  ) throws -> String {
+  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
     let textSnippet = archive.insert(text)
     let nodes = parsingRules.parse(text)
     let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
@@ -175,6 +204,6 @@ public struct NoteArchive {
     )
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
-    return propertiesSnippet.sha1Digest
+    return (propertiesSnippet, properties)
   }
 }

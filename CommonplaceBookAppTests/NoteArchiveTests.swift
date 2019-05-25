@@ -40,12 +40,39 @@ final class NoteArchiveTests: XCTestCase {
       let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
       let serialized = archive.textSerialized()
       print(serialized)
-      let retrievedText = try archive.note(for: noteIdentifier)
+      let retrievedText = try archive.currentText(for: noteIdentifier)
       XCTAssertEqual(retrievedText, Examples.vocabulary.rawValue)
 
       let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
-      let roundTripRetrieved = try roundTrip.note(for: noteIdentifier)
+      let roundTripRetrieved = try roundTrip.currentText(for: noteIdentifier)
       XCTAssertEqual(roundTripRetrieved, Examples.vocabulary.rawValue)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  func testModifyPageText() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    do {
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let modifiedText = Examples.vocabulary.rawValue + "* Tu ?[to be](eres) americano.\n"
+      try archive.updateText(
+        for: noteIdentifier,
+        to: modifiedText,
+        at: now.addingTimeInterval(3600)
+      )
+      XCTAssertEqual(archive.pageProperties.count, 1)
+      XCTAssertEqual(archive.versions.count, 2)
+      XCTAssertEqual(modifiedText, try archive.currentText(for: noteIdentifier))
+      let serialized = archive.textSerialized()
+      print(serialized)
+      let retrievedText = try archive.currentText(for: noteIdentifier)
+      XCTAssertEqual(retrievedText, modifiedText)
+
+      let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
+      let roundTripRetrieved = try roundTrip.currentText(for: noteIdentifier)
+      XCTAssertEqual(roundTripRetrieved, modifiedText)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
