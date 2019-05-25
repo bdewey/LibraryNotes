@@ -33,6 +33,16 @@ extension Array where Element == Node {
     return challengeTemplates
   }
 
+  func archiveChallengeTemplates(
+    to archive: inout TextSnippetArchive
+  ) -> [ChallengeTemplateArchiveKey] {
+    return Swift.Array([
+      archive.insert(contentsOf: VocabularyAssociation.makeAssociations(from: self).0),
+      archive.insert(contentsOf: ClozeTemplate.extract(from: self)),
+      archive.insert(contentsOf: QuoteTemplate.extract(from: self)),
+    ].joined())
+  }
+
   /// Extracts the title from an array of nodes.
   ///
   /// - note: If there is a heading anywhere in the nodes, the contents of the first heading

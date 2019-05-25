@@ -22,6 +22,8 @@
 		D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F646E22981E38008C3A92 /* TextSnippet.swift */; };
 		D33F647122982366008C3A92 /* Array+Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647022982366008C3A92 /* Array+Node.swift */; };
 		D33F6473229828DA008C3A92 /* SnippetBackedPageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */; };
+		D33F64752298C70C008C3A92 /* PageManifest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F64742298C70C008C3A92 /* PageManifest.swift */; };
+		D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */; };
 		D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C02189D8DC0082396D /* HashtagViewController.swift */; };
@@ -130,6 +132,8 @@
 		D33F646E22981E38008C3A92 /* TextSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippet.swift; sourceTree = "<group>"; };
 		D33F647022982366008C3A92 /* Array+Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Node.swift"; sourceTree = "<group>"; };
 		D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetBackedPageProperties.swift; sourceTree = "<group>"; };
+		D33F64742298C70C008C3A92 /* PageManifest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageManifest.swift; sourceTree = "<group>"; };
+		D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextSnippetArchive+ChallengeTemplate.swift"; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StylesheetContaining.swift; sourceTree = "<group>"; };
 		D34D875B20ED84330043F755 /* LibreFranklin-ThinItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ThinItalic.otf"; sourceTree = "<group>"; };
@@ -347,6 +351,8 @@
 				D33F646E22981E38008C3A92 /* TextSnippet.swift */,
 				D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */,
 				D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */,
+				D33F64742298C70C008C3A92 /* PageManifest.swift */,
+				D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -656,6 +662,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */,
+				D33F64752298C70C008C3A92 /* PageManifest.swift in Sources */,
 				D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
@@ -681,6 +688,7 @@
 				D374AB4E2290ADE400F54561 /* NoteBundle+Pages.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */,
+				D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D374AB4C2290AC1E00F54561 /* NoteBundle+Logging.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,

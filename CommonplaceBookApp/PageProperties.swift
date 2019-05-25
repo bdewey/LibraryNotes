@@ -19,6 +19,16 @@ public struct PageProperties: Codable, Equatable {
 
   /// IDs of all card templates in the page.
   public let cardTemplates: [String]
+
+  func makeSnippet() throws -> TextSnippet {
+    let data = try JSONEncoder().encode(self)
+    let text = String(data: data, encoding: .utf8)!
+    return TextSnippet(text)
+  }
+
+  func decodeSnippet(_ snippet: TextSnippet) throws -> PageProperties {
+    return try JSONDecoder().decode(PageProperties.self, from: snippet.text.data(using: .utf8)!)
+  }
 }
 
 /// Wrapper around PageProperties for IGListKit.

@@ -16,15 +16,21 @@ public struct TextSnippetArchive: Equatable {
   /// Indexes snippets by the sha1 digest
   public private(set) var snippetDigestIndex: [String: TextSnippet] = [:]
 
-  public mutating func insert(_ text: String) -> TextSnippet {
-    let snippet = TextSnippet(text)
+  @discardableResult
+  public mutating func insert(_ snippet: TextSnippet) -> Bool {
     if let existingSnippet = snippetDigestIndex[snippet.sha1Digest] {
-      return existingSnippet
+      return false
     } else {
       snippets.append(snippet)
       snippetDigestIndex[snippet.sha1Digest] = snippet
-      return snippet
+      return true
     }
+  }
+
+  public mutating func insert(_ text: String) -> TextSnippet {
+    let snippet = TextSnippet(text)
+    insert(snippet)
+    return snippet
   }
 
   public func textSerialized() -> String {
