@@ -109,6 +109,11 @@ public struct NoteArchive {
     return (propertiesSnippet, try PageProperties(propertiesSnippet))
   }
 
+  /// Updates the text associated with `pageIdentifier` to `text`, creating a new version
+  /// in the process.
+  ///
+  /// - note: If `text` is not different from the current value associated with `pageIdentifier`,
+  ///         this operation is a no-op. No new version gets created.
   public mutating func updateText(
     for pageIdentifier: String,
     to text: String,
@@ -116,6 +121,10 @@ public struct NoteArchive {
   ) throws {
     let (existingSnippet, existingProperties) = try currentPageProperties(for: pageIdentifier)
     let (newSnippet, newProperties) = try archivePageProperties(from: text, timestamp: timestamp)
+    // New content is the same as the old content
+    if newProperties.sha1Digest == existingProperties.sha1Digest {
+      return
+    }
     existingSnippet.encodeAsDiff(from: newSnippet)
     guard let existingTextSnippet = archive.snippetDigestIndex[existingProperties.sha1Digest] else {
       throw RetrievalError.noSuchPage(existingProperties.sha1Digest)
@@ -205,5 +214,64 @@ public struct NoteArchive {
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
     return (propertiesSnippet, properties)
+  }
+}
+
+public extension NoteArchive {
+  mutating func importFile(
+    named fileName: String,
+    text: String,
+    contentChangeDate: Date,
+    importDate: Date
+  ) throws {
+    var importRecords = try getFileImportRecords()
+    if let importRecord = importRecords[fileName] {
+      if !contentChangeDate.closeEnough(to: importRecord.changeDate) {
+        try updateText(for: importRecord.pageIdentifier, to: text, at: importDate)
+      }
+    } else {
+      let pageIdentifier = try insertNote(text, timestamp: importDate)
+      importRecords[fileName] = FileImportRecord(
+        pageIdentifier: pageIdentifier,
+        changeDate: contentChangeDate
+      )
+      try archiveFileImportRecords(importRecords)
+    }
+  }
+}
+
+private extension NoteArchive {
+  struct FileImportRecord: Codable {
+    let pageIdentifier: String
+    let changeDate: Date
+  }
+
+  func getFileImportRecords() throws -> [String: FileImportRecord] {
+    guard
+      let snippetIdentifier = archive.symbolicReferences["file-import"],
+      let snippet = archive.snippetDigestIndex[snippetIdentifier] else {
+        return [:]
+    }
+    return try JSONDecoder().decode(
+      [String: FileImportRecord].self,
+      from: snippet.text.data(using: .utf8)!
+    )
+  }
+
+  mutating func archiveFileImportRecords(_ records: [String: FileImportRecord]) throws {
+    let data = try JSONEncoder().encode(records)
+    let snippet = TextSnippet(String(data: data, encoding: .utf8)!)
+    if let exisitingSnippetIdentifier = archive.symbolicReferences["file-import"] {
+      archive.removeSnippet(withDigest: exisitingSnippetIdentifier)
+    }
+    archive.insert(snippet)
+    try archive.insertSymbolicReference(key: "file-import", value: snippet.sha1Digest)
+  }
+}
+
+private extension Date {
+  /// True if the receiver and `other` are "close enough"
+  func closeEnough(to other: Date) -> Bool {
+    return abs(timeIntervalSince(other)) < 1
   }
 }

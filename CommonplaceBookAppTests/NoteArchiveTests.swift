@@ -77,6 +77,82 @@ final class NoteArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testModifyToIdenticalContentIsNoOp() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    do {
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let preModifiedArchive = archive
+      try archive.updateText(
+        for: noteIdentifier,
+        to: Examples.vocabulary.rawValue,
+        at: now.addingTimeInterval(3600)
+      )
+      XCTAssertEqual(archive.versions.count, 1)
+      XCTAssertEqual(
+        archive.pageProperties,
+        preModifiedArchive.pageProperties,
+        "Archives do not match"
+      )
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  func testFileImports() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    let contentChangeDate = now.addingTimeInterval(-1 * 3600) // one hour ago
+    do {
+      try archive.importFile(
+        named: "vocabulary.txt",
+        text: Examples.vocabulary.rawValue,
+        contentChangeDate: contentChangeDate,
+        importDate: now
+      )
+      try archive.importFile(
+        named: "quotes.txt",
+        text: Examples.quotes.rawValue,
+        contentChangeDate: contentChangeDate,
+        importDate: now
+      )
+      XCTAssertEqual(archive.versions.count, 2)
+
+      // Make sure the file import table is serialized / deserialized.
+      var regeneratedArchive = try NoteArchive(
+        parsingRules: parsingRules,
+        textSerialization: archive.textSerialized()
+      )
+
+      // Try to reimport, nothing should change.
+      try regeneratedArchive.importFile(
+        named: "vocabulary.txt",
+        text: Examples.vocabulary.rawValue,
+        contentChangeDate: contentChangeDate,
+        importDate: now
+      )
+      try regeneratedArchive.importFile(
+        named: "quotes.txt",
+        text: Examples.quotes.rawValue,
+        contentChangeDate: contentChangeDate,
+        importDate: now
+      )
+      XCTAssertEqual(regeneratedArchive.versions.count, 2)
+
+      // Change quotes. Now we get a new version but not a new page.
+      try regeneratedArchive.importFile(
+        named: "quotes.txt",
+        text: Examples.quotes.rawValue + "\n> This is a new quote!\n",
+        contentChangeDate: contentChangeDate.addingTimeInterval(30),
+        importDate: now
+      )
+      XCTAssertEqual(regeneratedArchive.versions.count, 3)
+      XCTAssertEqual(regeneratedArchive.pageProperties.count, 2)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private enum Examples: String {
