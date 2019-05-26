@@ -604,6 +604,7 @@ PODS:
   - SwipeCellKit (2.6.0)
   - TextBundleKit (0.5.1)
   - TextBundleKit/unit (0.5.1)
+  - Yams (2.0.0)
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
@@ -621,6 +622,7 @@ DEPENDENCIES:
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
   - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
   - TextBundleKit/unit (from `https://github.com/bdewey/textbundle-swift`)
+  - Yams
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -636,6 +638,7 @@ SPEC REPOS:
     - MotionTransitioning
     - SDWebImage
     - SnapKit
+    - Yams
 
 EXTERNAL SOURCES:
   CollectionViewLayouts:
@@ -717,7 +720,8 @@ SPEC CHECKSUMS:
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   TextBundleKit: c2e3251330543318b55f7e4f7c53a17751fef941
+  Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 9dfb7e30c6209497ea5c7ae05b18133bc42eaf1d
+PODFILE CHECKSUM: 8d6b094e37c75f060588a4360719ad71c5ef625f
 
 COCOAPODS: 1.6.0

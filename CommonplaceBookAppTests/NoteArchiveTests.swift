@@ -149,6 +149,7 @@ final class NoteArchiveTests: XCTestCase {
       )
       XCTAssertEqual(regeneratedArchive.versions.count, 3)
       XCTAssertEqual(regeneratedArchive.pageProperties.count, 2)
+      print(regeneratedArchive.textSerialized())
     } catch {
       XCTFail("Unexpected error: \(error)")
     }

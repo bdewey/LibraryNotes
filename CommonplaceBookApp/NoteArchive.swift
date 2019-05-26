@@ -2,6 +2,7 @@
 
 import Foundation
 import MiniMarkdown
+import Yams
 
 public struct NoteArchiveVersion: LosslessStringConvertible {
   public let timestamp: Date
@@ -252,15 +253,12 @@ private extension NoteArchive {
       let snippet = archive.snippetDigestIndex[snippetIdentifier] else {
         return [:]
     }
-    return try JSONDecoder().decode(
-      [String: FileImportRecord].self,
-      from: snippet.text.data(using: .utf8)!
-    )
+    return try YAMLDecoder().decode([String: FileImportRecord].self, from: snippet.text)
   }
 
   mutating func archiveFileImportRecords(_ records: [String: FileImportRecord]) throws {
-    let data = try JSONEncoder().encode(records)
-    let snippet = TextSnippet(String(data: data, encoding: .utf8)!)
+    let encoded = try YAMLEncoder().encode(records)
+    let snippet = TextSnippet(encoded)
     if let exisitingSnippetIdentifier = archive.symbolicReferences["file-import"] {
       archive.removeSnippet(withDigest: exisitingSnippetIdentifier)
     }

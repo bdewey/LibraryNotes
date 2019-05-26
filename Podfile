@@ -24,6 +24,7 @@ target 'CommonplaceBookApp' do
   pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
   # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['unit']
   pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['unit']
+  pod 'Yams'
 
   target 'CommonplaceBookAppTests' do
     inherit! :search_paths
