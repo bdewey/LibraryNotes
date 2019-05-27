@@ -1,5 +1,6 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import Foundation
 import MiniMarkdown
 import Yams
@@ -41,12 +42,12 @@ public struct NoteArchive {
     self.archive = try TextSnippetArchive(textSerialization: textSerialization)
     self.pagePropertiesVersionHistory = try NoteArchive.getVersionHistory(from: archive)
     if let identifier = pagePropertiesVersionHistory.last?.digest {
-      self.pageProperties = try NoteArchive.getPageManifest(
+      self.pagePropertyDigests = try NoteArchive.getPageManifest(
         from: archive,
         manifestIdentifier: identifier
       )
     } else {
-      self.pageProperties = [:]
+      self.pagePropertyDigests = [:]
     }
   }
 
@@ -58,7 +59,19 @@ public struct NoteArchive {
   private var pagePropertiesVersionHistory: [NoteArchiveVersion] = []
 
   /// Mapping of page UUID (constant across revisions) to the current page properties digest
-  public internal(set) var pageProperties: [String: String] = [:]
+  private var pagePropertyDigests: [String: String] = [:]
+
+  /// Returns the current mapping of page id to page properties
+  public var pageProperties: [String: PageProperties] {
+    return pagePropertyDigests.compactMapValues({ propertyDigest -> PageProperties? in
+      guard
+        let snippet = archive.snippetDigestIndex[propertyDigest],
+        let properties = try? PageProperties(snippet) else {
+          return nil
+      }
+      return properties
+    })
+  }
 
   public enum SerializationError: Error {
     case noVersionReference
@@ -74,6 +87,17 @@ public struct NoteArchive {
     return pagePropertiesVersionHistory.map { $0.timestamp }
   }
 
+  /// Our file import dates
+  public var fileImportDates: [String: Date] {
+    do {
+      let records = try getFileImportRecords()
+      return records.mapValues { $0.changeDate }
+    } catch {
+      DDLogError("Unexpected error getting file import records: \(error)")
+      return [:]
+    }
+  }
+
   /// Text version of the archive, suitable for storing to disk.
   public func textSerialized() -> String {
     return archive.textSerialized()
@@ -86,7 +110,7 @@ public struct NoteArchive {
   mutating public func insertNote(_ text: String, timestamp: Date) throws -> String {
     let (propertiesSnippet, _) = try archivePageProperties(from: text, timestamp: timestamp)
     let key = UUID().uuidString
-    pageProperties[key] = propertiesSnippet.sha1Digest
+    pagePropertyDigests[key] = propertiesSnippet.sha1Digest
     try archivePageManifestVersion(timestamp: timestamp)
     return key
   }
@@ -103,7 +127,7 @@ public struct NoteArchive {
   private func currentPageProperties(
     for pageIdentifier: String
   ) throws -> (snippet: TextSnippet, properties: PageProperties) {
-    guard let propertiesDigest = pageProperties[pageIdentifier],
+    guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
       let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
         throw RetrievalError.noSuchPage(pageIdentifier)
     }
@@ -134,7 +158,7 @@ public struct NoteArchive {
       throw RetrievalError.noSuchPage(newProperties.sha1Digest)
     }
     existingTextSnippet.encodeAsDiff(from: newTextSnippet)
-    pageProperties[pageIdentifier] = newSnippet.sha1Digest
+    pagePropertyDigests[pageIdentifier] = newSnippet.sha1Digest
     try archivePageManifestVersion(timestamp: timestamp)
   }
 
@@ -172,7 +196,7 @@ public struct NoteArchive {
   }
 
   private mutating func archivePageManifest() -> String {
-    let manifest = pageProperties
+    let manifest = pagePropertyDigests
       .map({ "\($0.key) \($0.value)" })
       .sorted()
       .joined(separator: "\n")

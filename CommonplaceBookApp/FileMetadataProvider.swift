@@ -20,6 +20,8 @@ public protocol FileMetadataProvider: class {
   /// The current array of metadata.
   var fileMetadata: [FileMetadata] { get }
 
+  func queryForCurrentFileMetadata(completion: @escaping ([FileMetadata]) -> Void)
+
   /// Delegate that can receive notifications when `fileMetadata` changes.
   var delegate: FileMetadataProviderDelegate? { get set }
 

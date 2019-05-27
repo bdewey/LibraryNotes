@@ -78,6 +78,9 @@
 		D3CA91A720ED84E300F6DF13 /* LibreFranklin-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875D20ED84330043F755 /* LibreFranklin-Regular.otf */; };
 		D3CA91A820ED84E300F6DF13 /* LibreFranklin-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875E20ED84330043F755 /* LibreFranklin-SemiBold.otf */; };
 		D3CA91A920ED84E300F6DF13 /* LibreFranklin-ThinItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = D34D875B20ED84330043F755 /* LibreFranklin-ThinItalic.otf */; };
+		D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */; };
+		D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */; };
+		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
@@ -185,6 +188,9 @@
 		D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBundleEditableDocument.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CA919620ED848E00F6DF13 /* Merriweather-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Bold.otf"; sourceTree = "<group>"; };
+		D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocument.swift; sourceTree = "<group>"; };
+		D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+Importing.swift"; sourceTree = "<group>"; };
+		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -336,6 +342,9 @@
 				D3187CAD218DF7AB00815772 /* MenuItem.swift */,
 				D35C72C42189E1340082396D /* MenuSectionController.swift */,
 				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
+				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
+				D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */,
+				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
 				D374AB492290A67100F54561 /* NoteBundle.swift */,
 				D374AB4B2290AC1E00F54561 /* NoteBundle+Logging.swift */,
 				D374AB4D2290ADE400F54561 /* NoteBundle+Pages.swift */,
@@ -343,7 +352,6 @@
 				D37E6D31228D780E006CD0FA /* NoteBundleDocument.swift */,
 				D374AB5122926AE500F54561 /* NoteBundleFileMetadataMirror.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
-				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D37E6D35228D9DD8006CD0FA /* PageProperties.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
@@ -358,6 +366,7 @@
 				D33F646E22981E38008C3A92 /* TextSnippet.swift */,
 				D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */,
 				D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */,
+				D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -674,6 +683,7 @@
 				D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
+				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
@@ -700,6 +710,7 @@
 				D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D374AB4C2290AC1E00F54561 /* NoteBundle+Logging.swift in Sources */,
+				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D374AB5222926AE500F54561 /* NoteBundleFileMetadataMirror.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
@@ -713,6 +724,7 @@
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D374AB4A2290A67100F54561 /* NoteBundle.swift in Sources */,
 				D37E6D32228D780E006CD0FA /* NoteBundleDocument.swift in Sources */,
+				D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -35,6 +35,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     return navigationController
   }()
 
+  var noteArchiveDocument: NoteArchiveDocument?
+
   var documentMirror: NoteBundleFileMetadataMirror?
 
   func application(
@@ -51,6 +53,20 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
+        let noteArchiveDocument = NoteArchiveDocument(
+          fileURL: metadataProvider.container.appendingPathComponent("archive.notebundle"),
+          parsingRules: parsingRules
+        )
+        noteArchiveDocument.openOrCreate(completionHandler: { _ in
+          metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
+            noteArchiveDocument.importFileMetadataItems(
+              fileMetadataItems,
+              from: metadataProvider,
+              importDate: Date()
+            )
+          })
+        })
+        self.noteArchiveDocument = noteArchiveDocument
         let noteBundleDocument = NoteBundleDocument(
           fileURL: metadataProvider.container.appendingPathComponent("commonplace2.notebundle"),
           parsingRules: parsingRules

@@ -34,6 +34,10 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
     }
   }
 
+  public func queryForCurrentFileMetadata(completion: @escaping ([FileMetadata]) -> Void) {
+    completion(fileMetadata)
+  }
+
   public weak var delegate: FileMetadataProviderDelegate?
 
   public func delete(_ metadata: FileMetadata) throws {
