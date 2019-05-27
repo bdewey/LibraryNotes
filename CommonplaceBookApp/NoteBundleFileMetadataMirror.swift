@@ -28,6 +28,10 @@ public final class NoteBundleFileMetadataMirror {
     document.addObserver(self)
     document.openOrCreate { success in
       DDLogDebug("Opened note bundle: \(success), state = \(document.documentState)")
+      if success {
+        self.didOpenDocument = true
+        self.processCurrentModels()
+      }
     }
     metadataProvider.delegate = self
   }
@@ -38,17 +42,28 @@ public final class NoteBundleFileMetadataMirror {
 
   public let document: NoteBundleDocument
   public let metadataProvider: FileMetadataProvider
+  private var didOpenDocument = false
+  private var currentModels: [FileMetadata] = []
 
   /// Responds to changes in document state.
   private func documentStateChanged() {
-    guard !document.documentState.contains(.closed) else { return }
+    DDLogInfo("State for \(document.fileURL.lastPathComponent): \(document.documentState)")
     if document.documentState.contains(.inConflict) {
       DDLogError("Conflict! Dont handle that yet :-(")
-    } else if document.documentState.contains(.editingDisabled) {
-      DDLogError("Editing disabled. Why?")
-    } else {
-      processMetadata(metadataProvider.fileMetadata)
     }
+  }
+}
+
+extension UIDocument.State: CustomStringConvertible {
+  public var description: String {
+    var bits: [String] = []
+    if contains(.closed) { bits.append("closed") }
+    if contains(.inConflict) { bits.append("in conflict") }
+    if contains(.savingError) { bits.append("saving error") }
+    if contains(.editingDisabled) { bits.append("editing disabled") }
+    if contains(.progressAvailable) { bits.append("progress available") }
+    if bits.isEmpty { bits.append("normal") }
+    return "UIDocument.State = " + bits.joined(separator: ", ")
   }
 }
 
@@ -149,13 +164,15 @@ extension NoteBundleFileMetadataMirror: FileMetadataProviderDelegate {
     _ provider: FileMetadataProvider,
     didUpdate metadata: [FileMetadata]
   ) {
-    processMetadata(metadata)
+    currentModels = metadata.filter { (metadata) -> Bool in
+      metadata.fileName.hasSuffix(".txt")
+    }
+    processCurrentModels()
   }
 
-  private func processMetadata(_ metadata: [FileMetadata]) {
-    guard document.documentState.intersection([.closed, .editingDisabled]).isEmpty else { return }
-    let models = metadata
-    for fileMetadata in models {
+  private func processCurrentModels() {
+    guard didOpenDocument else { return }
+    for fileMetadata in currentModels {
       fileMetadata.downloadIfNeeded(in: metadataProvider.container)
       document.updatePage(for: fileMetadata, in: metadataProvider, completion: nil)
     }

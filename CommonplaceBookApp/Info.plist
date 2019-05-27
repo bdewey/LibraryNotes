@@ -72,18 +72,18 @@
 			<key>CFBundleTypeIconFiles</key>
 			<array/>
 			<key>CFBundleTypeName</key>
-			<string>Notebook Review Metadata</string>
+			<string>Note Bundle</string>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>org.brians-brain.notebook-metadata</string>
+				<string>org.brians-brain.notebundle</string>
 			</array>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>review</string>
+					<string>notebundle</string>
 				</array>
 			</dict>
 		</dict>
@@ -206,7 +206,7 @@
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>org.brians-brain.notebook-metadata</string>
+			<string>org.brians-brain.notebundle</string>
 		</dict>
 	</array>
 	<key>UTImportedTypeDeclarations</key>

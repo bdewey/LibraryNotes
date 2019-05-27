@@ -70,7 +70,13 @@ public final class NoteBundleDocument: UIDocument {
   private let parsingRules: ParsingRules
 
   /// Single structure holding all of the mutable data
-  public private(set) var noteBundle: NoteBundle
+  public private(set) var noteBundle: NoteBundle {
+    didSet {
+      if oldValue.pageProperties != noteBundle.pageProperties {
+        notifyObserversOfPagePropertiesChange()
+      }
+    }
+  }
 
   /// All things watching the document lifecycle.
   private var observers: [WeakObserver] = []
@@ -93,7 +99,6 @@ public final class NoteBundleDocument: UIDocument {
     completion: ((Bool) -> Void)?
   ) {
     assert(Thread.isMainThread)
-    assert(documentState.intersection([.closed, .editingDisabled]).isEmpty)
     guard pendingPropertyLoads[fileMetadata.fileName] == nil else {
       completion?(false)
       return
@@ -114,21 +119,17 @@ public final class NoteBundleDocument: UIDocument {
         DispatchQueue.main.async {
           switch propertiesResult {
           case .success(let tuple):
-            let didChange = self.noteBundle.addChallengesFromPage(
+            _ = self.noteBundle.addChallengesFromPage(
               named: fileMetadata.fileName,
               pageProperties: tuple.0,
               challengeTemplates: tuple.1
             )
-            if didChange {
-              self.notifyObserversOfChange()
-            }
           case .failure(let error):
             DDLogError("Unexpected error importing document: \(error)")
           }
           if let newName = self.pendingPropertyLoads[fileMetadata.fileName],
             fileMetadata.fileName != newName {
             self.noteBundle.renamePage(from: fileMetadata.fileName, to: newName)
-            self.notifyObserversOfChange()
           }
           self.pendingPropertyLoads[fileMetadata.fileName] = nil
           self.updateChangeCount(.done)
@@ -144,10 +145,9 @@ public final class NoteBundleDocument: UIDocument {
   /// - parameter date: The date the study session took place.
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     assert(Thread.isMainThread)
-    assert(documentState.intersection([.closed, .editingDisabled]).isEmpty)
     noteBundle.updateStudySessionResults(studySession, on: date)
     updateChangeCount(.done)
-    self.notifyObserversOfChange()
+    self.notifyObserversOfPagePropertiesChange()
   }
 
   public func deleteFileMetadata(_ fileMetadata: FileMetadata) {
@@ -163,7 +163,6 @@ public final class NoteBundleDocument: UIDocument {
         noteBundle.renamePage(from: oldName, to: newName)
       }
     }
-    notifyObserversOfChange()
     updateChangeCount(.done)
   }
 
@@ -197,7 +196,7 @@ extension NoteBundleDocument: Observable {
     }
   }
 
-  private func notifyObserversOfChange() {
+  private func notifyObserversOfPagePropertiesChange() {
     assert(Thread.isMainThread)
     for observerWrapper in observers {
       observerWrapper.observer?.noteBundleDocumentDidUpdatePages(self)
