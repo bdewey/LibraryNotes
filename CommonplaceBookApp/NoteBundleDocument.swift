@@ -52,6 +52,7 @@ public final class NoteBundleDocument: UIDocument {
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     noteBundle = NoteBundle(parsingRules: parsingRules)
+    noteArchive = NoteArchive(parsingRules: parsingRules)
     super.init(fileURL: url)
     self.observerToken = NotificationCenter.default.addObserver(
       forName: UIDocument.stateChangedNotification,
@@ -77,6 +78,9 @@ public final class NoteBundleDocument: UIDocument {
       }
     }
   }
+
+  private var noteArchive: NoteArchive
+  private let noteArchiveQueue = DispatchQueue(label: "org.brians-brain.note-archive")
 
   /// All things watching the document lifecycle.
   private var observers: [WeakObserver] = []
@@ -116,6 +120,17 @@ public final class NoteBundleDocument: UIDocument {
             try self.noteBundle.extractPropertiesAndTemplates(from: text, loadedFrom: fileMetadata)
           }
         })
+        // TODO: Improve this graft
+        if let text = textResult.value {
+          self.noteArchiveQueue.async {
+            try? self.noteArchive.importFile(
+              named: fileMetadata.fileName,
+              text: text,
+              contentChangeDate: fileMetadata.contentChangeDate,
+              importDate: Date()
+            )
+          }
+        }
         DispatchQueue.main.async {
           switch propertiesResult {
           case .success(let tuple):
@@ -166,6 +181,11 @@ public final class NoteBundleDocument: UIDocument {
     updateChangeCount(.done)
   }
 
+  public override func handleError(_ error: Swift.Error, userInteractionPermitted: Bool) {
+    DDLogError("Document error = \(error)")
+    super.handleError(error, userInteractionPermitted: userInteractionPermitted)
+  }
+
   /// Loads document data.
   /// The document is a bundle of different data streams.
   public override func load(fromContents contents: Any, ofType typeName: String?) throws {
@@ -179,6 +199,14 @@ public final class NoteBundleDocument: UIDocument {
   /// Generates a bundle containing all of the current data.
   public override func contents(forType typeName: String) throws -> Any {
     let wrapper = try noteBundle.fileWrapper()
+    let serializedArchive = noteArchiveQueue.sync {
+      noteArchive.textSerialized()
+    }
+    let noteArchiveWrapper = FileWrapper(
+      regularFileWithContents: serializedArchive.data(using: .utf8)!
+    )
+    noteArchiveWrapper.preferredFilename = "notes.archive"
+    wrapper.addFileWrapper(noteArchiveWrapper)
     return wrapper
   }
 }

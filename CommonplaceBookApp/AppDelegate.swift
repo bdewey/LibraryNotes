@@ -52,7 +52,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
       switch metadataProviderResult {
       case .success(let metadataProvider):
         let noteBundleDocument = NoteBundleDocument(
-          fileURL: metadataProvider.container.appendingPathComponent("commonplace2.notebundle"),
+          fileURL: metadataProvider.container.appendingPathComponent("commonplace3.notebundle"),
           parsingRules: parsingRules
         )
         let documentMirror = NoteBundleFileMetadataMirror(
