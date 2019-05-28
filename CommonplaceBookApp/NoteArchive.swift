@@ -80,6 +80,8 @@ public struct NoteArchive {
   public enum RetrievalError: Error {
     case noSuchPage(String)
     case noSuchText(String)
+    case noSuchTemplateKey(String)
+    case noSuchTemplateClass(String)
   }
 
   /// Timestamps of all of the versions stored in this archive.
@@ -126,6 +128,16 @@ public struct NoteArchive {
       throw RetrievalError.noSuchText(properties.sha1Digest)
     }
     return noteSnippet.text
+  }
+
+  public func challengeTemplate(for key: ChallengeTemplateArchiveKey) throws -> ChallengeTemplate {
+    guard let snippet = archive.snippetDigestIndex[key.digest] else {
+      throw RetrievalError.noSuchTemplateKey(key.digest)
+    }
+    guard let klass = ChallengeTemplateType.classMap[key.type] else {
+      throw RetrievalError.noSuchTemplateClass(key.type)
+    }
+    return try klass.init(markdown: snippet.text, parsingRules: parsingRules)
   }
 
   private func currentPageProperties(

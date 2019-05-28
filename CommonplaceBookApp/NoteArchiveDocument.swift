@@ -178,8 +178,37 @@ public extension NoteArchiveDocument {
     filter: ((String, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
-    // TODO: Write this.
-    return StudySession()
+    let filter = filter ?? { _, _ in true }
+    return noteArchiveQueue.sync {
+      return noteArchive.pageProperties
+        .filter { filter($0.key, $0.value) }
+        .map { (name, reviewProperties) -> StudySession in
+          let challengeTemplates = reviewProperties.cardTemplates
+            .compactMap { keyString -> ChallengeTemplate? in
+              guard let key = ChallengeTemplateArchiveKey(keyString) else {
+                DDLogError("Expected a challenge key: \(keyString)")
+                return nil
+              }
+              do {
+                return try noteArchive.challengeTemplate(for: key)
+              } catch {
+                DDLogError("Unexpected error getting challenge template: \(error)")
+                return nil
+              }
+          }
+          // TODO: Filter down to eligible cards
+          let eligibleCards = challengeTemplates.cards
+          return StudySession(
+            eligibleCards,
+            properties: CardDocumentProperties(
+              documentName: name,
+              attributionMarkdown: reviewProperties.title,
+              parsingRules: self.parsingRules
+            )
+          )
+        }
+        .reduce(into: StudySession(), { $0 += $1 })
+    }
   }
 
   /// Update the notebook with the result of a study session.

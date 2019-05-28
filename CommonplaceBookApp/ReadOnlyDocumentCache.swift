@@ -49,13 +49,6 @@ public final class ReadOnlyDocumentCache: DocumentCache {
       completion(nil)
       return
     }
-    document.open { success in
-      if success {
-        self.nameToDocumentMap[name] = document
-        completion(document)
-      } else {
-        completion(nil)
-      }
-    }
+    completion(document)
   }
 }

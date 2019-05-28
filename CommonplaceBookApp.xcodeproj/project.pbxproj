@@ -87,7 +87,6 @@
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F646E22981E38008C3A92 /* TextSnippet.swift */; };
 		D33F647122982366008C3A92 /* Array+Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647022982366008C3A92 /* Array+Node.swift */; };
-		D33F6473229828DA008C3A92 /* SnippetBackedPageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */; };
 		D33F64752298C70C008C3A92 /* NoteArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F64742298C70C008C3A92 /* NoteArchive.swift */; };
 		D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */; };
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
@@ -281,7 +280,6 @@
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F646E22981E38008C3A92 /* TextSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippet.swift; sourceTree = "<group>"; };
 		D33F647022982366008C3A92 /* Array+Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Array+Node.swift"; sourceTree = "<group>"; };
-		D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnippetBackedPageProperties.swift; sourceTree = "<group>"; };
 		D33F64742298C70C008C3A92 /* NoteArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchive.swift; sourceTree = "<group>"; };
 		D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TextSnippetArchive+ChallengeTemplate.swift"; sourceTree = "<group>"; };
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
@@ -536,7 +534,6 @@
 				D34D875A20ED840B0043F755 /* Resources */,
 				D31AFAA0229D61EC00ED2B76 /* ScrollingTopTabBarViewController.swift */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
-				D33F6472229828DA008C3A92 /* SnippetBackedPageProperties.swift */,
 				D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */,
 				D31AFAA3229D61ED00ED2B76 /* StatisticsMonthHeaderReusableView.swift */,
 				D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */,
@@ -935,7 +932,6 @@
 				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
 				D31AFAD7229D61EE00ED2B76 /* StatisticsMonthHeaderReusableView.swift in Sources */,
-				D33F6473229828DA008C3A92 /* SnippetBackedPageProperties.swift in Sources */,
 				D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
