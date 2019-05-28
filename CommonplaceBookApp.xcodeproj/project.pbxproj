@@ -80,6 +80,8 @@
 		D31AFAF5229D654B00ED2B76 /* Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAF4229D654B00ED2B76 /* Stylesheet.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32A1BA2229D750F00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */; };
+		D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; };
+		D32A1BAD229D8A8A00B78576 /* DiffMatchPatch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */; };
 		D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuoteTemplate.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
@@ -106,7 +108,6 @@
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
 		D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */; };
 		D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6C229657C900F54561 /* TextArchiveTests.swift */; };
-		D374AB7E2296CC2600F54561 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D374AB7D2296CC2600F54561 /* DiffMatchPatch.framework */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
 		D375D34520EDE1B800EAB4F0 /* PlainTextDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */; };
@@ -173,6 +174,20 @@
 			remoteInfo = CommonplaceBookApp;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D32A1BAA229D8A6200B78576 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D32A1BAD229D8A8A00B78576 /* DiffMatchPatch.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		3859AFBAF83CDE4C1D927655 /* Pods-CommonplaceBookAppTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookAppTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookAppTests/Pods-CommonplaceBookAppTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -259,6 +274,8 @@
 		D31FA12B20ED847A00224FCD /* Merriweather-BoldItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-BoldItalic.otf"; sourceTree = "<group>"; };
 		D31FA12C20ED847A00224FCD /* Merriweather-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Black.otf"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
 		D32C8B59214AC8DF0048BF80 /* DocumentSectionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSectionController.swift; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuoteTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplate.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
@@ -342,8 +359,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D374AB7E2296CC2600F54561 /* DiffMatchPatch.framework in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
+				D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -372,6 +389,7 @@
 			children = (
 				D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */,
 				D374AB7D2296CC2600F54561 /* DiffMatchPatch.framework */,
+				D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */,
 				D3C1F402210E5AC400F92E85 /* CoreServices.framework */,
 				A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */,
 				C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */,
@@ -420,6 +438,7 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
+				D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */,
 				D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */,
 				D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0421D470B2008445DA /* CommonplaceBookAppUITests */,
@@ -604,6 +623,7 @@
 				D3DC5EBD20EC9B0100F0B74B /* Resources */,
 				556A7CDB6EF5F61DEE38FE72 /* [CP] Embed Pods Frameworks */,
 				D318C0FC2148707D00B035A1 /* ShellScript */,
+				D32A1BAA229D8A6200B78576 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
