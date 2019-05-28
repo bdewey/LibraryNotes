@@ -194,7 +194,8 @@ extension NoteBundleDocument: Observable {
     }
   }
 
-  private func notifyObserversOfPagePropertiesChange() {
+  // TODO: This is exposed as a hack. I don't think I'll need it in NoteArchive so...
+  internal func notifyObserversOfPagePropertiesChange() {
     assert(Thread.isMainThread)
     for observerWrapper in observers {
       observerWrapper.observer?.noteBundleDocumentDidUpdatePages(self)

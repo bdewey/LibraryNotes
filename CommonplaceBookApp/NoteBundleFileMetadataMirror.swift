@@ -173,6 +173,7 @@ extension NoteBundleFileMetadataMirror: FileMetadataProviderDelegate {
   ) {
     setCurrentModels(from: metadata)
     processCurrentModels()
+    document.notifyObserversOfPagePropertiesChange()
   }
 
   private func processCurrentModels() {

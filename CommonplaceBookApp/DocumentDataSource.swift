@@ -30,7 +30,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
   public var cardsPerDocument = [String: Int]()
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
-    return propertiesFilteredByHashtag
+    let objects = propertiesFilteredByHashtag
       // give IGLitstKit its own copy of the model objects to guard against mutations
       .compactMap { tuple -> NoteBundlePagePropertiesListDiffable? in
         guard let fileMetadata = self.fileMetadataProvider.fileMetadata.first(where: { $0.fileName == tuple.key }) else {
@@ -45,6 +45,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
       .sorted(
         by: { $0.properties.timestamp > $1.properties.timestamp }
       )
+    return objects
   }
 
   private var propertiesFilteredByHashtag: [String: PageProperties] {
