@@ -195,7 +195,7 @@ public extension NoteArchiveDocument {
                 DDLogError("Unexpected error getting challenge template: \(error)")
                 return nil
               }
-          }
+            }
           // TODO: Filter down to eligible cards
           let eligibleCards = challengeTemplates.cards
           return StudySession(
