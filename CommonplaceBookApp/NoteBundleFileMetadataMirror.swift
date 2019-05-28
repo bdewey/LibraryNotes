@@ -34,6 +34,7 @@ public final class NoteBundleFileMetadataMirror {
       }
     }
     metadataProvider.delegate = self
+    setCurrentModels(from: metadataProvider.fileMetadata)
   }
 
   deinit {
@@ -44,6 +45,12 @@ public final class NoteBundleFileMetadataMirror {
   public let metadataProvider: FileMetadataProvider
   private var didOpenDocument = false
   private var currentModels: [FileMetadata] = []
+
+  private func setCurrentModels(from metadata: [FileMetadata]) {
+    currentModels = metadata.filter { (metadata) -> Bool in
+      metadata.fileName.hasSuffix(".txt")
+    }
+  }
 
   /// Responds to changes in document state.
   private func documentStateChanged() {
@@ -164,9 +171,7 @@ extension NoteBundleFileMetadataMirror: FileMetadataProviderDelegate {
     _ provider: FileMetadataProvider,
     didUpdate metadata: [FileMetadata]
   ) {
-    currentModels = metadata.filter { (metadata) -> Bool in
-      metadata.fileName.hasSuffix(".txt")
-    }
+    setCurrentModels(from: metadata)
     processCurrentModels()
   }
 

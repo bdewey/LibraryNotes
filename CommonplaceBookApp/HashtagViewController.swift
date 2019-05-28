@@ -1,6 +1,5 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CommonplaceBook
 import IGListKit
 import UIKit
 

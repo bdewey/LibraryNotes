@@ -45,6 +45,10 @@ final class TestMetadataProvider: FileMetadataProvider {
 
   var fileMetadata: [FileMetadata] { return Array(fileNameToMetadata.values) }
 
+  func queryForCurrentFileMetadata(completion: @escaping ([FileMetadata]) -> Void) {
+    completion(fileMetadata)
+  }
+
   /// Map of file name to file contents
   var fileContents: [String: String]
 

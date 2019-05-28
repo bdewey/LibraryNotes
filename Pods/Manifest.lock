@@ -19,9 +19,6 @@ PODS:
     - CocoaLumberjack/Core
   - CollectionViewLayouts (0.1.0):
     - CocoaLumberjack/Swift (>= 3.4)
-  - CommonplaceBook (0.3.1):
-    - MaterialComponents (>= 59.0)
-    - TextBundleKit (~> 0.5)
   - CwlSignal (2.0.0):
     - CwlUtils
   - CwlUtils (1.1.0)
@@ -37,32 +34,6 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - FlashcardKit (0.10.1):
-    - CollectionViewLayouts
-    - CommonplaceBook (~> 0.2)
-    - CwlSignal
-    - CwlUtils
-    - DZNPhotoPickerController
-    - MaterialComponents (>= 61.0)
-    - MiniMarkdown (~> 0.9)
-    - NunitoSans
-    - SDWebImage (~> 4.0)
-    - SDWebImage/GIF (~> 4.0)
-    - SnapKit (~> 4.0)
-    - TextBundleKit (~> 0.5)
-  - FlashcardKit/unit (0.10.1):
-    - CollectionViewLayouts
-    - CommonplaceBook (~> 0.2)
-    - CwlSignal
-    - CwlUtils
-    - DZNPhotoPickerController
-    - MaterialComponents (>= 61.0)
-    - MiniMarkdown (~> 0.9)
-    - NunitoSans
-    - SDWebImage (~> 4.0)
-    - SDWebImage/GIF (~> 4.0)
-    - SnapKit (~> 4.0)
-    - TextBundleKit (~> 0.5)
   - IGListKit (3.4.0):
     - IGListKit/Default (= 3.4.0)
   - IGListKit/Default (3.4.0):
@@ -600,7 +571,7 @@ PODS:
   - SDWebImage/GIF (4.4.6):
     - FLAnimatedImage (~> 1.0)
     - SDWebImage/Core
-  - SnapKit (4.2.0)
+  - SnapKit (5.0.0)
   - SwipeCellKit (2.6.0)
   - TextBundleKit (0.5.1)
   - TextBundleKit/unit (0.5.1)
@@ -608,17 +579,17 @@ PODS:
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
-  - CommonplaceBook (from `https://github.com/bdewey/CommonplaceBook.git`)
   - CwlSignal (from `https://github.com/bdewey/CwlSignal`)
   - CwlUtils (from `https://github.com/bdewey/CwlUtils`)
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - FlashcardKit (from `../FlashcardKit`)
-  - FlashcardKit/unit (from `../FlashcardKit`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
   - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
+  - SDWebImage (~> 4.0)
+  - SDWebImage/GIF (~> 4.0)
+  - SnapKit
   - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
   - TextBundleKit (from `https://github.com/bdewey/textbundle-swift`)
   - TextBundleKit/unit (from `https://github.com/bdewey/textbundle-swift`)
@@ -643,16 +614,12 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   CollectionViewLayouts:
     :git: https://github.com/bdewey/CollectionViewLayouts.git
-  CommonplaceBook:
-    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :git: https://github.com/bdewey/CwlSignal
   CwlUtils:
     :git: https://github.com/bdewey/CwlUtils
   DZNPhotoPickerController:
     :git: https://github.com/bdewey/DZNPhotoPickerController
-  FlashcardKit:
-    :path: "../FlashcardKit"
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
@@ -668,9 +635,6 @@ CHECKOUT OPTIONS:
   CollectionViewLayouts:
     :commit: eb323db65d8e9b7c4cbbc31b0dfa83f1ddc90302
     :git: https://github.com/bdewey/CollectionViewLayouts.git
-  CommonplaceBook:
-    :commit: ec493653ac8a5227c57ff2a48bf20369ef261c41
-    :git: https://github.com/bdewey/CommonplaceBook.git
   CwlSignal:
     :commit: c86edbc54c6613424f88782220b6c6c2771a166e
     :git: https://github.com/bdewey/CwlSignal
@@ -700,13 +664,11 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   CocoaLumberjack: 118bf4a820efc641f79fa487b75ed928dccfae23
   CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
-  CommonplaceBook: f4c9918685a7eb90a83ed08f8f62146c89ae762a
   CwlSignal: 6b87ee172614a141ba06f2145f5a18bd7e66c983
   CwlUtils: c1ba508748e8000989df81730b153f4eaeaaa6c8
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  FlashcardKit: 89c3224d163a7c533ab1a11826194b6e8456750c
   IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 0ee07d35506ced6cab8b3c8591f0031da36e8cbf
   MDFInternationalization: 010097556d6b09d2c4ea38e0820ea6d37be6a314
@@ -717,11 +679,11 @@ SPEC CHECKSUMS:
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
   NunitoSans: 64c8e29a148f6c101a78195da1238e0ac8b3b8e6
   SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
-  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+  SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   TextBundleKit: c2e3251330543318b55f7e4f7c53a17751fef941
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 8d6b094e37c75f060588a4360719ad71c5ef625f
+PODFILE CHECKSUM: 49d4ae18e61aa5c2be12563b491b2e5d2f8a345e
 
 COCOAPODS: 1.6.0

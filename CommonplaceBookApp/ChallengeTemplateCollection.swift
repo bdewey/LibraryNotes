@@ -1,7 +1,6 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
 import CommonCrypto
-import FlashcardKit
 import Foundation
 import MiniMarkdown
 

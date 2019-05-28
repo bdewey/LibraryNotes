@@ -2,7 +2,6 @@
 // swiftlint:disable force_try
 
 @testable import CommonplaceBookApp
-import FlashcardKit
 import MiniMarkdown
 import XCTest
 

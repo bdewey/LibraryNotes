@@ -1,8 +1,6 @@
 // Copyright © 2019 Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import CommonplaceBook
-import FlashcardKit
 import IGListKit
 import MiniMarkdown
 import UIKit
