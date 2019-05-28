@@ -8,17 +8,14 @@ import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
   init(
-    notebook: NoteBundleDocument,
-    metadataProvider: FileMetadataProvider,
+    notebook: NoteArchiveDocument,
     stylesheet: Stylesheet
   ) {
     self.notebook = notebook
-    self.metadataProvider = metadataProvider
     self.stylesheet = stylesheet
   }
 
-  private let notebook: NoteBundleDocument
-  private let metadataProvider: FileMetadataProvider
+  private let notebook: NoteArchiveDocument
   private let stylesheet: Stylesheet
   private var object: NoteBundlePagePropertiesListDiffable!
 
@@ -65,16 +62,6 @@ public final class DocumentSectionController: ListSectionController {
       string: detailString,
       attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
     )
-    if object.fileMetadata.isUploading {
-      cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
-    } else if object.fileMetadata.isDownloading {
-      cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if object.fileMetadata.downloadingStatus
-      != NSMetadataUbiquitousItemDownloadingStatusCurrent {
-      cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
-    } else {
-      cell.statusIcon.image = nil
-    }
     let now = Date()
     let dateDelta = now.timeIntervalSince(object.properties.timestamp)
     cell.ageLabel.attributedText = NSAttributedString(
@@ -95,49 +82,9 @@ public final class DocumentSectionController: ListSectionController {
     self.object = (object as! NoteBundlePagePropertiesListDiffable)
   }
 
+  // TODO: Edit documents
   public override func didSelectItem(at index: Int) {
-    metadataProvider.loadEditingViewController(
-      for: object.fileMetadata,
-      parsingRules: notebook.noteBundle.parsingRules,
-      stylesheet: stylesheet
-    ) { editingViewController in
-      guard let editingViewController = editingViewController else { return }
-      self.viewController?.navigationController?.pushViewController(
-        editingViewController,
-        animated: true
-      )
-    }
-  }
-}
-
-extension FileMetadataProvider {
-  func loadEditingViewController(
-    for metadata: FileMetadata,
-    parsingRules: ParsingRules,
-    stylesheet: Stylesheet,
-    completion: @escaping (UIViewController?) -> Void
-  ) {
-    guard let document = editableDocument(for: metadata) else {
-      completion(nil)
-      return
-    }
-    document.open { success in
-      guard success else { completion(nil); return }
-      if metadata.contentTypeTree.contains("org.brians-brain.swiftflash") {
-        completion(metadata.languageViewController(
-          for: document as! TextBundleDocument, // swiftlint:disable:this force_cast
-          parsingRules: parsingRules
-        ))
-      } else {
-        completion(
-          TextEditViewController(
-            document: document,
-            parsingRules: LanguageDeck.parsingRules,
-            stylesheet: stylesheet
-          )
-        )
-      }
-    }
+    assertionFailure("Not implemented")
   }
 }
 
@@ -164,8 +111,8 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
       if properties.cardCount > 0,
         let viewController = self.viewController as? DocumentListViewController {
         let studyAction = SwipeAction(style: .default, title: "Study") { action, _ in
-          let studySession = self.notebook.noteBundle.studySession(
-            filter: { name, _ in name == properties.fileMetadata.fileName }
+          let studySession = self.notebook.studySession(
+            filter: { name, _ in name == properties.pageKey }
           )
           viewController.presentStudySessionViewController(for: studySession)
           action.fulfill(with: ExpansionFulfillmentStyle.reset)
@@ -178,7 +125,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
       }
 
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-        dataSource.deleteFileMetadata(properties.fileMetadata)
+        dataSource.deletePage(pageIdentifier: properties.pageKey)
         // handle action by updating model with deletion
         action.fulfill(with: .delete)
       }

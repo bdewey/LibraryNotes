@@ -29,17 +29,13 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebookMirror: NoteBundleFileMetadataMirror,
-    metadataProvider: FileMetadataProvider,
+    notebook: NoteArchiveDocument,
     stylesheet: Stylesheet
   ) {
-    self.notebookMirror = notebookMirror
-    self.notebook = notebookMirror.document
-    self.metadataProvider = metadataProvider
+    self.notebook = notebook
     self.stylesheet = stylesheet
     self.dataSource = DocumentDataSource(
       notebook: notebook,
-      fileMetadataProvider: metadataProvider,
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
@@ -58,9 +54,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     dataSource.notebook.removeObserver(documentListAdapter)
   }
 
-  private let notebookMirror: NoteBundleFileMetadataMirror
-  private let notebook: NoteBundleDocument
-  private let metadataProvider: FileMetadataProvider
+  private let notebook: NoteArchiveDocument
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
 
@@ -139,60 +133,39 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.width.equalTo(56)
       make.height.equalTo(56)
     }
-    studySession = notebook.noteBundle.studySession()
-
-    do {
-      try notebookMirror.performRenames(notebookMirror.desiredBaseNameForPage)
-    } catch {
-      DDLogError("Unexpected error performing renames in load: \(error)")
-    }
+    studySession = notebook.studySession()
   }
 
   @objc private func didTapNewDocument() {
-    DispatchQueue.global(qos: .default).async {
-      let name = FileNameGenerator(
-        baseName: DayComponents(Date()).description,
-        pathExtension: "txt"
-      ).firstName(notIn: self.metadataProvider)
-      let fileMetadata = FileMetadata(fileName: name)
-      guard let document = self.metadataProvider.editableDocument(for: fileMetadata) else {
-        DDLogError("Could not get an editable document for \(name). WHY OH WHY?")
-        return
-      }
-      let notebook = self.notebook
-      document.openOrCreate(completionHandler: { success in
-        guard success else {
-          DDLogError("Unexpected error creating new document \(name)")
-          return
-        }
-        var initialText = "# "
-        let initialOffset = initialText.count
-        initialText += "\n"
-        if let hashtag = self.dataSource.filteredHashtag {
-          initialText += hashtag
-          initialText += "\n"
-        }
-        document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
-          initialText
-        })
-        let viewController = TextEditViewController(
-          document: document,
-          parsingRules: self.notebook.noteBundle.parsingRules,
-          stylesheet: self.stylesheet
-        )
-        viewController.onDocumentClose = { success in
-          if !success { DDLogError("Failure closing document? Why oh why?") }
-          do {
-            try self.notebookMirror.performRenames(self.notebookMirror.desiredBaseNameForPage)
-          } catch {
-            DDLogError("Unexpected error on rename: \(error)")
-          }
-        }
-        viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-        viewController.autoFirstResponder = true
-        self.navigationController?.pushViewController(viewController, animated: true)
-      })
-    }
+//    DispatchQueue.global(qos: .default).async {
+//      let notebook = self.notebook
+//      var initialText = "# "
+//      let initialOffset = initialText.count
+//      initialText += "\n"
+//      if let hashtag = self.dataSource.filteredHashtag {
+//        initialText += hashtag
+//        initialText += "\n"
+//      }
+//      document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
+//        initialText
+//      })
+//      let viewController = TextEditViewController(
+//        document: document,
+//        parsingRules: self.notebook.noteBundle.parsingRules,
+//        stylesheet: self.stylesheet
+//      )
+//      viewController.onDocumentClose = { success in
+//        if !success { DDLogError("Failure closing document? Why oh why?") }
+//        do {
+//          try self.notebookMirror.performRenames(self.notebookMirror.desiredBaseNameForPage)
+//        } catch {
+//          DDLogError("Unexpected error on rename: \(error)")
+//        }
+//      }
+//      viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+//      viewController.autoFirstResponder = true
+//      self.navigationController?.pushViewController(viewController, animated: true)
+//    }
   }
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
@@ -233,7 +206,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let filter: (String, PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
-    studySession = notebook.noteBundle.studySession(filter: filter)
+    studySession = notebook.studySession(filter: filter)
   }
 
   public func presentStudySessionViewController(for studySession: StudySession) {
@@ -275,14 +248,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
 extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
   func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    let fileURL = metadataProvider.container.appendingPathComponent(name)
-    // TODO: Should I really do this based on path extension?
-    switch fileURL.pathExtension {
-    case "deck", "textbundle":
-      return TextBundleDocument(fileURL: fileURL)
-    default:
-      return PlainTextDocument(fileURL: fileURL)
-    }
+    return notebook
   }
 }
 
@@ -301,15 +267,11 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   }
 }
 
-extension DocumentListViewController: NoteBundleDocumentObserver {
-  func noteBundleDocument(
-    _ document: NoteBundleDocument,
-    didChangeToState state: UIDocument.State
+extension DocumentListViewController: NoteArchiveDocumentObserver {
+  func noteArchiveDocument(
+    _ document: NoteArchiveDocument,
+    didUpdatePageProperties properties: [String : PageProperties]
   ) {
-    // nothing
-  }
-
-  func noteBundleDocumentDidUpdatePages(_ document: NoteBundleDocument) {
     updateStudySession()
   }
 }

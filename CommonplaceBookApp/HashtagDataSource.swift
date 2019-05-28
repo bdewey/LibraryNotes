@@ -9,13 +9,13 @@ public protocol HashtagDataSourceDelegate: class {
 }
 
 public final class HashtagDataSource: NSObject, ListAdapterDataSource {
-  public init(document: NoteBundleDocument, stylesheet: Stylesheet) {
+  public init(document: NoteArchiveDocument, stylesheet: Stylesheet) {
     self.document = document
     self.stylesheet = stylesheet
   }
 
   public weak var delegate: HashtagDataSourceDelegate?
-  public let document: NoteBundleDocument
+  public let document: NoteArchiveDocument
   private let stylesheet: Stylesheet
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
@@ -37,7 +37,7 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
         )
       ),
     ]
-    let hashtags = document.noteBundle.pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
+    let hashtags = document.pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
       hashtags.formUnion(props.hashtags)
     }
     let hashtagDiffables = Array(hashtags).sorted().map { hashtag in

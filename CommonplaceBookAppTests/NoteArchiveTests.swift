@@ -15,8 +15,8 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
-      try archive.insertNote(Examples.quotes.rawValue, timestamp: now.addingTimeInterval(3600))
+      try archive.insertNote(Examples.vocabulary.rawValue, contentChangeTime: now.addingTimeInterval(3600), versionTimestamp: now.addingTimeInterval(3600))
+      try archive.insertNote(Examples.quotes.rawValue, contentChangeTime: now.addingTimeInterval(3600), versionTimestamp: now.addingTimeInterval(3600))
       XCTAssertEqual(archive.versions.count, 2)
       let serialized = archive.textSerialized()
       print(serialized)
@@ -36,7 +36,7 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, contentChangeTime: now.addingTimeInterval(3600), versionTimestamp: now.addingTimeInterval(3600))
       let serialized = archive.textSerialized()
       print(serialized)
       let retrievedText = try archive.currentText(for: noteIdentifier)
@@ -54,12 +54,13 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, contentChangeTime: now.addingTimeInterval(3600), versionTimestamp: now.addingTimeInterval(3600))
       let modifiedText = Examples.vocabulary.rawValue + "* Tu ?[to be](eres) americano.\n"
       try archive.updateText(
         for: noteIdentifier,
         to: modifiedText,
-        at: now.addingTimeInterval(3600)
+        contentChangeTime: now.addingTimeInterval(3600),
+        versionTimestamp: now.addingTimeInterval(3600)
       )
       XCTAssertEqual(archive.pageProperties.count, 1)
       XCTAssertEqual(archive.versions.count, 2)
@@ -81,12 +82,13 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, timestamp: now)
+      let noteIdentifier = try archive.insertNote(Examples.vocabulary.rawValue, contentChangeTime: now.addingTimeInterval(3600), versionTimestamp: now.addingTimeInterval(3600))
       let preModifiedArchive = archive
       try archive.updateText(
         for: noteIdentifier,
         to: Examples.vocabulary.rawValue,
-        at: now.addingTimeInterval(3600)
+        contentChangeTime: now.addingTimeInterval(3600),
+        versionTimestamp: now.addingTimeInterval(3600)
       )
       XCTAssertEqual(archive.versions.count, 1)
       XCTAssertEqual(

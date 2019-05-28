@@ -107,11 +107,15 @@ public struct NoteArchive {
   /// - returns: An identifier that can be used to return the current version of this page
   ///            at any point in time.
   @discardableResult
-  mutating public func insertNote(_ text: String, timestamp: Date) throws -> String {
+  mutating public func insertNote(
+    _ text: String,
+    contentChangeTime timestamp: Date,
+    versionTimestamp: Date
+  ) throws -> String {
     let (propertiesSnippet, _) = try archivePageProperties(from: text, timestamp: timestamp)
     let key = UUID().uuidString
     pagePropertyDigests[key] = propertiesSnippet.sha1Digest
-    try archivePageManifestVersion(timestamp: timestamp)
+    try archivePageManifestVersion(timestamp: versionTimestamp)
     return key
   }
 
@@ -137,12 +141,19 @@ public struct NoteArchive {
   /// Updates the text associated with `pageIdentifier` to `text`, creating a new version
   /// in the process.
   ///
+  /// - parameter pageIdentifier: The page identifier to update
+  /// - parameter text: The new text of the page
+  /// - parameter contentChangeTime: The *content change* timestamp of the text
+  /// - parameter versionTimestamp: The time we are applying this change. If nil, the version
+  ///             will be recorded with `timestamp`. Importing an existing file is the expected
+  ///             case where the version timestamp is different from the content change timestamp.
   /// - note: If `text` is not different from the current value associated with `pageIdentifier`,
   ///         this operation is a no-op. No new version gets created.
   public mutating func updateText(
     for pageIdentifier: String,
     to text: String,
-    at timestamp: Date
+    contentChangeTime timestamp: Date,
+    versionTimestamp: Date
   ) throws {
     let (existingSnippet, existingProperties) = try currentPageProperties(for: pageIdentifier)
     let (newSnippet, newProperties) = try archivePageProperties(from: text, timestamp: timestamp)
@@ -159,7 +170,7 @@ public struct NoteArchive {
     }
     existingTextSnippet.encodeAsDiff(from: newTextSnippet)
     pagePropertyDigests[pageIdentifier] = newSnippet.sha1Digest
-    try archivePageManifestVersion(timestamp: timestamp)
+    try archivePageManifestVersion(timestamp: versionTimestamp)
   }
 
   private mutating func archivePageManifestVersion(timestamp: Date) throws {
@@ -174,7 +185,8 @@ public struct NoteArchive {
   }
 
   private mutating func archiveVersionHistory() throws {
-    let history = pagePropertiesVersionHistory.map { $0.description }.joined(separator: "\n")
+    let history = pagePropertiesVersionHistory.reversed()
+      .map { $0.description }.joined(separator: "\n")
     if let existingHistory = archive.symbolicReferences["versions"] {
       archive.removeSnippet(withDigest: existingHistory)
     }
@@ -191,6 +203,7 @@ public struct NoteArchive {
       throw SerializationError.noVersionReference
     }
     return versionSnippet.text.split(separator: "\n")
+      .reversed()
       .map(String.init)
       .compactMap(NoteArchiveVersion.init)
   }
@@ -252,10 +265,19 @@ public extension NoteArchive {
     var importRecords = try getFileImportRecords()
     if let importRecord = importRecords[fileName] {
       if !contentChangeDate.closeEnough(to: importRecord.changeDate) {
-        try updateText(for: importRecord.pageIdentifier, to: text, at: importDate)
+        try updateText(
+          for: importRecord.pageIdentifier,
+          to: text,
+          contentChangeTime: contentChangeDate,
+          versionTimestamp: importDate
+        )
       }
     } else {
-      let pageIdentifier = try insertNote(text, timestamp: importDate)
+      let pageIdentifier = try insertNote(
+        text,
+        contentChangeTime: contentChangeDate,
+        versionTimestamp: importDate
+      )
       importRecords[fileName] = FileImportRecord(
         pageIdentifier: pageIdentifier,
         changeDate: contentChangeDate

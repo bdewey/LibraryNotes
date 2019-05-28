@@ -10,7 +10,7 @@ public protocol HashtagViewControllerDelegate: class {
 }
 
 public final class HashtagViewController: UIViewController {
-  public init(index: NoteBundleDocument, stylesheet: Stylesheet) {
+  public init(index: NoteArchiveDocument, stylesheet: Stylesheet) {
     self.dataSource = HashtagDataSource(document: index, stylesheet: stylesheet)
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)

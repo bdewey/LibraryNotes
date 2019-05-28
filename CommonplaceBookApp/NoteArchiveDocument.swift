@@ -50,6 +50,10 @@ public final class NoteArchiveDocument: UIDocument {
     }
   }
 
+  public func deletePage(pageIdentifier: String) {
+    assertionFailure("Not implemented")
+  }
+
   /// Deserialize `noteArchive` from `contents`
   /// - precondition: `contents` is a directory FileWrapper with a "text.snippets" regular file
   /// - throws: NSError in the NoteArchiveDocument domain on any error
@@ -65,9 +69,11 @@ public final class NoteArchiveDocument: UIDocument {
         return
     }
     do {
-      try noteArchiveQueue.sync {
+      let pageProperties = try noteArchiveQueue.sync { () -> [String: PageProperties] in
         noteArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: text)
+        return noteArchive.pageProperties
       }
+      notifyObservers(of: pageProperties)
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
     }
@@ -163,5 +169,24 @@ public extension NoteArchiveDocument {
         "innerError": innerError,
       ]
     )
+  }
+}
+
+// MARK: - Study sessions
+public extension NoteArchiveDocument {
+  func studySession(
+    filter: ((String, PageProperties) -> Bool)? = nil,
+    date: Date = Date()
+  ) -> StudySession {
+    // TODO: Write this.
+    return StudySession()
+  }
+
+  /// Update the notebook with the result of a study session.
+  ///
+  /// - parameter studySession: The completed study session.
+  /// - parameter date: The date the study session took place.
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
+    assertionFailure("Not implemented")
   }
 }

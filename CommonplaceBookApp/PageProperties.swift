@@ -2,6 +2,7 @@
 
 import Foundation
 import IGListKit
+import Yams
 
 /// Metadata about pages in a NoteBundle.
 public struct PageProperties: Codable, Equatable {
@@ -20,7 +21,13 @@ public struct PageProperties: Codable, Equatable {
   /// IDs of all card templates in the page.
   public let cardTemplates: [String]
 
-  init(sha1Digest: String, timestamp: Date, hashtags: [String], title: String, cardTemplates: [String]) {
+  init(
+    sha1Digest: String,
+    timestamp: Date,
+    hashtags: [String],
+    title: String,
+    cardTemplates: [String]
+  ) {
     self.sha1Digest = sha1Digest
     self.timestamp = timestamp
     self.hashtags = hashtags
@@ -29,19 +36,18 @@ public struct PageProperties: Codable, Equatable {
   }
 
   func makeSnippet() throws -> TextSnippet {
-    let data = try JSONEncoder().encode(self)
-    let text = String(data: data, encoding: .utf8)!
+    let text = try YAMLEncoder().encode(self)
     return TextSnippet(text)
   }
 
   init(_ snippet: TextSnippet) throws {
-    self = try JSONDecoder().decode(PageProperties.self, from: snippet.text.data(using: .utf8)!)
+    self = try YAMLDecoder().decode(PageProperties.self, from: snippet.text)
   }
 }
 
 /// Wrapper around PageProperties for IGListKit.
 public final class NoteBundlePagePropertiesListDiffable: ListDiffable {
-  public let fileMetadata: FileMetadata
+  public let pageKey: String
 
   /// The wrapped PageProperties.
   public private(set) var properties: PageProperties
@@ -50,26 +56,28 @@ public final class NoteBundlePagePropertiesListDiffable: ListDiffable {
   public private(set) var cardCount: Int
 
   /// Designated initializer.
-  public init(fileMetadata: FileMetadata, properties: PageProperties, cardCount: Int) {
-    self.fileMetadata = fileMetadata
+  public init(pageKey: String, properties: PageProperties, cardCount: Int) {
+    self.pageKey = pageKey
     self.properties = properties
     self.cardCount = cardCount
   }
 
   public func diffIdentifier() -> NSObjectProtocol {
-    return fileMetadata.fileName as NSString
+    return pageKey as NSString
   }
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
     guard let otherWrapper = object as? NoteBundlePagePropertiesListDiffable else { return false }
     return properties == otherWrapper.properties &&
       cardCount == otherWrapper.cardCount &&
-      fileMetadata == otherWrapper.fileMetadata
+      pageKey == otherWrapper.pageKey
   }
 }
 
 /// Debuggability extensions for PagePropertiesListDiffable.
-extension NoteBundlePagePropertiesListDiffable: CustomStringConvertible, CustomDebugStringConvertible {
+extension NoteBundlePagePropertiesListDiffable:
+  CustomStringConvertible,
+  CustomDebugStringConvertible {
   public var description: String { return String(describing: properties) }
   public var debugDescription: String {
     return "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) "

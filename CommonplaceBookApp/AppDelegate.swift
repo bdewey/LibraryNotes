@@ -35,8 +35,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
   var noteArchiveDocument: NoteArchiveDocument?
 
-  var documentMirror: NoteBundleFileMetadataMirror?
-
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -65,18 +63,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           })
         })
         self.noteArchiveDocument = noteArchiveDocument
-        let noteBundleDocument = NoteBundleDocument(
-          fileURL: metadataProvider.container.appendingPathComponent("commonplace2.notebundle"),
-          parsingRules: parsingRules
-        )
-        let documentMirror = NoteBundleFileMetadataMirror(
-          document: noteBundleDocument,
-          metadataProvider: metadataProvider
-        )
-        self.documentMirror = documentMirror
         window.rootViewController = self.makeViewController(
-          notebookMirror: documentMirror,
-          metadataProvider: metadataProvider
+          notebook: noteArchiveDocument
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
@@ -122,15 +110,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeViewController(
-    notebookMirror: NoteBundleFileMetadataMirror,
-    metadataProvider: FileMetadataProvider
+    notebook: NoteArchiveDocument
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self
     navigationController.pushViewController(
       DocumentListViewController(
-        notebookMirror: notebookMirror,
-        metadataProvider: metadataProvider,
+        notebook: notebook,
         stylesheet: commonplaceBookStylesheet
       ),
       animated: false
