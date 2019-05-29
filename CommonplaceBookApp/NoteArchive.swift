@@ -121,6 +121,13 @@ public struct NoteArchive {
     return key
   }
 
+  mutating public func removeNote(for pageIdentifier: String, versionTimestamp: Date) throws {
+    guard pagePropertyDigests.removeValue(forKey: pageIdentifier) != nil else {
+      throw RetrievalError.noSuchPage(pageIdentifier)
+    }
+    try archivePageManifestVersion(timestamp: versionTimestamp)
+  }
+
   /// Gets the current version of the text for a particular page.
   public func currentText(for pageIdentifier: String) throws -> String {
     let properties = try currentPageProperties(for: pageIdentifier).properties

@@ -73,8 +73,12 @@ public final class NoteArchiveDocument: UIDocument {
     invalidateSavedSnippets()
   }
 
-  public func deletePage(pageIdentifier: String) {
-    assertionFailure("Not implemented")
+  public func deletePage(pageIdentifier: String) throws {
+    try noteArchiveQueue.sync {
+      try noteArchive.removeNote(for: pageIdentifier, versionTimestamp: Date())
+    }
+    invalidateSavedSnippets()
+    notifyObservers(of: pageProperties)
   }
 
   private enum BundleWrapperKey {

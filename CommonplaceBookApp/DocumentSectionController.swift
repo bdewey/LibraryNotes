@@ -142,7 +142,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
       }
 
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-        dataSource.deletePage(pageIdentifier: properties.pageKey)
+        try? dataSource.deletePage(pageIdentifier: properties.pageKey)
         // handle action by updating model with deletion
         action.fulfill(with: .delete)
       }
