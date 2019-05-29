@@ -29,6 +29,7 @@ public extension NoteArchiveDocument {
           importDate: importDate
         )
         self.notifyObservers(of: self.noteArchive.pageProperties)
+        self.invalidateSavedSnippets()
       } catch {
         DDLogError("Unexpected error importing file \(fileName): \(error)")
       }

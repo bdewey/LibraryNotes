@@ -93,6 +93,16 @@ public final class NoteArchiveDocument: UIDocument {
     self.topLevelFileWrapper = topLevelFileWrapper
     return topLevelFileWrapper
   }
+
+  /// Lets the UIDocument infrastructure know we have content to save, and also
+  /// discards our in-memory representation of the snippet file wrapper.
+  internal func invalidateSavedSnippets() {
+    if let topLevelFileWrapper = topLevelFileWrapper,
+      let archiveWrapper = topLevelFileWrapper.fileWrappers!["text.snippets"] {
+      topLevelFileWrapper.removeFileWrapper(archiveWrapper)
+    }
+    updateChangeCount(.done)
+  }
 }
 
 /// Observing.
@@ -122,11 +132,6 @@ public extension NoteArchiveDocument {
     for observerWrapper in observers {
       observerWrapper.observer?.noteArchiveDocument(self, didUpdatePageProperties: pageProperties)
     }
-    if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers!["text.snippets"] {
-      topLevelFileWrapper.removeFileWrapper(archiveWrapper)
-    }
-    updateChangeCount(.done)
   }
 }
 
