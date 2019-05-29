@@ -29,7 +29,7 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   /// How to parse Markdown in the snippets
-  private let parsingRules: ParsingRules
+  public let parsingRules: ParsingRules
 
   /// Top-level FileWrapper for our contents
   private var topLevelFileWrapper: FileWrapper?
@@ -52,6 +52,25 @@ public final class NoteArchiveDocument: UIDocument {
     return noteArchiveQueue.sync {
       noteArchive.pageProperties
     }
+  }
+
+  /// Holds page contents in memory until we have a chance to save.
+  private var modifiedPageContents: [String: String] = [:]
+
+  public func currentTextContents(for pageIdentifier: String) throws -> String {
+    assert(Thread.isMainThread)
+    if let inMemoryContents = modifiedPageContents[pageIdentifier] {
+      return inMemoryContents
+    }
+    return try noteArchiveQueue.sync {
+      try noteArchive.currentText(for: pageIdentifier)
+    }
+  }
+
+  public func changeTextContents(for pageIdentifier: String, to text: String) {
+    assert(Thread.isMainThread)
+    modifiedPageContents[pageIdentifier] = text
+    invalidateSavedSnippets()
   }
 
   public func deletePage(pageIdentifier: String) {
@@ -99,7 +118,21 @@ public final class NoteArchiveDocument: UIDocument {
     let topLevelFileWrapper = self.topLevelFileWrapper
       ?? FileWrapper(directoryWithFileWrappers: [:])
     precondition(topLevelFileWrapper.isDirectory)
+    var shouldNotify = false
     if topLevelFileWrapper.fileWrappers![BundleWrapperKey.snippets] == nil {
+      let now = Date()
+      try noteArchiveQueue.sync {
+        for (pageIdentifier, modifiedText) in modifiedPageContents {
+          try self.noteArchive.updateText(
+            for: pageIdentifier,
+            to: modifiedText,
+            contentChangeTime: now,
+            versionTimestamp: now
+          )
+          shouldNotify = true
+        }
+        modifiedPageContents.removeAll()
+      }
       topLevelFileWrapper.addFileWrapper(textSnippetsFileWrapper())
     }
     if topLevelFileWrapper.fileWrappers![BundleWrapperKey.studyLog] == nil {
@@ -111,6 +144,9 @@ public final class NoteArchiveDocument: UIDocument {
     }
     self.topLevelFileWrapper = topLevelFileWrapper
     DDLogInfo("Saving: \(topLevelFileWrapper.fileWrappers!.keys)")
+    if shouldNotify {
+      notifyObservers(of: pageProperties)
+    }
     return topLevelFileWrapper
   }
 

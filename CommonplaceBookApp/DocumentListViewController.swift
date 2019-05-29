@@ -137,35 +137,22 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   @objc private func didTapNewDocument() {
-//    DispatchQueue.global(qos: .default).async {
-//      let notebook = self.notebook
-//      var initialText = "# "
-//      let initialOffset = initialText.count
-//      initialText += "\n"
-//      if let hashtag = self.dataSource.filteredHashtag {
-//        initialText += hashtag
-//        initialText += "\n"
-//      }
-//      document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
-//        initialText
-//      })
-//      let viewController = TextEditViewController(
-//        document: document,
-//        parsingRules: self.notebook.noteBundle.parsingRules,
-//        stylesheet: self.stylesheet
-//      )
-//      viewController.onDocumentClose = { success in
-//        if !success { DDLogError("Failure closing document? Why oh why?") }
-//        do {
-//          try self.notebookMirror.performRenames(self.notebookMirror.desiredBaseNameForPage)
-//        } catch {
-//          DDLogError("Unexpected error on rename: \(error)")
-//        }
-//      }
-//      viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-//      viewController.autoFirstResponder = true
-//      self.navigationController?.pushViewController(viewController, animated: true)
-//    }
+    var initialText = "# "
+    let initialOffset = initialText.count
+    initialText += "\n"
+    if let hashtag = self.dataSource.filteredHashtag {
+      initialText += hashtag
+      initialText += "\n"
+    }
+    let viewController = TextEditViewController(
+      parsingRules: notebook.parsingRules,
+      stylesheet: stylesheet
+    )
+    viewController.markdown = initialText
+    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+    viewController.autoFirstResponder = true
+    viewController.delegate = notebook
+    self.navigationController?.pushViewController(viewController, animated: true)
   }
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?

@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import Foundation
 import IGListKit
 import MiniMarkdown
@@ -84,7 +85,23 @@ public final class DocumentSectionController: ListSectionController {
 
   // TODO: Edit documents
   public override func didSelectItem(at index: Int) {
-    assertionFailure("Not implemented")
+    guard let object = object else {
+      assertionFailure("Unexpected object type")
+      return
+    }
+    do {
+      let textEditViewController = TextEditViewController(
+        parsingRules: notebook.parsingRules,
+        stylesheet: stylesheet
+      )
+      textEditViewController.pageIdentifier = object.pageKey
+      textEditViewController.markdown = try notebook.currentTextContents(for: object.pageKey)
+      textEditViewController.delegate = notebook
+      viewController?.navigationController?
+        .pushViewController(textEditViewController, animated: true)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
+    }
   }
 }
 
@@ -143,7 +160,6 @@ extension FileMetadata {
     parsingRules: ParsingRules
   ) -> UIViewController {
     let textViewController = TextEditViewController(
-      document: document,
       parsingRules: LanguageDeck.parsingRules,
       stylesheet: Stylesheet.hablaEspanol
     )

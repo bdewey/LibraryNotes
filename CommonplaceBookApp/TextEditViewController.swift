@@ -14,19 +14,27 @@ extension Tag {
   fileprivate static let textEditViewController = Tag(rawValue: "textEditViewController")
 }
 
+protocol TextEditViewControllerDelegate: AnyObject {
+  func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String)
+  func textEditViewControllerDidClose(_ viewController: TextEditViewController)
+}
+
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController,
   MDCScrollEventForwarder,
   StylesheetContaining {
   /// Designated initializer.
-  init(document: EditableDocument, parsingRules: ParsingRules, stylesheet: Stylesheet) {
-    self.document = document
+  init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
     self.parsingRules = parsingRules
     self.stylesheet = stylesheet
-    var renderers = TextEditViewController.renderers
-    if let configurer = document as? ConfiguresRenderers {
-      configurer.configureRenderers(&renderers)
-    }
+
+    // TODO: This is how I used to show pictures, methinks; how should it work in the NoteArchive
+    // world?
+
+    let renderers = TextEditViewController.renderers
+//    if let configurer = document as? ConfiguresRenderers {
+//      configurer.configureRenderers(&renderers)
+//    }
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(with: stylesheet),
@@ -34,13 +42,6 @@ final class TextEditViewController: UIViewController,
       stylesheet: stylesheet
     )
     super.init(nibName: nil, bundle: nil)
-    self.endpoint = document.textSignal.subscribeValues { [weak self] taggedString in
-      guard taggedString.tag != Tag.textEditViewController,
-        let textStorage = self?.textStorage else {
-        return
-      }
-      textStorage.markdown = taggedString.value
-    }
     textStorage.delegate = self
     NotificationCenter.default.addObserver(
       self,
@@ -60,17 +61,12 @@ final class TextEditViewController: UIViewController,
     fatalError("init(coder:) has not been implemented")
   }
 
-  /// Block that's run when the controller is deallocated.
-  public var onDocumentClose: ((Bool) -> Void)?
-
   deinit {
-    NotificationCenter.default.removeObserver(self)
-    document.close(completionHandler: onDocumentClose)
+    delegate?.textEditViewControllerDidClose(self)
   }
 
   // Init-time state.
 
-  private let document: TextEditViewControllerDocument
   private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
@@ -78,6 +74,21 @@ final class TextEditViewController: UIViewController,
   private var endpoint: SignalEndpoint<Tagged<String>>?
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
+
+  public weak var delegate: TextEditViewControllerDelegate?
+
+  /// The markdown
+  public var markdown: String {
+    get {
+      return textStorage.markdown
+    }
+    set {
+      textStorage.markdown = newValue
+    }
+  }
+
+  /// Identifier of the page we are editing.
+  public var pageIdentifier: String?
 
   private static func formatters(
     with stylesheet: Stylesheet
@@ -235,9 +246,7 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    document.applyTaggedModification(tag: .textEditViewController) { _ in
-      self.textStorage.markdown
-    }
+    delegate?.textEditViewController(self, didChange: self.textStorage.markdown)
   }
 }
 
