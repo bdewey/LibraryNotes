@@ -40,6 +40,8 @@ public final class NoteArchiveDocument: UIDocument {
   /// Protects noteArchive.
   internal let noteArchiveQueue = DispatchQueue(label: "org.brians-brain.note-archive-document")
 
+  internal var studyLog = StudyLog()
+
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// The observers.
@@ -70,6 +72,11 @@ public final class NoteArchiveDocument: UIDocument {
         // Is this an error? Or expected for a new document?
         return
     }
+    if let logData = wrapper.fileWrappers?["study.log"]?.regularFileContents,
+      let logText = String(data: logData, encoding: .utf8),
+      let studyLog = StudyLog(logText) {
+      self.studyLog = studyLog
+    }
     do {
       let pageProperties = try noteArchiveQueue.sync { () -> [String: PageProperties] in
         noteArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: text)
@@ -90,6 +97,13 @@ public final class NoteArchiveDocument: UIDocument {
     if topLevelFileWrapper.fileWrappers!["text.snippets"] == nil {
       topLevelFileWrapper.addFileWrapper(textSnippetsFileWrapper())
     }
+    if topLevelFileWrapper.fileWrappers!["study.log"] == nil {
+      let logWrapper = FileWrapper(
+        regularFileWithContents: studyLog.description.data(using: .utf8)!
+      )
+      logWrapper.preferredFilename = "study.log"
+      topLevelFileWrapper.addFileWrapper(logWrapper)
+    }
     self.topLevelFileWrapper = topLevelFileWrapper
     return topLevelFileWrapper
   }
@@ -99,6 +113,14 @@ public final class NoteArchiveDocument: UIDocument {
   internal func invalidateSavedSnippets() {
     if let topLevelFileWrapper = topLevelFileWrapper,
       let archiveWrapper = topLevelFileWrapper.fileWrappers!["text.snippets"] {
+      topLevelFileWrapper.removeFileWrapper(archiveWrapper)
+    }
+    updateChangeCount(.done)
+  }
+
+  internal func invalidateSavedStudyLog() {
+    if let topLevelFileWrapper = topLevelFileWrapper,
+      let archiveWrapper = topLevelFileWrapper.fileWrappers!["study.log"] {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
@@ -187,6 +209,7 @@ public extension NoteArchiveDocument {
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
+    let suppressionDates = studyLog.identifierSuppressionDates()
     return noteArchiveQueue.sync {
       return noteArchive.pageProperties
         .filter { filter($0.key, $0.value) }
@@ -202,6 +225,7 @@ public extension NoteArchiveDocument {
               }
               do {
                 let template = try noteArchive.challengeTemplate(for: key)
+                template.templateIdentifier = key.digest
                 challengeTemplateCache.setObject(template, forKey: keyString as NSString)
                 return template
               } catch {
@@ -211,6 +235,12 @@ public extension NoteArchiveDocument {
             }
           // TODO: Filter down to eligible cards
           let eligibleCards = challengeTemplates.cards
+            .filter { challenge -> Bool in
+              guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
+                return true
+              }
+              return Calendar.current.startOfDay(for: date) >= Calendar.current.startOfDay(for: suppressionDate)
+            }
           return StudySession(
             eligibleCards,
             properties: CardDocumentProperties(
@@ -229,6 +259,8 @@ public extension NoteArchiveDocument {
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
   func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
-    assertionFailure("Not implemented")
+    studyLog.updateStudySessionResults(studySession, on: date)
+    invalidateSavedStudyLog()
+    notifyObservers(of: pageProperties)
   }
 }

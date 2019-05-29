@@ -14,7 +14,7 @@ public struct ChallengeIdentifier: Hashable {
   public let index: Int
 
   /// Public initializer.
-  public init(templateDigest: String?, index: Int) {
+  public init(templateDigest: String, index: Int) {
     self.templateDigest = templateDigest
     self.index = index
   }
