@@ -40,6 +40,8 @@ public final class NoteArchiveDocument: UIDocument {
   /// Protects noteArchive.
   internal let noteArchiveQueue = DispatchQueue(label: "org.brians-brain.note-archive-document")
 
+  private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
+
   /// The observers.
   private var observers: [WeakObserver] = []
 
@@ -73,6 +75,7 @@ public final class NoteArchiveDocument: UIDocument {
         noteArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: text)
         return noteArchive.pageProperties
       }
+      DDLogInfo("Loaded \(pageProperties.count) pages")
       notifyObservers(of: pageProperties)
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
@@ -189,8 +192,13 @@ public extension NoteArchiveDocument {
                 DDLogError("Expected a challenge key: \(keyString)")
                 return nil
               }
+              if let cachedTemplate = challengeTemplateCache.object(forKey: keyString as NSString) {
+                return cachedTemplate
+              }
               do {
-                return try noteArchive.challengeTemplate(for: key)
+                let template = try noteArchive.challengeTemplate(for: key)
+                challengeTemplateCache.setObject(template, forKey: keyString as NSString)
+                return template
               } catch {
                 DDLogError("Unexpected error getting challenge template: \(error)")
                 return nil
