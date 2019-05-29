@@ -58,6 +58,11 @@ public final class NoteArchiveDocument: UIDocument {
     assertionFailure("Not implemented")
   }
 
+  private enum BundleWrapperKey {
+    static let snippets = "text.snippets"
+    static let studyLog = "study.log"
+  }
+
   /// Deserialize `noteArchive` from `contents`
   /// - precondition: `contents` is a directory FileWrapper with a "text.snippets" regular file
   /// - throws: NSError in the NoteArchiveDocument domain on any error
@@ -67,12 +72,12 @@ public final class NoteArchiveDocument: UIDocument {
     }
     topLevelFileWrapper = wrapper
     guard
-      let data = wrapper.fileWrappers?["text.snippets"]?.regularFileContents,
+      let data = wrapper.fileWrappers?[BundleWrapperKey.snippets]?.regularFileContents,
       let text = String(data: data, encoding: .utf8) else {
         // Is this an error? Or expected for a new document?
         return
     }
-    if let logData = wrapper.fileWrappers?["study.log"]?.regularFileContents,
+    if let logData = wrapper.fileWrappers?[BundleWrapperKey.studyLog]?.regularFileContents,
       let logText = String(data: logData, encoding: .utf8),
       let studyLog = StudyLog(logText) {
       self.studyLog = studyLog
@@ -94,14 +99,14 @@ public final class NoteArchiveDocument: UIDocument {
     let topLevelFileWrapper = self.topLevelFileWrapper
       ?? FileWrapper(directoryWithFileWrappers: [:])
     precondition(topLevelFileWrapper.isDirectory)
-    if topLevelFileWrapper.fileWrappers!["text.snippets"] == nil {
+    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.snippets] == nil {
       topLevelFileWrapper.addFileWrapper(textSnippetsFileWrapper())
     }
-    if topLevelFileWrapper.fileWrappers!["study.log"] == nil {
+    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.studyLog] == nil {
       let logWrapper = FileWrapper(
         regularFileWithContents: studyLog.description.data(using: .utf8)!
       )
-      logWrapper.preferredFilename = "study.log"
+      logWrapper.preferredFilename = BundleWrapperKey.studyLog
       topLevelFileWrapper.addFileWrapper(logWrapper)
     }
     self.topLevelFileWrapper = topLevelFileWrapper
@@ -113,7 +118,7 @@ public final class NoteArchiveDocument: UIDocument {
   /// discards our in-memory representation of the snippet file wrapper.
   internal func invalidateSavedSnippets() {
     if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers!["text.snippets"] {
+      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.snippets] {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
@@ -121,7 +126,7 @@ public final class NoteArchiveDocument: UIDocument {
 
   internal func invalidateSavedStudyLog() {
     if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers!["study.log"] {
+      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.studyLog] {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
@@ -165,7 +170,7 @@ private extension NoteArchiveDocument {
       noteArchive.textSerialized()
     }
     let fileWrapper = FileWrapper(regularFileWithContents: text.data(using: .utf8)!)
-    fileWrapper.preferredFilename = "text.snippets"
+    fileWrapper.preferredFilename = BundleWrapperKey.snippets
     return fileWrapper
   }
 }
@@ -240,7 +245,7 @@ public extension NoteArchiveDocument {
               guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
                 return true
               }
-              return Calendar.current.startOfDay(for: date) >= Calendar.current.startOfDay(for: suppressionDate)
+              return date >= suppressionDate
             }
           return StudySession(
             eligibleCards,
