@@ -44,8 +44,14 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     let window = UIWindow(frame: UIScreen.main.bounds)
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
-    let parsingRules = LanguageDeck.parsingRules
+    self.window = window
+    return true
+  }
 
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    guard let window = window, noteArchiveDocument == nil else { return }
+    let parsingRules = LanguageDeck.parsingRules
+    window.rootViewController = loadingViewController
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
@@ -71,10 +77,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
       }
-
     })
-    self.window = window
-    return true
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    guard let document = noteArchiveDocument else { return }
+    if document.hasUnsavedChanges {
+      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
+    }
+    noteArchiveDocument = nil
   }
 
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider>) -> Void) {
