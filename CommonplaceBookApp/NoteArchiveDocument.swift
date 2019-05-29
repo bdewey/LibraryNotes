@@ -105,6 +105,7 @@ public final class NoteArchiveDocument: UIDocument {
       topLevelFileWrapper.addFileWrapper(logWrapper)
     }
     self.topLevelFileWrapper = topLevelFileWrapper
+    DDLogInfo("Saving: \(topLevelFileWrapper.fileWrappers!.keys)")
     return topLevelFileWrapper
   }
 
