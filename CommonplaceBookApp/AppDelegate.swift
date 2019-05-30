@@ -1,8 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import CommonplaceBook
-import FlashcardKit
 import MaterialComponents.MaterialAppBar
 import MaterialComponents.MaterialSnackbar
 import TextBundleKit
@@ -35,6 +33,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     return navigationController
   }()
 
+  var noteArchiveDocument: NoteArchiveDocument?
+
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -44,29 +44,48 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     let window = UIWindow(frame: UIScreen.main.bounds)
     window.rootViewController = loadingViewController
     window.makeKeyAndVisible()
+    self.window = window
+    return true
+  }
 
+  func applicationDidBecomeActive(_ application: UIApplication) {
+    guard let window = window, noteArchiveDocument == nil else { return }
+    let parsingRules = LanguageDeck.parsingRules
+    window.rootViewController = loadingViewController
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
-        let parsingRules = LanguageDeck.parsingRules
+        let noteArchiveDocument = NoteArchiveDocument(
+          fileURL: metadataProvider.container.appendingPathComponent("archive.notebundle"),
+          parsingRules: parsingRules
+        )
+        noteArchiveDocument.openOrCreate(completionHandler: { _ in
+          metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
+            noteArchiveDocument.importFileMetadataItems(
+              fileMetadataItems,
+              from: metadataProvider,
+              importDate: Date()
+            )
+          })
+        })
+        self.noteArchiveDocument = noteArchiveDocument
         window.rootViewController = self.makeViewController(
-          notebook: Notebook(
-            parsingRules: parsingRules,
-            metadataProvider: metadataProvider
-          ).loadCachedProperties()
-            .loadStudyMetadata()
-            .monitorMetadataProvider()
-            .loadChallengeTemplates()
+          notebook: noteArchiveDocument
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
       }
-
     })
-    self.window = window
-    return true
+  }
+
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    guard let document = noteArchiveDocument else { return }
+    if document.hasUnsavedChanges {
+      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
+    }
+    noteArchiveDocument = nil
   }
 
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider>) -> Void) {
@@ -102,7 +121,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   }
 
   private func makeViewController(
-    notebook: Notebook
+    notebook: NoteArchiveDocument
   ) -> UIViewController {
     let navigationController = MDCAppBarNavigationController()
     navigationController.delegate = self

@@ -1,8 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CommonplaceBook
 import CwlSignal
-import FlashcardKit
 import Foundation
 import MiniMarkdown
 import TextBundleKit

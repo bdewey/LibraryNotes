@@ -1,6 +1,5 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CommonplaceBook
 import Foundation
 import IGListKit
 
@@ -10,13 +9,13 @@ public protocol HashtagDataSourceDelegate: class {
 }
 
 public final class HashtagDataSource: NSObject, ListAdapterDataSource {
-  public init(index: Notebook, stylesheet: Stylesheet) {
-    self.index = index
+  public init(document: NoteArchiveDocument, stylesheet: Stylesheet) {
+    self.document = document
     self.stylesheet = stylesheet
   }
 
   public weak var delegate: HashtagDataSourceDelegate?
-  public let index: Notebook
+  public let document: NoteArchiveDocument
   private let stylesheet: Stylesheet
 
   public func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
@@ -38,8 +37,8 @@ public final class HashtagDataSource: NSObject, ListAdapterDataSource {
         )
       ),
     ]
-    let hashtags = index.pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
-      hashtags.formUnion(props.value.hashtags)
+    let hashtags = document.pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
+      hashtags.formUnion(props.hashtags)
     }
     let hashtagDiffables = Array(hashtags).sorted().map { hashtag in
       MenuItem(

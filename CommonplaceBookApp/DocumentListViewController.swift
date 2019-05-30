@@ -1,9 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import CommonplaceBook
 import CoreServices
-import FlashcardKit
 import IGListKit
 import MaterialComponents
 import MiniMarkdown
@@ -31,17 +29,20 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: Notebook,
+    notebook: NoteArchiveDocument,
     stylesheet: Stylesheet
   ) {
     self.notebook = notebook
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(notebook: notebook, stylesheet: stylesheet)
+    self.dataSource = DocumentDataSource(
+      notebook: notebook,
+      stylesheet: stylesheet
+    )
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
-    notebook.addListener(self)
+    notebook.addObserver(self)
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -50,10 +51,10 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
   deinit {
-    dataSource.notebook.removeListener(documentListAdapter)
+    dataSource.notebook.removeObserver(documentListAdapter)
   }
 
-  private let notebook: Notebook
+  private let notebook: NoteArchiveDocument
   public let stylesheet: Stylesheet
   private let dataSource: DocumentDataSource
 
@@ -100,7 +101,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let updater = ListAdapterUpdater()
     let adapter = ListAdapter(updater: updater, viewController: self)
     adapter.dataSource = dataSource
-    dataSource.notebook.addListener(adapter)
+    dataSource.notebook.addObserver(adapter)
     return adapter
   }()
 
@@ -133,58 +134,25 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.height.equalTo(56)
     }
     studySession = notebook.studySession()
-    do {
-      try notebook.performRenames(notebook.desiredBaseNameForPage)
-    } catch {
-      DDLogError("Unexpected error performing renames in load: \(error)")
-    }
   }
 
   @objc private func didTapNewDocument() {
-    DispatchQueue.global(qos: .default).async {
-      let name = FileNameGenerator(
-        baseName: DayComponents(Date()).description,
-        pathExtension: "txt"
-      ).firstName(notIn: self.notebook.metadataProvider)
-      let fileMetadata = FileMetadata(fileName: name)
-      guard let document = self.notebook.metadataProvider.editableDocument(for: fileMetadata) else {
-        DDLogError("Could not get an editable document for \(name). WHY OH WHY?")
-        return
-      }
-      let notebook = self.notebook
-      document.openOrCreate(completionHandler: { success in
-        guard success else {
-          DDLogError("Unexpected error creating new document \(name)")
-          return
-        }
-        var initialText = "# "
-        let initialOffset = initialText.count
-        initialText += "\n"
-        if let hashtag = self.dataSource.filteredHashtag {
-          initialText += hashtag
-          initialText += "\n"
-        }
-        document.applyTaggedModification(tag: .memory, modification: { (_) -> String in
-          initialText
-        })
-        let viewController = TextEditViewController(
-          document: document,
-          parsingRules: self.notebook.parsingRules,
-          stylesheet: self.stylesheet
-        )
-        viewController.onDocumentClose = { success in
-          if !success { DDLogError("Failure closing document? Why oh why?") }
-          do {
-            try notebook.performRenames(notebook.desiredBaseNameForPage)
-          } catch {
-            DDLogError("Unexpected error on rename: \(error)")
-          }
-        }
-        viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-        viewController.autoFirstResponder = true
-        self.navigationController?.pushViewController(viewController, animated: true)
-      })
+    var initialText = "# "
+    let initialOffset = initialText.count
+    initialText += "\n"
+    if let hashtag = self.dataSource.filteredHashtag {
+      initialText += hashtag
+      initialText += "\n"
     }
+    let viewController = TextEditViewController(
+      parsingRules: notebook.parsingRules,
+      stylesheet: stylesheet
+    )
+    viewController.markdown = initialText
+    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+    viewController.autoFirstResponder = true
+    viewController.delegate = notebook
+    self.navigationController?.pushViewController(viewController, animated: true)
   }
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
@@ -222,9 +190,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private func updateStudySession() {
-    let filter: (PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
-      ? { _ in true }
-      : { properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+    let filter: (String, PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+      ? { _, _ in true }
+      : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
     studySession = notebook.studySession(filter: filter)
   }
 
@@ -267,14 +235,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
 extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
   func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    let fileURL = notebook.containerURL.appendingPathComponent(name)
-    // TODO: Should I really do this based on path extension?
-    switch fileURL.pathExtension {
-    case "deck", "textbundle":
-      return TextBundleDocument(fileURL: fileURL)
-    default:
-      return PlainTextDocument(fileURL: fileURL)
-    }
+    return notebook
   }
 }
 
@@ -293,13 +254,11 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   }
 }
 
-extension DocumentListViewController: NotebookChangeListener {
-  func notebook(_ notebook: Notebook, didChange key: Notebook.Key) {
-    switch key {
-    case .pageProperties:
-      updateStudySession()
-    default:
-      break
-    }
+extension DocumentListViewController: NoteArchiveDocumentObserver {
+  func noteArchiveDocument(
+    _ document: NoteArchiveDocument,
+    didUpdatePageProperties properties: [String : PageProperties]
+  ) {
+    updateStudySession()
   }
 }

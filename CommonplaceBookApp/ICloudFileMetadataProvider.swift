@@ -8,24 +8,15 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
   public init(container: URL) {
     assert(Thread.isMainThread)
     self.container = container
-    self.query = NSMetadataQuery()
-    query.predicate = NSComparisonPredicate.page
-    query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
-    query.searchItems = [container]
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(didFinishGatheringNotification(_:)),
-      name: NSNotification.Name.NSMetadataQueryDidFinishGathering,
-      object: query
+    query = ICloudMetadataQuery(
+      predicate: NSComparisonPredicate.page,
+      enableUpdates: true,
+      callbackQueue: .main,
+      callback: { [weak self] _, items in
+        self?.updateFileMetadata(with: items)
+      }
     )
-    NotificationCenter.default.addObserver(
-      self,
-      selector: #selector(didUpdateNotification(_:)),
-      name: NSNotification.Name.NSMetadataQueryDidUpdate,
-      object: query
-    )
-    query.enableUpdates()
-    query.start()
+    query?.start()
   }
 
   deinit {
@@ -39,13 +30,30 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
     }
   }
 
+  public func queryForCurrentFileMetadata(completion: @escaping ([FileMetadata]) -> Void) {
+    assert(Thread.isMainThread)
+    let adHocQuery = ICloudMetadataQuery(
+      predicate: NSComparisonPredicate.page,
+      enableUpdates: false,
+      callbackQueue: .main
+    ) { [weak self] query, items in
+      let fileMetadata = items.map { FileMetadata(metadataItem: $0) }
+      completion(fileMetadata)
+      self?.activeQueries.removeAll(where: { $0 === query })
+    }
+    activeQueries.append(adHocQuery)
+    adHocQuery.start()
+  }
+
   public weak var delegate: FileMetadataProviderDelegate?
 
   /// the specific ubiquitous container we monitor.
   public let container: URL
 
   /// Our active query for documents
-  private let query: NSMetadataQuery
+  private var query: ICloudMetadataQuery?
+
+  private var activeQueries: [ICloudMetadataQuery] = []
 
   public func delete(_ metadata: FileMetadata) throws {
     try FileManager.default.removeItem(at: container.appendingPathComponent(metadata.fileName))
@@ -62,19 +70,73 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
     try FileManager.default.moveItem(at: url, to: destinationURL)
   }
 
-  @objc private func didFinishGatheringNotification(_ notification: NSNotification) {
-    fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
-      guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
+  private func updateFileMetadata(with metadataItems: [NSMetadataItem]) {
+    fileMetadata = metadataItems.map({ (metadataItem) -> FileMetadata in
       return FileMetadata(metadataItem: metadataItem)
     })
   }
+}
 
-  @objc private func didUpdateNotification(_ notification: NSNotification) {
-    DDLogInfo("Received notification: " + String(describing: notification.userInfo))
-    fileMetadata = query.results.compactMap({ (maybeMetadataItem) -> FileMetadata? in
-      guard let metadataItem = maybeMetadataItem as? NSMetadataItem else { return nil }
-      return FileMetadata(metadataItem: metadataItem)
-    })
+/// Provides a block-based-callback API for querying for data in ubiquitous storage.
+/// It can either provide just the initial gathered results, or initial results plus live updates.
+private final class ICloudMetadataQuery {
+
+  private let query: NSMetadataQuery
+  private let enableUpdates: Bool
+  private let callback: (ICloudMetadataQuery, [NSMetadataItem]) -> Void
+  private let callbackQueue: DispatchQueue
+
+  init(
+    predicate: NSPredicate?,
+    enableUpdates: Bool,
+    callbackQueue: DispatchQueue,
+    callback: @escaping (ICloudMetadataQuery, [NSMetadataItem]) -> Void
+  ) {
+    self.enableUpdates = enableUpdates
+    self.callbackQueue = callbackQueue
+    self.callback = callback
+
+    query = NSMetadataQuery()
+    query.predicate = predicate
+    query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(didFinishGatheringNotification(_:)),
+      name: NSNotification.Name.NSMetadataQueryDidFinishGathering,
+      object: query
+    )
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(didUpdateNotification(_:)),
+      name: NSNotification.Name.NSMetadataQueryDidUpdate,
+      object: query
+    )
+    query.start()
+  }
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
+
+  func start() {
+    query.start()
+  }
+
+  @objc func didFinishGatheringNotification(_ notification: NSNotification) {
+    let items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
+    callbackQueue.async {
+      self.callback(self, items)
+    }
+    if enableUpdates {
+      query.enableUpdates()
+    }
+  }
+
+  @objc func didUpdateNotification(_ notification: NSNotification) {
+    let items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
+    callbackQueue.async {
+      self.callback(self, items)
+    }
   }
 }
 

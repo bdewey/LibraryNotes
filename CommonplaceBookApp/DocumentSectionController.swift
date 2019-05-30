@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CommonplaceBook
-import FlashcardKit
+import CocoaLumberjack
 import Foundation
 import IGListKit
 import MiniMarkdown
@@ -9,14 +8,17 @@ import SwipeCellKit
 import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
-  init(notebook: Notebook, stylesheet: Stylesheet) {
+  init(
+    notebook: NoteArchiveDocument,
+    stylesheet: Stylesheet
+  ) {
     self.notebook = notebook
     self.stylesheet = stylesheet
   }
 
-  private let notebook: Notebook
+  private let notebook: NoteArchiveDocument
   private let stylesheet: Stylesheet
-  private var properties: PagePropertiesListDiffable!
+  private var object: NoteBundlePagePropertiesListDiffable!
 
   /// Used to create attributed strings from page titles.
   ///
@@ -45,34 +47,24 @@ public final class DocumentSectionController: ListSectionController {
       at: index
     ) as! DocumentCollectionViewCell // swiftlint:disable:this force_cast
     cell.stylesheet = stylesheet
-    titleRenderer.markdown = properties.value.title
+    titleRenderer.markdown = object.properties.title
     cell.titleLabel.attributedText = titleRenderer.attributedString
-    cell.accessibilityLabel = properties.value.title
-    var detailString = properties.value.hashtags.joined(separator: ", ")
-    if properties.cardCount > 0 {
+    cell.accessibilityLabel = object.properties.title
+    var detailString = object.properties.hashtags.joined(separator: ", ")
+    if object.cardCount > 0 {
       if !detailString.isEmpty { detailString += ". " }
-      if properties.cardCount == 1 {
+      if object.cardCount == 1 {
         detailString += "1 card."
       } else {
-        detailString += "\(properties.cardCount) cards."
+        detailString += "\(object.cardCount) cards."
       }
     }
     cell.detailLabel.attributedText = NSAttributedString(
       string: detailString,
       attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
     )
-    if properties.value.fileMetadata.isUploading {
-      cell.statusIcon.image = UIImage(named: "round_cloud_upload_black_24pt")
-    } else if properties.value.fileMetadata.isDownloading {
-      cell.statusIcon.image = UIImage(named: "round_cloud_download_black_24pt")
-    } else if properties.value.fileMetadata.downloadingStatus
-      != NSMetadataUbiquitousItemDownloadingStatusCurrent {
-      cell.statusIcon.image = UIImage(named: "round_cloud_queue_black_24pt")
-    } else {
-      cell.statusIcon.image = nil
-    }
     let now = Date()
-    let dateDelta = now.timeIntervalSince(properties.value.fileMetadata.contentChangeDate)
+    let dateDelta = now.timeIntervalSince(object.properties.timestamp)
     cell.ageLabel.attributedText = NSAttributedString(
       string: ageFormatter.string(from: dateDelta) ?? "",
       attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
@@ -88,51 +80,27 @@ public final class DocumentSectionController: ListSectionController {
 
   public override func didUpdate(to object: Any) {
     // swiftlint:disable:next force_cast
-    properties = (object as! PagePropertiesListDiffable)
+    self.object = (object as! NoteBundlePagePropertiesListDiffable)
   }
 
+  // TODO: Edit documents
   public override func didSelectItem(at index: Int) {
-    notebook.loadEditingViewController(
-      for: properties.value.fileMetadata,
-      parsingRules: notebook.parsingRules,
-      stylesheet: stylesheet
-    ) { editingViewController in
-      guard let editingViewController = editingViewController else { return }
-      self.viewController?.navigationController?.pushViewController(
-        editingViewController,
-        animated: true
-      )
-    }
-  }
-}
-
-extension Notebook {
-  func loadEditingViewController(
-    for metadata: FileMetadata,
-    parsingRules: ParsingRules,
-    stylesheet: Stylesheet,
-    completion: @escaping (UIViewController?) -> Void
-  ) {
-    guard let document = metadataProvider.editableDocument(for: metadata) else {
-      completion(nil)
+    guard let object = object else {
+      assertionFailure("Unexpected object type")
       return
     }
-    document.open { success in
-      guard success else { completion(nil); return }
-      if metadata.contentTypeTree.contains("org.brians-brain.swiftflash") {
-        completion(metadata.languageViewController(
-          for: document as! TextBundleDocument, // swiftlint:disable:this force_cast
-          parsingRules: parsingRules
-        ))
-      } else {
-        completion(
-          TextEditViewController(
-            document: document,
-            parsingRules: LanguageDeck.parsingRules,
-            stylesheet: stylesheet
-          )
-        )
-      }
+    do {
+      let textEditViewController = TextEditViewController(
+        parsingRules: notebook.parsingRules,
+        stylesheet: stylesheet
+      )
+      textEditViewController.pageIdentifier = object.pageKey
+      textEditViewController.markdown = try notebook.currentTextContents(for: object.pageKey)
+      textEditViewController.delegate = notebook
+      viewController?.navigationController?
+        .pushViewController(textEditViewController, animated: true)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
     }
   }
 }
@@ -156,12 +124,12 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
 
     let dataSource = notebook
     var actions = [SwipeAction]()
-    if let properties = self.properties {
+    if let properties = self.object {
       if properties.cardCount > 0,
         let viewController = self.viewController as? DocumentListViewController {
         let studyAction = SwipeAction(style: .default, title: "Study") { action, _ in
           let studySession = self.notebook.studySession(
-            filter: { $0.fileMetadata.fileName == properties.value.fileMetadata.fileName }
+            filter: { name, _ in name == properties.pageKey }
           )
           viewController.presentStudySessionViewController(for: studySession)
           action.fulfill(with: ExpansionFulfillmentStyle.reset)
@@ -174,7 +142,7 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
       }
 
       let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, _ in
-        dataSource.deleteFileMetadata(properties.value.fileMetadata)
+        try? dataSource.deletePage(pageIdentifier: properties.pageKey)
         // handle action by updating model with deletion
         action.fulfill(with: .delete)
       }
@@ -192,7 +160,6 @@ extension FileMetadata {
     parsingRules: ParsingRules
   ) -> UIViewController {
     let textViewController = TextEditViewController(
-      document: document,
       parsingRules: LanguageDeck.parsingRules,
       stylesheet: Stylesheet.hablaEspanol
     )

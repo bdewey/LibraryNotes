@@ -45,36 +45,14 @@ final class TestMetadataProvider: FileMetadataProvider {
 
   var fileMetadata: [FileMetadata] { return Array(fileNameToMetadata.values) }
 
+  func queryForCurrentFileMetadata(completion: @escaping ([FileMetadata]) -> Void) {
+    completion(fileMetadata)
+  }
+
   /// Map of file name to file contents
   var fileContents: [String: String]
 
   var contentsChangeListener: ((String, String) -> Void)?
-
-  /// Get DocumentProperties for all of the FileMetadata.
-  var documentProperties: [PageProperties] {
-    return fileNameToMetadata
-      .values
-      .filter { $0.fileName != Notebook.Key.pageProperties.rawValue }
-      .map {
-        let text = fileContents[$0.fileName] ?? ""
-        return PageProperties(fileMetadata: $0, nodes: parsingRules.parse(text))
-      }
-  }
-
-  /// Gets `documentProperties` as a serialized JSON string.
-  var documentPropertiesJSON: String {
-    let data = (try? Notebook.encoder.encode(documentProperties)) ?? Data()
-    return String(data: data, encoding: .utf8) ?? ""
-  }
-
-  /// Adds "properties.json" that contains cached `DocumentProperties` for all existing
-  /// file contents.
-  func addPropertiesCache() {
-    addFileInfo(FileInfo(
-      fileName: Notebook.Key.pageProperties.rawValue,
-      contents: documentPropertiesJSON
-    ))
-  }
 
   /// A delegate to notify in the event of changes.
   /// - note: Currently unused as the metadata in this collection are immutable.

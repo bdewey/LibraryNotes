@@ -2,7 +2,6 @@
 
 import UIKit
 
-import CommonplaceBook
 import CwlSignal
 import MiniMarkdown
 import TextBundleKit
