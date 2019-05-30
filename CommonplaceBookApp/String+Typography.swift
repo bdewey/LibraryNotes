@@ -1,10 +1,10 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
-fileprivate let nonWhitespace = CharacterSet.whitespacesAndNewlines.inverted
+private let nonWhitespace = CharacterSet.whitespacesAndNewlines.inverted
 
-fileprivate struct TypographyConstants {
+private struct TypographyConstants {
   static let openCurlyDoubleQuote: Character = "\u{201c}"
   static let closeCurlyDoubleQuote: Character = "\u{201d}"
   static let openCurlySingleQuote: Character = "\u{2018}"

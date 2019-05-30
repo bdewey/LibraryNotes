@@ -30,7 +30,7 @@ public final class DocumentDataSource: NSObject, ListAdapterDataSource {
     let objects = propertiesFilteredByHashtag
       // give IGLitstKit its own copy of the model objects to guard against mutations
       .compactMap { tuple -> NoteBundlePagePropertiesListDiffable? in
-        return NoteBundlePagePropertiesListDiffable(
+        NoteBundlePagePropertiesListDiffable(
           pageKey: tuple.key,
           properties: tuple.value,
           cardCount: cardsPerDocument[tuple.key, default: 0]

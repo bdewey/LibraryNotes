@@ -36,7 +36,7 @@ final class QuoteTemplateTests: XCTestCase {
     let nodes = ParsingRules().parse(testContent)
     let quoteTemplates = QuoteTemplate.extract(from: nodes)
     XCTAssertEqual(quoteTemplates.count, 5)
-    let cards = quoteTemplates.map({ $0.challenges }).joined()
+    let cards = quoteTemplates.map { $0.challenges }.joined()
     XCTAssertEqual(cards.count, 5)
   }
 

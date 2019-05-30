@@ -1,17 +1,10 @@
-//
-//  CommonplaceBook.swift
-//  time-lord
-//
-//  Created by Brian Dewey on 2/14/18.
-//  Copyright © 2018 Brian's Brain. All rights reserved.
-//
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import TextBundleKit
 import UIKit
 
 /// An object that knows how to manipulate documents in the Commonplace Book.
 public protocol DocumentFactory {
-  
   /// The underlying document type. Probably a UIDocument subclass.
   associatedtype Document
 
@@ -23,19 +16,19 @@ public protocol DocumentFactory {
   /// - parameter url: The URL to open.
   /// - parameter completion: A completion routine to call with the document.
   func openDocument(at url: URL, completion: @escaping (Result<Document>) -> Void)
-  
+
 //  /// Creates a new document.
 //  ///
 //  /// - parameter url: The URL where to place the new document.
 //  /// - parameter completion: The completion routine to call with the newly created document.
 //  func createNewDocument(at url: URL, completion: @escaping (Result<Document>) -> Void)
-//  
+//
   /// Merge two versions of a document.
   ///
   /// - parameter source: The source document. This contains new changes.
   /// - parameter destination: The destination document, that receives the changes from `source`.
   func merge(source: Document, destination: Document)
-  
+
   /// Deletes a document.
   ///
   /// - parameter document: The document to delete.
@@ -44,9 +37,8 @@ public protocol DocumentFactory {
 
 /// Manages documents in Commonplace Book, a common central repository.
 public final class CommonplaceBook {
-
   private static let containerIdentifier = "iCloud.org.brians-brain.commonplace-book"
-  
+
   /// Asynchronously opens a document.
   ///
   /// This routine handles all of the work of determining if there are local changes, iCloud
@@ -80,7 +72,7 @@ public final class CommonplaceBook {
           factory.openDocument(at: cloudURL, completion: completion)
         case (false, false, true):
           // We're not using cloud, but the only thing is the cloud document. Make it local then go.
-          self.setUbiquitous(false, itemAt: cloudURL, destinationURL: localURL, completion: { (error) in
+          self.setUbiquitous(false, itemAt: cloudURL, destinationURL: localURL, completion: { error in
             if let error = error {
               completion(.failure(error))
             } else {
@@ -92,7 +84,7 @@ public final class CommonplaceBook {
           self.merge(source: cloudURL, destination: localURL, factory: factory, completion: completion)
         case (true, true, false):
           // We're using cloud, but we only have a local copy.
-          self.setUbiquitous(true, itemAt: localURL, destinationURL: cloudURL, completion: { (error) in
+          self.setUbiquitous(true, itemAt: localURL, destinationURL: cloudURL, completion: { error in
             if let error = error {
               completion(.failure(error))
             } else {
@@ -106,7 +98,7 @@ public final class CommonplaceBook {
       }
     }
   }
-  
+
   /// Asynchronously sets whether the item at the specified URL should be stored in the cloud.
   ///
   /// - parameter ubiquitious: Specify true to move the item to iCloud or false to remove it
@@ -122,7 +114,7 @@ public final class CommonplaceBook {
     completion: @escaping (Error?) -> Void
   ) {
     DispatchQueue.global(qos: .default).async {
-      var fileError: Error? = nil
+      var fileError: Error?
       do {
         try FileManager.default.setUbiquitous(ubiquitous, itemAt: itemAt, destinationURL: destinationURL)
       } catch {
@@ -133,7 +125,7 @@ public final class CommonplaceBook {
       }
     }
   }
-  
+
   /// Merge two versions of a document.
   ///
   /// - parameter source: The URL for the source version of the document.
@@ -146,8 +138,8 @@ public final class CommonplaceBook {
     factory: DocumentFactoryType,
     completion: @escaping (Result<Document>) -> Void
   ) where DocumentFactoryType.Document == Document {
-    factory.openDocument(at: source) { (sourceResult) in
-      factory.openDocument(at: destination, completion: { (destinationResult) in
+    factory.openDocument(at: source) { sourceResult in
+      factory.openDocument(at: destination, completion: { destinationResult in
         switch (sourceResult, destinationResult) {
         case (.success(let sourceDocument), .success(let destinationDocument)):
           factory.merge(source: sourceDocument, destination: destinationDocument)
@@ -167,7 +159,7 @@ public final class CommonplaceBook {
     assert(!Thread.isMainThread)
     return FileManager.default.url(forUbiquityContainerIdentifier: containerIdentifier)!.appendingPathComponent("Documents")
   }
-  
+
   /// The URL of the local document container.
   public static var localContainerURL: URL {
     return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!

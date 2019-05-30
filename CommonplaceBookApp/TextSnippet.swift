@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
@@ -7,7 +7,6 @@ import Foundation
 /// Since the archive is line-based, each chunk *must* end with a newline (\n)
 /// If you try to create a chunk that does not end with a newline, we add one.
 public final class TextSnippet {
-
   /// Designated initalizer.
   public init(_ text: String) {
     self._text = text.appendingNewlineIfNecessary()
@@ -30,7 +29,7 @@ public final class TextSnippet {
         return snippetCounts
       }
       assert(
-        snippetCounts.allSatisfy({ $0.value == 1 }),
+        snippetCounts.allSatisfy { $0.value == 1 },
         "Cycle in parent chain: \(parentChain)\n\(snippetCounts)"
       )
 
@@ -150,7 +149,7 @@ public final class TextSnippet {
   /// including this one.
   public var parentChain: [String] {
     var results: [String] = []
-    enumerateParentChain { (snippet) in
+    enumerateParentChain { snippet in
       results.append(snippet.sha1Digest)
     }
     return results
@@ -166,7 +165,6 @@ public final class TextSnippet {
 
 /// Serialization / deserialization of the chunk.
 public extension TextSnippet {
-
   enum SerializationError: Error {
     case excessInput
     case expectedDigest
@@ -181,7 +179,7 @@ public extension TextSnippet {
 
   convenience init<S: StringProtocol>(
     textSerialization: S
-    ) throws where S.SubSequence == Substring {
+  ) throws where S.SubSequence == Substring {
     let (chunk, remainder) = try TextSnippet.parse(
       textSerialization[textSerialization.startIndex...]
     )
@@ -220,11 +218,11 @@ public extension TextSnippet {
 
   private static func parseChunkWithoutParent(
     from input: Substring
-    ) -> (TextSnippet, Substring)? {
+  ) -> (TextSnippet, Substring)? {
     guard
       let index = input.firstIndex(of: "\n").flatMap({ input.index(after: $0) })
-      else {
-        return nil
+    else {
+      return nil
     }
     let header = String(input[input.startIndex ..< index])
     guard
@@ -232,12 +230,12 @@ public extension TextSnippet {
         in: header,
         options: [],
         range: header.completeRange
-        ).first,
+      ).first,
       match.numberOfRanges == 3,
       let lineCount = header.int(at: match.range(at: 2)),
       let splitIndex = input[index...].index(after: lineCount, character: "\n")
-      else {
-        return nil
+    else {
+      return nil
     }
     let digest = header.string(at: match.range(at: 1))
     return (
@@ -258,11 +256,11 @@ public extension TextSnippet {
 
   private static func parseChunkWithParent(
     from input: Substring
-    ) -> (TextSnippet, Substring)? {
+  ) -> (TextSnippet, Substring)? {
     guard
       let index = input.firstIndex(of: "\n").flatMap({ input.index(after: $0) })
-      else {
-        return nil
+    else {
+      return nil
     }
     let header = String(input[input.startIndex ..< index])
     guard
@@ -270,12 +268,12 @@ public extension TextSnippet {
         in: header,
         options: [],
         range: header.completeRange
-        ).first,
+      ).first,
       match.numberOfRanges == 4,
       let lineCount = header.int(at: match.range(at: 3)),
       let splitIndex = input[index...].index(after: lineCount, character: "\n")
-      else {
-        return nil
+    else {
+      return nil
     }
     let digest = header.string(at: match.range(at: 1))
     let parentReference = header.string(at: match.range(at: 2))

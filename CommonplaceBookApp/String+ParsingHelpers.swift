@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -7,7 +7,7 @@ public extension String {
     if last == "\n" {
       return self
     } else {
-      return self.appending("\n")
+      return appending("\n")
     }
   }
 
@@ -24,10 +24,10 @@ public extension String {
   }
 
   func count(of character: Character) -> Int {
-    return reduce(0, { (count, stringCharacter) -> Int in
+    return reduce(0) { (count, stringCharacter) -> Int in
       if stringCharacter == character { return count + 1 }
       return count
-    })
+    }
   }
 }
 

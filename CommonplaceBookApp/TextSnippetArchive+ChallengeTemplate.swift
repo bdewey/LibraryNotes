@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -29,7 +29,7 @@ public struct ChallengeTemplateArchiveKey: LosslessStringConvertible {
 /// Extensions to do type-safe insertion and extraction of ChallengeTemplate instances.
 public extension TextSnippetArchive {
   mutating func insert(_ challengeTemplate: ChallengeTemplate) -> ChallengeTemplateArchiveKey {
-    let snippet = self.insert(challengeTemplate.asMarkdown)
+    let snippet = insert(challengeTemplate.asMarkdown)
     return ChallengeTemplateArchiveKey(
       digest: snippet.sha1Digest,
       type: challengeTemplate.type.rawValue

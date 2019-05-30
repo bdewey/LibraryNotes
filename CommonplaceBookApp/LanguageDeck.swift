@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CwlSignal
 import Foundation
@@ -28,7 +28,7 @@ public final class LanguageDeck {
         Array([vocabularyAssociations.cards, clozeTemplates.cards].joined())
       }
     self.studySessionSignal = document.documentStudyMetadata.signal
-      .combineLatest(combinedCards, { (documentValue, cards) -> StudySession in
+      .combineLatest(combinedCards) { (documentValue, cards) -> StudySession in
         documentValue.value.studySession(
           from: cards,
           limit: 500,
@@ -38,7 +38,7 @@ public final class LanguageDeck {
             parsingRules: LanguageDeck.parsingRules
           )
         )
-      })
+      }
   }
 
   public convenience init(document: TextBundleDocument) {
@@ -75,11 +75,11 @@ public final class LanguageDeck {
     // TODO: useCloud should be a user setting.
     let factory = TextBundleDocumentFactory(useCloud: true)
     CommonplaceBook.openDocument(at: pathComponent, using: factory) { documentResult in
-      let deckResult = documentResult.flatMap({ (document) -> LanguageDeck in
+      let deckResult = documentResult.flatMap { (document) -> LanguageDeck in
         let deck = LanguageDeck(document: document)
         deck.populateEmptyDocument()
         return deck
-      })
+      }
       completion(deckResult)
     }
   }

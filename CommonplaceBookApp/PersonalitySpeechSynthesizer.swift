@@ -1,23 +1,22 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import Foundation
 import AVFoundation
+import Foundation
 
 @objc public final class PersonalitySpeechSynthesizer: NSObject {
-  
   public typealias SpeechCompletionBlock = () -> Void
-  
+
   public init(voice: AVSpeechSynthesisVoice) {
     self.voice = voice
     self.speechSynthesizer = AVSpeechSynthesizer()
     super.init()
     speechSynthesizer.delegate = self
   }
-  
+
   private let voice: AVSpeechSynthesisVoice
   private let speechSynthesizer: AVSpeechSynthesizer
-  private var completionBlocks: [AVSpeechUtterance : SpeechCompletionBlock] = [:]
-  
+  private var completionBlocks: [AVSpeechUtterance: SpeechCompletionBlock] = [:]
+
   public func speak(_ utterance: AVSpeechUtterance, completion: SpeechCompletionBlock? = nil) {
     if let completion = completion {
       completionBlocks[utterance] = completion
@@ -29,11 +28,11 @@ import AVFoundation
 
 extension PersonalitySpeechSynthesizer {
   public static let british: PersonalitySpeechSynthesizer = {
-    return PersonalitySpeechSynthesizer.make(with: "en-GB")
+    PersonalitySpeechSynthesizer.make(with: "en-GB")
   }()
 
   public static let spanish: PersonalitySpeechSynthesizer = {
-    return PersonalitySpeechSynthesizer.make(with: "es-MX")
+    PersonalitySpeechSynthesizer.make(with: "es-MX")
   }()
 
   /// Maps from a language code to a PeronalitySpeechSynthesizer that ues that language.

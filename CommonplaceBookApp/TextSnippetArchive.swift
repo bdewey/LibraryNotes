@@ -1,10 +1,9 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
 
 public struct TextSnippetArchive: Equatable {
-
   public enum Error: Swift.Error {
     case invalidKeyFormat
     case hashNotFound
@@ -13,7 +12,7 @@ public struct TextSnippetArchive: Equatable {
   public static let identifier = "Text Snippet Archive version 1.0\n"
 
   /// Publically constructable.
-  public init() { }
+  public init() {}
 
   /// The chunks that make up this archive.
   public private(set) var snippets: [TextSnippet] = []
@@ -129,7 +128,7 @@ public struct TextSnippetArchive: Equatable {
     guard match.numberOfRanges == 2,
       let lineCount = header.int(at: match.range(at: 1)),
       let endOfReferencesIndex = remainder.index(after: lineCount, character: "\n")
-      else {
+    else {
       throw TextSnippet.SerializationError.invalidHeader
     }
     let referencesSubstring = input[index ..< endOfReferencesIndex]

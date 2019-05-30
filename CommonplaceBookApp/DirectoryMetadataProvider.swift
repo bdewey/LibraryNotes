@@ -65,9 +65,9 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
       options: []
     )
     DDLogInfo("Found \(items.count) items in the container")
-    fileMetadata = try items.map({ (url) -> FileMetadata in
+    fileMetadata = try items.map { (url) -> FileMetadata in
       try FileMetadata(fileURL: url)
-    })
+    }
   }
 
   fileprivate func extractMetadataAndLogOnError() {

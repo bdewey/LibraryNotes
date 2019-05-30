@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
 import MaterialComponents.MDCTypographyScheme
@@ -67,7 +67,7 @@ struct VocabularyAssociationCard: Challenge {
       document: document,
       stylesheet: stylesheet
     )
-    return blocks.map({ renderer.render(node: $0) }).joined()
+    return blocks.map { renderer.render(node: $0) }.joined()
   }
 
   func answer(
@@ -83,7 +83,7 @@ struct VocabularyAssociationCard: Challenge {
       document: document,
       stylesheet: stylesheet
     )
-    return blocks.map({ renderer.render(node: $0) }).joined()
+    return blocks.map { renderer.render(node: $0) }.joined()
   }
 
   var pronunciation: String {

@@ -1,10 +1,9 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
 public struct StudyLog {
-
-  public init() { }
+  public init() {}
 
   public struct Entry {
     public let timestamp: Date
@@ -35,7 +34,7 @@ public struct StudyLog {
   /// study.
   public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
     return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) {
-      (suppressionDates, entry) in
+      suppressionDates, entry in
       guard entry.statistics.correct > 0 else {
         suppressionDates[entry.identifier] = nil
         return
@@ -48,7 +47,7 @@ public struct StudyLog {
       } else {
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: entry.timestamp.addingTimeInterval(.day))
       }
-      }.mapValues { $0.nextDate }
+    }.mapValues { $0.nextDate }
   }
 }
 
@@ -56,7 +55,7 @@ extension StudyLog: BidirectionalCollection {
   public var startIndex: Int { return entries.startIndex }
   public var endIndex: Int { return entries.endIndex }
   public func index(after i: Int) -> Int { return i + 1 }
-  public func index(before i: Int) -> Int { return i - 1  }
+  public func index(before i: Int) -> Int { return i - 1 }
 
   public subscript(position: Int) -> Entry {
     return entries[position]
@@ -82,8 +81,8 @@ extension StudyLog.Entry: LosslessStringConvertible {
       let index = Int(components[2]),
       let correct = Int(components[4]),
       let incorrect = Int(components[6])
-      else {
-        return nil
+    else {
+      return nil
     }
     self.timestamp = date
     self.identifier = ChallengeIdentifier(templateDigest: String(components[1]), index: index)
@@ -99,6 +98,6 @@ extension StudyLog.Entry: LosslessStringConvertible {
       String(statistics.correct),
       "incorrect",
       String(statistics.incorrect),
-    ].compactMap({ $0 }).joined(separator: " ")
+    ].compactMap { $0 }.joined(separator: " ")
   }
 }

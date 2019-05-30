@@ -1,9 +1,8 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
 extension UIStackView {
-  
   /// Changes the entire set of arranged subviews, animating the transition if requested.
   ///
   /// At the end of this method, any UIView that was in the old `arrangedSubviews` but not in
@@ -13,14 +12,14 @@ extension UIStackView {
   /// - parameter newArrangedSubviews: The new set of arranged subviews.
   /// - parameter animated: If true, then the stack view animates the transition to the new state.
   public func setArrangedSubviews(_ newArrangedSubviews: [UIView], animated: Bool) {
-    var finalAlpha: [UIView : CGFloat] = [:]
+    var finalAlpha: [UIView: CGFloat] = [:]
     for arrangedSubview in arrangedSubviews {
       finalAlpha[arrangedSubview] = 0.0
-      self.removeArrangedSubview(arrangedSubview)
+      removeArrangedSubview(arrangedSubview)
     }
     for (index, newSubview) in newArrangedSubviews.enumerated() {
       finalAlpha[newSubview] = 1.0
-      self.insertArrangedSubview(newSubview, at: index)
+      insertArrangedSubview(newSubview, at: index)
     }
     let animations = {
       for (view, alpha) in finalAlpha {

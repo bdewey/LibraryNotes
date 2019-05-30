@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -39,7 +39,7 @@ extension FileManager {
   ///   after the app is exited.
   func urlForUniqueTemporaryDirectory(
     preferredName: String? = nil
-    ) throws -> (url: URL, deleteDirectory: () throws -> Void) {
+  ) throws -> (url: URL, deleteDirectory: () throws -> Void) {
     let basename = preferredName ?? UUID().uuidString
 
     var counter = 0

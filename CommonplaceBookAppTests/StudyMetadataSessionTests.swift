@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 // swiftlint:disable force_try
 
@@ -25,11 +25,11 @@ final class StudyMetadataSessionTests: XCTestCase {
 
   var allCards: Set<String> {
     return associations
-      .map({ $0.challenges })
+      .map { $0.challenges }
       .joined()
-      .reduce(into: Set<String>(), { results, card in
+      .reduce(into: Set<String>()) { results, card in
         results.insert(card.identifier)
-      })
+      }
   }
 
   let today: Date = {

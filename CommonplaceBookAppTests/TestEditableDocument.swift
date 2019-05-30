@@ -73,5 +73,5 @@ final class TestEditableDocument: EditableDocument {
   var previousError: Error?
 
   /// Stub for document state
-  let documentState =  UIDocument.State.normal
+  let documentState = UIDocument.State.normal
 }

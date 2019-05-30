@@ -1,23 +1,22 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
 /// Contains a summary of the review history of an item, and can compute the next time
 /// an item should be reviewed.
 public struct StudyMetadata: Equatable, Codable {
-  
   /// The day of a particular review.
   public let day: DayComponents
-  
+
   /// The number of days from the *prior* review.
   public let daysSinceLastReview: Int?
-  
+
   /// The total correct/incorrect answer history for this item.
   public let totalAnswers: AnswerStatistics
-  
+
   /// The correct/incorrect answers for this item in *this* review.
   public let lastAnswers: AnswerStatistics
-  
+
   /// Full initializer.
   public init(
     day: DayComponents,
@@ -30,7 +29,7 @@ public struct StudyMetadata: Equatable, Codable {
     self.totalAnswers = totalAnswers
     self.lastAnswers = lastAnswers
   }
-  
+
   /// Initialize when there is no prior history to chain to.
   ///
   /// - parameter day: The day of a specific review.
@@ -42,7 +41,7 @@ public struct StudyMetadata: Equatable, Codable {
     self.totalAnswers = lastAnswers
     self.daysSinceLastReview = nil
   }
-  
+
   /// Creates a new `StudyMetadata` structure that reflects the results of review on a day.
   ///
   /// - parameter answers: The correct/incorrect statistics for the most recent review.
@@ -52,11 +51,11 @@ public struct StudyMetadata: Equatable, Codable {
     return StudyMetadata(
       day: day,
       daysSinceLastReview: day - self.day,
-      totalAnswers: answers + self.totalAnswers,
+      totalAnswers: answers + totalAnswers,
       lastAnswers: answers
     )
   }
-  
+
   /// Returns the number of days until the next review.
   ///
   /// The number of days until next review is a function of:
@@ -79,11 +78,11 @@ public struct StudyMetadata: Equatable, Codable {
     let factor = pow(2.0, 1.0 - Double(lastAnswers.incorrect))
     return Int(max(1, round(Double(daysSinceLastReview) * factor)))
   }
-  
+
   /// Invariant: If a review results in this distribution of correct and incorrect answers,
   /// then daysUntilNextReview should equal daysSinceLastReview.
   public static let answerStatisticsForSameReviewDuration = AnswerStatistics(correct: 1, incorrect: 1)
-  
+
   /// Returns true if this item is eligible for study on a particular day.
   public func eligibleForStudy(on day: DayComponents) -> Bool {
     return (day - self.day) >= daysUntilNextReview

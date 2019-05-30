@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -85,7 +85,7 @@ public final class VocabularyAssociation: ChallengeTemplate {
   }
 
   public required init(markdown description: String, parsingRules: ParsingRules) throws {
-    let decoded = try JSONDecoder().decode(VocabularyAssociation.self, from: description.data(using: .utf8)!) 
+    let decoded = try JSONDecoder().decode(VocabularyAssociation.self, from: description.data(using: .utf8)!)
     self.spanish = decoded.spanish
     self.english = decoded.english
     self.testSpelling = decoded.testSpelling
@@ -160,10 +160,11 @@ extension VocabularyAssociation: CustomReflectable {
     return Mirror(
       VocabularyAssociation.self,
       children: [
-      "spanish": spanish,
-      "english": english,
-      "testSpelling": testSpelling,
-    ])
+        "spanish": spanish,
+        "english": english,
+        "testSpelling": testSpelling,
+      ]
+    )
   }
 }
 

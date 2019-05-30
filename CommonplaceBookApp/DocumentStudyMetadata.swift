@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import TextBundleKit
@@ -54,7 +54,7 @@ extension TextBundleDocument {
 extension DocumentProperty where Value == IdentifierToStudyMetadata {
   func update(with studySession: StudySession, on date: Date) {
     let day = DayComponents(date)
-    changeValue { (dictionary) -> Dictionary<String, StudyMetadata> in
+    changeValue { (dictionary) -> [String: StudyMetadata] in
       var dictionary = dictionary
       for (_, documentResults) in studySession.results {
         for (identifier, statistics) in documentResults {

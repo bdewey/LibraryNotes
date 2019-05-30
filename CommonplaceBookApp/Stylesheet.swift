@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MaterialComponents.MDCSemanticColorScheme
@@ -6,24 +6,25 @@ import MaterialComponents.MDCTypographyScheme
 
 extension UIColor {
   public convenience init(rgb: UInt32, alpha: CGFloat = 1.0) {
-    self.init(red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
-              green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
-              blue: CGFloat(rgb & 0xFF) / 255.0,
-              alpha: alpha)
+    self.init(
+      red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
+      green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
+      blue: CGFloat(rgb & 0xFF) / 255.0,
+      alpha: alpha
+    )
   }
 
   public var brightness: CGFloat {
     var red: CGFloat = 0
     var green: CGFloat = 0
     var blue: CGFloat = 0
-    self.getRed(&red, green: &green, blue: &blue, alpha: nil)
+    getRed(&red, green: &green, blue: &blue, alpha: nil)
     let brightness = ((red * 299) + (green * 587) + (blue * 114)) / 1000
     return brightness
   }
 }
 
 public struct Stylesheet {
-
   public enum Style: Hashable {
     case headline1
     case headline2
@@ -50,15 +51,14 @@ public struct Stylesheet {
   }
 
   public struct Colors {
-
-    public init() { }
+    public init() {}
 
     public var primaryColor = UIColor(rgb: 0x6200EE)
     public var primaryColorVariant = UIColor(rgb: 0x3700B3)
     public var secondaryColor = UIColor(rgb: 0x03DAC6)
     public var errorColor = UIColor(rgb: 0xB00020)
     public var surfaceColor = UIColor(rgb: 0xFFFFFF)
-    public var darkSurfaceColor = UIColor(rgb: 0xf5f5f5)
+    public var darkSurfaceColor = UIColor(rgb: 0xF5F5F5)
     public var backgroundColor = UIColor(rgb: 0xFFFFFF)
     public var onPrimaryColor = UIColor(rgb: 0xFFFFFF)
     public var onSecondaryColor = UIColor(rgb: 0x000000)
@@ -104,14 +104,14 @@ public struct Stylesheet {
     .lightTextDisabled: 0.38,
   ]
 
-  public init() { }
+  public init() {}
 }
 
 extension Stylesheet {
   public var buttonScheme: MDCButtonScheme {
     let scheme = MDCButtonScheme()
-    scheme.colorScheme = self.colors.withDarkerColorAsPrimary().semanticColorScheme
-    scheme.typographyScheme = self.typographyScheme
+    scheme.colorScheme = colors.withDarkerColorAsPrimary().semanticColorScheme
+    scheme.typographyScheme = typographyScheme
     scheme.cornerRadius = 8
     scheme.minimumHeight = 36
     return scheme
@@ -176,7 +176,6 @@ extension Stylesheet {
 }
 
 extension Stylesheet {
-
   /// Style debugging help: Prints all of the available fonts to the console.
   public static func printFontNames() {
     for family in UIFont.familyNames.sorted() {

@@ -1,10 +1,9 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import XCTest
 
 final class TextArchiveTests: XCTestCase {
-
   func testSimpleChunks() {
     let chunk = TextSnippet("no newline")
     XCTAssertEqual(chunk.text, "no newline\n")
@@ -66,10 +65,10 @@ final class TextArchiveTests: XCTestCase {
     let child = TextSnippet("cat")
     child.encodeAsDiff(from: parent)
     let expectedSerialization = """
-+++ 8f6abfbac8c81b55f9005f7ec09e32d29e40eb40 1
-cat
+    +++ 8f6abfbac8c81b55f9005f7ec09e32d29e40eb40 1
+    cat
 
-"""
+    """
     XCTAssertEqual(child.textSerialized(), expectedSerialization)
   }
 

@@ -20,7 +20,7 @@ final class TestMetadataProvider: FileMetadataProvider {
     self.fileNameToMetadata = fileInfo.reduce(
       into: [String: FileMetadata](), { $0[$1.fileName] = FileMetadata(fileName: $1.fileName) }
     )
-    self.fileContents = fileInfo.reduce(into: [String: String](), { $0[$1.fileName] = $1.contents })
+    self.fileContents = fileInfo.reduce(into: [String: String]()) { $0[$1.fileName] = $1.contents }
     self.parsingRules = parsingRules
   }
 

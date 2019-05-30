@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CwlSignal
 import Foundation
@@ -7,18 +7,18 @@ import TextBundleKit
 extension TextBundleDocument {
   var vocabularyAssocationsPublisher: Signal<[VocabularyAssociation]> {
     let signalBridge = text.signal
-    let result = signalBridge.map({ (valueDescription) -> [VocabularyAssociation] in
+    let result = signalBridge.map { (valueDescription) -> [VocabularyAssociation] in
       VocabularyAssociation.makeAssociations(
         from: valueDescription.value
       ).0
-    }).continuous()
+    }.continuous()
     return result
   }
 
   var vocabularyAssociations: TextBundleKit.Result<[VocabularyAssociation]> {
-    return text.taggedResult.flatMap({ (taggedText) -> [VocabularyAssociation] in
+    return text.taggedResult.flatMap { (taggedText) -> [VocabularyAssociation] in
       VocabularyAssociation.makeAssociations(from: taggedText.value).0
-    })
+    }
   }
 
   func setVocabularyAssociations(_ vocabularyAssociations: [VocabularyAssociation]) {

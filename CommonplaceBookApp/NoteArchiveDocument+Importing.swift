@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import UIKit
@@ -85,7 +85,7 @@ private extension NoteArchiveDocument {
     for item in toImport {
       group.enter()
       metadataProvider.loadText(from: item) { textResult in
-        _ = textResult.flatMap({ text -> Void in
+        _ = textResult.flatMap { text -> Void in
           try? self.importFile(
             named: item.fileName,
             text: text,
@@ -93,7 +93,7 @@ private extension NoteArchiveDocument {
             importDate: importDate,
             completion: { group.leave() }
           )
-        })
+        }
       }
     }
     group.notify(queue: .main) {

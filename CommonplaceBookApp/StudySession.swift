@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -120,6 +120,7 @@ extension StudySession: Collection {
   public func index(after i: Int) -> Int {
     return cards.index(after: i)
   }
+
   public subscript(position: Int) -> AttributedCard {
     return cards[position]
   }
@@ -149,6 +150,6 @@ extension StudySession {
 extension Sequence where Element == StudySession.AttributedCard {
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<String> {
-    return reduce(into: Set<String>(), { $0.insert($1.card.identifier) })
+    return reduce(into: Set<String>()) { $0.insert($1.card.identifier) }
   }
 }

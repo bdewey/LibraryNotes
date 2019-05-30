@@ -1,15 +1,15 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
-public typealias IdentifierToStudyMetadata = Dictionary<String, StudyMetadata>
+public typealias IdentifierToStudyMetadata = [String: StudyMetadata]
 
 public protocol StudyItem: Comparable {
   var tableViewTitle: NSAttributedString { get }
   func studyMetadata(from identifierToStudyMetadata: IdentifierToStudyMetadata) -> StudyMetadata
 }
 
-fileprivate let dateFormatter: DateFormatter = {
+private let dateFormatter: DateFormatter = {
   let dateFormatter = DateFormatter()
   dateFormatter.dateStyle = .short
   dateFormatter.doesRelativeDateFormatting = true
@@ -48,10 +48,10 @@ public final class StudyMetadataDataSource<Item: StudyItem>: NSObject, UITableVi
     let today = DayComponents(Date())
     let itemData = items.map { ItemData(item: $0, studyMetadata: $0.studyMetadata(from: studyMetadata)) }
     let daysToItemData = Dictionary(grouping: itemData) {
-      return max($0.studyMetadata.dayForNextReview, today)
+      max($0.studyMetadata.dayForNextReview, today)
     }
     data = daysToItemData
-      .map { SectionData(targetDate: $0.key.date, items: $0.value.sorted() ) }
+      .map { SectionData(targetDate: $0.key.date, items: $0.value.sorted()) }
       .sorted(by: { $0.targetDate < $1.targetDate })
     tableView?.reloadData()
   }

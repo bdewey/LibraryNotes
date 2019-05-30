@@ -1,9 +1,10 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
-// swiftlint:disable force_try
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 @testable import CommonplaceBookApp
 import MiniMarkdown
 import XCTest
+
+// swiftlint:disable force_try
 
 final class NoteArchiveDocumentTests: XCTestCase {
   var metadataProvider: TestMetadataProvider!

@@ -8,7 +8,7 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
   public init(container: URL) {
     assert(Thread.isMainThread)
     self.container = container
-    query = ICloudMetadataQuery(
+    self.query = ICloudMetadataQuery(
       predicate: NSComparisonPredicate.page,
       enableUpdates: true,
       callbackQueue: .main,
@@ -71,16 +71,15 @@ public final class ICloudFileMetadataProvider: FileMetadataProvider {
   }
 
   private func updateFileMetadata(with metadataItems: [NSMetadataItem]) {
-    fileMetadata = metadataItems.map({ (metadataItem) -> FileMetadata in
-      return FileMetadata(metadataItem: metadataItem)
-    })
+    fileMetadata = metadataItems.map { (metadataItem) -> FileMetadata in
+      FileMetadata(metadataItem: metadataItem)
+    }
   }
 }
 
 /// Provides a block-based-callback API for querying for data in ubiquitous storage.
 /// It can either provide just the initial gathered results, or initial results plus live updates.
 private final class ICloudMetadataQuery {
-
   private let query: NSMetadataQuery
   private let enableUpdates: Bool
   private let callback: (ICloudMetadataQuery, [NSMetadataItem]) -> Void
@@ -96,7 +95,7 @@ private final class ICloudMetadataQuery {
     self.callbackQueue = callbackQueue
     self.callback = callback
 
-    query = NSMetadataQuery()
+    self.query = NSMetadataQuery()
     query.predicate = predicate
     query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
     NotificationCenter.default.addObserver(

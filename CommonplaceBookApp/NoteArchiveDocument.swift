@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import IGListKit
@@ -97,8 +97,8 @@ public final class NoteArchiveDocument: UIDocument {
     guard
       let data = wrapper.fileWrappers?[BundleWrapperKey.snippets]?.regularFileContents,
       let text = String(data: data, encoding: .utf8) else {
-        // Is this an error? Or expected for a new document?
-        return
+      // Is this an error? Or expected for a new document?
+      return
     }
     if let logData = wrapper.fileWrappers?[BundleWrapperKey.studyLog]?.regularFileContents,
       let logText = String(data: logData, encoding: .utf8),
@@ -249,6 +249,7 @@ public extension NoteArchiveDocument {
 }
 
 // MARK: - Study sessions
+
 public extension NoteArchiveDocument {
   func studySession(
     filter: ((String, PageProperties) -> Bool)? = nil,
@@ -257,7 +258,7 @@ public extension NoteArchiveDocument {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
     return noteArchiveQueue.sync {
-      return noteArchive.pageProperties
+      noteArchive.pageProperties
         .filter { filter($0.key, $0.value) }
         .map { (name, reviewProperties) -> StudySession in
           let challengeTemplates = reviewProperties.cardTemplates
@@ -296,7 +297,7 @@ public extension NoteArchiveDocument {
             )
           )
         }
-        .reduce(into: StudySession(), { $0 += $1 })
+        .reduce(into: StudySession()) { $0 += $1 }
     }
   }
 

@@ -152,7 +152,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
     viewController.autoFirstResponder = true
     viewController.delegate = notebook
-    self.navigationController?.pushViewController(viewController, animated: true)
+    navigationController?.pushViewController(viewController, animated: true)
   }
 
   private var hamburgerPresentationController: CoverPartiallyPresentationController?
@@ -257,7 +257,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 extension DocumentListViewController: NoteArchiveDocumentObserver {
   func noteArchiveDocument(
     _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String : PageProperties]
+    didUpdatePageProperties properties: [String: PageProperties]
   ) {
     updateStudySession()
   }

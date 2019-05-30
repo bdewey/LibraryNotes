@@ -1,4 +1,4 @@
-// Copyright © 2018 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -7,13 +7,12 @@ public protocol MetadataQueryDelegate: class {
 }
 
 public final class MetadataQuery {
-  
   private let query: NSMetadataQuery
   private weak var delegate: MetadataQueryDelegate?
-  
-    public init(predicate: NSPredicate?, delegate: MetadataQueryDelegate) {
+
+  public init(predicate: NSPredicate?, delegate: MetadataQueryDelegate) {
     self.delegate = delegate
-    query = NSMetadataQuery()
+    self.query = NSMetadataQuery()
     query.predicate = predicate
     query.searchScopes = [NSMetadataQueryUbiquitousDocumentsScope]
     NotificationCenter.default.addObserver(
@@ -31,16 +30,16 @@ public final class MetadataQuery {
     query.enableUpdates()
     query.start()
   }
-  
+
   deinit {
     NotificationCenter.default.removeObserver(self)
   }
-  
+
   @objc func didFinishGatheringNotification(_ notification: NSNotification) {
     let items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
     delegate?.metadataQuery(self, didFindItems: items)
   }
-  
+
   @objc func didUpdateNotification(_ notification: NSNotification) {
     print("Received notification: \(notification.userInfo)")
     let items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast

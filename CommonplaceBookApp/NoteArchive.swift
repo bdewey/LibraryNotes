@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import Foundation
@@ -63,14 +63,14 @@ public struct NoteArchive {
 
   /// Returns the current mapping of page id to page properties
   public var pageProperties: [String: PageProperties] {
-    return pagePropertyDigests.compactMapValues({ propertyDigest -> PageProperties? in
+    return pagePropertyDigests.compactMapValues { propertyDigest -> PageProperties? in
       guard
         let snippet = archive.snippetDigestIndex[propertyDigest],
         let properties = try? PageProperties(snippet) else {
-          return nil
+        return nil
       }
       return properties
-    })
+    }
   }
 
   public enum SerializationError: Error {
@@ -109,7 +109,7 @@ public struct NoteArchive {
   /// - returns: An identifier that can be used to return the current version of this page
   ///            at any point in time.
   @discardableResult
-  mutating public func insertNote(
+  public mutating func insertNote(
     _ text: String,
     contentChangeTime timestamp: Date,
     versionTimestamp: Date
@@ -121,7 +121,7 @@ public struct NoteArchive {
     return key
   }
 
-  mutating public func removeNote(for pageIdentifier: String, versionTimestamp: Date) throws {
+  public mutating func removeNote(for pageIdentifier: String, versionTimestamp: Date) throws {
     guard pagePropertyDigests.removeValue(forKey: pageIdentifier) != nil else {
       throw RetrievalError.noSuchPage(pageIdentifier)
     }
@@ -152,7 +152,7 @@ public struct NoteArchive {
   ) throws -> (snippet: TextSnippet, properties: PageProperties) {
     guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
       let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
-        throw RetrievalError.noSuchPage(pageIdentifier)
+      throw RetrievalError.noSuchPage(pageIdentifier)
     }
     return (propertiesSnippet, try PageProperties(propertiesSnippet))
   }
@@ -231,7 +231,7 @@ public struct NoteArchive {
 
   private mutating func archivePageManifest() -> String {
     let manifest = pagePropertyDigests
-      .map({ "\($0.key) \($0.value)" })
+      .map { "\($0.key) \($0.value)" }
       .sorted()
       .joined(separator: "\n")
     let manifestSnippet = archive.insert(manifest)
@@ -318,7 +318,7 @@ private extension NoteArchive {
     guard
       let snippetIdentifier = archive.symbolicReferences["file-import"],
       let snippet = archive.snippetDigestIndex[snippetIdentifier] else {
-        return [:]
+      return [:]
     }
     return try YAMLDecoder().decode([String: FileImportRecord].self, from: snippet.text)
   }

@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -41,7 +41,7 @@ extension Array where Element == Node {
   var title: String {
     if let heading = self.lazy.compactMap(
       { $0.first(where: { $0.type == .heading }) }
-      ).first as? Heading {
+    ).first as? Heading {
       return String(heading.inlineSlice.substring)
     } else if let notBlank = self.lazy.compactMap({
       $0.first(where: { $0.type != .blank })
@@ -54,8 +54,7 @@ extension Array where Element == Node {
 
   /// Extracts all hashtags from nodes.
   var hashtags: [String] {
-    let hashtagSet = self
-      .map { $0.findNodes(where: { $0.type == .hashtag }) }
+    let hashtagSet = map { $0.findNodes(where: { $0.type == .hashtag }) }
       .joined()
       .reduce(into: Set<String>()) { $0.insert(String($1.slice.substring)) }
     return [String](hashtagSet)

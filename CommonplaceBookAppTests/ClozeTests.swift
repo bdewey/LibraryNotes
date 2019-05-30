@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 @testable import CommonplaceBookApp
 @testable import MiniMarkdown
@@ -25,7 +25,7 @@ final class ClozeTests: XCTestCase {
     """
     let blocks = parsingRules.parse(example)
     XCTAssertEqual(blocks[4].type, .list)
-    let clozeNodes = blocks.map({ $0.findNodes(where: { $0.type == .cloze }) }).joined()
+    let clozeNodes = blocks.map { $0.findNodes(where: { $0.type == .cloze }) }.joined()
     XCTAssertEqual(clozeNodes.count, 1)
     if let cloze = clozeNodes.first as? Cloze {
       XCTAssertEqual(cloze.slice.substring, "?[to be](es)")

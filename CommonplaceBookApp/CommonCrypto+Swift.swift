@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonCrypto
 import Foundation
@@ -9,15 +9,15 @@ public extension Data {
     var digest = Data(repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
 
     withUnsafeBytes { dataPtr -> Void in
-      digest.withUnsafeMutableBytes({ digestPtr -> Void in
+      digest.withUnsafeMutableBytes { digestPtr -> Void in
         CC_SHA1(dataPtr, CC_LONG(count), digestPtr)
-      })
+      }
     }
     return digest.toHexString()
   }
 
   private func toHexString() -> String {
-    return lazy.map { (byte) in
+    return lazy .map { byte in
       (byte <= 0xF ? "0" : "") + String(byte, radix: 16)
     }.joined()
   }

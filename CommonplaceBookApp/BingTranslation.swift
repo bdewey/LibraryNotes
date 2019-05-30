@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import TextBundleKit
@@ -38,7 +38,7 @@ final class BingTranslation: NSObject {
     let phrases = [RequestText(phrase)]
     let dataResult = Result<Data> { try encoder.encode(phrases) }
     guard case .success(let data) = dataResult else {
-      let stringResult = dataResult.flatMap({ _ in "" })
+      let stringResult = dataResult.flatMap { _ in "" }
       completion(stringResult)
       return
     }

@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
@@ -45,16 +45,16 @@ public final class VocabularyViewController: UIViewController {
     self.document = languageDeck.document
     super.init(nibName: nil, bundle: nil)
     self.title = "Vocabulary"
-    subscriptions += languageDeck.studySessionSignal.subscribeValues({ [weak self] studySession in
+    subscriptions += languageDeck.studySessionSignal.subscribeValues { [weak self] studySession in
       self?.nextStudySession = studySession
-    })
+    }
     subscriptions += document.documentStudyMetadata.signal
       .map { $0.value }
       .combineLatest(languageDeck.vocabularyAssociationsSignal) { ($0, $1) }
-      .subscribeValues({ [weak self] tuple in
+      .subscribeValues { [weak self] tuple in
         let (studyMetadata, vocabularyAssociations) = tuple
         self?.dataSource.update(items: vocabularyAssociations, studyMetadata: studyMetadata)
-      })
+      }
   }
 
   required init?(coder aDecoder: NSCoder) {

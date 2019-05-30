@@ -1,4 +1,4 @@
-// Copyright © 2018-present Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonCrypto
 import Foundation
@@ -41,7 +41,7 @@ public protocol MarkdownParseable {
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
 open class ChallengeTemplate: Codable, MarkdownParseable {
-  required public init(markdown: String, parsingRules: ParsingRules) throws {}
+  public required init(markdown: String, parsingRules: ParsingRules) throws {}
 
   open var asMarkdown: String {
     assertionFailure("subclasses should implement")
@@ -72,7 +72,7 @@ open class ChallengeTemplate: Codable, MarkdownParseable {
 extension Array where Element: ChallengeTemplate {
   /// Returns the challenges from all of the associations in the array.
   public var cards: [Challenge] {
-    return Array<Challenge>(map { $0.challenges }.joined())
+    return [Challenge](map { $0.challenges }.joined())
   }
 }
 
@@ -121,6 +121,6 @@ public final class CardTemplateSerializationWrapper: Codable {
 extension Array where Element == CardTemplateSerializationWrapper {
   /// Convenience: Returns the cards made from all wrapped templates.
   public var cards: [Challenge] {
-    return Array<Challenge>(map { $0.value.challenges }.joined())
+    return [Challenge](map { $0.value.challenges }.joined())
   }
 }
