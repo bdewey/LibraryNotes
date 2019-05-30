@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */; };
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
-		D305DAFC228C86E300B41EE7 /* ChallengeTemplateCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D305DAFB228C86E300B41EE7 /* ChallengeTemplateCollection.swift */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
 		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
@@ -110,7 +109,6 @@
 		D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* PageProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
-		D39015C0228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015BF228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
@@ -190,7 +188,6 @@
 		A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
-		D305DAFB228C86E300B41EE7 /* ChallengeTemplateCollection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateCollection.swift; sourceTree = "<group>"; };
 		D30B0242229E513C00F3B459 /* StudyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLog.swift; sourceTree = "<group>"; };
 		D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+TextEditViewController.swift"; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
@@ -312,7 +309,6 @@
 		D37E6D35228D9DD8006CD0FA /* PageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageProperties.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
-		D39015BF228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateCollectionTests.swift; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
@@ -461,7 +457,6 @@
 				D31AFA9D229D61EC00ED2B76 /* ChallengesDataSource.swift */,
 				D31AFA84229D61E800ED2B76 /* ChallengesViewController.swift */,
 				D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */,
-				D305DAFB228C86E300B41EE7 /* ChallengeTemplateCollection.swift */,
 				D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */,
 				D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */,
 				D31AFA9A229D61EC00ED2B76 /* Cloze.swift */,
@@ -560,7 +555,6 @@
 			isa = PBXGroup;
 			children = (
 				D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */,
-				D39015BF228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift */,
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
 				D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
@@ -937,7 +931,6 @@
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
 				D31AFAB8229D61EE00ED2B76 /* ChallengesViewController.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
-				D305DAFC228C86E300B41EE7 /* ChallengeTemplateCollection.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D31AFAB3229D61EE00ED2B76 /* StudyStatisticsStorage.swift in Sources */,
@@ -979,7 +972,6 @@
 				D31AFAEE229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift in Sources */,
 				D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
-				D39015C0228FB12B0097B182 /* ChallengeTemplateCollectionTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */,
 				D33F647B22999F52008C3A92 /* NoteArchiveTests.swift in Sources */,

@@ -24,14 +24,6 @@ extension Array where Element == Node {
     return results
   }
 
-  func challengeTemplates() throws -> ChallengeTemplateCollection {
-    var challengeTemplates = ChallengeTemplateCollection()
-    try challengeTemplates.insert(contentsOf: VocabularyAssociation.makeAssociations(from: self).0)
-    try challengeTemplates.insert(contentsOf: ClozeTemplate.extract(from: self))
-    try challengeTemplates.insert(contentsOf: QuoteTemplate.extract(from: self))
-    return challengeTemplates
-  }
-
   func archiveChallengeTemplates(
     to archive: inout TextSnippetArchive
   ) -> [ChallengeTemplateArchiveKey] {
