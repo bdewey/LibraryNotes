@@ -18,7 +18,8 @@ public extension NoteArchiveDocument {
     named fileName: String,
     text: String,
     contentChangeDate: Date,
-    importDate: Date
+    importDate: Date,
+    completion: (() -> Void)? = nil
   ) throws {
     noteArchiveQueue.async {
       do {
@@ -30,6 +31,11 @@ public extension NoteArchiveDocument {
         )
         self.notifyObservers(of: self.noteArchive.pageProperties)
         self.invalidateSavedSnippets()
+        if let completion = completion {
+          DispatchQueue.main.async {
+            completion()
+          }
+        }
       } catch {
         DDLogError("Unexpected error importing file \(fileName): \(error)")
       }
@@ -39,7 +45,8 @@ public extension NoteArchiveDocument {
   func importFileMetadataItems(
     _ items: [FileMetadata],
     from metadataProvider: FileMetadataProvider,
-    importDate: Date
+    importDate: Date,
+    completion: (() -> Void)? = nil
   ) {
     assert(Thread.isMainThread)
     DDLogInfo("Examining \(items.count) file(s) for import...")
@@ -50,7 +57,8 @@ public extension NoteArchiveDocument {
           items,
           from: metadataProvider,
           existingImportDates: fileImportDates,
-          importDate: importDate
+          importDate: importDate,
+          completion: completion
         )
       }
     }
@@ -62,7 +70,8 @@ private extension NoteArchiveDocument {
     _ items: [FileMetadata],
     from metadataProvider: FileMetadataProvider,
     existingImportDates: [String: Date],
-    importDate: Date
+    importDate: Date,
+    completion: (() -> Void)? = nil
   ) {
     assert(Thread.isMainThread)
     let toImport = items
@@ -72,17 +81,23 @@ private extension NoteArchiveDocument {
         return !existingDate.withinInterval(1, of: item.contentChangeDate)
       }
     DDLogInfo("Determined we need to import \(toImport.count) file(s)")
+    let group = DispatchGroup()
     for item in toImport {
+      group.enter()
       metadataProvider.loadText(from: item) { textResult in
         _ = textResult.flatMap({ text -> Void in
           try? self.importFile(
             named: item.fileName,
             text: text,
             contentChangeDate: item.contentChangeDate,
-            importDate: importDate
+            importDate: importDate,
+            completion: { group.leave() }
           )
         })
       }
+    }
+    group.notify(queue: .main) {
+      completion?()
     }
   }
 }

@@ -40,7 +40,7 @@ public final class NoteArchiveDocument: UIDocument {
   /// Protects noteArchive.
   internal let noteArchiveQueue = DispatchQueue(label: "org.brians-brain.note-archive-document")
 
-  internal var studyLog = StudyLog()
+  public internal(set) var studyLog = StudyLog()
 
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
