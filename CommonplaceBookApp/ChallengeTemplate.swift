@@ -52,7 +52,7 @@ open class ChallengeTemplate: Codable, MarkdownParseable {
   /// the template before creating any challenges from it.
   ///
   /// Can only be set from nil to non-nil once; immutable once set.
-  public var templateIdentifier: String! {
+  public var templateIdentifier: String? {
     willSet {
       precondition(templateIdentifier == nil)
     }

@@ -12,6 +12,7 @@ public struct StudyLog {
     public let statistics: AnswerStatistics
 
     public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
+      assert(identifier.templateDigest != nil)
       self.timestamp = timestamp
       self.identifier = identifier
       self.statistics = statistics

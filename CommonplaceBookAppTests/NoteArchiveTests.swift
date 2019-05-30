@@ -200,6 +200,36 @@ final class NoteArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  /// the goal is to create the exact same text at multiple points in the version history of a page
+  /// to make sure we don't create a diff cycle
+  func testPageVersionCycle() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    do {
+      let pageIdentifier = try archive.insertNote(
+        Examples.vocabulary.rawValue,
+        contentChangeTime: now,
+        versionTimestamp: now
+      )
+      try archive.updateText(
+        for: pageIdentifier,
+        to: Examples.vocabulary.rawValue + "blah\n",
+        contentChangeTime: now.addingTimeInterval(3600),
+        versionTimestamp: now.addingTimeInterval(3600)
+      )
+      try archive.updateText(
+        for: pageIdentifier,
+        to: Examples.vocabulary.rawValue,
+        contentChangeTime: now.addingTimeInterval(7200),
+        versionTimestamp: now.addingTimeInterval(7200)
+      )
+      XCTAssertEqual(archive.versions.count, 3)
+      XCTAssertEqual(Examples.vocabulary.rawValue, try archive.currentText(for: pageIdentifier))
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private enum Examples: String {

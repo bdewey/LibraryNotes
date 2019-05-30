@@ -187,6 +187,7 @@ public struct NoteArchive {
     guard let newTextSnippet = archive.snippetDigestIndex[newProperties.sha1Digest] else {
       throw RetrievalError.noSuchPage(newProperties.sha1Digest)
     }
+    newTextSnippet.encodeAsDiff(from: nil)
     existingTextSnippet.encodeAsDiff(from: newTextSnippet)
     pagePropertyDigests[pageIdentifier] = newSnippet.sha1Digest
     try archivePageManifestVersion(timestamp: versionTimestamp)
