@@ -155,6 +155,51 @@ final class NoteArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testRemovePage() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    let now = Date()
+    do {
+      // Create some filler files, just to make sure we start using delta encodings for pages &
+      // versions.
+      for delay in 0 ..< 10 {
+        try archive.insertNote(
+          "All work and no play makes Jack a dull boy",
+          contentChangeTime: now.addingTimeInterval(TimeInterval(delay)),
+          versionTimestamp: now.addingTimeInterval(TimeInterval(delay))
+        )
+      }
+      let survivor = try archive.insertNote(
+        Examples.vocabulary.rawValue,
+        contentChangeTime: now,
+        versionTimestamp: now
+      )
+      let victim = try archive.insertNote(
+        Examples.quotes.rawValue,
+        contentChangeTime: now.addingTimeInterval(3600),
+        versionTimestamp: now.addingTimeInterval(3600)
+      )
+      // By removing the last note, the page manifest will now be exactly the same as one version
+      // ago. This test case deliberately provokes that to make sure we don't create a cycle
+      // of delta-encoding.
+      try archive.removeNote(for: victim, versionTimestamp: now.addingTimeInterval(7200))
+      XCTAssertEqual(archive.versions.count, 13)
+      XCTAssertEqual(archive.pageProperties.count, 11)
+      let serialized = archive.textSerialized()
+      print(serialized)
+      let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
+      // Have to compare formatted timestamps because we lose precision in serialization
+      let dateFormatter = ISO8601DateFormatter()
+      XCTAssertEqual(
+        roundTrip.versions.map(dateFormatter.string),
+        archive.versions.map(dateFormatter.string)
+      )
+      XCTAssertEqual(Examples.vocabulary.rawValue, try roundTrip.currentText(for: survivor))
+      XCTAssertThrowsError(try roundTrip.currentText(for: victim))
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private enum Examples: String {

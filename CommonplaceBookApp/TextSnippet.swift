@@ -20,6 +20,21 @@ public final class TextSnippet {
   /// assuming that encoding actually saves space.
   public func encodeAsDiff(from other: TextSnippet?) {
     if let parent = other {
+      // Make sure we are not creating a cycle. Every digest in the parent chain should show up once.
+      var parentChain = parent.parentChain
+      parentChain.insert(sha1Digest, at: 0)
+      let snippetCounts = parentChain.reduce([String: Int]()) { (snippetCounts, digest) -> [String: Int] in
+        var snippetCounts = snippetCounts
+        let currentValue = snippetCounts[digest, default: 0]
+        snippetCounts[digest] = currentValue + 1
+        return snippetCounts
+      }
+      assert(
+        snippetCounts.allSatisfy({ $0.value == 1 }),
+        "Cycle in parent chain: \(parentChain)\n\(snippetCounts)"
+      )
+
+      // Construct the patch.
       let dmp = DiffMatchPatch()
       let parentText = parent.text
       let diff = dmp.diff_main(ofOldString: parentText, andNewString: text)
@@ -128,6 +143,23 @@ public final class TextSnippet {
     case .indirect:
       assertionFailure("Have not yet resolved chunk parent")
       return nil
+    }
+  }
+
+  /// The list of all sha1 digests needed to construct this snippet through delta encoding,
+  /// including this one.
+  public var parentChain: [String] {
+    var results: [String] = []
+    enumerateParentChain { (snippet) in
+      results.append(snippet.sha1Digest)
+    }
+    return results
+  }
+
+  internal func enumerateParentChain(block: (TextSnippet) -> Void) {
+    block(self)
+    if let parent = parent {
+      parent.enumerateParentChain(block: block)
     }
   }
 }

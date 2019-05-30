@@ -197,6 +197,7 @@ public struct NoteArchive {
     if let existingVersion = pagePropertiesVersionHistory.last,
       let oldManifestSnippet = archive.snippetDigestIndex[existingVersion.digest],
       let newManifestSnippet = archive.snippetDigestIndex[version.digest] {
+      newManifestSnippet.encodeAsDiff(from: nil)
       oldManifestSnippet.encodeAsDiff(from: newManifestSnippet)
     }
     pagePropertiesVersionHistory.append(version)
