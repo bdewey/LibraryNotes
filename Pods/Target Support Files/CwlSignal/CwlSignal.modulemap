@@ -1,6 +1,0 @@
-framework module CwlSignal {
-  umbrella header "CwlSignal-umbrella.h"
-
-  export *
-  module * { export * }
-}
