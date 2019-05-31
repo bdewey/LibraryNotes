@@ -88,10 +88,3 @@ final class TestMetadataProvider: FileMetadataProvider {
     fileContents[metadata.fileName] = nil
   }
 }
-
-extension TestMetadataProvider: TestEditableDocumentDelegate {
-  func document(_ document: TestEditableDocument, didUpdate text: String) {
-    fileContents[document.name] = text
-    contentsChangeListener?(document.name, text)
-  }
-}

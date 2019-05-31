@@ -6,19 +6,6 @@ import TextBundleKit
 import enum TextBundleKit.Result
 import UIKit
 
-public protocol EditableDocument: class {
-  var fileURL: URL { get }
-  var currentTextResult: Result<Tagged<String>> { get }
-  var textSignal: Signal<Tagged<String>> { get }
-  func applyTaggedModification(tag: Tag, modification: (String) -> String)
-  func open(completionHandler: ((Bool) -> Void)?)
-  func revert(toContentsOf url: URL, completionHandler: ((Bool) -> Void)?)
-  func openOrCreate(completionHandler: ((Bool) -> Void)?)
-  func close(completionHandler: ((Bool) -> Void)?)
-  var previousError: Swift.Error? { get }
-  var documentState: UIDocument.State { get }
-}
-
 public protocol ConfiguresRenderers {
   func configureRenderers(_ renderers: inout [NodeType: RenderedMarkdown.RenderFunction])
 }

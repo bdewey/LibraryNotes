@@ -8,8 +8,6 @@ import MaterialComponents
 import MiniMarkdown
 import TextBundleKit
 
-private typealias TextEditViewControllerDocument = EditableDocument
-
 extension Tag {
   fileprivate static let textEditViewController = Tag(rawValue: "textEditViewController")
 }
