@@ -84,8 +84,9 @@ private extension NoteArchiveDocument {
     let group = DispatchGroup()
     for item in toImport {
       group.enter()
-      metadataProvider.loadText(from: item) { textResult in
-        _ = textResult.flatMap { text -> Void in
+      DispatchQueue.global(qos: .default).async {
+        let textResult = Result { try metadataProvider.text(for: item) }
+        _ = textResult.map { text -> Void in
           try? self.importFile(
             named: item.fileName,
             text: text,

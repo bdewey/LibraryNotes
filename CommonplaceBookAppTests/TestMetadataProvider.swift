@@ -58,14 +58,18 @@ final class TestMetadataProvider: FileMetadataProvider {
   /// - note: Currently unused as the metadata in this collection are immutable.
   weak var delegate: FileMetadataProviderDelegate?
 
-  /// Get an editable document for a file metadata.
-  /// - note: Currently provides only dummy content. TODO: Associate different text with
-  ///         different metadata.
-  func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
-    let contents = fileContents[metadata.fileName] ?? ""
-    let document = TestEditableDocument(name: metadata.fileName, text: contents)
-    document.delegate = self
-    return document
+  func data(for fileMetadata: FileMetadata) throws -> Data {
+    guard let contents = fileContents[fileMetadata.fileName] else {
+      throw NSError(domain: NSCocoaErrorDomain, code: NSFileNoSuchFileError, userInfo: nil)
+    }
+    return contents.data(using: .utf8)!
+  }
+
+  func text(for fileMetadata: FileMetadata) throws -> String {
+    guard let contents = fileContents[fileMetadata.fileName] else {
+      throw NSError(domain: NSCocoaErrorDomain, code: NSFileNoSuchFileError, userInfo: nil)
+    }
+    return contents
   }
 
   func delete(_ metadata: FileMetadata) throws {

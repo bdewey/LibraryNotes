@@ -25,8 +25,11 @@ public protocol FileMetadataProvider: class {
   /// Delegate that can receive notifications when `fileMetadata` changes.
   var delegate: FileMetadataProviderDelegate? { get set }
 
-  /// Gets the EditableDocument that corresponds to a particular piece of metadata.
-  func editableDocument(for metadata: FileMetadata) -> EditableDocument?
+  /// Gets the contents of `fileMetadata` as a UTF-8 encoded string.
+  func text(for fileMetadata: FileMetadata) throws -> String
+
+  /// Gets the data backed by this `fileMetadata`
+  func data(for fileMetadata: FileMetadata) throws -> Data
 
   /// Delete an item.
   func delete(_ metadata: FileMetadata) throws
@@ -45,43 +48,13 @@ enum FileMetadataProviderError: Error {
 
 /// I/O routines that work for all implementations of FileMetadataProvider
 public extension FileMetadataProvider {
-  /// Default implementation of editableDocument -- will work for any FileMetadataProvider
-  /// that is named by URLs that a UIDocument can open.
-  func editableDocument(for metadata: FileMetadata) -> EditableDocument? {
-    let fileURL = container.appendingPathComponent(metadata.fileName)
-    switch metadata.contentType {
-    case "public.plain-text", "public.json":
-      return PlainTextDocument(fileURL: fileURL)
-    case "org.textbundle.package", "org.brians-brain.swiftflash":
-      return TextBundleDocument(fileURL: fileURL)
-    default:
-      return nil
-    }
+  func data(for fileMetadata: FileMetadata) throws -> Data {
+    let url = container.appendingPathComponent(fileMetadata.fileName)
+    return try Data(contentsOf: url)
   }
 
-  /// Loads the text from a specific FileMetadata.
-  ///
-  /// - note: FileMetadata may refer to either a plain text file -or- a textbundle,
-  ///         and this method knows how to read from either.
-  ///
-  /// - parameter fileMetadata: The FileMetadata specifying the file to read from.
-  /// - parameter completion: Completion block with the result of reading.
-  func loadText(
-    from fileMetadata: FileMetadata,
-    completion: @escaping (Result<String>) -> Void
-  ) {
-    guard let document = editableDocument(for: fileMetadata) else {
-      completion(.failure(FileMetadataProviderError.cannotGetDocument))
-      return
-    }
-    document.open { success in
-      guard success else {
-        completion(.failure(FileMetadataProviderError.cannotOpenDocument))
-        return
-      }
-      let textResult = document.currentTextResult.flatMap { $0.value }
-      document.close(completionHandler: nil)
-      completion(textResult)
-    }
+  func text(for fileMetadata: FileMetadata) throws -> String {
+    let fileData = try data(for: fileMetadata)
+    return String(data: fileData, encoding: .utf8)!
   }
 }

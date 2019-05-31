@@ -65,30 +65,3 @@ extension PlainTextDocument: EditableDocument {
     close(completionHandler: nil)
   }
 }
-
-extension PlainTextDocument {
-  struct Factory: DocumentFactory {
-    var useCloud: Bool = true
-
-    static let `default` = Factory()
-
-    func openDocument(at url: URL, completion: @escaping (Result<PlainTextDocument>) -> Void) {
-      let document = PlainTextDocument(fileURL: url)
-      document.open { success in
-        if success {
-          completion(.success(document))
-        } else {
-          completion(.failure(document.previousError ?? Error.couldNotOpenDocument))
-        }
-      }
-    }
-
-    func merge(source: PlainTextDocument, destination: PlainTextDocument) {}
-
-    func delete(_ document: PlainTextDocument) {
-      document.close { _ in
-        try? FileManager.default.removeItem(at: document.fileURL)
-      }
-    }
-  }
-}
