@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import Foundation
-import TextBundleKit
 
 public protocol FileMetadataProviderDelegate: class {
   /// Sent when there are new FileMetadata items in the provider.

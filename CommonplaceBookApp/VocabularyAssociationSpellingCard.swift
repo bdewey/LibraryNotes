@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
-import TextBundleKit
 import UIKit
 
 struct VocabularyAssociationSpellingCard: Challenge {

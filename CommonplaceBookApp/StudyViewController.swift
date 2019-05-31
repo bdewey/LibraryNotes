@@ -2,7 +2,6 @@
 
 import AVFoundation
 import MaterialComponents
-import TextBundleKit
 import UIKit
 
 public protocol StudyViewControllerDelegate: class {

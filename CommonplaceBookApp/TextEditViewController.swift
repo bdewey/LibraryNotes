@@ -5,11 +5,6 @@ import UIKit
 import CocoaLumberjack
 import MaterialComponents
 import MiniMarkdown
-import TextBundleKit
-
-extension Tag {
-  fileprivate static let textEditViewController = Tag(rawValue: "textEditViewController")
-}
 
 protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String)

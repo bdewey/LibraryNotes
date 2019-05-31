@@ -31,9 +31,7 @@
 		D31AFABA229D61EE00ED2B76 /* BingTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA86229D61E900ED2B76 /* BingTranslation.swift */; };
 		D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA87229D61E900ED2B76 /* StudyViewController.swift */; };
 		D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */; };
-		D31AFABE229D61EE00ED2B76 /* StatisticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */; };
 		D31AFABF229D61EE00ED2B76 /* Stylesheet+HablaEspanol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */; };
-		D31AFAC0229D61EE00ED2B76 /* StatisticsCalendarDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */; };
 		D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */; };
 		D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */; };
 		D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */; };
@@ -190,9 +188,7 @@
 		D31AFA86229D61E900ED2B76 /* BingTranslation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BingTranslation.swift; sourceTree = "<group>"; };
 		D31AFA87229D61E900ED2B76 /* StudyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyViewController.swift; sourceTree = "<group>"; };
 		D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
-		D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsViewController.swift; sourceTree = "<group>"; };
 		D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stylesheet+HablaEspanol.swift"; sourceTree = "<group>"; };
-		D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsCalendarDataSource.swift; sourceTree = "<group>"; };
 		D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RenderedMarkdown+Stylesheet.swift"; sourceTree = "<group>"; };
 		D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Typography.swift"; sourceTree = "<group>"; };
 		D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
@@ -465,9 +461,7 @@
 				D34D875A20ED840B0043F755 /* Resources */,
 				D31AFAA0229D61EC00ED2B76 /* ScrollingTopTabBarViewController.swift */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
-				D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */,
 				D31AFAA3229D61ED00ED2B76 /* StatisticsMonthHeaderReusableView.swift */,
-				D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
 				D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */,
 				D30B0242229E513C00F3B459 /* StudyLog.swift */,
@@ -819,7 +813,6 @@
 				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
 				D31AFAAF229D61EE00ED2B76 /* MDCScrollEventForwarder.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
-				D31AFAC0229D61EE00ED2B76 /* StatisticsCalendarDataSource.swift in Sources */,
 				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
 				D3187CAC218D25D800815772 /* ShadowView.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
@@ -834,7 +827,6 @@
 				D3187CB0218DFBBC00815772 /* HashtagDataSource.swift in Sources */,
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
 				D31AFAF5229D654B00ED2B76 /* Stylesheet.swift in Sources */,
-				D31AFABE229D61EE00ED2B76 /* StatisticsViewController.swift in Sources */,
 				D31AFACA229D61EE00ED2B76 /* ClozeCard.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */,

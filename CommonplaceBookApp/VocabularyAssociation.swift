@@ -2,7 +2,6 @@
 
 import Foundation
 import MiniMarkdown
-import TextBundleKit
 
 extension Node {
   /// Returns true if the node is a table with a specified number of columns.

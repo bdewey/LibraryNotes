@@ -3,7 +3,6 @@
 import AVFoundation
 import MaterialComponents
 import SnapKit
-import TextBundleKit
 import UIKit
 
 final class VocabularyAssociationCardView: ChallengeView {

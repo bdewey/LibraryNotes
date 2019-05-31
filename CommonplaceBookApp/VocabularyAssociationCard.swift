@@ -3,7 +3,6 @@
 import AVFoundation
 import MaterialComponents.MDCTypographyScheme
 import MiniMarkdown
-import TextBundleKit
 import UIKit
 
 /// A specific card for a vocabulary association.

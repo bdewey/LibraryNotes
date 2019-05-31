@@ -4,7 +4,6 @@ import AVFoundation
 import MaterialComponents
 import MiniMarkdown
 import SnapKit
-import TextBundleKit
 import UIKit
 
 /// A generic card with a "front" and a "back" side.

@@ -5,7 +5,6 @@ import Foundation
 import IGListKit
 import MiniMarkdown
 import SwipeCellKit
-import TextBundleKit
 
 public final class DocumentSectionController: ListSectionController {
   init(
