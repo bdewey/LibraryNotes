@@ -36,7 +36,6 @@
 		D31AFAC0229D61EE00ED2B76 /* StatisticsCalendarDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */; };
 		D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */; };
 		D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */; };
-		D31AFAC4229D61EE00ED2B76 /* Publisher+Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */; };
 		D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */; };
 		D31AFAC6229D61EE00ED2B76 /* StudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */; };
 		D31AFAC8229D61EE00ED2B76 /* VocabularyAssociation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA94229D61EB00ED2B76 /* VocabularyAssociation.swift */; };
@@ -91,7 +90,6 @@
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
 		D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* PageProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
-		D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
@@ -197,7 +195,6 @@
 		D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsCalendarDataSource.swift; sourceTree = "<group>"; };
 		D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RenderedMarkdown+Stylesheet.swift"; sourceTree = "<group>"; };
 		D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Typography.swift"; sourceTree = "<group>"; };
-		D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Publisher+Signal.swift"; sourceTree = "<group>"; };
 		D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
 		D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadata.swift; sourceTree = "<group>"; };
 		D31AFA94229D61EB00ED2B76 /* VocabularyAssociation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssociation.swift; sourceTree = "<group>"; };
@@ -273,7 +270,6 @@
 		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		D37E6D35228D9DD8006CD0FA /* PageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageProperties.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
-		D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MiniMarkdownTextStorage+CommonplaceBookApp.swift"; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
@@ -454,7 +450,6 @@
 				D3187CAD218DF7AB00815772 /* MenuItem.swift */,
 				D35C72C42189E1340082396D /* MenuSectionController.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
-				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */,
 				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
@@ -464,7 +459,6 @@
 				D37E6D35228D9DD8006CD0FA /* PageProperties.swift */,
 				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
 				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
-				D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
@@ -868,7 +862,6 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
-				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
@@ -877,7 +870,6 @@
 				D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
 				D35C72C52189E1340082396D /* MenuSectionController.swift in Sources */,
-				D31AFAC4229D61EE00ED2B76 /* Publisher+Signal.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
