@@ -7,7 +7,7 @@ import MiniMarkdown
 /// Extensible enum for the different types of card templates.
 /// Also maintains a mapping between each type and the specific CardTemplate class
 /// associated with that type.
-public struct ChallengeTemplateType: RawRepresentable {
+public struct ChallengeTemplateType: RawRepresentable, Equatable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way

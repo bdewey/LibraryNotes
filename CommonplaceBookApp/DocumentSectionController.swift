@@ -153,37 +153,3 @@ extension DocumentSectionController: SwipeCollectionViewCellDelegate {
     return actions
   }
 }
-
-extension FileMetadata {
-  fileprivate func languageViewController(
-    for document: TextBundleDocument,
-    parsingRules: ParsingRules
-  ) -> UIViewController {
-    let textViewController = TextEditViewController(
-      parsingRules: LanguageDeck.parsingRules,
-      stylesheet: Stylesheet.hablaEspanol
-    )
-    let languageDeck = LanguageDeck(
-      document: document,
-      miniMarkdownSignal: textViewController.miniMarkdownSignal
-    )
-    let tabBarViewController = ScrollingTopTabBarViewController()
-    let vocabularyViewController = VocabularyViewController(languageDeck: languageDeck)
-    textViewController.title = "Notes"
-
-    let challengesViewController = ChallengesViewController(
-      studyStatistics: languageDeck.document.studyStatistics
-    )
-    challengesViewController.title = "Challenges"
-    let statisticsViewController = StatisticsViewController(
-      studyStatistics: languageDeck.document.studyStatistics
-    )
-    tabBarViewController.viewControllers = [
-      vocabularyViewController,
-      textViewController,
-      challengesViewController,
-      statisticsViewController,
-    ]
-    return tabBarViewController
-  }
-}

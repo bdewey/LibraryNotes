@@ -3,7 +3,7 @@
 import CocoaLumberjack
 import MaterialComponents.MaterialAppBar
 import MaterialComponents.MaterialSnackbar
-import TextBundleKit
+import MiniMarkdown
 import UIKit
 
 @UIApplicationMain
@@ -50,7 +50,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
   func applicationDidBecomeActive(_ application: UIApplication) {
     guard let window = window, noteArchiveDocument == nil else { return }
-    let parsingRules = LanguageDeck.parsingRules
+    let parsingRules = ParsingRules.commonplace
     window.rootViewController = loadingViewController
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
@@ -88,7 +88,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     noteArchiveDocument = nil
   }
 
-  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider>) -> Void) {
+  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
     if CommandLine.arguments.contains("--uitesting") {
       do {
         let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")

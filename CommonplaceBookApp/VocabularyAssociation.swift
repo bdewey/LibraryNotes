@@ -49,7 +49,11 @@ extension ChallengeTemplateType {
 /// - Given the Spanish word, what is the English word?
 /// - Given the Engish word, what is the Spanish word?
 /// - How do you spell the Spanish word? (optional)
-public final class VocabularyAssociation: ChallengeTemplate {
+public final class VocabularyAssociation: ChallengeTemplate, Equatable {
+  public static func == (lhs: VocabularyAssociation, rhs: VocabularyAssociation) -> Bool {
+    return lhs.spanish == rhs.spanish && lhs.english == rhs.english && lhs.testSpelling == rhs.testSpelling
+  }
+
   public override var type: ChallengeTemplateType { return .vocabularyAssociation }
 
   /// The Spanish word.

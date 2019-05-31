@@ -3,7 +3,6 @@
 import AVFoundation
 import Foundation
 import MaterialComponents
-import TextBundleKit
 
 /// Uniquely identifies a challenge.
 public struct ChallengeIdentifier: Hashable {

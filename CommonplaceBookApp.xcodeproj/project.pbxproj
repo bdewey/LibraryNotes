@@ -11,6 +11,9 @@
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
 		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
+		D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */; };
+		D30BD4FA22A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4F922A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift */; };
+		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D3187CAC218D25D800815772 /* ShadowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAB218D25D800815772 /* ShadowView.swift */; };
 		D3187CAE218DF7AB00815772 /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CAD218DF7AB00815772 /* MenuItem.swift */; };
@@ -20,7 +23,6 @@
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
 		D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */; };
 		D31AFAAF229D61EE00ED2B76 /* MDCScrollEventForwarder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7B229D61E800ED2B76 /* MDCScrollEventForwarder.swift */; };
-		D31AFAB0229D61EE00ED2B76 /* VocabularyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7C229D61E800ED2B76 /* VocabularyViewController.swift */; };
 		D31AFAB1229D61EE00ED2B76 /* TextBundleDocumentFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7D229D61E800ED2B76 /* TextBundleDocumentFactory.swift */; };
 		D31AFAB2229D61EE00ED2B76 /* VocabularyAssociationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7E229D61E800ED2B76 /* VocabularyAssociationCard.swift */; };
 		D31AFAB3229D61EE00ED2B76 /* StudyStatisticsStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7F229D61E800ED2B76 /* StudyStatisticsStorage.swift */; };
@@ -28,11 +30,9 @@
 		D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */; };
 		D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */; };
 		D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA83229D61E800ED2B76 /* Challenge.swift */; };
-		D31AFAB8229D61EE00ED2B76 /* ChallengesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA84229D61E800ED2B76 /* ChallengesViewController.swift */; };
 		D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */; };
 		D31AFABA229D61EE00ED2B76 /* BingTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA86229D61E900ED2B76 /* BingTranslation.swift */; };
 		D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA87229D61E900ED2B76 /* StudyViewController.swift */; };
-		D31AFABC229D61EE00ED2B76 /* ResourceBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA88229D61E900ED2B76 /* ResourceBundle.swift */; };
 		D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */; };
 		D31AFABE229D61EE00ED2B76 /* StatisticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */; };
 		D31AFABF229D61EE00ED2B76 /* Stylesheet+HablaEspanol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */; };
@@ -43,13 +43,9 @@
 		D31AFAC4229D61EE00ED2B76 /* Publisher+Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */; };
 		D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */; };
 		D31AFAC6229D61EE00ED2B76 /* StudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */; };
-		D31AFAC7229D61EE00ED2B76 /* VocabularyAssociationSpellingCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA93229D61EB00ED2B76 /* VocabularyAssociationSpellingCardView.swift */; };
 		D31AFAC8229D61EE00ED2B76 /* VocabularyAssociation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA94229D61EB00ED2B76 /* VocabularyAssociation.swift */; };
-		D31AFAC9229D61EE00ED2B76 /* LanguageDeck.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA95229D61EB00ED2B76 /* LanguageDeck.swift */; };
 		D31AFACA229D61EE00ED2B76 /* ClozeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA96229D61EB00ED2B76 /* ClozeCard.swift */; };
 		D31AFACB229D61EE00ED2B76 /* ChallengeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */; };
-		D31AFACC229D61EE00ED2B76 /* TextBundle+VocabularyCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA98229D61EC00ED2B76 /* TextBundle+VocabularyCard.swift */; };
-		D31AFACD229D61EE00ED2B76 /* NewVocabularyAssociationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA99229D61EC00ED2B76 /* NewVocabularyAssociationViewController.swift */; };
 		D31AFACE229D61EE00ED2B76 /* Cloze.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA9A229D61EC00ED2B76 /* Cloze.swift */; };
 		D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */; };
 		D31AFAD0229D61EE00ED2B76 /* ClozeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA9C229D61EC00ED2B76 /* ClozeTemplate.swift */; };
@@ -70,14 +66,9 @@
 		D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */; };
 		D31AFAEA229D620B00ED2B76 /* CardTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */; };
 		D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */; };
-		D31AFAEC229D620B00ED2B76 /* StudyMetadataSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE2229D620B00ED2B76 /* StudyMetadataSessionTests.swift */; };
-		D31AFAED229D620B00ED2B76 /* LanguageDeckBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE3229D620B00ED2B76 /* LanguageDeckBase.swift */; };
-		D31AFAEE229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE4229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift */; };
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF0229D620B00ED2B76 /* VocabularyAssocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE6229D620B00ED2B76 /* VocabularyAssocationTests.swift */; };
-		D31AFAF1229D620B00ED2B76 /* StatisticsCalendarDataSourceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE7229D620B00ED2B76 /* StatisticsCalendarDataSourceTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
-		D31AFAF3229D620B00ED2B76 /* LanguageDeckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE9229D620B00ED2B76 /* LanguageDeckTests.swift */; };
 		D31AFAF5229D654B00ED2B76 /* Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAF4229D654B00ED2B76 /* Stylesheet.swift */; };
 		D31FA12520ED845A00224FCD /* LibreFranklin-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */; };
 		D32A1BA2229D750F00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */; };
@@ -190,6 +181,9 @@
 		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
 		D30B0242229E513C00F3B459 /* StudyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLog.swift; sourceTree = "<group>"; };
 		D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+TextEditViewController.swift"; sourceTree = "<group>"; };
+		D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ParsingRules+CommonplaceBook.swift"; sourceTree = "<group>"; };
+		D30BD4F922A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssociationSpellingCardView.swift; sourceTree = "<group>"; };
+		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D3187CAB218D25D800815772 /* ShadowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShadowView.swift; sourceTree = "<group>"; };
 		D3187CAD218DF7AB00815772 /* MenuItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
@@ -199,7 +193,6 @@
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
 		D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeView.swift; sourceTree = "<group>"; };
 		D31AFA7B229D61E800ED2B76 /* MDCScrollEventForwarder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDCScrollEventForwarder.swift; sourceTree = "<group>"; };
-		D31AFA7C229D61E800ED2B76 /* VocabularyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyViewController.swift; sourceTree = "<group>"; };
 		D31AFA7D229D61E800ED2B76 /* TextBundleDocumentFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextBundleDocumentFactory.swift; sourceTree = "<group>"; };
 		D31AFA7E229D61E800ED2B76 /* VocabularyAssociationCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssociationCard.swift; sourceTree = "<group>"; };
 		D31AFA7F229D61E800ED2B76 /* StudyStatisticsStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyStatisticsStorage.swift; sourceTree = "<group>"; };
@@ -207,11 +200,9 @@
 		D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TimeInterval+CommonIntervals.swift"; sourceTree = "<group>"; };
 		D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardDocumentProperties.swift; sourceTree = "<group>"; };
 		D31AFA83229D61E800ED2B76 /* Challenge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Challenge.swift; sourceTree = "<group>"; };
-		D31AFA84229D61E800ED2B76 /* ChallengesViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengesViewController.swift; sourceTree = "<group>"; };
 		D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+SwiftFlash.swift"; sourceTree = "<group>"; };
 		D31AFA86229D61E900ED2B76 /* BingTranslation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BingTranslation.swift; sourceTree = "<group>"; };
 		D31AFA87229D61E900ED2B76 /* StudyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyViewController.swift; sourceTree = "<group>"; };
-		D31AFA88229D61E900ED2B76 /* ResourceBundle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceBundle.swift; sourceTree = "<group>"; };
 		D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
 		D31AFA8A229D61E900ED2B76 /* StatisticsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsViewController.swift; sourceTree = "<group>"; };
 		D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stylesheet+HablaEspanol.swift"; sourceTree = "<group>"; };
@@ -222,13 +213,9 @@
 		D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Publisher+Signal.swift"; sourceTree = "<group>"; };
 		D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
 		D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadata.swift; sourceTree = "<group>"; };
-		D31AFA93229D61EB00ED2B76 /* VocabularyAssociationSpellingCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssociationSpellingCardView.swift; sourceTree = "<group>"; };
 		D31AFA94229D61EB00ED2B76 /* VocabularyAssociation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssociation.swift; sourceTree = "<group>"; };
-		D31AFA95229D61EB00ED2B76 /* LanguageDeck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguageDeck.swift; sourceTree = "<group>"; };
 		D31AFA96229D61EB00ED2B76 /* ClozeCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeCard.swift; sourceTree = "<group>"; };
 		D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeTemplate.swift; sourceTree = "<group>"; };
-		D31AFA98229D61EC00ED2B76 /* TextBundle+VocabularyCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TextBundle+VocabularyCard.swift"; sourceTree = "<group>"; };
-		D31AFA99229D61EC00ED2B76 /* NewVocabularyAssociationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewVocabularyAssociationViewController.swift; sourceTree = "<group>"; };
 		D31AFA9A229D61EC00ED2B76 /* Cloze.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cloze.swift; sourceTree = "<group>"; };
 		D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetadataQuery.swift; sourceTree = "<group>"; };
 		D31AFA9C229D61EC00ED2B76 /* ClozeTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTemplate.swift; sourceTree = "<group>"; };
@@ -249,14 +236,9 @@
 		D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadOnlyDocumentCache.swift; sourceTree = "<group>"; };
 		D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTemplateTests.swift; sourceTree = "<group>"; };
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
-		D31AFAE2229D620B00ED2B76 /* StudyMetadataSessionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadataSessionTests.swift; sourceTree = "<group>"; };
-		D31AFAE3229D620B00ED2B76 /* LanguageDeckBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguageDeckBase.swift; sourceTree = "<group>"; };
-		D31AFAE4229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TextBundle+VocabularyCardTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE6229D620B00ED2B76 /* VocabularyAssocationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyAssocationTests.swift; sourceTree = "<group>"; };
-		D31AFAE7229D620B00ED2B76 /* StatisticsCalendarDataSourceTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsCalendarDataSourceTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
-		D31AFAE9229D620B00ED2B76 /* LanguageDeckTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LanguageDeckTests.swift; sourceTree = "<group>"; };
 		D31AFAF4229D654B00ED2B76 /* Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stylesheet.swift; sourceTree = "<group>"; };
 		D31FA12420ED845A00224FCD /* LibreFranklin-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-ExtraLight.otf"; sourceTree = "<group>"; };
 		D31FA12620ED847A00224FCD /* Merriweather-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Merriweather-Regular.otf"; sourceTree = "<group>"; };
@@ -455,7 +437,6 @@
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D31AFA83229D61E800ED2B76 /* Challenge.swift */,
 				D31AFA9D229D61EC00ED2B76 /* ChallengesDataSource.swift */,
-				D31AFA84229D61E800ED2B76 /* ChallengesViewController.swift */,
 				D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */,
 				D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */,
 				D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */,
@@ -486,7 +467,6 @@
 				D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
-				D31AFA95229D61EB00ED2B76 /* LanguageDeck.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
@@ -496,7 +476,6 @@
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
 				D31AFA8E229D61EA00ED2B76 /* MiniMarkdownSignal.swift */,
 				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
-				D31AFA99229D61EC00ED2B76 /* NewVocabularyAssociationViewController.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */,
 				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
@@ -504,13 +483,13 @@
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
 				D37E6D35228D9DD8006CD0FA /* PageProperties.swift */,
+				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
 				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
 				D375D34420EDE1B800EAB4F0 /* PlainTextDocument.swift */,
 				D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
-				D31AFA88229D61E900ED2B76 /* ResourceBundle.swift */,
 				D34D875A20ED840B0043F755 /* Resources */,
 				D31AFAA0229D61EC00ED2B76 /* ScrollingTopTabBarViewController.swift */,
 				D3187CAB218D25D800815772 /* ShadowView.swift */,
@@ -529,7 +508,6 @@
 				D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */,
 				D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */,
 				D31AFAA9229D61ED00ED2B76 /* TextBundle+Image.swift */,
-				D31AFA98229D61EC00ED2B76 /* TextBundle+VocabularyCard.swift */,
 				D31AFA7D229D61E800ED2B76 /* TextBundleDocumentFactory.swift */,
 				D3C1F406210E776000F92E85 /* TextBundleEditableDocument.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
@@ -545,8 +523,8 @@
 				D31AFA7E229D61E800ED2B76 /* VocabularyAssociationCard.swift */,
 				D31AFAA7229D61ED00ED2B76 /* VocabularyAssociationCardView.swift */,
 				D31AFAA6229D61ED00ED2B76 /* VocabularyAssociationSpellingCard.swift */,
-				D31AFA93229D61EB00ED2B76 /* VocabularyAssociationSpellingCardView.swift */,
-				D31AFA7C229D61E800ED2B76 /* VocabularyViewController.swift */,
+				D30BD4F922A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift */,
+				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -559,19 +537,14 @@
 				D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
-				D31AFAE3229D620B00ED2B76 /* LanguageDeckBase.swift */,
-				D31AFAE9229D620B00ED2B76 /* LanguageDeckTests.swift */,
 				D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */,
 				D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */,
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
-				D31AFAE7229D620B00ED2B76 /* StatisticsCalendarDataSourceTests.swift */,
 				D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */,
-				D31AFAE2229D620B00ED2B76 /* StudyMetadataSessionTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D36BC17921B571CA00935691 /* TestEditableDocument.swift */,
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 				D374AB6C229657C900F54561 /* TextArchiveTests.swift */,
-				D31AFAE4229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift */,
 				D31AFAE6229D620B00ED2B76 /* VocabularyAssocationTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
@@ -870,13 +843,12 @@
 				D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D31AFACB229D61EE00ED2B76 /* ChallengeTemplate.swift in Sources */,
-				D31AFAB0229D61EE00ED2B76 /* VocabularyViewController.swift in Sources */,
 				D31AFAB2229D61EE00ED2B76 /* VocabularyAssociationCard.swift in Sources */,
-				D31AFAC7229D61EE00ED2B76 /* VocabularyAssociationSpellingCardView.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
 				D31AFAD1229D61EE00ED2B76 /* ChallengesDataSource.swift in Sources */,
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
 				D31AFAD4229D61EE00ED2B76 /* ScrollingTopTabBarViewController.swift in Sources */,
+				D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
 				D31AFAAF229D61EE00ED2B76 /* MDCScrollEventForwarder.swift in Sources */,
@@ -889,7 +861,6 @@
 				D31AFABF229D61EE00ED2B76 /* Stylesheet+HablaEspanol.swift in Sources */,
 				D31AFADD229D61EE00ED2B76 /* TextBundle+Image.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
-				D31AFABC229D61EE00ED2B76 /* ResourceBundle.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */,
 				D31AFAB1229D61EE00ED2B76 /* TextBundleDocumentFactory.swift in Sources */,
@@ -910,6 +881,7 @@
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
 				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
+				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D31AFAD7229D61EE00ED2B76 /* StatisticsMonthHeaderReusableView.swift in Sources */,
 				D3187CB2218DFF4D00815772 /* DocumentDataSource.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
@@ -929,7 +901,6 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D32C8B5A214AC8DF0048BF80 /* DocumentSectionController.swift in Sources */,
-				D31AFAB8229D61EE00ED2B76 /* ChallengesViewController.swift in Sources */,
 				D384179D2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
@@ -943,11 +914,11 @@
 				D31AFAC4229D61EE00ED2B76 /* Publisher+Signal.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
-				D31AFACC229D61EE00ED2B76 /* TextBundle+VocabularyCard.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D31AFABA229D61EE00ED2B76 /* BingTranslation.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozeTemplate.swift in Sources */,
+				D30BD4FA22A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
 				D31AFAC2229D61EE00ED2B76 /* MiniMarkdownSignal.swift in Sources */,
@@ -955,8 +926,6 @@
 				D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
 				D31AFADB229D61EE00ED2B76 /* VocabularyAssociationCardView.swift in Sources */,
-				D31AFACD229D61EE00ED2B76 /* NewVocabularyAssociationViewController.swift in Sources */,
-				D31AFAC9229D61EE00ED2B76 /* LanguageDeck.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -966,10 +935,7 @@
 			files = (
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */,
-				D31AFAED229D620B00ED2B76 /* LanguageDeckBase.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
-				D31AFAF3229D620B00ED2B76 /* LanguageDeckTests.swift in Sources */,
-				D31AFAEE229D620B00ED2B76 /* TextBundle+VocabularyCardTests.swift in Sources */,
 				D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
@@ -980,8 +946,6 @@
 				D36BC17A21B571CA00935691 /* TestEditableDocument.swift in Sources */,
 				D31AFAEA229D620B00ED2B76 /* CardTemplateTests.swift in Sources */,
 				D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */,
-				D31AFAEC229D620B00ED2B76 /* StudyMetadataSessionTests.swift in Sources */,
-				D31AFAF1229D620B00ED2B76 /* StatisticsCalendarDataSourceTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import TextBundleKit
 
 private let encoder = JSONEncoder()
 private let decoder = JSONDecoder()
@@ -25,7 +24,7 @@ final class BingTranslation: NSObject {
     of phrase: String,
     from sourceLanguage: Language,
     to destinationLanguage: Language,
-    completion: @escaping (Result<String>) -> Void
+    completion: @escaping (Result<String, Swift.Error>) -> Void
   ) {
     var urlComponents = URLComponents(url: requestURL, resolvingAgainstBaseURL: false)!
     urlComponents.queryItems = [
@@ -36,9 +35,10 @@ final class BingTranslation: NSObject {
     var request = URLRequest(url: urlComponents.url!)
     request.httpMethod = "POST"
     let phrases = [RequestText(phrase)]
-    let dataResult = Result<Data> { try encoder.encode(phrases) }
+    let dataResult = Result<Data, Swift.Error> { try encoder.encode(phrases) }
     guard case .success(let data) = dataResult else {
-      let stringResult = dataResult.flatMap { _ in "" }
+      // Convert the data failure into a string failure and complete now.
+      let stringResult = dataResult.map { _ -> String in "" }
       completion(stringResult)
       return
     }
@@ -46,7 +46,7 @@ final class BingTranslation: NSObject {
     request.setValue(String(data.count), forHTTPHeaderField: "Content-Length")
     request.setValue(key1, forHTTPHeaderField: "Ocp-Apim-Subscription-Key")
 
-    let completeOnMainThread = { (result: Result<String>) in
+    let completeOnMainThread = { (result: Result<String, Swift.Error>) in
       if Thread.isMainThread {
         completion(result)
       } else {

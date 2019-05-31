@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 @testable import CommonplaceBookApp
-@testable import TextBundleKit
 import XCTest
 
 private let expectedMarkdown = """

@@ -2,9 +2,8 @@
 
 import Foundation
 import MiniMarkdown
-import TextBundleKit
 
-/// A struct that combines a TextBundle with the parsing rules for interpreting the contents
+/// A struct that combines document attribution with the parsing rules for interpreting the contents
 /// of the document.
 public struct CardDocumentProperties {
   /// The document name that the card came from.

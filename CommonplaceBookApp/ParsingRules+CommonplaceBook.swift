@@ -1,0 +1,13 @@
+// Copyright © 2019 Brian's Brain. All rights reserved.
+
+import Foundation
+import MiniMarkdown
+
+extension ParsingRules {
+  /// The variant of the parsing rules we use in CommonplaceBook
+  public static let commonplace: ParsingRules = {
+    var parsingRules = MiniMarkdown.ParsingRules()
+    parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
+    return parsingRules
+  }()
+}

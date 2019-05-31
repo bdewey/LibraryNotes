@@ -51,7 +51,7 @@ final class QuoteTemplateTests: XCTestCase {
   }
 
   func testRenderCloze() {
-    let parsingRules = LanguageDeck.parsingRules
+    let parsingRules = ParsingRules.commonplace
     let nodes = parsingRules.parse(contentWithCloze)
     let quoteTemplates = QuoteTemplate.extract(from: nodes)
     let renderer = RenderedMarkdown(

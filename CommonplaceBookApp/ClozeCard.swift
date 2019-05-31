@@ -4,7 +4,6 @@ import AVFoundation
 import CocoaLumberjack
 import Foundation
 import MiniMarkdown
-import TextBundleKit
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
 /// a hint. The removed word/phrase is a "cloze".
