@@ -59,7 +59,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           fileURL: metadataProvider.container.appendingPathComponent("archive.notebundle"),
           parsingRules: parsingRules
         )
-        noteArchiveDocument.openOrCreate(completionHandler: { _ in
+        noteArchiveDocument.open(completionHandler: { _ in
           metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
             noteArchiveDocument.importFileMetadataItems(
               fileMetadataItems,
