@@ -35,7 +35,6 @@
 		D31AFABF229D61EE00ED2B76 /* Stylesheet+HablaEspanol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */; };
 		D31AFAC0229D61EE00ED2B76 /* StatisticsCalendarDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */; };
 		D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */; };
-		D31AFAC2229D61EE00ED2B76 /* MiniMarkdownSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8E229D61EA00ED2B76 /* MiniMarkdownSignal.swift */; };
 		D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */; };
 		D31AFAC4229D61EE00ED2B76 /* Publisher+Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */; };
 		D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */; };
@@ -197,7 +196,6 @@
 		D31AFA8B229D61E900ED2B76 /* Stylesheet+HablaEspanol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stylesheet+HablaEspanol.swift"; sourceTree = "<group>"; };
 		D31AFA8C229D61E900ED2B76 /* StatisticsCalendarDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StatisticsCalendarDataSource.swift; sourceTree = "<group>"; };
 		D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RenderedMarkdown+Stylesheet.swift"; sourceTree = "<group>"; };
-		D31AFA8E229D61EA00ED2B76 /* MiniMarkdownSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniMarkdownSignal.swift; sourceTree = "<group>"; };
 		D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Typography.swift"; sourceTree = "<group>"; };
 		D31AFA90229D61EB00ED2B76 /* Publisher+Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Publisher+Signal.swift"; sourceTree = "<group>"; };
 		D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
@@ -456,7 +454,6 @@
 				D3187CAD218DF7AB00815772 /* MenuItem.swift */,
 				D35C72C42189E1340082396D /* MenuSectionController.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
-				D31AFA8E229D61EA00ED2B76 /* MiniMarkdownSignal.swift */,
 				D384179C2164F1840077923A /* MiniMarkdownTextStorage+CommonplaceBookApp.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */,
@@ -890,7 +887,6 @@
 				D30BD4FA22A0B847007E1F31 /* VocabularyAssociationSpellingCardView.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
-				D31AFAC2229D61EE00ED2B76 /* MiniMarkdownSignal.swift in Sources */,
 				D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */,
 				D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
