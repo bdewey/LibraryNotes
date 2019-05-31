@@ -57,6 +57,26 @@ public struct TextSnippetArchive: Equatable {
     symbolicReferences[key] = value
   }
 
+  /// Merge the contents of another TextSnippetArchive into the receiver.
+  ///
+  /// - note: This implementation is simple, "correct" (no data is lost), but
+  ///         suboptimal. If `other` has saved space by changing a snippet that
+  ///         exists in the reciever to a delta encoding based off a new snippet,
+  ///         it won't be delta encoded after this operation. Since I'm not sure
+  ///         I'll actually drive document conflicts from this method, leaving as is.
+  public mutating func merge(other: TextSnippetArchive) {
+    for snippet in other.snippets {
+      insert(snippet)
+    }
+  }
+
+  /// Non-mutating variant of `merge`
+  public func merging(other: TextSnippetArchive) -> TextSnippetArchive {
+    var copy = self
+    copy.merge(other: other)
+    return copy
+  }
+
   public func textSerialized() -> String {
     var results = TextSnippetArchive.identifier
     results.append(referencesSerialized())

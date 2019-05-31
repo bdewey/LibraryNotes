@@ -103,7 +103,20 @@ final class TextArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testMerge() {
+    var archive = TextSnippetArchive()
+    _ = archive.insert("alpha")
+    _ = archive.insert("beta")
+    var branch = archive
+    _ = archive.insert("gamma")
+    _ = branch.insert("delta")
+    let merged = archive.merging(other: branch)
+    XCTAssertEqual(merged.snippets.count, 4)
+  }
 }
+
+// swiftlint:disable line_length
 
 private let testContent = """
 # *Educated*, Tara Westover
