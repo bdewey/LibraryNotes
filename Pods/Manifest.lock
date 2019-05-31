@@ -19,6 +19,7 @@ PODS:
     - CocoaLumberjack/Core
   - CollectionViewLayouts (0.1.0):
     - CocoaLumberjack/Swift (>= 3.4)
+  - DataCompression (3.5.0)
   - DZNEmptyDataSet (1.8.1)
   - DZNPhotoPickerController (2.1):
     - DZNPhotoPickerController/Core (= 2.1)
@@ -574,6 +575,7 @@ PODS:
 
 DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
+  - DataCompression
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
@@ -590,6 +592,7 @@ SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - AFNetworking
     - CocoaLumberjack
+    - DataCompression
     - DZNEmptyDataSet
     - FLAnimatedImage
     - IGListKit
@@ -640,6 +643,7 @@ SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   CocoaLumberjack: 118bf4a820efc641f79fa487b75ed928dccfae23
   CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
+  DataCompression: 11afbfe7d6eae7269de6f35d4388691f545642e8
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
@@ -657,6 +661,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 9becc21e8fcb0c6b43348d3777cdf05b7976b38f
+PODFILE CHECKSUM: a6c44d536d05c1269514739e03d76f561ab85b09
 
 COCOAPODS: 1.6.0

@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import DataCompression
 import IGListKit
 import MiniMarkdown
 import UIKit
@@ -82,6 +83,8 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   private enum BundleWrapperKey {
+    static let compressedSnippets = "text.snippets.gz"
+    static let compressedStudyLog = "study.log.gz"
     static let snippets = "text.snippets"
     static let studyLog = "study.log"
   }
@@ -94,22 +97,14 @@ public final class NoteArchiveDocument: UIDocument {
       throw error(for: .unexpectedContentType)
     }
     topLevelFileWrapper = wrapper
-    guard
-      let data = wrapper.fileWrappers?[BundleWrapperKey.snippets]?.regularFileContents,
-      let text = String(data: data, encoding: .utf8) else {
-      // Is this an error? Or expected for a new document?
-      return
-    }
-    if let logData = wrapper.fileWrappers?[BundleWrapperKey.studyLog]?.regularFileContents,
-      let logText = String(data: logData, encoding: .utf8),
-      let studyLog = StudyLog(logText) {
-      self.studyLog = studyLog
-    }
+    self.studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
     do {
-      let pageProperties = try noteArchiveQueue.sync { () -> [String: PageProperties] in
-        noteArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: text)
-        return noteArchive.pageProperties
-      }
+      let noteArchive = try NoteArchiveDocument.loadNoteArchive(
+        from: wrapper,
+        parsingRules: parsingRules
+      )
+      let pageProperties = noteArchive.pageProperties
+      noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(pageProperties.count) pages")
       notifyObservers(of: pageProperties)
     } catch {
@@ -122,30 +117,21 @@ public final class NoteArchiveDocument: UIDocument {
     let topLevelFileWrapper = self.topLevelFileWrapper
       ?? FileWrapper(directoryWithFileWrappers: [:])
     precondition(topLevelFileWrapper.isDirectory)
-    var shouldNotify = false
-    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.snippets] == nil {
-      let now = Date()
-      try noteArchiveQueue.sync {
-        for (pageIdentifier, modifiedText) in modifiedPageContents {
-          try self.noteArchive.updateText(
-            for: pageIdentifier,
-            to: modifiedText,
-            contentChangeTime: now,
-            versionTimestamp: now
-          )
-          shouldNotify = true
-        }
-        modifiedPageContents.removeAll()
-      }
-      topLevelFileWrapper.addFileWrapper(textSnippetsFileWrapper())
+    let shouldNotify = try archiveModifiedPageContentsIfNeeded()
+    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedSnippets] == nil {
+      topLevelFileWrapper.addFileWrapper(try compressedSnippetsFileWrapper())
     }
-    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.studyLog] == nil {
+    if topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedStudyLog] == nil {
+      guard let compressedLog = studyLog.description.data(using: .utf8)!.gzip() else {
+        throw error(for: .couldNotCompressStudyLog)
+      }
       let logWrapper = FileWrapper(
-        regularFileWithContents: studyLog.description.data(using: .utf8)!
+        regularFileWithContents: compressedLog
       )
-      logWrapper.preferredFilename = BundleWrapperKey.studyLog
+      logWrapper.preferredFilename = BundleWrapperKey.compressedStudyLog
       topLevelFileWrapper.addFileWrapper(logWrapper)
     }
+    purgeUnneededWrappers(from: topLevelFileWrapper)
     self.topLevelFileWrapper = topLevelFileWrapper
     DDLogInfo("Saving: \(topLevelFileWrapper.fileWrappers!.keys)")
     if shouldNotify {
@@ -157,16 +143,16 @@ public final class NoteArchiveDocument: UIDocument {
   /// Lets the UIDocument infrastructure know we have content to save, and also
   /// discards our in-memory representation of the snippet file wrapper.
   internal func invalidateSavedSnippets() {
-    if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.snippets] {
-      topLevelFileWrapper.removeFileWrapper(archiveWrapper)
+    guard let topLevelFileWrapper = topLevelFileWrapper else { return }
+    if let compressedWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedSnippets] {
+      topLevelFileWrapper.removeFileWrapper(compressedWrapper)
     }
     updateChangeCount(.done)
   }
 
   internal func invalidateSavedStudyLog() {
     if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.studyLog] {
+      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedStudyLog] {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
@@ -203,15 +189,74 @@ public extension NoteArchiveDocument {
   }
 }
 
+/// Load / save support
 private extension NoteArchiveDocument {
-  /// Returns a FileWrapper containing the serialized text snippets
-  func textSnippetsFileWrapper() -> FileWrapper {
+  static func loadNoteArchive(
+    from wrapper: FileWrapper,
+    parsingRules: ParsingRules
+  ) throws -> NoteArchive {
+    let maybeData = wrapper.fileWrappers?[BundleWrapperKey.compressedSnippets]?.regularFileContents?.gunzip()
+      ?? wrapper.fileWrappers?[BundleWrapperKey.snippets]?.regularFileContents
+    guard
+      let data = maybeData,
+      let text = String(data: data, encoding: .utf8) else {
+        // Is this an error? Or expected for a new document?
+        return NoteArchive(parsingRules: parsingRules)
+    }
+    return try NoteArchive(parsingRules: parsingRules, textSerialization: text)
+  }
+
+  static func loadStudyLog(from wrapper: FileWrapper) -> StudyLog {
+    let maybeData = wrapper.fileWrappers?[BundleWrapperKey.compressedStudyLog]?.regularFileContents?.gunzip()
+      ?? wrapper.fileWrappers?[BundleWrapperKey.studyLog]?.regularFileContents
+    guard let logData = maybeData,
+      let logText = String(data: logData, encoding: .utf8),
+      let studyLog = StudyLog(logText) else {
+        return StudyLog()
+    }
+    return studyLog
+  }
+
+  /// Commits `self.modifiedPageContents` to `noteArchive`
+  /// - returns: True if we added contents to `noteArchive`
+  func archiveModifiedPageContentsIfNeeded() throws -> Bool {
+    var shouldNotify = false
+    let now = Date()
+    try noteArchiveQueue.sync {
+      for (pageIdentifier, modifiedText) in modifiedPageContents {
+        try self.noteArchive.updateText(
+          for: pageIdentifier,
+          to: modifiedText,
+          contentChangeTime: now,
+          versionTimestamp: now
+        )
+        shouldNotify = true
+      }
+      modifiedPageContents.removeAll()
+    }
+    return shouldNotify
+  }
+
+  func compressedSnippetsFileWrapper() throws -> FileWrapper {
     let text = noteArchiveQueue.sync {
       noteArchive.textSerialized()
     }
-    let fileWrapper = FileWrapper(regularFileWithContents: text.data(using: .utf8)!)
-    fileWrapper.preferredFilename = BundleWrapperKey.snippets
-    return fileWrapper
+    guard let compressed = text.data(using: .utf8)!.gzip()  else  {
+      throw error(for: .couldNotCompressArchive)
+    }
+    let compressedWrapper = FileWrapper(regularFileWithContents: compressed)
+    compressedWrapper.preferredFilename = BundleWrapperKey.compressedSnippets
+    return compressedWrapper
+  }
+
+  /// Removes unneeded data file wrappers from `directoryWrapper`
+  func purgeUnneededWrappers(from directoryWrapper: FileWrapper) {
+    precondition(directoryWrapper.isDirectory)
+    let unneededKeys = Set(directoryWrapper.fileWrappers!.keys)
+      .subtracting([BundleWrapperKey.compressedStudyLog, BundleWrapperKey.compressedSnippets])
+    for key in unneededKeys {
+      directoryWrapper.removeFileWrapper(directoryWrapper.fileWrappers![key]!)
+    }
   }
 }
 
@@ -220,6 +265,8 @@ public extension NoteArchiveDocument {
   static let errorDomain = "NoteArchiveDocument"
 
   enum ErrorCode: String, CaseIterable {
+    case couldNotCompressArchive = "Could not compress text.snippets"
+    case couldNotCompressStudyLog = "Could not compress study.log"
     case textSnippetsDeserializeError = "Unexpected error deserializing text.snippets"
     case unexpectedContentType = "Unexpected file content type"
   }
