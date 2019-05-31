@@ -115,28 +115,29 @@ extension MarkdownAttributedStringRenderer {
       stylesheet: stylesheet,
       style: textStyle
     )
-    guard let document = document as? TextBundleDocument else { return renderer }
-    renderer.renderFunctions[.image] = { node, _ in
-      let results = NSMutableAttributedString()
-      let imageNode = node as! MiniMarkdown.Image // swiftlint:disable:this force_cast
-      if let image = document.image(for: node) {
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        let aspectRatio = image.size.width / image.size.height
-        attachment.bounds = CGRect(x: 0, y: 0, width: 100.0 * aspectRatio, height: 100.0)
-        results.append(NSAttributedString(attachment: attachment))
-      }
-      if !imageNode.text.isEmpty {
-        results.append(
-          NSAttributedString(
-            string: "\n" + String(imageNode.text),
-            attributes: stylesheet.attributes(style: captionStyle)
-          )
-        )
-      }
-      return results
-    }
     return renderer
+//    guard let document = document as? TextBundleDocument else { return renderer }
+//    renderer.renderFunctions[.image] = { node, _ in
+//      let results = NSMutableAttributedString()
+//      let imageNode = node as! MiniMarkdown.Image // swiftlint:disable:this force_cast
+//      if let image = document.image(for: node) {
+//        let attachment = NSTextAttachment()
+//        attachment.image = image
+//        let aspectRatio = image.size.width / image.size.height
+//        attachment.bounds = CGRect(x: 0, y: 0, width: 100.0 * aspectRatio, height: 100.0)
+//        results.append(NSAttributedString(attachment: attachment))
+//      }
+//      if !imageNode.text.isEmpty {
+//        results.append(
+//          NSAttributedString(
+//            string: "\n" + String(imageNode.text),
+//            attributes: stylesheet.attributes(style: captionStyle)
+//          )
+//        )
+//      }
+//      return results
+//    }
+//    return renderer
   }
 
   static func promptRenderer(

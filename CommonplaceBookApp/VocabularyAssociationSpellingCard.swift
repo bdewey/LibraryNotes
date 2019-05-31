@@ -42,11 +42,12 @@ struct VocabularyAssociationSpellingCard: Challenge {
   }
 
   func image(document: UIDocument, parseableDocument: CardDocumentProperties) -> UIImage? {
-    guard let document = document as? TextBundleDocument else { return nil }
-    let blocks = parseableDocument.parsingRules.parse(vocabularyAssociation.english)
-    return blocks.map { $0.findNodes(where: { $0.type == .image }) }
-      .joined()
-      .compactMap { document.image(for: $0) }
-      .first
+    return nil
+//    guard let document = document as? TextBundleDocument else { return nil }
+//    let blocks = parseableDocument.parsingRules.parse(vocabularyAssociation.english)
+//    return blocks.map { $0.findNodes(where: { $0.type == .image }) }
+//      .joined()
+//      .compactMap { document.image(for: $0) }
+//      .first
   }
 }
