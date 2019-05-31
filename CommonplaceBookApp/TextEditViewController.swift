@@ -3,7 +3,6 @@
 import UIKit
 
 import CocoaLumberjack
-import CwlSignal
 import MaterialComponents
 import MiniMarkdown
 import TextBundleKit
@@ -68,8 +67,6 @@ final class TextEditViewController: UIViewController,
   private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
-  internal var miniMarkdownSignal: Signal<[Node]> { return textStorage.markdownSignal }
-  private var endpoint: SignalEndpoint<Tagged<String>>?
   public var headerView: MDCFlexibleHeaderView?
   public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
