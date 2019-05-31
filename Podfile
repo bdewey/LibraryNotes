@@ -21,8 +21,6 @@ target 'CommonplaceBookApp' do
   pod 'SDWebImage/GIF', '~> 4.0'
   pod 'SnapKit'
   pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
-  # pod 'TextBundleKit', :path => '../textbundle-swift', :testspecs => ['unit']
-  pod 'TextBundleKit', :git => 'https://github.com/bdewey/textbundle-swift', :testspecs => ['unit']
   pod 'Yams'
 
   target 'CommonplaceBookAppTests' do
