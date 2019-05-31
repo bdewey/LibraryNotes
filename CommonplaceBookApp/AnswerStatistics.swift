@@ -3,7 +3,7 @@
 import Foundation
 
 /// Contains counts about the number of times a prompt was answered correctly versus incorrectly.
-public struct AnswerStatistics: Codable, Equatable {
+public struct AnswerStatistics: Codable, Equatable, Hashable {
   /// The correct count
   public var correct: Int
 

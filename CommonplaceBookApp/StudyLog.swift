@@ -5,7 +5,7 @@ import Foundation
 public struct StudyLog {
   public init() {}
 
-  public struct Entry {
+  public struct Entry: Hashable, Comparable {
     public let timestamp: Date
     public let identifier: ChallengeIdentifier
     public let statistics: AnswerStatistics
@@ -16,10 +16,46 @@ public struct StudyLog {
       self.identifier = identifier
       self.statistics = statistics
     }
+
+    public static func < (lhs: StudyLog.Entry, rhs: StudyLog.Entry) -> Bool {
+      if lhs.timestamp != rhs.timestamp { return lhs.timestamp < rhs.timestamp }
+      if lhs.identifier.templateDigest != rhs.identifier.templateDigest {
+        return lhs.identifier.templateDigest! < rhs.identifier.templateDigest!
+      }
+      if lhs.identifier.index != rhs.identifier.index {
+        return lhs.identifier.index < rhs.identifier.index
+      }
+      if lhs.statistics.correct != rhs.statistics.correct {
+        return lhs.statistics.correct < rhs.statistics.correct
+      }
+      return lhs.statistics.incorrect < rhs.statistics.incorrect
+    }
   }
 
   private var entries: [Entry] = []
 
+  /// Adds an entry to the log.
+  public mutating func append(_ entry: Entry) {
+    entries.append(entry)
+  }
+
+  /// Constructs an entry from parameters and inserts it into the log.
+  /// (Slightly easier to use in tests.)
+  public mutating func appendEntry(
+    challengeIdentifier: ChallengeIdentifier,
+    correct: Int = 1,
+    incorrect: Int = 0,
+    timestamp: Date = Date()
+  ) {
+    let entry = Entry(
+      timestamp: timestamp,
+      identifier: challengeIdentifier,
+      statistics: AnswerStatistics(correct: correct, incorrect: incorrect)
+    )
+    entries.append(entry)
+  }
+
+  /// Constructs log entries from all of the challenges in `studySession` and adds them to the log.
   public mutating func updateStudySessionResults(
     _ studySession: StudySession,
     on date: Date = Date()
@@ -28,6 +64,17 @@ public struct StudyLog {
       let entry = Entry(timestamp: date, identifier: identifier, statistics: statistics)
       entries.append(entry)
     }
+  }
+
+  /// Merges the entries from another study log into this one.
+  ///
+  /// - Any new entries from `other` are copied into the receiver
+  /// - Any duplicate entries are ignored
+  /// - The results are sorted by time
+  public mutating func merge(other: StudyLog) {
+    entries = Array(
+      Set(entries).union(Set(other.entries))
+    ).sorted()
   }
 
   /// Computes dates until which we should suppress the given challenge identifier from further
