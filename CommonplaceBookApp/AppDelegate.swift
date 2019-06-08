@@ -131,6 +131,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     }
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
 
+    if UserDefaults.standard.value(forKey: "use_icloud") == nil {
+      DDLogInfo("Setting default value for use_icloud")
+      UserDefaults.standard.setValue(true, forKey: "use_icloud")
+    }
+    assert(UserDefaults.standard.value(forKey: "use_icloud") != nil)
     if UserDefaults.standard.bool(forKey: "use_icloud") {
       DDLogInfo("Trying to get documents from iCloud")
       makeICloudProvider { result in
