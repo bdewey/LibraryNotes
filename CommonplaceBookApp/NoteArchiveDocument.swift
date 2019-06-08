@@ -33,7 +33,7 @@ public final class NoteArchiveDocument: UIDocument {
   public let parsingRules: ParsingRules
 
   /// Top-level FileWrapper for our contents
-  private var topLevelFileWrapper: FileWrapper?
+  private var topLevelFileWrapper = FileWrapper(directoryWithFileWrappers: [:])
 
   /// The actual document contents.
   internal var noteArchive: NoteArchive
@@ -114,8 +114,6 @@ public final class NoteArchiveDocument: UIDocument {
 
   /// Serialize `noteArchive` to `topLevelFileWrapper` and return `topLevelFileWrapper` for saving
   public override func contents(forType typeName: String) throws -> Any {
-    let topLevelFileWrapper = self.topLevelFileWrapper
-      ?? FileWrapper(directoryWithFileWrappers: [:])
     precondition(topLevelFileWrapper.isDirectory)
     let shouldNotify = try archiveModifiedPageContentsIfNeeded()
     if topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedSnippets] == nil {
@@ -132,7 +130,6 @@ public final class NoteArchiveDocument: UIDocument {
       topLevelFileWrapper.addFileWrapper(logWrapper)
     }
     purgeUnneededWrappers(from: topLevelFileWrapper)
-    self.topLevelFileWrapper = topLevelFileWrapper
     DDLogInfo("Saving: \(topLevelFileWrapper.fileWrappers!.keys)")
     if shouldNotify {
       notifyObservers(of: pageProperties)
@@ -143,7 +140,6 @@ public final class NoteArchiveDocument: UIDocument {
   /// Lets the UIDocument infrastructure know we have content to save, and also
   /// discards our in-memory representation of the snippet file wrapper.
   internal func invalidateSavedSnippets() {
-    guard let topLevelFileWrapper = topLevelFileWrapper else { return }
     if let compressedWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedSnippets] {
       topLevelFileWrapper.removeFileWrapper(compressedWrapper)
     }
@@ -151,8 +147,7 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   internal func invalidateSavedStudyLog() {
-    if let topLevelFileWrapper = topLevelFileWrapper,
-      let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedStudyLog] {
+    if let archiveWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedStudyLog] {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
@@ -241,7 +236,7 @@ private extension NoteArchiveDocument {
     let text = noteArchiveQueue.sync {
       noteArchive.textSerialized()
     }
-    guard let compressed = text.data(using: .utf8)!.gzip()  else  {
+    guard let compressed = text.data(using: .utf8)!.gzip() else {
       throw error(for: .couldNotCompressArchive)
     }
     let compressedWrapper = FileWrapper(regularFileWithContents: compressed)
