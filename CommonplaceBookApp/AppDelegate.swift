@@ -23,14 +23,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     .quote,
   ]
 
-  private lazy var loadingViewController: UIViewController = {
+  private lazy var loadingViewController: LoadingViewController = {
     let loadingViewController = LoadingViewController(stylesheet: commonplaceBookStylesheet)
     loadingViewController.title = "Interactive Notebook"
     loadingViewController.delegate = self
-    let navigationController = MDCAppBarNavigationController()
-    navigationController.delegate = self
-    navigationController.pushViewController(loadingViewController, animated: false)
-    return navigationController
+    return loadingViewController
   }()
 
   var noteArchiveDocument: NoteArchiveDocument?
@@ -42,7 +39,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
     let window = UIWindow(frame: UIScreen.main.bounds)
-    window.rootViewController = loadingViewController
+
+    let navigationController = MDCAppBarNavigationController()
+    navigationController.delegate = self
+    navigationController.pushViewController(loadingViewController, animated: false)
+    window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
     return true
@@ -51,7 +52,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   func applicationDidBecomeActive(_ application: UIApplication) {
     guard let window = window, noteArchiveDocument == nil else { return }
     let parsingRules = ParsingRules.commonplace
-    window.rootViewController = loadingViewController
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
@@ -77,6 +77,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let message = MDCSnackbarMessage(text: messageText)
         MDCSnackbarManager.show(message)
+        self.loadingViewController.style = .error
       }
     })
   }
@@ -89,35 +90,58 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     noteArchiveDocument = nil
   }
 
-  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
-    if CommandLine.arguments.contains("--uitesting") {
-      do {
-        let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
-        let metadataProvider = try DirectoryMetadataProvider(
-          container: container,
-          deleteExistingContents: true
-        )
-        completion(.success(metadataProvider))
-      } catch {
-        completion(.failure(error))
-      }
-    } else {
-      DispatchQueue.global(qos: .default).async {
-        if let containerURL = FileManager.default.url(
-          forUbiquityContainerIdentifier: "iCloud.org.brians-brain.commonplace-book"
-        ) {
-          DispatchQueue.main.async {
-            let metadataProvider = ICloudFileMetadataProvider(
-              container: containerURL.appendingPathComponent("Documents")
-            )
-            completion(.success(metadataProvider))
-          }
-        } else {
-          DispatchQueue.main.async {
-            completion(.failure(Error.noCloud))
-          }
+  private func makeDirectoryProvider(
+    at container: URL,
+    deleteExistingContents: Bool = false
+  ) -> Result<FileMetadataProvider, Swift.Error> {
+    return Result {
+      try DirectoryMetadataProvider(
+        container: container,
+        deleteExistingContents: deleteExistingContents
+      )
+    }
+  }
+
+  private func makeICloudProvider(
+    completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void
+  ) {
+    DispatchQueue.global(qos: .default).async {
+      if let containerURL = FileManager.default.url(
+        forUbiquityContainerIdentifier: "iCloud.org.brians-brain.CommonplaceBookApp"
+      ) {
+        DispatchQueue.main.async {
+          let metadataProvider = ICloudFileMetadataProvider(
+            container: containerURL.appendingPathComponent("Documents")
+          )
+          completion(.success(metadataProvider))
+        }
+      } else {
+        DispatchQueue.main.async {
+          completion(.failure(Error.noCloud))
         }
       }
+    }
+  }
+
+  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
+    if CommandLine.arguments.contains("--uitesting") {
+      let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
+      completion(makeDirectoryProvider(at: container, deleteExistingContents: true))
+      return
+    }
+    let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
+
+    if UserDefaults.standard.bool(forKey: "use_icloud") {
+      DDLogInfo("Trying to get documents from iCloud")
+      makeICloudProvider { result in
+        let innerResult = result.flatMapError { _ -> Result<FileMetadataProvider, Swift.Error> in
+          DDLogInfo("Error getting iCloud documents; falling back to local")
+          return self.makeDirectoryProvider(at: directoryURL)
+        }
+        completion(innerResult)
+      }
+    } else {
+      completion(makeDirectoryProvider(at: directoryURL))
     }
   }
 

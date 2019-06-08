@@ -20,6 +20,17 @@ public final class LoadingViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  public enum LoadingStyle {
+    case error
+    case loading
+  }
+
+  public var style = LoadingStyle.loading {
+    didSet {
+      updateUI()
+    }
+  }
+
   public weak var delegate: LoadingViewControllerDelegate?
   public let stylesheet: Stylesheet
 
@@ -30,6 +41,11 @@ public final class LoadingViewController: UIViewController {
     activityIndicator.snp.makeConstraints { make in
       make.center.equalToSuperview()
     }
+    view.addSubview(errorImageView)
+    errorImageView.snp.makeConstraints { make in
+      make.center.equalToSuperview()
+    }
+    updateUI()
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.200) {
       self.activityIndicator.startAnimating()
     }
@@ -39,9 +55,19 @@ public final class LoadingViewController: UIViewController {
     activityIndicator.cycleColors = cycleColors
   }
 
+  private func updateUI() {
+    activityIndicator.isHidden = style != .loading
+    errorImageView.isHidden = style != .error
+  }
+
   private lazy var activityIndicator: MDCActivityIndicator = {
     let activityIndicator = MDCActivityIndicator()
     activityIndicator.sizeToFit()
     return activityIndicator
+  }()
+
+  private lazy var errorImageView: UIImageView = {
+    let image = UIImage(named: "round_error_outline_black_48pt")
+    return UIImageView(image: image)
   }()
 }
