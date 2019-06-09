@@ -43,6 +43,8 @@ public final class NoteArchiveDocument: UIDocument {
 
   public internal(set) var studyLog = StudyLog()
 
+  public private(set) var previousError: Error?
+
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// The observers.
@@ -135,6 +137,11 @@ public final class NoteArchiveDocument: UIDocument {
       notifyObservers(of: pageProperties)
     }
     return topLevelFileWrapper
+  }
+
+  public override func handleError(_ error: Error, userInteractionPermitted: Bool) {
+    previousError = error
+    super.handleError(error, userInteractionPermitted: userInteractionPermitted)
   }
 
   /// Lets the UIDocument infrastructure know we have content to save, and also

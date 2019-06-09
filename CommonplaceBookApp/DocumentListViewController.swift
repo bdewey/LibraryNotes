@@ -205,6 +205,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     studyVC.modalTransitionStyle = .crossDissolve
     studyVC.maximumCardWidth = 440
     studyVC.title = navigationItem.title
+    studyVC.modalPresentationStyle = .fullScreen
     present(studyVC, animated: true, completion: nil)
   }
 }

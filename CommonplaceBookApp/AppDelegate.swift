@@ -60,7 +60,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
           parsingRules: parsingRules
         )
         DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
-        noteArchiveDocument.open(completionHandler: { _ in
+        noteArchiveDocument.open(completionHandler: { success in
+          DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
           metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
             noteArchiveDocument.importFileMetadataItems(
               fileMetadataItems,
