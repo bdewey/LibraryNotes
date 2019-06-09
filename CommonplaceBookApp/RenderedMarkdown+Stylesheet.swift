@@ -16,16 +16,7 @@ extension RenderedMarkdown {
     formatters[.bold] = { $1.bold = true }
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
     renderers[.delimiter] = { _, _ in NSAttributedString() }
-    renderers[.cloze] = { node, attributes in
-      guard let cloze = node as? Cloze else {
-        assertionFailure()
-        return NSAttributedString()
-      }
-      return NSAttributedString(
-        string: String(cloze.hiddenText),
-        attributes: attributes
-      )
-    }
+    renderers[.clozeHint] = { _, _ in NSAttributedString() }
     self.init(
       parsingRules: parsingRules,
       formatters: formatters,
@@ -45,16 +36,7 @@ extension MarkdownAttributedStringRenderer {
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.bold] = { $1.bold = true }
     renderFunctions[.delimiter] = { _, _ in NSAttributedString() }
-    renderFunctions[.cloze] = { node, attributes in
-      guard let cloze = node as? Cloze else {
-        assertionFailure()
-        return NSAttributedString()
-      }
-      return NSAttributedString(
-        string: String(cloze.hiddenText),
-        attributes: attributes
-      )
-    }
+    renderFunctions[.clozeHint] = { _, _ in NSAttributedString() }
     defaultAttributes = stylesheet.attributes(style: style)
     defaultAttributes.lineHeightMultiple = 1.2
   }

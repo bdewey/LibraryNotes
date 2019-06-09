@@ -579,8 +579,8 @@ DEPENDENCIES:
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `https://github.com/bdewey/MiniMarkdown`)
-  - MiniMarkdown/Tests (from `https://github.com/bdewey/MiniMarkdown`)
+  - MiniMarkdown (from `../MiniMarkdown`)
+  - MiniMarkdown/Tests (from `../MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SDWebImage (~> 4.0)
   - SDWebImage/GIF (~> 4.0)
@@ -613,7 +613,7 @@ EXTERNAL SOURCES:
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
   MiniMarkdown:
-    :git: https://github.com/bdewey/MiniMarkdown
+    :path: "../MiniMarkdown"
   NunitoSans:
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
@@ -629,9 +629,6 @@ CHECKOUT OPTIONS:
   MaterialComponents:
     :commit: c5c237fd0f98ca1312e854998133fc9a19ccfb2f
     :git: https://github.com/material-components/material-components-ios
-  MiniMarkdown:
-    :commit: 66fe9b37263252463af9c248b1010d9fa62d21ff
-    :git: https://github.com/bdewey/MiniMarkdown
   NunitoSans:
     :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
     :git: https://github.com/bdewey/NunitoSans
@@ -661,6 +658,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: a6c44d536d05c1269514739e03d76f561ab85b09
+PODFILE CHECKSUM: 0506d79b0c60cd172a6823e7481e842c89d93f9d
 
 COCOAPODS: 1.6.0

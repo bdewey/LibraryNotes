@@ -12,8 +12,8 @@ target 'CommonplaceBookApp' do
   pod 'DataCompression'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
   pod 'IGListKit', '~> 3.0'
-  # pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
-  pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
+  pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
+  # pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'NunitoSans', :git => 'https://github.com/bdewey/NunitoSans'
   pod 'SDWebImage', '~> 4.0'

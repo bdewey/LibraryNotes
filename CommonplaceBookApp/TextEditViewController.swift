@@ -104,7 +104,12 @@ final class TextEditViewController: UIViewController,
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
+    formatters[.cloze] = { $1.backgroundColor = UIColor.yellow.withAlphaComponent(0.3) }
+    formatters[.clozeHint] = {
+      $1.color = stylesheet.colors
+        .onSurfaceColor
+        .withAlphaComponent(stylesheet.alpha[.darkTextMediumEmphasis] ?? 0.5)
+    }
     formatters[.hashtag] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
     formatters[.blockQuote] = {
       $1.backgroundColor = stylesheet.colors.darkSurfaceColor

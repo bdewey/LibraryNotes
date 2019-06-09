@@ -191,7 +191,7 @@ extension Stylesheet {
       .font: typographyScheme.body2,
       .foregroundColor: colors.onSurfaceColor
         .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
-      .backgroundColor: UIColor(rgb: 0xF6E6F0),
+      .backgroundColor: UIColor.yellow.withAlphaComponent(0.3),
       .paragraphStyle: defaultParagraphStyle,
     ]
   }
