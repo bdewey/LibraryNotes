@@ -62,4 +62,35 @@ final class ClozeTests: XCTestCase {
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
   }
+
+  func testClozeFormatting() {
+    // Simple storage that will mark clozes as bold.
+    let textStorage = MiniMarkdownTextStorage(
+      parsingRules: parsingRules,
+      formatters: [.cloze: { $1.bold = true }],
+      renderers: [:]
+    )
+    let layoutManager = NSLayoutManager()
+    textStorage.addLayoutManager(layoutManager)
+    let textContainer = NSTextContainer()
+    layoutManager.addTextContainer(textContainer)
+    let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
+    textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+
+    textView.insertText("Testing")
+    textView.selectedRange = NSRange(location: 0, length: 7)
+
+    let range = textView.selectedRange
+    textView.selectedRange = NSRange(location: range.upperBound, length: 0)
+    textView.insertText(")")
+    textView.selectedRange = NSRange(location: range.lowerBound, length: 0)
+    textView.insertText("?[](")
+    textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
+
+    var testRange = NSRange(location: NSNotFound, length: 0)
+    // swiftlint:disable:next force_cast
+    let actualFont = textStorage.attributes(at: 0, effectiveRange: &testRange)[.font] as! UIFont
+    XCTAssert(actualFont.fontDescriptor.symbolicTraits.contains(.traitBold))
+    XCTAssertEqual(testRange, NSRange(location: 0, length: 12))
+  }
 }

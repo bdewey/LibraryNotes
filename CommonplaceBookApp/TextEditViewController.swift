@@ -202,6 +202,8 @@ final class TextEditViewController: UIViewController,
       autoFirstResponder = false
     }
     adjustMargins(size: view!.bounds.size)
+    let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
+    UIMenuController.shared.menuItems = [highlightMenuItem]
   }
 
   override func viewWillTransition(
@@ -325,5 +327,18 @@ extension TextEditViewController: UITextViewDelegate {
 extension TextEditViewController: UIScrollViewForTracking {
   var scrollViewForTracking: UIScrollView {
     return textView
+  }
+}
+
+// MARK: - Commands
+private extension TextEditViewController {
+  /// Converts the currently selected text to a cloze.
+  @objc func convertTextToCloze() {
+    let range = textView.selectedRange
+    textView.selectedRange = NSRange(location: range.upperBound, length: 0)
+    textView.insertText(")")
+    textView.selectedRange = NSRange(location: range.lowerBound, length: 0)
+    textView.insertText("?[](")
+    textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
   }
 }
