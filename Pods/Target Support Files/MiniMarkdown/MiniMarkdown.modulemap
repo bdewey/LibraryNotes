@@ -1,6 +1,0 @@
-framework module MiniMarkdown {
-  umbrella header "MiniMarkdown-umbrella.h"
-
-  export *
-  module * { export * }
-}

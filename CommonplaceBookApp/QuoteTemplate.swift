@@ -2,6 +2,7 @@
 
 import Foundation
 import MiniMarkdown
+import UIKit
 
 extension ChallengeTemplateType {
   public static let quote = ChallengeTemplateType(rawValue: "quote", class: QuoteTemplate.self)

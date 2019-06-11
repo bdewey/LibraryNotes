@@ -554,10 +554,6 @@ PODS:
     - MaterialComponents/private/Math
   - MDFInternationalization (2.0.0)
   - MDFTextAccessibility (2.0.0)
-  - MiniMarkdown (0.11.1):
-    - CocoaLumberjack/Swift (>= 3.4)
-  - MiniMarkdown/Tests (0.11.1):
-    - CocoaLumberjack/Swift (>= 3.4)
   - MotionAnimator (2.8.1):
     - MotionInterchange (~> 1.6)
   - MotionInterchange (1.6.0)
@@ -579,8 +575,6 @@ DEPENDENCIES:
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
   - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
-  - MiniMarkdown (from `../MiniMarkdown`)
-  - MiniMarkdown/Tests (from `../MiniMarkdown`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SDWebImage (~> 4.0)
   - SDWebImage/GIF (~> 4.0)
@@ -612,8 +606,6 @@ EXTERNAL SOURCES:
     :git: https://github.com/bdewey/DZNPhotoPickerController
   MaterialComponents:
     :git: https://github.com/material-components/material-components-ios
-  MiniMarkdown:
-    :path: "../MiniMarkdown"
   NunitoSans:
     :git: https://github.com/bdewey/NunitoSans
   SwipeCellKit:
@@ -648,7 +640,6 @@ SPEC CHECKSUMS:
   MaterialComponents: 0ee07d35506ced6cab8b3c8591f0031da36e8cbf
   MDFInternationalization: 010097556d6b09d2c4ea38e0820ea6d37be6a314
   MDFTextAccessibility: 85c09a1bd9c321f494348e632a25063bcda35a53
-  MiniMarkdown: c985e1f3a566c0a19f06cf0985f10c9da466f2bb
   MotionAnimator: ee16aa30567c5bae0fb2750c132915829cfaaf8a
   MotionInterchange: ead0e3ae1f3a5fb539e289debbc7ae036160a10d
   MotionTransitioning: 23d25edc2f4606efb922403cbac6d81af37aa33a
@@ -658,6 +649,6 @@ SPEC CHECKSUMS:
   SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 0506d79b0c60cd172a6823e7481e842c89d93f9d
+PODFILE CHECKSUM: 3f977c59ad746f4865e5ef831527afa31da9c083
 
 COCOAPODS: 1.6.0
