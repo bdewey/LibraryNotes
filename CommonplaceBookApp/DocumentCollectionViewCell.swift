@@ -4,7 +4,7 @@ import MaterialComponents
 import SwipeCellKit
 import UIKit
 
-final class DocumentCollectionViewCell: SwipeCollectionViewCell {
+final class DocumentCollectionViewCell: UICollectionViewCell {
   override init(frame: CGRect) {
     super.init(frame: frame)
     self.inkTouchController = MDCInkTouchController(view: contentView)

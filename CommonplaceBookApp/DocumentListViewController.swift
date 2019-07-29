@@ -33,10 +33,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   ) {
     self.notebook = notebook
     self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(
-      notebook: notebook,
-      stylesheet: stylesheet
-    )
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.leftBarButtonItem = hashtagMenuButton
@@ -48,14 +44,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     fatalError("init(coder:) has not been implemented")
   }
 
-  /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
-  deinit {
-    dataSource.notebook.removeObserver(documentListAdapter)
-  }
-
   private let notebook: NoteArchiveDocument
   public let stylesheet: Stylesheet
-  private let dataSource: DocumentDataSource
+  private var dataSource: DocumentDiffableDataSource!
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     UIBarButtonItem(
@@ -95,25 +86,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return layout
   }()
 
-  // TODO: Code smell here
-  private lazy var documentListAdapter: ListAdapter = {
-    let updater = ListAdapterUpdater()
-    let adapter = ListAdapter(updater: updater, viewController: self)
-    adapter.dataSource = dataSource
-    dataSource.notebook.addObserver(adapter)
-    return adapter
-  }()
-
   private lazy var documentCollectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
     collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.register(
-      DocumentCollectionViewCell.self,
-      forCellWithReuseIdentifier: reuseIdentifier
-    )
     collectionView.backgroundColor = stylesheet.colors.surfaceColor
-    documentListAdapter.collectionView = collectionView
     collectionView.accessibilityIdentifier = "document-list"
+    collectionView.delegate = self
     return collectionView
   }()
 
@@ -121,6 +99,11 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    self.dataSource = DocumentDiffableDataSource(
+      collectionView: documentCollectionView,
+      notebook: notebook,
+      stylesheet: stylesheet
+    )
     view.addSubview(documentCollectionView)
     view.addSubview(newDocumentButton)
     documentCollectionView.snp.makeConstraints { make in
@@ -133,6 +116,23 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       make.height.equalTo(56)
     }
     studySession = notebook.studySession()
+    dataSource.performUpdates(animated: false)
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    layout.itemSize = CGSize(width: documentCollectionView.bounds.width, height: 72)
+    dataSource.startObservingNotebook()
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    dataSource.stopObservingNotebook()
+  }
+
+  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    super.viewWillTransition(to: size, with: coordinator)
+    layout.itemSize = CGSize(width: size.width, height: 72)
   }
 
   @objc private func didTapNewDocument() {
@@ -210,10 +210,28 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 }
 
+extension DocumentListViewController: UICollectionViewDelegate {
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    guard let viewProperties = dataSource.itemIdentifier(for: indexPath) else { return }
+    do {
+      let textEditViewController = TextEditViewController(
+        parsingRules: notebook.parsingRules,
+        stylesheet: stylesheet
+      )
+      textEditViewController.pageIdentifier = viewProperties.pageKey
+      textEditViewController.markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
+      textEditViewController.delegate = notebook
+      navigationController?
+        .pushViewController(textEditViewController, animated: true)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
+    }
+  }
+}
+
 extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
     dataSource.filteredHashtag = nil
-    documentListAdapter.performUpdates(animated: true)
     title = "Interactive Notebook"
     updateStudySession()
     dismiss(animated: true, completion: nil)
@@ -222,7 +240,6 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
     print("Tapped " + hashtag)
     dataSource.filteredHashtag = hashtag
-    documentListAdapter.performUpdates(animated: true)
     title = hashtag
     updateStudySession()
     dismiss(animated: true, completion: nil)

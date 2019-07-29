@@ -68,7 +68,6 @@ public final class DocumentSectionController: ListSectionController {
       string: ageFormatter.string(from: dateDelta) ?? "",
       attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
     )
-    cell.delegate = self
     cell.setNeedsLayout()
     return cell
   }

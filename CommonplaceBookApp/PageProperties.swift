@@ -5,7 +5,7 @@ import IGListKit
 import Yams
 
 /// Metadata about pages in a NoteBundle.
-public struct PageProperties: Codable, Equatable {
+public struct PageProperties: Codable, Hashable {
   /// SHA-1 digest of the contents of the page.
   public let sha1Digest: String
 

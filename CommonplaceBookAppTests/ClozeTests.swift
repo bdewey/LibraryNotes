@@ -5,8 +5,8 @@
 import XCTest
 
 final class ClozeTests: XCTestCase {
-  private let parsingRules: MiniMarkdown.ParsingRules = {
-    var parsingRules = MiniMarkdown.ParsingRules()
+  private let parsingRules: ParsingRules = {
+    var parsingRules = ParsingRules()
     parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
     return parsingRules
   }()
