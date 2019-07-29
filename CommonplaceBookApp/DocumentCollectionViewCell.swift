@@ -4,9 +4,9 @@ import MaterialComponents
 import SwipeCellKit
 import UIKit
 
-final class DocumentCollectionViewCell: UICollectionViewCell {
-  override init(frame: CGRect) {
-    super.init(frame: frame)
+final class DocumentTableViewCell: UITableViewCell {
+  override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+    super.init(style: style, reuseIdentifier: reuseIdentifier)
     self.inkTouchController = MDCInkTouchController(view: contentView)
     inkTouchController.addInkView()
     statusIcon.contentMode = .scaleAspectFit

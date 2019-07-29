@@ -7,8 +7,6 @@ import MiniMarkdown
 import SnapKit
 import UIKit
 
-private let reuseIdentifier = "HACKY_document"
-
 extension NSComparisonPredicate {
   fileprivate convenience init(conformingToUTI uti: String) {
     self.init(
@@ -77,35 +75,29 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return button
   }()
 
-  private lazy var layout: UICollectionViewFlowLayout = {
-    let layout = UICollectionViewFlowLayout()
-    layout.scrollDirection = .vertical
-    layout.minimumInteritemSpacing = 0
-    layout.minimumLineSpacing = 0
-    return layout
-  }()
-
-  private lazy var documentCollectionView: UICollectionView = {
-    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
-    collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.backgroundColor = stylesheet.colors.surfaceColor
-    collectionView.accessibilityIdentifier = "document-list"
-    collectionView.delegate = self
-    return collectionView
+  private lazy var tableView: UITableView = {
+    let tableView = UITableView(frame: .zero, style: .plain)
+    tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+    tableView.backgroundColor = stylesheet.colors.surfaceColor
+    tableView.accessibilityIdentifier = "document-list"
+    tableView.rowHeight = 72
+    tableView.delegate = self
+    tableView.separatorStyle = .none
+    return tableView
   }()
 
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    self.dataSource = DocumentDiffableDataSource(
-      collectionView: documentCollectionView,
+    dataSource = DocumentDiffableDataSource(
+      tableView: tableView,
       notebook: notebook,
       stylesheet: stylesheet
     )
-    view.addSubview(documentCollectionView)
+    view.addSubview(tableView)
     view.addSubview(newDocumentButton)
-    documentCollectionView.snp.makeConstraints { make in
+    tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
     newDocumentButton.snp.makeConstraints { make in
@@ -120,18 +112,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    layout.itemSize = CGSize(width: documentCollectionView.bounds.width, height: 72)
     dataSource.startObservingNotebook()
   }
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     dataSource.stopObservingNotebook()
-  }
-
-  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-    super.viewWillTransition(to: size, with: coordinator)
-    layout.itemSize = CGSize(width: size.width, height: 72)
   }
 
   @objc private func didTapNewDocument() {
@@ -209,8 +195,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 }
 
-extension DocumentListViewController: UICollectionViewDelegate {
-  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+extension DocumentListViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
     guard let viewProperties = dataSource.itemIdentifier(for: indexPath) else { return }
     do {
       let textEditViewController = TextEditViewController(
@@ -225,6 +212,31 @@ extension DocumentListViewController: UICollectionViewDelegate {
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
     }
+  }
+
+  func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    var actions = [UIContextualAction]()
+    if let properties = dataSource.itemIdentifier(for: indexPath) {
+      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+        try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
+        completion(true)
+      }
+      deleteAction.image = UIImage(named: "round_delete_forever_black_24pt")
+      actions.append(deleteAction)
+      if properties.cardCount > 0 {
+        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
+          let studySession = self.notebook.studySession(
+            filter: { name, _ in name == properties.pageKey }
+          )
+          self.presentStudySessionViewController(for: studySession)
+          completion(true)
+        }
+        studyAction.image = UIImage(named: "round_school_black_24pt")
+        studyAction.backgroundColor = stylesheet.colors.secondaryColor
+        actions.append(studyAction)
+      }
+    }
+    return UISwipeActionsConfiguration(actions: actions)
   }
 }
 

@@ -331,6 +331,7 @@ extension TextEditViewController: UIScrollViewForTracking {
 }
 
 // MARK: - Commands
+
 private extension TextEditViewController {
   /// Converts the currently selected text to a cloze.
   @objc func convertTextToCloze() {

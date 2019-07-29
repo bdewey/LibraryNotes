@@ -99,7 +99,7 @@ public final class NoteArchiveDocument: UIDocument {
       throw error(for: .unexpectedContentType)
     }
     topLevelFileWrapper = wrapper
-    self.studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
+    studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
     do {
       let noteArchive = try NoteArchiveDocument.loadNoteArchive(
         from: wrapper,
@@ -202,8 +202,8 @@ private extension NoteArchiveDocument {
     guard
       let data = maybeData,
       let text = String(data: data, encoding: .utf8) else {
-        // Is this an error? Or expected for a new document?
-        return NoteArchive(parsingRules: parsingRules)
+      // Is this an error? Or expected for a new document?
+      return NoteArchive(parsingRules: parsingRules)
     }
     return try NoteArchive(parsingRules: parsingRules, textSerialization: text)
   }
@@ -214,7 +214,7 @@ private extension NoteArchiveDocument {
     guard let logData = maybeData,
       let logText = String(data: logData, encoding: .utf8),
       let studyLog = StudyLog(logText) else {
-        return StudyLog()
+      return StudyLog()
     }
     return studyLog
   }

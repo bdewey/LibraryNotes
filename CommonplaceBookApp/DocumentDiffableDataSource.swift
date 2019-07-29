@@ -1,12 +1,11 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import MiniMarkdown
 import UIKit
 
 /// Given a NoteArchiveDocument, manages a collection of cells representing the pages in that document.
-public final class DocumentDiffableDataSource: UICollectionViewDiffableDataSource<DocumentDiffableDataSource.DocumentSection, DocumentDiffableDataSource.ViewProperties> {
-
+public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<DocumentDiffableDataSource.DocumentSection, DocumentDiffableDataSource.ViewProperties> {
   public typealias Snapshot = NSDiffableDataSourceSnapshot<DocumentSection, ViewProperties>
 
   public let notebook: NoteArchiveDocument
@@ -31,22 +30,19 @@ public final class DocumentDiffableDataSource: UICollectionViewDiffableDataSourc
 
   /// Designated initializer.
   public init(
-    collectionView: UICollectionView,
+    tableView: UITableView,
     notebook: NoteArchiveDocument,
     stylesheet: Stylesheet
   ) {
     self.notebook = notebook
-    collectionView.register(
-      DocumentCollectionViewCell.self,
-      forCellWithReuseIdentifier: ReuseIdentifiers.documentCell
-    )
+    tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
     let titleRenderer = RenderedMarkdown.makeTitleRenderer(with: stylesheet)
-    super.init(collectionView: collectionView) { (collectionView, indexPath, viewProperties) -> UICollectionViewCell? in
-          guard
-        let cell = collectionView.dequeueReusableCell(
-          withReuseIdentifier: ReuseIdentifiers.documentCell,
+    super.init(tableView: tableView) { (tableView, indexPath, viewProperties) -> UITableViewCell? in
+      guard
+        let cell = tableView.dequeueReusableCell(
+          withIdentifier: ReuseIdentifiers.documentCell,
           for: indexPath
-        ) as? DocumentCollectionViewCell
+        ) as? DocumentTableViewCell
       else {
         preconditionFailure("Forgot to register the right kind of cell")
       }
@@ -132,7 +128,7 @@ public final class DocumentDiffableDataSource: UICollectionViewDiffableDataSourc
 extension DocumentDiffableDataSource: NoteArchiveDocumentObserver {
   public func noteArchiveDocument(
     _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String : PageProperties]
+    didUpdatePageProperties properties: [String: PageProperties]
   ) {
     updateCardsPerDocument()
     performUpdates(animated: true)

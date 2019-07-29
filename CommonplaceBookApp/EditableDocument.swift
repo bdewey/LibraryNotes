@@ -12,7 +12,7 @@ extension UIDocument {
   /// If opening the document doesn't succeed, try saving it with mode `.forCreating`.
   /// - parameter completionHandler: Optional handler to be called with a Bool indicating success.
   public func openOrCreate(completionHandler: ((Bool) -> Void)?) {
-    self.open { success in
+    open { success in
       // "the completion handler is called on the main queue" for open
       if success {
         completionHandler?(success)
