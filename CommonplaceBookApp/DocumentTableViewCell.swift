@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import MaterialComponents
-import SwipeCellKit
 import UIKit
 
 final class DocumentTableViewCell: UITableViewCell {

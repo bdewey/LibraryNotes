@@ -5,7 +5,7 @@ target 'CommonplaceBookApp' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
-  platform :ios, '11.0'
+  platform :ios, '13.0'
 
   # Pods for remember
   pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
@@ -17,7 +17,6 @@ target 'CommonplaceBookApp' do
   pod 'SDWebImage', '~> 4.0'
   pod 'SDWebImage/GIF', '~> 4.0'
   pod 'SnapKit'
-  pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
   pod 'Yams'
 
   target 'CommonplaceBookAppTests' do

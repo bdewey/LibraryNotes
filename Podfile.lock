@@ -566,7 +566,6 @@ PODS:
     - FLAnimatedImage (~> 1.0)
     - SDWebImage/Core
   - SnapKit (5.0.0)
-  - SwipeCellKit (2.6.0)
   - Yams (2.0.0)
 
 DEPENDENCIES:
@@ -579,7 +578,6 @@ DEPENDENCIES:
   - SDWebImage (~> 4.0)
   - SDWebImage/GIF (~> 4.0)
   - SnapKit
-  - SwipeCellKit (from `https://github.com/SwipeCellKit/SwipeCellKit.git`)
   - Yams
 
 SPEC REPOS:
@@ -608,8 +606,6 @@ EXTERNAL SOURCES:
     :git: https://github.com/material-components/material-components-ios
   NunitoSans:
     :git: https://github.com/bdewey/NunitoSans
-  SwipeCellKit:
-    :git: https://github.com/SwipeCellKit/SwipeCellKit.git
 
 CHECKOUT OPTIONS:
   CollectionViewLayouts:
@@ -624,9 +620,6 @@ CHECKOUT OPTIONS:
   NunitoSans:
     :commit: 1513b386314a943dc41b1bce9b2b3cfa60bc6cd1
     :git: https://github.com/bdewey/NunitoSans
-  SwipeCellKit:
-    :commit: 9d17bfa7daff16f20d4f6e7febcb2fccb62f6e2b
-    :git: https://github.com/SwipeCellKit/SwipeCellKit.git
 
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
@@ -646,9 +639,8 @@ SPEC CHECKSUMS:
   NunitoSans: 64c8e29a148f6c101a78195da1238e0ac8b3b8e6
   SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
-  SwipeCellKit: 935ca28c187ec6e1ffb2b578cf8ddca842bfdcbb
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 3f977c59ad746f4865e5ef831527afa31da9c083
+PODFILE CHECKSUM: a887c7d28ef3aef3a55c9c426b2d0ce4c8e14b21
 
 COCOAPODS: 1.6.0

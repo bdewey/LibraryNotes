@@ -84,7 +84,7 @@
 		D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */; };
 		D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6C229657C900F54561 /* TextArchiveTests.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
-		D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */; };
+		D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */; };
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
 		D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* PageProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
@@ -262,7 +262,7 @@
 		D374AB7D2296CC2600F54561 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D374AB7F2296D3C200F54561 /* CommonplaceBookApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CommonplaceBookApp-Bridging-Header.h"; sourceTree = "<group>"; };
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
-		D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCollectionViewCell.swift; sourceTree = "<group>"; };
+		D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		D37E6D35228D9DD8006CD0FA /* PageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageProperties.swift; sourceTree = "<group>"; };
@@ -429,9 +429,9 @@
 				D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */,
 				D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */,
 				D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */,
-				D375D33D20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
+				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
@@ -567,8 +567,6 @@
 				D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */,
 			);
 			name = CommonplaceBookAppTests;
-			packageProductDependencies = (
-			);
 			productName = CommonplaceBookAppTests;
 			productReference = D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -587,8 +585,6 @@
 				D3E98F0921D470B2008445DA /* PBXTargetDependency */,
 			);
 			name = CommonplaceBookAppUITests;
-			packageProductDependencies = (
-			);
 			productName = CommonplaceBookAppUITests;
 			productReference = D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -739,7 +735,6 @@
 				"${BUILT_PRODUCTS_DIR}/NunitoSans/NunitoSans.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
-				"${BUILT_PRODUCTS_DIR}/SwipeCellKit/SwipeCellKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Yams/Yams.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -761,7 +756,6 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NunitoSans.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwipeCellKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Yams.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -865,7 +859,7 @@
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
-				D375D33E20EDA08F00EAB4F0 /* DocumentCollectionViewCell.swift in Sources */,
+				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D33F647122982366008C3A92 /* Array+Node.swift in Sources */,
 				D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */,
