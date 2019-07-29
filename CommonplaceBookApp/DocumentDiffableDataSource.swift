@@ -112,7 +112,6 @@ public final class DocumentDiffableDataSource: UICollectionViewDiffableDataSourc
         return $0.value.hashtags.contains(hashtag)
       }
     let objects = propertiesFilteredByHashtag
-      // give IGLitstKit its own copy of the model objects to guard against mutations
       .compactMap { tuple in
         ViewProperties(pageKey: tuple.key, pageProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
       }

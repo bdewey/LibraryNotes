@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import CoreServices
-import IGListKit
 import MaterialComponents
 import MiniMarkdown
 import SnapKit
