@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import IGListKit
 import Yams
 
 /// Metadata about pages in a NoteBundle.
@@ -42,45 +41,5 @@ public struct PageProperties: Codable, Hashable {
 
   init(_ snippet: TextSnippet) throws {
     self = try YAMLDecoder().decode(PageProperties.self, from: snippet.text)
-  }
-}
-
-/// Wrapper around PageProperties for IGListKit.
-public final class NoteBundlePagePropertiesListDiffable: ListDiffable {
-  public let pageKey: String
-
-  /// The wrapped PageProperties.
-  public private(set) var properties: PageProperties
-
-  /// How many cards are eligible for study in this page.
-  public private(set) var cardCount: Int
-
-  /// Designated initializer.
-  public init(pageKey: String, properties: PageProperties, cardCount: Int) {
-    self.pageKey = pageKey
-    self.properties = properties
-    self.cardCount = cardCount
-  }
-
-  public func diffIdentifier() -> NSObjectProtocol {
-    return pageKey as NSString
-  }
-
-  public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
-    guard let otherWrapper = object as? NoteBundlePagePropertiesListDiffable else { return false }
-    return properties == otherWrapper.properties &&
-      cardCount == otherWrapper.cardCount &&
-      pageKey == otherWrapper.pageKey
-  }
-}
-
-/// Debuggability extensions for PagePropertiesListDiffable.
-extension NoteBundlePagePropertiesListDiffable:
-  CustomStringConvertible,
-  CustomDebugStringConvertible {
-  public var description: String { return String(describing: properties) }
-  public var debugDescription: String {
-    return "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) "
-      + String(describing: properties)
   }
 }
