@@ -11,7 +11,6 @@ target 'CommonplaceBookApp' do
   pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
   pod 'DataCompression'
   pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  pod 'IGListKit', '~> 3.0'
   pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
   pod 'NunitoSans', :git => 'https://github.com/bdewey/NunitoSans'
   pod 'SDWebImage', '~> 4.0'

@@ -32,11 +32,6 @@ PODS:
   - DZNPhotoPickerController/Services (2.1):
     - AFNetworking (~> 3.0)
   - FLAnimatedImage (1.0.12)
-  - IGListKit (3.4.0):
-    - IGListKit/Default (= 3.4.0)
-  - IGListKit/Default (3.4.0):
-    - IGListKit/Diffing
-  - IGListKit/Diffing (3.4.0)
   - MaterialComponents (81.1.0):
     - MaterialComponents/ActionSheet (= 81.1.0)
     - MaterialComponents/ActivityIndicator (= 81.1.0)
@@ -572,7 +567,6 @@ DEPENDENCIES:
   - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
   - DataCompression
   - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - IGListKit (~> 3.0)
   - MaterialComponents (from `https://github.com/material-components/material-components-ios`)
   - NunitoSans (from `https://github.com/bdewey/NunitoSans`)
   - SDWebImage (~> 4.0)
@@ -587,7 +581,6 @@ SPEC REPOS:
     - DataCompression
     - DZNEmptyDataSet
     - FLAnimatedImage
-    - IGListKit
     - MDFInternationalization
     - MDFTextAccessibility
     - MotionAnimator
@@ -629,7 +622,6 @@ SPEC CHECKSUMS:
   DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
   DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
   FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  IGListKit: 7a5d788e9fb746bcd402baa8e8b24bc3bd2a5a07
   MaterialComponents: 0ee07d35506ced6cab8b3c8591f0031da36e8cbf
   MDFInternationalization: 010097556d6b09d2c4ea38e0820ea6d37be6a314
   MDFTextAccessibility: 85c09a1bd9c321f494348e632a25063bcda35a53
@@ -641,6 +633,6 @@ SPEC CHECKSUMS:
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: a887c7d28ef3aef3a55c9c426b2d0ce4c8e14b21
+PODFILE CHECKSUM: e70b9f5eff750106194493648bbdf9e3d6371f69
 
 COCOAPODS: 1.6.0
