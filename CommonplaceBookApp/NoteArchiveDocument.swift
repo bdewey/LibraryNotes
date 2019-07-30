@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import DataCompression
-import IGListKit
 import MiniMarkdown
 import UIKit
 
@@ -11,15 +10,6 @@ public protocol NoteArchiveDocumentObserver: AnyObject {
     _ document: NoteArchiveDocument,
     didUpdatePageProperties properties: [String: PageProperties]
   )
-}
-
-extension ListAdapter: NoteArchiveDocumentObserver {
-  public func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    performUpdates(animated: true)
-  }
 }
 
 public final class NoteArchiveDocument: UIDocument {

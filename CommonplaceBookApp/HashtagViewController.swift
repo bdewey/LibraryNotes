@@ -1,6 +1,5 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import IGListKit
 import UIKit
 
 public protocol HashtagViewControllerDelegate: class {
@@ -11,41 +10,26 @@ public protocol HashtagViewControllerDelegate: class {
 
 public final class HashtagViewController: UIViewController {
   public init(index: NoteArchiveDocument, stylesheet: Stylesheet) {
-    self.dataSource = HashtagDataSource(document: index, stylesheet: stylesheet)
+    self.notebook = index
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
-    self.dataSource.delegate = self
   }
 
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
-  deinit {
-    dataSource.document.removeObserver(documentListAdapter)
-  }
-
-  private let dataSource: HashtagDataSource
+  private let notebook: NoteArchiveDocument
+  private var hashtagDataController: HashtagDataController!
   private let stylesheet: Stylesheet
   public weak var delegate: HashtagViewControllerDelegate?
 
-  private lazy var documentListAdapter: ListAdapter = {
-    let updater = ListAdapterUpdater()
-    let adapter = ListAdapter(updater: updater, viewController: self)
-    adapter.dataSource = dataSource
-    dataSource.document.addObserver(adapter)
-    return adapter
-  }()
-
-  private lazy var collectionView: UICollectionView = {
-    let collectionView = UICollectionView(
-      frame: .zero,
-      collectionViewLayout: UICollectionViewFlowLayout()
-    )
-    collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.backgroundColor = stylesheet.colors.surfaceColor
-    documentListAdapter.collectionView = collectionView
-    return collectionView
+  private lazy var tableView: UITableView = {
+    let tableView = UITableView(frame: .zero, style: .plain)
+    tableView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    tableView.backgroundColor = stylesheet.colors.surfaceColor
+    tableView.separatorStyle = .none
+    return tableView
   }()
 
   public override func loadView() {
@@ -55,16 +39,29 @@ public final class HashtagViewController: UIViewController {
   }
 
   public override func viewDidLoad() {
-    view.addSubview(collectionView)
+    hashtagDataController = HashtagDataController(tableView: tableView, notebook: notebook, stylesheet: stylesheet)
+    hashtagDataController.delegate = self
+    view.addSubview(tableView)
+  }
+
+  public override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    hashtagDataController.performUpdates(animated: false)
+    hashtagDataController.startObservingNotebook()
+  }
+
+  public override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    hashtagDataController.stopObservingNotebook()
   }
 }
 
-extension HashtagViewController: HashtagDataSourceDelegate {
-  public func hashtagDataSourceDidClearHashtag() {
+extension HashtagViewController: HashtagDataControllerDelegate {
+  public func hashtagDataControllerDidClearHashtag() {
     delegate?.hashtagViewControllerDidClearHashtag(self)
   }
 
-  public func hashtagDataSourceDidSelectHashtag(_ hashtag: String) {
+  public func hashtagDataControllerDidSelectHashtag(_ hashtag: String) {
     delegate?.hashtagViewController(self, didTap: hashtag)
   }
 }
