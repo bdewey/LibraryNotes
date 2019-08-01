@@ -40,9 +40,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let navigationController = MDCAppBarNavigationController()
-    navigationController.delegate = self
-    navigationController.pushViewController(loadingViewController, animated: false)
+    let navigationController = UINavigationController(rootViewController: loadingViewController)
     window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
@@ -154,16 +152,27 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   private func makeViewController(
     notebook: NoteArchiveDocument
   ) -> UIViewController {
-    let navigationController = MDCAppBarNavigationController()
-    navigationController.delegate = self
-    navigationController.pushViewController(
-      DocumentListViewController(
+    let primaryNavigationController = UINavigationController(
+      rootViewController: DocumentListViewController(
         notebook: notebook,
         stylesheet: commonplaceBookStylesheet
-      ),
-      animated: false
+      )
     )
-    return navigationController
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules,
+      stylesheet: commonplaceBookStylesheet
+    )
+    textEditViewController.delegate = notebook
+    let secondaryNavigationController = UINavigationController(
+      rootViewController: textEditViewController
+    )
+
+    let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
+    splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
+
+    textEditViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
+    textEditViewController.navigationItem.leftItemsSupplementBackButton = true
+    return splitViewController
   }
 
   func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor] {
@@ -205,28 +214,6 @@ extension UIViewController {
       return container.stylesheet.typographyScheme
     } else {
       return MDCTypographyScheme(defaults: .material201804)
-    }
-  }
-}
-
-extension AppDelegate: MDCAppBarNavigationControllerDelegate {
-  func appBarNavigationController(
-    _ navigationController: MDCAppBarNavigationController,
-    willAdd appBar: MDCAppBar,
-    asChildOf viewController: UIViewController
-  ) {
-    MDCAppBarColorThemer.applySemanticColorScheme(
-      viewController.semanticColorScheme,
-      to: appBar
-    )
-    MDCAppBarTypographyThemer.applyTypographyScheme(
-      viewController.typographyScheme,
-      to: appBar
-    )
-    if var forwarder = viewController as? MDCScrollEventForwarder {
-      forwarder.headerView = appBar.headerViewController.headerView
-      appBar.headerViewController.headerView.observesTrackingScrollViewScrollEvents = false
-      appBar.headerViewController.headerView.shiftBehavior = forwarder.desiredShiftBehavior
     }
   }
 }

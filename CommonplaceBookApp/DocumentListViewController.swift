@@ -43,7 +43,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private let notebook: NoteArchiveDocument
   public let stylesheet: Stylesheet
-  private var dataSource: DocumentDiffableDataSource!
+  private var dataSource: DocumentDiffableDataSource?
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     UIBarButtonItem(
@@ -90,11 +90,12 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    dataSource = DocumentDiffableDataSource(
+    let dataSource = DocumentDiffableDataSource(
       tableView: tableView,
       notebook: notebook,
       stylesheet: stylesheet
     )
+    self.dataSource = dataSource
     view.addSubview(tableView)
     view.addSubview(newDocumentButton)
     tableView.snp.makeConstraints { make in
@@ -112,19 +113,19 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    dataSource.startObservingNotebook()
+    dataSource?.startObservingNotebook()
   }
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    dataSource.stopObservingNotebook()
+    dataSource?.stopObservingNotebook()
   }
 
   @objc private func didTapNewDocument() {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
-    if let hashtag = self.dataSource.filteredHashtag {
+    if let hashtag = self.dataSource?.filteredHashtag {
       initialText += hashtag
       initialText += "\n"
     }
@@ -174,9 +175,9 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private func updateStudySession() {
-    let filter: (String, PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+    let filter: (String, PageProperties) -> Bool = (dataSource?.filteredHashtag == nil)
       ? { _, _ in true }
-      : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+      : { _, properties in properties.hashtags.contains(self.dataSource!.filteredHashtag!) }
     studySession = notebook.studySession(filter: filter)
   }
 
@@ -198,25 +199,34 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 extension DocumentListViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
-    guard let viewProperties = dataSource.itemIdentifier(for: indexPath) else { return }
+    guard let viewProperties = dataSource?.itemIdentifier(for: indexPath) else { return }
+    let markdown: String
     do {
-      let textEditViewController = TextEditViewController(
-        parsingRules: notebook.parsingRules,
-        stylesheet: stylesheet
-      )
-      textEditViewController.pageIdentifier = viewProperties.pageKey
-      textEditViewController.markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
-      textEditViewController.delegate = notebook
-      navigationController?
-        .pushViewController(textEditViewController, animated: true)
+      markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
+      return
+    }
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules,
+      stylesheet: stylesheet
+    )
+    textEditViewController.pageIdentifier = viewProperties.pageKey
+    textEditViewController.markdown = markdown
+    textEditViewController.delegate = notebook
+    if let splitViewController = splitViewController {
+      splitViewController.showDetailViewController(
+        UINavigationController(rootViewController: textEditViewController),
+        sender: self
+      )
+    } else if let navigationController = navigationController {
+      navigationController.pushViewController(textEditViewController, animated: true)
     }
   }
 
   func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
     var actions = [UIContextualAction]()
-    if let properties = dataSource.itemIdentifier(for: indexPath) {
+    if let properties = dataSource?.itemIdentifier(for: indexPath) {
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
         try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
         completion(true)
@@ -242,7 +252,7 @@ extension DocumentListViewController: UITableViewDelegate {
 
 extension DocumentListViewController: HashtagViewControllerDelegate {
   func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
-    dataSource.filteredHashtag = nil
+    dataSource?.filteredHashtag = nil
     title = "Interactive Notebook"
     updateStudySession()
     dismiss(animated: true, completion: nil)
@@ -250,7 +260,7 @@ extension DocumentListViewController: HashtagViewControllerDelegate {
 
   func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
     print("Tapped " + hashtag)
-    dataSource.filteredHashtag = hashtag
+    dataSource?.filteredHashtag = hashtag
     title = hashtag
     updateStudySession()
     dismiss(animated: true, completion: nil)
