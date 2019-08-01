@@ -206,17 +206,16 @@ final class TextEditViewController: UIViewController,
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
 
-  override func viewWillTransition(
-    to size: CGSize,
-    with coordinator: UIViewControllerTransitionCoordinator
-  ) {
-    super.viewWillTransition(to: size, with: coordinator)
-    adjustMargins(size: size)
+  override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    DDLogInfo("viewWillLayoutSubviews, width = \(view.frame.width)")
+    adjustMargins(size: view.frame.size)
   }
 
   private func adjustMargins(size: CGSize) {
     let delta = size.width - 440
     let horizontalInset = max(delta / 2, 0)
+    DDLogInfo("adjustMargins: width = \(size.width), inset = \(horizontalInset)")
     textView.textContainerInset = UIEdgeInsets(
       top: 8,
       left: horizontalInset,
