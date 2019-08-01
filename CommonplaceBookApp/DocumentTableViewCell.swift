@@ -6,14 +6,15 @@ import UIKit
 final class DocumentTableViewCell: UITableViewCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    self.inkTouchController = MDCInkTouchController(view: contentView)
-    inkTouchController.addInkView()
     statusIcon.contentMode = .scaleAspectFit
     self.contentView.addSubview(titleLabel)
     self.contentView.addSubview(detailLabel)
     self.contentView.addSubview(ageLabel)
     self.contentView.addSubview(statusIcon)
     self.contentView.addSubview(divider)
+
+    backgroundColor = UIColor.systemBackground
+    divider.backgroundColor = UIColor.separator
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -24,17 +25,8 @@ final class DocumentTableViewCell: UITableViewCell {
   let detailLabel = UILabel(frame: .zero)
   let ageLabel = UILabel(frame: .zero)
   let statusIcon = UIImageView(frame: .zero)
-  var stylesheet: Stylesheet? {
-    didSet {
-      if let stylesheet = stylesheet {
-        backgroundColor = stylesheet.colors.surfaceColor
-        divider.backgroundColor = stylesheet.colors.onSurfaceColor.withAlphaComponent(0.12)
-      }
-    }
-  }
 
   private let divider = UIView(frame: .zero)
-  private var inkTouchController: MDCInkTouchController!
 
   override func layoutSubviews() {
     super.layoutSubviews()

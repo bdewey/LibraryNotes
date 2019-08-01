@@ -31,12 +31,11 @@ public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<Doc
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteArchiveDocument,
-    stylesheet: Stylesheet
+    notebook: NoteArchiveDocument
   ) {
     self.notebook = notebook
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
-    let titleRenderer = RenderedMarkdown.makeTitleRenderer(with: stylesheet)
+    let titleRenderer = RenderedMarkdown.makeTitleRenderer()
     super.init(tableView: tableView) { (tableView, indexPath, viewProperties) -> UITableViewCell? in
       guard
         let cell = tableView.dequeueReusableCell(
@@ -46,7 +45,6 @@ public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<Doc
       else {
         preconditionFailure("Forgot to register the right kind of cell")
       }
-      cell.stylesheet = stylesheet
       titleRenderer.markdown = viewProperties.pageProperties.title
       cell.titleLabel.attributedText = titleRenderer.attributedString
       cell.accessibilityLabel = viewProperties.pageProperties.title
@@ -61,13 +59,19 @@ public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<Doc
       }
       cell.detailLabel.attributedText = NSAttributedString(
         string: detailString,
-        attributes: stylesheet.attributes(style: .body2, emphasis: .darkTextMediumEmphasis)
+        attributes: [
+          .font: UIFont.preferredFont(forTextStyle: .subheadline),
+          .foregroundColor: UIColor.secondaryLabel,
+        ]
       )
       let now = Date()
       let dateDelta = now.timeIntervalSince(viewProperties.pageProperties.timestamp)
       cell.ageLabel.attributedText = NSAttributedString(
         string: DocumentDiffableDataSource.ageFormatter.string(from: dateDelta) ?? "",
-        attributes: stylesheet.attributes(style: .caption, emphasis: .darkTextMediumEmphasis)
+        attributes: [
+          .font: UIFont.preferredFont(forTextStyle: .caption1),
+          .foregroundColor: UIColor.secondaryLabel,
+        ]
       )
       cell.setNeedsLayout()
       return cell
@@ -136,7 +140,7 @@ extension DocumentDiffableDataSource: NoteArchiveDocumentObserver {
 }
 
 private extension RenderedMarkdown {
-  static func makeTitleRenderer(with stylesheet: Stylesheet) -> RenderedMarkdown {
+  static func makeTitleRenderer() -> RenderedMarkdown {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.emphasis] = { $1.italic = true }
     var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
@@ -146,7 +150,10 @@ private extension RenderedMarkdown {
       formatters: formatters,
       renderers: renderers
     )
-    renderer.defaultAttributes = stylesheet.attributes(style: .subtitle1)
+    renderer.defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .headline),
+      .foregroundColor: UIColor.label,
+    ]
     return renderer
   }
 }

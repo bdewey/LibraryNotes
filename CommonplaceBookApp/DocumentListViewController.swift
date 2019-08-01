@@ -76,7 +76,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private lazy var tableView: UITableView = {
     let tableView = UITableView(frame: .zero, style: .plain)
     tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    tableView.backgroundColor = stylesheet.colors.surfaceColor
+    tableView.backgroundColor = UIColor.systemBackground
     tableView.accessibilityIdentifier = "document-list"
     tableView.rowHeight = 72
     tableView.delegate = self
@@ -90,8 +90,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     super.viewDidLoad()
     let dataSource = DocumentDiffableDataSource(
       tableView: tableView,
-      notebook: notebook,
-      stylesheet: stylesheet
+      notebook: notebook
     )
     self.dataSource = dataSource
     view.addSubview(tableView)
