@@ -67,7 +67,7 @@ public final class LoadingViewController: UIViewController {
   }()
 
   private lazy var errorImageView: UIImageView = {
-    let image = UIImage(named: "round_error_outline_black_48pt")
+    let image = UIImage(systemName: "xmark.octagon.fill")
     return UIImageView(image: image)
   }()
 }

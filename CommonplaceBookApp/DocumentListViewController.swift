@@ -47,26 +47,24 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
 
   private lazy var hashtagMenuButton: UIBarButtonItem = {
     UIBarButtonItem(
-      image: UIImage(named: "round_menu_black_24pt")?.withRenderingMode(.alwaysTemplate),
+      image: UIImage(systemName: "number"),
       style: .plain,
       target: self,
       action: #selector(didTapHashtagMenu)
     )
   }()
 
-  private lazy var newDocumentButton: MDCButton = {
-    let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
-    let button = MDCFloatingButton(frame: .zero)
-    button.setImage(icon, for: .normal)
+  private lazy var newDocumentButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "plus.circle")
+    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapNewDocument))
     button.accessibilityIdentifier = "new-document"
-    MDCFloatingActionButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
-    button.addTarget(self, action: #selector(didTapNewDocument), for: .touchUpInside)
     return button
   }()
 
   private lazy var studyButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "rectangle.stack")
     let button = UIBarButtonItem(
-      title: "Study",
+      image: icon,
       style: .plain,
       target: self,
       action: #selector(startStudySession)
@@ -97,18 +95,13 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     )
     self.dataSource = dataSource
     view.addSubview(tableView)
-    view.addSubview(newDocumentButton)
     tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    newDocumentButton.snp.makeConstraints { make in
-      make.trailing.equalToSuperview().offset(-16)
-      make.bottom.equalToSuperview().offset(-16)
-      make.width.equalTo(56)
-      make.height.equalTo(56)
-    }
     studySession = notebook.studySession()
     dataSource.performUpdates(animated: false)
+
+    navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -231,7 +224,7 @@ extension DocumentListViewController: UITableViewDelegate {
         try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
         completion(true)
       }
-      deleteAction.image = UIImage(named: "round_delete_forever_black_24pt")
+      deleteAction.image = UIImage(systemName: "trash")
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
@@ -241,8 +234,8 @@ extension DocumentListViewController: UITableViewDelegate {
           self.presentStudySessionViewController(for: studySession)
           completion(true)
         }
-        studyAction.image = UIImage(named: "round_school_black_24pt")
-        studyAction.backgroundColor = stylesheet.colors.secondaryColor
+        studyAction.image = UIImage(systemName: "rectangle.stack")
+        studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
     }
