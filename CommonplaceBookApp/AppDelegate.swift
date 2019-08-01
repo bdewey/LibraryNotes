@@ -169,9 +169,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
     splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
-
-    textEditViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem
-    textEditViewController.navigationItem.leftItemsSupplementBackButton = true
     return splitViewController
   }
 
