@@ -157,6 +157,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
         stylesheet: commonplaceBookStylesheet
       )
     )
+    primaryNavigationController.navigationBar.prefersLargeTitles = true
     let textEditViewController = TextEditViewController(
       parsingRules: notebook.parsingRules,
       stylesheet: commonplaceBookStylesheet

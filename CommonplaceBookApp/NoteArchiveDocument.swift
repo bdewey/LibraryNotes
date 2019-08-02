@@ -47,6 +47,14 @@ public final class NoteArchiveDocument: UIDocument {
     }
   }
 
+  /// All hashtags used across all pages, sorted.
+  public var hashtags: [String] {
+    let hashtags = pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
+      hashtags.formUnion(props.hashtags)
+    }
+    return Array(hashtags).sorted()
+  }
+
   /// Holds page contents in memory until we have a chance to save.
   private var modifiedPageContents: [String: String] = [:]
 

@@ -31,7 +31,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
-    self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
     notebook.addObserver(self)
   }
@@ -43,15 +42,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   private let notebook: NoteArchiveDocument
   public let stylesheet: Stylesheet
   private var dataSource: DocumentDiffableDataSource?
-
-  private lazy var hashtagMenuButton: UIBarButtonItem = {
-    UIBarButtonItem(
-      image: UIImage(systemName: "number"),
-      style: .plain,
-      target: self,
-      action: #selector(didTapHashtagMenu)
-    )
-  }()
 
   private lazy var newDocumentButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "plus.circle")
@@ -99,6 +89,13 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     studySession = notebook.studySession()
     dataSource.performUpdates(animated: false)
 
+    let resultsViewController = DocumentSearchResultsViewController()
+    resultsViewController.delegate = self
+    let searchController = UISearchController(searchResultsController: resultsViewController)
+    searchController.searchResultsUpdater = self
+    searchController.searchBar.delegate = self
+    navigationItem.searchController = searchController
+
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
   }
 
@@ -144,22 +141,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     }
   }
 
-  @objc private func didTapHashtagMenu() {
-    let hashtagViewController = HashtagViewController(
-      index: notebook,
-      stylesheet: stylesheet
-    )
-    hamburgerPresentationController = CoverPartiallyPresentationController(
-      presentedViewController: hashtagViewController,
-      presenting: self,
-      coverDirection: .left
-    )
-    hashtagViewController.transitioningDelegate = hamburgerPresentationController
-    hashtagViewController.modalPresentationStyle = .custom
-    hashtagViewController.delegate = self
-    present(hashtagViewController, animated: true, completion: nil)
-  }
-
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
     presentStudySessionViewController(for: studySession)
@@ -186,6 +167,30 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       animated: true,
       completion: nil
     )
+  }
+}
+
+// MARK: - Search
+/// Everything needed for search.
+/// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
+extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchResultsViewControllerDelegate, UISearchBarDelegate {
+  func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
+    dataSource?.filteredHashtag = hashtag
+    navigationItem.searchController?.searchBar.text = hashtag
+    navigationItem.searchController?.dismiss(animated: true, completion: nil)
+  }
+
+  func updateSearchResults(for searchController: UISearchController) {
+    guard let resultsViewController = searchController.searchResultsController as? DocumentSearchResultsViewController else {
+      assertionFailure()
+      return
+    }
+    let pattern = searchController.searchBar.text ?? ""
+    resultsViewController.setHashtags(notebook.hashtags.filter({ $0.fuzzyMatch(pattern: pattern) }))
+  }
+
+  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    dataSource?.filteredHashtag = nil
   }
 }
 
@@ -240,27 +245,6 @@ extension DocumentListViewController: UITableViewDelegate {
       }
     }
     return UISwipeActionsConfiguration(actions: actions)
-  }
-}
-
-extension DocumentListViewController: HashtagViewControllerDelegate {
-  func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
-    dataSource?.filteredHashtag = nil
-    title = "Interactive Notebook"
-    updateStudySession()
-    dismiss(animated: true, completion: nil)
-  }
-
-  func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
-    print("Tapped " + hashtag)
-    dataSource?.filteredHashtag = hashtag
-    title = hashtag
-    updateStudySession()
-    dismiss(animated: true, completion: nil)
-  }
-
-  func hashtagViewControllerDidCancel(_ viewController: HashtagViewController) {
-    dismiss(animated: true, completion: nil)
   }
 }
 

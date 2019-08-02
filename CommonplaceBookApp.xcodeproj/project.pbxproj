@@ -14,7 +14,6 @@
 		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
 		D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */; };
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
-		D312DF3022EFF223004B098D /* HashtagDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D312DF2F22EFF223004B098D /* HashtagDataController.swift */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
@@ -53,6 +52,8 @@
 		D32A1BA2229D750F00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAD229D8A8A00B78576 /* DiffMatchPatch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D3331C8522F4E25D002B62AF /* DocumentSearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */; };
+		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
 		D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuoteTemplate.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F646E22981E38008C3A92 /* TextSnippet.swift */; };
@@ -63,7 +64,6 @@
 		D33F647B22999F52008C3A92 /* NoteArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D34D875720ED0A7C0043F755 /* StylesheetContaining.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34D875620ED0A7C0043F755 /* StylesheetContaining.swift */; };
-		D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C02189D8DC0082396D /* HashtagViewController.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
@@ -158,7 +158,6 @@
 		D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+TextEditViewController.swift"; sourceTree = "<group>"; };
 		D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ParsingRules+CommonplaceBook.swift"; sourceTree = "<group>"; };
 		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
-		D312DF2F22EFF223004B098D /* HashtagDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HashtagDataController.swift; path = ../../../../../../System/Volumes/Data/Users/brian/Documents/Projects/CommonplaceBookApp/CommonplaceBookApp/HashtagDataController.swift; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadataDataSource.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
@@ -204,6 +203,8 @@
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
+		D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSearchResultsViewController.swift; sourceTree = "<group>"; };
+		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuoteTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplate.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F646E22981E38008C3A92 /* TextSnippet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippet.swift; sourceTree = "<group>"; };
@@ -225,7 +226,6 @@
 		D34D876320ED84330043F755 /* LibreFranklin-BlackItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-BlackItalic.otf"; sourceTree = "<group>"; };
 		D34D876420ED84330043F755 /* LibreFranklin-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-Black.otf"; sourceTree = "<group>"; };
 		D34D876520ED84330043F755 /* LibreFranklin-Bold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LibreFranklin-Bold.otf"; sourceTree = "<group>"; };
-		D35C72C02189D8DC0082396D /* HashtagViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HashtagViewController.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
@@ -402,13 +402,12 @@
 				D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
+				D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
-				D312DF2F22EFF223004B098D /* HashtagDataController.swift */,
-				D35C72C02189D8DC0082396D /* HashtagViewController.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
 				D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
@@ -434,6 +433,7 @@
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
 				D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */,
+				D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */,
 				D30B0242229E513C00F3B459 /* StudyLog.swift */,
 				D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */,
 				D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */,
@@ -767,8 +767,8 @@
 				D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
+				D3331C8522F4E25D002B62AF /* DocumentSearchResultsViewController.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
-				D35C72C12189D8DC0082396D /* HashtagViewController.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
@@ -783,7 +783,6 @@
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */,
 				D31AFACE229D61EE00ED2B76 /* Cloze.swift in Sources */,
-				D312DF3022EFF223004B098D /* HashtagDataController.swift in Sources */,
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
 				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
@@ -802,6 +801,7 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
+				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
