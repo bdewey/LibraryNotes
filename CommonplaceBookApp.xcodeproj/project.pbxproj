@@ -1229,7 +1229,7 @@
 			repositoryURL = "https://github.com/bdewey/MiniMarkdown.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.12.1;
+				minimumVersion = 0.13.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

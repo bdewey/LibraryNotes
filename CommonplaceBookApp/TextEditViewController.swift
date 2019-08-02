@@ -29,7 +29,7 @@ final class TextEditViewController: UIViewController,
 //    }
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
-      formatters: TextEditViewController.formatters(with: stylesheet),
+      formatters: TextEditViewController.formatters(),
       renderers: renderers,
       stylesheet: stylesheet
     )
@@ -81,38 +81,36 @@ final class TextEditViewController: UIViewController,
   public var pageIdentifier: String?
 
   private static func formatters(
-    with stylesheet: Stylesheet
   ) -> [NodeType: RenderedMarkdown.FormattingFunction] {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.heading] = {
       let heading = $0 as! Heading // swiftlint:disable:this force_cast
-      if heading.headingLevel == 1 {
-        $1.fontSize = 20
-        $1.kern = 0.25
-      } else {
-        $1.fontSize = 16
-        $1.kern = 0.15
+      switch heading.headingLevel {
+      case 1:
+        $1.textStyle = .largeTitle
+      case 2:
+        $1.textStyle = .title1
+      case 3:
+        $1.textStyle = .title2
+      default:
+        $1.textStyle = .title3
       }
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { _, attributes in
-      attributes.color = stylesheet.colors
-        .onSurfaceColor
-        .withAlphaComponent(stylesheet.alpha[.darkTextDisabled] ?? 0.5)
+      attributes.color = UIColor.quaternaryLabel
     }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = UIColor.yellow.withAlphaComponent(0.3) }
+    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
-      $1.color = stylesheet.colors
-        .onSurfaceColor
-        .withAlphaComponent(stylesheet.alpha[.darkTextMediumEmphasis] ?? 0.5)
+      $1.color = UIColor.secondaryLabel
     }
-    formatters[.hashtag] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
+    formatters[.hashtag] = { $1.backgroundColor = UIColor.secondarySystemBackground }
     formatters[.blockQuote] = {
-      $1.backgroundColor = stylesheet.colors.darkSurfaceColor
+      $1.backgroundColor = UIColor.secondarySystemBackground
       $1.listLevel += 1
     }
     return formatters
@@ -152,7 +150,10 @@ final class TextEditViewController: UIViewController,
       formatters: formatters,
       renderers: renderers
     )
-    textStorage.defaultAttributes = stylesheet.attributes(style: .body2)
+    textStorage.defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.label,
+    ]
     textStorage.defaultAttributes.headIndent = 28
     textStorage.defaultAttributes.firstLineHeadIndent = 28
     return textStorage
@@ -164,7 +165,7 @@ final class TextEditViewController: UIViewController,
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
     let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = stylesheet.colors.surfaceColor
+    textView.backgroundColor = UIColor.systemBackground
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()
