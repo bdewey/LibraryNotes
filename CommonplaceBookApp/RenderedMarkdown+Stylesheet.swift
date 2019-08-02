@@ -2,13 +2,13 @@
 
 import Foundation
 import MiniMarkdown
+import UIKit
 
 extension RenderedMarkdown {
-  /// Convenience initializer for a RenderedMarkdown that uses a style in a Stylesheet.
-  /// Knows how to render clozes, etc.
+  /// Convenience initializer for a RenderedMarkdown that uses a specific TextStyle.
+  /// Hides delimiters and cloze hints.
   public convenience init(
-    stylesheet: Stylesheet,
-    style: Stylesheet.Style,
+    textStyle: UIFont.TextStyle,
     parsingRules: ParsingRules
   ) {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
@@ -22,22 +22,27 @@ extension RenderedMarkdown {
       formatters: formatters,
       renderers: renderers
     )
-    defaultAttributes = stylesheet.attributes(style: style)
+    defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: textStyle),
+      .foregroundColor: UIColor.label,
+    ]
     defaultAttributes.lineHeightMultiple = 1.2
   }
 }
 
 extension MarkdownAttributedStringRenderer {
   public init(
-    stylesheet: Stylesheet,
-    style: Stylesheet.Style
+    textStyle: UIFont.TextStyle
   ) {
     self.init()
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.bold] = { $1.bold = true }
     renderFunctions[.delimiter] = { _, _ in NSAttributedString() }
     renderFunctions[.clozeHint] = { _, _ in NSAttributedString() }
-    defaultAttributes = stylesheet.attributes(style: style)
+    defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: textStyle),
+      .foregroundColor: UIColor.label,
+    ]
     defaultAttributes.lineHeightMultiple = 1.2
   }
 }

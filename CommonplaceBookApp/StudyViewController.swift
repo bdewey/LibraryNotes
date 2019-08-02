@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
-import MaterialComponents
 import UIKit
 
 public protocol StudyViewControllerDelegate: class {
@@ -20,15 +19,12 @@ public final class StudyViewController: UIViewController {
   public init(
     studySession: StudySession,
     documentCache: DocumentCache,
-    stylesheet: Stylesheet,
     delegate: StudyViewControllerDelegate
   ) {
     self.studySession = studySession
     self.documentCache = documentCache
-    self.stylesheet = stylesheet
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
-    addChild(appBar.headerViewController)
     self.tabBarItem.title = "STUDY"
     self.title = "¡Habla Español!"
   }
@@ -41,7 +37,6 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   private let documentCache: DocumentCache
-  private let stylesheet: Stylesheet
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -67,17 +62,6 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  private lazy var appBar: MDCAppBar = {
-    let appBar = MDCAppBar()
-    MDCAppBarColorThemer.applySemanticColorScheme(stylesheet.colors.semanticColorScheme, to: appBar)
-    MDCAppBarTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: appBar)
-    return appBar
-  }()
-
-  public override var childForStatusBarStyle: UIViewController? {
-    return appBar.headerViewController
-  }
-
   private var cardsRemainingLabel: UILabel!
 
   public override func viewDidLoad() {
@@ -100,24 +84,11 @@ public final class StudyViewController: UIViewController {
     cardsRemainingLabel.textAlignment = .center
     cardsRemainingLabel.translatesAutoresizingMaskIntoConstraints = false
     // TODO: this should probably be "caption" -- prototype inside Sketch
-    cardsRemainingLabel.font = stylesheet.typographyScheme.body2
-    appBar.addSubviewsToParent()
-    view.backgroundColor = stylesheet.colors.darkSurfaceColor
+    cardsRemainingLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+    view.backgroundColor = UIColor.systemGroupedBackground
     configureUI()
-    appBar.navigationBar.trailingBarButtonItem = UIBarButtonItem(
-      title: "DONE",
-      style: .plain,
-      target: self,
-      action: #selector(didTapDone)
-    )
-
-    // TODO: Get rid of the option to cancel once I have multi-document support
-    appBar.navigationBar.leadingBarButtonItem = UIBarButtonItem(
-      title: "Discard",
-      style: .plain,
-      target: self,
-      action: #selector(didTapCancel)
-    )
+    navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
+    navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(didTapCancel))
   }
 
   private func configureUI() {
@@ -134,25 +105,21 @@ public final class StudyViewController: UIViewController {
   }
 
   @objc private func didTapCancel() {
-    let alertController = MDCAlertController(
+    let alertController = UIAlertController(
       title: "Discard study session?",
       message: "Are you sure you want to discard your study session? " +
-        "If you do this, the app will not remember what questions you answered correctly."
+        "If you do this, the app will not remember what questions you answered correctly.",
+      preferredStyle: .alert
     )
-    let cancel = MDCAlertAction(title: "Cancel") { _ in
+    let cancel = UIAlertAction(title: "Cancel", style: .cancel) { _ in
       // Nothing
     }
-    let discard = MDCAlertAction(title: "Discard") { _ in
+    let discard = UIAlertAction(title: "Discard", style: .destructive) { _ in
       self.studySession.studySessionEndDate = Date()
       self.delegate?.studyViewControllerDidCancel(self)
     }
     alertController.addAction(discard)
     alertController.addAction(cancel)
-    MDCAlertColorThemer.applySemanticColorScheme(
-      stylesheet.colors.withDarkerColorAsPrimary().semanticColorScheme,
-      to: alertController
-    )
-    MDCAlertTypographyThemer.applyTypographyScheme(stylesheet.typographyScheme, to: alertController)
     present(alertController, animated: true, completion: nil)
   }
 
@@ -168,8 +135,7 @@ public final class StudyViewController: UIViewController {
       guard let document = document else { completion(nil); return }
       let cardView = cardFromDocument.card.challengeView(
         document: document,
-        properties: cardFromDocument.properties,
-        stylesheet: self.stylesheet
+        properties: cardFromDocument.properties
       )
       cardView.delegate = self
       self.view.addSubview(cardView)

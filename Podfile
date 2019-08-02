@@ -5,21 +5,12 @@ target 'CommonplaceBookApp' do
   # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
   use_frameworks!
 
-  platform :ios, '11.0'
+  platform :ios, '13.0'
 
   # Pods for remember
-  pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
+  pod 'CocoaLumberjack/Swift'
   pod 'DataCompression'
-  pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  pod 'IGListKit', '~> 3.0'
-  pod 'MiniMarkdown', :path => '../MiniMarkdown', :testspecs => ['Tests']
-  # pod 'MiniMarkdown', :git => 'https://github.com/bdewey/MiniMarkdown', :testspecs => ['Tests']
-  pod 'MaterialComponents', :git => 'https://github.com/material-components/material-components-ios'
-  pod 'NunitoSans', :git => 'https://github.com/bdewey/NunitoSans'
-  pod 'SDWebImage', '~> 4.0'
-  pod 'SDWebImage/GIF', '~> 4.0'
   pod 'SnapKit'
-  pod 'SwipeCellKit', :git => 'https://github.com/SwipeCellKit/SwipeCellKit.git'
   pod 'Yams'
 
   target 'CommonplaceBookAppTests' do

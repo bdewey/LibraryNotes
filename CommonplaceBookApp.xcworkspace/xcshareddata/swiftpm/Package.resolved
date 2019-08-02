@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "MiniMarkdown",
+        "repositoryURL": "https://github.com/bdewey/MiniMarkdown.git",
+        "state": {
+          "branch": null,
+          "revision": "046cf90a2280901064862777339fb001819de96b",
+          "version": "0.13.0"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "state": {
+          "branch": null,
+          "revision": "f4240bf022a69815241a883c03645444b58ac553",
+          "version": "1.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

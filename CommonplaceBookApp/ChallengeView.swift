@@ -2,15 +2,29 @@
 
 import AVFoundation
 import Foundation
-import MaterialComponents
+import UIKit
 
 public protocol ChallengeViewDelegate: class {
   func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool)
   func challengeView(_ cardView: ChallengeView, didRequestSpeech: AVSpeechUtterance, language: String)
 }
 
-open class ChallengeView: MDCCard {
+open class ChallengeView: UIControl {
   public weak var delegate: ChallengeViewDelegate?
 
   var introductoryUtterances: [AVSpeechUtterance]? { return nil }
+
+  public override init(frame: CGRect) {
+    super.init(frame: frame)
+    commonInit()
+  }
+
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
+    commonInit()
+  }
+
+  private func commonInit() {
+    backgroundColor = UIColor.secondarySystemGroupedBackground
+  }
 }

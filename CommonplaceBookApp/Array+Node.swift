@@ -10,10 +10,6 @@ extension Array where Element == Node {
   func cardTemplates() -> [CardTemplateSerializationWrapper] {
     var results = [CardTemplateSerializationWrapper]()
     results.append(
-      contentsOf: VocabularyAssociation.makeAssociations(from: self).0
-        .map { CardTemplateSerializationWrapper($0) }
-    )
-    results.append(
       contentsOf: ClozeTemplate.extract(from: self)
         .map { CardTemplateSerializationWrapper($0) }
     )
@@ -28,7 +24,6 @@ extension Array where Element == Node {
     to archive: inout TextSnippetArchive
   ) -> [ChallengeTemplateArchiveKey] {
     return Swift.Array([
-      archive.insert(contentsOf: VocabularyAssociation.makeAssociations(from: self).0),
       archive.insert(contentsOf: ClozeTemplate.extract(from: self)),
       archive.insert(contentsOf: QuoteTemplate.extract(from: self)),
     ].joined())

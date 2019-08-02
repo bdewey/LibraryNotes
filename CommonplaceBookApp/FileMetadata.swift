@@ -4,7 +4,6 @@
 
 import CocoaLumberjack
 import Foundation
-import IGListKit
 import MobileCoreServices
 
 /// Contains the properties of a file at a point in time (the structure is immutable)

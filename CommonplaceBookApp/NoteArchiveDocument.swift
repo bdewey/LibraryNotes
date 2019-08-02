@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import DataCompression
-import IGListKit
 import MiniMarkdown
 import UIKit
 
@@ -11,15 +10,6 @@ public protocol NoteArchiveDocumentObserver: AnyObject {
     _ document: NoteArchiveDocument,
     didUpdatePageProperties properties: [String: PageProperties]
   )
-}
-
-extension ListAdapter: NoteArchiveDocumentObserver {
-  public func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    performUpdates(animated: true)
-  }
 }
 
 public final class NoteArchiveDocument: UIDocument {
@@ -55,6 +45,14 @@ public final class NoteArchiveDocument: UIDocument {
     return noteArchiveQueue.sync {
       noteArchive.pageProperties
     }
+  }
+
+  /// All hashtags used across all pages, sorted.
+  public var hashtags: [String] {
+    let hashtags = pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
+      hashtags.formUnion(props.hashtags)
+    }
+    return Array(hashtags).sorted()
   }
 
   /// Holds page contents in memory until we have a chance to save.
@@ -99,7 +97,7 @@ public final class NoteArchiveDocument: UIDocument {
       throw error(for: .unexpectedContentType)
     }
     topLevelFileWrapper = wrapper
-    self.studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
+    studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
     do {
       let noteArchive = try NoteArchiveDocument.loadNoteArchive(
         from: wrapper,
@@ -202,8 +200,8 @@ private extension NoteArchiveDocument {
     guard
       let data = maybeData,
       let text = String(data: data, encoding: .utf8) else {
-        // Is this an error? Or expected for a new document?
-        return NoteArchive(parsingRules: parsingRules)
+      // Is this an error? Or expected for a new document?
+      return NoteArchive(parsingRules: parsingRules)
     }
     return try NoteArchive(parsingRules: parsingRules, textSerialization: text)
   }
@@ -214,7 +212,7 @@ private extension NoteArchiveDocument {
     guard let logData = maybeData,
       let logText = String(data: logData, encoding: .utf8),
       let studyLog = StudyLog(logText) else {
-        return StudyLog()
+      return StudyLog()
     }
     return studyLog
   }

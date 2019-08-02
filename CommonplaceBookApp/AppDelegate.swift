@@ -1,13 +1,11 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import MaterialComponents.MaterialAppBar
-import MaterialComponents.MaterialSnackbar
 import MiniMarkdown
 import UIKit
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControllerDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   let useCloud = true
 
@@ -18,15 +16,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   // This is here to force initialization of the CardTemplateType, which registers the class
   // with the type name. This has to be done before deserializing any card templates.
   private let knownCardTemplateTypes: [ChallengeTemplateType] = [
-    .vocabularyAssociation,
     .cloze,
     .quote,
   ]
 
   private lazy var loadingViewController: LoadingViewController = {
-    let loadingViewController = LoadingViewController(stylesheet: commonplaceBookStylesheet)
+    let loadingViewController = LoadingViewController()
     loadingViewController.title = "Interactive Notebook"
-    loadingViewController.delegate = self
     return loadingViewController
   }()
 
@@ -40,9 +36,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let navigationController = MDCAppBarNavigationController()
-    navigationController.delegate = self
-    navigationController.pushViewController(loadingViewController, animated: false)
+    let navigationController = UINavigationController(rootViewController: loadingViewController)
     window.rootViewController = navigationController
     window.makeKeyAndVisible()
     self.window = window
@@ -76,8 +70,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
-        let message = MDCSnackbarMessage(text: messageText)
-        MDCSnackbarManager.show(message)
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        window.rootViewController?.present(alertController, animated: true, completion: nil)
         self.loadingViewController.style = .error
       }
     })
@@ -154,79 +150,22 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   private func makeViewController(
     notebook: NoteArchiveDocument
   ) -> UIViewController {
-    let navigationController = MDCAppBarNavigationController()
-    navigationController.delegate = self
-    navigationController.pushViewController(
-      DocumentListViewController(
-        notebook: notebook,
-        stylesheet: commonplaceBookStylesheet
-      ),
-      animated: false
+    let primaryNavigationController = UINavigationController(
+      rootViewController: DocumentListViewController(
+        notebook: notebook
+      )
     )
-    return navigationController
-  }
-
-  func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor] {
-    return [commonplaceBookStylesheet.colors.secondaryColor]
-  }
-}
-
-extension LoadingViewController: StylesheetContaining {}
-
-private let commonplaceBookStylesheet: Stylesheet = {
-  var stylesheet = Stylesheet()
-  stylesheet.colors.primaryColor = UIColor.white
-  stylesheet.colors.onPrimaryColor = UIColor.black
-  stylesheet.colors.secondaryColor = UIColor(rgb: 0x661FFF)
-  stylesheet.colors.onSecondaryColor = UIColor.white
-  stylesheet.colors.surfaceColor = UIColor.white
-  stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
-  stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
-  stylesheet.typographyScheme.caption = UIFont(name: "Merriweather-Light", size: 11.4)!
-  stylesheet.typographyScheme.subtitle1 = UIFont(name: "LibreFranklin-SemiBold", size: 15.95)!
-  stylesheet.kern[.headline6] = 0.25
-  stylesheet.kern[.body2] = 0.25
-  stylesheet.kern[.caption] = 0.4
-  stylesheet.kern[.subtitle1] = 0.15
-  return stylesheet
-}()
-
-extension UIViewController {
-  var semanticColorScheme: MDCColorScheming {
-    if let container = self as? StylesheetContaining {
-      return container.stylesheet.colors.semanticColorScheme
-    } else {
-      return MDCSemanticColorScheme(defaults: .material201804)
-    }
-  }
-
-  var typographyScheme: MDCTypographyScheme {
-    if let container = self as? StylesheetContaining {
-      return container.stylesheet.typographyScheme
-    } else {
-      return MDCTypographyScheme(defaults: .material201804)
-    }
-  }
-}
-
-extension AppDelegate: MDCAppBarNavigationControllerDelegate {
-  func appBarNavigationController(
-    _ navigationController: MDCAppBarNavigationController,
-    willAdd appBar: MDCAppBar,
-    asChildOf viewController: UIViewController
-  ) {
-    MDCAppBarColorThemer.applySemanticColorScheme(
-      viewController.semanticColorScheme,
-      to: appBar
+    primaryNavigationController.navigationBar.prefersLargeTitles = true
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules
     )
-    MDCAppBarTypographyThemer.applyTypographyScheme(
-      viewController.typographyScheme,
-      to: appBar
+    textEditViewController.delegate = notebook
+    let secondaryNavigationController = UINavigationController(
+      rootViewController: textEditViewController
     )
-    if var forwarder = viewController as? MDCScrollEventForwarder {
-      forwarder.headerView = appBar.headerViewController.headerView
-      appBar.headerViewController.headerView.observesTrackingScrollViewScrollEvents = false
-      appBar.headerViewController.headerView.shiftBehavior = forwarder.desiredShiftBehavior
-    }
+
+    let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
+    splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
+    return splitViewController
   }
 }

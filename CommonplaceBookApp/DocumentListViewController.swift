@@ -2,13 +2,9 @@
 
 import CocoaLumberjack
 import CoreServices
-import IGListKit
-import MaterialComponents
 import MiniMarkdown
 import SnapKit
 import UIKit
-
-private let reuseIdentifier = "HACKY_document"
 
 extension NSComparisonPredicate {
   fileprivate convenience init(conformingToUTI uti: String) {
@@ -23,23 +19,16 @@ extension NSComparisonPredicate {
 }
 
 /// Implements a filterable list of documents in an interactive notebook.
-final class DocumentListViewController: UIViewController, StylesheetContaining {
+final class DocumentListViewController: UIViewController {
   /// Designated initializer.
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteArchiveDocument,
-    stylesheet: Stylesheet
+    notebook: NoteArchiveDocument
   ) {
     self.notebook = notebook
-    self.stylesheet = stylesheet
-    self.dataSource = DocumentDataSource(
-      notebook: notebook,
-      stylesheet: stylesheet
-    )
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
-    self.navigationItem.leftBarButtonItem = hashtagMenuButton
     self.navigationItem.rightBarButtonItem = studyButton
     notebook.addObserver(self)
   }
@@ -48,37 +37,20 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     fatalError("init(coder:) has not been implemented")
   }
 
-  /// Performs necessary cleanup tasks: Closing the index, deregisters the adapter.
-  deinit {
-    dataSource.notebook.removeObserver(documentListAdapter)
-  }
-
   private let notebook: NoteArchiveDocument
-  public let stylesheet: Stylesheet
-  private let dataSource: DocumentDataSource
+  private var dataSource: DocumentDiffableDataSource?
 
-  private lazy var hashtagMenuButton: UIBarButtonItem = {
-    UIBarButtonItem(
-      image: UIImage(named: "round_menu_black_24pt")?.withRenderingMode(.alwaysTemplate),
-      style: .plain,
-      target: self,
-      action: #selector(didTapHashtagMenu)
-    )
-  }()
-
-  private lazy var newDocumentButton: MDCButton = {
-    let icon = UIImage(named: "baseline_add_black_24pt")?.withRenderingMode(.alwaysTemplate)
-    let button = MDCFloatingButton(frame: .zero)
-    button.setImage(icon, for: .normal)
+  private lazy var newDocumentButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "plus.circle")
+    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapNewDocument))
     button.accessibilityIdentifier = "new-document"
-    MDCFloatingActionButtonThemer.applyScheme(stylesheet.buttonScheme, to: button)
-    button.addTarget(self, action: #selector(didTapNewDocument), for: .touchUpInside)
     return button
   }()
 
   private lazy var studyButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "rectangle.stack")
     let button = UIBarButtonItem(
-      title: "Study",
+      image: icon,
       style: .plain,
       target: self,
       action: #selector(startStudySession)
@@ -87,65 +59,63 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     return button
   }()
 
-  private lazy var layout: UICollectionViewFlowLayout = {
-    let layout = UICollectionViewFlowLayout()
-    layout.scrollDirection = .vertical
-    layout.minimumInteritemSpacing = 0
-    layout.minimumLineSpacing = 0
-    return layout
-  }()
-
-  // TODO: Code smell here
-  private lazy var documentListAdapter: ListAdapter = {
-    let updater = ListAdapterUpdater()
-    let adapter = ListAdapter(updater: updater, viewController: self)
-    adapter.dataSource = dataSource
-    dataSource.notebook.addObserver(adapter)
-    return adapter
-  }()
-
-  private lazy var documentCollectionView: UICollectionView = {
-    let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.layout)
-    collectionView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    collectionView.register(
-      DocumentCollectionViewCell.self,
-      forCellWithReuseIdentifier: reuseIdentifier
-    )
-    collectionView.backgroundColor = stylesheet.colors.surfaceColor
-    documentListAdapter.collectionView = collectionView
-    collectionView.accessibilityIdentifier = "document-list"
-    return collectionView
+  private lazy var tableView: UITableView = {
+    let tableView = UITableView(frame: .zero, style: .plain)
+    tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+    tableView.backgroundColor = UIColor.systemBackground
+    tableView.accessibilityIdentifier = "document-list"
+    tableView.estimatedRowHeight = 72
+    tableView.delegate = self
+    tableView.separatorStyle = .none
+    return tableView
   }()
 
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.addSubview(documentCollectionView)
-    view.addSubview(newDocumentButton)
-    documentCollectionView.snp.makeConstraints { make in
+    let dataSource = DocumentDiffableDataSource(
+      tableView: tableView,
+      notebook: notebook
+    )
+    self.dataSource = dataSource
+    view.addSubview(tableView)
+    tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    newDocumentButton.snp.makeConstraints { make in
-      make.trailing.equalToSuperview().offset(-16)
-      make.bottom.equalToSuperview().offset(-16)
-      make.width.equalTo(56)
-      make.height.equalTo(56)
-    }
     studySession = notebook.studySession()
+    dataSource.performUpdates(animated: false)
+
+    let resultsViewController = DocumentSearchResultsViewController()
+    resultsViewController.delegate = self
+    let searchController = UISearchController(searchResultsController: resultsViewController)
+    searchController.searchResultsUpdater = self
+    searchController.searchBar.delegate = self
+    navigationItem.searchController = searchController
+
+    navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
+  }
+
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    dataSource?.startObservingNotebook()
+  }
+
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(animated)
+    dataSource?.stopObservingNotebook()
   }
 
   @objc private func didTapNewDocument() {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
-    if let hashtag = self.dataSource.filteredHashtag {
+    if let hashtag = self.dataSource?.filteredHashtag {
       initialText += hashtag
       initialText += "\n"
     }
     let viewController = TextEditViewController(
-      parsingRules: notebook.parsingRules,
-      stylesheet: stylesheet
+      parsingRules: notebook.parsingRules
     )
     viewController.markdown = initialText
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
@@ -167,31 +137,15 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     }
   }
 
-  @objc private func didTapHashtagMenu() {
-    let hashtagViewController = HashtagViewController(
-      index: notebook,
-      stylesheet: stylesheet
-    )
-    hamburgerPresentationController = CoverPartiallyPresentationController(
-      presentedViewController: hashtagViewController,
-      presenting: self,
-      coverDirection: .left
-    )
-    hashtagViewController.transitioningDelegate = hamburgerPresentationController
-    hashtagViewController.modalPresentationStyle = .custom
-    hashtagViewController.delegate = self
-    present(hashtagViewController, animated: true, completion: nil)
-  }
-
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
     presentStudySessionViewController(for: studySession)
   }
 
   private func updateStudySession() {
-    let filter: (String, PageProperties) -> Bool = (dataSource.filteredHashtag == nil)
+    let filter: (String, PageProperties) -> Bool = (dataSource?.filteredHashtag == nil)
       ? { _, _ in true }
-      : { _, properties in properties.hashtags.contains(self.dataSource.filteredHashtag!) }
+      : { _, properties in properties.hashtags.contains(self.dataSource!.filteredHashtag!) }
     studySession = notebook.studySession(filter: filter)
   }
 
@@ -199,37 +153,92 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let studyVC = StudyViewController(
       studySession: studySession.limiting(to: 20),
       documentCache: ReadOnlyDocumentCache(delegate: self),
-      stylesheet: stylesheet,
       delegate: self
     )
-    studyVC.modalTransitionStyle = .crossDissolve
     studyVC.maximumCardWidth = 440
     studyVC.title = navigationItem.title
-    studyVC.modalPresentationStyle = .fullScreen
-    present(studyVC, animated: true, completion: nil)
+    present(
+      UINavigationController(rootViewController: studyVC),
+      animated: true,
+      completion: nil
+    )
   }
 }
 
-extension DocumentListViewController: HashtagViewControllerDelegate {
-  func hashtagViewControllerDidClearHashtag(_ viewController: HashtagViewController) {
-    dataSource.filteredHashtag = nil
-    documentListAdapter.performUpdates(animated: true)
-    title = "Interactive Notebook"
-    updateStudySession()
-    dismiss(animated: true, completion: nil)
+// MARK: - Search
+/// Everything needed for search.
+/// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
+extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchResultsViewControllerDelegate, UISearchBarDelegate {
+  func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
+    dataSource?.filteredHashtag = hashtag
+    navigationItem.searchController?.searchBar.text = hashtag
+    navigationItem.searchController?.dismiss(animated: true, completion: nil)
   }
 
-  func hashtagViewController(_ viewController: HashtagViewController, didTap hashtag: String) {
-    print("Tapped " + hashtag)
-    dataSource.filteredHashtag = hashtag
-    documentListAdapter.performUpdates(animated: true)
-    title = hashtag
-    updateStudySession()
-    dismiss(animated: true, completion: nil)
+  func updateSearchResults(for searchController: UISearchController) {
+    guard let resultsViewController = searchController.searchResultsController as? DocumentSearchResultsViewController else {
+      assertionFailure()
+      return
+    }
+    let pattern = searchController.searchBar.text ?? ""
+    resultsViewController.setHashtags(notebook.hashtags.filter({ $0.fuzzyMatch(pattern: pattern) }))
   }
 
-  func hashtagViewControllerDidCancel(_ viewController: HashtagViewController) {
-    dismiss(animated: true, completion: nil)
+  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    dataSource?.filteredHashtag = nil
+  }
+}
+
+extension DocumentListViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
+    guard let viewProperties = dataSource?.itemIdentifier(for: indexPath) else { return }
+    let markdown: String
+    do {
+      markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
+      return
+    }
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules
+    )
+    textEditViewController.pageIdentifier = viewProperties.pageKey
+    textEditViewController.markdown = markdown
+    textEditViewController.delegate = notebook
+    if let splitViewController = splitViewController {
+      splitViewController.showDetailViewController(
+        UINavigationController(rootViewController: textEditViewController),
+        sender: self
+      )
+    } else if let navigationController = navigationController {
+      navigationController.pushViewController(textEditViewController, animated: true)
+    }
+  }
+
+  func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    var actions = [UIContextualAction]()
+    if let properties = dataSource?.itemIdentifier(for: indexPath) {
+      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+        try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
+        completion(true)
+      }
+      deleteAction.image = UIImage(systemName: "trash")
+      actions.append(deleteAction)
+      if properties.cardCount > 0 {
+        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
+          let studySession = self.notebook.studySession(
+            filter: { name, _ in name == properties.pageKey }
+          )
+          self.presentStudySessionViewController(for: studySession)
+          completion(true)
+        }
+        studyAction.image = UIImage(systemName: "rectangle.stack")
+        studyAction.backgroundColor = UIColor.systemBlue
+        actions.append(studyAction)
+      }
+    }
+    return UISwipeActionsConfiguration(actions: actions)
   }
 }
 

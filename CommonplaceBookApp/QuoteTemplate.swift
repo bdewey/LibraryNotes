@@ -2,6 +2,7 @@
 
 import Foundation
 import MiniMarkdown
+import UIKit
 
 extension ChallengeTemplateType {
   public static let quote = ChallengeTemplateType(rawValue: "quote", class: QuoteTemplate.self)
@@ -90,25 +91,18 @@ extension QuoteTemplate: Challenge {
 
   public func challengeView(
     document: UIDocument,
-    properties: CardDocumentProperties,
-    stylesheet: Stylesheet
+    properties: CardDocumentProperties
   ) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
-    view.context = stylesheet.attributedString(
-      "Identify the source".uppercased(),
-      style: .overline,
-      emphasis: .darkTextMediumEmphasis
-    )
+    view.context = NSAttributedString(string: "Identify the source".uppercased(), attributes: [.font: UIFont.preferredFont(forTextStyle: .caption1), .foregroundColor: UIColor.secondaryLabel])
     let quoteRenderer = RenderedMarkdown(
-      stylesheet: stylesheet,
-      style: .body2,
+      textStyle: .body,
       parsingRules: properties.parsingRules
     )
     let (front, chapterAndVerse) = renderCardFront(with: quoteRenderer)
     view.front = front
     let attributionRenderer = RenderedMarkdown(
-      stylesheet: stylesheet,
-      style: .caption,
+      textStyle: .caption1,
       parsingRules: properties.parsingRules
     )
     let back = NSMutableAttributedString()
@@ -117,7 +111,6 @@ extension QuoteTemplate: Challenge {
     attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
     back.append(attributionRenderer.attributedString)
     view.back = back
-    view.stylesheet = stylesheet
     return view
   }
 

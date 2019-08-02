@@ -3,7 +3,6 @@
 import UIKit
 
 import CocoaLumberjack
-import MaterialComponents
 import MiniMarkdown
 
 protocol TextEditViewControllerDelegate: AnyObject {
@@ -12,13 +11,10 @@ protocol TextEditViewControllerDelegate: AnyObject {
 }
 
 /// Allows editing of a single text file.
-final class TextEditViewController: UIViewController,
-  MDCScrollEventForwarder,
-  StylesheetContaining {
+final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
+  init(parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
-    self.stylesheet = stylesheet
 
     // TODO: This is how I used to show pictures, methinks; how should it work in the NoteArchive
     // world?
@@ -29,9 +25,8 @@ final class TextEditViewController: UIViewController,
 //    }
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
-      formatters: TextEditViewController.formatters(with: stylesheet),
-      renderers: renderers,
-      stylesheet: stylesheet
+      formatters: TextEditViewController.formatters(),
+      renderers: renderers
     )
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
@@ -60,10 +55,7 @@ final class TextEditViewController: UIViewController,
   // Init-time state.
 
   private let parsingRules: ParsingRules
-  internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
-  public var headerView: MDCFlexibleHeaderView?
-  public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
   public weak var delegate: TextEditViewControllerDelegate?
 
@@ -81,38 +73,36 @@ final class TextEditViewController: UIViewController,
   public var pageIdentifier: String?
 
   private static func formatters(
-    with stylesheet: Stylesheet
   ) -> [NodeType: RenderedMarkdown.FormattingFunction] {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
     formatters[.heading] = {
       let heading = $0 as! Heading // swiftlint:disable:this force_cast
-      if heading.headingLevel == 1 {
-        $1.fontSize = 20
-        $1.kern = 0.25
-      } else {
-        $1.fontSize = 16
-        $1.kern = 0.15
+      switch heading.headingLevel {
+      case 1:
+        $1.textStyle = .largeTitle
+      case 2:
+        $1.textStyle = .title1
+      case 3:
+        $1.textStyle = .title2
+      default:
+        $1.textStyle = .title3
       }
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { _, attributes in
-      attributes.color = stylesheet.colors
-        .onSurfaceColor
-        .withAlphaComponent(stylesheet.alpha[.darkTextDisabled] ?? 0.5)
+      attributes.color = UIColor.quaternaryLabel
     }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = UIColor.yellow.withAlphaComponent(0.3) }
+    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
-      $1.color = stylesheet.colors
-        .onSurfaceColor
-        .withAlphaComponent(stylesheet.alpha[.darkTextMediumEmphasis] ?? 0.5)
+      $1.color = UIColor.secondaryLabel
     }
-    formatters[.hashtag] = { $1.backgroundColor = stylesheet.colors.darkSurfaceColor }
+    formatters[.hashtag] = { $1.backgroundColor = UIColor.secondarySystemBackground }
     formatters[.blockQuote] = {
-      $1.backgroundColor = stylesheet.colors.darkSurfaceColor
+      $1.backgroundColor = UIColor.secondarySystemBackground
       $1.listLevel += 1
     }
     return formatters
@@ -144,15 +134,17 @@ final class TextEditViewController: UIViewController,
   private static func makeTextStorage(
     parsingRules: ParsingRules,
     formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction],
-    stylesheet: Stylesheet
+    renderers: [NodeType: RenderedMarkdown.RenderFunction]
   ) -> MiniMarkdownTextStorage {
     let textStorage = MiniMarkdownTextStorage(
       parsingRules: parsingRules,
       formatters: formatters,
       renderers: renderers
     )
-    textStorage.defaultAttributes = stylesheet.attributes(style: .body2)
+    textStorage.defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.label,
+    ]
     textStorage.defaultAttributes.headIndent = 28
     textStorage.defaultAttributes.firstLineHeadIndent = 28
     return textStorage
@@ -164,7 +156,7 @@ final class TextEditViewController: UIViewController,
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
     let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = stylesheet.colors.surfaceColor
+    textView.backgroundColor = UIColor.systemBackground
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return textView
   }()
@@ -186,6 +178,8 @@ final class TextEditViewController: UIViewController,
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
+    navigationItem.leftItemsSupplementBackButton = true
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
   }
@@ -206,17 +200,16 @@ final class TextEditViewController: UIViewController,
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
 
-  override func viewWillTransition(
-    to size: CGSize,
-    with coordinator: UIViewControllerTransitionCoordinator
-  ) {
-    super.viewWillTransition(to: size, with: coordinator)
-    adjustMargins(size: size)
+  override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    DDLogInfo("viewWillLayoutSubviews, width = \(view.frame.width)")
+    adjustMargins(size: view.frame.size)
   }
 
   private func adjustMargins(size: CGSize) {
     let delta = size.width - 440
     let horizontalInset = max(delta / 2, 0)
+    DDLogInfo("adjustMargins: width = \(size.width), inset = \(horizontalInset)")
     textView.textContainerInset = UIEdgeInsets(
       top: 8,
       left: horizontalInset,
@@ -298,39 +291,10 @@ extension TextEditViewController: UITextViewDelegate {
       return true
     }
   }
-
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    forwardScrollViewDidScroll(scrollView)
-  }
-
-  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    forwardScrollViewDidEndDecelerating(scrollView)
-  }
-
-  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    forwardScrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
-  }
-
-  func scrollViewWillEndDragging(
-    _ scrollView: UIScrollView,
-    withVelocity velocity: CGPoint,
-    targetContentOffset: UnsafeMutablePointer<CGPoint>
-  ) {
-    forwardScrollViewWillEndDragging(
-      scrollView,
-      withVelocity: velocity,
-      targetContentOffset: targetContentOffset
-    )
-  }
-}
-
-extension TextEditViewController: UIScrollViewForTracking {
-  var scrollViewForTracking: UIScrollView {
-    return textView
-  }
 }
 
 // MARK: - Commands
+
 private extension TextEditViewController {
   /// Converts the currently selected text to a cloze.
   @objc func convertTextToCloze() {
