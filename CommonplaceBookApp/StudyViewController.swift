@@ -19,12 +19,10 @@ public final class StudyViewController: UIViewController {
   public init(
     studySession: StudySession,
     documentCache: DocumentCache,
-    stylesheet: Stylesheet,
     delegate: StudyViewControllerDelegate
   ) {
     self.studySession = studySession
     self.documentCache = documentCache
-    self.stylesheet = stylesheet
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
     self.tabBarItem.title = "STUDY"
@@ -39,7 +37,6 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   private let documentCache: DocumentCache
-  private let stylesheet: Stylesheet
 
   private weak var delegate: StudyViewControllerDelegate?
 

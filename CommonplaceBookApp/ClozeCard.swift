@@ -73,7 +73,7 @@ extension ClozeCard: Challenge {
     return cardView
   }
 
-  func utterance(node: Node, stylesheet: Stylesheet) -> AVSpeechUtterance {
+  func utterance(node: Node) -> AVSpeechUtterance {
     let phrase = clozeRenderer.render(node: node).string
     let utterance = AVSpeechUtterance(string: phrase)
     utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")

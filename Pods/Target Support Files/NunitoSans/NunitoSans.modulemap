@@ -1,6 +1,0 @@
-framework module NunitoSans {
-  umbrella header "NunitoSans-umbrella.h"
-
-  export *
-  module * { export * }
-}

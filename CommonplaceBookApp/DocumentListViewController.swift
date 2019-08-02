@@ -19,16 +19,14 @@ extension NSComparisonPredicate {
 }
 
 /// Implements a filterable list of documents in an interactive notebook.
-final class DocumentListViewController: UIViewController, StylesheetContaining {
+final class DocumentListViewController: UIViewController {
   /// Designated initializer.
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteArchiveDocument,
-    stylesheet: Stylesheet
+    notebook: NoteArchiveDocument
   ) {
     self.notebook = notebook
-    self.stylesheet = stylesheet
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.rightBarButtonItem = studyButton
@@ -40,7 +38,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
   }
 
   private let notebook: NoteArchiveDocument
-  public let stylesheet: Stylesheet
   private var dataSource: DocumentDiffableDataSource?
 
   private lazy var newDocumentButton: UIBarButtonItem = {
@@ -118,8 +115,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
       initialText += "\n"
     }
     let viewController = TextEditViewController(
-      parsingRules: notebook.parsingRules,
-      stylesheet: stylesheet
+      parsingRules: notebook.parsingRules
     )
     viewController.markdown = initialText
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
@@ -157,7 +153,6 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     let studyVC = StudyViewController(
       studySession: studySession.limiting(to: 20),
       documentCache: ReadOnlyDocumentCache(delegate: self),
-      stylesheet: stylesheet,
       delegate: self
     )
     studyVC.maximumCardWidth = 440
@@ -206,8 +201,7 @@ extension DocumentListViewController: UITableViewDelegate {
       return
     }
     let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules,
-      stylesheet: stylesheet
+      parsingRules: notebook.parsingRules
     )
     textEditViewController.pageIdentifier = viewProperties.pageKey
     textEditViewController.markdown = markdown

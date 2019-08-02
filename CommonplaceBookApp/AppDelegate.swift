@@ -5,7 +5,7 @@ import MiniMarkdown
 import UIKit
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControllerDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   let useCloud = true
 
@@ -21,9 +21,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   ]
 
   private lazy var loadingViewController: LoadingViewController = {
-    let loadingViewController = LoadingViewController(stylesheet: commonplaceBookStylesheet)
+    let loadingViewController = LoadingViewController()
     loadingViewController.title = "Interactive Notebook"
-    loadingViewController.delegate = self
     return loadingViewController
   }()
 
@@ -153,14 +152,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
   ) -> UIViewController {
     let primaryNavigationController = UINavigationController(
       rootViewController: DocumentListViewController(
-        notebook: notebook,
-        stylesheet: commonplaceBookStylesheet
+        notebook: notebook
       )
     )
     primaryNavigationController.navigationBar.prefersLargeTitles = true
     let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules,
-      stylesheet: commonplaceBookStylesheet
+      parsingRules: notebook.parsingRules
     )
     textEditViewController.delegate = notebook
     let secondaryNavigationController = UINavigationController(
@@ -171,28 +168,4 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
     splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
     return splitViewController
   }
-
-  func loadingViewControllerCycleColors(_ viewController: LoadingViewController) -> [UIColor] {
-    return [commonplaceBookStylesheet.colors.secondaryColor]
-  }
 }
-
-extension LoadingViewController: StylesheetContaining {}
-
-private let commonplaceBookStylesheet: Stylesheet = {
-  var stylesheet = Stylesheet()
-  stylesheet.colors.primaryColor = UIColor.white
-  stylesheet.colors.onPrimaryColor = UIColor.black
-  stylesheet.colors.secondaryColor = UIColor(rgb: 0x661FFF)
-  stylesheet.colors.onSecondaryColor = UIColor.white
-  stylesheet.colors.surfaceColor = UIColor.white
-  stylesheet.typographyScheme.headline6 = UIFont(name: "LibreFranklin-Medium", size: 20.0)!
-  stylesheet.typographyScheme.body2 = UIFont(name: "LibreFranklin-Regular", size: 14.0)!
-  stylesheet.typographyScheme.caption = UIFont(name: "Merriweather-Light", size: 11.4)!
-  stylesheet.typographyScheme.subtitle1 = UIFont(name: "LibreFranklin-SemiBold", size: 15.95)!
-  stylesheet.kern[.headline6] = 0.25
-  stylesheet.kern[.body2] = 0.25
-  stylesheet.kern[.caption] = 0.4
-  stylesheet.kern[.subtitle1] = 0.15
-  return stylesheet
-}()

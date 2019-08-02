@@ -11,12 +11,10 @@ protocol TextEditViewControllerDelegate: AnyObject {
 }
 
 /// Allows editing of a single text file.
-final class TextEditViewController: UIViewController,
-  StylesheetContaining {
+final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
+  init(parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
-    self.stylesheet = stylesheet
 
     // TODO: This is how I used to show pictures, methinks; how should it work in the NoteArchive
     // world?
@@ -28,8 +26,7 @@ final class TextEditViewController: UIViewController,
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(),
-      renderers: renderers,
-      stylesheet: stylesheet
+      renderers: renderers
     )
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
@@ -58,7 +55,6 @@ final class TextEditViewController: UIViewController,
   // Init-time state.
 
   private let parsingRules: ParsingRules
-  internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
 
   public weak var delegate: TextEditViewControllerDelegate?
@@ -138,8 +134,7 @@ final class TextEditViewController: UIViewController,
   private static func makeTextStorage(
     parsingRules: ParsingRules,
     formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction],
-    stylesheet: Stylesheet
+    renderers: [NodeType: RenderedMarkdown.RenderFunction]
   ) -> MiniMarkdownTextStorage {
     let textStorage = MiniMarkdownTextStorage(
       parsingRules: parsingRules,
