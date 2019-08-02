@@ -118,7 +118,6 @@ extension QuoteTemplate: Challenge {
     attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
     back.append(attributionRenderer.attributedString)
     view.back = back
-    view.stylesheet = stylesheet
     return view
   }
 

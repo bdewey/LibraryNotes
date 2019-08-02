@@ -32,16 +32,6 @@ public final class TwoSidedCardView: ChallengeView {
     setAnswerVisible(false, animated: false)
   }
 
-  /// Stylesheet for styling buttons.
-  public var stylesheet: Stylesheet? {
-    didSet {
-      guard let stylesheet = stylesheet else { return }
-      MDCContainedButtonThemer.applyScheme(stylesheet.buttonScheme, to: gotItButton)
-      MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: studyMoreButton)
-      MDCTextButtonThemer.applyScheme(stylesheet.buttonScheme, to: prounounceSpanishButton)
-    }
-  }
-
   /// A string displayed at the top of the card, both front and back, that gives context
   /// about what to do with the card.
   public var context: NSAttributedString? {
@@ -81,7 +71,7 @@ public final class TwoSidedCardView: ChallengeView {
   private lazy var buttonRow: UIStackView = {
     let buttonRow = UIStackView(arrangedSubviews: [gotItButton, studyMoreButton])
     buttonRow.axis = .horizontal
-    buttonRow.spacing = 8
+    buttonRow.spacing = 24
     return buttonRow
   }()
 
@@ -109,23 +99,24 @@ public final class TwoSidedCardView: ChallengeView {
     return backLabel
   }()
 
-  private lazy var gotItButton: MDCButton = {
-    let button = MDCButton(frame: .zero)
-    button.setTitle("Got it", for: .normal)
+  private lazy var gotItButton: UIButton = {
+    let button = UIButton(type: .system)
+    button.setTitle("Got It", for: .normal)
     button.addTarget(self, action: #selector(didTapGotIt), for: .touchUpInside)
     return button
   }()
 
-  private lazy var studyMoreButton: MDCButton = {
-    let button = MDCButton(frame: .zero)
+  private lazy var studyMoreButton: UIButton = {
+    let button = UIButton(type: .system)
     button.setTitle("Study More", for: .normal)
     button.addTarget(self, action: #selector(didTapStudyMore), for: .touchUpInside)
+    button.tintColor = .systemRed
     return button
   }()
 
   // TODO: Whoa, I don't actually use this?
-  private lazy var prounounceSpanishButton: MDCButton = {
-    let button = MDCButton(frame: .zero)
+  private lazy var prounounceSpanishButton: UIButton = {
+    let button = UIButton(type: .system)
     button.setTitle("Say it", for: .normal)
     button.addTarget(self, action: #selector(didTapPronounce), for: .touchUpInside)
     return button
