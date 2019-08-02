@@ -33,9 +33,8 @@ public struct ClozeCard {
 
   /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
   /// replaced with a hint if present, and highlighted.
-  public func cardFrontRenderer(stylesheet: Stylesheet) -> MarkdownAttributedStringRenderer {
+  public func cardFrontRenderer() -> MarkdownAttributedStringRenderer {
     return MarkdownAttributedStringRenderer.cardFront(
-      stylesheet: stylesheet,
       hideClozeAt: clozeIndex
     )
   }
@@ -50,30 +49,28 @@ extension ClozeCard: Challenge {
   public func challengeView(
     document: UIDocument,
     properties: CardDocumentProperties,
-    stylesheet: Stylesheet
+    stylesheet DONOTUSE: Stylesheet
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)
     let nodes = properties.parsingRules.parse(markdown)
     assert(nodes.count == 1)
     let node = nodes[0]
-    cardView.context = context(stylesheet: stylesheet)
-    let (front, chapterAndVerse) = cardFront(node: node, stylesheet: stylesheet)
+    cardView.context = context()
+    let (front, chapterAndVerse) = cardFront(node: node)
       .decomposedChapterAndVerseAnnotation
     cardView.front = front
     let back = NSMutableAttributedString()
-    back.append(cardBack(node: node, stylesheet: stylesheet).removingChapterAndVerseAnnotation())
+    back.append(cardBack(node: node).removingChapterAndVerseAnnotation())
     if !properties.attributionMarkdown.isEmpty {
       back.append(NSAttributedString(string: "\n"))
       let attributionRenderer = RenderedMarkdown(
-        stylesheet: stylesheet,
-        style: .caption,
+        textStyle: .caption1,
         parsingRules: properties.parsingRules
       )
       attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
       back.append(attributionRenderer.attributedString)
     }
     cardView.back = back
-    cardView.stylesheet = stylesheet
     return cardView
   }
 
@@ -84,22 +81,22 @@ extension ClozeCard: Challenge {
     return utterance
   }
 
-  func context(stylesheet: Stylesheet) -> NSAttributedString {
-    let font = stylesheet.typographyScheme.overline
+  func context() -> NSAttributedString {
+    let font = UIFont.preferredFont(forTextStyle: .subheadline)
     let contextString = "Fill in the blank"
     return NSAttributedString(
       string: contextString.localizedUppercase,
-      attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor(white: 0, alpha: 0.6)]
+      attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor.secondaryLabel]
     )
   }
 
-  func cardFront(node: Node, stylesheet: Stylesheet) -> NSAttributedString {
-    return cardFrontRenderer(stylesheet: stylesheet).render(node: node)
+  func cardFront(node: Node) -> NSAttributedString {
+    return cardFrontRenderer().render(node: node)
   }
 
-  func cardBack(node: Node, stylesheet: Stylesheet) -> NSAttributedString {
+  func cardBack(node: Node) -> NSAttributedString {
     return MarkdownAttributedStringRenderer
-      .cardBackRenderer(stylesheet: stylesheet, revealingClozeAt: clozeIndex)
+      .cardBackRenderer(revealingClozeAt: clozeIndex)
       .render(node: node)
   }
 }
@@ -108,10 +105,9 @@ extension MarkdownAttributedStringRenderer {
   /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
   /// highlight the cloze.
   static func cardFront(
-    stylesheet: Stylesheet,
     hideClozeAt index: Int
   ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet, style: .body2)
+    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
     var renderedCloze = 0
     renderer.renderFunctions[.cloze] = { node, _ in
       guard let cloze = node as? Cloze else { return NSAttributedString() }
@@ -122,19 +118,19 @@ extension MarkdownAttributedStringRenderer {
           // There is no real hint. So instead put the hidden text but render it using the
           // background color. That way it takes up the correct amount of space in the string,
           // but is still invisible.
-          var attributes = stylesheet.clozeAttributes
-          attributes[.foregroundColor] = attributes[.backgroundColor]
+          var attributes = Attributes.cloze
+          attributes[.foregroundColor] = UIColor.clear
           return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
         } else {
           return NSAttributedString(
             string: String(cloze.hint),
-            attributes: stylesheet.clozeAttributes
+            attributes: Attributes.cloze
           )
         }
       } else {
         return NSAttributedString(
           string: String(cloze.hiddenText),
-          attributes: stylesheet.textAttributes
+          attributes: Attributes.text
         )
       }
     }
@@ -143,17 +139,14 @@ extension MarkdownAttributedStringRenderer {
 
   /// Builds a renderer that will show and highlight the cloze at clozeIndex.
   static func cardBackRenderer(
-    stylesheet: Stylesheet,
     revealingClozeAt index: Int
   ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(stylesheet: stylesheet, style: .body2)
-    var localClozeAttributes = stylesheet.clozeAttributes
-    localClozeAttributes[.foregroundColor] = stylesheet.colors
-      .onSurfaceColor
-      .withAlphaComponent(stylesheet.alpha[.darkTextHighEmphasis] ?? 1.0)
+    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
+    var localClozeAttributes = Attributes.cloze
+    localClozeAttributes[.foregroundColor] = UIColor.label
     var renderedCloze = 0
     renderer.renderFunctions[.cloze] = { node, _ in
-      let attributes = renderedCloze == index ? localClozeAttributes : stylesheet.textAttributes
+      let attributes = renderedCloze == index ? localClozeAttributes : Attributes.text
       renderedCloze += 1
       guard let cloze = node as? Cloze else { return NSAttributedString() }
       return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
@@ -177,32 +170,27 @@ private let defaultParagraphStyle: NSParagraphStyle = {
   return paragraphStyle
 }()
 
-extension Stylesheet {
-  var textAttributes: [NSAttributedString.Key: Any] {
+/// A collection of common NSAttributedString attributes
+private enum Attributes {
+  static var text: [NSAttributedString.Key: Any] {
     return [
-      .font: typographyScheme.body2,
-      .foregroundColor: colors.onSurfaceColor.withAlphaComponent(alpha[.darkTextHighEmphasis] ?? 1),
-      .paragraphStyle: defaultParagraphStyle,
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.label,
     ]
   }
 
-  var clozeAttributes: [NSAttributedString.Key: Any] {
+  static var cloze: [NSAttributedString.Key: Any] {
     return [
-      .font: typographyScheme.body2,
-      .foregroundColor: colors.onSurfaceColor
-        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
-      .backgroundColor: UIColor.yellow.withAlphaComponent(0.3),
-      .paragraphStyle: defaultParagraphStyle,
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.secondaryLabel,
+      .backgroundColor: UIColor.systemYellow.withAlphaComponent(0.3),
     ]
   }
 
-  var captionAttributes: [NSAttributedString.Key: Any] {
+  static var caption: [NSAttributedString.Key: Any] {
     return [
-      .font: typographyScheme.caption,
-      .foregroundColor: colors.onSurfaceColor
-        .withAlphaComponent(alpha[.darkTextMediumEmphasis] ?? 0.5),
-      .kern: kern[.caption] ?? 1.0,
-      .paragraphStyle: defaultParagraphStyle,
+      .font: UIFont.preferredFont(forTextStyle: .caption1),
+      .foregroundColor: UIColor.secondaryLabel,
     ]
   }
 }
