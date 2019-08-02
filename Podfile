@@ -8,11 +8,8 @@ target 'CommonplaceBookApp' do
   platform :ios, '13.0'
 
   # Pods for remember
-  pod 'CollectionViewLayouts', :git => 'https://github.com/bdewey/CollectionViewLayouts.git'
+  pod 'CocoaLumberjack/Swift'
   pod 'DataCompression'
-  pod "DZNPhotoPickerController", :git => 'https://github.com/bdewey/DZNPhotoPickerController'
-  pod 'SDWebImage', '~> 4.0'
-  pod 'SDWebImage/GIF', '~> 4.0'
   pod 'SnapKit'
   pod 'Yams'
 

@@ -161,26 +161,14 @@ strip_invalid_archs() {
 
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/CollectionViewLayouts/CollectionViewLayouts.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/DZNPhotoPickerController/DZNPhotoPickerController.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Yams/Yams.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/CollectionViewLayouts/CollectionViewLayouts.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/DZNEmptyDataSet/DZNEmptyDataSet.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/DZNPhotoPickerController/DZNPhotoPickerController.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/DataCompression/DataCompression.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/FLAnimatedImage/FLAnimatedImage.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Yams/Yams.framework"
 fi

@@ -1,92 +1,30 @@
 PODS:
-  - AFNetworking (3.2.1):
-    - AFNetworking/NSURLSession (= 3.2.1)
-    - AFNetworking/Reachability (= 3.2.1)
-    - AFNetworking/Security (= 3.2.1)
-    - AFNetworking/Serialization (= 3.2.1)
-    - AFNetworking/UIKit (= 3.2.1)
-  - AFNetworking/NSURLSession (3.2.1):
-    - AFNetworking/Reachability
-    - AFNetworking/Security
-    - AFNetworking/Serialization
-  - AFNetworking/Reachability (3.2.1)
-  - AFNetworking/Security (3.2.1)
-  - AFNetworking/Serialization (3.2.1)
-  - AFNetworking/UIKit (3.2.1):
-    - AFNetworking/NSURLSession
-  - CocoaLumberjack/Core (3.5.2)
-  - CocoaLumberjack/Swift (3.5.2):
+  - CocoaLumberjack/Core (3.5.3)
+  - CocoaLumberjack/Swift (3.5.3):
     - CocoaLumberjack/Core
-  - CollectionViewLayouts (0.1.0):
-    - CocoaLumberjack/Swift (>= 3.4)
   - DataCompression (3.5.0)
-  - DZNEmptyDataSet (1.8.1)
-  - DZNPhotoPickerController (2.1):
-    - DZNPhotoPickerController/Core (= 2.1)
-  - DZNPhotoPickerController/Core (2.1):
-    - DZNEmptyDataSet (~> 1.7)
-    - DZNPhotoPickerController/Editor
-    - DZNPhotoPickerController/Services
-    - SDWebImage (~> 4.0)
-  - DZNPhotoPickerController/Editor (2.1)
-  - DZNPhotoPickerController/Services (2.1):
-    - AFNetworking (~> 3.0)
-  - FLAnimatedImage (1.0.12)
-  - SDWebImage (4.4.6):
-    - SDWebImage/Core (= 4.4.6)
-  - SDWebImage/Core (4.4.6)
-  - SDWebImage/GIF (4.4.6):
-    - FLAnimatedImage (~> 1.0)
-    - SDWebImage/Core
   - SnapKit (5.0.0)
   - Yams (2.0.0)
 
 DEPENDENCIES:
-  - CollectionViewLayouts (from `https://github.com/bdewey/CollectionViewLayouts.git`)
+  - CocoaLumberjack/Swift
   - DataCompression
-  - DZNPhotoPickerController (from `https://github.com/bdewey/DZNPhotoPickerController`)
-  - SDWebImage (~> 4.0)
-  - SDWebImage/GIF (~> 4.0)
   - SnapKit
   - Yams
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
-    - AFNetworking
     - CocoaLumberjack
     - DataCompression
-    - DZNEmptyDataSet
-    - FLAnimatedImage
-    - SDWebImage
     - SnapKit
     - Yams
 
-EXTERNAL SOURCES:
-  CollectionViewLayouts:
-    :git: https://github.com/bdewey/CollectionViewLayouts.git
-  DZNPhotoPickerController:
-    :git: https://github.com/bdewey/DZNPhotoPickerController
-
-CHECKOUT OPTIONS:
-  CollectionViewLayouts:
-    :commit: eb323db65d8e9b7c4cbbc31b0dfa83f1ddc90302
-    :git: https://github.com/bdewey/CollectionViewLayouts.git
-  DZNPhotoPickerController:
-    :commit: f57d768578af762226932b6ed63ebecc0de45f64
-    :git: https://github.com/bdewey/DZNPhotoPickerController
-
 SPEC CHECKSUMS:
-  AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
-  CocoaLumberjack: 118bf4a820efc641f79fa487b75ed928dccfae23
-  CollectionViewLayouts: d905dc360902b17ce6a78f00c9b0f8cbdc16c01c
+  CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   DataCompression: 11afbfe7d6eae7269de6f35d4388691f545642e8
-  DZNEmptyDataSet: 9525833b9e68ac21c30253e1d3d7076cc828eaa7
-  DZNPhotoPickerController: e173a9c4e1ea2dcfa9d8947e1840626054bff9c1
-  FLAnimatedImage: 4a0b56255d9b05f18b6dd7ee06871be5d3b89e31
-  SDWebImage: 3f3f0c02f09798048c47a5ed0a13f17b063572d8
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
   Yams: cb96472112d99e4b368f8dae9ab62e8a3eb8a3f9
 
-PODFILE CHECKSUM: 4b5e1ce9d7c1cd566500b90cafb400050023b99d
+PODFILE CHECKSUM: 79d4115368dbe87bc2fbcdb792e450b17ad784c8
 
 COCOAPODS: 1.7.5

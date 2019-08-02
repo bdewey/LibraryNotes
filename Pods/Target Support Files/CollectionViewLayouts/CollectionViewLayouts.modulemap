@@ -1,6 +1,0 @@
-framework module CollectionViewLayouts {
-  umbrella header "CollectionViewLayouts-umbrella.h"
-
-  export *
-  module * { export * }
-}
