@@ -33,10 +33,8 @@ public protocol Challenge {
   /// - parameter document: The document the card came from. Can be used for things like
   ///                       loading images.
   /// - parameter properties: Relevant properties of `document`
-  /// - parameter stylesheet: Stylesheet to use when rendering the view.
   func challengeView(
     document: UIDocument,
-    properties: CardDocumentProperties,
-    stylesheet: Stylesheet
+    properties: CardDocumentProperties
   ) -> ChallengeView
 }

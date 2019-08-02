@@ -139,8 +139,7 @@ public final class StudyViewController: UIViewController {
       guard let document = document else { completion(nil); return }
       let cardView = cardFromDocument.card.challengeView(
         document: document,
-        properties: cardFromDocument.properties,
-        stylesheet: self.stylesheet
+        properties: cardFromDocument.properties
       )
       cardView.delegate = self
       self.view.addSubview(cardView)

@@ -91,8 +91,7 @@ extension QuoteTemplate: Challenge {
 
   public func challengeView(
     document: UIDocument,
-    properties: CardDocumentProperties,
-    stylesheet DONOTUSE: Stylesheet
+    properties: CardDocumentProperties
   ) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = NSAttributedString(string: "Identify the source".uppercased(), attributes: [.font: UIFont.preferredFont(forTextStyle: .caption1), .foregroundColor: UIColor.secondaryLabel])

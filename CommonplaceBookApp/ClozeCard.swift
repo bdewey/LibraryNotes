@@ -48,8 +48,7 @@ extension ClozeCard: Challenge {
 
   public func challengeView(
     document: UIDocument,
-    properties: CardDocumentProperties,
-    stylesheet DONOTUSE: Stylesheet
+    properties: CardDocumentProperties
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)
     let nodes = properties.parsingRules.parse(markdown)
