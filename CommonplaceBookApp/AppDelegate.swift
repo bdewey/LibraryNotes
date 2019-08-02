@@ -1,8 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import MaterialComponents.MaterialAppBar
-import MaterialComponents.MaterialSnackbar
 import MiniMarkdown
 import UIKit
 
@@ -73,8 +71,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, LoadingViewControll
         )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
-        let message = MDCSnackbarMessage(text: messageText)
-        MDCSnackbarManager.show(message)
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        window.rootViewController?.present(alertController, animated: true, completion: nil)
         self.loadingViewController.style = .error
       }
     })
@@ -195,21 +195,3 @@ private let commonplaceBookStylesheet: Stylesheet = {
   stylesheet.kern[.subtitle1] = 0.15
   return stylesheet
 }()
-
-extension UIViewController {
-  var semanticColorScheme: MDCColorScheming {
-    if let container = self as? StylesheetContaining {
-      return container.stylesheet.colors.semanticColorScheme
-    } else {
-      return MDCSemanticColorScheme(defaults: .material201804)
-    }
-  }
-
-  var typographyScheme: MDCTypographyScheme {
-    if let container = self as? StylesheetContaining {
-      return container.stylesheet.typographyScheme
-    } else {
-      return MDCTypographyScheme(defaults: .material201804)
-    }
-  }
-}

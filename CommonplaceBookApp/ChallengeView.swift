@@ -2,7 +2,7 @@
 
 import AVFoundation
 import Foundation
-import MaterialComponents
+import UIKit
 
 public protocol ChallengeViewDelegate: class {
   func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool)

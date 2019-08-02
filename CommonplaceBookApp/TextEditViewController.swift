@@ -3,7 +3,6 @@
 import UIKit
 
 import CocoaLumberjack
-import MaterialComponents
 import MiniMarkdown
 
 protocol TextEditViewControllerDelegate: AnyObject {
@@ -13,7 +12,6 @@ protocol TextEditViewControllerDelegate: AnyObject {
 
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController,
-  MDCScrollEventForwarder,
   StylesheetContaining {
   /// Designated initializer.
   init(parsingRules: ParsingRules, stylesheet: Stylesheet) {
@@ -62,8 +60,6 @@ final class TextEditViewController: UIViewController,
   private let parsingRules: ParsingRules
   internal let stylesheet: Stylesheet
   private let textStorage: MiniMarkdownTextStorage
-  public var headerView: MDCFlexibleHeaderView?
-  public let desiredShiftBehavior = MDCFlexibleHeaderShiftBehavior.enabled
 
   public weak var delegate: TextEditViewControllerDelegate?
 
@@ -299,36 +295,6 @@ extension TextEditViewController: UITextViewDelegate {
     } else {
       return true
     }
-  }
-
-  func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    forwardScrollViewDidScroll(scrollView)
-  }
-
-  func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-    forwardScrollViewDidEndDecelerating(scrollView)
-  }
-
-  func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-    forwardScrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
-  }
-
-  func scrollViewWillEndDragging(
-    _ scrollView: UIScrollView,
-    withVelocity velocity: CGPoint,
-    targetContentOffset: UnsafeMutablePointer<CGPoint>
-  ) {
-    forwardScrollViewWillEndDragging(
-      scrollView,
-      withVelocity: velocity,
-      targetContentOffset: targetContentOffset
-    )
-  }
-}
-
-extension TextEditViewController: UIScrollViewForTracking {
-  var scrollViewForTracking: UIScrollView {
-    return textView
   }
 }
 

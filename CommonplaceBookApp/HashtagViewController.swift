@@ -32,12 +32,6 @@ public final class HashtagViewController: UIViewController {
     return tableView
   }()
 
-  public override func loadView() {
-    let shadowView = ShadowView()
-    shadowView.shadowElevation = .menu
-    view = shadowView
-  }
-
   public override func viewDidLoad() {
     hashtagDataController = HashtagDataController(tableView: tableView, notebook: notebook, stylesheet: stylesheet)
     hashtagDataController.delegate = self

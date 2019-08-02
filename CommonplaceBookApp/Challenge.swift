@@ -2,7 +2,7 @@
 
 import AVFoundation
 import Foundation
-import MaterialComponents
+import UIKit
 
 /// Uniquely identifies a challenge.
 public struct ChallengeIdentifier: Hashable {
