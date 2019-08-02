@@ -78,7 +78,7 @@ final class DocumentListViewController: UIViewController, StylesheetContaining {
     tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
     tableView.backgroundColor = UIColor.systemBackground
     tableView.accessibilityIdentifier = "document-list"
-    tableView.rowHeight = 72
+    tableView.estimatedRowHeight = 72
     tableView.delegate = self
     tableView.separatorStyle = .none
     return tableView
