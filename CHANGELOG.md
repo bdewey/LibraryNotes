@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Shows all available hashtags when nothing in the search bar
+- When you click "clear" on the search bar and there is an active search, it goes to the non-filtered state instead of the "active search" state
+
 ## [0.1.0] - 2019-08-02
 
 ### Added

@@ -91,6 +91,7 @@ final class DocumentListViewController: UIViewController {
     let searchController = UISearchController(searchResultsController: resultsViewController)
     searchController.searchResultsUpdater = self
     searchController.searchBar.delegate = self
+    searchController.showsSearchResultsController = true
     navigationItem.searchController = searchController
 
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
@@ -186,6 +187,15 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
     dataSource?.filteredHashtag = nil
+  }
+
+  func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
+    if searchBar.text.isEmpty && dataSource?.filteredHashtag != nil {
+      // Allow single-click clear of the filtered hashtag
+      dataSource?.filteredHashtag = nil
+      return false
+    }
+    return true
   }
 }
 
