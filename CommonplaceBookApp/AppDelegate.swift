@@ -166,6 +166,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
     splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
+    splitViewController.preferredDisplayMode = .allVisible
+    splitViewController.delegate = self
     return splitViewController
+  }
+}
+
+extension AppDelegate: UISplitViewControllerDelegate {
+  func splitViewController(
+    _ splitViewController: UISplitViewController,
+    collapseSecondary secondaryViewController: UIViewController,
+    onto primaryViewController: UIViewController
+  ) -> Bool {
+    guard
+      let navigationController = secondaryViewController as? UINavigationController,
+      let textEditViewController = navigationController.visibleViewController as? TextEditViewController
+    else {
+      assertionFailure()
+      return false
+    }
+    // Per documentation:
+    // Return false to let the split view controller try and incorporate the secondary view
+    // controller’s content into the collapsed interface or true to indicate that you do not want
+    // the split view controller to do anything with the secondary view controller.
+    //
+    // In our case, if the textEditViewController doesn't represent a real page, we don't
+    // want to show it.
+    return textEditViewController.pageIdentifier == nil
   }
 }

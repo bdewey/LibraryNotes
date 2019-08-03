@@ -6,6 +6,7 @@
 
 - Shows all available hashtags when nothing in the search bar
 - When you click "clear" on the search bar and there is an active search, it goes to the non-filtered state instead of the "active search" state
+- Refined split view behavior: on iPhone, don't start by looking at an empty document. On iPad, prefer to keep everything visible.
 
 ## [0.1.0] - 2019-08-02
 
