@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */; };
-		637F8B0C22AE186100698868 /* BuildFile in Frameworks */ = {isa = PBXBuildFile; productRef = 637F8B0B22AE186100698868 /* SwiftPackageProductDependency */; };
+		637F8B0C22AE186100698868 /* MiniMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 637F8B0B22AE186100698868 /* MiniMarkdown */; };
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
 		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
@@ -230,7 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				637F8B0C22AE186100698868 /* BuildFile in Frameworks */,
+				637F8B0C22AE186100698868 /* MiniMarkdown in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
@@ -430,7 +430,7 @@
 			);
 			name = CommonplaceBookApp;
 			packageProductDependencies = (
-				637F8B0B22AE186100698868 /* SwiftPackageProductDependency */,
+				637F8B0B22AE186100698868 /* MiniMarkdown */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */;
@@ -516,7 +516,7 @@
 			);
 			mainGroup = D3DC5EB620EC9B0100F0B74B;
 			packageReferences = (
-				637F8B0A22AE186100698868 /* RemoteSwiftPackageReference */,
+				637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -881,7 +881,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "CommonplaceBookApp/CommonplaceBookApp-Bridging-Header.h";
@@ -907,7 +907,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "CommonplaceBookApp/CommonplaceBookApp-Bridging-Header.h";
@@ -1047,7 +1047,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		637F8B0A22AE186100698868 /* RemoteSwiftPackageReference */ = {
+		637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/MiniMarkdown.git";
 			requirement = {
@@ -1058,9 +1058,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		637F8B0B22AE186100698868 /* SwiftPackageProductDependency */ = {
+		637F8B0B22AE186100698868 /* MiniMarkdown */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 637F8B0A22AE186100698868 /* RemoteSwiftPackageReference */;
+			package = 637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */;
 			productName = MiniMarkdown;
 		};
 /* End XCSwiftPackageProductDependency section */
