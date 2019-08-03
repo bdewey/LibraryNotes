@@ -122,10 +122,19 @@ final class DocumentListViewController: UIViewController {
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
     viewController.autoFirstResponder = true
     viewController.delegate = notebook
-    navigationController?.pushViewController(viewController, animated: true)
+    showTextEditViewController(viewController)
   }
 
-  private var hamburgerPresentationController: CoverPartiallyPresentationController?
+  private func showTextEditViewController(_ textEditViewController: TextEditViewController) {
+    if let splitViewController = splitViewController {
+      splitViewController.showDetailViewController(
+        UINavigationController(rootViewController: textEditViewController),
+        sender: self
+      )
+    } else if let navigationController = navigationController {
+      navigationController.pushViewController(textEditViewController, animated: true)
+    }
+  }
 
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
@@ -216,14 +225,7 @@ extension DocumentListViewController: UITableViewDelegate {
     textEditViewController.pageIdentifier = viewProperties.pageKey
     textEditViewController.markdown = markdown
     textEditViewController.delegate = notebook
-    if let splitViewController = splitViewController {
-      splitViewController.showDetailViewController(
-        UINavigationController(rootViewController: textEditViewController),
-        sender: self
-      )
-    } else if let navigationController = navigationController {
-      navigationController.pushViewController(textEditViewController, animated: true)
-    }
+    showTextEditViewController(textEditViewController)
   }
 
   func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
