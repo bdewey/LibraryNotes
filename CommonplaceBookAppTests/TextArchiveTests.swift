@@ -92,9 +92,8 @@ final class TextArchiveTests: XCTestCase {
 
   func testCreateSymbolicReferences() {
     var archive = TextSnippetArchive()
-    let snippet = archive.insert("This is important text")
     do {
-      try archive.insertSymbolicReference(key: "HEAD", value: snippet.sha1Digest)
+      try archive.setSymbolicReference(key: "HEAD", text: "This is important text")
       let serialized = archive.textSerialized()
       print(serialized)
       let roundTrip = try TextSnippetArchive(textSerialization: serialized)

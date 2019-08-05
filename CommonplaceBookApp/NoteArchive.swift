@@ -5,31 +5,6 @@ import Foundation
 import MiniMarkdown
 import Yams
 
-public struct NoteArchiveVersion: LosslessStringConvertible {
-  public let timestamp: Date
-  public let digest: String
-
-  public init(timestamp: Date, digest: String) {
-    self.timestamp = timestamp
-    self.digest = digest
-  }
-
-  public init?(_ description: String) {
-    let components = description.split(separator: " ").map(String.init)
-    guard
-      components.count == 2,
-      let date = ISO8601DateFormatter().date(from: components[0]) else { return nil }
-
-    self.timestamp = date
-    self.digest = components[1]
-  }
-
-  public var description: String {
-    let date = ISO8601DateFormatter().string(from: timestamp)
-    return [date, digest].joined(separator: " ")
-  }
-}
-
 public struct NoteArchive {
   /// Default initializer; creates an empty NoteBundle.
   public init(parsingRules: ParsingRules) {
@@ -54,9 +29,11 @@ public struct NoteArchive {
   /// Rules used to parse challenge templates.
   public let parsingRules: ParsingRules
 
+  /// Archive containing the notes.
   private var archive = TextSnippetArchive()
 
-  private var pagePropertiesVersionHistory: [NoteArchiveVersion] = []
+  /// All persisted versions of the archive. We store deltas between versions so *hopefully* it's not too expensive to keep everything around.
+  private var pagePropertiesVersionHistory: [Version] = []
 
   /// Mapping of page UUID (constant across revisions) to the current page properties digest
   private var pagePropertyDigests: [String: String] = [:]
@@ -74,6 +51,7 @@ public struct NoteArchive {
   }
 
   public enum SerializationError: Error {
+    /// There is no symbolic reference to the "versions" array in the archive.
     case noVersionReference
   }
 
@@ -121,6 +99,8 @@ public struct NoteArchive {
     return key
   }
 
+  /// Removes a note from the archive.
+  /// - throws: `RetrievalError.noSuchPage` if the page does not exist.
   public mutating func removeNote(for pageIdentifier: String, versionTimestamp: Date) throws {
     guard pagePropertyDigests.removeValue(forKey: pageIdentifier) != nil else {
       throw RetrievalError.noSuchPage(pageIdentifier)
@@ -145,16 +125,6 @@ public struct NoteArchive {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
     return try klass.init(markdown: snippet.text, parsingRules: parsingRules)
-  }
-
-  private func currentPageProperties(
-    for pageIdentifier: String
-  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
-    guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
-      let propertiesSnippet = archive.snippets[propertiesDigest] else {
-      throw RetrievalError.noSuchPage(pageIdentifier)
-    }
-    return (propertiesSnippet, try PageProperties(propertiesSnippet))
   }
 
   /// Updates the text associated with `pageIdentifier` to `text`, creating a new version
@@ -193,87 +163,6 @@ public struct NoteArchive {
     try archivePageManifestVersion(timestamp: versionTimestamp)
   }
 
-  private mutating func archivePageManifestVersion(timestamp: Date) throws {
-    let version = NoteArchiveVersion(timestamp: timestamp, digest: archivePageManifest())
-    if let existingVersion = pagePropertiesVersionHistory.last,
-      let oldManifestSnippet = archive.snippets[existingVersion.digest],
-      let newManifestSnippet = archive.snippets[version.digest] {
-      newManifestSnippet.encodeAsDiff(from: nil)
-      oldManifestSnippet.encodeAsDiff(from: newManifestSnippet)
-    }
-    pagePropertiesVersionHistory.append(version)
-    try archiveVersionHistory()
-  }
-
-  private mutating func archiveVersionHistory() throws {
-    let history = pagePropertiesVersionHistory.reversed()
-      .map { $0.description }.joined(separator: "\n")
-    if let existingHistory = archive.symbolicReferences["versions"] {
-      archive.removeSnippet(withDigest: existingHistory)
-    }
-    let historySnippet = archive.insert(history)
-    try archive.insertSymbolicReference(key: "versions", value: historySnippet.sha1Digest)
-  }
-
-  private static func getVersionHistory(
-    from archive: TextSnippetArchive
-  ) throws -> [NoteArchiveVersion] {
-    guard
-      let versionDigest = archive.symbolicReferences["versions"],
-      let versionSnippet = archive.snippets[versionDigest] else {
-      throw SerializationError.noVersionReference
-    }
-    return versionSnippet.text.split(separator: "\n")
-      .reversed()
-      .map(String.init)
-      .compactMap(NoteArchiveVersion.init)
-  }
-
-  private mutating func archivePageManifest() -> String {
-    let manifest = pagePropertyDigests
-      .map { "\($0.key) \($0.value)" }
-      .sorted()
-      .joined(separator: "\n")
-    let manifestSnippet = archive.insert(manifest)
-    return manifestSnippet.sha1Digest
-  }
-
-  private static func getPageManifest(
-    from archive: TextSnippetArchive,
-    manifestIdentifier: String
-  ) throws -> [String: String] {
-    guard let manifestSnippet = archive.snippets[manifestIdentifier] else {
-      throw RetrievalError.noSuchPage(manifestIdentifier)
-    }
-    let keyValuePairs = manifestSnippet.text
-      .split(separator: "\n")
-      .compactMap { line -> (String, String)? in
-        let components = line.split(separator: " ")
-        guard components.count == 2 else { return nil }
-        return (String(components[0]), String(components[1]))
-      }
-    return Dictionary(uniqueKeysWithValues: keyValuePairs)
-  }
-
-  /// Synchronously extract properties & challenge templates from the contents of a file.
-  mutating func archivePageProperties(
-    from text: String,
-    timestamp: Date
-  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
-    let textSnippet = archive.insert(text)
-    let nodes = parsingRules.parse(text)
-    let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
-    let properties = PageProperties(
-      sha1Digest: textSnippet.sha1Digest,
-      timestamp: timestamp,
-      hashtags: nodes.hashtags,
-      title: String(nodes.title.split(separator: "\n").first ?? ""),
-      cardTemplates: challengeTemplateKeys.map { $0.description }
-    )
-    let propertiesSnippet = try properties.makeSnippet()
-    archive.insert(propertiesSnippet)
-    return (propertiesSnippet, properties)
-  }
 }
 
 public extension NoteArchive {
@@ -308,7 +197,34 @@ public extension NoteArchive {
   }
 }
 
+// MARK: - Private
 private extension NoteArchive {
+  /// A timestamp & digest. The digest references the page manifest at that version.
+  struct Version: LosslessStringConvertible {
+    public let timestamp: Date
+    public let digest: String
+
+    public init(timestamp: Date, digest: String) {
+      self.timestamp = timestamp
+      self.digest = digest
+    }
+
+    public init?(_ description: String) {
+      let components = description.split(separator: " ").map(String.init)
+      guard
+        components.count == 2,
+        let date = ISO8601DateFormatter().date(from: components[0]) else { return nil }
+
+      self.timestamp = date
+      self.digest = components[1]
+    }
+
+    public var description: String {
+      let date = ISO8601DateFormatter().string(from: timestamp)
+      return [date, digest].joined(separator: " ")
+    }
+  }
+
   struct FileImportRecord: Codable {
     let pageIdentifier: String
     let changeDate: Date
@@ -325,12 +241,104 @@ private extension NoteArchive {
 
   mutating func archiveFileImportRecords(_ records: [String: FileImportRecord]) throws {
     let encoded = try YAMLEncoder().encode(records)
-    let snippet = TextSnippet(encoded)
-    if let exisitingSnippetIdentifier = archive.symbolicReferences["file-import"] {
-      archive.removeSnippet(withDigest: exisitingSnippetIdentifier)
+    try archive.setSymbolicReference(key: "file-import", text: encoded)
+  }
+
+  func currentPageProperties(
+    for pageIdentifier: String
+  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
+    guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
+      let propertiesSnippet = archive.snippets[propertiesDigest] else {
+      throw RetrievalError.noSuchPage(pageIdentifier)
     }
-    archive.insert(snippet)
-    try archive.insertSymbolicReference(key: "file-import", value: snippet.sha1Digest)
+    return (propertiesSnippet, try PageProperties(propertiesSnippet))
+  }
+
+  /// Creates a new Version representing the current page manifest in the archive.
+  /// - parameter timestamp: The version timestamp.
+  /// - throws:
+  mutating func archivePageManifestVersion(timestamp: Date) throws {
+    let version = Version(timestamp: timestamp, digest: archivePageManifest())
+    if let existingVersion = pagePropertiesVersionHistory.last,
+      let oldManifestSnippet = archive.snippets[existingVersion.digest],
+      let newManifestSnippet = archive.snippets[version.digest] {
+      newManifestSnippet.encodeAsDiff(from: nil)
+      oldManifestSnippet.encodeAsDiff(from: newManifestSnippet)
+    }
+    pagePropertiesVersionHistory.append(version)
+    try archiveVersionHistory()
+  }
+
+  /// Writes the version history array into the archive.
+  /// - note: We keep only one copy of the version array in the archive
+  /// - throws: `TextSnippetArchive.Error` if there is a problem creating the symbolic reference to the version snippet
+  ///           in the archive.
+  mutating func archiveVersionHistory() throws {
+    let history = pagePropertiesVersionHistory.reversed()
+      .map { $0.description }.joined(separator: "\n")
+    try archive.setSymbolicReference(key: "versions", text: history)
+  }
+
+  /// Loads the version array from the archive.
+  /// - throws: `SerializationError` if we can't find the version array
+  static func getVersionHistory(
+    from archive: TextSnippetArchive
+  ) throws -> [Version] {
+    guard
+      let versionDigest = archive.symbolicReferences["versions"],
+      let versionSnippet = archive.snippets[versionDigest] else {
+      throw SerializationError.noVersionReference
+    }
+    return versionSnippet.text.split(separator: "\n")
+      .reversed()
+      .map(String.init)
+      .compactMap(Version.init)
+  }
+
+  mutating func archivePageManifest() -> String {
+    let manifest = pagePropertyDigests
+      .map { "\($0.key) \($0.value)" }
+      .sorted()
+      .joined(separator: "\n")
+    let manifestSnippet = archive.insert(manifest)
+    return manifestSnippet.sha1Digest
+  }
+
+  static func getPageManifest(
+    from archive: TextSnippetArchive,
+    manifestIdentifier: String
+  ) throws -> [String: String] {
+    guard let manifestSnippet = archive.snippets[manifestIdentifier] else {
+      throw RetrievalError.noSuchPage(manifestIdentifier)
+    }
+    let keyValuePairs = manifestSnippet.text
+      .split(separator: "\n")
+      .compactMap { line -> (String, String)? in
+        let components = line.split(separator: " ")
+        guard components.count == 2 else { return nil }
+        return (String(components[0]), String(components[1]))
+      }
+    return Dictionary(uniqueKeysWithValues: keyValuePairs)
+  }
+
+  /// Synchronously extract properties & challenge templates from the contents of a file.
+  mutating func archivePageProperties(
+    from text: String,
+    timestamp: Date
+  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
+    let textSnippet = archive.insert(text)
+    let nodes = parsingRules.parse(text)
+    let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
+    let properties = PageProperties(
+      sha1Digest: textSnippet.sha1Digest,
+      timestamp: timestamp,
+      hashtags: nodes.hashtags,
+      title: String(nodes.title.split(separator: "\n").first ?? ""),
+      cardTemplates: challengeTemplateKeys.map { $0.description }
+    )
+    let propertiesSnippet = try properties.makeSnippet()
+    archive.insert(propertiesSnippet)
+    return (propertiesSnippet, properties)
   }
 }
 

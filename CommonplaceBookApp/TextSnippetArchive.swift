@@ -50,12 +50,31 @@ public struct TextSnippetArchive: Equatable {
     return true
   }
 
-  /// Adds a symbolic reference to a hash.
-  /// - throws: TextSnippetArchive.Error
-  public mutating func insertSymbolicReference(key: String, value: String) throws {
+  /// Adds `text` to the archive as a symbolic reference.
+  ///
+  /// This method creates a snippet for `text` and inserts the snippet into the archive. It saves the sha1Digest
+  /// of the new snippet in `symbolicReferences` using `key`.
+  ///
+  /// - note: `key` cannot contain a colon, or it won't properly deserialize. The method throws an error if you
+  /// use an invalid key.
+  ///
+  /// - parameter key: The symbolic reference key.
+  /// - parameter text: The text to insert.
+  /// - parameter deleteExistingSnippet: If true, any snippet currently referenced by `symbolicReferences[key]` will be removed from the archive.
+  /// - throws: `Error.invalidKeyFormat` if `key` is not a valid key.
+  @discardableResult
+  public mutating func setSymbolicReference(
+    key: String,
+    text: String,
+    deleteExistingSnippet: Bool = true
+  ) throws -> String {
     guard !key.isEmpty, !key.contains(":") else { throw Error.invalidKeyFormat }
-    guard snippets[value] != nil else { throw Error.hashNotFound }
-    symbolicReferences[key] = value
+    if deleteExistingSnippet, let existingSnippet = symbolicReferences[key] {
+      removeSnippet(withDigest: existingSnippet)
+    }
+    let snippet = insert(text)
+    symbolicReferences[key] = snippet.sha1Digest
+    return snippet.sha1Digest
   }
 
   /// Merge the contents of another TextSnippetArchive into the receiver.
@@ -65,6 +84,7 @@ public struct TextSnippetArchive: Equatable {
   ///         exists in the reciever to a delta encoding based off a new snippet,
   ///         it won't be delta encoded after this operation. Since I'm not sure
   ///         I'll actually drive document conflicts from this method, leaving as is.
+  // TODO: Need to do something about symbolic references
   public mutating func merge(other: TextSnippetArchive) {
     for (_, snippet) in other.snippets {
       insert(snippet)
