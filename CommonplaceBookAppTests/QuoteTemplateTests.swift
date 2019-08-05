@@ -55,8 +55,7 @@ final class QuoteTemplateTests: XCTestCase {
     let nodes = parsingRules.parse(contentWithCloze)
     let quoteTemplates = QuoteTemplate.extract(from: nodes)
     let renderer = RenderedMarkdown(
-      stylesheet: Stylesheet(),
-      style: .body1,
+      textStyle: .body,
       parsingRules: parsingRules
     )
     let (front, _) = quoteTemplates[0].renderCardFront(with: renderer)

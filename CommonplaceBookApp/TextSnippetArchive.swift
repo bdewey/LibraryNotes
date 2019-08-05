@@ -3,6 +3,7 @@
 import CocoaLumberjack
 import Foundation
 
+/// A collection / serialization format for TextSnippets.
 public struct TextSnippetArchive: Equatable {
   public enum Error: Swift.Error {
     case invalidKeyFormat

@@ -47,9 +47,7 @@ final class ClozeTests: XCTestCase {
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let stylesheet = Stylesheet()
     let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
-      stylesheet: stylesheet,
       hideClozeAt: clozeCards[0].clozeIndex
     )
     let node = parsingRules.parse(clozeCards[0].markdown)[0]
@@ -58,7 +56,7 @@ final class ClozeTests: XCTestCase {
       "Yo to be de España. ¿De dónde es ustedes?"
     )
     XCTAssertEqual(
-      clozeCards[1].cardFrontRenderer(stylesheet: stylesheet).render(node: node).string,
+      clozeCards[1].cardFrontRenderer().render(node: node).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
   }

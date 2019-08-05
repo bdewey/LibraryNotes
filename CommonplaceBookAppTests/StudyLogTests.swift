@@ -10,7 +10,9 @@ final class StudyLogTests: XCTestCase {
     dateComponents.month = 3
     dateComponents.day = 19
     dateComponents.year = 2006
-    let now = Calendar.current.date(from: dateComponents)!
+    var testCalendar = Calendar.current
+    testCalendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+    let now = testCalendar.date(from: dateComponents)!
     let identifier = ChallengeIdentifier(templateDigest: "test", index: 0)
     for delta in 0 ..< 10 {
       studyLog.appendEntry(
