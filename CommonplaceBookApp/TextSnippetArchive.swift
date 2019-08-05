@@ -111,7 +111,7 @@ public struct TextSnippetArchive: Equatable {
       remainder = nextStep
     }
     for chunk in chunks {
-      try chunk.resolveParentReference(using: chunkForId)
+      try chunk.resolveIndirectEncoding(with: chunkForId)
     }
     self.snippets = chunks
     self.snippetDigestIndex = chunkForId

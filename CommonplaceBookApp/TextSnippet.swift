@@ -3,16 +3,87 @@
 import CocoaLumberjack
 import Foundation
 
-/// A chunk of text to store in the archive.
-/// Since the archive is line-based, each chunk *must* end with a newline (\n)
-/// If you try to create a chunk that does not end with a newline, we add one.
+/// A "semantically immutable" collection of lines of text.
+///
+/// - note: "Semantically immutable" means the actual *contents* of the text will not change once created.
+/// However, the *encoding* of the text might change.
 public final class TextSnippet {
-  /// Designated initalizer.
+  /// Designated public initalizer.
+  ///
+  /// This will insert a newline if needed to `text`, count the number of lines, and compute the SHA1 digest
+  /// of the text to use as the snippet identifier.
   public init(_ text: String) {
-    self._text = text.appendingNewlineIfNecessary()
-    self.sha1Digest = self._text.sha1Digest()
-    self.lineCount = self._text.count(of: "\n")
-    self._parent = .none
+    let text = text.appendingNewlineIfNecessary()
+    self.encoding = .raw(text: text)
+    self.sha1Digest = text.sha1Digest()
+    self.lineCount = text.count(of: "\n")
+  }
+
+  /// Private memberwise initializer.
+  ///
+  /// Unlike the public initializer, this does no validation that `text` ends in a newline, that the hashes match, etc.
+  private init(
+    encoding: TextSnippetEncoding,
+    sha1Digest: String,
+    lineCount: Int
+  ) {
+    self.encoding = encoding
+    self.sha1Digest = sha1Digest
+    self.lineCount = lineCount
+  }
+
+  /// The SHA-1 digest of `text`
+  public let sha1Digest: String
+
+  /// How many lines in this chunk.
+  public private(set) var lineCount: Int
+
+  /// Synchronization for the encoding of this text snippet.
+  /// Accessing "parent" and "_text" should happen on this queue.
+  private let encodingQueue = DispatchQueue(
+    label: "org.brians-brain.encoding",
+    qos: .default,
+    attributes: [.concurrent]
+  )
+
+  /// Internal representation of the text snippet. This could either be the raw text, or it could be a diff.
+  // TODO: Make this an enum with associated values.
+  private var encoding: TextSnippetEncoding
+
+  /// The text in this chunk. Guaranteed to end in a "\n"
+  public var text: String {
+    return encodingQueue.sync {
+      switch encoding {
+      case .raw(let text):
+        return text
+      case .direct(parent: let snippet, diff: let diff):
+        let dmp = DiffMatchPatch()
+        do {
+          if let patches = try dmp.patch_(fromText: diff) as? [Any],
+            let results = dmp.patch_apply(patches, to: snippet.text),
+            let result = results[0] as? String {
+            return result
+          } else {
+            throw SerializationError.invalidPatch(patch: diff)
+          }
+        } catch {
+          DDLogError("Unexpected error applying patch: \(error)")
+        }
+        assertionFailure()
+        return ""
+      case .indirect:
+        preconditionFailure("Have not yet resolved an indirect parent reference")
+      }
+    }
+  }
+
+  /// Changes indirect diff encodings to direct diff encodings using `chunkForId` to supply the mapping of parent IDs to parents.
+  internal func resolveIndirectEncoding(
+    with chunkForId: [String: TextSnippet]
+  ) throws {
+    try encodingQueue.sync(flags: DispatchWorkItemFlags.barrier) {
+      encoding = try encoding.resolvingIndirect(with: chunkForId)
+    }
   }
 
   /// Changes the encoding of a snippet to be as a diff based on another snippet,
@@ -45,120 +116,17 @@ public final class TextSnippet {
       // space we need for storing an extra digest
       if patchText.count + 41 < text.count {
         encodingQueue.sync(flags: .barrier) {
-          _text = patchText
+          encoding = .direct(parent: parent, diff: patchText)
           lineCount = patchText.count(of: "\n")
-          _parent = .direct(parent)
         }
       }
     } else {
       let text = self.text
       let lineCount = text.count(of: "\n")
       encodingQueue.sync(flags: .barrier) {
-        _text = text
+        encoding = .raw(text: text)
         self.lineCount = lineCount
-        _parent = .none
       }
-    }
-  }
-
-  private enum ParentChunkReference {
-    case none
-    case direct(TextSnippet)
-    case indirect(String)
-  }
-
-  private init(
-    text: String,
-    sha1Digest: String,
-    lineCount: Int,
-    parent: ParentChunkReference = .none
-  ) {
-    self._text = text
-    self.sha1Digest = sha1Digest
-    self.lineCount = lineCount
-    self._parent = parent
-  }
-
-  internal func resolveParentReference(using chunkForId: [String: TextSnippet]) throws {
-    guard case ParentChunkReference.indirect(let digest) = _parent else { return }
-    guard let chunk = chunkForId[digest] else {
-      throw SerializationError.noChunk(withDigest: digest)
-    }
-    encodingQueue.sync(flags: DispatchWorkItemFlags.barrier) {
-      _parent = .direct(chunk)
-    }
-  }
-
-  /// Synchronization for the encoding of this text snippet.
-  /// Accessing "parent" and "_text" should happen on this queue.
-  private let encodingQueue = DispatchQueue(
-    label: "org.brians-brain.encoding",
-    qos: .default,
-    attributes: [.concurrent]
-  )
-
-  private var _text: String
-
-  /// The text in this chunk. Guaranteed to end in a "\n"
-  public var text: String {
-    return encodingQueue.sync {
-      if let parent = parent {
-        let dmp = DiffMatchPatch()
-        do {
-          if let patches = try dmp.patch_(fromText: _text) as? [Any],
-            let results = dmp.patch_apply(patches, to: parent.text),
-            let result = results[0] as? String {
-            return result
-          } else {
-            throw SerializationError.invalidPatch(patch: _text)
-          }
-        } catch {
-          DDLogError("Unexpected error applying patch: \(error)")
-        }
-        assertionFailure()
-        return ""
-      } else {
-        return _text
-      }
-    }
-  }
-
-  /// The SHA-1 digest of `text`
-  public let sha1Digest: String
-
-  /// How many lines in this chunk.
-  public private(set) var lineCount: Int
-
-  private var _parent: ParentChunkReference
-
-  /// Optional: A parent TextChunk. If present, `text` is a diff operation that, when applied
-  /// to the ...
-  public var parent: TextSnippet? {
-    switch _parent {
-    case .none:
-      return nil
-    case .direct(let parent):
-      return parent
-    case .indirect:
-      assertionFailure("Have not yet resolved chunk parent")
-      return nil
-    }
-  }
-
-  /// The list of all sha1 digests needed to construct this snippet through delta encoding,
-  /// including this one.
-  public var parentChain: [String] {
-    var results: [String] = []
-    enumerateParentChain { snippet in
-      results.append(snippet.sha1Digest)
-    }
-    return results
-  }
-
-  internal func enumerateParentChain(block: (TextSnippet) -> Void) {
-    block(self)
-    if let parent = parent {
-      parent.enumerateParentChain(block: block)
     }
   }
 }
@@ -177,6 +145,7 @@ public extension TextSnippet {
     case wrongNumberOfLines(expected: Int, actual: Int)
   }
 
+  /// Parses a single snippet.
   convenience init<S: StringProtocol>(
     textSerialization: S
   ) throws where S.SubSequence == Substring {
@@ -189,18 +158,23 @@ public extension TextSnippet {
     if chunk.sha1Digest != chunk.text.sha1Digest() {
       throw SerializationError.invalidHash
     }
-    self.init(text: chunk.text, sha1Digest: chunk.sha1Digest, lineCount: chunk.lineCount)
+    self.init(encoding: chunk.encoding, sha1Digest: chunk.sha1Digest, lineCount: chunk.lineCount)
   }
 
   /// Returns plain-text serialization of this chunk.
   func textSerialized() -> String {
-    if let parent = parent {
-      return "+++ \(sha1Digest) \(parent.sha1Digest) \(lineCount)\n\(_text)"
-    } else {
-      return "+++ \(sha1Digest) \(lineCount)\n\(_text)"
+    switch encoding {
+    case .raw(text: let text):
+      return "+++ \(sha1Digest) \(lineCount)\n\(text)"
+    case .direct(parent: let parent, diff: let diff):
+      return "+++ \(sha1Digest) \(parent.sha1Digest) \(lineCount)\n\(diff)"
+    case .indirect(parentSha1Digest: let parentDigest, diff: let diff):
+      return "+++ \(sha1Digest) \(parentDigest) \(lineCount)\n\(diff)"
     }
   }
 
+  /// Top-level parser.
+  /// - returns: A tuple of (parsed header, remainder)
   internal static func parse(_ input: Substring) throws -> (TextSnippet, Substring) {
     if let (chunk, remainder) = parseChunkWithoutParent(from: input) {
       return (chunk, remainder)
@@ -209,14 +183,91 @@ public extension TextSnippet {
     }
     throw SerializationError.invalidHeader
   }
+}
 
-  // swiftlint:disable:next force_try
-  static let noParentChunkHeader = try! NSRegularExpression(
-    pattern: "^\\+\\+\\+ ([0-9a-f]{40}) (\\d+)$",
-    options: []
-  )
+extension TextSnippet: Equatable {
+  public static func == (lhs: TextSnippet, rhs: TextSnippet) -> Bool {
+    // don't have to compare text if the digests match!
+    return lhs.sha1Digest == rhs.sha1Digest &&
+      lhs.lineCount == rhs.lineCount
+  }
+}
 
-  private static func parseChunkWithoutParent(
+/// Implementation details.
+private extension TextSnippet {
+  /// How Text is represented in memory.
+  enum TextSnippetEncoding {
+    /// We have the plain-ol-text of the snippet
+    case raw(text: String)
+
+    /// The text is a diff off of a parent that is loaded in memory
+    case direct(parent: TextSnippet, diff: String)
+
+    /// The text is a diff off of a parent that's not yet loaded, but we have the parent ID
+    case indirect(parentSha1Digest: String, diff: String)
+
+    /// Turns `.indirect` encodings into `.direct` encodings, leaving other encodings unchanged.
+    func resolvingIndirect(with snippets: [String: TextSnippet]) throws -> TextSnippetEncoding {
+      switch self {
+      case .indirect(parentSha1Digest: let sha1Digest, diff: let diff):
+        guard let snippet = snippets[sha1Digest] else {
+          throw SerializationError.noChunk(withDigest: sha1Digest)
+        }
+        return .direct(parent: snippet, diff: diff)
+      default:
+        return self
+      }
+    }
+  }
+
+  /// Optional: A parent TextChunk. If present, `text` is a diff operation that, when applied
+  /// to the ...
+  var parent: TextSnippet? {
+    return encodingQueue.sync {
+      if case TextSnippetEncoding.direct(parent: let parent, diff: _) = encoding {
+        return parent
+      } else {
+        return nil
+      }
+    }
+  }
+
+  /// The list of all sha1 digests needed to construct this snippet through delta encoding,
+  /// including this one.
+  var parentChain: [String] {
+    var results: [String] = []
+    enumerateParentChain { snippet in
+      results.append(snippet.sha1Digest)
+    }
+    return results
+  }
+
+  func enumerateParentChain(block: (TextSnippet) -> Void) {
+    block(self)
+    if let parent = parent {
+      parent.enumerateParentChain(block: block)
+    }
+  }
+
+  enum HeaderExpressions {
+    /// What the header looks like for a raw-encoded snippet (no parent, no delta)
+    // swiftlint:disable:next force_try
+    static let noParentChunk = try! NSRegularExpression(
+      pattern: "^\\+\\+\\+ ([0-9a-f]{40}) (\\d+)$",
+      options: []
+    )
+
+    /// What the header looks like for a delta-encoded snippet
+    // swiftlint:disable:next force_try
+    static let parentChunk = try! NSRegularExpression(
+      pattern: "^\\+\\+\\+ ([0-9a-f]{40}) ([0-9a-f]{40}) (\\d+)$",
+      options: []
+    )
+  }
+
+  /// Parses a raw-encoded snippet (no parent, no delta)
+  /// - returns: If parsing succeeds, a tuple of (parsed snippet, remainder). If parsing fails, nil.
+  static func parseChunkWithoutParent(
     from input: Substring
   ) -> (TextSnippet, Substring)? {
     guard
@@ -226,7 +277,7 @@ public extension TextSnippet {
     }
     let header = String(input[input.startIndex ..< index])
     guard
-      let match = TextSnippet.noParentChunkHeader.matches(
+      let match = HeaderExpressions.noParentChunk.matches(
         in: header,
         options: [],
         range: header.completeRange
@@ -240,7 +291,7 @@ public extension TextSnippet {
     let digest = header.string(at: match.range(at: 1))
     return (
       TextSnippet(
-        text: String(input[index ..< splitIndex]),
+        encoding: .raw(text: String(input[index ..< splitIndex])),
         sha1Digest: digest,
         lineCount: lineCount
       ),
@@ -248,13 +299,9 @@ public extension TextSnippet {
     )
   }
 
-  // swiftlint:disable:next force_try
-  static let parentChunkHeader = try! NSRegularExpression(
-    pattern: "^\\+\\+\\+ ([0-9a-f]{40}) ([0-9a-f]{40}) (\\d+)$",
-    options: []
-  )
-
-  private static func parseChunkWithParent(
+  /// Parses a delta-encoded snippet
+  /// - returns: If parsing succeeds, a tuple of (parsed snippet, remainder). If parsing fails, nil.
+  static func parseChunkWithParent(
     from input: Substring
   ) -> (TextSnippet, Substring)? {
     guard
@@ -264,7 +311,7 @@ public extension TextSnippet {
     }
     let header = String(input[input.startIndex ..< index])
     guard
-      let match = TextSnippet.parentChunkHeader.matches(
+      let match = HeaderExpressions.parentChunk.matches(
         in: header,
         options: [],
         range: header.completeRange
@@ -279,20 +326,11 @@ public extension TextSnippet {
     let parentReference = header.string(at: match.range(at: 2))
     return (
       TextSnippet(
-        text: String(input[index ..< splitIndex]),
+        encoding: .indirect(parentSha1Digest: parentReference, diff: String(input[index ..< splitIndex])),
         sha1Digest: digest,
-        lineCount: lineCount,
-        parent: .indirect(parentReference)
+        lineCount: lineCount
       ),
       input[splitIndex...]
     )
-  }
-}
-
-extension TextSnippet: Equatable {
-  public static func == (lhs: TextSnippet, rhs: TextSnippet) -> Bool {
-    // don't have to compare text if the digests match!
-    return lhs.sha1Digest == rhs.sha1Digest &&
-      lhs.lineCount == rhs.lineCount
   }
 }
