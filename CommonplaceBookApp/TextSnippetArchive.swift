@@ -3,19 +3,20 @@
 import CocoaLumberjack
 import Foundation
 
-/// A collection / serialization format for TextSnippets.
+/// A collection of TextSnippets, indexed by the sha1Digest property, that can be serialized & deserialized as plain text.
 public struct TextSnippetArchive: Equatable {
   public enum Error: Swift.Error {
     case invalidKeyFormat
     case hashNotFound
   }
 
+  /// Line that identifies a valid snippet archive; will appear as the first line in the archive.
   public static let identifier = "Text Snippet Archive version 1.0\n"
 
   /// Publically constructable.
   public init() {}
 
-  /// The chunks that make up this archive.
+  /// The snippets that make up this archive.
   public private(set) var snippets: [TextSnippet] = []
 
   /// Indexes snippets by the sha1 digest
@@ -24,6 +25,9 @@ public struct TextSnippetArchive: Equatable {
   /// References a symbolic name to a hash value.
   public private(set) var symbolicReferences: [String: String] = [:]
 
+  /// Inserts a snippet into the collection.
+  /// - returns: The instance of the TextSnippet class that is actually stored in the collection. This may not be the same instance
+  /// that was passed in.
   @discardableResult
   public mutating func insert(_ snippet: TextSnippet) -> TextSnippet {
     if let existingSnippet = snippetDigestIndex[snippet.sha1Digest] {
@@ -35,6 +39,7 @@ public struct TextSnippetArchive: Equatable {
     }
   }
 
+  /// Convenience: Converts a string into a TextSnippet, then inserts it into the collection.
   public mutating func insert(_ text: String) -> TextSnippet {
     let snippet = TextSnippet(text)
     return insert(snippet)
@@ -78,6 +83,7 @@ public struct TextSnippetArchive: Equatable {
     return copy
   }
 
+  /// Returns the contents of the archive serialized as a single string.
   public func textSerialized() -> String {
     var results = TextSnippetArchive.identifier
     results.append(referencesSerialized())
@@ -87,6 +93,7 @@ public struct TextSnippetArchive: Equatable {
     return results
   }
 
+  /// Initializer that constructs an archive from the serialized text format.
   public init(textSerialization: String) throws {
     let prefix = textSerialization.prefix(TextSnippetArchive.identifier.count)
     if prefix != TextSnippetArchive.identifier {
@@ -117,14 +124,17 @@ public struct TextSnippetArchive: Equatable {
     self.snippetDigestIndex = chunkForId
     self.symbolicReferences = references
   }
+}
 
+private extension TextSnippetArchive {
   // swiftlint:disable:next force_try
-  private static let referenceHeaderRegex = try! NSRegularExpression(
+  static let referenceHeaderRegex = try! NSRegularExpression(
     pattern: "^\\+\\+\\+ References (\\d+)$",
     options: []
   )
 
-  private func referencesSerialized() -> String {
+  /// Returns symbolic references in serialized form.
+  func referencesSerialized() -> String {
     guard !symbolicReferences.isEmpty else { return "" }
     let serializedText = symbolicReferences
       .map { [$0.key, $0.value].joined(separator: ":") }
@@ -134,7 +144,9 @@ public struct TextSnippetArchive: Equatable {
     return "+++ References \(lineCount)\n" + serializedText
   }
 
-  private static func parseReferences(
+  /// Parses the symbolic references from the beginning of `input`
+  /// - returns: A tuple (symbolic references, unparsed remainder) if parsing succeeds, otherwise nil.
+  static func parseReferences(
     from input: Substring
   ) throws -> ([String: String], Substring)? {
     guard let index = input.index(after: 1, character: "\n") else { return nil }
