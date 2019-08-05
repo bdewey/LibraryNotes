@@ -56,9 +56,13 @@ public struct NoteArchive {
   }
 
   public enum RetrievalError: Error {
+    /// A page with the given page identifier does not exist.
     case noSuchPage(String)
+    /// A text snippet with the given sha1Digest does not exist.
     case noSuchText(String)
+    /// There is no specific text for a challenge template in the archive.
     case noSuchTemplateKey(String)
+    /// The challenge template uses an unkown template class.
     case noSuchTemplateClass(String)
   }
 
@@ -117,6 +121,10 @@ public struct NoteArchive {
     return noteSnippet.text
   }
 
+  /// Gets a `ChallengeTemplate` given its key.
+  /// - parameter key: A reference to a specific challenge template in the archive.
+  /// - throws: `RetrievalError.noSuchTemplateKey` if the specific challenge text does not exist in the archive.
+  /// - throws: `RetrievalError.noSuchTemplateClass` if this key uses an unknown challenge template.
   public func challengeTemplate(for key: ChallengeTemplateArchiveKey) throws -> ChallengeTemplate {
     guard let snippet = archive.snippets[key.digest] else {
       throw RetrievalError.noSuchTemplateKey(key.digest)
@@ -165,7 +173,9 @@ public struct NoteArchive {
 
 }
 
+// MARK: - Import
 public extension NoteArchive {
+  /// Adds the contents of a file to the archive as a new note.
   mutating func importFile(
     named fileName: String,
     text: String,
@@ -225,8 +235,11 @@ private extension NoteArchive {
     }
   }
 
+  /// Represents a specific file that has been imported into the archive.
   struct FileImportRecord: Codable {
+    /// The UUID representing the page that holds the file contents.
     let pageIdentifier: String
+    /// The changeDate of the file at the time it was imported.
     let changeDate: Date
   }
 

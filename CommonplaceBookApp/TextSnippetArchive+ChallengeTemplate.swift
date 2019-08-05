@@ -2,6 +2,7 @@
 
 import Foundation
 
+/// Supports serializing a challenge template into a TextSnippetArchive.
 public struct ChallengeTemplateArchiveKey: LosslessStringConvertible {
   /// Digest of the challenge template serialized data in the TextSnippetArchive
   public let digest: String
