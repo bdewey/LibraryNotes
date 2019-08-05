@@ -16,11 +16,8 @@ public struct TextSnippetArchive: Equatable {
   /// Publically constructable.
   public init() {}
 
-  /// The snippets that make up this archive.
-  public private(set) var snippets: [TextSnippet] = []
-
   /// Indexes snippets by the sha1 digest
-  public private(set) var snippetDigestIndex: [String: TextSnippet] = [:]
+  public private(set) var snippets: [String: TextSnippet] = [:]
 
   /// References a symbolic name to a hash value.
   public private(set) var symbolicReferences: [String: String] = [:]
@@ -30,11 +27,10 @@ public struct TextSnippetArchive: Equatable {
   /// that was passed in.
   @discardableResult
   public mutating func insert(_ snippet: TextSnippet) -> TextSnippet {
-    if let existingSnippet = snippetDigestIndex[snippet.sha1Digest] {
+    if let existingSnippet = snippets[snippet.sha1Digest] {
       return existingSnippet
     } else {
-      snippets.append(snippet)
-      snippetDigestIndex[snippet.sha1Digest] = snippet
+      snippets[snippet.sha1Digest] = snippet
       return snippet
     }
   }
@@ -49,8 +45,7 @@ public struct TextSnippetArchive: Equatable {
   /// - returns: True if the snippet was in the archive in the first place.
   @discardableResult
   public mutating func removeSnippet(withDigest digest: String) -> Bool {
-    guard snippetDigestIndex.removeValue(forKey: digest) != nil else { return false }
-    snippets.removeAll(where: { $0.sha1Digest == digest })
+    guard snippets.removeValue(forKey: digest) != nil else { return false }
     symbolicReferences.removeAll(whereValue: { $0 == digest })
     return true
   }
@@ -59,7 +54,7 @@ public struct TextSnippetArchive: Equatable {
   /// - throws: TextSnippetArchive.Error
   public mutating func insertSymbolicReference(key: String, value: String) throws {
     guard !key.isEmpty, !key.contains(":") else { throw Error.invalidKeyFormat }
-    guard snippetDigestIndex[value] != nil else { throw Error.hashNotFound }
+    guard snippets[value] != nil else { throw Error.hashNotFound }
     symbolicReferences[key] = value
   }
 
@@ -71,7 +66,7 @@ public struct TextSnippetArchive: Equatable {
   ///         it won't be delta encoded after this operation. Since I'm not sure
   ///         I'll actually drive document conflicts from this method, leaving as is.
   public mutating func merge(other: TextSnippetArchive) {
-    for snippet in other.snippets {
+    for (_, snippet) in other.snippets {
       insert(snippet)
     }
   }
@@ -87,8 +82,8 @@ public struct TextSnippetArchive: Equatable {
   public func textSerialized() -> String {
     var results = TextSnippetArchive.identifier
     results.append(referencesSerialized())
-    for chunk in snippets {
-      results.append(chunk.textSerialized())
+    for (_, snippet) in snippets {
+      results.append(snippet.textSerialized())
     }
     return results
   }
@@ -109,19 +104,16 @@ public struct TextSnippetArchive: Equatable {
     } else {
       references = [:]
     }
-    var chunks: [TextSnippet] = []
-    var chunkForId: [String: TextSnippet] = [:]
+    var snippets: [String: TextSnippet] = [:]
     while !remainder.isEmpty {
-      let (chunk, nextStep) = try TextSnippet.parse(remainder)
-      chunks.append(chunk)
-      chunkForId[chunk.sha1Digest] = chunk
+      let (snippet, nextStep) = try TextSnippet.parse(remainder)
+      snippets[snippet.sha1Digest] = snippet
       remainder = nextStep
     }
-    for chunk in chunks {
-      try chunk.resolveIndirectEncoding(with: chunkForId)
+    for (_, snippet) in snippets {
+      try snippet.resolveIndirectEncoding(with: snippets)
     }
-    self.snippets = chunks
-    self.snippetDigestIndex = chunkForId
+    self.snippets = snippets
     self.symbolicReferences = references
   }
 }

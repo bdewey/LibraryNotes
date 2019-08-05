@@ -65,7 +65,7 @@ public struct NoteArchive {
   public var pageProperties: [String: PageProperties] {
     return pagePropertyDigests.compactMapValues { propertyDigest -> PageProperties? in
       guard
-        let snippet = archive.snippetDigestIndex[propertyDigest],
+        let snippet = archive.snippets[propertyDigest],
         let properties = try? PageProperties(snippet) else {
         return nil
       }
@@ -131,14 +131,14 @@ public struct NoteArchive {
   /// Gets the current version of the text for a particular page.
   public func currentText(for pageIdentifier: String) throws -> String {
     let properties = try currentPageProperties(for: pageIdentifier).properties
-    guard let noteSnippet = archive.snippetDigestIndex[properties.sha1Digest] else {
+    guard let noteSnippet = archive.snippets[properties.sha1Digest] else {
       throw RetrievalError.noSuchText(properties.sha1Digest)
     }
     return noteSnippet.text
   }
 
   public func challengeTemplate(for key: ChallengeTemplateArchiveKey) throws -> ChallengeTemplate {
-    guard let snippet = archive.snippetDigestIndex[key.digest] else {
+    guard let snippet = archive.snippets[key.digest] else {
       throw RetrievalError.noSuchTemplateKey(key.digest)
     }
     guard let klass = ChallengeTemplateType.classMap[key.type] else {
@@ -151,7 +151,7 @@ public struct NoteArchive {
     for pageIdentifier: String
   ) throws -> (snippet: TextSnippet, properties: PageProperties) {
     guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
-      let propertiesSnippet = archive.snippetDigestIndex[propertiesDigest] else {
+      let propertiesSnippet = archive.snippets[propertiesDigest] else {
       throw RetrievalError.noSuchPage(pageIdentifier)
     }
     return (propertiesSnippet, try PageProperties(propertiesSnippet))
@@ -181,10 +181,10 @@ public struct NoteArchive {
       return
     }
     existingSnippet.encodeAsDiff(from: newSnippet)
-    guard let existingTextSnippet = archive.snippetDigestIndex[existingProperties.sha1Digest] else {
+    guard let existingTextSnippet = archive.snippets[existingProperties.sha1Digest] else {
       throw RetrievalError.noSuchPage(existingProperties.sha1Digest)
     }
-    guard let newTextSnippet = archive.snippetDigestIndex[newProperties.sha1Digest] else {
+    guard let newTextSnippet = archive.snippets[newProperties.sha1Digest] else {
       throw RetrievalError.noSuchPage(newProperties.sha1Digest)
     }
     newTextSnippet.encodeAsDiff(from: nil)
@@ -196,8 +196,8 @@ public struct NoteArchive {
   private mutating func archivePageManifestVersion(timestamp: Date) throws {
     let version = NoteArchiveVersion(timestamp: timestamp, digest: archivePageManifest())
     if let existingVersion = pagePropertiesVersionHistory.last,
-      let oldManifestSnippet = archive.snippetDigestIndex[existingVersion.digest],
-      let newManifestSnippet = archive.snippetDigestIndex[version.digest] {
+      let oldManifestSnippet = archive.snippets[existingVersion.digest],
+      let newManifestSnippet = archive.snippets[version.digest] {
       newManifestSnippet.encodeAsDiff(from: nil)
       oldManifestSnippet.encodeAsDiff(from: newManifestSnippet)
     }
@@ -220,7 +220,7 @@ public struct NoteArchive {
   ) throws -> [NoteArchiveVersion] {
     guard
       let versionDigest = archive.symbolicReferences["versions"],
-      let versionSnippet = archive.snippetDigestIndex[versionDigest] else {
+      let versionSnippet = archive.snippets[versionDigest] else {
       throw SerializationError.noVersionReference
     }
     return versionSnippet.text.split(separator: "\n")
@@ -242,7 +242,7 @@ public struct NoteArchive {
     from archive: TextSnippetArchive,
     manifestIdentifier: String
   ) throws -> [String: String] {
-    guard let manifestSnippet = archive.snippetDigestIndex[manifestIdentifier] else {
+    guard let manifestSnippet = archive.snippets[manifestIdentifier] else {
       throw RetrievalError.noSuchPage(manifestIdentifier)
     }
     let keyValuePairs = manifestSnippet.text
@@ -317,7 +317,7 @@ private extension NoteArchive {
   func getFileImportRecords() throws -> [String: FileImportRecord] {
     guard
       let snippetIdentifier = archive.symbolicReferences["file-import"],
-      let snippet = archive.snippetDigestIndex[snippetIdentifier] else {
+      let snippet = archive.snippets[snippetIdentifier] else {
       return [:]
     }
     return try YAMLDecoder().decode([String: FileImportRecord].self, from: snippet.text)
