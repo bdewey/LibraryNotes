@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2019-08-07
+
+### Changed
+
+- Faster typing propagation between master & detail view
+
 ## [0.2.0] - 2019-08-03
 
 ### Changed

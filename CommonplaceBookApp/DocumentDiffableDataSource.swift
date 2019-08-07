@@ -95,12 +95,19 @@ public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<Doc
       cardsPerDocument: cardsPerDocument,
       hashtag: filteredHashtag
     )
-    // Only animate inserts & deletes.
-    // In particular I don't want to animate reloads as I type -- it's too noisy
-    // I'm said I'm losing reordering animations :-(
-    // Is there some way, when observing the notebook, to know that it was a typing change?
-    let reallyAnimate = animated && self.snapshot().numberOfItems != snapshot.numberOfItems
+    let reallyAnimate = animated && DocumentDiffableDataSource.majorSnapshotDifferences(between: self.snapshot(), and: snapshot)
     apply(snapshot, animatingDifferences: reallyAnimate)
+  }
+
+  /// Compares lhs & rhs to see if the differences are worth animating.
+  private static func majorSnapshotDifferences(between lhs: Snapshot, and rhs: Snapshot) -> Bool {
+    if lhs.numberOfItems != rhs.numberOfItems {
+      return true
+    }
+    for (lhsItem, rhsItem) in zip(lhs.itemIdentifiers, rhs.itemIdentifiers) {
+      if lhsItem.pageKey != rhsItem.pageKey { return true }
+    }
+    return false
   }
 
   private static func snapshot(
