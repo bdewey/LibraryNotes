@@ -75,7 +75,7 @@ public final class NoteArchiveDocument: UIDocument {
 
   private func schedulePropertyBatchUpdate() {
     guard propertyBatchUpdateTimer == nil else { return }
-    propertyBatchUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false, block: { _ in
+    propertyBatchUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: { _ in
       let count = self.noteArchiveQueue.sync {
         self.noteArchive.batchUpdatePageProperties()
       }
