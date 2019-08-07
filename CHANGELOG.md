@@ -5,6 +5,7 @@
 ### Changed
 
 - Faster typing propagation between master & detail view
+- Keep rows highlighted in the detail view
 
 ## [0.2.0] - 2019-08-03
 
