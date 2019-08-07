@@ -55,14 +55,8 @@ public final class NoteArchiveDocument: UIDocument {
     return Array(hashtags).sorted()
   }
 
-  /// Holds page contents in memory until we have a chance to save.
-  private var modifiedPageContents: [String: String] = [:]
-
   public func currentTextContents(for pageIdentifier: String) throws -> String {
     assert(Thread.isMainThread)
-    if let inMemoryContents = modifiedPageContents[pageIdentifier] {
-      return inMemoryContents
-    }
     return try noteArchiveQueue.sync {
       try noteArchive.currentText(for: pageIdentifier)
     }
@@ -70,13 +64,31 @@ public final class NoteArchiveDocument: UIDocument {
 
   public func changeTextContents(for pageIdentifier: String, to text: String) {
     assert(Thread.isMainThread)
-    modifiedPageContents[pageIdentifier] = text
+    noteArchiveQueue.sync {
+      noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
+    }
     invalidateSavedSnippets()
+    schedulePropertyBatchUpdate()
+  }
+
+  private var propertyBatchUpdateTimer: Timer?
+
+  private func schedulePropertyBatchUpdate() {
+    guard propertyBatchUpdateTimer == nil else { return }
+    propertyBatchUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false, block: { _ in
+      let count = self.noteArchiveQueue.sync {
+        self.noteArchive.batchUpdatePageProperties()
+      }
+      if count > 0 {
+        self.notifyObservers(of: self.pageProperties)
+      }
+      self.propertyBatchUpdateTimer = nil
+    })
   }
 
   public func deletePage(pageIdentifier: String) throws {
-    try noteArchiveQueue.sync {
-      try noteArchive.removeNote(for: pageIdentifier, versionTimestamp: Date())
+    noteArchiveQueue.sync {
+      noteArchive.removeNote(for: pageIdentifier)
     }
     invalidateSavedSnippets()
     notifyObservers(of: pageProperties)
@@ -115,7 +127,6 @@ public final class NoteArchiveDocument: UIDocument {
   /// Serialize `noteArchive` to `topLevelFileWrapper` and return `topLevelFileWrapper` for saving
   public override func contents(forType typeName: String) throws -> Any {
     precondition(topLevelFileWrapper.isDirectory)
-    let shouldNotify = try archiveModifiedPageContentsIfNeeded()
     if topLevelFileWrapper.fileWrappers![BundleWrapperKey.compressedSnippets] == nil {
       topLevelFileWrapper.addFileWrapper(try compressedSnippetsFileWrapper())
     }
@@ -131,9 +142,6 @@ public final class NoteArchiveDocument: UIDocument {
     }
     purgeUnneededWrappers(from: topLevelFileWrapper)
     DDLogInfo("Saving: \(topLevelFileWrapper.fileWrappers!.keys)")
-    if shouldNotify {
-      notifyObservers(of: pageProperties)
-    }
     return topLevelFileWrapper
   }
 
@@ -217,29 +225,10 @@ private extension NoteArchiveDocument {
     return studyLog
   }
 
-  /// Commits `self.modifiedPageContents` to `noteArchive`
-  /// - returns: True if we added contents to `noteArchive`
-  func archiveModifiedPageContentsIfNeeded() throws -> Bool {
-    var shouldNotify = false
-    let now = Date()
-    try noteArchiveQueue.sync {
-      for (pageIdentifier, modifiedText) in modifiedPageContents {
-        try self.noteArchive.updateText(
-          for: pageIdentifier,
-          to: modifiedText,
-          contentChangeTime: now,
-          versionTimestamp: now
-        )
-        shouldNotify = true
-      }
-      modifiedPageContents.removeAll()
-    }
-    return shouldNotify
-  }
-
   func compressedSnippetsFileWrapper() throws -> FileWrapper {
-    let text = noteArchiveQueue.sync {
-      noteArchive.textSerialized()
+    let text = try noteArchiveQueue.sync { () -> String in
+      try noteArchive.archivePageManifestVersion(timestamp: Date())
+      return noteArchive.textSerialized()
     }
     guard let compressed = text.data(using: .utf8)!.gzip() else {
       throw error(for: .couldNotCompressArchive)

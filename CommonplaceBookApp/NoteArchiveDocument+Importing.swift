@@ -31,6 +31,7 @@ public extension NoteArchiveDocument {
         )
         self.notifyObservers(of: self.noteArchive.pageProperties)
         self.invalidateSavedSnippets()
+        DDLogInfo("Finished importing file \(fileName)")
         if let completion = completion {
           DispatchQueue.main.async {
             completion()
@@ -97,8 +98,11 @@ private extension NoteArchiveDocument {
         }
       }
     }
-    group.notify(queue: .main) {
-      completion?()
+    group.notify(queue: noteArchiveQueue) {
+      self.noteArchive.batchUpdatePageProperties()
+      DispatchQueue.main.async {
+        completion?()
+      }
     }
   }
 }

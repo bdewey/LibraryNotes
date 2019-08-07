@@ -14,7 +14,7 @@ extension NoteArchiveDocument: TextEditViewControllerDelegate {
       let now = Date()
       do {
         let pageIdentifier = try noteArchiveQueue.sync {
-          try noteArchive.insertNote(markdown, contentChangeTime: now, versionTimestamp: now)
+          try noteArchive.insertNote(markdown, contentChangeTime: now)
         }
         viewController.pageIdentifier = pageIdentifier
         invalidateSavedSnippets()

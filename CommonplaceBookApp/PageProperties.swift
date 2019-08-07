@@ -29,9 +29,11 @@ public struct PageProperties: Codable, Hashable {
   ) {
     self.sha1Digest = sha1Digest
     self.timestamp = timestamp
-    self.hashtags = hashtags
+    // Sorting the arrays to make equality comparisons canonical
+    // Consider turning the arrays into sets?
+    self.hashtags = hashtags.sorted()
     self.title = title
-    self.cardTemplates = cardTemplates
+    self.cardTemplates = cardTemplates.sorted()
   }
 
   func makeSnippet() throws -> TextSnippet {
@@ -39,6 +41,7 @@ public struct PageProperties: Codable, Hashable {
     return TextSnippet(text)
   }
 
+  /// Construct PageProperties from encoded YAML.
   init(_ snippet: TextSnippet) throws {
     self = try YAMLDecoder().decode(PageProperties.self, from: snippet.text)
   }
