@@ -79,6 +79,7 @@ public final class NoteArchiveDocument: UIDocument {
       let count = self.noteArchiveQueue.sync {
         self.noteArchive.batchUpdatePageProperties()
       }
+      // swiftlint:disable:next empty_count
       if count > 0 {
         self.notifyObservers(of: self.pageProperties)
       }

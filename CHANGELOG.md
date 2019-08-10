@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Mac support via Catalyst
+
 ## [0.3.0] - 2019-08-07
 
 ### Changed
