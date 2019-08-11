@@ -204,9 +204,10 @@ private extension DocumentListViewController {
 /// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
 extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchResultsViewControllerDelegate, UISearchBarDelegate {
   func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
-    dataSource?.filteredHashtag = hashtag
-    navigationItem.searchController?.searchBar.text = hashtag
-    navigationItem.searchController?.dismiss(animated: true, completion: nil)
+    guard let searchController = navigationItem.searchController else { return }
+    let token = UISearchToken(icon: nil, text: hashtag)
+    token.representedObject = hashtag
+    searchController.searchBar.searchTextField.tokens = [token]
   }
 
   func documentSearchResultsDidSelectPageIdentifier(_ pageIdentifier: String) {
@@ -223,11 +224,17 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
       return
     }
     let pattern = searchController.searchBar.text ?? ""
-    resultsViewController.hashtags = notebook.hashtags
-      .filter { $0.fuzzyMatch(pattern: pattern) }
-    let queryString = """
+    var queryString = """
     contentDescription == "*\(pattern)*"dc
     """
+    if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
+      queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
+      resultsViewController.hashtags = []
+    } else {
+      resultsViewController.hashtags = notebook.hashtags
+        .filter { $0.fuzzyMatch(pattern: pattern) }
+    }
+    DDLogInfo("Issuing query: \(queryString)")
     let query = CSSearchQuery(queryString: queryString, attributes: nil)
     var allIdentifiers: [String] = []
     query.foundItemsHandler = { items in
