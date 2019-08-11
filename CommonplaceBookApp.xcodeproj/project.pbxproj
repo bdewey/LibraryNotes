@@ -46,6 +46,7 @@
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
 		D31E6A0322A1581E005B7C1C /* StudyLogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31E6A0222A1581E005B7C1C /* StudyLogTests.swift */; };
+		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
 		D32A1BA2229D750F00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAD229D8A8A00B78576 /* DiffMatchPatch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -167,6 +168,7 @@
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
 		D31E6A0222A1581E005B7C1C /* StudyLogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogTests.swift; sourceTree = "<group>"; };
+		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
@@ -325,6 +327,7 @@
 				D3B5B50721BA55E9009B3EB5 /* Condition.swift */,
 				D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */,
 				D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */,
+				D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */,
 				D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */,
 				D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */,
@@ -656,6 +659,7 @@
 				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
+				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,

@@ -67,7 +67,7 @@ public final class DocumentDiffableDataSource: UITableViewDiffableDataSource<Doc
       let now = Date()
       let dateDelta = now.timeIntervalSince(viewProperties.pageProperties.timestamp)
       cell.ageLabel.attributedText = NSAttributedString(
-        string: DocumentDiffableDataSource.ageFormatter.string(from: dateDelta) ?? "",
+        string: DateComponentsFormatter.age.string(from: dateDelta) ?? "",
         attributes: [
           .font: UIFont.preferredFont(forTextStyle: .caption1),
           .foregroundColor: UIColor.secondaryLabel,
@@ -151,38 +151,10 @@ extension DocumentDiffableDataSource: NoteArchiveDocumentObserver {
   }
 }
 
-private extension RenderedMarkdown {
-  static func makeTitleRenderer() -> RenderedMarkdown {
-    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-    formatters[.emphasis] = { $1.italic = true }
-    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.delimiter] = { _, _ in NSAttributedString() }
-    let renderer = RenderedMarkdown(
-      parsingRules: ParsingRules(),
-      formatters: formatters,
-      renderers: renderers
-    )
-    renderer.defaultAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: .headline),
-      .foregroundColor: UIColor.label,
-    ]
-    return renderer
-  }
-}
-
 private extension DocumentDiffableDataSource {
   enum ReuseIdentifiers {
     static let documentCell = "DocumentCollectionViewCell"
   }
-
-  static let ageFormatter: DateComponentsFormatter = {
-    let ageFormatter = DateComponentsFormatter()
-    ageFormatter.maximumUnitCount = 1
-    ageFormatter.unitsStyle = .abbreviated
-    ageFormatter.allowsFractionalUnits = false
-    ageFormatter.allowedUnits = [.day, .hour, .minute]
-    return ageFormatter
-  }()
 
   func updateCardsPerDocument() {
     let studySession = notebook.studySession()

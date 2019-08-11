@@ -1,8 +1,10 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import CoreSpotlight
 import DataCompression
 import MiniMarkdown
+import MobileCoreServices
 import UIKit
 
 public protocol NoteArchiveDocumentObserver: AnyObject {
@@ -12,7 +14,11 @@ public protocol NoteArchiveDocumentObserver: AnyObject {
   )
 }
 
+/// A UIDocument that contains a NoteArchive and a StudyLog.
 public final class NoteArchiveDocument: UIDocument {
+  /// Designated initializer.
+  /// - parameter fileURL: The URL of the document
+  /// - parameter parsingRules: Defines how to parse markdown inside the notes
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     self.noteArchive = NoteArchive(parsingRules: parsingRules)
@@ -31,8 +37,10 @@ public final class NoteArchiveDocument: UIDocument {
   /// Protects noteArchive.
   internal let noteArchiveQueue = DispatchQueue(label: "org.brians-brain.note-archive-document")
 
+  /// Holds the outcome of every study session.
   public internal(set) var studyLog = StudyLog()
 
+  /// If there is every an I/O error, this contains it.
   public private(set) var previousError: Error?
 
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
@@ -116,6 +124,7 @@ public final class NoteArchiveDocument: UIDocument {
         from: wrapper,
         parsingRules: parsingRules
       )
+      try? noteArchive.addToSpotlight()
       let pageProperties = noteArchive.pageProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(pageProperties.count) pages")

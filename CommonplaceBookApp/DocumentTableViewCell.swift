@@ -17,14 +17,14 @@ final class DocumentTableViewCell: UITableViewCell {
 
     contentView.addSubview(horizontalStack)
     contentView.addSubview(divider)
-    horizontalStack.snp.makeConstraints { (make) in
+    horizontalStack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(8)
       make.height.greaterThanOrEqualTo(72)
     }
-    ageLabel.snp.makeConstraints { (make) in
+    ageLabel.snp.makeConstraints { make in
       make.width.equalTo(56)
     }
-    divider.snp.makeConstraints { (make) in
+    divider.snp.makeConstraints { make in
       make.height.equalTo(1)
       make.width.equalTo(verticalStack.snp.width)
       make.bottom.equalToSuperview()

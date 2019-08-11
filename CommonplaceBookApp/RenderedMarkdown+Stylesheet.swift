@@ -28,6 +28,24 @@ extension RenderedMarkdown {
     ]
     defaultAttributes.lineHeightMultiple = 1.2
   }
+
+  /// Makes a RenderedMarkdown for rendering document titles in a list.
+  public static func makeTitleRenderer() -> RenderedMarkdown {
+    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
+    formatters[.emphasis] = { $1.italic = true }
+    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
+    renderers[.delimiter] = { _, _ in NSAttributedString() }
+    let renderer = RenderedMarkdown(
+      parsingRules: ParsingRules(),
+      formatters: formatters,
+      renderers: renderers
+    )
+    renderer.defaultAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .headline),
+      .foregroundColor: UIColor.label,
+    ]
+    return renderer
+  }
 }
 
 extension MarkdownAttributedStringRenderer {

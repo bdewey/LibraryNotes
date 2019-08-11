@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import CoreServices
+import CoreSpotlight
 import MiniMarkdown
 import SnapKit
 import UIKit
@@ -39,6 +40,7 @@ final class DocumentListViewController: UIViewController {
 
   private let notebook: NoteArchiveDocument
   private var dataSource: DocumentDiffableDataSource?
+  private var currentSpotlightQuery: CSSearchQuery?
 
   private lazy var newDocumentButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "plus.circle")
@@ -125,17 +127,6 @@ final class DocumentListViewController: UIViewController {
     showTextEditViewController(viewController)
   }
 
-  private func showTextEditViewController(_ textEditViewController: TextEditViewController) {
-    if let splitViewController = splitViewController {
-      splitViewController.showDetailViewController(
-        UINavigationController(rootViewController: textEditViewController),
-        sender: self
-      )
-    } else if let navigationController = navigationController {
-      navigationController.pushViewController(textEditViewController, animated: true)
-    }
-  }
-
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {
@@ -175,7 +166,40 @@ final class DocumentListViewController: UIViewController {
   }
 }
 
+// MARK: - Private
+
+private extension DocumentListViewController {
+  func showPage(with pageIdentifier: String) {
+    let markdown: String
+    do {
+      markdown = try notebook.currentTextContents(for: pageIdentifier)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
+      return
+    }
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules
+    )
+    textEditViewController.pageIdentifier = pageIdentifier
+    textEditViewController.markdown = markdown
+    textEditViewController.delegate = notebook
+    showTextEditViewController(textEditViewController)
+  }
+
+  func showTextEditViewController(_ textEditViewController: TextEditViewController) {
+    if let splitViewController = splitViewController {
+      splitViewController.showDetailViewController(
+        UINavigationController(rootViewController: textEditViewController),
+        sender: self
+      )
+    } else if let navigationController = navigationController {
+      navigationController.pushViewController(textEditViewController, animated: true)
+    }
+  }
+}
+
 // MARK: - Search
+
 /// Everything needed for search.
 /// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
 extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchResultsViewControllerDelegate, UISearchBarDelegate {
@@ -185,13 +209,38 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
     navigationItem.searchController?.dismiss(animated: true, completion: nil)
   }
 
+  func documentSearchResultsDidSelectPageIdentifier(_ pageIdentifier: String) {
+    showPage(with: pageIdentifier)
+  }
+
+  func documentSearchResultsPageProperties(for pageIdentifier: String) -> PageProperties? {
+    notebook.pageProperties[pageIdentifier]
+  }
+
   func updateSearchResults(for searchController: UISearchController) {
     guard let resultsViewController = searchController.searchResultsController as? DocumentSearchResultsViewController else {
       assertionFailure()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
-    resultsViewController.setHashtags(notebook.hashtags.filter({ $0.fuzzyMatch(pattern: pattern) }))
+    resultsViewController.hashtags = notebook.hashtags
+      .filter { $0.fuzzyMatch(pattern: pattern) }
+    let queryString = """
+    contentDescription == "*\(pattern)*"dc
+    """
+    let query = CSSearchQuery(queryString: queryString, attributes: nil)
+    var allIdentifiers: [String] = []
+    query.foundItemsHandler = { items in
+      allIdentifiers.append(contentsOf: items.map { $0.uniqueIdentifier })
+    }
+    query.completionHandler = { _ in
+      DDLogInfo("Found identifiers: \(allIdentifiers)")
+      DispatchQueue.main.async {
+        resultsViewController.pageIdentifiers = allIdentifiers
+      }
+    }
+    query.start()
+    currentSpotlightQuery = query
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -199,7 +248,7 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
   }
 
   func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-    if searchBar.text.isEmpty && dataSource?.filteredHashtag != nil {
+    if searchBar.text.isEmpty, dataSource?.filteredHashtag != nil {
       // Allow single-click clear of the filtered hashtag
       dataSource?.filteredHashtag = nil
       return false

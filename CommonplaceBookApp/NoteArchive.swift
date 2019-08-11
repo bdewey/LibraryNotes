@@ -1,8 +1,10 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import CoreSpotlight
 import Foundation
 import MiniMarkdown
+import MobileCoreServices
 import Yams
 
 public struct NoteArchive {
@@ -89,7 +91,7 @@ public struct NoteArchive {
 
   /// Text version of the archive, suitable for storing to disk.
   public func textSerialized() -> String {
-    assert(pageContentsCache.allSatisfy({ !$0.value.dirty }))
+    assert(pageContentsCache.allSatisfy { !$0.value.dirty })
     return archive.textSerialized()
   }
 
@@ -169,7 +171,7 @@ public struct NoteArchive {
   @discardableResult
   public mutating func batchUpdatePageProperties() -> Int {
     let updated = archive.updatePageProperties(
-      in: pageContentsCache.filter({ $0.value.pagePropertiesStale }),
+      in: pageContentsCache.filter { $0.value.pagePropertiesStale },
       parsingRules: parsingRules
     )
     pageContentsCache.merge(updated, uniquingKeysWith: { _, new in new })
@@ -199,6 +201,7 @@ public struct NoteArchive {
 }
 
 // MARK: - Import
+
 public extension NoteArchive {
   /// Adds the contents of a file to the archive as a new note.
   mutating func importFile(
@@ -230,7 +233,36 @@ public extension NoteArchive {
   }
 }
 
+// MARK: - Indexing
+
+public extension NoteArchive {
+  /// Adds all of the current contents of this NoteArchive to Spotlight.
+  // TODO: Get rid of "throw", add a completion routine to get the error?
+  func addToSpotlight() throws {
+    let toIndex = try pageProperties.map { pageIdentifier, pageProperties in
+      (pageIdentifier, pageProperties, try currentText(for: pageIdentifier))
+    }
+    let items = toIndex.map { tuple -> CSSearchableItem in
+      let (pageIdentifier, pageProperties, pageContents) = tuple
+      let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
+      attributes.title = pageProperties.title
+      attributes.keywords = pageProperties.hashtags
+      attributes.contentDescription = pageContents
+      let item = CSSearchableItem(uniqueIdentifier: pageIdentifier, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
+      return item
+    }
+    CSSearchableIndex.default().indexSearchableItems(items) { error in
+      if let error = error {
+        DDLogError(error.localizedDescription)
+      } else {
+        DDLogInfo("Indexing finished")
+      }
+    }
+  }
+}
+
 // MARK: - Private
+
 private extension NoteArchive {
   /// A timestamp & digest. The digest references the page manifest at that version.
   struct Version: LosslessStringConvertible {
@@ -286,8 +318,8 @@ private extension NoteArchive {
     mutating func setText(_ text: String, modifiedTimestamp: Date) {
       self.text = text
       self.modifiedTimestamp = modifiedTimestamp
-      self.dirty = true
-      self.pagePropertiesStale = true
+      dirty = true
+      pagePropertiesStale = true
     }
   }
 
