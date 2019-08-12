@@ -50,7 +50,6 @@
 		D32A1BA2229D750F00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; };
 		D32A1BAD229D8A8A00B78576 /* DiffMatchPatch.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D3331C8522F4E25D002B62AF /* DocumentSearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
 		D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuoteTemplate.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
@@ -172,7 +171,6 @@
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAB229D8A8A00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
-		D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentSearchResultsViewController.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuoteTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplate.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
@@ -331,7 +329,6 @@
 				D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */,
 				D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
-				D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
@@ -640,7 +637,6 @@
 				D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
-				D3331C8522F4E25D002B62AF /* DocumentSearchResultsViewController.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,

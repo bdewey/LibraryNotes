@@ -80,12 +80,12 @@ final class DocumentListViewController: UIViewController {
     studySession = notebook.studySession()
     dataSource.performUpdates(animated: false)
 
-    let resultsViewController = DocumentSearchResultsViewController(notebook: notebook, delegate: self)
-    resultsViewController.delegate = self
-    let searchController = UISearchController(searchResultsController: resultsViewController)
+    let searchController = UISearchController(searchResultsController: nil)
     searchController.searchResultsUpdater = self
     searchController.searchBar.delegate = self
     searchController.showsSearchResultsController = true
+    searchController.searchBar.searchTextField.clearButtonMode = .whileEditing
+    searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
@@ -178,6 +178,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     let token = UISearchToken(icon: nil, text: hashtag)
     token.representedObject = hashtag
     searchController.searchBar.searchTextField.tokens = [token]
+    searchController.searchBar.searchTextField.text = ""
     searchController.dismiss(animated: true, completion: nil)
   }
 }
@@ -213,17 +214,11 @@ private extension DocumentListViewController {
 /// Everything needed for search.
 /// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
-  func documentSearchResultsDidSelectPageIdentifier(_ pageIdentifier: String) {
-    showPage(with: pageIdentifier)
-  }
-
-  func documentSearchResultsPageProperties(for pageIdentifier: String) -> PageProperties? {
-    notebook.pageProperties[pageIdentifier]
-  }
-
   func updateSearchResults(for searchController: UISearchController) {
-    guard let resultsViewController = searchController.searchResultsController as? DocumentSearchResultsViewController else {
-      assertionFailure()
+    guard searchController.isActive else {
+      dataSource?.hashtags = []
+      dataSource?.filteredPageIdentifiers = nil
+      currentSpotlightQuery = nil
       return
     }
     let pattern = searchController.searchBar.text ?? ""
@@ -232,10 +227,13 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     """
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
       queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
-      resultsViewController.dataSource?.hashtags = []
+      self.dataSource?.hashtags = []
+      dataSource?.filteredHashtag = selectedHashtag
     } else {
-      resultsViewController.dataSource?.hashtags = notebook.hashtags
+      DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
+      self.dataSource?.hashtags = notebook.hashtags
         .filter { $0.fuzzyMatch(pattern: pattern) }
+      dataSource?.filteredHashtag = nil
     }
     DDLogInfo("Issuing query: \(queryString)")
     let query = CSSearchQuery(queryString: queryString, attributes: nil)
@@ -246,11 +244,16 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")
       DispatchQueue.main.async {
-        resultsViewController.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
+        self.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
       }
     }
     query.start()
     currentSpotlightQuery = query
+  }
+
+  func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+    DDLogInfo("searchBarTextDidEndEditing")
+    dataSource?.hashtags = []
   }
 }
 

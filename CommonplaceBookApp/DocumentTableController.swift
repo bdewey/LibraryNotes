@@ -66,8 +66,15 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  /// If true, show a list of hashtags as a section in the table.
+  /// If not empty, show a list of hashtags as a section in the table.
   public var hashtags: [String] = [] {
+    didSet {
+      performUpdates(animated: true)
+    }
+  }
+
+  /// If set, only show pages that contain this hashtag.
+  public var filteredHashtag: String? {
     didSet {
       performUpdates(animated: true)
     }
@@ -95,6 +102,7 @@ public final class DocumentTableController: NSObject {
       for: notebook,
       cardsPerDocument: cardsPerDocument,
       hashtags: hashtags,
+      filteredHashtag: filteredHashtag,
       filteredPageIdentifiers: filteredPageIdentifiers
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
@@ -316,6 +324,7 @@ private extension DocumentTableController {
     for notebook: NoteArchiveDocument,
     cardsPerDocument: [String: Int],
     hashtags: [String],
+    filteredHashtag: String?,
     filteredPageIdentifiers: Set<String>?
   ) -> Snapshot {
     let snapshot = Snapshot()
@@ -330,6 +339,11 @@ private extension DocumentTableController {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)
       }
+      .filter {
+        guard let hashtag = filteredHashtag else { return true }
+        return $0.value.hashtags.contains(hashtag)
+      }
+
     let objects = propertiesFilteredByHashtag
       .compactMap { tuple in
         ViewProperties(pageKey: tuple.key, pageProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
