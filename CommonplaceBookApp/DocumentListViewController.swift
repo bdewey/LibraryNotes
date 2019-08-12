@@ -219,6 +219,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
       dataSource?.hashtags = []
       dataSource?.filteredPageIdentifiers = nil
       currentSpotlightQuery = nil
+      updateStudySession()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
