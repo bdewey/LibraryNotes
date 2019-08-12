@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import CoreSpotlight
 import MiniMarkdown
 import UIKit
 
@@ -27,6 +28,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   }()
 
   var noteArchiveDocument: NoteArchiveDocument?
+  /// If non-nil, we want to open this page initially upon opening the document.
+  var initialPageIdentifier: String?
 
   func application(
     _ application: UIApplication,
@@ -54,7 +57,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
           parsingRules: parsingRules
         )
         DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
+        let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
+        window.rootViewController = self.wrapViewController(
+          documentListViewController
+        )
+        let pageIdentifierCopy = self.initialPageIdentifier
         noteArchiveDocument.open(completionHandler: { success in
+          pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
           DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
           metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
             noteArchiveDocument.importFileMetadataItems(
@@ -64,10 +73,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             )
           })
         })
+        self.initialPageIdentifier = nil
         self.noteArchiveDocument = noteArchiveDocument
-        window.rootViewController = self.makeViewController(
-          notebook: noteArchiveDocument
-        )
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
@@ -85,6 +92,26 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
     }
     noteArchiveDocument = nil
+  }
+
+  func application(
+    _ application: UIApplication,
+    continue userActivity: NSUserActivity,
+    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
+  ) -> Bool {
+    switch userActivity.activityType {
+    case CSSearchableItemActionType:
+      guard
+        let uniqueIdentifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String
+      else {
+        break
+      }
+      DDLogInfo("Opening page \(uniqueIdentifier)")
+      self.initialPageIdentifier = uniqueIdentifier
+    default:
+      break
+    }
+    return true
   }
 
   private func makeDirectoryProvider(
@@ -147,13 +174,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   }
 
-  private func makeViewController(
-    notebook: NoteArchiveDocument
+  private func wrapViewController(
+    _ documentListViewController: DocumentListViewController
   ) -> UIViewController {
+    let notebook = documentListViewController.notebook
     let primaryNavigationController = UINavigationController(
-      rootViewController: DocumentListViewController(
-        notebook: notebook
-      )
+      rootViewController: documentListViewController
     )
     primaryNavigationController.navigationBar.prefersLargeTitles = true
     let textEditViewController = TextEditViewController(

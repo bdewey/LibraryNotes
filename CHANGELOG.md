@@ -5,6 +5,7 @@
 ### Added
 
 - Mac support via Catalyst
+- Full-text search
 
 ## [0.3.0] - 2019-08-07
 

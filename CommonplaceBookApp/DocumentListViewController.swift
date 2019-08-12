@@ -38,7 +38,7 @@ final class DocumentListViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let notebook: NoteArchiveDocument
+  public let notebook: NoteArchiveDocument
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
 
@@ -62,6 +62,23 @@ final class DocumentListViewController: UIViewController {
   }()
 
   private lazy var tableView: UITableView = DocumentTableController.makeTableView()
+
+  internal func showPage(with pageIdentifier: String) {
+    let markdown: String
+    do {
+      markdown = try notebook.currentTextContents(for: pageIdentifier)
+    } catch {
+      DDLogError("Unexpected error loading page: \(error)")
+      return
+    }
+    let textEditViewController = TextEditViewController(
+      parsingRules: notebook.parsingRules
+    )
+    textEditViewController.pageIdentifier = pageIdentifier
+    textEditViewController.markdown = markdown
+    textEditViewController.delegate = notebook
+    showTextEditViewController(textEditViewController)
+  }
 
   // MARK: - Lifecycle
 
@@ -186,23 +203,6 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 // MARK: - Private
 
 private extension DocumentListViewController {
-  func showPage(with pageIdentifier: String) {
-    let markdown: String
-    do {
-      markdown = try notebook.currentTextContents(for: pageIdentifier)
-    } catch {
-      DDLogError("Unexpected error loading page: \(error)")
-      return
-    }
-    let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules
-    )
-    textEditViewController.pageIdentifier = pageIdentifier
-    textEditViewController.markdown = markdown
-    textEditViewController.delegate = notebook
-    showTextEditViewController(textEditViewController)
-  }
-
   /// If there is currently a hashtag active in the search bar, return it.
   var currentHashtag: String? {
     return navigationItem.searchController?.searchBar.searchTextField.tokens.first?.representedObject as? String
