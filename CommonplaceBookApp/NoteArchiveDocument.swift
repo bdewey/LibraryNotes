@@ -124,7 +124,7 @@ public final class NoteArchiveDocument: UIDocument {
         from: wrapper,
         parsingRules: parsingRules
       )
-      try? noteArchive.addToSpotlight()
+      noteArchive.addToSpotlight()
       let pageProperties = noteArchive.pageProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(pageProperties.count) pages")

@@ -175,6 +175,8 @@ public struct NoteArchive {
       parsingRules: parsingRules
     )
     pageContentsCache.merge(updated, uniquingKeysWith: { _, new in new })
+    let items = updated.compactMap(searchableItem)
+    addItemsToIndex(items)
     return updated.count
   }
 
@@ -213,7 +215,7 @@ public extension NoteArchive {
     var importRecords = try getFileImportRecords()
     if let importRecord = importRecords[fileName] {
       if !contentChangeDate.closeEnough(to: importRecord.changeDate) {
-        try updateText(
+        updateText(
           for: importRecord.pageIdentifier,
           to: text,
           contentChangeTime: contentChangeDate
@@ -237,27 +239,50 @@ public extension NoteArchive {
 
 public extension NoteArchive {
   /// Adds all of the current contents of this NoteArchive to Spotlight.
-  // TODO: Get rid of "throw", add a completion routine to get the error?
-  func addToSpotlight() throws {
-    let toIndex = try pageProperties.map { pageIdentifier, pageProperties in
-      (pageIdentifier, pageProperties, try currentText(for: pageIdentifier))
+  func addToSpotlight(completion: ((Error?) -> Void)? = nil) {
+    do {
+      let toIndex = try pageProperties.map { pageIdentifier, pageProperties in
+        (pageIdentifier, pageProperties, try currentText(for: pageIdentifier))
+      }
+      let items = toIndex.map(searchableItem)
+      addItemsToIndex(items, completion: completion)
+    } catch {
+      completion?(error)
     }
-    let items = toIndex.map { tuple -> CSSearchableItem in
-      let (pageIdentifier, pageProperties, pageContents) = tuple
-      let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
-      attributes.title = pageProperties.title
-      attributes.keywords = pageProperties.hashtags
-      attributes.contentDescription = pageContents
-      let item = CSSearchableItem(uniqueIdentifier: pageIdentifier, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
-      return item
-    }
+  }
+
+  private func addItemsToIndex(_ items: [CSSearchableItem], completion: ((Error?) -> Void)? = nil) {
     CSSearchableIndex.default().indexSearchableItems(items) { error in
       if let error = error {
         DDLogError(error.localizedDescription)
       } else {
         DDLogInfo("Indexing finished")
       }
+      completion?(error)
     }
+  }
+
+  private func searchableItem(
+    pageIdentifier: String,
+    pageProperties: PageProperties,
+    pageContents: String
+  ) -> CSSearchableItem {
+    let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
+    attributes.title = pageProperties.title
+    attributes.keywords = pageProperties.hashtags
+    attributes.contentDescription = pageContents
+    let item = CSSearchableItem(uniqueIdentifier: pageIdentifier, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
+    return item
+  }
+
+  private func searchableItem(
+    pageIdentifier: String,
+    pageContents: PageContents
+  ) -> CSSearchableItem? {
+    guard let pageProperties = pageContents.pageProperties else {
+      return nil
+    }
+    return searchableItem(pageIdentifier: pageIdentifier, pageProperties: pageProperties, pageContents: pageContents.text)
   }
 }
 
