@@ -73,7 +73,7 @@
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
-		D3A99ED422EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */; };
+		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
@@ -198,7 +198,7 @@
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
-		D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentDiffableDataSource.swift; sourceTree = "<group>"; };
+		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -330,9 +330,9 @@
 				D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */,
 				D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */,
 				D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */,
-				D3A99ED322EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D3331C8422F4E25D002B62AF /* DocumentSearchResultsViewController.swift */,
+				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
@@ -674,7 +674,7 @@
 				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
-				D3A99ED422EDDCA7000D6DE2 /* DocumentDiffableDataSource.swift in Sources */,
+				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,

@@ -39,7 +39,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private let notebook: NoteArchiveDocument
-  private var dataSource: DocumentDiffableDataSource?
+  private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
 
   private lazy var newDocumentButton: UIBarButtonItem = {
@@ -61,25 +61,17 @@ final class DocumentListViewController: UIViewController {
     return button
   }()
 
-  private lazy var tableView: UITableView = {
-    let tableView = UITableView(frame: .zero, style: .plain)
-    tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    tableView.backgroundColor = UIColor.systemBackground
-    tableView.accessibilityIdentifier = "document-list"
-    tableView.estimatedRowHeight = 72
-    tableView.delegate = self
-    tableView.separatorStyle = .none
-    return tableView
-  }()
+  private lazy var tableView: UITableView = DocumentTableController.makeTableView()
 
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    let dataSource = DocumentDiffableDataSource(
+    let dataSource = DocumentTableController(
       tableView: tableView,
       notebook: notebook
     )
+    dataSource.delegate = self
     self.dataSource = dataSource
     view.addSubview(tableView)
     tableView.snp.makeConstraints { make in
@@ -88,7 +80,7 @@ final class DocumentListViewController: UIViewController {
     studySession = notebook.studySession()
     dataSource.performUpdates(animated: false)
 
-    let resultsViewController = DocumentSearchResultsViewController()
+    let resultsViewController = DocumentSearchResultsViewController(notebook: notebook, delegate: self)
     resultsViewController.delegate = self
     let searchController = UISearchController(searchResultsController: resultsViewController)
     searchController.searchResultsUpdater = self
@@ -113,7 +105,8 @@ final class DocumentListViewController: UIViewController {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
-    if let hashtag = self.dataSource?.filteredHashtag {
+    // TODO: Turn this long sequence of properties into a computed property. This is gross.
+    if let hashtag = currentHashtag {
       initialText += hashtag
       initialText += "\n"
     }
@@ -144,13 +137,28 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let filter: (String, PageProperties) -> Bool = (dataSource?.filteredHashtag == nil)
+    let filter: (String, PageProperties) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
-      : { _, properties in properties.hashtags.contains(self.dataSource!.filteredHashtag!) }
+      : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
     studySession = notebook.studySession(filter: filter)
   }
+}
 
-  public func presentStudySessionViewController(for studySession: StudySession) {
+// MARK: - DocumentTableControllerDelegate
+
+extension DocumentListViewController: DocumentTableControllerDelegate {
+  func showTextEditViewController(_ textEditViewController: TextEditViewController) {
+    if let splitViewController = splitViewController {
+      splitViewController.showDetailViewController(
+        UINavigationController(rootViewController: textEditViewController),
+        sender: self
+      )
+    } else if let navigationController = navigationController {
+      navigationController.pushViewController(textEditViewController, animated: true)
+    }
+  }
+
+  func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession.limiting(to: 20),
       documentCache: ReadOnlyDocumentCache(delegate: self),
@@ -163,6 +171,14 @@ final class DocumentListViewController: UIViewController {
       animated: true,
       completion: nil
     )
+  }
+
+  func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
+    guard let searchController = navigationItem.searchController else { return }
+    let token = UISearchToken(icon: nil, text: hashtag)
+    token.representedObject = hashtag
+    searchController.searchBar.searchTextField.tokens = [token]
+    searchController.dismiss(animated: true, completion: nil)
   }
 }
 
@@ -186,15 +202,9 @@ private extension DocumentListViewController {
     showTextEditViewController(textEditViewController)
   }
 
-  func showTextEditViewController(_ textEditViewController: TextEditViewController) {
-    if let splitViewController = splitViewController {
-      splitViewController.showDetailViewController(
-        UINavigationController(rootViewController: textEditViewController),
-        sender: self
-      )
-    } else if let navigationController = navigationController {
-      navigationController.pushViewController(textEditViewController, animated: true)
-    }
+  /// If there is currently a hashtag active in the search bar, return it.
+  var currentHashtag: String? {
+    return navigationItem.searchController?.searchBar.searchTextField.tokens.first?.representedObject as? String
   }
 }
 
@@ -202,14 +212,7 @@ private extension DocumentListViewController {
 
 /// Everything needed for search.
 /// This is a bunch of little protocols and it's clearer to declare conformance in a single extension.
-extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchResultsViewControllerDelegate, UISearchBarDelegate {
-  func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
-    guard let searchController = navigationItem.searchController else { return }
-    let token = UISearchToken(icon: nil, text: hashtag)
-    token.representedObject = hashtag
-    searchController.searchBar.searchTextField.tokens = [token]
-  }
-
+extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func documentSearchResultsDidSelectPageIdentifier(_ pageIdentifier: String) {
     showPage(with: pageIdentifier)
   }
@@ -229,9 +232,9 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
     """
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
       queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
-      resultsViewController.hashtags = []
+      resultsViewController.dataSource?.hashtags = []
     } else {
-      resultsViewController.hashtags = notebook.hashtags
+      resultsViewController.dataSource?.hashtags = notebook.hashtags
         .filter { $0.fuzzyMatch(pattern: pattern) }
     }
     DDLogInfo("Issuing query: \(queryString)")
@@ -243,82 +246,11 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")
       DispatchQueue.main.async {
-        fatalError("Not implemented")
-//        resultsViewController.pageIdentifiers = allIdentifiers
+        resultsViewController.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
       }
     }
     query.start()
     currentSpotlightQuery = query
-  }
-
-  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    dataSource?.filteredHashtag = nil
-  }
-
-  func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
-    if searchBar.text.isEmpty, dataSource?.filteredHashtag != nil {
-      // Allow single-click clear of the filtered hashtag
-      dataSource?.filteredHashtag = nil
-      return false
-    }
-    return true
-  }
-}
-
-extension DocumentListViewController: UITableViewDelegate {
-  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    guard let item = dataSource?.itemIdentifier(for: indexPath) else { return }
-    switch item {
-    case .page(let viewProperties):
-      let markdown: String
-      do {
-        markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
-      } catch {
-        DDLogError("Unexpected error loading page: \(error)")
-        return
-      }
-      let textEditViewController = TextEditViewController(
-        parsingRules: notebook.parsingRules
-      )
-      textEditViewController.pageIdentifier = viewProperties.pageKey
-      textEditViewController.markdown = markdown
-      textEditViewController.delegate = notebook
-      showTextEditViewController(textEditViewController)
-    case .hashtag:
-      fatalError("not implemented")
-    }
-  }
-
-  func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-    guard let item = dataSource?.itemIdentifier(for: indexPath) else {
-      return nil
-    }
-    var actions = [UIContextualAction]()
-    switch item {
-    case .page(let properties):
-      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
-        completion(true)
-      }
-      deleteAction.image = UIImage(systemName: "trash")
-      actions.append(deleteAction)
-      if properties.cardCount > 0 {
-        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          let studySession = self.notebook.studySession(
-            filter: { name, _ in name == properties.pageKey }
-          )
-          self.presentStudySessionViewController(for: studySession)
-          completion(true)
-        }
-        studyAction.image = UIImage(systemName: "rectangle.stack")
-        studyAction.backgroundColor = UIColor.systemBlue
-        actions.append(studyAction)
-      }
-    case .hashtag:
-      // NOTHING
-      break
-    }
-    return UISwipeActionsConfiguration(actions: actions)
   }
 }
 
