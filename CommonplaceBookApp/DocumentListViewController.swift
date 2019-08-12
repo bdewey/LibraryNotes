@@ -243,7 +243,8 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")
       DispatchQueue.main.async {
-        resultsViewController.pageIdentifiers = allIdentifiers
+        fatalError("Not implemented")
+//        resultsViewController.pageIdentifiers = allIdentifiers
       }
     }
     query.start()
@@ -266,26 +267,35 @@ extension DocumentListViewController: UISearchResultsUpdating, DocumentSearchRes
 
 extension DocumentListViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    guard let viewProperties = dataSource?.itemIdentifier(for: indexPath) else { return }
-    let markdown: String
-    do {
-      markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
-    } catch {
-      DDLogError("Unexpected error loading page: \(error)")
-      return
+    guard let item = dataSource?.itemIdentifier(for: indexPath) else { return }
+    switch item {
+    case .page(let viewProperties):
+      let markdown: String
+      do {
+        markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
+      } catch {
+        DDLogError("Unexpected error loading page: \(error)")
+        return
+      }
+      let textEditViewController = TextEditViewController(
+        parsingRules: notebook.parsingRules
+      )
+      textEditViewController.pageIdentifier = viewProperties.pageKey
+      textEditViewController.markdown = markdown
+      textEditViewController.delegate = notebook
+      showTextEditViewController(textEditViewController)
+    case .hashtag:
+      fatalError("not implemented")
     }
-    let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules
-    )
-    textEditViewController.pageIdentifier = viewProperties.pageKey
-    textEditViewController.markdown = markdown
-    textEditViewController.delegate = notebook
-    showTextEditViewController(textEditViewController)
   }
 
   func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    guard let item = dataSource?.itemIdentifier(for: indexPath) else {
+      return nil
+    }
     var actions = [UIContextualAction]()
-    if let properties = dataSource?.itemIdentifier(for: indexPath) {
+    switch item {
+    case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
         try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
         completion(true)
@@ -304,6 +314,9 @@ extension DocumentListViewController: UITableViewDelegate {
         studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
+    case .hashtag:
+      // NOTHING
+      break
     }
     return UISwipeActionsConfiguration(actions: actions)
   }
