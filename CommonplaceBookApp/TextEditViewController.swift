@@ -202,14 +202,12 @@ final class TextEditViewController: UIViewController {
 
   override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    DDLogInfo("viewWillLayoutSubviews, width = \(view.frame.width)")
     adjustMargins(size: view.frame.size)
   }
 
   private func adjustMargins(size: CGSize) {
     let delta = size.width - 440
     let horizontalInset = max(delta / 2, 0)
-    DDLogInfo("adjustMargins: width = \(size.width), inset = \(horizontalInset)")
     textView.textContainerInset = UIEdgeInsets(
       top: 8,
       left: horizontalInset,
