@@ -206,13 +206,13 @@ final class TextEditViewController: UIViewController {
   }
 
   private func adjustMargins(size: CGSize) {
-    let delta = size.width - 440
-    let horizontalInset = max(delta / 2, 0)
+    // I wish I could use autolayout to set the insets.
+    let readableContentGuide = textView.readableContentGuide
     textView.textContainerInset = UIEdgeInsets(
       top: 8,
-      left: horizontalInset,
+      left: readableContentGuide.layoutFrame.minX,
       bottom: 8,
-      right: horizontalInset
+      right: textView.bounds.maxX - readableContentGuide.layoutFrame.maxX
     )
   }
 
@@ -221,7 +221,7 @@ final class TextEditViewController: UIViewController {
   @objc func handleKeyboardNotification(_ notification: Notification) {
     guard let keyboardInfo = KeyboardInfo(notification) else { return }
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
-    textView.scrollIndicatorInsets.bottom = textView.contentInset.bottom
+    textView.verticalScrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
   }
 }

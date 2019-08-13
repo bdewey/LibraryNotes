@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The TextEditViewController now uses the readableContentGuide to adjust the margins of the text.
+
 ## [0.4.0] - 2019-08-12
 
 ### Added
