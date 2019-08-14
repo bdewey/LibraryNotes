@@ -244,9 +244,18 @@ private extension DocumentTableController {
     case documents
   }
 
-  enum Item: Hashable {
+  enum Item: Hashable, CustomStringConvertible {
     case hashtag(String)
     case page(ViewProperties)
+
+    var description: String {
+      switch self {
+      case .hashtag(let hashtag):
+        return hashtag
+      case .page(let viewProperties):
+        return "Page \(viewProperties.pageKey)"
+      }
+    }
   }
 
   /// All properties needed to display a document cell.
@@ -357,6 +366,7 @@ private extension DocumentTableController {
         Item.page($0)
       }
     snapshot.appendItems(objects)
+    DDLogDebug("Generating snapshot with \(objects.count) entries: \(objects)")
     return snapshot
   }
 }

@@ -251,6 +251,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
       dataSource?.filteredHashtag = nil
     }
     DDLogInfo("Issuing query: \(queryString)")
+    currentSpotlightQuery?.cancel()
     let query = CSSearchQuery(queryString: queryString, attributes: nil)
     var allIdentifiers: [String] = []
     query.foundItemsHandler = { items in
@@ -259,7 +260,9 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")
       DispatchQueue.main.async {
-        self.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
+        if searchController.isActive, self.currentSpotlightQuery == query {
+          self.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
+        }
       }
     }
     query.start()
@@ -269,6 +272,10 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     DDLogInfo("searchBarTextDidEndEditing")
     dataSource?.hashtags = []
+  }
+
+  func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+    dataSource?.filteredPageIdentifiers = nil
   }
 }
 

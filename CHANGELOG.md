@@ -8,6 +8,10 @@
 - The TextEditViewController now uses the readableContentGuide to adjust the margins of the text.
 - Use an empty view controller when you haven't explicitly selected a page
 
+### Fixed
+
+- The document list was filtered even when search wasn't active
+
 ## [0.4.0] - 2019-08-12
 
 ### Added

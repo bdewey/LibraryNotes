@@ -254,11 +254,12 @@ public extension NoteArchive {
   }
 
   private func addItemsToIndex(_ items: [CSSearchableItem], completion: ((Error?) -> Void)? = nil) {
+    DDLogInfo("Indexing \(items.count) item(s)")
     CSSearchableIndex.default().indexSearchableItems(items) { error in
       if let error = error {
-        DDLogError(error.localizedDescription)
+        DDLogError("Indexing error: \(error.localizedDescription)")
       } else {
-        DDLogInfo("Indexing finished")
+        DDLogInfo("Indexing finished without error")
       }
       completion?(error)
     }
