@@ -245,7 +245,9 @@ public extension NoteArchive {
         (pageIdentifier, pageProperties, try currentText(for: pageIdentifier))
       }
       let items = toIndex.map(searchableItem)
-      addItemsToIndex(items, completion: completion)
+      CSSearchableIndex.default().deleteAllSearchableItems { _ in
+        self.addItemsToIndex(items, completion: completion)
+      }
     } catch {
       completion?(error)
     }

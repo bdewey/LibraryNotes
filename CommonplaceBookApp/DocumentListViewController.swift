@@ -198,6 +198,20 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     searchController.searchBar.searchTextField.text = ""
     searchController.dismiss(animated: true, completion: nil)
   }
+
+  func documentTableDidDeleteDocument(with pageIdentifier: String) {
+    guard
+      let splitViewController = self.splitViewController,
+      splitViewController.viewControllers.count > 1,
+      let navigationController = splitViewController.viewControllers.last as? UINavigationController,
+      let detailViewController = navigationController.viewControllers.first as? TextEditViewController
+    else {
+        return
+    }
+    if detailViewController.pageIdentifier == pageIdentifier {
+      splitViewController.showDetailViewController(EmptyViewController(), sender: nil)
+    }
+  }
 }
 
 // MARK: - Private

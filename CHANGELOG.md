@@ -4,7 +4,9 @@
 
 ### Changed
 
+- When you delete a page, it gets removed from the index AND from the detail view (if it was the page you were looking at)
 - The TextEditViewController now uses the readableContentGuide to adjust the margins of the text.
+- Use an empty view controller when you haven't explicitly selected a page
 
 ## [0.4.0] - 2019-08-12
 

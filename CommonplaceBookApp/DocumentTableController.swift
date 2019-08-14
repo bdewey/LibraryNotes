@@ -11,6 +11,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
+  func documentTableDidDeleteDocument(with pageIdentifier: String)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -166,6 +167,7 @@ extension DocumentTableController: UITableViewDelegate {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
         try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
+        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }
       deleteAction.image = UIImage(systemName: "trash")

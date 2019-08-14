@@ -73,6 +73,7 @@
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
+		D3AFC83A2304415400C884E3 /* EmptyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AFC8392304415400C884E3 /* EmptyViewController.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
@@ -197,6 +198,7 @@
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
+		D3AFC8392304415400C884E3 /* EmptyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyViewController.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -332,6 +334,7 @@
 				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
+				D3AFC8392304415400C884E3 /* EmptyViewController.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
@@ -653,6 +656,7 @@
 				D31AFACE229D61EE00ED2B76 /* Cloze.swift in Sources */,
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
 				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
+				D3AFC83A2304415400C884E3 /* EmptyViewController.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,

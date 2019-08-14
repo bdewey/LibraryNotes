@@ -99,6 +99,7 @@ public final class NoteArchiveDocument: UIDocument {
     noteArchiveQueue.sync {
       noteArchive.removeNote(for: pageIdentifier)
     }
+    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier], completionHandler: nil)
     invalidateSavedSnippets()
     notifyObservers(of: pageProperties)
   }

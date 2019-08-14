@@ -177,21 +177,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   private func wrapViewController(
     _ documentListViewController: DocumentListViewController
   ) -> UIViewController {
-    let notebook = documentListViewController.notebook
     let primaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
     )
     primaryNavigationController.navigationBar.prefersLargeTitles = true
-    let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules
-    )
-    textEditViewController.delegate = notebook
-    let secondaryNavigationController = UINavigationController(
-      rootViewController: textEditViewController
-    )
 
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
-    splitViewController.viewControllers = [primaryNavigationController, secondaryNavigationController]
+    splitViewController.viewControllers = [primaryNavigationController, EmptyViewController()]
     splitViewController.preferredDisplayMode = .allVisible
     splitViewController.delegate = self
     return splitViewController
