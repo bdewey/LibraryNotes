@@ -196,13 +196,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   fileprivate func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
+    DDLogInfo("Opening document at \(url)")
     let noteArchiveDocument = NoteArchiveDocument(
       fileURL: url,
       parsingRules: ParsingRules.commonplace
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-    controller.present(self.wrapViewController(documentListViewController), animated: true, completion: nil)
+    let wrappedViewController: UIViewController = self.wrapViewController(documentListViewController)
+    controller.present(wrappedViewController, animated: true, completion: nil)
     let pageIdentifierCopy = self.initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
       pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
@@ -239,6 +241,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
+    DDLogInfo("Imported document to \(destinationURL)")
     openDocument(at: destinationURL, from: controller)
   }
 
