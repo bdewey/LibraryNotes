@@ -31,6 +31,17 @@ public final class NoteArchiveDocument: UIDocument {
   /// Top-level FileWrapper for our contents
   private var topLevelFileWrapper = FileWrapper(directoryWithFileWrappers: [:])
 
+  /// FileWrapper for image assets.
+  private var assetsFileWrapper: FileWrapper {
+    if let fileWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.assets] {
+      return fileWrapper
+    }
+    let fileWrapper = FileWrapper(directoryWithFileWrappers: [:])
+    fileWrapper.preferredFilename = BundleWrapperKey.assets
+    topLevelFileWrapper.addFileWrapper(fileWrapper)
+    return fileWrapper
+  }
+
   /// The actual document contents.
   internal var noteArchive: NoteArchive
 
@@ -105,6 +116,7 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   private enum BundleWrapperKey {
+    static let assets = "assets"
     static let compressedSnippets = "text.snippets.gz"
     static let compressedStudyLog = "study.log.gz"
     static let snippets = "text.snippets"
@@ -253,7 +265,7 @@ private extension NoteArchiveDocument {
   func purgeUnneededWrappers(from directoryWrapper: FileWrapper) {
     precondition(directoryWrapper.isDirectory)
     let unneededKeys = Set(directoryWrapper.fileWrappers!.keys)
-      .subtracting([BundleWrapperKey.compressedStudyLog, BundleWrapperKey.compressedSnippets])
+      .subtracting([BundleWrapperKey.compressedStudyLog, BundleWrapperKey.compressedSnippets, BundleWrapperKey.assets])
     for key in unneededKeys {
       directoryWrapper.removeFileWrapper(directoryWrapper.fileWrappers![key]!)
     }
@@ -367,8 +379,13 @@ extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
     store imageData: Data,
     suffix: String
   ) -> String {
-    let hash = imageData.sha1Digest()
-    DDLogError("Need to implement storage for \(hash)")
-    return "\(hash).\(suffix)"
+    let key = "\(imageData.sha1Digest()).\(suffix)"
+    let assetsWrapper = assetsFileWrapper
+    if assetsWrapper.fileWrappers![key] == nil {
+      let imageFileWrapper = FileWrapper(regularFileWithContents: imageData)
+      imageFileWrapper.preferredFilename = key
+      assetsWrapper.addFileWrapper(imageFileWrapper)
+    }
+    return "\(BundleWrapperKey.assets)/\(key)"
   }
 }
