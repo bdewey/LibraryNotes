@@ -224,6 +224,19 @@ final class TextEditViewController: UIViewController {
     textView.verticalScrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
   }
+
+  // MARK: - Paste
+  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
+      DDLogDebug("Looks like you want to paste an image! Okay!")
+      return true
+    }
+    return false
+  }
+
+  override func paste(itemProviders: [NSItemProvider]) {
+    DDLogInfo("Pasting \(itemProviders)")
+  }
 }
 
 extension TextEditViewController: NSTextStorageDelegate {
