@@ -1,9 +1,9 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import UIKit
-
 import CocoaLumberjack
 import MiniMarkdown
+import MobileCoreServices
+import UIKit
 
 protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String)
@@ -74,7 +74,7 @@ final class TextEditViewController: UIViewController {
   private let parsingRules: ParsingRules
   private let textStorage: MiniMarkdownTextStorage
 
-  public weak var delegate: TextEditViewControllerDelegate?
+  public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 
   /// The markdown
   public var markdown: String {
@@ -175,6 +175,15 @@ final class TextEditViewController: UIViewController {
     let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
     textView.backgroundColor = UIColor.systemBackground
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    textView.pasteConfiguration = UIPasteConfiguration(
+      acceptableTypeIdentifiers: [
+        kUTTypeJPEG as String,
+        kUTTypePNG as String,
+        kUTTypeImage as String,
+        kUTTypePlainText as String,
+      ]
+    )
+    textView.imageStorage = delegate
     return textView
   }()
 
@@ -243,7 +252,9 @@ final class TextEditViewController: UIViewController {
   }
 
   // MARK: - Paste
+
   override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    DDLogDebug("Checking if we can perform action \(action)")
     if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
       DDLogDebug("Looks like you want to paste an image! Okay!")
       return true

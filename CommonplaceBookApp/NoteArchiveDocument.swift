@@ -358,3 +358,17 @@ public extension NoteArchiveDocument {
     notifyObservers(of: pageProperties)
   }
 }
+
+// MARK: - MarkdownEditingTextViewImageStoring
+
+extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
+  public func markdownEditingTextView(
+    _ textView: MarkdownEditingTextView,
+    store imageData: Data,
+    suffix: String
+  ) -> String {
+    let hash = imageData.sha1Digest()
+    DDLogError("Need to implement storage for \(hash)")
+    return "\(hash).\(suffix)"
+  }
+}
