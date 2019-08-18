@@ -44,6 +44,23 @@ final class TextEditViewController: UIViewController {
     )
   }
 
+  /// Constructs a new blank document that will save back to `notebook` on changes.
+  convenience init(notebook: NoteArchiveDocument, currentHashtag: String?) {
+    var initialText = "# "
+    let initialOffset = initialText.count
+    initialText += "\n"
+    // TODO: Turn this long sequence of properties into a computed property. This is gross.
+    if let hashtag = currentHashtag {
+      initialText += hashtag
+      initialText += "\n"
+    }
+    self.init(parsingRules: notebook.parsingRules)
+    self.markdown = initialText
+    self.selectedRange = NSRange(location: initialOffset, length: 0)
+    self.autoFirstResponder = true
+    self.delegate = notebook
+  }
+
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
