@@ -146,7 +146,7 @@ extension DocumentTableController: UITableViewDelegate {
         return
       }
       let textEditViewController = TextEditViewController(
-        parsingRules: notebook.parsingRules
+        notebook: notebook
       )
       textEditViewController.pageIdentifier = viewProperties.pageKey
       textEditViewController.markdown = markdown

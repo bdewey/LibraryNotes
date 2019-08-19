@@ -188,6 +188,20 @@ public final class NoteArchiveDocument: UIDocument {
     }
     updateChangeCount(.done)
   }
+
+  /// Gets data contained in a file wrapper
+  /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
+  /// - returns: The data contained in that wrapper if it exists, nil otherwise.
+  internal func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
+    var currentWrapper = topLevelFileWrapper
+    for pathComponent in fileWrapperKey.split(separator: "/") {
+      guard let nextWrapper = currentWrapper.fileWrappers?[String(pathComponent)] else {
+        return nil
+      }
+      currentWrapper = nextWrapper
+    }
+    return currentWrapper.regularFileContents
+  }
 }
 
 /// Observing.
@@ -387,5 +401,25 @@ extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
       assetsWrapper.addFileWrapper(imageFileWrapper)
     }
     return "\(BundleWrapperKey.assets)/\(key)"
+  }
+}
+
+// MARK: - Images
+extension NoteArchiveDocument {
+  /// Adds a renderer tthat knows how to render images using assets from this document
+  /// - parameter renderers: The collection of render functions
+  func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
+    renderers[.image] = { [weak self] node, attributes in
+      guard
+        let self = self,
+        let imageNode = node as? Image,
+        let data = self.data(for: imageNode.url),
+        let image = UIImage(data: data)
+      else {
+        return NSAttributedString(string: node.markdown, attributes: attributes)
+      }
+      let attachment = NSTextAttachment(image: image)
+      return NSAttributedString(attachment: attachment)
+    }
   }
 }

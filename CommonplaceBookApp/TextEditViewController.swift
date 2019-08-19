@@ -13,16 +13,11 @@ protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  init(parsingRules: ParsingRules) {
-    self.parsingRules = parsingRules
+  init(notebook: NoteArchiveDocument) {
+    self.parsingRules = notebook.parsingRules
 
-    // TODO: This is how I used to show pictures, methinks; how should it work in the NoteArchive
-    // world?
-
-    let renderers = TextEditViewController.renderers
-//    if let configurer = document as? ConfiguresRenderers {
-//      configurer.configureRenderers(&renderers)
-//    }
+    var renderers = TextEditViewController.renderers
+    notebook.addImageRenderer(to: &renderers)
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(),
@@ -45,7 +40,10 @@ final class TextEditViewController: UIViewController {
   }
 
   /// Constructs a new blank document that will save back to `notebook` on changes.
-  convenience init(notebook: NoteArchiveDocument, currentHashtag: String?) {
+  static func makeBlankDocument(
+    notebook: NoteArchiveDocument,
+    currentHashtag: String?
+  ) -> TextEditViewController {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
@@ -54,11 +52,12 @@ final class TextEditViewController: UIViewController {
       initialText += hashtag
       initialText += "\n"
     }
-    self.init(parsingRules: notebook.parsingRules)
-    self.markdown = initialText
-    self.selectedRange = NSRange(location: initialOffset, length: 0)
-    self.autoFirstResponder = true
-    self.delegate = notebook
+    let viewController = TextEditViewController(notebook: notebook)
+    viewController.markdown = initialText
+    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+    viewController.autoFirstResponder = true
+    viewController.delegate = notebook
+    return viewController
   }
 
   required init(coder aDecoder: NSCoder) {

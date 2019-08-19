@@ -72,7 +72,7 @@ final class DocumentListViewController: UIViewController {
       return
     }
     let textEditViewController = TextEditViewController(
-      parsingRules: notebook.parsingRules
+      notebook: notebook
     )
     textEditViewController.pageIdentifier = pageIdentifier
     textEditViewController.markdown = markdown
@@ -119,7 +119,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func didTapNewDocument() {
-    let viewController = TextEditViewController(notebook: notebook, currentHashtag: currentHashtag)
+    let viewController = TextEditViewController.makeBlankDocument(notebook: notebook, currentHashtag: currentHashtag)
     showTextEditViewController(viewController)
   }
 
@@ -196,7 +196,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.pageIdentifier == pageIdentifier {
       // We just deleted the current page. Show a blank document.
-      showTextEditViewController(TextEditViewController(notebook: notebook, currentHashtag: currentHashtag))
+      showTextEditViewController(TextEditViewController.makeBlankDocument(notebook: notebook, currentHashtag: currentHashtag))
     }
   }
 }
