@@ -192,7 +192,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
       let detailViewController = navigationController.viewControllers.first as? TextEditViewController
     else {
-        return
+      return
     }
     if detailViewController.pageIdentifier == pageIdentifier {
       // We just deleted the current page. Show a blank document.
@@ -229,11 +229,11 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     """
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
       queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
-      self.dataSource?.hashtags = []
+      dataSource?.hashtags = []
       dataSource?.filteredHashtag = selectedHashtag
     } else {
       DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
-      self.dataSource?.hashtags = notebook.hashtags
+      dataSource?.hashtags = notebook.hashtags
         .filter { $0.fuzzyMatch(pattern: pattern) }
       dataSource?.filteredHashtag = nil
     }
