@@ -418,7 +418,8 @@ extension NoteArchiveDocument {
       else {
         return NSAttributedString(string: node.markdown, attributes: attributes)
       }
-      let attachment = NSTextAttachment(image: image)
+      let attachment = NSTextAttachment()
+      attachment.image = image
       return NSAttributedString(attachment: attachment)
     }
   }
