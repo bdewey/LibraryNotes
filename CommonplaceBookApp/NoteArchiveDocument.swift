@@ -414,12 +414,27 @@ extension NoteArchiveDocument {
         let self = self,
         let imageNode = node as? Image,
         let data = self.data(for: imageNode.url),
-        let image = UIImage(data: data)
+        let image = data.image(maxSize: 200)
       else {
         return NSAttributedString(string: node.markdown, attributes: attributes)
       }
       let attachment = NSTextAttachment(image: image)
       return NSAttributedString(attachment: attachment)
     }
+  }
+}
+
+private extension Data {
+  func image(maxSize: CGFloat) -> UIImage? {
+    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
+      return nil
+    }
+    let options: [NSString: NSObject] = [
+      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
+      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
+      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
+    ]
+    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
+    return image
   }
 }
