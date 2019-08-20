@@ -199,7 +199,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - UIDocumentBrowserViewControllerDelegate
 
 extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
-  fileprivate func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
+  /// Opens a document.
+  /// - parameter url: The URL of the document to open
+  /// - parameter controller: The view controller from which to present the DocumentListViewController
+  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
     DDLogInfo("Opening document at \(url)")
     let noteArchiveDocument = NoteArchiveDocument(
       fileURL: url,
@@ -207,13 +210,18 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-    let wrappedViewController: UIViewController = self.wrapViewController(documentListViewController)
+    let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
     controller.present(wrappedViewController, animated: true, completion: nil)
     let pageIdentifierCopy = self.initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
       pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
-      DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
+      let properties: [String: String] = [
+        "Success": success.description,
+        "documentState": String(describing: noteArchiveDocument.documentState),
+        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil"
+      ]
+      DDLogInfo("In open completion handler. \(properties)")
     })
     self.initialPageIdentifier = nil
     self.noteArchiveDocument = noteArchiveDocument
