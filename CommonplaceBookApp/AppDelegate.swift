@@ -49,64 +49,44 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     self.window = window
 
     if let openedDocumentBookmarkData = openedDocumentBookmark {
+      DDLogInfo("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
         let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
+        DDLogInfo("Successfully resolved url: \(url)")
         openDocument(at: url, from: browser)
       } catch {
         DDLogError("Unexpected error: \(error.localizedDescription)")
       }
+    } else {
+      DDLogInfo("Trying to open the default document")
+      openDefaultDocument(from: browser)
     }
     return true
   }
 
-//  func applicationDidBecomeActive(_ application: UIApplication) {
-//    guard let window = window, noteArchiveDocument == nil else { return }
-//    let parsingRules = ParsingRules.commonplace
-//    makeMetadataProvider(completion: { metadataProviderResult in
-//      switch metadataProviderResult {
-//      case .success(let metadataProvider):
-//        let noteArchiveDocument = NoteArchiveDocument(
-//          fileURL: metadataProvider.container.appendingPathComponent("archive.notebundle"),
-//          parsingRules: parsingRules
-//        )
-//        DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
-//        let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-//        window.rootViewController = self.wrapViewController(
-//          documentListViewController
-//        )
-//        let pageIdentifierCopy = self.initialPageIdentifier
-//        noteArchiveDocument.open(completionHandler: { success in
-//          pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
-//          DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
-//          metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
-//            noteArchiveDocument.importFileMetadataItems(
-//              fileMetadataItems,
-//              from: metadataProvider,
-//              importDate: Date()
-//            )
-//          })
-//        })
-//        self.initialPageIdentifier = nil
-//        self.noteArchiveDocument = noteArchiveDocument
-//      case .failure(let error):
-//        let messageText = "Error opening Notebook: \(error.localizedDescription)"
-//        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-//        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-//        alertController.addAction(okAction)
-//        window.rootViewController?.present(alertController, animated: true, completion: nil)
-//        self.loadingViewController.style = .error
-//      }
-//    })
-//  }
+  private func openDefaultDocument(from viewController: UIDocumentBrowserViewController) {
+    makeMetadataProvider(completion: { metadataProviderResult in
+      switch metadataProviderResult {
+      case .success(let metadataProvider):
+        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notebundle"), from: viewController)
+      case .failure(let error):
+        let messageText = "Error opening Notebook: \(error.localizedDescription)"
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        viewController.present(alertController, animated: true, completion: nil)
+        self.loadingViewController.style = .error
+      }
+    })
+  }
 
-//  func applicationDidEnterBackground(_ application: UIApplication) {
-//    guard let document = noteArchiveDocument else { return }
-//    if document.hasUnsavedChanges {
-//      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
-//    }
-//    noteArchiveDocument = nil
-//  }
+  func applicationDidEnterBackground(_ application: UIApplication) {
+    guard let document = noteArchiveDocument else { return }
+    if document.hasUnsavedChanges {
+      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
+    }
+  }
 
   func application(
     _ application: UIApplication,
