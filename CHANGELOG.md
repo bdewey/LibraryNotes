@@ -4,7 +4,7 @@
 
 ### Added
 
-- [x] Document browser
+- Document browser
 - [ ] Remembers the most recent open document and page
 - [ ] If no recent document, opens "archive.notebundle"
 
