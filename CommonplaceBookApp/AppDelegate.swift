@@ -81,13 +81,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     })
   }
 
-  func applicationDidEnterBackground(_ application: UIApplication) {
-    guard let document = noteArchiveDocument else { return }
-    if document.hasUnsavedChanges {
-      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
-    }
-  }
-
   func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
