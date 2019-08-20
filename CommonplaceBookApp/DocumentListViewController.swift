@@ -119,21 +119,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func didTapNewDocument() {
-    var initialText = "# "
-    let initialOffset = initialText.count
-    initialText += "\n"
-    // TODO: Turn this long sequence of properties into a computed property. This is gross.
-    if let hashtag = currentHashtag {
-      initialText += hashtag
-      initialText += "\n"
-    }
-    let viewController = TextEditViewController(
-      parsingRules: notebook.parsingRules
-    )
-    viewController.markdown = initialText
-    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-    viewController.autoFirstResponder = true
-    viewController.delegate = notebook
+    let viewController = TextEditViewController(notebook: notebook, currentHashtag: currentHashtag)
     showTextEditViewController(viewController)
   }
 
@@ -206,10 +192,11 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
       let detailViewController = navigationController.viewControllers.first as? TextEditViewController
     else {
-        return
+      return
     }
     if detailViewController.pageIdentifier == pageIdentifier {
-      splitViewController.showDetailViewController(EmptyViewController(), sender: nil)
+      // We just deleted the current page. Show a blank document.
+      showTextEditViewController(TextEditViewController(notebook: notebook, currentHashtag: currentHashtag))
     }
   }
 }
@@ -242,11 +229,11 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     """
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
       queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
-      self.dataSource?.hashtags = []
+      dataSource?.hashtags = []
       dataSource?.filteredHashtag = selectedHashtag
     } else {
       DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
-      self.dataSource?.hashtags = notebook.hashtags
+      dataSource?.hashtags = notebook.hashtags
         .filter { $0.fuzzyMatch(pattern: pattern) }
       dataSource?.filteredHashtag = nil
     }

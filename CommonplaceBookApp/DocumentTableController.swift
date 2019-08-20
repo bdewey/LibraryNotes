@@ -16,7 +16,6 @@ protocol DocumentTableControllerDelegate: AnyObject {
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 public final class DocumentTableController: NSObject {
-
   /// Designated initializer.
   public init(
     tableView: UITableView,
@@ -341,7 +340,7 @@ private extension DocumentTableController {
     var snapshot = Snapshot()
     if !hashtags.isEmpty {
       snapshot.appendSections([.hashtags])
-      snapshot.appendItems(hashtags.map({ Item.hashtag($0) }))
+      snapshot.appendItems(hashtags.map { Item.hashtag($0) })
     }
     snapshot.appendSections([.documents])
 
