@@ -109,7 +109,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         break
       }
       DDLogInfo("Opening page \(uniqueIdentifier)")
-      self.initialPageIdentifier = uniqueIdentifier
+      initialPageIdentifier = uniqueIdentifier
     default:
       break
     }
@@ -185,7 +185,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     primaryNavigationController.navigationBar.prefersLargeTitles = true
 
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
-    splitViewController.viewControllers = [primaryNavigationController, EmptyViewController()]
+    let detailViewController = UINavigationController(
+      rootViewController:
+      TextEditViewController.makeBlankDocument(notebook: documentListViewController.notebook, currentHashtag: nil)
+    )
+    splitViewController.viewControllers = [primaryNavigationController, detailViewController]
     splitViewController.preferredDisplayMode = .allVisible
     splitViewController.delegate = self
     return splitViewController

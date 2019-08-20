@@ -4,6 +4,16 @@
 
 ### Changed
 
+- Instead of an empty view controller, use a blank document page
+
+## [0.5.0] - 2019-08-20
+
+### Added
+
+- Compiles with Xcode 11 Beta 6 and runs on iOS 13 Beta 7
+
+### Changed
+
 - When you delete a page, it gets removed from the index AND from the detail view (if it was the page you were looking at)
 - The TextEditViewController now uses the readableContentGuide to adjust the margins of the text.
 - Use an empty view controller when you haven't explicitly selected a page

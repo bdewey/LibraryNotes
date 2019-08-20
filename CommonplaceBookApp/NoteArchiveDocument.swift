@@ -31,6 +31,17 @@ public final class NoteArchiveDocument: UIDocument {
   /// Top-level FileWrapper for our contents
   private var topLevelFileWrapper = FileWrapper(directoryWithFileWrappers: [:])
 
+  /// FileWrapper for image assets.
+  private var assetsFileWrapper: FileWrapper {
+    if let fileWrapper = topLevelFileWrapper.fileWrappers![BundleWrapperKey.assets] {
+      return fileWrapper
+    }
+    let fileWrapper = FileWrapper(directoryWithFileWrappers: [:])
+    fileWrapper.preferredFilename = BundleWrapperKey.assets
+    topLevelFileWrapper.addFileWrapper(fileWrapper)
+    return fileWrapper
+  }
+
   /// The actual document contents.
   internal var noteArchive: NoteArchive
 
@@ -105,6 +116,7 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   private enum BundleWrapperKey {
+    static let assets = "assets"
     static let compressedSnippets = "text.snippets.gz"
     static let compressedStudyLog = "study.log.gz"
     static let snippets = "text.snippets"
@@ -175,6 +187,20 @@ public final class NoteArchiveDocument: UIDocument {
       topLevelFileWrapper.removeFileWrapper(archiveWrapper)
     }
     updateChangeCount(.done)
+  }
+
+  /// Gets data contained in a file wrapper
+  /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
+  /// - returns: The data contained in that wrapper if it exists, nil otherwise.
+  internal func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
+    var currentWrapper = topLevelFileWrapper
+    for pathComponent in fileWrapperKey.split(separator: "/") {
+      guard let nextWrapper = currentWrapper.fileWrappers?[String(pathComponent)] else {
+        return nil
+      }
+      currentWrapper = nextWrapper
+    }
+    return currentWrapper.regularFileContents
   }
 }
 
@@ -253,7 +279,7 @@ private extension NoteArchiveDocument {
   func purgeUnneededWrappers(from directoryWrapper: FileWrapper) {
     precondition(directoryWrapper.isDirectory)
     let unneededKeys = Set(directoryWrapper.fileWrappers!.keys)
-      .subtracting([BundleWrapperKey.compressedStudyLog, BundleWrapperKey.compressedSnippets])
+      .subtracting([BundleWrapperKey.compressedStudyLog, BundleWrapperKey.compressedSnippets, BundleWrapperKey.assets])
     for key in unneededKeys {
       directoryWrapper.removeFileWrapper(directoryWrapper.fileWrappers![key]!)
     }
@@ -356,5 +382,60 @@ public extension NoteArchiveDocument {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
     notifyObservers(of: pageProperties)
+  }
+}
+
+// MARK: - MarkdownEditingTextViewImageStoring
+
+extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
+  public func markdownEditingTextView(
+    _ textView: MarkdownEditingTextView,
+    store imageData: Data,
+    suffix: String
+  ) -> String {
+    let key = "\(imageData.sha1Digest()).\(suffix)"
+    let assetsWrapper = assetsFileWrapper
+    if assetsWrapper.fileWrappers![key] == nil {
+      let imageFileWrapper = FileWrapper(regularFileWithContents: imageData)
+      imageFileWrapper.preferredFilename = key
+      assetsWrapper.addFileWrapper(imageFileWrapper)
+    }
+    return "\(BundleWrapperKey.assets)/\(key)"
+  }
+}
+
+// MARK: - Images
+extension NoteArchiveDocument {
+  /// Adds a renderer tthat knows how to render images using assets from this document
+  /// - parameter renderers: The collection of render functions
+  func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
+    renderers[.image] = { [weak self] node, attributes in
+      guard
+        let self = self,
+        let imageNode = node as? Image,
+        let data = self.data(for: imageNode.url),
+        let image = data.image(maxSize: 200)
+      else {
+        return NSAttributedString(string: node.markdown, attributes: attributes)
+      }
+      let attachment = NSTextAttachment()
+      attachment.image = image
+      return NSAttributedString(attachment: attachment)
+    }
+  }
+}
+
+private extension Data {
+  func image(maxSize: CGFloat) -> UIImage? {
+    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
+      return nil
+    }
+    let options: [NSString: NSObject] = [
+      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
+      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
+      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
+    ]
+    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
+    return image
   }
 }

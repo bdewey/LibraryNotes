@@ -1,22 +1,17 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonCrypto
+import CryptoKit
 import Foundation
 
-public extension Data {
+public extension DataProtocol {
   /// Returns the SHA-1 digest of the contents of the data buffer.
   func sha1Digest() -> String {
-    var digest = Data(repeating: 0, count: Int(CC_SHA1_DIGEST_LENGTH))
-
-    withUnsafeBytes { dataPtr -> Void in
-      digest.withUnsafeMutableBytes { digestPtr -> Void in
-        CC_SHA1(dataPtr, CC_LONG(count), digestPtr)
-      }
-    }
-    return digest.toHexString()
+    let digest = Insecure.SHA1.hash(data: self)
+    return Data(digest).toHexString()
   }
 
-  private func toHexString() -> String {
+  func toHexString() -> String {
     return lazy .map { byte in
       (byte <= 0xF ? "0" : "") + String(byte, radix: 16)
     }.joined()
