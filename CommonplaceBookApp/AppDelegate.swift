@@ -31,6 +31,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   /// If non-nil, we want to open this page initially upon opening the document.
   var initialPageIdentifier: String?
 
+  @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
+
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -45,6 +47,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     window.rootViewController = browser
     window.makeKeyAndVisible()
     self.window = window
+
+    if let openedDocumentBookmarkData = openedDocumentBookmark {
+      var isStale: Bool = false
+      do {
+        let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
+        openDocument(at: url, from: browser)
+      } catch {
+        DDLogError("Unexpected error: \(error.localizedDescription)")
+      }
+    }
     return true
   }
 
@@ -222,6 +234,9 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
         "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil"
       ]
       DDLogInfo("In open completion handler. \(properties)")
+      if success {
+        self.openedDocumentBookmark = try? url.bookmarkData()
+      }
     })
     self.initialPageIdentifier = nil
     self.noteArchiveDocument = noteArchiveDocument
