@@ -39,59 +39,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let navigationController = UINavigationController(rootViewController: loadingViewController)
-    window.rootViewController = navigationController
+    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notebundle"])
+    browser.delegate = self
+
+    window.rootViewController = browser
     window.makeKeyAndVisible()
     self.window = window
     return true
-  }
-
-  func applicationDidBecomeActive(_ application: UIApplication) {
-    guard let window = window, noteArchiveDocument == nil else { return }
-    let parsingRules = ParsingRules.commonplace
-    makeMetadataProvider(completion: { metadataProviderResult in
-      switch metadataProviderResult {
-      case .success(let metadataProvider):
-        let noteArchiveDocument = NoteArchiveDocument(
-          fileURL: metadataProvider.container.appendingPathComponent("archive.notebundle"),
-          parsingRules: parsingRules
-        )
-        DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
-        let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-        window.rootViewController = self.wrapViewController(
-          documentListViewController
-        )
-        let pageIdentifierCopy = self.initialPageIdentifier
-        noteArchiveDocument.open(completionHandler: { success in
-          pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
-          DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
-          metadataProvider.queryForCurrentFileMetadata(completion: { fileMetadataItems in
-            noteArchiveDocument.importFileMetadataItems(
-              fileMetadataItems,
-              from: metadataProvider,
-              importDate: Date()
-            )
-          })
-        })
-        self.initialPageIdentifier = nil
-        self.noteArchiveDocument = noteArchiveDocument
-      case .failure(let error):
-        let messageText = "Error opening Notebook: \(error.localizedDescription)"
-        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alertController.addAction(okAction)
-        window.rootViewController?.present(alertController, animated: true, completion: nil)
-        self.loadingViewController.style = .error
-      }
-    })
-  }
-
-  func applicationDidEnterBackground(_ application: UIApplication) {
-    guard let document = noteArchiveDocument else { return }
-    if document.hasUnsavedChanges {
-      document.save(to: document.fileURL, for: .forOverwriting, completionHandler: nil)
-    }
-    noteArchiveDocument = nil
   }
 
   func application(
@@ -193,6 +147,67 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return splitViewController
   }
 }
+
+// MARK: - UIDocumentBrowserViewControllerDelegate
+
+extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
+  fileprivate func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
+    DDLogInfo("Opening document at \(url)")
+    let noteArchiveDocument = NoteArchiveDocument(
+      fileURL: url,
+      parsingRules: ParsingRules.commonplace
+    )
+    DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
+    let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
+    let wrappedViewController: UIViewController = self.wrapViewController(documentListViewController)
+    wrappedViewController.modalPresentationStyle = .fullScreen
+    controller.present(wrappedViewController, animated: true, completion: nil)
+    let pageIdentifierCopy = self.initialPageIdentifier
+    noteArchiveDocument.open(completionHandler: { success in
+      pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
+      DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
+    })
+    self.initialPageIdentifier = nil
+    self.noteArchiveDocument = noteArchiveDocument
+  }
+
+  func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
+    guard let url = documentURLs.first else { return }
+    openDocument(at: url, from: controller)
+  }
+
+  func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
+    let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
+    let url = directoryURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("notebundle")
+    let document = NoteArchiveDocument(fileURL: url, parsingRules: ParsingRules.commonplace)
+    document.save(to: url, for: .forCreating) { saveSuccess in
+      guard saveSuccess else {
+        DDLogError("Could not save document to \(url): \(document.previousError?.localizedDescription ?? "nil")")
+        importHandler(nil, .none)
+        return
+      }
+      document.close { closeSuccess in
+        guard closeSuccess else {
+          DDLogError("Could not close document at \(url): \(document.previousError?.localizedDescription ?? "nil")")
+          importHandler(nil, .none)
+          return
+        }
+        importHandler(url, .copy)
+      }
+    }
+  }
+
+  func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
+    DDLogInfo("Imported document to \(destinationURL)")
+    openDocument(at: destinationURL, from: controller)
+  }
+
+  func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
+    DDLogError("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+  }
+}
+
+// MARK: - UISplitViewControllerDelegate
 
 extension AppDelegate: UISplitViewControllerDelegate {
   func splitViewController(

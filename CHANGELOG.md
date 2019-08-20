@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- Document browser
+- [ ] Remembers the most recent open document and page
+- [ ] If no recent document, opens "archive.notebundle"
+
 ### Changed
 
 - Instead of an empty view controller, use a blank document page

@@ -42,6 +42,13 @@ final class DocumentListViewController: UIViewController {
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
 
+  private lazy var documentBrowserButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "folder")
+    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapFiles))
+    button.accessibilityIdentifier = "open-files"
+    return button
+  }()
+
   private lazy var newDocumentButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "plus.circle")
     let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapNewDocument))
@@ -105,6 +112,7 @@ final class DocumentListViewController: UIViewController {
     searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
+    navigationItem.leftBarButtonItem = documentBrowserButton
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
   }
 
@@ -116,6 +124,10 @@ final class DocumentListViewController: UIViewController {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     dataSource?.stopObservingNotebook()
+  }
+
+  @objc private func didTapFiles() {
+    dismiss(animated: true, completion: nil)
   }
 
   @objc private func didTapNewDocument() {
