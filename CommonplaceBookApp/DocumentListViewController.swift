@@ -127,7 +127,15 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func didTapFiles() {
-    dismiss(animated: true, completion: nil)
+    if UIApplication.isSimulator {
+      let messageText = "Document browser doesn't work in the simulator"
+      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alertController.addAction(okAction)
+      present(alertController, animated: true, completion: nil)
+    } else {
+      dismiss(animated: true, completion: nil)
+    }
   }
 
   @objc private func didTapNewDocument() {
