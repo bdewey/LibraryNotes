@@ -2,10 +2,6 @@
 
 ## Unreleased
 
-### Added
-
-- Can paste images into pages
-
 ### Changed
 
 - Instead of an empty view controller, use a blank document page
