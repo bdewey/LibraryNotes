@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Compiles with Xcode 11 Beta 6 and runs on iOS 13 Beta 7
+
 ### Changed
 
 - When you delete a page, it gets removed from the index AND from the detail view (if it was the page you were looking at)
