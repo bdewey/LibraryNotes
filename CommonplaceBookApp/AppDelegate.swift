@@ -208,6 +208,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     let wrappedViewController: UIViewController = self.wrapViewController(documentListViewController)
+    wrappedViewController.modalPresentationStyle = .fullScreen
     controller.present(wrappedViewController, animated: true, completion: nil)
     let pageIdentifierCopy = self.initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
