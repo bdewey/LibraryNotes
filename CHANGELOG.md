@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## [0.5.0] - 2019-08-20
+
+### Added
+
+- Compiles with Xcode 11 Beta 6 and runs on iOS 13 Beta 7
 
 ### Changed
 

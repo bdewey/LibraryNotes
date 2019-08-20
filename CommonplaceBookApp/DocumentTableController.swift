@@ -337,7 +337,7 @@ private extension DocumentTableController {
     filteredHashtag: String?,
     filteredPageIdentifiers: Set<String>?
   ) -> Snapshot {
-    let snapshot = Snapshot()
+    var snapshot = Snapshot()
     if !hashtags.isEmpty {
       snapshot.appendSections([.hashtags])
       snapshot.appendItems(hashtags.map { Item.hashtag($0) })
