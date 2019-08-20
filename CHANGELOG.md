@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Instead of an empty view controller, use a blank document page
+
 ## [0.5.0] - 2019-08-20
 
 ### Added
