@@ -61,6 +61,7 @@
 		D33F647B22999F52008C3A92 /* NoteArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
+		D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C6230C5AD300A46B3F /* UserDefault.swift */; };
 		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
 		D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */; };
@@ -182,6 +183,7 @@
 		D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveTests.swift; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
+		D35E90C6230C5AD300A46B3F /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippetArchive.swift; sourceTree = "<group>"; };
@@ -373,6 +375,7 @@
 				D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */,
 				D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
+				D35E90C6230C5AD300A46B3F /* UserDefault.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -669,6 +672,7 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
+				D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
