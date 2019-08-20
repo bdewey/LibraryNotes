@@ -7,6 +7,7 @@
 - [x] Document browser
 - [ ] Remembers the most recent open document and page
 - [ ] If no recent document, opens "archive.notebundle"
+- Added UserDefault property wrapper to make it easier to persist data
 
 ### Changed
 
