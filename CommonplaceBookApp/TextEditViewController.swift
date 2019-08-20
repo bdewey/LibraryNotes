@@ -1,9 +1,9 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import UIKit
-
 import CocoaLumberjack
 import MiniMarkdown
+import MobileCoreServices
+import UIKit
 
 protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String)
@@ -13,16 +13,11 @@ protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  init(parsingRules: ParsingRules) {
-    self.parsingRules = parsingRules
+  init(notebook: NoteArchiveDocument) {
+    self.parsingRules = notebook.parsingRules
 
-    // TODO: This is how I used to show pictures, methinks; how should it work in the NoteArchive
-    // world?
-
-    let renderers = TextEditViewController.renderers
-//    if let configurer = document as? ConfiguresRenderers {
-//      configurer.configureRenderers(&renderers)
-//    }
+    var renderers = TextEditViewController.renderers
+    notebook.addImageRenderer(to: &renderers)
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
       formatters: TextEditViewController.formatters(),
@@ -45,7 +40,10 @@ final class TextEditViewController: UIViewController {
   }
 
   /// Constructs a new blank document that will save back to `notebook` on changes.
-  convenience init(notebook: NoteArchiveDocument, currentHashtag: String?) {
+  static func makeBlankDocument(
+    notebook: NoteArchiveDocument,
+    currentHashtag: String?
+  ) -> TextEditViewController {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
@@ -54,11 +52,12 @@ final class TextEditViewController: UIViewController {
       initialText += hashtag
       initialText += "\n"
     }
-    self.init(parsingRules: notebook.parsingRules)
-    self.markdown = initialText
-    self.selectedRange = NSRange(location: initialOffset, length: 0)
-    self.autoFirstResponder = true
-    self.delegate = notebook
+    let viewController = TextEditViewController(notebook: notebook)
+    viewController.markdown = initialText
+    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
+    viewController.autoFirstResponder = true
+    viewController.delegate = notebook
+    return viewController
   }
 
   required init(coder aDecoder: NSCoder) {
@@ -74,7 +73,7 @@ final class TextEditViewController: UIViewController {
   private let parsingRules: ParsingRules
   private let textStorage: MiniMarkdownTextStorage
 
-  public weak var delegate: TextEditViewControllerDelegate?
+  public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 
   /// The markdown
   public var markdown: String {
@@ -175,6 +174,15 @@ final class TextEditViewController: UIViewController {
     let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
     textView.backgroundColor = UIColor.systemBackground
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    textView.pasteConfiguration = UIPasteConfiguration(
+      acceptableTypeIdentifiers: [
+        kUTTypeJPEG as String,
+        kUTTypePNG as String,
+        kUTTypeImage as String,
+        kUTTypePlainText as String,
+      ]
+    )
+    textView.imageStorage = delegate
     return textView
   }()
 
@@ -240,6 +248,21 @@ final class TextEditViewController: UIViewController {
     textView.contentInset.bottom = keyboardInfo.frameEnd.height
     textView.verticalScrollIndicatorInsets.bottom = textView.contentInset.bottom
     textView.scrollRangeToVisible(textView.selectedRange)
+  }
+
+  // MARK: - Paste
+
+  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    DDLogDebug("Checking if we can perform action \(action)")
+    if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
+      DDLogDebug("Looks like you want to paste an image! Okay!")
+      return true
+    }
+    return false
+  }
+
+  override func paste(itemProviders: [NSItemProvider]) {
+    DDLogInfo("Pasting \(itemProviders)")
   }
 }
 
