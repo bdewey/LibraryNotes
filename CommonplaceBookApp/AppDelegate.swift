@@ -198,20 +198,20 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
     controller.present(wrappedViewController, animated: true, completion: nil)
-    let pageIdentifierCopy = self.initialPageIdentifier
+    let pageIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
       pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
       let properties: [String: String] = [
         "Success": success.description,
         "documentState": String(describing: noteArchiveDocument.documentState),
-        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil"
+        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
       DDLogInfo("In open completion handler. \(properties)")
       if success {
         self.openedDocumentBookmark = try? url.bookmarkData()
       }
     })
-    self.initialPageIdentifier = nil
+    initialPageIdentifier = nil
     self.noteArchiveDocument = noteArchiveDocument
   }
 
