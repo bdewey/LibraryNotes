@@ -39,6 +39,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let notebook: NoteArchiveDocument
+  public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
 
@@ -127,15 +128,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func didTapFiles() {
-    if UIApplication.isSimulator {
-      let messageText = "Document browser doesn't work in the simulator"
-      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-      alertController.addAction(okAction)
-      present(alertController, animated: true, completion: nil)
-    } else {
-      dismiss(animated: true, completion: nil)
-    }
+    didTapFilesAction?()
   }
 
   @objc private func didTapNewDocument() {
