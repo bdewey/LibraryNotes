@@ -62,6 +62,7 @@
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C6230C5AD300A46B3F /* UserDefault.swift */; };
+		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
 		D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */; };
@@ -184,6 +185,7 @@
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35E90C6230C5AD300A46B3F /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
+		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
 		D374AB6A229655BA00F54561 /* TextSnippetArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextSnippetArchive.swift; sourceTree = "<group>"; };
@@ -374,6 +376,7 @@
 				D33F64762298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift */,
 				D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */,
 				D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */,
+				D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D35E90C6230C5AD300A46B3F /* UserDefault.swift */,
 			);
@@ -688,6 +691,7 @@
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozeTemplate.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
+				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
 				D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */,
 				D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */,

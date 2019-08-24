@@ -198,8 +198,16 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     documentListViewController.didTapFilesAction = { [weak self] in
-      self?.openedDocumentBookmark = nil
-      documentListViewController.dismiss(animated: true, completion: nil)
+      if UIApplication.isSimulator {
+        let messageText = "Document browser doesn't work in the simulator"
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        documentListViewController.present(alertController, animated: true, completion: nil)
+      } else {
+        self?.openedDocumentBookmark = nil
+        documentListViewController.dismiss(animated: true, completion: nil)
+      }
     }
     let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
