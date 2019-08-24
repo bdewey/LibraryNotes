@@ -31,6 +31,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   /// If non-nil, we want to open this page initially upon opening the document.
   var initialPageIdentifier: String?
 
+  @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
+  @UserDefault("has_run_0", defaultValue: false) var hasRun: Bool
+
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -45,7 +48,39 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     window.rootViewController = browser
     window.makeKeyAndVisible()
     self.window = window
+
+    if let openedDocumentBookmarkData = openedDocumentBookmark {
+      DDLogInfo("Bookmark data exists for an open document")
+      var isStale: Bool = false
+      do {
+        let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
+        DDLogInfo("Successfully resolved url: \(url)")
+        openDocument(at: url, from: browser)
+      } catch {
+        DDLogError("Unexpected error: \(error.localizedDescription)")
+      }
+    } else if !(hasRun ?? false) {
+      DDLogInfo("Trying to open the default document")
+      openDefaultDocument(from: browser)
+    }
+    hasRun = true
     return true
+  }
+
+  private func openDefaultDocument(from viewController: UIDocumentBrowserViewController) {
+    makeMetadataProvider(completion: { metadataProviderResult in
+      switch metadataProviderResult {
+      case .success(let metadataProvider):
+        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notebundle"), from: viewController)
+      case .failure(let error):
+        let messageText = "Error opening Notebook: \(error.localizedDescription)"
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        viewController.present(alertController, animated: true, completion: nil)
+        self.loadingViewController.style = .error
+      }
+    })
   }
 
   func application(
@@ -151,7 +186,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - UIDocumentBrowserViewControllerDelegate
 
 extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
-  fileprivate func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
+  /// Opens a document.
+  /// - parameter url: The URL of the document to open
+  /// - parameter controller: The view controller from which to present the DocumentListViewController
+  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
     DDLogInfo("Opening document at \(url)")
     let noteArchiveDocument = NoteArchiveDocument(
       fileURL: url,
@@ -159,15 +197,35 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-    let wrappedViewController: UIViewController = self.wrapViewController(documentListViewController)
+    documentListViewController.didTapFilesAction = { [weak self] in
+      if UIApplication.isSimulator {
+        let messageText = "Document browser doesn't work in the simulator"
+        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        documentListViewController.present(alertController, animated: true, completion: nil)
+      } else {
+        self?.openedDocumentBookmark = nil
+        documentListViewController.dismiss(animated: true, completion: nil)
+      }
+    }
+    let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
     controller.present(wrappedViewController, animated: true, completion: nil)
-    let pageIdentifierCopy = self.initialPageIdentifier
+    let pageIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
       pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
-      DDLogInfo("In open completion handler. Success = \(success), documentState = \(noteArchiveDocument.documentState), previousError = \(noteArchiveDocument.previousError)")
+      let properties: [String: String] = [
+        "Success": success.description,
+        "documentState": String(describing: noteArchiveDocument.documentState),
+        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
+      ]
+      DDLogInfo("In open completion handler. \(properties)")
+      if success {
+        self.openedDocumentBookmark = try? url.bookmarkData()
+      }
     })
-    self.initialPageIdentifier = nil
+    initialPageIdentifier = nil
     self.noteArchiveDocument = noteArchiveDocument
   }
 
