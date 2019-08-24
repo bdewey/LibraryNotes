@@ -32,6 +32,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   var initialPageIdentifier: String?
 
   @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
+  @UserDefault("has_run_0", defaultValue: false) var hasRun: Bool
 
   func application(
     _ application: UIApplication,
@@ -58,10 +59,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       } catch {
         DDLogError("Unexpected error: \(error.localizedDescription)")
       }
-    } else {
+    } else if !(hasRun ?? false) {
       DDLogInfo("Trying to open the default document")
       openDefaultDocument(from: browser)
     }
+    hasRun = true
     return true
   }
 
@@ -195,6 +197,10 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
+    documentListViewController.didTapFilesAction = { [weak self] in
+      self?.openedDocumentBookmark = nil
+      documentListViewController.dismiss(animated: true, completion: nil)
+    }
     let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
     controller.present(wrappedViewController, animated: true, completion: nil)
