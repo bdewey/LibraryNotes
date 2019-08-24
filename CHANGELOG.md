@@ -5,8 +5,9 @@
 ### Added
 
 - Document browser
-- [ ] Remembers the most recent open document and page
-- [ ] If no recent document, opens "archive.notebundle"
+- Remembers the most recent open document and page
+- If no recent document, opens "archive.notebundle" (important for onboarding & simulator)
+- Added UserDefault property wrapper to make it easier to persist data
 
 ### Changed
 
