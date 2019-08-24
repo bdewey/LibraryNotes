@@ -42,7 +42,8 @@ final class TextEditViewController: UIViewController {
   /// Constructs a new blank document that will save back to `notebook` on changes.
   static func makeBlankDocument(
     notebook: NoteArchiveDocument,
-    currentHashtag: String?
+    currentHashtag: String?,
+    autoFirstResponder: Bool
   ) -> TextEditViewController {
     var initialText = "# "
     let initialOffset = initialText.count
@@ -55,7 +56,7 @@ final class TextEditViewController: UIViewController {
     let viewController = TextEditViewController(notebook: notebook)
     viewController.markdown = initialText
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-    viewController.autoFirstResponder = true
+    viewController.autoFirstResponder = autoFirstResponder
     viewController.delegate = notebook
     return viewController
   }

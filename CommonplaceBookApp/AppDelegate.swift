@@ -174,7 +174,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
     let detailViewController = UINavigationController(
       rootViewController:
-      TextEditViewController.makeBlankDocument(notebook: documentListViewController.notebook, currentHashtag: nil)
+      TextEditViewController.makeBlankDocument(
+        notebook: documentListViewController.notebook,
+        currentHashtag: nil,
+        autoFirstResponder: false
+      )
     )
     splitViewController.viewControllers = [primaryNavigationController, detailViewController]
     splitViewController.preferredDisplayMode = .allVisible

@@ -132,7 +132,11 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func didTapNewDocument() {
-    let viewController = TextEditViewController.makeBlankDocument(notebook: notebook, currentHashtag: currentHashtag)
+    let viewController = TextEditViewController.makeBlankDocument(
+      notebook: notebook,
+      currentHashtag: currentHashtag,
+      autoFirstResponder: true
+    )
     showTextEditViewController(viewController)
   }
 
@@ -209,7 +213,13 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.pageIdentifier == pageIdentifier {
       // We just deleted the current page. Show a blank document.
-      showTextEditViewController(TextEditViewController.makeBlankDocument(notebook: notebook, currentHashtag: currentHashtag))
+      showTextEditViewController(
+        TextEditViewController.makeBlankDocument(
+          notebook: notebook,
+          currentHashtag: currentHashtag,
+          autoFirstResponder: false
+        )
+      )
     }
   }
 }
