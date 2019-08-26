@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Swipe actions are back!
+- Always try to load the defalut document in the simulator
+
 ## [0.6.0] - 2019-08-24
 
 ### Added

@@ -59,7 +59,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       } catch {
         DDLogError("Unexpected error: \(error.localizedDescription)")
       }
-    } else if !(hasRun ?? false) {
+    } else if !(hasRun ?? false) || UIApplication.isSimulator {
       DDLogInfo("Trying to open the default document")
       openDefaultDocument(from: browser)
     }
