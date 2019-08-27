@@ -60,6 +60,9 @@
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
 		D33F647B22999F52008C3A92 /* NoteArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
+		D3516E35231560D200A8AFBC /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = D3516E34231560D200A8AFBC /* Yams */; };
+		D3516E37231560F500A8AFBC /* FrontMatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3516E36231560F500A8AFBC /* FrontMatterTests.swift */; };
+		D3516E392315620F00A8AFBC /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = D3516E382315620F00A8AFBC /* Yams */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C6230C5AD300A46B3F /* UserDefault.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -183,6 +186,7 @@
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
 		D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveTests.swift; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
+		D3516E36231560F500A8AFBC /* FrontMatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrontMatterTests.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35E90C6230C5AD300A46B3F /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -233,6 +237,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				637F8B0C22AE186100698868 /* MiniMarkdown in Frameworks */,
+				D3516E35231560D200A8AFBC /* Yams in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
@@ -243,6 +248,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3516E392315620F00A8AFBC /* Yams in Frameworks */,
 				3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -399,6 +405,7 @@
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 				D374AB6C229657C900F54561 /* TextArchiveTests.swift */,
 				D31E6A0222A1581E005B7C1C /* StudyLogTests.swift */,
+				D3516E36231560F500A8AFBC /* FrontMatterTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -434,6 +441,7 @@
 			name = CommonplaceBookApp;
 			packageProductDependencies = (
 				637F8B0B22AE186100698868 /* MiniMarkdown */,
+				D3516E34231560D200A8AFBC /* Yams */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */;
@@ -454,6 +462,9 @@
 				D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */,
 			);
 			name = CommonplaceBookAppTests;
+			packageProductDependencies = (
+				D3516E382315620F00A8AFBC /* Yams */,
+			);
 			productName = CommonplaceBookAppTests;
 			productReference = D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -520,6 +531,7 @@
 			mainGroup = D3DC5EB620EC9B0100F0B74B;
 			packageReferences = (
 				637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */,
+				D3516E33231560D200A8AFBC /* XCRemoteSwiftPackageReference "Yams" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -706,6 +718,7 @@
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
+				D3516E37231560F500A8AFBC /* FrontMatterTests.swift in Sources */,
 				D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D31E6A0322A1581E005B7C1C /* StudyLogTests.swift in Sources */,
@@ -1063,6 +1076,14 @@
 				minimumVersion = 0.13.0;
 			};
 		};
+		D3516E33231560D200A8AFBC /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1070,6 +1091,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */;
 			productName = MiniMarkdown;
+		};
+		D3516E34231560D200A8AFBC /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D3516E33231560D200A8AFBC /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+		D3516E382315620F00A8AFBC /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D3516E33231560D200A8AFBC /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
