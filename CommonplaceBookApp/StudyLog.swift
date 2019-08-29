@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import Foundation
 
 public struct StudyLog {
@@ -82,16 +83,34 @@ public struct StudyLog {
   public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
     return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) {
       suppressionDates, entry in
+      // We're going to trace what happens to a specific identifier
+      let shouldTrace = entry.identifier == ChallengeIdentifier(
+        templateDigest: "732ab6d75b1194fbfd73265a573665c113d6f9de",
+        index: 2
+      )
       guard entry.statistics.correct > 0 else {
+        if shouldTrace {
+          DDLogDebug("StudyLog: Niling date for \(entry)")
+        }
         suppressionDates[entry.identifier] = nil
         return
       }
       if let currentEntry = suppressionDates[entry.identifier] {
-        let delta = currentEntry.currentDate.timeIntervalSince(entry.timestamp)
+        // The minimum delta is 1 day
+        let delta = Swift.max(entry.timestamp.timeIntervalSince(currentEntry.currentDate), TimeInterval.day)
         let factor = pow(2.0, 1.0 - Double(entry.statistics.incorrect))
         let nextDate = entry.timestamp.addingTimeInterval(delta * factor)
+        if shouldTrace {
+          DDLogDebug(
+            "StudyLog: Updating delta = \(delta / TimeInterval.day) day(s) " +
+            "factor = \(factor) nextDate = \(nextDate)"
+          )
+        }
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: nextDate)
       } else {
+        if shouldTrace {
+          DDLogDebug("StudyLog: nextDate += 1 day")
+        }
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: entry.timestamp.addingTimeInterval(.day))
       }
     }.mapValues { $0.nextDate }

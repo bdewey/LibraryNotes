@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Bug with computing the next date in spaced repetition
+
 ## [0.6.1] - 2019-08-26
 
 ### Fixed
