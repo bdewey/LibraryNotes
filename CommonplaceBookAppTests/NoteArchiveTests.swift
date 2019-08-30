@@ -238,6 +238,20 @@ final class NoteArchiveTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testInsertRawProperties() {
+    var archive = NoteArchive(parsingRules: parsingRules)
+    do {
+      var properties = PageProperties()
+      properties.hashtags = ["#testing"]
+      properties.timestamp = Date()
+      let result = try archive.insertPageProperties(properties)
+      let roundTrip = archive.pageProperties[result]
+      XCTAssertEqual(roundTrip, properties)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private enum Examples: String {

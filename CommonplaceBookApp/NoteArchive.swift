@@ -60,6 +60,8 @@ public struct NoteArchive {
   public enum SerializationError: Error {
     /// There is no symbolic reference to the "versions" array in the archive.
     case noVersionReference
+    /// Unimplemented functionality
+    case notImplemented
   }
 
   public enum RetrievalError: Error {
@@ -110,6 +112,10 @@ public struct NoteArchive {
     return key
   }
 
+  public mutating func insertPageProperties(_ pageProperties: PageProperties) throws -> String {
+    throw SerializationError.notImplemented
+  }
+
   /// Removes a note from the archive.
   /// - throws: `RetrievalError.noSuchPage` if the page does not exist.
   public mutating func removeNote(for pageIdentifier: String) {
@@ -123,8 +129,8 @@ public struct NoteArchive {
       return cacheEntry.text
     }
     let properties = try currentPageProperties(for: pageIdentifier).properties
-    guard let noteSnippet = archive.snippets[properties.sha1Digest] else {
-      throw RetrievalError.noSuchText(properties.sha1Digest)
+    guard let digest = properties.sha1Digest, let noteSnippet = archive.snippets[digest] else {
+      throw RetrievalError.noSuchText(properties.sha1Digest ?? "nil")
     }
     return noteSnippet.text
   }
@@ -272,7 +278,7 @@ public extension NoteArchive {
   ) -> CSSearchableItem {
     let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
     attributes.title = pageProperties.title
-    attributes.keywords = pageProperties.hashtags
+    attributes.keywords = Array(pageProperties.hashtags).sorted()
     attributes.contentDescription = pageContents
     let item = CSSearchableItem(uniqueIdentifier: pageIdentifier, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
     return item
@@ -398,8 +404,11 @@ private extension NoteArchive {
       }
       newPropertiesSnippet.encodeAsDiff(from: nil)
       existingPropertiesSnippet.encodeAsDiff(from: newPropertiesSnippet)
-      guard let existingTextSnippet = archive.snippets[existingProperties.sha1Digest] else {
-        throw RetrievalError.noSuchPage(existingProperties.sha1Digest)
+      guard
+        let digest = existingProperties.sha1Digest,
+        let existingTextSnippet = archive.snippets[digest]
+      else {
+        throw RetrievalError.noSuchPage(existingProperties.sha1Digest ?? "nil")
       }
       // Note the content can be the same but the properties can have different timestamps
       // So, check and make sure we didn't wind up with identical content before delta encoding.
@@ -502,7 +511,7 @@ private extension NoteArchive {
       timestamp: timestamp,
       hashtags: nodes.hashtags,
       title: String(nodes.title.split(separator: "\n").first ?? ""),
-      cardTemplates: challengeTemplateKeys.map { $0.description }
+      cardTemplates: challengeTemplateKeys.map({ $0.description })
     )
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
@@ -528,7 +537,7 @@ private extension TextSnippetArchive {
         timestamp: pageContent.modifiedTimestamp,
         hashtags: nodes.hashtags,
         title: String(nodes.title.split(separator: "\n").first ?? ""),
-        cardTemplates: challengeTemplateKeys.map { $0.description }
+        cardTemplates: challengeTemplateKeys.map({ $0.description })
       )
       pageContent.pagePropertiesStale = false
       return pageContent
