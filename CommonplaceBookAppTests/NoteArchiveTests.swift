@@ -242,12 +242,17 @@ final class NoteArchiveTests: XCTestCase {
   func testInsertRawProperties() {
     var archive = NoteArchive(parsingRules: parsingRules)
     do {
+      let now = Date()
       var properties = PageProperties()
       properties.hashtags = ["#testing"]
-      properties.timestamp = Date()
-      let result = try archive.insertPageProperties(properties)
-      let roundTrip = archive.pageProperties[result]
+      properties.timestamp = now
+      let key = archive.insertPageProperties(properties)
+      let roundTrip = archive.pageProperties[key]
       XCTAssertEqual(roundTrip, properties)
+      try archive.archivePageManifestVersion(timestamp: now)
+      let serialized = archive.textSerialized()
+      let newArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
+      XCTAssertEqual(newArchive.pageProperties[key], properties)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
