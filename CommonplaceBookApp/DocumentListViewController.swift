@@ -131,7 +131,7 @@ final class DocumentListViewController: UIViewController {
     didTapFilesAction?()
   }
 
-  fileprivate func makeBlankTextDocument() {
+  private func makeBlankTextDocument() {
     let viewController = TextEditViewController.makeBlankDocument(
       notebook: notebook,
       currentHashtag: currentHashtag,
@@ -140,14 +140,23 @@ final class DocumentListViewController: UIViewController {
     showTextEditViewController(viewController)
   }
 
+  private func makeBlankVocabularyPage() {
+    let viewController = VocabularyViewController(notebook: notebook)
+    viewController.title = "Vocabulary"
+    splitViewController?.showDetailViewController(
+      UINavigationController(rootViewController: viewController),
+      sender: nil
+    )
+  }
+
   @objc private func didTapNewDocument() {
     let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
     let textAction = UIAlertAction(title: "Text", style: .default) { [weak self] _ in
       self?.makeBlankTextDocument()
     }
     alertController.addAction(textAction)
-    let vocabularyAction = UIAlertAction(title: "Vocabulary", style: .default) { _ in
-      DDLogDebug("Tapped vocabulary")
+    let vocabularyAction = UIAlertAction(title: "Vocabulary", style: .default) { [weak self] _ in
+      self?.makeBlankVocabularyPage()
     }
     alertController.addAction(vocabularyAction)
     alertController.popoverPresentationController?.barButtonItem = newDocumentButton

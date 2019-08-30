@@ -14,6 +14,7 @@
 		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
 		D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */; };
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
+		D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D261723193F9A0031AA20 /* VocabularyViewController.swift */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
 		D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
@@ -137,6 +138,7 @@
 		D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+TextEditViewController.swift"; sourceTree = "<group>"; };
 		D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ParsingRules+CommonplaceBook.swift"; sourceTree = "<group>"; };
 		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
+		D30D261723193F9A0031AA20 /* VocabularyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyViewController.swift; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
 		D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadataDataSource.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
@@ -379,6 +381,7 @@
 				D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D35E90C6230C5AD300A46B3F /* UserDefault.swift */,
+				D30D261723193F9A0031AA20 /* VocabularyViewController.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -649,6 +652,7 @@
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */,
+				D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */,
 				D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
