@@ -131,13 +131,27 @@ final class DocumentListViewController: UIViewController {
     didTapFilesAction?()
   }
 
-  @objc private func didTapNewDocument() {
+  fileprivate func makeBlankTextDocument() {
     let viewController = TextEditViewController.makeBlankDocument(
       notebook: notebook,
       currentHashtag: currentHashtag,
       autoFirstResponder: true
     )
     showTextEditViewController(viewController)
+  }
+
+  @objc private func didTapNewDocument() {
+    let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+    let textAction = UIAlertAction(title: "Text", style: .default) { [weak self] _ in
+      self?.makeBlankTextDocument()
+    }
+    alertController.addAction(textAction)
+    let vocabularyAction = UIAlertAction(title: "Vocabulary", style: .default) { _ in
+      DDLogDebug("Tapped vocabulary")
+    }
+    alertController.addAction(vocabularyAction)
+    alertController.popoverPresentationController?.barButtonItem = newDocumentButton
+    present(alertController, animated: true)
   }
 
   /// Stuff we can study based on the current selected documents.
