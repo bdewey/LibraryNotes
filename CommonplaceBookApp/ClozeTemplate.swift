@@ -39,25 +39,20 @@ public final class ClozeTemplate: ChallengeTemplate {
 
   // MARK: - Codable conformance
 
-  enum CodingKeys: String, CodingKey {
-    /// Encodes/decodes markdown text associated with `node`
-    case markdown
-  }
-
   public required convenience init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
       throw Error.noParsingRules
     }
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let markdown = try container.decode(String.self, forKey: .markdown)
+    let container = try decoder.singleValueContainer()
+    let markdown = try container.decode(String.self)
     let nodes = parsingRules.parse(markdown)
     if nodes.count != 1 { throw Error.markdownParseError }
     self.init(node: nodes[0])
   }
 
   public override func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(node.allMarkdown, forKey: .markdown)
+    var container = encoder.singleValueContainer()
+    try container.encode(node.allMarkdown)
   }
 
   public required convenience init(markdown description: String, parsingRules: ParsingRules) throws {

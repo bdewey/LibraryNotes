@@ -3,6 +3,7 @@
 import CommonplaceBookApp
 import MiniMarkdown
 import XCTest
+import Yams
 
 // swiftlint:disable force_try
 
@@ -48,6 +49,26 @@ final class QuoteTemplateTests: XCTestCase {
     decoder.userInfo[.markdownParsingRules] = ParsingRules()
     let decodedTemplates = try! decoder.decode([QuoteTemplate].self, from: data)
     XCTAssertEqual(decodedTemplates, quoteTemplates)
+  }
+
+  func testYamlEncodingIsJustMarkdown() {
+    let parsingRules = ParsingRules.commonplace
+    let blocks = parsingRules.parse(contentWithCloze)
+    XCTAssertEqual(blocks.count, 1)
+    guard let template = QuoteTemplate.extract(from: blocks).first else {
+      XCTFail("Could not load template")
+      return
+    }
+
+    do {
+      let text = try YAMLEncoder().encode(template)
+      print(text)
+      let decoder = YAMLDecoder()
+      let decoded = try decoder.decode(QuoteTemplate.self, from: text, userInfo: [.markdownParsingRules: parsingRules])
+      XCTAssertEqual(decoded.challenges.count, template.challenges.count)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
   }
 
   func testRenderCloze() {
