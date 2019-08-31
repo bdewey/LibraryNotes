@@ -152,7 +152,6 @@ public struct NoteArchive {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
     return try YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules])
-//    return try klass.init(markdown: snippet.text, parsingRules: parsingRules)
   }
 
   /// Updates the text associated with `pageIdentifier` to `text`, creating a new version

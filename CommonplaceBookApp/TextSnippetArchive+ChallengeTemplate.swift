@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import Foundation
 import Yams
 
@@ -30,8 +31,8 @@ public struct ChallengeTemplateArchiveKey: LosslessStringConvertible {
 
 /// Extensions to do type-safe insertion and extraction of ChallengeTemplate instances.
 public extension TextSnippetArchive {
-  mutating func insert(_ challengeTemplate: ChallengeTemplate) -> ChallengeTemplateArchiveKey {
-    let text = try! YAMLEncoder().encode(challengeTemplate)
+  mutating func insert(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey {
+    let text = try YAMLEncoder().encode(challengeTemplate)
     let snippet = insert(text)
     return ChallengeTemplateArchiveKey(
       digest: snippet.sha1Digest,
@@ -42,6 +43,15 @@ public extension TextSnippetArchive {
   mutating func insert<S: Sequence>(
     contentsOf sequence: S
   ) -> [ChallengeTemplateArchiveKey] where S.Element == ChallengeTemplate {
-    return sequence.map { insert($0) }
+    var errors = 0
+    let results = sequence.compactMap { template -> ChallengeTemplateArchiveKey? in
+      let result = try? insert(template)
+      if result == nil {
+        errors += 1
+      }
+      return result
+    }
+    assert(errors == 0, "Errors serializing templates")
+    return results
   }
 }

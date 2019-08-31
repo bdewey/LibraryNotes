@@ -47,10 +47,6 @@ public final class QuoteTemplate: ChallengeTemplate {
     }
   }
 
-  public override var asMarkdown: String {
-    return quote.allMarkdown
-  }
-
   public override func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     try container.encode(quote.allMarkdown)
