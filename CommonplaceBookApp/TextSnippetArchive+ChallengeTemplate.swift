@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
+import Yams
 
 /// Supports serializing a challenge template into a TextSnippetArchive.
 public struct ChallengeTemplateArchiveKey: LosslessStringConvertible {
@@ -30,7 +31,8 @@ public struct ChallengeTemplateArchiveKey: LosslessStringConvertible {
 /// Extensions to do type-safe insertion and extraction of ChallengeTemplate instances.
 public extension TextSnippetArchive {
   mutating func insert(_ challengeTemplate: ChallengeTemplate) -> ChallengeTemplateArchiveKey {
-    let snippet = insert(challengeTemplate.asMarkdown)
+    let text = try! YAMLEncoder().encode(challengeTemplate)
+    let snippet = insert(text)
     return ChallengeTemplateArchiveKey(
       digest: snippet.sha1Digest,
       type: challengeTemplate.type.rawValue

@@ -151,7 +151,8 @@ public struct NoteArchive {
     guard let klass = ChallengeTemplateType.classMap[key.type] else {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
-    return try klass.init(markdown: snippet.text, parsingRules: parsingRules)
+    return try YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules])
+//    return try klass.init(markdown: snippet.text, parsingRules: parsingRules)
   }
 
   /// Updates the text associated with `pageIdentifier` to `text`, creating a new version

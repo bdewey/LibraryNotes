@@ -32,22 +32,10 @@ public struct ChallengeTemplateType: RawRepresentable, Equatable {
   public private(set) static var classMap = [String: ChallengeTemplate.Type]()
 }
 
-public protocol MarkdownParseable {
-  init(markdown: String, parsingRules: ParsingRules) throws
-  var asMarkdown: String { get }
-}
-
 /// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-open class ChallengeTemplate: Codable, MarkdownParseable {
-  public required init(markdown: String, parsingRules: ParsingRules) throws {}
-
-  open var asMarkdown: String {
-    assertionFailure("subclasses should implement")
-    return ""
-  }
-
+open class ChallengeTemplate: Codable {
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
