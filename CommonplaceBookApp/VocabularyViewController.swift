@@ -13,7 +13,18 @@ final class VocabularyViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let notebook: NoteArchiveDocument
+  /// The notebook we write changes back to
+  let notebook: NoteArchiveDocument
+
+  /// The page that stores our vocabulary.
+  var properties = PageProperties() {
+    didSet {
+      title = properties.title
+    }
+  }
+
+  /// Identifier of the page. If nil, it means we're working with unsaved content.
+  var pageIdentifier: String?
 
   // MARK: - Lifecycle
 
