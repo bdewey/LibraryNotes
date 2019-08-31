@@ -3,8 +3,8 @@
 import Foundation
 import MiniMarkdown
 
-extension Dictionary where Key == String, Value == StudyMetadata {
-  public static let empty: [String: StudyMetadata] = [:]
+extension Dictionary where Key == ChallengeIdentifier, Value == StudyMetadata {
+  public static let empty: [ChallengeIdentifier: StudyMetadata] = [:]
 
   /// Builds a study session from vocabulary associations.
   public func studySession(
@@ -14,13 +14,13 @@ extension Dictionary where Key == String, Value == StudyMetadata {
     date: Date = Date()
   ) -> StudySession {
     let studyCards = cards
-      .filter { self.eligibleForStudy(identifier: $0.identifier, on: date) }
+      .filter { self.eligibleForStudy(identifier: $0.challengeIdentifier, on: date) }
       .shuffled()
       .prefix(limit)
     return StudySession(studyCards, properties: properties)
   }
 
-  private func eligibleForStudy(identifier: String, on date: Date) -> Bool {
+  private func eligibleForStudy(identifier: ChallengeIdentifier, on date: Date) -> Bool {
     let day = DayComponents(date)
     // If we have no record of this identifier, we can study it.
     return self[identifier]?.eligibleForStudy(on: day) ?? true

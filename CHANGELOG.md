@@ -14,6 +14,7 @@
 
 - CardTemplateSerializationWrapper and related tests
 - MarkdownParseable protocol
+- String `identifier` property on Challenge
 
 ## [0.6.2] - 2019-08-29
 
