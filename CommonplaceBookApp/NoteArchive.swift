@@ -60,6 +60,8 @@ public struct NoteArchive {
   public enum SerializationError: Error {
     /// There is no symbolic reference to the "versions" array in the archive.
     case noVersionReference
+    /// Unimplemented functionality
+    case notImplemented
   }
 
   public enum RetrievalError: Error {
@@ -110,6 +112,15 @@ public struct NoteArchive {
     return key
   }
 
+  /// Inserts "naked properties" into the archive -- PageProperties that are directly manipulated, not derived from text.
+  public mutating func insertPageProperties(_ pageProperties: PageProperties) -> String {
+    var pageContents = PageContents(pageProperties: pageProperties)
+    pageContents.dirty = true
+    let key = UUID().uuidString
+    pageContentsCache[key] = pageContents
+    return key
+  }
+
   /// Removes a note from the archive.
   /// - throws: `RetrievalError.noSuchPage` if the page does not exist.
   public mutating func removeNote(for pageIdentifier: String) {
@@ -119,12 +130,12 @@ public struct NoteArchive {
 
   /// Gets the current version of the text for a particular page.
   public func currentText(for pageIdentifier: String) throws -> String {
-    if let cacheEntry = pageContentsCache[pageIdentifier] {
-      return cacheEntry.text
+    if let text = pageContentsCache[pageIdentifier]?.text {
+      return text
     }
     let properties = try currentPageProperties(for: pageIdentifier).properties
-    guard let noteSnippet = archive.snippets[properties.sha1Digest] else {
-      throw RetrievalError.noSuchText(properties.sha1Digest)
+    guard let digest = properties.sha1Digest, let noteSnippet = archive.snippets[digest] else {
+      throw RetrievalError.noSuchText(properties.sha1Digest ?? "nil")
     }
     return noteSnippet.text
   }
@@ -164,6 +175,18 @@ public struct NoteArchive {
       contents.setText(text, modifiedTimestamp: timestamp)
       pageContentsCache[pageIdentifier] = contents
     }
+  }
+
+  /// Updates naked page properties.
+  /// - precondition: pageProperties is not associated with content
+  /// - parameter pageIdentifier: The permanent identifier for the properties
+  /// - parameter pageProperties: The properties to update.
+  public mutating func updatePageProperties(
+    for pageIdentifier: String,
+    to pageProperties: PageProperties
+  ) {
+    precondition(pageProperties.sha1Digest == nil)
+    pageContentsCache[pageIdentifier] = PageContents(dirty: true, pageProperties: pageProperties)
   }
 
   /// Updates all page properties that are stale in the contents cache.
@@ -285,7 +308,7 @@ public extension NoteArchive {
     guard let pageProperties = pageContents.pageProperties else {
       return nil
     }
-    return searchableItem(pageIdentifier: pageIdentifier, pageProperties: pageProperties, pageContents: pageContents.text)
+    return searchableItem(pageIdentifier: pageIdentifier, pageProperties: pageProperties, pageContents: pageContents.text ?? "")
   }
 }
 
@@ -320,26 +343,25 @@ private extension NoteArchive {
 
   /// An in-memory cache record of the contents of a page
   struct PageContents {
-    var text: String
+    /// Page text. If nil, we are caching raw properties
+    var text: String?
     var modifiedTimestamp: Date
     var dirty: Bool
     var pageProperties: PageProperties?
     var pagePropertiesStale: Bool
 
-    init() {
-      self.text = ""
-      self.modifiedTimestamp = Date.distantPast
-      self.dirty = false
-      self.pageProperties = nil
-      self.pagePropertiesStale = false
-    }
-
-    init(text: String, pageProperties: PageProperties) {
+    init(
+      text: String? = nil,
+      modifiedTimestamp: Date? = nil,
+      dirty: Bool = false,
+      pageProperties: PageProperties? = nil,
+      pagePropertiesStale: Bool = false
+    ) {
       self.text = text
-      self.dirty = false
+      self.modifiedTimestamp = modifiedTimestamp ?? pageProperties?.timestamp ?? Date.distantPast
+      self.dirty = dirty
       self.pageProperties = pageProperties
-      self.pagePropertiesStale = false
-      self.modifiedTimestamp = pageProperties.timestamp
+      self.pagePropertiesStale = pagePropertiesStale
     }
 
     /// Updates text.
@@ -381,7 +403,8 @@ private extension NoteArchive {
     // Make sure all properties are up to date
     batchUpdatePageProperties()
     for (pageIdentifier, contents) in pageContentsCache where contents.dirty {
-      let newTextSnippet = archive.insert(contents.text)
+      // If there is text associated with these contents, make sure the text is in the archive.
+      let newTextSnippet = contents.text.map { archive.insert($0) }
       // Because we updated all page properties, safe to force-unwrap
       let newPropertiesSnippet = archive.insert(try contents.pageProperties!.makeSnippet())
       pageContentsCache[pageIdentifier]?.dirty = false
@@ -398,14 +421,19 @@ private extension NoteArchive {
       }
       newPropertiesSnippet.encodeAsDiff(from: nil)
       existingPropertiesSnippet.encodeAsDiff(from: newPropertiesSnippet)
-      guard let existingTextSnippet = archive.snippets[existingProperties.sha1Digest] else {
-        throw RetrievalError.noSuchPage(existingProperties.sha1Digest)
-      }
-      // Note the content can be the same but the properties can have different timestamps
-      // So, check and make sure we didn't wind up with identical content before delta encoding.
-      if newTextSnippet.sha1Digest != existingTextSnippet.sha1Digest {
-        newTextSnippet.encodeAsDiff(from: nil)
-        existingTextSnippet.encodeAsDiff(from: newTextSnippet)
+      // If the properties are associated with text, delta-encode the text.
+      if let digest = existingProperties.sha1Digest {
+        guard
+          let existingTextSnippet = archive.snippets[digest]
+        else {
+          throw RetrievalError.noSuchPage(existingProperties.sha1Digest ?? "nil")
+        }
+        // Note the content can be the same but the properties can have different timestamps
+        // So, check and make sure we didn't wind up with identical content before delta encoding.
+        if let textSnippet = newTextSnippet, textSnippet.sha1Digest != existingTextSnippet.sha1Digest {
+          textSnippet.encodeAsDiff(from: nil)
+          existingTextSnippet.encodeAsDiff(from: newTextSnippet)
+        }
       }
       pagePropertyDigests[pageIdentifier] = newPropertiesSnippet.sha1Digest
     }
@@ -502,7 +530,7 @@ private extension NoteArchive {
       timestamp: timestamp,
       hashtags: nodes.hashtags,
       title: String(nodes.title.split(separator: "\n").first ?? ""),
-      cardTemplates: challengeTemplateKeys.map { $0.description }
+      cardTemplates: challengeTemplateKeys.map({ $0.description })
     )
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
@@ -519,16 +547,21 @@ private extension TextSnippetArchive {
     parsingRules: ParsingRules
   ) -> [String: NoteArchive.PageContents] {
     pageContents.mapValues { pageContent in
-      guard pageContent.pagePropertiesStale else { return pageContent }
+      guard
+        pageContent.pagePropertiesStale,
+        let text = pageContent.text
+      else {
+        return pageContent
+      }
       var pageContent = pageContent
-      let nodes = parsingRules.parse(pageContent.text)
+      let nodes = parsingRules.parse(text)
       let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &self)
       pageContent.pageProperties = PageProperties(
-        sha1Digest: TextSnippet(pageContent.text).sha1Digest,
+        sha1Digest: TextSnippet(text).sha1Digest,
         timestamp: pageContent.modifiedTimestamp,
         hashtags: nodes.hashtags,
         title: String(nodes.title.split(separator: "\n").first ?? ""),
-        cardTemplates: challengeTemplateKeys.map { $0.description }
+        cardTemplates: challengeTemplateKeys.map({ $0.description })
       )
       pageContent.pagePropertiesStale = false
       return pageContent
