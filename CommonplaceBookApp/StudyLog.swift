@@ -61,7 +61,7 @@ public struct StudyLog {
     _ studySession: StudySession,
     on date: Date = Date()
   ) {
-    for (identifier, statistics) in studySession.nextGenResults {
+    for (identifier, statistics) in studySession.results {
       let entry = Entry(timestamp: date, identifier: identifier, statistics: statistics)
       entries.append(entry)
     }

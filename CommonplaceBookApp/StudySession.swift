@@ -21,10 +21,10 @@ public struct StudySession {
   private var currentIndex: Int
 
   /// Identifiers of the cards that were answered correctly the first time.
-  private(set) var answeredCorrectly: Set<String> = []
+  private(set) var answeredCorrectly: Set<ChallengeIdentifier> = []
 
   /// Identifiers of cards that were answered incorrectly at least once.
-  private(set) var answeredIncorrectly: Set<String> = []
+  private(set) var answeredIncorrectly: Set<ChallengeIdentifier> = []
 
   /// When the person started this particular study session.
   public var studySessionStartDate: Date?
@@ -32,18 +32,17 @@ public struct StudySession {
   /// When the person ended this particular study session.
   public var studySessionEndDate: Date?
 
-  public private(set) var results = [String: [String: AnswerStatistics]]()
-  public private(set) var nextGenResults = [ChallengeIdentifier: AnswerStatistics]()
+  public private(set) var results = [ChallengeIdentifier: AnswerStatistics]()
 
   /// Identifiers of cards that weren't answered at all in the study session.
-  var didNotAnswerAtAll: Set<String> {
+  var didNotAnswerAtAll: Set<ChallengeIdentifier> {
     var didNotAnswer = allIdentifiers
     didNotAnswer.subtract(answeredCorrectly)
     didNotAnswer.subtract(answeredIncorrectly)
     return didNotAnswer
   }
 
-  var allIdentifiers: Set<String> {
+  var allIdentifiers: Set<ChallengeIdentifier> {
     return cards.allIdentifiers
   }
 
@@ -74,21 +73,17 @@ public struct StudySession {
   /// Record a correct or incorrect answer for the current card, and advance `currentCard`
   public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
-    let identifier = currentCard.card.identifier
-    var statistics = results[currentCard.properties.documentName, default: [:]][identifier, default: AnswerStatistics.empty]
-    var nextGenStatistics = nextGenResults[currentCard.card.challengeIdentifier, default: AnswerStatistics.empty]
+    let identifier = currentCard.card.challengeIdentifier
+    var statistics = results[currentCard.card.challengeIdentifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1
-      nextGenStatistics.correct += 1
     } else {
       answeredIncorrectly.insert(identifier)
       cards.append(currentCard)
       statistics.incorrect += 1
-      nextGenStatistics.incorrect += 1
     }
-    results[currentCard.properties.documentName, default: [:]][identifier] = statistics
-    nextGenResults[currentCard.card.challengeIdentifier] = statistics
+    results[currentCard.card.challengeIdentifier] = statistics
     currentIndex += 1
   }
 
@@ -149,7 +144,7 @@ extension StudySession {
 
 extension Sequence where Element == StudySession.AttributedCard {
   /// For a sequence of cards, return the set of all identifiers.
-  var allIdentifiers: Set<String> {
-    return reduce(into: Set<String>()) { $0.insert($1.card.identifier) }
+  var allIdentifiers: Set<ChallengeIdentifier> {
+    return reduce(into: Set<ChallengeIdentifier>()) { $0.insert($1.card.challengeIdentifier) }
   }
 }
