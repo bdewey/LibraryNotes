@@ -13,6 +13,7 @@
 ### Removed
 
 - CardTemplateSerializationWrapper and related tests
+- MarkdownParseable protocol
 
 ## [0.6.2] - 2019-08-29
 

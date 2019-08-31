@@ -63,10 +63,6 @@ public final class ClozeTemplate: ChallengeTemplate {
     self.init(node: nodes[0])
   }
 
-  public override var asMarkdown: String {
-    return node.allMarkdown
-  }
-
   // MARK: - CardTemplate conformance
 
   public override var challenges: [Challenge] {
