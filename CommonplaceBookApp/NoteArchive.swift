@@ -295,7 +295,7 @@ public extension NoteArchive {
   ) -> CSSearchableItem {
     let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
     attributes.title = pageProperties.title
-    attributes.keywords = Array(pageProperties.hashtags).sorted()
+    attributes.keywords = pageProperties.hashtags
     attributes.contentDescription = pageContents
     let item = CSSearchableItem(uniqueIdentifier: pageIdentifier, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
     return item
