@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import Foundation
 import MiniMarkdown
+import UIKit
 
 extension ChallengeTemplateType {
   public static let vocabulary = ChallengeTemplateType(rawValue: "vocab", class: VocabularyChallengeTemplate.self)
@@ -30,8 +30,13 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     super.init()
   }
 
-  public required init(markdown: String, parsingRules: ParsingRules) throws {
-    fatalError("VocabularyTemplate should not be deserialized from Markdown")
+  public override var challenges: [CommonplaceBookApp.Challenge] {
+    // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
+    // to manage these identifiers.
+    return [
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front),
+    ]
   }
 
   // MARK: - Codable
@@ -52,5 +57,21 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(front, forKey: .front)
     try container.encode(back, forKey: .back)
+  }
+}
+
+extension VocabularyChallengeTemplate {
+  public struct Challenge: CommonplaceBookApp.Challenge {
+    public let challengeIdentifier: ChallengeIdentifier
+    public let front: Word
+    public let back: Word
+
+    public func challengeView(
+      document: UIDocument,
+      properties: CardDocumentProperties
+    ) -> ChallengeView {
+      let view = TwoSidedCardView(frame: .zero)
+      return view
+    }
   }
 }
