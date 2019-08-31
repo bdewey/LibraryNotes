@@ -6,6 +6,10 @@
 
 - Internals: The ability to store and change "naked" properties
 
+### Removed
+
+- CardTemplateSerializationWrapper and related tests
+
 ## [0.6.2] - 2019-08-29
 
 ### Fixed
