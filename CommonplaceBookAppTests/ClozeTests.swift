@@ -3,6 +3,7 @@
 @testable import CommonplaceBookApp
 @testable import MiniMarkdown
 import XCTest
+import Yams
 
 final class ClozeTests: XCTestCase {
   private let parsingRules: ParsingRules = {
@@ -59,6 +60,28 @@ final class ClozeTests: XCTestCase {
       clozeCards[1].cardFrontRenderer().render(node: node).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
+  }
+
+  func testYamlEncodingIsJustMarkdown() {
+    let example = """
+    * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
+    """
+    let blocks = parsingRules.parse(example)
+    XCTAssertEqual(blocks.count, 1)
+    guard let template = ClozeTemplate.extract(from: blocks).first else {
+      XCTFail("Could not load template")
+      return
+    }
+
+    do {
+      let text = try YAMLEncoder().encode(template)
+      print(text)
+      let decoder = YAMLDecoder()
+      let decoded = try decoder.decode(ClozeTemplate.self, from: text, userInfo: [.markdownParsingRules: parsingRules])
+      XCTAssertEqual(decoded.challenges.count, template.challenges.count)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
   }
 
   func testClozeFormatting() {

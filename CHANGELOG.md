@@ -6,6 +6,10 @@
 
 - Internals: The ability to store and change "naked" properties
 
+### Changed
+
+- Internals: QuoteTemplate and ClozeTemplate use single-value containers
+
 ### Removed
 
 - CardTemplateSerializationWrapper and related tests
