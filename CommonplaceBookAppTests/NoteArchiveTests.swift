@@ -239,18 +239,26 @@ final class NoteArchiveTests: XCTestCase {
     }
   }
 
-  func testInsertRawProperties() {
+  func testInsertAndUpdateRawProperties() {
     var archive = NoteArchive(parsingRules: parsingRules)
     do {
       let now = Date()
       var properties = PageProperties()
+      properties.title = "Vocabulary List with a Really Long Title"
       properties.hashtags = ["#testing"]
       properties.timestamp = now
       let key = archive.insertPageProperties(properties)
       let roundTrip = archive.pageProperties[key]
       XCTAssertEqual(roundTrip, properties)
       try archive.archivePageManifestVersion(timestamp: now)
+      properties.cardTemplates = [
+        "12345:vocab",
+        "7890:vocab",
+      ]
+      archive.updatePageProperties(for: key, to: properties)
+      try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(3600))
       let serialized = archive.textSerialized()
+      print(serialized)
       let newArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
       XCTAssertEqual(newArchive.pageProperties[key], properties)
     } catch {

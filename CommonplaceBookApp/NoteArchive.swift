@@ -177,6 +177,18 @@ public struct NoteArchive {
     }
   }
 
+  /// Updates naked page properties.
+  /// - precondition: pageProperties is not associated with content
+  /// - parameter pageIdentifier: The permanent identifier for the properties
+  /// - parameter pageProperties: The properties to update.
+  public mutating func updatePageProperties(
+    for pageIdentifier: String,
+    to pageProperties: PageProperties
+  ) {
+    precondition(pageProperties.sha1Digest == nil)
+    pageContentsCache[pageIdentifier] = PageContents(dirty: true, pageProperties: pageProperties)
+  }
+
   /// Updates all page properties that are stale in the contents cache.
   /// - returns: How many page properties were updated.
   @discardableResult
@@ -409,17 +421,19 @@ private extension NoteArchive {
       }
       newPropertiesSnippet.encodeAsDiff(from: nil)
       existingPropertiesSnippet.encodeAsDiff(from: newPropertiesSnippet)
-      guard
-        let digest = existingProperties.sha1Digest,
-        let existingTextSnippet = archive.snippets[digest]
-      else {
-        throw RetrievalError.noSuchPage(existingProperties.sha1Digest ?? "nil")
-      }
-      // Note the content can be the same but the properties can have different timestamps
-      // So, check and make sure we didn't wind up with identical content before delta encoding.
-      if let textSnippet = newTextSnippet, textSnippet.sha1Digest != existingTextSnippet.sha1Digest {
-        textSnippet.encodeAsDiff(from: nil)
-        existingTextSnippet.encodeAsDiff(from: newTextSnippet)
+      // If the properties are associated with text, delta-encode the text.
+      if let digest = existingProperties.sha1Digest {
+        guard
+          let existingTextSnippet = archive.snippets[digest]
+        else {
+          throw RetrievalError.noSuchPage(existingProperties.sha1Digest ?? "nil")
+        }
+        // Note the content can be the same but the properties can have different timestamps
+        // So, check and make sure we didn't wind up with identical content before delta encoding.
+        if let textSnippet = newTextSnippet, textSnippet.sha1Digest != existingTextSnippet.sha1Digest {
+          textSnippet.encodeAsDiff(from: nil)
+          existingTextSnippet.encodeAsDiff(from: newTextSnippet)
+        }
       }
       pagePropertyDigests[pageIdentifier] = newPropertiesSnippet.sha1Digest
     }
