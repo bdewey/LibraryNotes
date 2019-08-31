@@ -11,7 +11,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
   public override var type: ChallengeTemplateType { return .vocabulary }
 
   /// Holds a vocabulary word -- a pairing of the word and language
-  public struct Word: Codable {
+  public struct Word: Codable, Hashable {
     public let text: String
     public let language: String
 
@@ -57,6 +57,18 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(front, forKey: .front)
     try container.encode(back, forKey: .back)
+  }
+}
+
+extension VocabularyChallengeTemplate: Hashable {
+  public static func == (lhs: VocabularyChallengeTemplate, rhs: VocabularyChallengeTemplate) -> Bool {
+    return lhs.front == rhs.front &&
+      lhs.back == rhs.back
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(front)
+    hasher.combine(back)
   }
 }
 
