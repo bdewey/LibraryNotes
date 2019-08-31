@@ -4,22 +4,6 @@ import Foundation
 import MiniMarkdown
 
 extension Array where Element == Node {
-  /// For an array of Nodes, return all VocabularyAssociations and ClozeTemplates found in
-  /// the nodes.
-  // TODO: Make this extensible for other card template types.
-  func cardTemplates() -> [CardTemplateSerializationWrapper] {
-    var results = [CardTemplateSerializationWrapper]()
-    results.append(
-      contentsOf: ClozeTemplate.extract(from: self)
-        .map { CardTemplateSerializationWrapper($0) }
-    )
-    results.append(
-      contentsOf: QuoteTemplate.extract(from: self)
-        .map { CardTemplateSerializationWrapper($0) }
-    )
-    return results
-  }
-
   func archiveChallengeTemplates(
     to archive: inout TextSnippetArchive
   ) -> [ChallengeTemplateArchiveKey] {

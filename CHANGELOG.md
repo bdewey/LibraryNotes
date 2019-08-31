@@ -6,6 +6,15 @@
 
 - Internals: The ability to store and change "naked" properties
 
+### Changed
+
+- Internals: QuoteTemplate and ClozeTemplate use single-value containers
+
+### Removed
+
+- CardTemplateSerializationWrapper and related tests
+- MarkdownParseable protocol
+
 ## [0.6.2] - 2019-08-29
 
 ### Fixed

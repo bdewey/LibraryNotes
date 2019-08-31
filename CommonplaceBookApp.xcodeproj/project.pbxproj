@@ -42,7 +42,6 @@
 		D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */; };
 		D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */; };
 		D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */; };
-		D31AFAEA229D620B00ED2B76 /* CardTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */; };
 		D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */; };
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
@@ -167,7 +166,6 @@
 		D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponents.swift; sourceTree = "<group>"; };
 		D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonalitySpeechSynthesizer.swift; sourceTree = "<group>"; };
 		D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadOnlyDocumentCache.swift; sourceTree = "<group>"; };
-		D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardTemplateTests.swift; sourceTree = "<group>"; };
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
@@ -392,7 +390,6 @@
 		D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				D31AFAE0229D620A00ED2B76 /* CardTemplateTests.swift */,
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
 				D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
@@ -721,7 +718,6 @@
 				D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */,
 				D33F647B22999F52008C3A92 /* NoteArchiveTests.swift in Sources */,
 				D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */,
-				D31AFAEA229D620B00ED2B76 /* CardTemplateTests.swift in Sources */,
 				D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

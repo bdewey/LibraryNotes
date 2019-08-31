@@ -32,22 +32,10 @@ public struct ChallengeTemplateType: RawRepresentable, Equatable {
   public private(set) static var classMap = [String: ChallengeTemplate.Type]()
 }
 
-public protocol MarkdownParseable {
-  init(markdown: String, parsingRules: ParsingRules) throws
-  var asMarkdown: String { get }
-}
-
 /// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-open class ChallengeTemplate: Codable, MarkdownParseable {
-  public required init(markdown: String, parsingRules: ParsingRules) throws {}
-
-  open var asMarkdown: String {
-    assertionFailure("subclasses should implement")
-    return ""
-  }
-
+open class ChallengeTemplate: Codable {
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
@@ -73,54 +61,5 @@ extension Array where Element: ChallengeTemplate {
   /// Returns the challenges from all of the associations in the array.
   public var cards: [Challenge] {
     return [Challenge](map { $0.challenges }.joined())
-  }
-}
-
-/// Wraps ChallengeTemplate instances to allow Codable heterogenous collections of ChallengeTemplate objects.
-public final class CardTemplateSerializationWrapper: Codable {
-  /// The wrapped ChallengeTemplate.
-  public let value: ChallengeTemplate
-
-  public init(_ value: ChallengeTemplate) { self.value = value }
-
-  enum CodingKeys: String, CodingKey {
-    /// Used to encode `value.type`
-    case type = "__type"
-    case value
-  }
-
-  enum Error: Swift.Error {
-    /// Thrown when we cannot look up a CardTemplate class for a specific type.
-    case noClassForType(type: String)
-    case couldNotDecodeValue
-    case noParsingRules
-  }
-
-  public init(from decoder: Decoder) throws {
-    // Step 1: Get the encoded type name and look up the corresponding CardTemplate class.
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let typeName = try container.decode(String.self, forKey: .type)
-    guard let templateClass = ChallengeTemplateType.classMap[typeName] else {
-      throw Error.noClassForType(type: typeName)
-    }
-    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw Error.noParsingRules
-    }
-
-    let description = try container.decode(String.self, forKey: .value)
-    self.value = try templateClass.init(markdown: description, parsingRules: parsingRules)
-  }
-
-  public func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(value.type.rawValue, forKey: .type)
-    try container.encode(value.asMarkdown, forKey: .value)
-  }
-}
-
-extension Array where Element == CardTemplateSerializationWrapper {
-  /// Convenience: Returns the cards made from all wrapped templates.
-  public var cards: [Challenge] {
-    return [Challenge](map { $0.value.challenges }.joined())
   }
 }

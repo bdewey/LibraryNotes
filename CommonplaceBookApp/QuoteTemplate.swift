@@ -24,16 +24,12 @@ public final class QuoteTemplate: ChallengeTemplate {
     super.init()
   }
 
-  enum CodingKeys: String, CodingKey {
-    case quote
-  }
-
   public required convenience init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
       throw Error.noParsingRules
     }
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let markdown = try container.decode(String.self, forKey: .quote)
+    let container = try decoder.singleValueContainer()
+    let markdown = try container.decode(String.self)
     let nodes = parsingRules.parse(markdown)
     if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
       self.init(quote: quote)
@@ -51,13 +47,9 @@ public final class QuoteTemplate: ChallengeTemplate {
     }
   }
 
-  public override var asMarkdown: String {
-    return quote.allMarkdown
-  }
-
   public override func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(quote.allMarkdown, forKey: .quote)
+    var container = encoder.singleValueContainer()
+    try container.encode(quote.allMarkdown)
   }
 
   public override var type: ChallengeTemplateType { return .quote }
