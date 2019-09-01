@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import SnapKit
 import UIKit
 
@@ -22,6 +23,11 @@ final class VocabularyViewController: UIViewController {
     didSet {
       title = properties.title
       dataSource.apply(makeSnapshot(), animatingDifferences: true)
+      if let pageIdentifier = pageIdentifier {
+        notebook.changePageProperties(for: pageIdentifier, to: properties)
+      } else {
+        self.pageIdentifier = notebook.insertPageProperties(properties)
+      }
     }
   }
 
@@ -32,7 +38,11 @@ final class VocabularyViewController: UIViewController {
     UIBarButtonItem(image: .add, style: .plain, target: self, action: #selector(didTapAddButton))
   }()
 
-  @objc private func didTapAddButton() {}
+  @objc private func didTapAddButton() {
+    let vc = AddVocabularyViewController(nibName: nil, bundle: nil)
+    vc.delegate = self
+    present(UINavigationController(rootViewController: vc), animated: true, completion: nil)
+  }
 
   private lazy var tableView: UITableView = {
     let tableView = UITableView(frame: .zero, style: .plain)
@@ -64,6 +74,28 @@ final class VocabularyViewController: UIViewController {
   }
 }
 
+// MARK: - AddVocabularyViewControllerDelegate
+extension VocabularyViewController: AddVocabularyViewControllerDelegate {
+  func addVocabularyViewController(
+    _ viewController: AddVocabularyViewController,
+    didAddFront: String,
+    back: String
+  ) {
+    let template = VocabularyChallengeTemplate(
+      front: VocabularyChallengeTemplate.Word(text: didAddFront, language: "es"),
+      back: VocabularyChallengeTemplate.Word(text: back, language: "en")
+    )
+    do {
+      let key = try notebook.insertChallengeTemplate(template)
+      properties.cardTemplates.append(key.description)
+    } catch {
+      DDLogError("Unexpected error: \(error)")
+    }
+    dismiss(animated: true, completion: nil)
+  }
+}
+
+// MARK: - Private
 private extension VocabularyViewController {
   typealias DataSource = UITableViewDiffableDataSource<Section, VocabularyChallengeTemplate>
   typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabularyChallengeTemplate>

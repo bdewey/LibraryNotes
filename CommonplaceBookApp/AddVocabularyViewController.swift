@@ -31,6 +31,7 @@ final class AddVocabularyViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    view.backgroundColor = .systemBackground
     navigationItem.rightBarButtonItem = doneButton
     let stack = UIStackView(arrangedSubviews: [
       frontTextField,

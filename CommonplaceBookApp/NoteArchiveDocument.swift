@@ -90,6 +90,14 @@ public final class NoteArchiveDocument: UIDocument {
     schedulePropertyBatchUpdate()
   }
 
+  public func changePageProperties(for pageIdentifier: String, to pageProperties: PageProperties) {
+    assert(Thread.isMainThread)
+    noteArchiveQueue.sync {
+      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
+    }
+    invalidateSavedSnippets()
+  }
+
   private var propertyBatchUpdateTimer: Timer?
 
   private func schedulePropertyBatchUpdate() {
@@ -373,6 +381,23 @@ public extension NoteArchiveDocument {
     } catch {
       DDLogError("Unexpected error getting challenge template: \(error)")
       return nil
+    }
+  }
+
+  /// Inserts a challenge template into the archive.
+  func insertChallengeTemplate(
+    _ challengeTemplate: ChallengeTemplate
+  ) throws -> ChallengeTemplateArchiveKey {
+    // TODO: Use the cache
+    return try noteArchiveQueue.sync {
+      try noteArchive.insertChallengeTemplate(challengeTemplate)
+    }
+  }
+
+  func insertPageProperties(_ pageProperties: PageProperties) -> String {
+    invalidateSavedSnippets()
+    return noteArchiveQueue.sync {
+      noteArchive.insertPageProperties(pageProperties)
     }
   }
 
