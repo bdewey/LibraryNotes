@@ -19,6 +19,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   private let knownCardTemplateTypes: [ChallengeTemplateType] = [
     .cloze,
     .quote,
+    .vocabulary,
   ]
 
   private lazy var loadingViewController: LoadingViewController = {

@@ -85,7 +85,7 @@ final class DocumentListViewController: UIViewController {
     textEditViewController.pageIdentifier = pageIdentifier
     textEditViewController.markdown = markdown
     textEditViewController.delegate = notebook
-    showTextEditViewController(textEditViewController)
+    showDetailViewController(textEditViewController)
   }
 
   // MARK: - Lifecycle
@@ -137,12 +137,12 @@ final class DocumentListViewController: UIViewController {
       currentHashtag: currentHashtag,
       autoFirstResponder: true
     )
-    showTextEditViewController(viewController)
+    showDetailViewController(viewController)
   }
 
   private func makeBlankVocabularyPage() {
     let viewController = VocabularyViewController(notebook: notebook)
-    viewController.title = "Vocabulary"
+    viewController.properties.title = "Test Vocabulary"
     splitViewController?.showDetailViewController(
       UINavigationController(rootViewController: viewController),
       sender: nil
@@ -190,14 +190,14 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showTextEditViewController(_ textEditViewController: TextEditViewController) {
+  func showDetailViewController(_ detailViewController: UIViewController ) {
     if let splitViewController = splitViewController {
       splitViewController.showDetailViewController(
-        UINavigationController(rootViewController: textEditViewController),
+        UINavigationController(rootViewController: detailViewController),
         sender: self
       )
     } else if let navigationController = navigationController {
-      navigationController.pushViewController(textEditViewController, animated: true)
+      navigationController.pushViewController(detailViewController, animated: true)
     }
   }
 
@@ -236,7 +236,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.pageIdentifier == pageIdentifier {
       // We just deleted the current page. Show a blank document.
-      showTextEditViewController(
+      showDetailViewController(
         TextEditViewController.makeBlankDocument(
           notebook: notebook,
           currentHashtag: currentHashtag,
