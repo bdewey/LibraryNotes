@@ -28,6 +28,12 @@ final class VocabularyViewController: UIViewController {
   /// Identifier of the page. If nil, it means we're working with unsaved content.
   var pageIdentifier: String?
 
+  private lazy var addCardButton: UIBarButtonItem = {
+    UIBarButtonItem(image: .add, style: .plain, target: self, action: #selector(didTapAddButton))
+  }()
+
+  @objc private func didTapAddButton() {}
+
   private lazy var tableView: UITableView = {
     let tableView = UITableView(frame: .zero, style: .plain)
     return tableView
@@ -50,6 +56,7 @@ final class VocabularyViewController: UIViewController {
   override func viewDidLoad() {
     view.backgroundColor = UIColor.systemBackground
     view.addSubview(tableView)
+    navigationItem.rightBarButtonItem = addCardButton
     tableView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
