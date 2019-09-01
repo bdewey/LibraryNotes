@@ -23,10 +23,12 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
 
   public let front: Word
   public let back: Word
+  public let parsingRules: ParsingRules
 
-  public init(front: Word, back: Word) {
+  public init(front: Word, back: Word, parsingRules: ParsingRules) {
     self.front = front
     self.back = back
+    self.parsingRules = parsingRules
     super.init()
   }
 
@@ -34,8 +36,8 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
     // to manage these identifiers.
     return [
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back),
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front, parsingRules: parsingRules),
     ]
   }
 
@@ -47,9 +49,14 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
   }
 
   required init(from decoder: Decoder) throws {
+    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
+      // TODO: Move this error somewhere else
+      throw ClozeTemplate.Error.noParsingRules
+    }
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.front = try container.decode(Word.self, forKey: .front)
     self.back = try container.decode(Word.self, forKey: .back)
+    self.parsingRules = parsingRules
     try super.init(from: decoder)
   }
 
@@ -77,13 +84,45 @@ extension VocabularyChallengeTemplate {
     public let challengeIdentifier: ChallengeIdentifier
     public let front: Word
     public let back: Word
+    public let parsingRules: ParsingRules
 
     public func challengeView(
       document: UIDocument,
       properties: CardDocumentProperties
     ) -> ChallengeView {
       let view = TwoSidedCardView(frame: .zero)
+      view.context = context()
+      let renderer = RenderedMarkdown(textStyle: .headline, parsingRules: parsingRules)
+      renderer.markdown = front.text
+      view.front = renderer.attributedString
+      renderer.markdown = back.text
+      view.back = renderer.attributedString
       return view
+    }
+
+    private func context() -> NSAttributedString {
+      let font = UIFont.preferredFont(forTextStyle: .subheadline)
+      let contextString: String
+      if let languageName = languageName(for: back.language) {
+        contextString = "Say this in \(languageName)"
+      } else {
+        contextString = "Translate"
+      }
+      return NSAttributedString(
+        string: contextString.localizedUppercase,
+        attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor.secondaryLabel]
+      )
+    }
+
+    private func languageName(for language: String) -> String? {
+      switch language.lowercased() {
+      case "en":
+        return "English"
+      case "es":
+        return "Spanish"
+      default:
+        return nil
+      }
     }
   }
 }

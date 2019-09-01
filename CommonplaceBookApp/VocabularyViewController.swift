@@ -83,7 +83,8 @@ extension VocabularyViewController: AddVocabularyViewControllerDelegate {
   ) {
     let template = VocabularyChallengeTemplate(
       front: VocabularyChallengeTemplate.Word(text: didAddFront, language: "es"),
-      back: VocabularyChallengeTemplate.Word(text: back, language: "en")
+      back: VocabularyChallengeTemplate.Word(text: back, language: "en"),
+      parsingRules: notebook.parsingRules
     )
     do {
       let key = try notebook.insertChallengeTemplate(template)
