@@ -159,6 +159,7 @@ final class DocumentListViewController: UIViewController {
       self?.makeBlankVocabularyPage()
     }
     alertController.addAction(vocabularyAction)
+    alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
     alertController.popoverPresentationController?.barButtonItem = newDocumentButton
     present(alertController, animated: true)
   }
@@ -190,7 +191,7 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showDetailViewController(_ detailViewController: UIViewController ) {
+  func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
       splitViewController.showDetailViewController(
         UINavigationController(rootViewController: detailViewController),
