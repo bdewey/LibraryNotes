@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import Combine
 import MiniMarkdown
 import UIKit
 
@@ -7,12 +8,12 @@ extension ChallengeTemplateType {
   public static let vocabulary = ChallengeTemplateType(rawValue: "vocab", class: VocabularyChallengeTemplate.self)
 }
 
-public final class VocabularyChallengeTemplate: ChallengeTemplate {
+public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObject {
   public override var type: ChallengeTemplateType { return .vocabulary }
 
   /// Holds a vocabulary word -- a pairing of the word and language
   public struct Word: Codable, Hashable {
-    public let text: String
+    public var text: String
     public let language: String
 
     public init(text: String, language: String) {
@@ -21,8 +22,8 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     }
   }
 
-  public let front: Word
-  public let back: Word
+  @Published public var front: Word
+  @Published public var back: Word
   public let parsingRules: ParsingRules
 
   public init(front: Word, back: Word, parsingRules: ParsingRules) {
@@ -30,6 +31,16 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate {
     self.back = back
     self.parsingRules = parsingRules
     super.init()
+  }
+
+  public func trimText() {
+    front.text = front.text.trimmingCharacters(in: .whitespacesAndNewlines)
+    back.text = back.text.trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  public var isValid: Bool {
+    !front.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+      && !back.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 
   public override var challenges: [CommonplaceBookApp.Challenge] {

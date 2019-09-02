@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import SnapKit
+import SwiftUI
 import UIKit
 
 /// Allows editing a vocabulary list.
@@ -26,7 +27,7 @@ final class VocabularyViewController: UIViewController {
       if let pageIdentifier = pageIdentifier {
         notebook.changePageProperties(for: pageIdentifier, to: properties)
       } else {
-        self.pageIdentifier = notebook.insertPageProperties(properties)
+        pageIdentifier = notebook.insertPageProperties(properties)
       }
     }
   }
@@ -39,18 +40,48 @@ final class VocabularyViewController: UIViewController {
   }()
 
   @objc private func didTapAddButton() {
-    let vc = AddVocabularyViewController(nibName: nil, bundle: nil)
-    vc.delegate = self
-    present(UINavigationController(rootViewController: vc), animated: true, completion: nil)
+    let template = VocabularyChallengeTemplate(
+      front: VocabularyChallengeTemplate.Word(text: "", language: "es"),
+      back: VocabularyChallengeTemplate.Word(text: "", language: "en"),
+      parsingRules: notebook.parsingRules
+    )
+    let viewController = UIHostingController(
+      rootView: EditVocabularyView(vocabularyTemplate: template, onCommit: { [weak self] in
+        self?.commit(template: template, indexPath: nil)
+        self?.dismiss(animated: true, completion: nil)
+      })
+    )
+    present(viewController, animated: true, completion: nil)
+  }
+
+  private func commit(template: VocabularyChallengeTemplate, indexPath: IndexPath?) {
+    do {
+      let key = try notebook.insertChallengeTemplate(template)
+      if let index = indexPath?.item {
+        // indexPath is reversed, so I need to re-reverse to edit the right model object
+        properties.cardTemplates[properties.cardTemplates.count - index - 1] = key.description
+      } else {
+        properties.cardTemplates.append(key.description)
+      }
+    } catch {
+      DDLogError("Unexpected error: \(error)")
+    }
+  }
+
+  private func deleteTemplate(at indexPath: IndexPath) {
+    // Reverse to get index
+    let index = properties.cardTemplates.count - indexPath.item - 1
+    properties.cardTemplates.remove(at: index)
   }
 
   private lazy var tableView: UITableView = {
     let tableView = UITableView(frame: .zero, style: .plain)
+    tableView.delegate = self
     return tableView
   }()
 
   private lazy var dataSource: DataSource = {
-    DataSource(tableView: tableView) { (innerTableView, _, template) -> UITableViewCell? in
+    let dataSource = DataSource(tableView: tableView) { (innerTableView, _, template) -> UITableViewCell? in
       var cell: UITableViewCell! = innerTableView.dequeueReusableCell(withIdentifier: Identifier.cell)
       if cell == nil {
         cell = UITableViewCell(style: .subtitle, reuseIdentifier: Identifier.cell)
@@ -59,6 +90,8 @@ final class VocabularyViewController: UIViewController {
       cell.detailTextLabel?.text = template.back.text
       return cell
     }
+    dataSource.viewController = self
+    return dataSource
   }()
 
   // MARK: - Lifecycle
@@ -74,31 +107,45 @@ final class VocabularyViewController: UIViewController {
   }
 }
 
-// MARK: - AddVocabularyViewControllerDelegate
-extension VocabularyViewController: AddVocabularyViewControllerDelegate {
-  func addVocabularyViewController(
-    _ viewController: AddVocabularyViewController,
-    didAddFront: String,
-    back: String
-  ) {
-    let template = VocabularyChallengeTemplate(
-      front: VocabularyChallengeTemplate.Word(text: didAddFront, language: "es"),
-      back: VocabularyChallengeTemplate.Word(text: back, language: "en"),
-      parsingRules: notebook.parsingRules
+extension VocabularyViewController: UITableViewDelegate {
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
+    guard let template = dataSource.itemIdentifier(for: indexPath) else { return }
+    let viewController = UIHostingController(
+      rootView: EditVocabularyView(vocabularyTemplate: template, onCommit: { [weak self] in
+        self?.commit(template: template, indexPath: indexPath)
+        self?.dismiss(animated: true, completion: nil)
+      })
     )
-    do {
-      let key = try notebook.insertChallengeTemplate(template)
-      properties.cardTemplates.append(key.description)
-    } catch {
-      DDLogError("Unexpected error: \(error)")
-    }
-    dismiss(animated: true, completion: nil)
+    present(viewController, animated: true, completion: nil)
   }
 }
 
 // MARK: - Private
+
 private extension VocabularyViewController {
-  typealias DataSource = UITableViewDiffableDataSource<Section, VocabularyChallengeTemplate>
+  final class DataSource: UITableViewDiffableDataSource<Section, VocabularyChallengeTemplate> {
+    /// The owning view controller
+    weak var viewController: VocabularyViewController?
+
+    override func tableView(
+      _ tableView: UITableView,
+      commit editingStyle: UITableViewCell.EditingStyle,
+      forRowAt indexPath: IndexPath
+    ) {
+      switch editingStyle {
+      case .delete:
+        viewController?.deleteTemplate(at: indexPath)
+      default:
+        break
+      }
+    }
+
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+      return true
+    }
+  }
+
   typealias Snapshot = NSDiffableDataSourceSnapshot<Section, VocabularyChallengeTemplate>
 
   enum Identifier {
@@ -113,6 +160,7 @@ private extension VocabularyViewController {
     var snapshot = VocabularyViewController.Snapshot()
     snapshot.appendSections([.vocabularyItems])
     let items = properties.cardTemplates
+      .reversed()
       .compactMap(notebook.challengeTemplate(for:))
       .compactMap { $0 as? VocabularyChallengeTemplate }
     snapshot.appendItems(items)
