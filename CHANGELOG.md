@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Eliminated "Cancel" button on study view; just use swipe-to-dismiss
+
 ## [0.7.0] - 2019-09-02
 
 ### Added

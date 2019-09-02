@@ -88,7 +88,6 @@ public final class StudyViewController: UIViewController {
     view.backgroundColor = UIColor.systemGroupedBackground
     configureUI()
     navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
-    navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(didTapCancel))
   }
 
   private func configureUI() {
@@ -102,25 +101,6 @@ public final class StudyViewController: UIViewController {
   @objc private func didTapDone() {
     studySession.studySessionEndDate = Date()
     delegate?.studyViewController(self, didFinishSession: studySession)
-  }
-
-  @objc private func didTapCancel() {
-    let alertController = UIAlertController(
-      title: "Discard study session?",
-      message: "Are you sure you want to discard your study session? " +
-        "If you do this, the app will not remember what questions you answered correctly.",
-      preferredStyle: .alert
-    )
-    let cancel = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-      // Nothing
-    }
-    let discard = UIAlertAction(title: "Discard", style: .destructive) { _ in
-      self.studySession.studySessionEndDate = Date()
-      self.delegate?.studyViewControllerDidCancel(self)
-    }
-    alertController.addAction(discard)
-    alertController.addAction(cancel)
-    present(alertController, animated: true, completion: nil)
   }
 
   public var maximumCardWidth: CGFloat?
