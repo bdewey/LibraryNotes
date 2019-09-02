@@ -90,6 +90,14 @@ public final class NoteArchiveDocument: UIDocument {
     schedulePropertyBatchUpdate()
   }
 
+  public func changePageProperties(for pageIdentifier: String, to pageProperties: PageProperties) {
+    assert(Thread.isMainThread)
+    noteArchiveQueue.sync {
+      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
+    }
+    invalidateSavedSnippets()
+  }
+
   private var propertyBatchUpdateTimer: Timer?
 
   private func schedulePropertyBatchUpdate() {
@@ -335,24 +343,7 @@ public extension NoteArchiveDocument {
         .filter { filter($0.key, $0.value) }
         .map { (name, reviewProperties) -> StudySession in
           let challengeTemplates = reviewProperties.cardTemplates
-            .compactMap { keyString -> ChallengeTemplate? in
-              guard let key = ChallengeTemplateArchiveKey(keyString) else {
-                DDLogError("Expected a challenge key: \(keyString)")
-                return nil
-              }
-              if let cachedTemplate = challengeTemplateCache.object(forKey: keyString as NSString) {
-                return cachedTemplate
-              }
-              do {
-                let template = try noteArchive.challengeTemplate(for: key)
-                template.templateIdentifier = key.digest
-                challengeTemplateCache.setObject(template, forKey: keyString as NSString)
-                return template
-              } catch {
-                DDLogError("Unexpected error getting challenge template: \(error)")
-                return nil
-              }
-            }
+            .compactMap(challengeTemplate(for:))
           // TODO: Filter down to eligible cards
           let eligibleCards = challengeTemplates.cards
             .filter { challenge -> Bool in
@@ -371,6 +362,42 @@ public extension NoteArchiveDocument {
           )
         }
         .reduce(into: StudySession()) { $0 += $1 }
+    }
+  }
+
+  func challengeTemplate(for keyString: String) -> ChallengeTemplate? {
+    guard let key = ChallengeTemplateArchiveKey(keyString) else {
+      DDLogError("Expected a challenge key: \(keyString)")
+      return nil
+    }
+    if let cachedTemplate = challengeTemplateCache.object(forKey: keyString as NSString) {
+      return cachedTemplate
+    }
+    do {
+      let template = try noteArchive.challengeTemplate(for: key)
+      template.templateIdentifier = key.digest
+      challengeTemplateCache.setObject(template, forKey: keyString as NSString)
+      return template
+    } catch {
+      DDLogError("Unexpected error getting challenge template: \(error)")
+      return nil
+    }
+  }
+
+  /// Inserts a challenge template into the archive.
+  func insertChallengeTemplate(
+    _ challengeTemplate: ChallengeTemplate
+  ) throws -> ChallengeTemplateArchiveKey {
+    // TODO: Use the cache
+    return try noteArchiveQueue.sync {
+      try noteArchive.insertChallengeTemplate(challengeTemplate)
+    }
+  }
+
+  func insertPageProperties(_ pageProperties: PageProperties) -> String {
+    invalidateSavedSnippets()
+    return noteArchiveQueue.sync {
+      noteArchive.insertPageProperties(pageProperties)
     }
   }
 

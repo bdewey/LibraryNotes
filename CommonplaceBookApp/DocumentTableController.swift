@@ -7,7 +7,7 @@ import UIKit
 /// Knows how to perform key actions with the document
 protocol DocumentTableControllerDelegate: AnyObject {
   /// Shows a TextEditViewController in the detail view.
-  func showTextEditViewController(_ textEditViewController: TextEditViewController)
+  func showDetailViewController(_ detailViewController: UIViewController)
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
@@ -138,6 +138,14 @@ extension DocumentTableController: UITableViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
+      if viewProperties.pageProperties.sha1Digest == nil {
+        // This is a vocabulary page, not a text page.
+        let vc = VocabularyViewController(notebook: notebook)
+        vc.pageIdentifier = viewProperties.pageKey
+        vc.properties = viewProperties.pageProperties
+        delegate?.showDetailViewController(vc)
+        return
+      }
       let markdown: String
       do {
         markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
@@ -151,7 +159,7 @@ extension DocumentTableController: UITableViewDelegate {
       textEditViewController.pageIdentifier = viewProperties.pageKey
       textEditViewController.markdown = markdown
       textEditViewController.delegate = notebook
-      delegate?.showTextEditViewController(textEditViewController)
+      delegate?.showDetailViewController(textEditViewController)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
     }

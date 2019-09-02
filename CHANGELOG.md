@@ -4,6 +4,7 @@
 
 ### Added
 
+- New page type! A vocabulary list.
 - Internals: The ability to store and change "naked" properties
 
 ### Changed

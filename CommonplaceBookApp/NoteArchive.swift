@@ -121,6 +121,12 @@ public struct NoteArchive {
     return key
   }
 
+  public mutating func insertChallengeTemplate(
+    _ challengeTemplate: ChallengeTemplate
+  ) throws -> ChallengeTemplateArchiveKey {
+    try archive.insert(challengeTemplate)
+  }
+
   /// Removes a note from the archive.
   /// - throws: `RetrievalError.noSuchPage` if the page does not exist.
   public mutating func removeNote(for pageIdentifier: String) {
