@@ -10,6 +10,7 @@
 
 - Cloze cards now manage attributes correctly and no longer clobber paragraph attributes
 - Vocabulary dialog no longer uses two columns on iPad
+- All saved templates now decode properly
 
 ## [0.7.0] - 2019-09-02
 

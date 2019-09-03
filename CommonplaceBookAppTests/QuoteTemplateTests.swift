@@ -52,20 +52,12 @@ final class QuoteTemplateTests: XCTestCase {
   }
 
   func testYamlEncodingIsJustMarkdown() {
-    let parsingRules = ParsingRules.commonplace
-    let blocks = parsingRules.parse(contentWithCloze)
-    XCTAssertEqual(blocks.count, 1)
-    guard let template = QuoteTemplate.extract(from: blocks).first else {
-      XCTFail("Could not load template")
-      return
-    }
-
     do {
-      let text = try YAMLEncoder().encode(template)
+      let text = try YAMLEncoder().encode(contentWithCloze)
       print(text)
       let decoder = YAMLDecoder()
-      let decoded = try decoder.decode(QuoteTemplate.self, from: text, userInfo: [.markdownParsingRules: parsingRules])
-      XCTAssertEqual(decoded.challenges.count, template.challenges.count)
+      let decoded = try decoder.decode(QuoteTemplate.self, from: text, userInfo: [.markdownParsingRules: ParsingRules.commonplace])
+      XCTAssertEqual(decoded.challenges.count, 1)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }

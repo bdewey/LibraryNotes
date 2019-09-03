@@ -157,7 +157,13 @@ public struct NoteArchive {
     guard let klass = ChallengeTemplateType.classMap[key.type] else {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
-    return try YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules])
+    if let fromYaml = try? YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules]) {
+      return fromYaml
+    }
+    // Try encoding the snippet as a YAML string, then decoding as klass.
+    // This will accomodate single-value-container types that didn't go through the YAML encoder.
+    let encodedText = try YAMLEncoder().encode(snippet.text)
+    return try YAMLDecoder().decode(klass, from: encodedText, userInfo: [.markdownParsingRules: parsingRules])
   }
 
   /// Updates the text associated with `pageIdentifier` to `text`, creating a new version
