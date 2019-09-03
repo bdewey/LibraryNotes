@@ -41,6 +41,7 @@ struct EditVocabularyView: View {
       .navigationBarTitle("Add Vocabulary")
       .navigationBarItems(trailing: doneButton)
     }
+    .navigationViewStyle(StackNavigationViewStyle())
   }
 
   private var doneButton: some View {
