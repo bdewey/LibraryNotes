@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Quote cards use a bigger "context" font & kern, consistent with clozes
+
 ## [0.7.1] - 2019-09-03
 
 ### Changed

@@ -86,7 +86,14 @@ extension QuoteTemplate: Challenge {
     properties: CardDocumentProperties
   ) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
-    view.context = NSAttributedString(string: "Identify the source".uppercased(), attributes: [.font: UIFont.preferredFont(forTextStyle: .caption1), .foregroundColor: UIColor.secondaryLabel])
+    view.context = NSAttributedString(
+      string: "Identify the source".uppercased(),
+      attributes: [
+        .font: UIFont.preferredFont(forTextStyle: .subheadline),
+        .foregroundColor: UIColor.secondaryLabel,
+        .kern: 2.0,
+      ]
+    )
     let quoteRenderer = RenderedMarkdown(
       textStyle: .body,
       parsingRules: properties.parsingRules
