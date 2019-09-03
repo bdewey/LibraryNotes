@@ -6,6 +6,10 @@
 
 - Eliminated "Cancel" button on study view; just use swipe-to-dismiss
 
+### Fixed
+
+- Cloze cards now manage attributes correctly and no longer clobber paragraph attributes
+
 ## [0.7.0] - 2019-09-02
 
 ### Added

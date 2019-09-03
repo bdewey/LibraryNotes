@@ -108,7 +108,7 @@ extension MarkdownAttributedStringRenderer {
   ) -> MarkdownAttributedStringRenderer {
     var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
     var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node, _ in
+    renderer.renderFunctions[.cloze] = { node, attributes in
       guard let cloze = node as? Cloze else { return NSAttributedString() }
       let shouldHide = renderedCloze == index
       renderedCloze += 1
@@ -117,19 +117,19 @@ extension MarkdownAttributedStringRenderer {
           // There is no real hint. So instead put the hidden text but render it using the
           // background color. That way it takes up the correct amount of space in the string,
           // but is still invisible.
-          var attributes = Attributes.cloze
+          var attributes = attributes.withClozeHighlight
           attributes[.foregroundColor] = UIColor.clear
           return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
         } else {
           return NSAttributedString(
             string: String(cloze.hint),
-            attributes: Attributes.cloze
+            attributes: attributes.withClozeHighlight
           )
         }
       } else {
         return NSAttributedString(
           string: String(cloze.hiddenText),
-          attributes: Attributes.text
+          attributes: attributes
         )
       }
     }
@@ -141,14 +141,14 @@ extension MarkdownAttributedStringRenderer {
     revealingClozeAt index: Int
   ) -> MarkdownAttributedStringRenderer {
     var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
-    var localClozeAttributes = Attributes.cloze
+    var localClozeAttributes = renderer.defaultAttributes.withClozeHighlight
     localClozeAttributes[.foregroundColor] = UIColor.label
     var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node, _ in
-      let attributes = renderedCloze == index ? localClozeAttributes : Attributes.text
+    renderer.renderFunctions[.cloze] = { node, attributes in
+      let finalAttributes = renderedCloze == index ? attributes.withClozeHighlight : attributes
       renderedCloze += 1
       guard let cloze = node as? Cloze else { return NSAttributedString() }
-      return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
+      return NSAttributedString(string: String(cloze.hiddenText), attributes: finalAttributes)
     }
     return renderer
   }
@@ -163,33 +163,11 @@ private let clozeRenderer: MarkdownAttributedStringRenderer = {
   return renderer
 }()
 
-private let defaultParagraphStyle: NSParagraphStyle = {
-  let paragraphStyle = NSMutableParagraphStyle()
-  paragraphStyle.alignment = .left
-  return paragraphStyle
-}()
-
-/// A collection of common NSAttributedString attributes
-private enum Attributes {
-  static var text: [NSAttributedString.Key: Any] {
-    return [
-      .font: UIFont.preferredFont(forTextStyle: .body),
-      .foregroundColor: UIColor.label,
-    ]
-  }
-
-  static var cloze: [NSAttributedString.Key: Any] {
-    return [
-      .font: UIFont.preferredFont(forTextStyle: .body),
-      .foregroundColor: UIColor.secondaryLabel,
-      .backgroundColor: UIColor.systemYellow.withAlphaComponent(0.3),
-    ]
-  }
-
-  static var caption: [NSAttributedString.Key: Any] {
-    return [
-      .font: UIFont.preferredFont(forTextStyle: .caption1),
-      .foregroundColor: UIColor.secondaryLabel,
-    ]
+private extension AttributedStringAttributes {
+  var withClozeHighlight: AttributedStringAttributes {
+    var copy = self
+    copy[.foregroundColor] = UIColor.secondaryLabel
+    copy[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+    return copy
   }
 }
