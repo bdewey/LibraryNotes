@@ -259,7 +259,7 @@ final class TextEditViewController: UIViewController {
       DDLogDebug("Looks like you want to paste an image! Okay!")
       return true
     }
-    return false
+    return super.canPerformAction(action, withSender: sender)
   }
 
   override func paste(itemProviders: [NSItemProvider]) {
