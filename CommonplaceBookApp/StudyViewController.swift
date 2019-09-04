@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
+import SnapKit
 import UIKit
 
 public protocol StudyViewControllerDelegate: class {
@@ -103,8 +104,6 @@ public final class StudyViewController: UIViewController {
     delegate?.studyViewController(self, didFinishSession: studySession)
   }
 
-  public var maximumCardWidth: CGFloat?
-
   /// Creates a card view for a card.
   private func makeCardView(
     for cardFromDocument: StudySession.AttributedCard?,
@@ -119,23 +118,10 @@ public final class StudyViewController: UIViewController {
       )
       cardView.delegate = self
       self.view.addSubview(cardView)
-      cardView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-      let widthConstraint = cardView.widthAnchor.constraint(
-        equalTo: self.view.widthAnchor,
-        multiplier: 1,
-        constant: -32
-      )
-      widthConstraint.priority = .defaultHigh
-      widthConstraint.isActive = true
-      if let maximumCardWidth = self.maximumCardWidth {
-        let maximumWidthConstraint = cardView
-          .widthAnchor
-          .constraint(lessThanOrEqualToConstant: maximumCardWidth)
-        maximumWidthConstraint.priority = .required
-        maximumWidthConstraint.isActive = true
+      cardView.snp.makeConstraints { make in
+        make.left.right.equalTo(self.view.readableContentGuide)
+        make.centerY.equalToSuperview()
       }
-      cardView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
-      cardView.translatesAutoresizingMaskIntoConstraints = false
       completion(cardView)
     }
   }

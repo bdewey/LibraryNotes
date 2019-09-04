@@ -208,7 +208,6 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       documentCache: ReadOnlyDocumentCache(delegate: self),
       delegate: self
     )
-    studyVC.maximumCardWidth = 440
     studyVC.title = navigationItem.title
     present(
       UINavigationController(rootViewController: studyVC),
