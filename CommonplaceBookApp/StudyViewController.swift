@@ -122,6 +122,7 @@ public final class StudyViewController: UIViewController {
         make.left.right.equalTo(self.view.readableContentGuide)
         make.centerY.equalToSuperview()
       }
+      cardView.layer.cornerRadius = 8
       completion(cardView)
     }
   }
