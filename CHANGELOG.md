@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+- Initial color wash is correct on the iPad study view
+
 ### Removed
 
 - DocumentCache protocol -- left over from when each page was a different document

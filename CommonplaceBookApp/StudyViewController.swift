@@ -153,6 +153,11 @@ public final class StudyViewController: UIViewController {
     navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
   }
 
+  public override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    currentDynamicItem?.centerX = view.center.x
+  }
+
   @objc private func didPan(sender: UIPanGestureRecognizer) {
     guard let currentCard = currentDynamicItem, let snap = cardSnapBehavior else { return }
     let translation = sender.translation(in: currentCard.view)
@@ -265,18 +270,18 @@ private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
   let view: UIView
   private let colorWashView: UIView
   private let swipeDescriptionLabel: UILabel
-  private let centerX: CGFloat
+
+  var centerX: CGFloat {
+    didSet {
+      configureUI()
+    }
+  }
 
   var center: CGPoint {
     get { view.center }
     set {
       view.center = newValue
-      let deltaX = newValue.x - centerX
-      let colorWash = deltaX < 0 ? UIColor.systemRed : UIColor.systemGreen
-      let alpha = min(abs(deltaX) / 100.0, 1.0)
-      swipeDescriptionLabel.alpha = alpha
-      let intensity = alpha * 0.4
-      colorWashView.backgroundColor = colorWash.withAlphaComponent(intensity)
+      configureUI()
     }
   }
 
@@ -288,6 +293,15 @@ private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
   var transform: CGAffineTransform {
     get { view.transform }
     set { view.transform = newValue }
+  }
+
+  private func configureUI() {
+    let deltaX = center.x - centerX
+    let colorWash = deltaX < 0 ? UIColor.systemRed : UIColor.systemGreen
+    let alpha = min(abs(deltaX) / 100.0, 1.0)
+    swipeDescriptionLabel.alpha = alpha
+    let intensity = alpha * 0.4
+    colorWashView.backgroundColor = colorWash.withAlphaComponent(intensity)
   }
 }
 
