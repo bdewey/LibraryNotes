@@ -432,6 +432,7 @@ extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
 }
 
 // MARK: - Images
+
 extension NoteArchiveDocument {
   /// Adds a renderer tthat knows how to render images using assets from this document
   /// - parameter renderers: The collection of render functions

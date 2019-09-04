@@ -103,7 +103,7 @@ public struct StudyLog {
         if shouldTrace {
           DDLogDebug(
             "StudyLog: Updating delta = \(delta / TimeInterval.day) day(s) " +
-            "factor = \(factor) nextDate = \(nextDate)"
+              "factor = \(factor) nextDate = \(nextDate)"
           )
         }
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: nextDate)

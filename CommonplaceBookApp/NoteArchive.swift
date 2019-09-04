@@ -542,7 +542,7 @@ private extension NoteArchive {
       timestamp: timestamp,
       hashtags: nodes.hashtags,
       title: String(nodes.title.split(separator: "\n").first ?? ""),
-      cardTemplates: challengeTemplateKeys.map({ $0.description })
+      cardTemplates: challengeTemplateKeys.map { $0.description }
     )
     let propertiesSnippet = try properties.makeSnippet()
     archive.insert(propertiesSnippet)
@@ -573,7 +573,7 @@ private extension TextSnippetArchive {
         timestamp: pageContent.modifiedTimestamp,
         hashtags: nodes.hashtags,
         title: String(nodes.title.split(separator: "\n").first ?? ""),
-        cardTemplates: challengeTemplateKeys.map({ $0.description })
+        cardTemplates: challengeTemplateKeys.map { $0.description }
       )
       pageContent.pagePropertiesStale = false
       return pageContent

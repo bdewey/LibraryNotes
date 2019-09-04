@@ -107,9 +107,10 @@ final class UILanguageAwareTextField: UITextField {
 
   override var textInputMode: UITextInputMode? {
     for inputMode in UITextInputMode.activeInputModes
+      // swiftformat:disable:next trailingClosures
       where inputMode.primaryLanguage.map({ Locale(identifier: $0) })?.languageCode == customLanguage {
-      return inputMode
-    }
+        return inputMode
+      }
     return super.textInputMode
   }
 }
