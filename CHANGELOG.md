@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Changed
+
+- Study view uses a progress bar
+- Use the readable size guide to set the width of the cards
+- Round corners
+
 ### Fixed
 
 - Quote cards use a bigger "context" font & kern, consistent with clozes
