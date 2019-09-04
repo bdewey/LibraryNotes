@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Swipe-to-score
 - Study view uses a progress bar
 - Use the readable size guide to set the width of the cards
 - Round corners

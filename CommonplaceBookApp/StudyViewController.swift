@@ -41,26 +41,75 @@ public final class StudyViewController: UIViewController {
 
   private weak var delegate: StudyViewControllerDelegate?
 
+  /// UIKitDynamics behavior used to put the card in ts desired resting position
+  private var cardSnapBehavior: UISnapBehavior?
+
+  /// Just holds the "correct" versus "incorrect" color whilst swiping
+  private lazy var colorWashView: UIView = {
+    let view = UIView(frame: .zero)
+    view.backgroundColor = .clear
+    return view
+  }()
+
+  /// Holds the description of what the swipe action is doing.
+  /// `currentDynamicItem` adjusts its alpha based on how far the swipe is proceeding
+  private lazy var swipeDescriptionLabel: UILabel = {
+    let label = UILabel(frame: .zero)
+    label.font = UIFont.preferredFont(forTextStyle: .headline)
+    label.textColor = .label
+    return label
+  }()
+
+  /// The current text we are showing in the swipe description.
+  /// Memoized here to minimize layout calculations while panning.
+  private var swipeDescriptionText: String? {
+    didSet {
+      if oldValue != swipeDescriptionText {
+        swipeDescriptionLabel.text = swipeDescriptionText
+        swipeDescriptionLabel.sizeToFit()
+      }
+    }
+  }
+
+  /// Encapsulates the current swipe state. As this item moves, either because of panning or
+  /// because of animations, it also changes the color/alpha of `colorWashView` and the alpha of `swipeDescriptionLabel`
+  private var currentDynamicItem: ColorTranslatingDynamicItem?
+
   /// The view displaying the current card.
   /// - note: Changing this value will animate away the old card view and animate in the new.
   private var currentCardView: ChallengeView? {
     didSet {
       currentCardView?.alpha = 0
       oldValue?.accessibilityIdentifier = nil
+      oldValue?.alpha = 0
+      oldValue?.removeFromSuperview()
+      cardSnapBehavior.map { animator.removeBehavior($0) }
+      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, colorWashView: colorWashView, swipeDescriptionLabel: swipeDescriptionLabel, centerX: view.center.x) }
       UIView.animate(withDuration: 0.2, animations: {
+        self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
         self.currentCardView?.alpha = 1
-        oldValue?.alpha = 0
       }) { _ in
-        oldValue?.removeFromSuperview()
         if let utterances = self.currentCardView?.introductoryUtterances {
           for utterance in utterances {
             PersonalitySpeechSynthesizer.spanish.speak(utterance)
           }
         }
-        self.currentCardView?.becomeFirstResponder()
-        self.currentCardView?.accessibilityIdentifier = "current-card"
+        if let current = self.currentCardView {
+          current.becomeFirstResponder()
+          current.accessibilityIdentifier = "current-card"
+          // TODO: Refactor so I don't have to force unwrap
+          let snapBehavior = UISnapBehavior(item: self.currentDynamicItem!, snapTo: self.view.center)
+          self.animator.addBehavior(snapBehavior)
+          self.cardSnapBehavior = snapBehavior
+        }
       }
     }
+  }
+
+  private func attachPanGestureRecognizer() {
+    guard let current = currentCardView else { return }
+    let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(StudyViewController.didPan(sender:)))
+    current.addGestureRecognizer(panGestureRecognizer)
   }
 
   private lazy var progressView: UIProgressView = {
@@ -74,10 +123,17 @@ public final class StudyViewController: UIViewController {
     return view
   }()
 
+  private lazy var animator = UIDynamicAnimator(referenceView: view)
+
   public override func viewDidLoad() {
     super.viewDidLoad()
+    view.addSubview(colorWashView)
+    view.addSubview(swipeDescriptionLabel)
     view.addSubview(doneImageView)
     view.addSubview(progressView)
+    colorWashView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
     doneImageView.snp.makeConstraints { make in
       make.right.top.equalTo(view.safeAreaLayoutGuide).inset(16)
     }
@@ -86,10 +142,65 @@ public final class StudyViewController: UIViewController {
       make.centerY.equalTo(doneImageView.snp.centerY)
       make.right.equalTo(doneImageView.snp.left).offset(-8)
     }
+    swipeDescriptionLabel.snp.makeConstraints { make in
+      make.centerX.equalToSuperview()
+      make.top.equalTo(doneImageView.snp.bottom).offset(16)
+    }
     studySession.studySessionStartDate = Date()
     view.backgroundColor = UIColor.systemGroupedBackground
     configureUI(animated: false, completion: nil)
     navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
+  }
+
+  @objc private func didPan(sender: UIPanGestureRecognizer) {
+    guard let currentCard = currentDynamicItem, let snap = cardSnapBehavior else { return }
+    let translation = sender.translation(in: currentCard.view)
+    switch sender.state {
+    case .began:
+      cardSnapBehavior.map { animator.removeBehavior($0) }
+    case .changed:
+      currentCard.center = view.center + translation
+      if translation.x > 0 {
+        swipeDescriptionLabel.text = "I got it right"
+      } else {
+        swipeDescriptionLabel.text = "Need to review"
+      }
+    case .ended:
+      var correct: Bool?
+      if translation.x > 100.0 {
+        snap.snapPoint = CGPoint(x: view.center.x + view.frame.width, y: view.center.y)
+        correct = true
+      } else if translation.x < -100.0 {
+        snap.snapPoint = CGPoint(x: view.center.x - view.frame.width, y: view.center.y)
+        correct = false
+      } else {
+        snap.snapPoint = view.center
+      }
+      cardSnapBehavior.map { animator.addBehavior($0) }
+      if let correct = correct {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+          // TODO: Get rid of force unwrap
+          self.userDidRespond(correct: correct)
+        }
+      }
+    case .cancelled, .failed:
+      cardSnapBehavior.map { animator.addBehavior($0) }
+    default:
+      break
+    }
+  }
+
+  // TODO: Move out of here
+  private func userDidRespond(correct: Bool) {
+    studySession.recordAnswer(correct: correct)
+    configureUI(animated: true) {
+      if self.studySession.remainingCards == 0 {
+        self.studySession.studySessionEndDate = Date()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+          self.delegate?.studyViewController(self, didFinishSession: self.studySession)
+        }
+      }
+    }
   }
 
   private func configureUI(animated: Bool, completion: (() -> Void)?) {
@@ -144,17 +255,47 @@ public final class StudyViewController: UIViewController {
   }
 }
 
-extension StudyViewController: ChallengeViewDelegate {
-  public func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool) {
-    studySession.recordAnswer(correct: didRespondCorrectly)
-    configureUI(animated: true) {
-      if self.studySession.remainingCards == 0 {
-        self.studySession.studySessionEndDate = Date()
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
-          self.delegate?.studyViewController(self, didFinishSession: self.studySession)
-        }
-      }
+/// Changes the color wash of `colorWashView` as the position of `view` changes.
+private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
+  init(view: UIView, colorWashView: UIView, swipeDescriptionLabel: UILabel, centerX: CGFloat) {
+    self.view = view
+    self.colorWashView = colorWashView
+    self.swipeDescriptionLabel = swipeDescriptionLabel
+    self.centerX = centerX
+  }
+
+  let view: UIView
+  private let colorWashView: UIView
+  private let swipeDescriptionLabel: UILabel
+  private let centerX: CGFloat
+
+  var center: CGPoint {
+    get { view.center }
+    set {
+      view.center = newValue
+      let deltaX = newValue.x - centerX
+      let colorWash = deltaX < 0 ? UIColor.systemRed : UIColor.systemGreen
+      let alpha = min(abs(deltaX) / 100.0, 1.0)
+      swipeDescriptionLabel.alpha = alpha
+      let intensity = alpha * 0.4
+      colorWashView.backgroundColor = colorWash.withAlphaComponent(intensity)
     }
+  }
+
+  var bounds: CGRect {
+    get { view.bounds }
+    set { view.bounds = newValue }
+  }
+
+  var transform: CGAffineTransform {
+    get { view.transform }
+    set { view.transform = newValue }
+  }
+}
+
+extension StudyViewController: ChallengeViewDelegate {
+  public func challengeViewDidRevealAnswer(_ challengeView: ChallengeView) {
+    attachPanGestureRecognizer()
   }
 
   public func challengeView(
@@ -163,5 +304,15 @@ extension StudyViewController: ChallengeViewDelegate {
     language: String
   ) {
     PersonalitySpeechSynthesizer.make(with: language).speak(utterance)
+  }
+}
+
+extension CGPoint {
+  static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+    return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+  }
+
+  static func += (lhs: inout CGPoint, rhs: CGPoint) {
+    lhs = CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
   }
 }

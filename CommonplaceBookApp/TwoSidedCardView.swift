@@ -59,19 +59,12 @@ public final class TwoSidedCardView: ChallengeView {
 
   private lazy var columnStack: UIStackView = {
     let columnStack = UIStackView(
-      arrangedSubviews: [contextLabel, frontLabel, backLabel, buttonRow]
+      arrangedSubviews: [contextLabel, frontLabel, backLabel]
     )
     columnStack.axis = .vertical
     columnStack.alignment = .leading
     columnStack.spacing = 8
     return columnStack
-  }()
-
-  private lazy var buttonRow: UIStackView = {
-    let buttonRow = UIStackView(arrangedSubviews: [gotItButton, studyMoreButton])
-    buttonRow.axis = .horizontal
-    buttonRow.spacing = 24
-    return buttonRow
   }()
 
   private let contextLabel: UILabel = {
@@ -98,38 +91,12 @@ public final class TwoSidedCardView: ChallengeView {
     return backLabel
   }()
 
-  private lazy var gotItButton: UIButton = {
-    let button = UIButton(type: .system)
-    button.setTitle("Got It", for: .normal)
-    button.addTarget(self, action: #selector(didTapGotIt), for: .touchUpInside)
-    return button
-  }()
-
-  private lazy var studyMoreButton: UIButton = {
-    let button = UIButton(type: .system)
-    button.setTitle("Study More", for: .normal)
-    button.addTarget(self, action: #selector(didTapStudyMore), for: .touchUpInside)
-    button.tintColor = .systemRed
-    return button
-  }()
-
-  // TODO: Whoa, I don't actually use this?
-  private lazy var prounounceSpanishButton: UIButton = {
-    let button = UIButton(type: .system)
-    button.setTitle("Say it", for: .normal)
-    button.addTarget(self, action: #selector(didTapPronounce), for: .touchUpInside)
-    return button
-  }()
-
   private func setAnswerVisible(_ answerVisible: Bool, animated: Bool) {
     let animations = {
       UIView.performWithoutAnimation {
         self.frontLabel.isHidden = answerVisible
       }
       self.backLabel.isHidden = !answerVisible
-      self.gotItButton.isHidden = !answerVisible
-      self.buttonRow.isHidden = !answerVisible
-      self.studyMoreButton.isHidden = !answerVisible
       self.columnStack.isUserInteractionEnabled = answerVisible
       self.setNeedsLayout()
       if animated { self.layoutIfNeeded() }
@@ -145,14 +112,7 @@ public final class TwoSidedCardView: ChallengeView {
 
   @objc private func revealAnswer() {
     setAnswerVisible(true, animated: true)
-  }
-
-  @objc private func didTapGotIt() {
-    delegate?.challengeView(self, didRespondCorrectly: true)
-  }
-
-  @objc private func didTapStudyMore() {
-    delegate?.challengeView(self, didRespondCorrectly: false)
+    delegate?.challengeViewDidRevealAnswer(self)
   }
 
   @objc private func didTapPronounce() {

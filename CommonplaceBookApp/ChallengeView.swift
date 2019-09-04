@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 public protocol ChallengeViewDelegate: class {
-  func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool)
+  func challengeViewDidRevealAnswer(_ challengeView: ChallengeView)
   func challengeView(_ cardView: ChallengeView, didRequestSpeech: AVSpeechUtterance, language: String)
 }
 
