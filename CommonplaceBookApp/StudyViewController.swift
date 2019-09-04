@@ -19,11 +19,11 @@ public final class StudyViewController: UIViewController {
   /// - parameter delegate: TSIA.
   public init(
     studySession: StudySession,
-    documentCache: DocumentCache,
+    notebook: NoteArchiveDocument,
     delegate: StudyViewControllerDelegate
   ) {
     self.studySession = studySession
-    self.documentCache = documentCache
+    self.notebook = notebook
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
     self.tabBarItem.title = "STUDY"
@@ -37,7 +37,8 @@ public final class StudyViewController: UIViewController {
   /// The current study session
   private var studySession: StudySession
 
-  private let documentCache: DocumentCache
+  /// The document we are studying from
+  private let notebook: NoteArchiveDocument
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -237,21 +238,18 @@ public final class StudyViewController: UIViewController {
     completion: @escaping (ChallengeView?) -> Void
   ) {
     guard let cardFromDocument = cardFromDocument else { completion(nil); return }
-    documentCache.document(for: cardFromDocument.properties.documentName) { document in
-      guard let document = document else { completion(nil); return }
-      let cardView = cardFromDocument.card.challengeView(
-        document: document,
-        properties: cardFromDocument.properties
-      )
-      cardView.delegate = self
-      self.view.addSubview(cardView)
-      cardView.snp.makeConstraints { make in
-        make.left.right.equalTo(self.view.readableContentGuide)
-        make.centerY.equalToSuperview()
-      }
-      cardView.layer.cornerRadius = 8
-      completion(cardView)
+    let cardView = cardFromDocument.card.challengeView(
+      document: notebook,
+      properties: cardFromDocument.properties
+    )
+    cardView.delegate = self
+    self.view.addSubview(cardView)
+    cardView.snp.makeConstraints { make in
+      make.left.right.equalTo(self.view.readableContentGuide)
+      make.centerY.equalToSuperview()
     }
+    cardView.layer.cornerRadius = 8
+    completion(cardView)
   }
 }
 

@@ -205,7 +205,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession.limiting(to: 20),
-      documentCache: ReadOnlyDocumentCache(delegate: self),
+      notebook: notebook,
       delegate: self
     )
     studyVC.title = navigationItem.title
@@ -309,12 +309,6 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
     dataSource?.filteredPageIdentifiers = nil
-  }
-}
-
-extension DocumentListViewController: ReadOnlyDocumentCacheDelegate {
-  func documentCache(_ cache: ReadOnlyDocumentCache, documentFor name: String) -> UIDocument? {
-    return notebook
   }
 }
 

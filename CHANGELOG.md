@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- DocumentCache protocol -- left over from when each page was a different document
+
 ## [0.8.0] - 2019-09-03
 
 ### Changed

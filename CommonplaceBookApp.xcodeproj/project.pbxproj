@@ -41,7 +41,6 @@
 		D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */; };
 		D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */; };
 		D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */; };
-		D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */; };
 		D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */; };
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
@@ -168,7 +167,6 @@
 		D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwoSidedCardView.swift; sourceTree = "<group>"; };
 		D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponents.swift; sourceTree = "<group>"; };
 		D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonalitySpeechSynthesizer.swift; sourceTree = "<group>"; };
-		D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReadOnlyDocumentCache.swift; sourceTree = "<group>"; };
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
@@ -368,7 +366,6 @@
 				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
 				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
-				D31AFAAB229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
@@ -662,7 +659,6 @@
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
-				D31AFADF229D61EE00ED2B76 /* ReadOnlyDocumentCache.swift in Sources */,
 				D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */,
 				D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */,
 				D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */,
