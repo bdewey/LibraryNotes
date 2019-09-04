@@ -63,40 +63,56 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  private var cardsRemainingLabel: UILabel!
+  private lazy var progressView: UIProgressView = {
+    UIProgressView(progressViewStyle: .default)
+  }()
+
+  private lazy var doneImageView: UIImageView = {
+    let check = UIImage(systemName: "checkmark.seal")
+    let view = UIImageView(image: check)
+    view.tintColor = .systemGray2
+    return view
+  }()
 
   public override func viewDidLoad() {
     super.viewDidLoad()
+    view.addSubview(doneImageView)
+    view.addSubview(progressView)
+    doneImageView.snp.makeConstraints { make in
+      make.right.top.equalTo(view.safeAreaLayoutGuide).inset(16)
+    }
+    progressView.snp.makeConstraints { make in
+      make.left.equalTo(view.safeAreaLayoutGuide).inset(16)
+      make.centerY.equalTo(doneImageView.snp.centerY)
+      make.right.equalTo(doneImageView.snp.left).offset(-8)
+    }
     studySession.studySessionStartDate = Date()
-    cardsRemainingLabel = UILabel(frame: .zero)
-    view.addSubview(cardsRemainingLabel)
-    cardsRemainingLabel.bottomAnchor.constraint(
-      lessThanOrEqualToSystemSpacingBelow: view.safeAreaLayoutGuide.bottomAnchor,
-      multiplier: -1
-    ).isActive = true
-    cardsRemainingLabel.leadingAnchor.constraint(
-      greaterThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.leadingAnchor,
-      multiplier: 1
-    ).isActive = true
-    cardsRemainingLabel.trailingAnchor.constraint(
-      lessThanOrEqualToSystemSpacingAfter: view.safeAreaLayoutGuide.trailingAnchor,
-      multiplier: -1
-    ).isActive = true
-    cardsRemainingLabel.textAlignment = .center
-    cardsRemainingLabel.translatesAutoresizingMaskIntoConstraints = false
-    // TODO: this should probably be "caption" -- prototype inside Sketch
-    cardsRemainingLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
     view.backgroundColor = UIColor.systemGroupedBackground
-    configureUI()
+    configureUI(animated: false, completion: nil)
     navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
   }
 
-  private func configureUI() {
+  private func configureUI(animated: Bool, completion: (() -> Void)?) {
     guard isViewLoaded else { return }
     makeCardView(for: studySession.currentCard) { cardView in
       self.currentCardView = cardView
     }
-    cardsRemainingLabel.text = "Cards remaining: \(studySession.remainingCards)"
+    let progressUpdates = { [progressView, studySession, doneImageView] in
+      progressView.setProgress(Float(studySession.count - studySession.remainingCards) / Float(studySession.count), animated: animated)
+      if studySession.remainingCards == 0 {
+        progressView.tintColor = .systemGreen
+        doneImageView.image = UIImage(systemName: "checkmark.seal.fill")
+        doneImageView.tintColor = .systemGreen
+      }
+    }
+    if animated {
+      UIView.animate(withDuration: 0.2, animations: progressUpdates) { (_) in
+        completion?()
+      }
+    } else {
+      progressUpdates()
+      completion?()
+    }
   }
 
   @objc private func didTapDone() {
@@ -131,10 +147,13 @@ public final class StudyViewController: UIViewController {
 extension StudyViewController: ChallengeViewDelegate {
   public func challengeView(_ cardView: ChallengeView, didRespondCorrectly: Bool) {
     studySession.recordAnswer(correct: didRespondCorrectly)
-    configureUI()
-    if studySession.remainingCards == 0 {
-      studySession.studySessionEndDate = Date()
-      delegate?.studyViewController(self, didFinishSession: studySession)
+    configureUI(animated: true) {
+      if self.studySession.remainingCards == 0 {
+        self.studySession.studySessionEndDate = Date()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
+          self.delegate?.studyViewController(self, didFinishSession: self.studySession)
+        }
+      }
     }
   }
 

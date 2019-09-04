@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Study view uses a progress bar
+
 ### Fixed
 
 - Quote cards use a bigger "context" font & kern, consistent with clozes
