@@ -6,6 +6,7 @@ import SwiftUI
 /// An "Add Vocabulary" view, designed to be presented modally inside a UIKit app.
 /// It will dismiss automatically on tapping Done.
 struct EditVocabularyView: View {
+  @EnvironmentObject var imageSearchRequest: ImageSearchRequest
   @ObservedObject var vocabularyTemplate: VocabularyChallengeTemplate
   var onCommit: () -> Void = {}
 
@@ -24,7 +25,11 @@ struct EditVocabularyView: View {
           LocaleAwareTextField(
             "Spanish",
             text: $vocabularyTemplate.front.text,
-            onCommit: { self.firstResponder = .english },
+            onCommit: {
+              self.firstResponder = .english
+              self.imageSearchRequest.searchTerm = self.vocabularyTemplate.front.text
+              self.imageSearchRequest.performSearch()
+            },
             shouldBeFirstResponder: firstResponder == .spanish
           ).customAutocapitalization(.none).locale(Locale(identifier: "es-MX"))
           LocaleAwareTextField(
@@ -58,5 +63,6 @@ struct AddVocabularyViewPreviews: PreviewProvider {
       parsingRules: ParsingRules()
     )
     return EditVocabularyView(vocabularyTemplate: template)
+      .environmentObject(ImageSearchRequest())
   }
 }

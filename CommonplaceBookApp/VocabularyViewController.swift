@@ -49,7 +49,7 @@ final class VocabularyViewController: UIViewController {
       rootView: EditVocabularyView(vocabularyTemplate: template, onCommit: { [weak self] in
         self?.commit(template: template, indexPath: nil)
         self?.dismiss(animated: true, completion: nil)
-      })
+      }).environmentObject(ImageSearchRequest())
     )
     present(viewController, animated: true, completion: nil)
   }
