@@ -420,20 +420,28 @@ extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
     store imageData: Data,
     suffix: String
   ) -> String {
-    let key = "\(imageData.sha1Digest()).\(suffix)"
-    let assetsWrapper = assetsFileWrapper
-    if assetsWrapper.fileWrappers![key] == nil {
-      let imageFileWrapper = FileWrapper(regularFileWithContents: imageData)
-      imageFileWrapper.preferredFilename = key
-      assetsWrapper.addFileWrapper(imageFileWrapper)
-    }
-    return "\(BundleWrapperKey.assets)/\(key)"
+    return storeAssetData(imageData, typeHint: suffix)
   }
 }
 
 // MARK: - Images
 
 extension NoteArchiveDocument {
+  /// Stores asset data into the document.
+  /// - parameter data: The asset data to store
+  /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
+  /// - returns: A key that can be used to get the data later.
+  public func storeAssetData(_ data: Data, typeHint: String) -> String {
+    let key = "\(data.sha1Digest()).\(typeHint)"
+    let assetsWrapper = assetsFileWrapper
+    if assetsWrapper.fileWrappers![key] == nil {
+      let imageFileWrapper = FileWrapper(regularFileWithContents: data)
+      imageFileWrapper.preferredFilename = key
+      assetsWrapper.addFileWrapper(imageFileWrapper)
+    }
+    return "\(BundleWrapperKey.assets)/\(key)"
+  }
+
   /// Adds a renderer tthat knows how to render images using assets from this document
   /// - parameter renderers: The collection of render functions
   func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {

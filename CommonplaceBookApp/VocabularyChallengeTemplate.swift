@@ -24,6 +24,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
 
   @Published public var front: Word
   @Published public var back: Word
+  @Published public var imageAsset: String?
   public let parsingRules: ParsingRules
 
   public init(front: Word, back: Word, parsingRules: ParsingRules) {
@@ -57,6 +58,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
   enum CodingKeys: String, CodingKey {
     case front
     case back
+    case imageAsset
   }
 
   required init(from decoder: Decoder) throws {
@@ -67,6 +69,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.front = try container.decode(Word.self, forKey: .front)
     self.back = try container.decode(Word.self, forKey: .back)
+    self.imageAsset = try container.decodeIfPresent(String.self, forKey: .imageAsset)
     self.parsingRules = parsingRules
     try super.init(from: decoder)
   }
@@ -75,6 +78,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(front, forKey: .front)
     try container.encode(back, forKey: .back)
+    try container.encodeIfPresent(imageAsset, forKey: .imageAsset)
   }
 }
 

@@ -46,7 +46,7 @@ final class VocabularyViewController: UIViewController {
       parsingRules: notebook.parsingRules
     )
     let viewController = UIHostingController(
-      rootView: EditVocabularyView(vocabularyTemplate: template, onCommit: { [weak self] in
+      rootView: EditVocabularyView(notebook: notebook, vocabularyTemplate: template, onCommit: { [weak self] in
         self?.commit(template: template, indexPath: nil)
         self?.dismiss(animated: true, completion: nil)
       }).environmentObject(ImageSearchRequest())
@@ -81,13 +81,18 @@ final class VocabularyViewController: UIViewController {
   }()
 
   private lazy var dataSource: DataSource = {
-    let dataSource = DataSource(tableView: tableView) { (innerTableView, _, template) -> UITableViewCell? in
+    let dataSource = DataSource(tableView: tableView) { [weak self](innerTableView, _, template) -> UITableViewCell? in
       var cell: UITableViewCell! = innerTableView.dequeueReusableCell(withIdentifier: Identifier.cell)
       if cell == nil {
         cell = UITableViewCell(style: .subtitle, reuseIdentifier: Identifier.cell)
       }
       cell.textLabel?.text = template.front.text
       cell.detailTextLabel?.text = template.back.text
+      if let key = template.imageAsset, let data = self?.notebook.data(for: key), let image = UIImage(data: data) {
+        cell.imageView?.image = image
+      } else {
+        cell.imageView?.image = nil
+      }
       return cell
     }
     dataSource.viewController = self
@@ -112,10 +117,10 @@ extension VocabularyViewController: UITableViewDelegate {
     tableView.deselectRow(at: indexPath, animated: true)
     guard let template = dataSource.itemIdentifier(for: indexPath) else { return }
     let viewController = UIHostingController(
-      rootView: EditVocabularyView(vocabularyTemplate: template, onCommit: { [weak self] in
+      rootView: EditVocabularyView(notebook: notebook, vocabularyTemplate: template, onCommit: { [weak self] in
         self?.commit(template: template, indexPath: indexPath)
         self?.dismiss(animated: true, completion: nil)
-      })
+      }).environmentObject(ImageSearchRequest())
     )
     present(viewController, animated: true, completion: nil)
   }

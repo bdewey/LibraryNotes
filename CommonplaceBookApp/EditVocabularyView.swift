@@ -7,6 +7,7 @@ import SwiftUI
 /// An "Add Vocabulary" view, designed to be presented modally inside a UIKit app.
 /// It will dismiss automatically on tapping Done.
 struct EditVocabularyView: View {
+  let notebook: NoteArchiveDocument
   @EnvironmentObject var imageSearchRequest: ImageSearchRequest
   @ObservedObject var vocabularyTemplate: VocabularyChallengeTemplate
   var onCommit: () -> Void = {}
@@ -41,10 +42,13 @@ struct EditVocabularyView: View {
             },
             shouldBeFirstResponder: firstResponder == .english
           ).customAutocapitalization(.none)
+          selectedImage?.resizable().aspectRatio(contentMode: .fit).frame(height: 50)
         }
-        Section(header: Text("Image")) {
-          ImageSearchResultsView(searchResults: imageSearchRequest.searchResults, onSelectedImage: self.onSelectedImage)
-            .frame(height: 200)
+        if imageSearchRequest.searchResults != nil {
+          Section(header: Text("Available images")) {
+            ImageSearchResultsView(searchResults: imageSearchRequest.searchResults, onSelectedImage: self.onSelectedImage)
+              .frame(height: 200)
+          }
         }
       }
       .navigationBarTitle("Add Vocabulary")
@@ -58,8 +62,22 @@ struct EditVocabularyView: View {
       .disabled(!vocabularyTemplate.isValid)
   }
 
+  private var selectedImage: SwiftUI.Image? {
+    if
+      let key = vocabularyTemplate.imageAsset,
+      let data = notebook.data(for: key),
+      let uiImage = UIImage(data: data) {
+      return Image(uiImage: uiImage)
+    } else {
+      return nil
+    }
+  }
+
   private func onSelectedImage(encodedImage: EncodedImage) {
     DDLogInfo("Selected image: \(encodedImage)")
+    let key = notebook.storeAssetData(encodedImage.data, typeHint: encodedImage.encoding)
+    DDLogInfo("Saved image data as asset \(key)")
+    vocabularyTemplate.imageAsset = key
   }
 }
 
@@ -70,7 +88,8 @@ struct AddVocabularyViewPreviews: PreviewProvider {
       back: VocabularyChallengeTemplate.Word(text: "", language: "en"),
       parsingRules: ParsingRules()
     )
-    return EditVocabularyView(vocabularyTemplate: template)
+    let url = FileManager.default.temporaryDirectory.appendingPathComponent("test.notebundle")
+    return EditVocabularyView(notebook: NoteArchiveDocument(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
       .environmentObject(ImageSearchRequest())
   }
 }
