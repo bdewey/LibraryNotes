@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import MiniMarkdown
 import SwiftUI
 
@@ -27,8 +28,7 @@ struct EditVocabularyView: View {
             text: $vocabularyTemplate.front.text,
             onCommit: {
               self.firstResponder = .english
-              self.imageSearchRequest.searchTerm = self.vocabularyTemplate.front.text
-              self.imageSearchRequest.performSearch()
+              self.imageSearchRequest.performSearch(for: self.vocabularyTemplate.front.text)
             },
             shouldBeFirstResponder: firstResponder == .spanish
           ).customAutocapitalization(.none).locale(Locale(identifier: "es-MX"))
@@ -42,6 +42,10 @@ struct EditVocabularyView: View {
             shouldBeFirstResponder: firstResponder == .english
           ).customAutocapitalization(.none)
         }
+        Section(header: Text("Image")) {
+          ImageSearchResultsView(searchResults: imageSearchRequest.searchResults, onSelectedImage: self.onSelectedImage)
+            .frame(height: 200)
+        }
       }
       .navigationBarTitle("Add Vocabulary")
       .navigationBarItems(trailing: doneButton)
@@ -52,6 +56,10 @@ struct EditVocabularyView: View {
   private var doneButton: some View {
     Button("Done", action: onCommit)
       .disabled(!vocabularyTemplate.isValid)
+  }
+
+  private func onSelectedImage(encodedImage: EncodedImage) {
+    DDLogInfo("Selected image: \(encodedImage)")
   }
 }
 

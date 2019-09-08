@@ -6,15 +6,19 @@ import Foundation
 
 /// Does an image search using Bing
 public final class ImageSearchRequest: ObservableObject {
-  /// What are we searching for?
-  public var searchTerm = ""
-
   @Published var previousError: Error?
-  @Published var images: Images?
+
+  public struct SearchResults: Equatable {
+    let searchTerm: String
+    let images: Images
+  }
+
+  /// Image search results for a specific search term.
+  @Published var searchResults: SearchResults?
 
   /// Initiates the search for the current search term.
-  public func performSearch() {
-    let request = makeRequest()
+  public func performSearch(for searchTerm: String) {
+    let request = makeRequest(for: searchTerm)
     previousError = nil
     let task = URLSession.shared.dataTask(with: request) { data, _, error in
       if let error = error {
@@ -31,7 +35,7 @@ public final class ImageSearchRequest: ObservableObject {
         let images = try JSONDecoder().decode(Images.self, from: data)
         DDLogInfo("Decoded \(images.value.count) image(s)")
         DispatchQueue.main.async {
-          self.images = images
+          self.searchResults = SearchResults(searchTerm: searchTerm, images: images)
         }
       } catch {
         DDLogError("Error decoding response: \(error)")
@@ -40,11 +44,11 @@ public final class ImageSearchRequest: ObservableObject {
     task.resume()
   }
 
-  public struct Images: Codable {
+  public struct Images: Codable, Equatable {
     let value: [Image]
   }
 
-  public struct Image: Codable {
+  public struct Image: Codable, Equatable {
     let accentColor: String
     let contentSize: String
     let contentUrl: String
@@ -55,7 +59,7 @@ public final class ImageSearchRequest: ObservableObject {
     let width: Int
   }
 
-  public struct MediaSize: Codable {
+  public struct MediaSize: Codable, Equatable {
     let height: Int
     let width: Int
   }
@@ -67,7 +71,7 @@ public final class ImageSearchRequest: ObservableObject {
   // TODO: This key shouldn't be built into the app.
   private let key = "e597b057bd4347deb1c2652ae110ae8f"
 
-  private func makeRequest() -> URLRequest {
+  private func makeRequest(for searchTerm: String) -> URLRequest {
     var urlComponents = URLComponents(url: endpoint, resolvingAgainstBaseURL: false)!
     urlComponents.queryItems = [
       URLQueryItem(name: "q", value: searchTerm),
