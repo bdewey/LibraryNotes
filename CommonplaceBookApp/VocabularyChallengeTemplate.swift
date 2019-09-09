@@ -157,20 +157,26 @@ extension VocabularyChallengeTemplate {
       self.promptWord = promptWord
       self.answerWord = answerWord
       super.init(frame: .zero)
-      if let image = image {
-        imageView.image = image
-      } else {
-        imageView.isHidden = true
-      }
       promptLabel.text = promptWord.text
       answerLabel.text = answerWord.text
-      // The image starts hidden if the prompt language is anything other than english
-      // TODO: "english" should be an environment variable of "language you already know"
-      imageView.isHidden = promptWord.language != "en"
       addSubview(stackView)
       stackView.snp.makeConstraints { make in
         make.edges.equalToSuperview().inset(16)
       }
+      if let image = image {
+        imageView.image = image
+        imageView.snp.makeConstraints { make in
+          make.width.equalToSuperview()
+          // This needs to be less-than-required, otherwise when the image is hidden it will force
+          // its width to 0, which forces the stack width to 0...
+          make.height.equalTo(imageView.snp.width).multipliedBy(image.size.height / image.size.width).priority(999)
+        }
+      } else {
+        imageView.isHidden = true
+      }
+      // The image starts hidden if the prompt language is anything other than english
+      // TODO: "english" should be an environment variable of "language you already know"
+      imageView.isHidden = promptWord.language != "en"
       addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
       layoutIfNeeded()
     }
