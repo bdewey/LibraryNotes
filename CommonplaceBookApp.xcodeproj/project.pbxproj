@@ -349,12 +349,14 @@
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
 				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
 				D35914FF231C205500883AC4 /* EditVocabularyView.swift */,
+				D3E4475F23254FAF00F21F91 /* EncodedImage.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
 				D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */,
 				D3E4475B23240CA200F21F91 /* ImageSearchRequest.swift */,
+				D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
@@ -396,8 +398,6 @@
 				D3591503231C3AC800883AC4 /* View+Locale.swift */,
 				D3D50A2C231AC8EB007440F1 /* VocabularyChallengeTemplate.swift */,
 				D30D261723193F9A0031AA20 /* VocabularyViewController.swift */,
-				D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */,
-				D3E4475F23254FAF00F21F91 /* EncodedImage.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";

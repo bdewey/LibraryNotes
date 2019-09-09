@@ -129,7 +129,13 @@ struct ImageSearchResultsView: UIViewRepresentable {
         )
         let decodedImage = UIImage(data: data)
         DispatchQueue.main.async {
-          self?.imageView.image = decodedImage
+          guard let imageView = self?.imageView, let decodedImage = decodedImage else { return }
+          imageView.image = decodedImage
+          imageView.snp.remakeConstraints({ make in
+            make.center.equalToSuperview()
+            make.height.equalToSuperview()
+            make.width.equalTo(imageView.snp.height).multipliedBy(decodedImage.size.width / decodedImage.size.height)
+          })
         }
       }
       task.resume()
