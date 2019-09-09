@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import AVFoundation
 import Combine
 import MiniMarkdown
 import UIKit
@@ -48,8 +49,8 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
     // to manage these identifiers.
     return [
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back, parsingRules: parsingRules),
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
     ]
   }
 
@@ -99,19 +100,26 @@ extension VocabularyChallengeTemplate {
     public let challengeIdentifier: ChallengeIdentifier
     public let front: Word
     public let back: Word
+    public let imageAsset: String?
     public let parsingRules: ParsingRules
 
     public func challengeView(
       document: UIDocument,
       properties: CardDocumentProperties
     ) -> ChallengeView {
-      let view = TwoSidedCardView(frame: .zero)
-      view.context = context()
-      let renderer = RenderedMarkdown(textStyle: .headline, parsingRules: parsingRules)
-      renderer.markdown = front.text
-      view.front = renderer.attributedString
-      renderer.markdown = back.text
-      view.back = renderer.attributedString
+      var image: UIImage?
+      if let notebook = document as? NoteArchiveDocument,
+        let assetKey = imageAsset,
+        let data = notebook.data(for: assetKey),
+        let documentImage = UIImage(data: data) {
+        image = documentImage
+      }
+      let view = VocabularyChallengeView(promptWord: front, answerWord: back, image: image)
+      if let languageName = languageName(for: back.language) {
+        view.context = "Say this in \(languageName)"
+      } else {
+        view.context = "Translate"
+      }
       return view
     }
 
@@ -138,6 +146,122 @@ extension VocabularyChallengeTemplate {
       default:
         return nil
       }
+    }
+  }
+}
+
+/// A specialized ChallengeView for vocabulary. It's got room for images, and it will speak words.
+extension VocabularyChallengeTemplate {
+  private final class VocabularyChallengeView: ChallengeView {
+    init(promptWord: Word, answerWord: Word, image: UIImage?) {
+      self.promptWord = promptWord
+      self.answerWord = answerWord
+      super.init(frame: .zero)
+      if let image = image {
+        imageView.image = image
+      } else {
+        imageView.isHidden = true
+      }
+      promptLabel.text = promptWord.text
+      answerLabel.text = answerWord.text
+      // The image starts hidden if the prompt language is anything other than english
+      // TODO: "english" should be an environment variable of "language you already know"
+      imageView.isHidden = promptWord.language != "en"
+      addSubview(stackView)
+      stackView.snp.makeConstraints { make in
+        make.edges.equalToSuperview().inset(16)
+      }
+      addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
+      layoutIfNeeded()
+    }
+
+    public required init?(coder: NSCoder) {
+      fatalError("init(coder:) has not been implemented")
+    }
+
+    private func speakWord(_ word: Word) {
+      let utterance = AVSpeechUtterance(string: word.text)
+      utterance.voice = AVSpeechSynthesisVoice(language: word.language)
+      AVSpeechSynthesizer().speak(utterance)
+    }
+
+    override func didMoveToSuperview() {
+      super.didMoveToSuperview()
+      if superview != nil, promptWord.language != "en" {
+        speakWord(promptWord)
+      }
+    }
+
+    private lazy var stackView: UIStackView = {
+      let stack = UIStackView(arrangedSubviews: [contextLabel, promptLabel, imageView, answerLabel])
+      stack.axis = .vertical
+      stack.alignment = .leading
+      stack.spacing = 8
+      stack.isUserInteractionEnabled = false
+      return stack
+    }()
+
+    var context: String? {
+      get { contextLabel.attributedText?.string }
+      set {
+        contextLabel.attributedText = NSAttributedString(
+          string: (newValue ?? "").localizedUppercase,
+          attributes: [
+            .font: UIFont.preferredFont(forTextStyle: .subheadline),
+            .kern: 2.0,
+            .foregroundColor: UIColor.secondaryLabel,
+          ]
+        )
+      }
+    }
+
+    let promptWord: Word
+    let answerWord: Word
+
+    private lazy var contextLabel: UILabel = {
+      let label = UILabel(frame: .zero)
+      label.font = .preferredFont(forTextStyle: .subheadline)
+      label.textColor = .secondaryLabel
+      return label
+    }()
+
+    private lazy var promptLabel: UILabel = {
+      let label = UILabel(frame: .zero)
+      label.font = .preferredFont(forTextStyle: .headline)
+      label.textColor = .label
+      return label
+    }()
+
+    private lazy var imageView: UIImageView = {
+      let imageView = UIImageView(frame: .zero)
+      imageView.contentMode = .scaleAspectFit
+      return imageView
+    }()
+
+    private lazy var answerLabel: UILabel = {
+      let label = UILabel(frame: .zero)
+      label.font = .preferredFont(forTextStyle: .body)
+      label.textColor = .label
+      label.isHidden = true
+      return label
+    }()
+
+    @objc private func revealAnswer() {
+      UIView.animate(
+        withDuration: 0.2,
+        animations: {
+          self.answerLabel.isHidden = false
+          self.imageView.isHidden = false
+          self.setNeedsLayout()
+          self.layoutIfNeeded()
+        },
+        completion: { _ in
+          if self.answerWord.language != "en" {
+            self.speakWord(self.answerWord)
+          }
+        }
+      )
+      delegate?.challengeViewDidRevealAnswer(self)
     }
   }
 }
