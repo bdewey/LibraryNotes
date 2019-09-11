@@ -196,16 +196,10 @@ extension VocabularyChallengeTemplate {
       fatalError("init(coder:) has not been implemented")
     }
 
-    private func speakWord(_ word: Word) {
-      let utterance = AVSpeechUtterance(string: word.text)
-      utterance.voice = AVSpeechSynthesisVoice(language: word.language)
-      speechSynthesizer.speak(utterance)
-    }
-
     override func didMoveToSuperview() {
       super.didMoveToSuperview()
       if superview != nil, promptWord.language != "en" {
-        speakWord(promptWord)
+        LoggingSpeechSynthesizer.shared.speakWord(promptWord)
       }
     }
 
@@ -277,7 +271,7 @@ extension VocabularyChallengeTemplate {
         },
         completion: { _ in
           if self.answerWord.language != "en" {
-            self.speakWord(self.answerWord)
+            LoggingSpeechSynthesizer.shared.speakWord(self.answerWord)
           }
         }
       )
