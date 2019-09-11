@@ -223,7 +223,7 @@ public final class StudyViewController: UIViewController {
       }
     }
     if animated {
-      UIView.animate(withDuration: 0.2, animations: progressUpdates) { (_) in
+      UIView.animate(withDuration: 0.2, animations: progressUpdates) { _ in
         completion?()
       }
     } else {
@@ -248,7 +248,7 @@ public final class StudyViewController: UIViewController {
       properties: cardFromDocument.properties
     )
     cardView.delegate = self
-    self.view.addSubview(cardView)
+    view.addSubview(cardView)
     cardView.snp.makeConstraints { make in
       make.left.right.equalTo(self.view.readableContentGuide)
       make.centerY.equalToSuperview()

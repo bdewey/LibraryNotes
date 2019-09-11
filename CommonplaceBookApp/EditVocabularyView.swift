@@ -25,6 +25,7 @@ struct EditVocabularyView: View {
     case english
     case none
   }
+
   @State private var firstResponder = FirstResponder.spanish
 
   var body: some View {

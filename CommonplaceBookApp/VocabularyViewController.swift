@@ -81,7 +81,7 @@ final class VocabularyViewController: UIViewController {
   }()
 
   private lazy var dataSource: DataSource = {
-    let dataSource = DataSource(tableView: tableView) { [weak self](innerTableView, _, template) -> UITableViewCell? in
+    let dataSource = DataSource(tableView: tableView) { [weak self] (innerTableView, _, template) -> UITableViewCell? in
       var cell: UITableViewCell! = innerTableView.dequeueReusableCell(withIdentifier: Identifier.cell)
       if cell == nil {
         cell = UITableViewCell(style: .subtitle, reuseIdentifier: Identifier.cell)

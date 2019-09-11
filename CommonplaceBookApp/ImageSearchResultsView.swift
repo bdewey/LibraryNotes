@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
 import SnapKit
@@ -132,11 +132,11 @@ struct ImageSearchResultsView: UIViewRepresentable {
         DispatchQueue.main.async {
           guard let imageView = self?.imageView, let decodedImage = decodedImage else { return }
           imageView.image = decodedImage
-          imageView.snp.remakeConstraints({ make in
+          imageView.snp.remakeConstraints { make in
             make.center.equalToSuperview()
             make.height.equalToSuperview()
             make.width.equalTo(imageView.snp.height).multipliedBy(decodedImage.size.width / decodedImage.size.height)
-          })
+          }
         }
       }
       task.resume()
@@ -146,9 +146,11 @@ struct ImageSearchResultsView: UIViewRepresentable {
 
 extension UIColor {
   public convenience init(rgb: UInt32, alpha: CGFloat = 1.0) {
-    self.init(red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
-              green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
-              blue: CGFloat(rgb & 0xFF) / 255.0,
-              alpha: alpha)
+    self.init(
+      red: CGFloat((rgb >> 16) & 0xFF) / 255.0,
+      green: CGFloat((rgb >> 8) & 0xFF) / 255.0,
+      blue: CGFloat(rgb & 0xFF) / 255.0,
+      alpha: alpha
+    )
   }
 }
