@@ -150,8 +150,11 @@ extension VocabularyChallengeTemplate {
   }
 }
 
-/// A specialized ChallengeView for vocabulary. It's got room for images, and it will speak words.
 extension VocabularyChallengeTemplate {
+  /// A specialized ChallengeView for vocabulary. It's got room for images, and it will speak words.
+  /// - The assumption is the viewer knows English and wants to learn something else.
+  /// - When the non-English word is revealed, it's also spoken.
+  /// - If there is an image, it will be revealed when the English word is revealed.
   private final class VocabularyChallengeView: ChallengeView {
     init(promptWord: Word, answerWord: Word, image: UIImage?) {
       self.promptWord = promptWord
@@ -181,6 +184,14 @@ extension VocabularyChallengeTemplate {
       layoutIfNeeded()
     }
 
+    /// What are we prompting for? (text & language)
+    let promptWord: Word
+
+    /// What's the expected response? (text & language)
+    let answerWord: Word
+
+    let speechSynthesizer = AVSpeechSynthesizer()
+
     public required init?(coder: NSCoder) {
       fatalError("init(coder:) has not been implemented")
     }
@@ -188,7 +199,7 @@ extension VocabularyChallengeTemplate {
     private func speakWord(_ word: Word) {
       let utterance = AVSpeechUtterance(string: word.text)
       utterance.voice = AVSpeechSynthesisVoice(language: word.language)
-      AVSpeechSynthesizer().speak(utterance)
+      speechSynthesizer.speak(utterance)
     }
 
     override func didMoveToSuperview() {
@@ -198,8 +209,9 @@ extension VocabularyChallengeTemplate {
       }
     }
 
+    /// Holds the vertical stack of controls.
     private lazy var stackView: UIStackView = {
-      let stack = UIStackView(arrangedSubviews: [contextLabel, promptLabel, imageView, answerLabel])
+      let stack = UIStackView(arrangedSubviews: [contextLabel, imageView, promptLabel, answerLabel])
       stack.axis = .vertical
       stack.alignment = .leading
       stack.spacing = 8
@@ -221,9 +233,7 @@ extension VocabularyChallengeTemplate {
       }
     }
 
-    let promptWord: Word
-    let answerWord: Word
-
+    /// The "context" at the top of the view, letting the viewer know what's expected.
     private lazy var contextLabel: UILabel = {
       let label = UILabel(frame: .zero)
       label.font = .preferredFont(forTextStyle: .subheadline)
@@ -231,6 +241,7 @@ extension VocabularyChallengeTemplate {
       return label
     }()
 
+    /// The prompt for a word.
     private lazy var promptLabel: UILabel = {
       let label = UILabel(frame: .zero)
       label.font = .preferredFont(forTextStyle: .headline)
@@ -238,12 +249,14 @@ extension VocabularyChallengeTemplate {
       return label
     }()
 
+    /// The optional image.
     private lazy var imageView: UIImageView = {
       let imageView = UIImageView(frame: .zero)
       imageView.contentMode = .scaleAspectFit
       return imageView
     }()
 
+    /// The expected response, given the prompt.
     private lazy var answerLabel: UILabel = {
       let label = UILabel(frame: .zero)
       label.font = .preferredFont(forTextStyle: .body)
@@ -252,6 +265,7 @@ extension VocabularyChallengeTemplate {
       return label
     }()
 
+    /// Reveals the answer.
     @objc private func revealAnswer() {
       UIView.animate(
         withDuration: 0.2,

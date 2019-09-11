@@ -7,17 +7,24 @@ import SwiftUI
 /// An "Add Vocabulary" view, designed to be presented modally inside a UIKit app.
 /// It will dismiss automatically on tapping Done.
 struct EditVocabularyView: View {
+  /// Notebook -- needed to save image assets.
   let notebook: NoteArchiveDocument
+
+  /// Holds the results from an image search.
   @EnvironmentObject var imageSearchRequest: ImageSearchRequest
+
+  /// The vocabulary template we are filling out.
   @ObservedObject var vocabularyTemplate: VocabularyChallengeTemplate
+
+  /// Action to take on commit.
   var onCommit: () -> Void = {}
 
+  /// Which field is supposed to have focus?
   private enum FirstResponder {
     case spanish
     case english
     case none
   }
-
   @State private var firstResponder = FirstResponder.spanish
 
   var body: some View {
@@ -57,11 +64,13 @@ struct EditVocabularyView: View {
     .navigationViewStyle(StackNavigationViewStyle())
   }
 
+  /// The "Done" button -- factored out because of disabled logic.
   private var doneButton: some View {
     Button("Done", action: onCommit)
       .disabled(!vocabularyTemplate.isValid)
   }
 
+  /// The current selected image for the vocabulary association.
   private var selectedImage: SwiftUI.Image? {
     if
       let key = vocabularyTemplate.imageAsset,
@@ -73,6 +82,8 @@ struct EditVocabularyView: View {
     }
   }
 
+  /// Handles that the selected image changed.
+  // TODO: Only store asset data when we commit this association?
   private func onSelectedImage(encodedImage: EncodedImage) {
     DDLogInfo("Selected image: \(encodedImage)")
     let key = notebook.storeAssetData(encodedImage.data, typeHint: encodedImage.encoding)

@@ -6,6 +6,7 @@ import SwiftUI
 import UIKit
 
 /// Displays image search results in a UICollectionView.
+/// This is a horizontally-scrollable UICollectionView to be easily embeddable inside a simple form.
 struct ImageSearchResultsView: UIViewRepresentable {
   let searchResults: ImageSearchRequest.SearchResults?
   var onSelectedImage: (EncodedImage) -> Void = { _ in }
