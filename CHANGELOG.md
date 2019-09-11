@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Image search & images for vocabulary cards
+
 ## [0.8.1] - 2019-09-04
 
 ### Fixed
