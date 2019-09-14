@@ -7,6 +7,7 @@
 - Tightened up the animation transitions for `TwoSidedCard`
 - Polished spacing between card text and attribution for quotes & clozes
 - No longer slide up the DocumentListViewController
+- No more "Done" button when studying. Swipe-to-dismiss saves on device and discards in simulator.
 
 ## [0.9.0] - 2019-09-11
 
