@@ -319,7 +319,6 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   ) {
     notebook.updateStudySessionResults(session)
     updateStudySession()
-    dismiss(animated: true, completion: nil)
   }
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {

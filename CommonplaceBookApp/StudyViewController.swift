@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
+import CocoaLumberjack
 import SnapKit
 import UIKit
 
@@ -148,7 +149,8 @@ public final class StudyViewController: UIViewController {
     studySession.studySessionStartDate = Date()
     view.backgroundColor = UIColor.systemGroupedBackground
     configureUI(animated: false, completion: nil)
-    navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDone))
+    // Assumes we're presented in a navigation controller
+    navigationController?.presentationController?.delegate = self
   }
 
   public override func viewDidLayoutSubviews() {
@@ -202,6 +204,7 @@ public final class StudyViewController: UIViewController {
         self.studySession.studySessionEndDate = Date()
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
           self.delegate?.studyViewController(self, didFinishSession: self.studySession)
+          self.dismiss(animated: true, completion: nil)
         }
       }
     }
@@ -230,11 +233,6 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  @objc private func didTapDone() {
-    studySession.studySessionEndDate = Date()
-    delegate?.studyViewController(self, didFinishSession: studySession)
-  }
-
   /// Creates a card view for a card.
   private func makeCardView(
     for cardFromDocument: StudySession.AttributedCard?,
@@ -253,6 +251,16 @@ public final class StudyViewController: UIViewController {
     }
     cardView.layer.cornerRadius = 8
     completion(cardView)
+  }
+}
+
+extension StudyViewController: UIAdaptivePresentationControllerDelegate {
+  public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+    DDLogInfo("Dismissing study view controller")
+    if !UIApplication.isSimulator {
+      studySession.studySessionEndDate = Date()
+      delegate?.studyViewController(self, didFinishSession: studySession)
+    }
   }
 }
 
