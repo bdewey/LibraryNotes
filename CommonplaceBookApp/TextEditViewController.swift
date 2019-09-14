@@ -96,10 +96,8 @@ final class TextEditViewController: UIViewController {
       let heading = $0 as! Heading // swiftlint:disable:this force_cast
       switch heading.headingLevel {
       case 1:
-        $1.textStyle = .largeTitle
-      case 2:
         $1.textStyle = .title1
-      case 3:
+      case 2:
         $1.textStyle = .title2
       default:
         $1.textStyle = .title3
