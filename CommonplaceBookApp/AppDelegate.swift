@@ -56,7 +56,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       do {
         let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
         DDLogInfo("Successfully resolved url: \(url)")
-        openDocument(at: url, from: browser)
+        openDocument(at: url, from: browser, animated: false)
       } catch {
         DDLogError("Unexpected error: \(error.localizedDescription)")
       }
@@ -72,7 +72,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
-        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notebundle"), from: viewController)
+        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notebundle"), from: viewController, animated: false)
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
@@ -194,7 +194,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// Opens a document.
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
-  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController) {
+  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
     DDLogInfo("Opening document at \(url)")
     let noteArchiveDocument = NoteArchiveDocument(
       fileURL: url,
@@ -216,7 +216,8 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     }
     let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
-    controller.present(wrappedViewController, animated: true, completion: nil)
+    wrappedViewController.modalTransitionStyle = .crossDissolve
+    controller.present(wrappedViewController, animated: animated, completion: nil)
     let pageIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
       pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
@@ -236,7 +237,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
     guard let url = documentURLs.first else { return }
-    openDocument(at: url, from: controller)
+    openDocument(at: url, from: controller, animated: true)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
@@ -262,7 +263,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
     DDLogInfo("Imported document to \(destinationURL)")
-    openDocument(at: destinationURL, from: controller)
+    openDocument(at: destinationURL, from: controller, animated: true)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {

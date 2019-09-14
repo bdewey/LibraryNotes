@@ -6,6 +6,7 @@
 
 - Tightened up the animation transitions for `TwoSidedCard`
 - Polished spacing between card text and attribution for quotes & clozes
+- No longer slide up the DocumentListViewController
 
 ## [0.9.0] - 2019-09-11
 
