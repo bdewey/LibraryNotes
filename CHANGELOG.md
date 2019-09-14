@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Tightened up the animation transitions for `TwoSidedCard`
+
 ## [0.9.0] - 2019-09-11
 
 ### Added

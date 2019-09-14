@@ -309,14 +309,6 @@ extension StudyViewController: ChallengeViewDelegate {
   public func challengeViewDidRevealAnswer(_ challengeView: ChallengeView) {
     attachPanGestureRecognizer()
   }
-
-  public func challengeView(
-    _ cardView: ChallengeView,
-    didRequestSpeech utterance: AVSpeechUtterance,
-    language: String
-  ) {
-    PersonalitySpeechSynthesizer.make(with: language).speak(utterance)
-  }
 }
 
 extension CGPoint {

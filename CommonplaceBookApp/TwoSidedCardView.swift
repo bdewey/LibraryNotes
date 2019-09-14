@@ -5,12 +5,15 @@ import MiniMarkdown
 import SnapKit
 import UIKit
 
+private extension CGFloat {
+  static let padding: CGFloat = 8
+}
+
 /// A generic card with a "front" and a "back" side.
 ///
 /// The view initially shows the card front with no buttons. When you tap the card, it will
 /// show the card back and two buttons: "Got it" and "study more."
 ///
-// TODO: What happened to "pronounce"??
 public final class TwoSidedCardView: ChallengeView {
   public override init(frame: CGRect) {
     super.init(frame: frame)
@@ -23,12 +26,29 @@ public final class TwoSidedCardView: ChallengeView {
   }
 
   private func commonInit() {
-    addSubview(columnStack)
-    columnStack.snp.makeConstraints { make in
-      make.edges.equalToSuperview().inset(16)
-    }
+    [contextLabel, frontLabel, backLabel].forEach { addSubview($0) }
+    createConstraints()
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
     setAnswerVisible(false, animated: false)
+  }
+
+  private var frontLabelConstraints: ConstraintMakerEditable?
+  private var backLabelConstraints: ConstraintMakerEditable?
+
+  private func createConstraints() {
+    contextLabel.snp.makeConstraints { make in
+      make.top.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
+    }
+    frontLabel.snp.makeConstraints { make in
+      make.top.equalTo(contextLabel.snp.bottom).offset(1.0 * CGFloat.padding)
+      make.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
+      self.frontLabelConstraints = make.bottom.equalToSuperview().inset(2.0 * CGFloat.padding)
+    }
+    backLabel.snp.makeConstraints { make in
+      make.top.equalTo(frontLabel.snp.top)
+      make.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
+      self.backLabelConstraints = make.bottom.equalToSuperview().inset(2.0 * CGFloat.padding)
+    }
   }
 
   /// A string displayed at the top of the card, both front and back, that gives context
@@ -50,27 +70,10 @@ public final class TwoSidedCardView: ChallengeView {
     set { backLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 
-  /// Something to say upon showing the card back.
-  public var utterance: AVSpeechUtterance?
-
-  /// The language of `utterance`
-  // TODO: Get rid of this and just carry the language in `utterance`
-  public var language: String?
-
-  private lazy var columnStack: UIStackView = {
-    let columnStack = UIStackView(
-      arrangedSubviews: [contextLabel, frontLabel, backLabel]
-    )
-    columnStack.axis = .vertical
-    columnStack.alignment = .leading
-    columnStack.spacing = 8
-    return columnStack
-  }()
-
   private let contextLabel: UILabel = {
     let contextLabel = UILabel(frame: .zero)
     contextLabel.numberOfLines = 0
-    contextLabel.textAlignment = .center
+    contextLabel.textAlignment = .left
     contextLabel.isUserInteractionEnabled = false
     return contextLabel
   }()
@@ -93,18 +96,20 @@ public final class TwoSidedCardView: ChallengeView {
 
   private func setAnswerVisible(_ answerVisible: Bool, animated: Bool) {
     let animations = {
-      UIView.performWithoutAnimation {
-        self.frontLabel.isHidden = answerVisible
+      self.frontLabel.alpha = answerVisible ? 0 : 1
+      self.backLabel.alpha = answerVisible ? 1 : 0
+      if answerVisible {
+        self.frontLabelConstraints?.constraint.deactivate()
+        self.backLabelConstraints?.constraint.activate()
+      } else {
+        self.frontLabelConstraints?.constraint.activate()
+        self.backLabelConstraints?.constraint.deactivate()
       }
-      self.backLabel.isHidden = !answerVisible
-      self.columnStack.isUserInteractionEnabled = answerVisible
       self.setNeedsLayout()
       if animated { self.layoutIfNeeded() }
     }
     if animated {
-      UIView.animate(withDuration: 0.2, animations: animations, completion: { _ in
-        self.didTapPronounce()
-      })
+      UIView.animate(withDuration: 0.2, animations: animations)
     } else {
       animations()
     }
@@ -113,11 +118,5 @@ public final class TwoSidedCardView: ChallengeView {
   @objc private func revealAnswer() {
     setAnswerVisible(true, animated: true)
     delegate?.challengeViewDidRevealAnswer(self)
-  }
-
-  @objc private func didTapPronounce() {
-    if let language = language, let utterance = utterance {
-      delegate?.challengeView(self, didRequestSpeech: utterance, language: language)
-    }
   }
 }

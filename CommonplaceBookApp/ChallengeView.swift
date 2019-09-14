@@ -6,7 +6,6 @@ import UIKit
 
 public protocol ChallengeViewDelegate: class {
   func challengeViewDidRevealAnswer(_ challengeView: ChallengeView)
-  func challengeView(_ cardView: ChallengeView, didRequestSpeech: AVSpeechUtterance, language: String)
 }
 
 open class ChallengeView: UIControl {
