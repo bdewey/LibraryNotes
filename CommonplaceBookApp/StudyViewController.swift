@@ -26,8 +26,6 @@ public final class StudyViewController: UIViewController {
     self.notebook = notebook
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
-    self.tabBarItem.title = "STUDY"
-    self.title = "¡Habla Español!"
   }
 
   required init?(coder aDecoder: NSCoder) {
