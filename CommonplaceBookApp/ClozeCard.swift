@@ -57,17 +57,17 @@ extension ClozeCard: Challenge {
     cardView.context = context()
     let (front, chapterAndVerse) = cardFront(node: node)
       .decomposedChapterAndVerseAnnotation
-    cardView.front = front
+    cardView.front = front.trimmingTrailingWhitespace()
     let back = NSMutableAttributedString()
-    back.append(cardBack(node: node).removingChapterAndVerseAnnotation())
+    back.append(cardBack(node: node).removingChapterAndVerseAnnotation().trimmingTrailingWhitespace())
     if !properties.attributionMarkdown.isEmpty {
-      back.append(NSAttributedString(string: "\n"))
+      back.append(NSAttributedString(string: "\n\n"))
       let attributionRenderer = RenderedMarkdown(
         textStyle: .caption1,
         parsingRules: properties.parsingRules
       )
       attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
-      back.append(attributionRenderer.attributedString)
+      back.append(attributionRenderer.attributedString.trimmingTrailingWhitespace())
     }
     cardView.back = back
     return cardView

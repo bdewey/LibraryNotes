@@ -5,6 +5,7 @@
 ### Changed
 
 - Tightened up the animation transitions for `TwoSidedCard`
+- Polished spacing between card text and attribution for quotes & clozes
 
 ## [0.9.0] - 2019-09-11
 

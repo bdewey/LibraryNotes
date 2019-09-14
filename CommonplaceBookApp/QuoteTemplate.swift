@@ -99,16 +99,16 @@ extension QuoteTemplate: Challenge {
       parsingRules: properties.parsingRules
     )
     let (front, chapterAndVerse) = renderCardFront(with: quoteRenderer)
-    view.front = front
+    view.front = front.trimmingTrailingWhitespace()
     let attributionRenderer = RenderedMarkdown(
       textStyle: .caption1,
       parsingRules: properties.parsingRules
     )
     let back = NSMutableAttributedString()
-    back.append(front)
-    back.append(NSAttributedString(string: "\n"))
+    back.append(front.trimmingTrailingWhitespace())
+    back.append(NSAttributedString(string: "\n\n"))
     attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
-    back.append(attributionRenderer.attributedString)
+    back.append(attributionRenderer.attributedString.trimmingTrailingWhitespace())
     view.back = back
     return view
   }
@@ -116,7 +116,7 @@ extension QuoteTemplate: Challenge {
   public func renderCardFront(
     with quoteRenderer: RenderedMarkdown
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
-    quoteRenderer.markdown = quote.allMarkdown
+    quoteRenderer.markdown = String(quote.allMarkdown)
     let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
     let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
     return (front: front, chapterAndVerse: chapterAndVerse)

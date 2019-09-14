@@ -52,4 +52,21 @@ extension NSAttributedString {
     result.deleteCharacters(in: range)
     return (result, chapterAndVerse)
   }
+
+  public func trimmingTrailingWhitespace() -> NSAttributedString {
+    let rangeToTrim = string.reversed().prefix(while: { $0.isWhitespaceOrNewline })
+    if rangeToTrim.isEmpty {
+      return self
+    }
+    guard
+      let index = string.index(string.endIndex, offsetBy: -1 * rangeToTrim.count, limitedBy: string.startIndex)
+    else {
+        return self
+    }
+    let nsRange = NSRange(index ..< string.endIndex, in: string)
+    // swiftlint:disable:next force_cast
+    let mutableCopy = self.mutableCopy() as! NSMutableAttributedString
+    mutableCopy.deleteCharacters(in: nsRange)
+    return mutableCopy
+  }
 }
