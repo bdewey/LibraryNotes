@@ -8,6 +8,7 @@ extension ParsingRules {
   public static let commonplace: ParsingRules = {
     var parsingRules = MiniMarkdown.ParsingRules()
     parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
+    parsingRules.blockParsers.parsers.insert(QuestionAndAnswer.nodeParser, at: 0)
     return parsingRules
   }()
 }

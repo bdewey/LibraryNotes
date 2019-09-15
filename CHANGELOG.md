@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `QuestionAndAnswer` node for parsing Q&A lines in minimarkdown
+
 ## [0.10.0] - 2019-09-14
 
 ### Changed
