@@ -8,12 +8,15 @@ extension ChallengeTemplateType {
   public static let questionAndAnswer = ChallengeTemplateType(rawValue: "qanda", class: QuestionAndAnswerTemplate.self)
 }
 
+/// Generates challenges from QuestionAndAnswer minimarkdown nodes.
 public final class QuestionAndAnswerTemplate: ChallengeTemplate {
+  /// Designated initializer.
   public init(node: QuestionAndAnswer) {
     self.node = node
     super.init()
   }
 
+  /// Decoding -- parses saved markdown and raises an error if it is not a single QuestionAndAnswer node.
   required convenience init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
       throw CommonErrors.noParsingRules
@@ -28,10 +31,12 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
     }
   }
 
+  /// The Q&A node.
   private let node: QuestionAndAnswer
 
   // MARK: - Codable
 
+  /// Encoding: Writes the markdown into a single value container.
   public override func encode(to encoder: Encoder) throws {
     var container = encoder.singleValueContainer()
     try container.encode(node.allMarkdown)
@@ -41,6 +46,7 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
 
   public override var type: ChallengeTemplateType { return .questionAndAnswer }
 
+  /// Extract templates from parsed minimarkdown.
   public static func extract(from nodes: [Node]) -> [QuestionAndAnswerTemplate] {
     return nodes.compactMap { node -> QuestionAndAnswerTemplate? in
       guard let qNode = node as? QuestionAndAnswer else { return nil }
@@ -48,6 +54,7 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
     }
   }
 
+  /// The single challenge from this template: Ourselves!
   public override var challenges: [Challenge] { return [self] }
 }
 
@@ -59,9 +66,13 @@ extension QuestionAndAnswerTemplate: Challenge {
   public func challengeView(document: UIDocument, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     let attributionNodes = properties.parsingRules.parse(properties.attributionMarkdown)
-    let attributionR2 = MarkdownAttributedStringRenderer(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0])
     if let attributionNode = attributionNodes.first {
-      view.context = attributionR2.render(node: attributionNode).trimmingTrailingWhitespace()
+      let attributionRenderer = MarkdownAttributedStringRenderer(
+        textStyle: .subheadline,
+        textColor: .secondaryLabel,
+        extraAttributes: [.kern: 2.0]
+      )
+      view.context = attributionRenderer.render(node: attributionNode).trimmingTrailingWhitespace()
     } else {
       view.context = NSAttributedString(string: "")
     }
@@ -71,14 +82,5 @@ extension QuestionAndAnswerTemplate: Challenge {
     view.front = renderer.render(node: node.question).trimmingTrailingWhitespace()
     view.back = renderer.render(node: node.answer).trimmingTrailingWhitespace()
     return view
-  }
-
-  public func renderCardFront(
-    with quoteRenderer: RenderedMarkdown
-  ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
-    quoteRenderer.markdown = String(node.allMarkdown)
-    let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
-    let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
-    return (front: front, chapterAndVerse: chapterAndVerse)
   }
 }
