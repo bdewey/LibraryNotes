@@ -55,6 +55,15 @@ open class ChallengeTemplate: Codable {
 
   /// Public initializer so we can subclass this outside of this module.
   public init() {}
+
+  public enum CommonErrors: Error {
+    /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
+    /// when decoding template.
+    case noParsingRules
+
+    /// Thrown when encoded template markdown does not decode to exactly one Node.
+    case markdownParseError
+  }
 }
 
 extension Array where Element: ChallengeTemplate {

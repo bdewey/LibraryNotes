@@ -17,15 +17,6 @@ extension CodingUserInfoKey {
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
 public final class ClozeTemplate: ChallengeTemplate {
-  public enum Error: Swift.Error {
-    /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
-    /// when decoding a ClozeTemplate.
-    case noParsingRules
-
-    /// Thrown when encoded ClozeTemplate markdown does not decode to exactly one Node.
-    case markdownParseError
-  }
-
   public override var type: ChallengeTemplateType { return .cloze }
 
   /// Designated initializer.
@@ -41,12 +32,12 @@ public final class ClozeTemplate: ChallengeTemplate {
 
   public required convenience init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw Error.noParsingRules
+      throw CommonErrors.noParsingRules
     }
     let container = try decoder.singleValueContainer()
     let markdown = try container.decode(String.self)
     let nodes = parsingRules.parse(markdown)
-    if nodes.count != 1 { throw Error.markdownParseError }
+    if nodes.count != 1 { throw CommonErrors.markdownParseError }
     self.init(node: nodes[0])
   }
 
@@ -58,7 +49,7 @@ public final class ClozeTemplate: ChallengeTemplate {
   public required convenience init(markdown description: String, parsingRules: ParsingRules) throws {
     let nodes = parsingRules.parse(description)
     if nodes.count != 1 {
-      throw Error.markdownParseError
+      throw CommonErrors.markdownParseError
     }
     self.init(node: nodes[0])
   }

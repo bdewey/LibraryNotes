@@ -105,8 +105,13 @@ final class TextEditViewController: UIViewController {
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
-    formatters[.delimiter] = { _, attributes in
-      attributes.color = UIColor.quaternaryLabel
+    formatters[.delimiter] = { delimiter, attributes in
+      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
+        attributes.bold = true
+        attributes.listLevel = 1
+      } else {
+        attributes.color = UIColor.quaternaryLabel
+      }
     }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
@@ -135,7 +140,7 @@ final class TextEditViewController: UIViewController {
     }
     renderers[.delimiter] = { node, attributes in
       var text = String(node.slice.substring)
-      if node.parent is Heading || node.parent is BlockQuote {
+      if node.parent is Heading || node.parent is BlockQuote || node.parent is QuestionAndAnswer.PrefixedLine {
         text = text.replacingOccurrences(of: " ", with: "\t")
       }
       return NSAttributedString(
@@ -318,6 +323,10 @@ extension TextEditViewController: UITextViewDelegate {
             return true
           }
         }
+      } else if line(at: range.location).hasPrefix("Q: ") {
+        replaceCharacters(in: range, with: "\nA: ")
+      } else if line(at: range.location).hasPrefix("A:\t") {
+        replaceCharacters(in: range, with: "\n\nQ: ")
       } else {
         // To make this be a separate paragraph in any conventional Markdown processor, we need
         // the blank line.
@@ -327,6 +336,26 @@ extension TextEditViewController: UITextViewDelegate {
     } else {
       return true
     }
+  }
+
+  /// Gets the line of text that contains a given location.
+  private func line(at location: Int) -> String {
+    let string = textStorage.string
+    var startIndex = string.index(string.startIndex, offsetBy: location)
+    if startIndex == string.endIndex || string[startIndex] == "\n" {
+      startIndex = string.index(before: startIndex)
+    }
+    while startIndex != string.startIndex, startIndex == string.endIndex || string[startIndex] != "\n" {
+      startIndex = string.index(before: startIndex)
+    }
+    if string[startIndex] == "\n" {
+      startIndex = string.index(after: startIndex)
+    }
+    var endIndex = startIndex
+    while endIndex != string.endIndex, string[endIndex] != "\n" {
+      endIndex = string.index(after: endIndex)
+    }
+    return String(string[startIndex ..< endIndex])
   }
 }
 

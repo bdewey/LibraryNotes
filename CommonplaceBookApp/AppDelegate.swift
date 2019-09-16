@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import CoreSpotlight
+import Logging
 import MiniMarkdown
 import UIKit
 
@@ -20,6 +21,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     .cloze,
     .quote,
     .vocabulary,
+    .questionAndAnswer,
   ]
 
   private lazy var loadingViewController: LoadingViewController = {
@@ -39,6 +41,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    let factory = LogHandlerFactory()
+    // Here's how you enable debug logging for different loggers...
+    // factory.logLevelsForLabel["org.brians-brain.MiniMarkdown"] = .debug
+    LoggingSystem.bootstrap(factory.logHandler(for:))
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
     let window = UIWindow(frame: UIScreen.main.bounds)
@@ -294,5 +300,16 @@ extension AppDelegate: UISplitViewControllerDelegate {
     // In our case, if the textEditViewController doesn't represent a real page, we don't
     // want to show it.
     return textEditViewController.pageIdentifier == nil
+  }
+}
+
+struct LogHandlerFactory {
+  var defaultLogLevel = Logger.Level.info
+  var logLevelsForLabel = [String: Logger.Level]()
+
+  func logHandler(for label: String) -> LogHandler {
+    var handler = StreamLogHandler.standardError(label: label)
+    handler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
+    return handler
   }
 }
