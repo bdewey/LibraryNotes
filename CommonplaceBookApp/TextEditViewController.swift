@@ -325,6 +325,8 @@ extension TextEditViewController: UITextViewDelegate {
         }
       } else if line(at: range.location).hasPrefix("Q: ") {
         replaceCharacters(in: range, with: "\nA: ")
+      } else if line(at: range.location).hasPrefix("A:\t") {
+        replaceCharacters(in: range, with: "\n\nQ: ")
       } else {
         // To make this be a separate paragraph in any conventional Markdown processor, we need
         // the blank line.
