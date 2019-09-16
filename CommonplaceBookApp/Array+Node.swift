@@ -10,6 +10,7 @@ extension Array where Element == Node {
     return Swift.Array([
       archive.insert(contentsOf: ClozeTemplate.extract(from: self)),
       archive.insert(contentsOf: QuoteTemplate.extract(from: self)),
+      archive.insert(contentsOf: QuestionAndAnswerTemplate.extract(from: self)),
     ].joined())
   }
 

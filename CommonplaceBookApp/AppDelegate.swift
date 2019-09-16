@@ -21,6 +21,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     .cloze,
     .quote,
     .vocabulary,
+    .questionAndAnswer,
   ]
 
   private lazy var loadingViewController: LoadingViewController = {

@@ -9,16 +9,6 @@ extension ChallengeTemplateType {
 }
 
 public final class QuoteTemplate: ChallengeTemplate {
-  // TODO: I should be able to share this with ClozeTemplate
-  public enum Error: Swift.Error {
-    /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
-    /// when decoding a ClozeTemplate.
-    case noParsingRules
-
-    /// Thrown when encoded ClozeTemplate markdown does not decode to exactly one Node.
-    case markdownParseError
-  }
-
   public init(quote: BlockQuote) {
     self.quote = quote
     super.init()
@@ -26,7 +16,7 @@ public final class QuoteTemplate: ChallengeTemplate {
 
   public required convenience init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw Error.noParsingRules
+      throw CommonErrors.noParsingRules
     }
     let container = try decoder.singleValueContainer()
     let markdown = try container.decode(String.self)
@@ -34,7 +24,7 @@ public final class QuoteTemplate: ChallengeTemplate {
     if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
       self.init(quote: quote)
     } else {
-      throw Error.markdownParseError
+      throw CommonErrors.markdownParseError
     }
   }
 
@@ -43,7 +33,7 @@ public final class QuoteTemplate: ChallengeTemplate {
     if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
       self.init(quote: quote)
     } else {
-      throw Error.markdownParseError
+      throw CommonErrors.markdownParseError
     }
   }
 

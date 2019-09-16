@@ -6,6 +6,7 @@
 
 - `QuestionAndAnswer` node for parsing Q&A lines in minimarkdown
 - Typing support for question-and-answer format
+- `QuestionAndAnswerTemplate` for creating Q&A challenges
 
 ## [0.10.0] - 2019-09-14
 

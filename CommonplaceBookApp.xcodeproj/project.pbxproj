@@ -77,6 +77,7 @@
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
+		D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
@@ -212,6 +213,7 @@
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
+		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTemplate.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -382,6 +384,7 @@
 				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
 				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
 				D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */,
+				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
@@ -675,6 +678,7 @@
 				D3591500231C205500883AC4 /* EditVocabularyView.swift in Sources */,
 				D3E4476023254FAF00F21F91 /* EncodedImage.swift in Sources */,
 				D3591502231C340100883AC4 /* LocaleAwareTextField.swift in Sources */,
+				D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,

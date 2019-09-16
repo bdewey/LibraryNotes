@@ -64,8 +64,7 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
 
   required init(from decoder: Decoder) throws {
     guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      // TODO: Move this error somewhere else
-      throw ClozeTemplate.Error.noParsingRules
+      throw CommonErrors.noParsingRules
     }
     let container = try decoder.container(keyedBy: CodingKeys.self)
     self.front = try container.decode(Word.self, forKey: .front)

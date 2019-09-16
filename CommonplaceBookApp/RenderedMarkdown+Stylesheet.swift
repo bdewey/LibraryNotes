@@ -9,6 +9,7 @@ extension RenderedMarkdown {
   /// Hides delimiters and cloze hints.
   public convenience init(
     textStyle: UIFont.TextStyle,
+    textColor: UIColor = .label,
     parsingRules: ParsingRules
   ) {
     var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
@@ -24,7 +25,7 @@ extension RenderedMarkdown {
     )
     defaultAttributes = [
       .font: UIFont.preferredFont(forTextStyle: textStyle),
-      .foregroundColor: UIColor.label,
+      .foregroundColor: textColor,
     ]
     defaultAttributes.lineHeightMultiple = 1.2
   }
@@ -50,7 +51,9 @@ extension RenderedMarkdown {
 
 extension MarkdownAttributedStringRenderer {
   public init(
-    textStyle: UIFont.TextStyle
+    textStyle: UIFont.TextStyle,
+    textColor: UIColor = .label,
+    extraAttributes: [NSAttributedString.Key: Any] = [:]
   ) {
     self.init()
     formattingFunctions[.emphasis] = { $1.italic = true }
@@ -59,8 +62,9 @@ extension MarkdownAttributedStringRenderer {
     renderFunctions[.clozeHint] = { _, _ in NSAttributedString() }
     defaultAttributes = [
       .font: UIFont.preferredFont(forTextStyle: textStyle),
-      .foregroundColor: UIColor.label,
+      .foregroundColor: textColor,
     ]
     defaultAttributes.lineHeightMultiple = 1.2
+    defaultAttributes.merge(extraAttributes, uniquingKeysWith: { _, new in new })
   }
 }
