@@ -105,8 +105,13 @@ final class TextEditViewController: UIViewController {
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
-    formatters[.delimiter] = { _, attributes in
-      attributes.color = UIColor.quaternaryLabel
+    formatters[.delimiter] = { delimiter, attributes in
+      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
+        attributes.bold = true
+        attributes.listLevel = 1
+      } else {
+        attributes.color = UIColor.quaternaryLabel
+      }
     }
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
@@ -135,7 +140,7 @@ final class TextEditViewController: UIViewController {
     }
     renderers[.delimiter] = { node, attributes in
       var text = String(node.slice.substring)
-      if node.parent is Heading || node.parent is BlockQuote {
+      if node.parent is Heading || node.parent is BlockQuote || node.parent is QuestionAndAnswer.PrefixedLine {
         text = text.replacingOccurrences(of: " ", with: "\t")
       }
       return NSAttributedString(
