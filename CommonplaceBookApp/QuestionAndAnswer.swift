@@ -38,6 +38,7 @@ public final class QuestionAndAnswer: Node, LineParseable {
       self.prefixDelimiter = delimiter
       self.remainder = remainder
       super.init(type: type, slice: delimiter.slice + remainder)
+      prefixDelimiter.parent = self
     }
 
     public let prefixDelimiter: Delimiter
