@@ -323,6 +323,8 @@ extension TextEditViewController: UITextViewDelegate {
             return true
           }
         }
+      } else if line(at: range.location).hasPrefix("Q: ") {
+        replaceCharacters(in: range, with: "\nA: ")
       } else {
         // To make this be a separate paragraph in any conventional Markdown processor, we need
         // the blank line.
@@ -332,6 +334,26 @@ extension TextEditViewController: UITextViewDelegate {
     } else {
       return true
     }
+  }
+
+  /// Gets the line of text that contains a given location.
+  private func line(at location: Int) -> String {
+    let string = textStorage.string
+    var startIndex = string.index(string.startIndex, offsetBy: location)
+    if startIndex == string.endIndex || string[startIndex] == "\n" {
+      startIndex = string.index(before: startIndex)
+    }
+    while startIndex != string.startIndex, startIndex == string.endIndex || string[startIndex] != "\n" {
+      startIndex = string.index(before: startIndex)
+    }
+    if string[startIndex] == "\n" {
+      startIndex = string.index(after: startIndex)
+    }
+    var endIndex = startIndex
+    while endIndex != string.endIndex, string[endIndex] != "\n" {
+      endIndex = string.index(after: endIndex)
+    }
+    return String(string[startIndex ..< endIndex])
   }
 }
 

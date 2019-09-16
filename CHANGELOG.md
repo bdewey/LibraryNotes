@@ -5,6 +5,7 @@
 ### Added
 
 - `QuestionAndAnswer` node for parsing Q&A lines in minimarkdown
+- Typing support for question-and-answer format
 
 ## [0.10.0] - 2019-09-14
 
