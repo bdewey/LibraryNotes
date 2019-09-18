@@ -116,6 +116,7 @@ final class TextEditViewController: UIViewController {
     formatters[.bold] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic = true }
     formatters[.table] = { $1.familyName = "Menlo" }
+    formatters[.codeSpan] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
       $1.color = UIColor.secondaryLabel

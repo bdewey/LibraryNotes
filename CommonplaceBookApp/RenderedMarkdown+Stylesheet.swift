@@ -58,6 +58,7 @@ extension MarkdownAttributedStringRenderer {
     self.init()
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.bold] = { $1.bold = true }
+    formattingFunctions[.codeSpan] = { $1.familyName = "Menlo" }
     renderFunctions[.delimiter] = { _, _ in NSAttributedString() }
     renderFunctions[.clozeHint] = { _, _ in NSAttributedString() }
     defaultAttributes = [
