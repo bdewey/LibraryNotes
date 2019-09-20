@@ -114,7 +114,7 @@ final class TextEditViewController: UIViewController {
       }
     }
     formatters[.bold] = { $1.bold = true }
-    formatters[.emphasis] = { $1.italic = true }
+    formatters[.emphasis] = { $1.italic.toggle() }
     formatters[.table] = { $1.familyName = "Menlo" }
     formatters[.codeSpan] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
@@ -123,7 +123,8 @@ final class TextEditViewController: UIViewController {
     }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.secondarySystemBackground }
     formatters[.blockQuote] = {
-      $1.backgroundColor = UIColor.secondarySystemBackground
+      $1.italic = true
+      $1.blockquoteBorderColor = UIColor.systemGreen
       $1.listLevel += 1
     }
     return formatters
@@ -172,7 +173,7 @@ final class TextEditViewController: UIViewController {
   }
 
   private lazy var textView: UITextView = {
-    let layoutManager = NSLayoutManager()
+    let layoutManager = LayoutManager()
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)

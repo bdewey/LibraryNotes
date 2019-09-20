@@ -6,6 +6,10 @@
 
 - `CodeSpan` support
 
+### Changed
+
+- Formatting for block quotes
+
 ## [0.11.0] - 2019-09-16
 
 ### Added
