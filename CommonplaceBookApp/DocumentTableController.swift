@@ -84,13 +84,16 @@ public final class DocumentTableController: NSObject {
   internal weak var delegate: DocumentTableControllerDelegate?
 
   private let notebook: NoteArchiveDocument
-  private var cardsPerDocument = [String: Int]()
+  private var cardsPerDocument = [String: Int]() {
+    didSet {
+      performUpdates(animated: true)
+    }
+  }
   private let dataSource: DataSource
 
   public func startObservingNotebook() {
     notebook.addObserver(self)
     updateCardsPerDocument()
-    performUpdates(animated: true)
   }
 
   public func stopObservingNotebook() {
@@ -232,7 +235,6 @@ extension DocumentTableController: NoteArchiveDocumentObserver {
     didUpdatePageProperties properties: [String: PageProperties]
   ) {
     updateCardsPerDocument()
-    performUpdates(animated: true)
   }
 }
 
