@@ -332,37 +332,55 @@ public extension NoteArchiveDocument {
 // MARK: - Study sessions
 
 public extension NoteArchiveDocument {
+  /// Computes a studySession for the relevant pages in the notebook.
+  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
+  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
+  /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   func studySession(
+    filter: ((String, PageProperties) -> Bool)? = nil,
+    date: Date = Date(),
+    completion: @escaping (StudySession) -> Void
+  ) {
+    DispatchQueue.global(qos: .default).async {
+      let result = self.synchronousStudySession(filter: filter, date: date)
+      DispatchQueue.main.async {
+        completion(result)
+      }
+    }
+  }
+
+  /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
+  // TODO: On debug builds, this is *really* slow. Worth optimizing.
+  internal func synchronousStudySession(
     filter: ((String, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
-    return noteArchiveQueue.sync {
-      noteArchive.pageProperties
-        .filter { filter($0.key, $0.value) }
-        .map { (name, reviewProperties) -> StudySession in
-          let challengeTemplates = reviewProperties.cardTemplates
-            .compactMap(challengeTemplate(for:))
-          // TODO: Filter down to eligible cards
-          let eligibleCards = challengeTemplates.cards
-            .filter { challenge -> Bool in
-              guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-                return true
-              }
-              return date >= suppressionDate
+    let properties = noteArchiveQueue.sync { noteArchive.pageProperties }
+    return properties
+      .filter { filter($0.key, $0.value) }
+      .map { (name, reviewProperties) -> StudySession in
+        let challengeTemplates = reviewProperties.cardTemplates
+          .compactMap(challengeTemplate(for:))
+        // TODO: Filter down to eligible cards
+        let eligibleCards = challengeTemplates.cards
+          .filter { challenge -> Bool in
+            guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
+              return true
             }
-          return StudySession(
-            eligibleCards,
-            properties: CardDocumentProperties(
-              documentName: name,
-              attributionMarkdown: reviewProperties.title,
-              parsingRules: self.parsingRules
-            )
+            return date >= suppressionDate
+          }
+        return StudySession(
+          eligibleCards,
+          properties: CardDocumentProperties(
+            documentName: name,
+            attributionMarkdown: reviewProperties.title,
+            parsingRules: self.parsingRules
           )
-        }
-        .reduce(into: StudySession()) { $0 += $1 }
-    }
+        )
+      }
+      .reduce(into: StudySession()) { $0 += $1 }
   }
 
   func challengeTemplate(for keyString: String) -> ChallengeTemplate? {

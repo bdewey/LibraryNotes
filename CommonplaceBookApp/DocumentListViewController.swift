@@ -102,7 +102,9 @@ final class DocumentListViewController: UIViewController {
     tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    studySession = notebook.studySession()
+    notebook.studySession { [weak self] in
+      self?.studySession = $0
+    }
     dataSource.performUpdates(animated: false)
 
     let searchController = UISearchController(searchResultsController: nil)
@@ -184,7 +186,11 @@ final class DocumentListViewController: UIViewController {
     let filter: (String, PageProperties) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
-    studySession = notebook.studySession(filter: filter)
+    let hashtag = currentHashtag
+    notebook.studySession(filter: filter) {
+      guard self.currentHashtag == hashtag else { return }
+      self.studySession = $0
+    }
   }
 }
 

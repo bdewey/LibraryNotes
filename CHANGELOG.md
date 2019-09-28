@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Made `NoteArchiveDocument.studySession` async to not block typing
+
 ## [0.12.0] - 2019-09-20
 
 ### Added

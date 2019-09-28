@@ -65,9 +65,9 @@ final class NoteArchiveDocumentTests: XCTestCase {
     defer { try? file.deleteDirectory() }
     let document = openDocument(fileURL: file.fileURL)
     loadAllPages(into: document)
-    XCTAssertEqual(document.studySession().count, 11)
+    XCTAssertEqual(document.synchronousStudySession().count, 11)
     XCTAssertEqual(
-      document.studySession(filter: { $1.hashtags.contains("#inspiration") }).count,
+      document.synchronousStudySession(filter: { $1.hashtags.contains("#inspiration") }).count,
       2
     )
   }
@@ -78,7 +78,7 @@ final class NoteArchiveDocumentTests: XCTestCase {
     let document = openDocument(fileURL: file.fileURL)
     loadAllPages(into: document)
     let previousLogCount = document.studyLog.count
-    var studySession = document.studySession()
+    var studySession = document.synchronousStudySession()
     XCTAssertEqual(studySession.count, 11)
     while studySession.currentCard != nil {
       studySession.recordAnswer(correct: true)
@@ -92,7 +92,7 @@ final class NoteArchiveDocumentTests: XCTestCase {
     XCTAssertEqual(newDocument.studyLog.count, previousLogCount + studySession.count)
 
     // Shouldn't have anything new to study today.
-    let repeatSession = newDocument.studySession()
+    let repeatSession = newDocument.synchronousStudySession()
     XCTAssertEqual(repeatSession.count, 0)
   }
 }

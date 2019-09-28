@@ -181,11 +181,10 @@ extension DocumentTableController: UITableViewDelegate {
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          let studySession = self.notebook.studySession(
-            filter: { name, _ in name == properties.pageKey }
-          )
-          self.delegate?.presentStudySessionViewController(for: studySession)
-          completion(true)
+          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }) {
+            self.delegate?.presentStudySessionViewController(for: $0)
+            completion(true)
+          }
         }
         studyAction.image = UIImage(systemName: "rectangle.stack")
         studyAction.backgroundColor = UIColor.systemBlue
@@ -334,15 +333,16 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    let studySession = notebook.studySession()
-    cardsPerDocument = studySession
-      .reduce(into: [String: Int]()) { cardsPerDocument, card in
-        cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
-      }
-    DDLogInfo(
-      "studySession.count = \(studySession.count). " +
-        "cardsPerDocument has \(cardsPerDocument.count) entries"
-    )
+    notebook.studySession { studySession in
+      self.cardsPerDocument = studySession
+        .reduce(into: [String: Int]()) { cardsPerDocument, card in
+          cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
+        }
+      DDLogInfo(
+        "studySession.count = \(studySession.count). " +
+          "cardsPerDocument has \(self.cardsPerDocument.count) entries"
+      )
+    }
   }
 
   static func snapshot(
