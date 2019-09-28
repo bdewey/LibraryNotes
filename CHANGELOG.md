@@ -6,6 +6,10 @@
 
 - Made `NoteArchiveDocument.studySession` async to not block typing
 
+### Fixed
+
+- Images can now appear in Q&A cards.
+
 ## [0.12.0] - 2019-09-20
 
 ### Added

@@ -462,7 +462,7 @@ extension NoteArchiveDocument {
 
   /// Adds a renderer tthat knows how to render images using assets from this document
   /// - parameter renderers: The collection of render functions
-  func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
+  public func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
     renderers[.image] = { [weak self] node, attributes in
       guard
         let self = self,

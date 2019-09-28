@@ -76,9 +76,12 @@ extension QuestionAndAnswerTemplate: Challenge {
     } else {
       view.context = NSAttributedString(string: "")
     }
-    let renderer = MarkdownAttributedStringRenderer(
+    var renderer = MarkdownAttributedStringRenderer(
       textStyle: .body
     )
+    if let noteArchiveDocument = document as? NoteArchiveDocument {
+      noteArchiveDocument.addImageRenderer(to: &renderer.renderFunctions)
+    }
     view.front = renderer.render(node: node.question).trimmingTrailingWhitespace()
     view.back = renderer.render(node: node.answer).trimmingTrailingWhitespace()
     return view
