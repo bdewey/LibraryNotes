@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A573a" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="CDAsset" representedClassName="CDAsset" syncable="YES" codeGenerationType="class">
+        <attribute name="data" attributeType="Binary"/>
+        <attribute name="shaHash" attributeType="String"/>
+    </entity>
+    <entity name="CDChallengeTemplate" representedClassName="CDChallengeTemplate" syncable="YES" codeGenerationType="class">
+        <attribute name="serialized" optional="YES" attributeType="String"/>
+        <attribute name="type" optional="YES" attributeType="String"/>
+        <relationship name="page" maxCount="1" deletionRule="Nullify" destinationEntity="CDPage" inverseName="challengeTemplates" inverseEntity="CDPage"/>
+        <relationship name="studyLogEntries" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDStudyLogEntry" inverseName="challengeTemplate" inverseEntity="CDStudyLogEntry"/>
+    </entity>
+    <entity name="CDHashtag" representedClassName="CDHashtag" syncable="YES" codeGenerationType="class">
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="pages" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDPage" inverseName="hashtags" inverseEntity="CDPage"/>
+    </entity>
+    <entity name="CDPage" representedClassName="CDPage" syncable="YES" codeGenerationType="class">
+        <attribute name="timestamp" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="uuid" attributeType="UUID" usesScalarValueType="NO"/>
+        <relationship name="challengeTemplates" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDChallengeTemplate" inverseName="page" inverseEntity="CDChallengeTemplate"/>
+        <relationship name="contents" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="CDPageContents" inverseName="page" inverseEntity="CDPageContents"/>
+        <relationship name="hashtags" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="CDHashtag" inverseName="pages" inverseEntity="CDHashtag"/>
+    </entity>
+    <entity name="CDPageContents" representedClassName="CDPageContents" syncable="YES" codeGenerationType="class">
+        <attribute name="contents" optional="YES" attributeType="String"/>
+        <relationship name="page" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDPage" inverseName="contents" inverseEntity="CDPage"/>
+    </entity>
+    <entity name="CDStudyLogEntry" representedClassName="CDStudyLogEntry" syncable="YES" codeGenerationType="class">
+        <attribute name="challengeIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="correct" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="incorrect" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="challengeTemplate" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDChallengeTemplate" inverseName="studyLogEntries" inverseEntity="CDChallengeTemplate"/>
+    </entity>
+    <elements>
+        <element name="CDPage" positionX="52.71484375" positionY="-219.3671875" width="128" height="133"/>
+        <element name="CDHashtag" positionX="-232.4609375" positionY="19.40234375" width="128" height="73"/>
+        <element name="CDChallengeTemplate" positionX="238.453125" positionY="14.3203125" width="128" height="103"/>
+        <element name="CDStudyLogEntry" positionX="415.9453125" positionY="220.28515625" width="128" height="118"/>
+        <element name="CDAsset" positionX="-200.4140625" positionY="275.12890625" width="128" height="73"/>
+        <element name="CDPageContents" positionX="135" positionY="90" width="128" height="73"/>
+    </elements>
+</model>
