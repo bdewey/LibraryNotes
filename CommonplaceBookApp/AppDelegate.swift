@@ -41,9 +41,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let factory = LogHandlerFactory()
+    var factory = LogHandlerFactory()
     // Here's how you enable debug logging for different loggers...
-    // factory.logLevelsForLabel["org.brians-brain.MiniMarkdown"] = .debug
+    factory.logLevelsForLabel["org.brians-brain.CoreData"] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
@@ -207,6 +207,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       parsingRules: ParsingRules.commonplace
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
+    CoreDataImporter.importNotebook(noteArchiveDocument)
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     documentListViewController.didTapFilesAction = { [weak self] in
       if UIApplication.isSimulator {
