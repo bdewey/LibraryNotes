@@ -207,7 +207,6 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       parsingRules: ParsingRules.commonplace
     )
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
-    CoreDataImporter.importNotebook(noteArchiveDocument)
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     documentListViewController.didTapFilesAction = { [weak self] in
       if UIApplication.isSimulator {
@@ -234,6 +233,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
         "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
       DDLogInfo("In open completion handler. \(properties)")
+      CoreDataImporter.importNotebook(noteArchiveDocument)
       if success {
         self.openedDocumentBookmark = try? url.bookmarkData()
       }
