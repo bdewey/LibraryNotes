@@ -75,7 +75,6 @@ public final class NoteArchiveDocument: UIDocument {
   }
 
   public func currentTextContents(for pageIdentifier: String) throws -> String {
-    assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
       try noteArchive.currentText(for: pageIdentifier)
     }

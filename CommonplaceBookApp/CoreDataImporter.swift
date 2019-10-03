@@ -24,9 +24,16 @@ public enum CoreDataImporter {
           let uuid = UUID(uuidString: key)!
           let page = CDPage.getOrCreate(uuid: uuid, context: backgroundContext)
           page.timestamp = properties.timestamp
+          page.title = properties.title
           for hashtag in properties.hashtags {
             let hashtagRecord = CDHashtag.getOrCreate(name: hashtag, context: backgroundContext)
             page.hashtags = page.hashtags?.adding(hashtagRecord) as NSSet?
+          }
+          if let contents = try? notebook.currentTextContents(for: key) {
+            page.contents.flatMap { backgroundContext.delete($0) }
+            let contentsObject = CDPageContents(context: backgroundContext)
+            contentsObject.contents = contents
+            page.contents = contentsObject
           }
         }
         do {
