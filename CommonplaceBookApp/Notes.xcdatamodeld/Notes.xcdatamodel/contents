@@ -4,11 +4,17 @@
         <attribute name="data" attributeType="Binary"/>
         <attribute name="shaHash" attributeType="String"/>
     </entity>
+    <entity name="CDChallenge" representedClassName="CDChallenge" syncable="YES" codeGenerationType="class">
+        <attribute name="key" optional="YES" attributeType="String"/>
+        <attribute name="suppressUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="challengeTemplate" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDChallengeTemplate" inverseName="challenges" inverseEntity="CDChallengeTemplate"/>
+        <relationship name="studyLogEntries" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDStudyLogEntry" inverseName="challenge" inverseEntity="CDStudyLogEntry"/>
+    </entity>
     <entity name="CDChallengeTemplate" representedClassName="CDChallengeTemplate" syncable="YES" codeGenerationType="class">
         <attribute name="serialized" optional="YES" attributeType="String"/>
         <attribute name="type" optional="YES" attributeType="String"/>
+        <relationship name="challenges" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDChallenge" inverseName="challengeTemplate" inverseEntity="CDChallenge"/>
         <relationship name="page" maxCount="1" deletionRule="Nullify" destinationEntity="CDPage" inverseName="challengeTemplates" inverseEntity="CDPage"/>
-        <relationship name="studyLogEntries" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDStudyLogEntry" inverseName="challengeTemplate" inverseEntity="CDStudyLogEntry"/>
     </entity>
     <entity name="CDHashtag" representedClassName="CDHashtag" syncable="YES" codeGenerationType="class">
         <attribute name="name" optional="YES" attributeType="String"/>
@@ -27,18 +33,18 @@
         <relationship name="page" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDPage" inverseName="contents" inverseEntity="CDPage"/>
     </entity>
     <entity name="CDStudyLogEntry" representedClassName="CDStudyLogEntry" syncable="YES" codeGenerationType="class">
-        <attribute name="challengeIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="correct" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="incorrect" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
-        <relationship name="challengeTemplate" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDChallengeTemplate" inverseName="studyLogEntries" inverseEntity="CDChallengeTemplate"/>
+        <relationship name="challenge" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDChallenge" inverseName="studyLogEntries" inverseEntity="CDChallenge"/>
     </entity>
     <elements>
-        <element name="CDPage" positionX="52.71484375" positionY="-219.3671875" width="128" height="133"/>
-        <element name="CDHashtag" positionX="-232.4609375" positionY="19.40234375" width="128" height="73"/>
-        <element name="CDChallengeTemplate" positionX="238.453125" positionY="14.3203125" width="128" height="103"/>
-        <element name="CDStudyLogEntry" positionX="415.9453125" positionY="220.28515625" width="128" height="118"/>
         <element name="CDAsset" positionX="-200.4140625" positionY="275.12890625" width="128" height="73"/>
+        <element name="CDChallengeTemplate" positionX="238.453125" positionY="14.3203125" width="128" height="103"/>
+        <element name="CDHashtag" positionX="-232.4609375" positionY="19.40234375" width="128" height="73"/>
+        <element name="CDPage" positionX="52.71484375" positionY="-219.3671875" width="128" height="133"/>
         <element name="CDPageContents" positionX="135" positionY="90" width="128" height="73"/>
+        <element name="CDStudyLogEntry" positionX="415.9453125" positionY="220.28515625" width="128" height="103"/>
+        <element name="CDChallenge" positionX="-27" positionY="-63" width="128" height="103"/>
     </elements>
 </model>
