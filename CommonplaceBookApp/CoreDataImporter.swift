@@ -3,6 +3,7 @@
 import CoreData
 import Foundation
 import Logging
+import Yams
 
 private let logger = Logger(label: "org.brians-brain.CoreData")
 
@@ -34,6 +35,30 @@ public enum CoreDataImporter {
             let contentsObject = CDPageContents(context: backgroundContext)
             contentsObject.contents = contents
             page.contents = contentsObject
+          }
+          // Delete all existing templates
+          if let existingTemplates = page.challengeTemplates {
+            for templateObject in existingTemplates {
+              // swiftlint:disable:next force_cast
+              backgroundContext.delete(templateObject as! NSManagedObject)
+            }
+          }
+          for templateKeyString in properties.cardTemplates {
+            guard
+              let templateKey = ChallengeTemplateArchiveKey(templateKeyString),
+              let template = notebook.challengeTemplate(for: templateKeyString)
+            else {
+              continue
+            }
+            do {
+              let templateObject = CDChallengeTemplate(context: backgroundContext)
+              templateObject.serialized = try YAMLEncoder().encode(template)
+              templateObject.type = templateKey.type
+              page.challengeTemplates = page.challengeTemplates?.adding(templateObject) as NSSet?
+              logger.info("Imported template \(templateKeyString)")
+            } catch {
+              logger.error("Error converting template \(templateKeyString): \(error)")
+            }
           }
         }
         do {
