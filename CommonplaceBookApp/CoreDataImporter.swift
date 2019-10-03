@@ -22,22 +22,8 @@ public enum CoreDataImporter {
       backgroundContext.perform {
         for (key, properties) in notebook.pageProperties {
           let uuid = UUID(uuidString: key)!
-          let request: NSFetchRequest<CDPage> = CDPage.fetchRequest()
-          request.resultType = .managedObjectIDResultType
-          request.predicate = NSPredicate(format: "uuid == %@", uuid as CVarArg)
-          do {
-            let existingRecords = try request.execute()
-            if existingRecords.isEmpty {
-              let page = CDPage(context: backgroundContext)
-              page.uuid = uuid
-              page.timestamp = properties.timestamp
-              logger.info("Made a record for key \(key)")
-            } else {
-              logger.info("Did not make a record for \(key) because it already existed")
-            }
-          } catch {
-            logger.error("Unexpected error on uuid \(key): \(error)")
-          }
+          let page = CDPage.getOrCreate(uuid: uuid, context: backgroundContext)
+          page.timestamp = properties.timestamp
         }
         do {
           try backgroundContext.save()

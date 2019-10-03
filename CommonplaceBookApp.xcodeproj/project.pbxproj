@@ -62,6 +62,7 @@
 		D3591500231C205500883AC4 /* EditVocabularyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35914FF231C205500883AC4 /* EditVocabularyView.swift */; };
 		D3591502231C340100883AC4 /* LocaleAwareTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3591501231C340100883AC4 /* LocaleAwareTextField.swift */; };
 		D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3591503231C3AC800883AC4 /* View+Locale.swift */; };
+		D35A7545234598FD00FDC236 /* CDPage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C6230C5AD300A46B3F /* UserDefault.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -198,6 +199,7 @@
 		D35914FF231C205500883AC4 /* EditVocabularyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditVocabularyView.swift; sourceTree = "<group>"; };
 		D3591501231C340100883AC4 /* LocaleAwareTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleAwareTextField.swift; sourceTree = "<group>"; };
 		D3591503231C3AC800883AC4 /* View+Locale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Locale.swift"; sourceTree = "<group>"; };
+		D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDPage+Extensions.swift"; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35E90C6230C5AD300A46B3F /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -336,7 +338,6 @@
 		D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */ = {
 			isa = PBXGroup;
 			children = (
-				D3E139792343076200353DAE /* ManagedObjects */,
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D33F647022982366008C3A92 /* Array+Node.swift */,
@@ -419,6 +420,7 @@
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 				D3E139692342FE9700353DAE /* Notes.xcdatamodeld */,
 				D3E1397A23437F5400353DAE /* CoreDataImporter.swift */,
+				D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -441,14 +443,6 @@
 				D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
-			sourceTree = "<group>";
-		};
-		D3E139792343076200353DAE /* ManagedObjects */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = ManagedObjects;
-			path = ..;
 			sourceTree = "<group>";
 		};
 		D3E98F0421D470B2008445DA /* CommonplaceBookAppUITests */ = {
@@ -755,6 +749,7 @@
 				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
 				D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */,
+				D35A7545234598FD00FDC236 /* CDPage+Extensions.swift in Sources */,
 				D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
 			);
