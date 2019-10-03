@@ -24,6 +24,10 @@ public enum CoreDataImporter {
           let uuid = UUID(uuidString: key)!
           let page = CDPage.getOrCreate(uuid: uuid, context: backgroundContext)
           page.timestamp = properties.timestamp
+          for hashtag in properties.hashtags {
+            let hashtagRecord = CDHashtag.getOrCreate(name: hashtag, context: backgroundContext)
+            page.hashtags = page.hashtags?.adding(hashtagRecord) as NSSet?
+          }
         }
         do {
           try backgroundContext.save()

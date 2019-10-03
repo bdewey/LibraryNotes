@@ -7,9 +7,8 @@ extension CDPage {
   static func getOrCreate(uuid: UUID, context: NSManagedObjectContext) -> CDPage {
     let request: NSFetchRequest<CDPage> = CDPage.fetchRequest()
     request.predicate = NSPredicate(format: "uuid == %@", uuid as CVarArg)
-    if let existingRecords = try? request.execute() {
-      assert(existingRecords.count == 1)
-      return existingRecords.first!
+    if let existingRecord = try? request.execute().first {
+      return existingRecord
     }
     let page = CDPage(context: context)
     page.uuid = uuid
