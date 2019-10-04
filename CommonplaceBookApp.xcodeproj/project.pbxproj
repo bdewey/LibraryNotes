@@ -64,6 +64,7 @@
 		D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3591503231C3AC800883AC4 /* View+Locale.swift */; };
 		D35A7545234598FD00FDC236 /* CDPage+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */; };
 		D35A754723459AEC00FDC236 /* CDHashtag+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35A754623459AEC00FDC236 /* CDHashtag+Extensions.swift */; };
+		D35A75492347727600FDC236 /* CDChallenge+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35A75482347727600FDC236 /* CDChallenge+Extensions.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C6230C5AD300A46B3F /* UserDefault.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -202,6 +203,7 @@
 		D3591503231C3AC800883AC4 /* View+Locale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Locale.swift"; sourceTree = "<group>"; };
 		D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDPage+Extensions.swift"; sourceTree = "<group>"; };
 		D35A754623459AEC00FDC236 /* CDHashtag+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDHashtag+Extensions.swift"; sourceTree = "<group>"; };
+		D35A75482347727600FDC236 /* CDChallenge+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CDChallenge+Extensions.swift"; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35E90C6230C5AD300A46B3F /* UserDefault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefault.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -422,6 +424,7 @@
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 				D3E139692342FE9700353DAE /* Notes.xcdatamodeld */,
 				D3E1397A23437F5400353DAE /* CoreDataImporter.swift */,
+				D35A75482347727600FDC236 /* CDChallenge+Extensions.swift */,
 				D35A7544234598FD00FDC236 /* CDPage+Extensions.swift */,
 				D35A754623459AEC00FDC236 /* CDHashtag+Extensions.swift */,
 			);
@@ -699,6 +702,7 @@
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
+				D35A75492347727600FDC236 /* CDChallenge+Extensions.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */,
 				D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */,

@@ -23,9 +23,7 @@ public enum CoreDataImporter {
       let backgroundContext = persistentContainer.newBackgroundContext()
       backgroundContext.perform {
         importAllPages(from: notebook, into: backgroundContext)
-        for (key, properties) in notebook.pageProperties {
-          importPage(from: notebook, key: key, properties: properties, into: backgroundContext)
-        }
+        importLog(from: notebook, into: backgroundContext)
         do {
           try backgroundContext.save()
           logger.info("Successfully saved Core Data content")
@@ -47,6 +45,45 @@ private extension CoreDataImporter {
     for (key, properties) in notebook.pageProperties {
       importPage(from: notebook, key: key, properties: properties, into: backgroundContext)
     }
+  }
+
+  static func importLog(
+    from notebook: NoteArchiveDocument,
+    into backgroundContext: NSManagedObjectContext
+  ) {
+    var totalImported = 0
+    for entry in notebook.studyLog {
+      guard
+        let challenge = try? CDChallenge.fetch(identifier: entry.identifier)
+      else {
+        logger.error("Could not find a challenge for \(entry.identifier)")
+        continue
+      }
+      guard entry.statistics.correct > 0 else {
+        challenge.suppressUntil = nil
+        continue
+      }
+      if let priorStudyDate = challenge.lastStudyDate {
+        let delta = Swift.max(entry.timestamp.timeIntervalSince(priorStudyDate), TimeInterval.day)
+        let factor = pow(2.0, 1.0 - Double(entry.statistics.incorrect))
+        challenge.suppressUntil = entry.timestamp.addingTimeInterval(delta * factor)
+      } else {
+        // TODO: This copies the current study logic but it seems wrong
+        // because it doesn't take correct/incorrect into account.
+        challenge.suppressUntil = entry.timestamp.addingTimeInterval(.day)
+      }
+      challenge.lastStudyDate = entry.timestamp
+      challenge.totalCorrect += Int32(entry.statistics.correct)
+      challenge.totalIncorrect += Int32(entry.statistics.incorrect)
+
+      let entryObject = CDStudyLogEntry(context: backgroundContext)
+      entryObject.correct = Int16(entry.statistics.correct)
+      entryObject.incorrect = Int16(entry.statistics.incorrect)
+      entryObject.timestamp = entry.timestamp
+      challenge.addToStudyLogEntries(entryObject)
+      totalImported += 1
+    }
+    logger.info("Imported \(totalImported) log entries")
   }
 
   static func importPage(
@@ -86,6 +123,7 @@ private extension CoreDataImporter {
       return nil
     }
     let templateObject = CDChallengeTemplate(context: context)
+    templateObject.legacyIdentifier = templateKey.digest
     templateObject.serialized = try YAMLEncoder().encode(template)
     templateObject.type = templateKey.type
     // Import challenges
@@ -94,7 +132,7 @@ private extension CoreDataImporter {
       challengeObject.key = String(describing: challenge.challengeIdentifier.index)
       return challengeObject
     }
-    templateObject.challenges = Set(challenges) as NSSet
+    templateObject.addToChallenges(NSSet(array: challenges))
     return templateObject
   }
 
