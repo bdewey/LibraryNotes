@@ -37,12 +37,8 @@ public enum CoreDataImporter {
             page.contents = contentsObject
           }
           // Delete all existing templates
-          if let existingTemplates = page.challengeTemplates {
-            for templateObject in existingTemplates {
-              // swiftlint:disable:next force_cast
-              backgroundContext.delete(templateObject as! NSManagedObject)
-            }
-          }
+          backgroundContext.deleteAllObjects(in: page.challengeTemplates)
+          // Import templates
           for templateKeyString in properties.cardTemplates {
             guard
               let templateKey = ChallengeTemplateArchiveKey(templateKeyString),
@@ -54,6 +50,13 @@ public enum CoreDataImporter {
               let templateObject = CDChallengeTemplate(context: backgroundContext)
               templateObject.serialized = try YAMLEncoder().encode(template)
               templateObject.type = templateKey.type
+              // Import challenges
+              let challenges = template.challenges.map { challenge -> CDChallenge in
+                let challengeObject = CDChallenge(context: backgroundContext)
+                challengeObject.key = String(describing: challenge.challengeIdentifier.index)
+                return challengeObject
+              }
+              templateObject.challenges = Set(challenges) as NSSet
               page.challengeTemplates = page.challengeTemplates?.adding(templateObject) as NSSet?
               logger.info("Imported template \(templateKeyString)")
             } catch {
@@ -68,6 +71,16 @@ public enum CoreDataImporter {
           logger.error("Unable to save core data changes: \(error)")
         }
       }
+    }
+  }
+}
+
+private extension NSManagedObjectContext {
+  func deleteAllObjects(in set: NSSet?) {
+    guard let set = set else { return }
+    for object in set {
+      guard let managedObject = object as? NSManagedObject else { continue }
+      delete(managedObject)
     }
   }
 }
