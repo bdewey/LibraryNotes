@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CoreData
 import Foundation
@@ -13,7 +13,7 @@ public enum CoreDataImporter {
     _ notebook: NoteArchiveDocument
   ) {
     let persistentContainer = NSPersistentContainer(name: "Notes")
-    persistentContainer.loadPersistentStores { (description, error) in
+    persistentContainer.loadPersistentStores { description, error in
       if let error = error {
         logger.error("Error opening persistent store: \(error)")
         return
@@ -48,8 +48,8 @@ private extension CoreDataImporter {
   static func importAllPages(
     from notebook: NoteArchiveDocument,
     into backgroundContext: NSManagedObjectContext
-  ) -> [String : CDChallengeTemplate] {
-    var notebookTemplates = [String : CDChallengeTemplate]()
+  ) -> [String: CDChallengeTemplate] {
+    var notebookTemplates = [String: CDChallengeTemplate]()
     for (key, properties) in notebook.pageProperties {
       let pageTemplates = importPage(
         from: notebook, key: key,
@@ -111,13 +111,14 @@ private extension CoreDataImporter {
     key: String,
     properties: PageProperties,
     into backgroundContext: NSManagedObjectContext
-  ) -> [String : CDChallengeTemplate] {
+  ) -> [String: CDChallengeTemplate] {
     let uuid = UUID(uuidString: key)!
     let page = CDPage.getOrCreate(uuid: uuid, context: backgroundContext)
     page.timestamp = properties.timestamp
     page.title = properties.title
-    page.hashtags = NSSet(array: properties.hashtags
-      .map { CDHashtag.getOrCreate(name: $0, context: backgroundContext) }
+    page.hashtags = NSSet(
+      array: properties.hashtags
+        .map { CDHashtag.getOrCreate(name: $0, context: backgroundContext) }
     )
     importPageContents(from: notebook, key: key, into: page)
     // Delete all existing templates
@@ -186,14 +187,14 @@ private extension NSManagedObjectContext {
 private extension CDChallengeTemplate {
   func challenge(for index: Int) -> CDChallenge? {
     challenges?
-      .compactMap({ challenge -> CDChallenge? in
+      .compactMap { challenge -> CDChallenge? in
         guard
           let challenge = challenge as? CDChallenge,
           challenge.key == String(describing: index)
         else {
-            return nil
+          return nil
         }
         return challenge
-      }).first
+      }.first
   }
 }

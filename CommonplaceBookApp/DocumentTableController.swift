@@ -89,6 +89,7 @@ public final class DocumentTableController: NSObject {
       performUpdates(animated: true)
     }
   }
+
   private let dataSource: DataSource
 
   public func startObservingNotebook() {
