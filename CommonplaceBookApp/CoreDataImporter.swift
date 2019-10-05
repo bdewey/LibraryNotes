@@ -22,8 +22,15 @@ public enum CoreDataImporter {
       }
       let backgroundContext = persistentContainer.newBackgroundContext()
       backgroundContext.perform {
-        importAllPages(from: notebook, into: backgroundContext)
-        importLog(from: notebook, into: backgroundContext)
+        let notebookTemplates = importAllPages(
+          from: notebook,
+          into: backgroundContext
+        )
+        importLog(
+          from: notebook,
+          into: backgroundContext,
+          templates: notebookTemplates
+        )
         do {
           try backgroundContext.save()
           logger.info("Successfully saved Core Data content")
@@ -41,20 +48,33 @@ private extension CoreDataImporter {
   static func importAllPages(
     from notebook: NoteArchiveDocument,
     into backgroundContext: NSManagedObjectContext
-  ) {
+  ) -> [String : CDChallengeTemplate] {
+    var notebookTemplates = [String : CDChallengeTemplate]()
     for (key, properties) in notebook.pageProperties {
-      importPage(from: notebook, key: key, properties: properties, into: backgroundContext)
+      let pageTemplates = importPage(
+        from: notebook, key: key,
+        properties: properties,
+        into: backgroundContext
+      )
+      notebookTemplates.merge(pageTemplates) { (_, template) -> CDChallengeTemplate in
+        assertionFailure()
+        return template
+      }
     }
+    return notebookTemplates
   }
 
   static func importLog(
     from notebook: NoteArchiveDocument,
-    into backgroundContext: NSManagedObjectContext
+    into backgroundContext: NSManagedObjectContext,
+    templates: [String: CDChallengeTemplate]
   ) {
     var totalImported = 0
     for entry in notebook.studyLog {
       guard
-        let challenge = try? CDChallenge.fetch(identifier: entry.identifier)
+        let digest = entry.identifier.templateDigest,
+        let challengeTemplate = templates[digest],
+        let challenge = challengeTemplate.challenge(for: entry.identifier.index)
       else {
         logger.error("Could not find a challenge for \(entry.identifier)")
         continue
@@ -91,7 +111,7 @@ private extension CoreDataImporter {
     key: String,
     properties: PageProperties,
     into backgroundContext: NSManagedObjectContext
-  ) {
+  ) -> [String : CDChallengeTemplate] {
     let uuid = UUID(uuidString: key)!
     let page = CDPage.getOrCreate(uuid: uuid, context: backgroundContext)
     page.timestamp = properties.timestamp
@@ -103,19 +123,22 @@ private extension CoreDataImporter {
     // Delete all existing templates
     backgroundContext.deleteAllObjects(in: page.challengeTemplates)
     // Import templates
-    page.challengeTemplates = NSSet(array: properties.cardTemplates
-      .compactMap {
+    let keysAndTemplates = Dictionary(
+      uniqueKeysWithValues: properties.cardTemplates.compactMap {
         try? convertTemplate(identifierString: $0, notebook: notebook, context: backgroundContext)
       }
     )
-    logger.info("page: \(page)")
+    keysAndTemplates.values.forEach {
+      page.addToChallengeTemplates($0)
+    }
+    return keysAndTemplates
   }
 
   static func convertTemplate(
     identifierString: String,
     notebook: NoteArchiveDocument,
     context: NSManagedObjectContext
-  ) throws -> CDChallengeTemplate? {
+  ) throws -> (key: String, template: CDChallengeTemplate)? {
     guard
       let templateKey = ChallengeTemplateArchiveKey(identifierString),
       let template = notebook.challengeTemplate(for: identifierString)
@@ -123,7 +146,6 @@ private extension CoreDataImporter {
       return nil
     }
     let templateObject = CDChallengeTemplate(context: context)
-    templateObject.legacyIdentifier = templateKey.digest
     templateObject.serialized = try YAMLEncoder().encode(template)
     templateObject.type = templateKey.type
     // Import challenges
@@ -133,7 +155,7 @@ private extension CoreDataImporter {
       return challengeObject
     }
     templateObject.addToChallenges(NSSet(array: challenges))
-    return templateObject
+    return (key: templateKey.digest, template: templateObject)
   }
 
   static func importPageContents(
@@ -158,5 +180,20 @@ private extension NSManagedObjectContext {
       guard let managedObject = object as? NSManagedObject else { continue }
       delete(managedObject)
     }
+  }
+}
+
+private extension CDChallengeTemplate {
+  func challenge(for index: Int) -> CDChallenge? {
+    challenges?
+      .compactMap({ challenge -> CDChallenge? in
+        guard
+          let challenge = challenge as? CDChallenge,
+          challenge.key == String(describing: index)
+        else {
+            return nil
+        }
+        return challenge
+      }).first
   }
 }

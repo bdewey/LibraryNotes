@@ -14,7 +14,6 @@
         <relationship name="studyLogEntries" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDStudyLogEntry" inverseName="challenge" inverseEntity="CDStudyLogEntry"/>
     </entity>
     <entity name="CDChallengeTemplate" representedClassName="CDChallengeTemplate" syncable="YES" codeGenerationType="class">
-        <attribute name="legacyIdentifier" optional="YES" attributeType="String"/>
         <attribute name="serialized" optional="YES" attributeType="String"/>
         <attribute name="type" optional="YES" attributeType="String"/>
         <relationship name="challenges" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDChallenge" inverseName="challengeTemplate" inverseEntity="CDChallenge"/>
@@ -44,7 +43,7 @@
     </entity>
     <elements>
         <element name="CDAsset" positionX="-200.4140625" positionY="275.12890625" width="128" height="73"/>
-        <element name="CDChallengeTemplate" positionX="238.453125" positionY="14.3203125" width="128" height="118"/>
+        <element name="CDChallengeTemplate" positionX="238.453125" positionY="14.3203125" width="128" height="103"/>
         <element name="CDHashtag" positionX="-232.4609375" positionY="19.40234375" width="128" height="73"/>
         <element name="CDPage" positionX="52.71484375" positionY="-219.3671875" width="128" height="133"/>
         <element name="CDPageContents" positionX="135" positionY="90" width="128" height="73"/>
