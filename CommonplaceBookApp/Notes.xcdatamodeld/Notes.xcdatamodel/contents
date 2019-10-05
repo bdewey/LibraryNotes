@@ -2,7 +2,7 @@
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14903" systemVersion="19A573a" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="CDAsset" representedClassName="CDAsset" syncable="YES" codeGenerationType="class">
         <attribute name="data" attributeType="Binary"/>
-        <attribute name="shaHash" attributeType="String"/>
+        <attribute name="digest" attributeType="String"/>
     </entity>
     <entity name="CDChallenge" representedClassName="CDChallenge" syncable="YES" codeGenerationType="class">
         <attribute name="key" optional="YES" attributeType="String"/>

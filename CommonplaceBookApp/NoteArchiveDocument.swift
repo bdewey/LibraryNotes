@@ -196,6 +196,15 @@ public final class NoteArchiveDocument: UIDocument {
     updateChangeCount(.done)
   }
 
+  internal var assetKeys: [String] {
+    guard
+      let assets = assetsFileWrapper.fileWrappers
+    else {
+      return []
+    }
+    return assets.keys.map { "assets/" + $0 }
+  }
+
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.

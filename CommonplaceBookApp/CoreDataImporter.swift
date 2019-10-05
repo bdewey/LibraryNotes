@@ -31,6 +31,7 @@ public enum CoreDataImporter {
           into: backgroundContext,
           templates: notebookTemplates
         )
+        importAssets(from: notebook, into: backgroundContext)
         do {
           try backgroundContext.save()
           logger.info("Successfully saved Core Data content")
@@ -104,6 +105,22 @@ private extension CoreDataImporter {
       totalImported += 1
     }
     logger.info("Imported \(totalImported) log entries")
+  }
+
+  static func importAssets(
+    from notebook: NoteArchiveDocument,
+    into backgroundContext: NSManagedObjectContext
+  ) {
+    var assetCount = 0
+    for key in notebook.assetKeys {
+      guard let data = notebook.data(for: key) else {
+        logger.info("No data for asset \(key)")
+        continue
+      }
+      _ = CDAsset.asset(data: data, context: backgroundContext)
+      assetCount += 1
+    }
+    logger.info("Imported \(assetCount) asset(s)")
   }
 
   static func importPage(
