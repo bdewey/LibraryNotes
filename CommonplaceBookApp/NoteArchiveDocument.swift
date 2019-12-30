@@ -7,6 +7,41 @@ import MiniMarkdown
 import MobileCoreServices
 import UIKit
 
+public protocol NoteArchiveDocument: TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
+  func changeTextContents(for pageIdentifier: String, to text: String)
+  func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
+  func addObserver(_ observer: NoteArchiveDocumentObserver)
+  func removeObserver(_ observer: NoteArchiveDocumentObserver)
+  func currentTextContents(for pageIdentifier: String) throws -> String
+  func studySession(
+    filter: ((String, PageProperties) -> Bool)?,
+    date: Date,
+    completion: @escaping (StudySession) -> Void
+  )
+  func synchronousStudySession(
+    filter: ((String, PageProperties) -> Bool)?,
+    date: Date
+  ) -> StudySession
+  var hashtags: [String] { get }
+  func deletePage(pageIdentifier: String) throws
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date)
+  var pageProperties: [String: PageProperties] { get }
+  var parsingRules: ParsingRules { get }
+  func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction])
+  func storeAssetData(_ data: Data, typeHint: String) -> String
+  func changePageProperties(for pageIdentifier: String, to pageProperties: PageProperties)
+  func insertPageProperties(_ pageProperties: PageProperties) -> String
+  func insertChallengeTemplate(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey
+  func challengeTemplate(for keyString: String) -> ChallengeTemplate?
+  var studyLog: StudyLog { get }
+  func importFileMetadataItems(
+    _ items: [FileMetadata],
+    from metadataProvider: FileMetadataProvider,
+    importDate: Date,
+    completion: (() -> Void)?
+  )
+}
+
 public protocol NoteArchiveDocumentObserver: AnyObject {
   func noteArchiveDocument(
     _ document: NoteArchiveDocument,
@@ -15,7 +50,7 @@ public protocol NoteArchiveDocumentObserver: AnyObject {
 }
 
 /// A UIDocument that contains a NoteArchive and a StudyLog.
-public final class NoteArchiveDocument: UIDocument {
+public final class NoteArchiveDocumentImpl: UIDocument, NoteArchiveDocument {
   /// Designated initializer.
   /// - parameter fileURL: The URL of the document
   /// - parameter parsingRules: Defines how to parse markdown inside the notes
@@ -139,9 +174,9 @@ public final class NoteArchiveDocument: UIDocument {
       throw error(for: .unexpectedContentType)
     }
     topLevelFileWrapper = wrapper
-    studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
+    studyLog = NoteArchiveDocumentImpl.loadStudyLog(from: wrapper)
     do {
-      let noteArchive = try NoteArchiveDocument.loadNoteArchive(
+      let noteArchive = try NoteArchiveDocumentImpl.loadNoteArchive(
         from: wrapper,
         parsingRules: parsingRules
       )
@@ -200,7 +235,7 @@ public final class NoteArchiveDocument: UIDocument {
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
-  internal func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
+  public func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
     var currentWrapper = topLevelFileWrapper
     for pathComponent in fileWrapperKey.split(separator: "/") {
       guard let nextWrapper = currentWrapper.fileWrappers?[String(pathComponent)] else {
@@ -213,7 +248,7 @@ public final class NoteArchiveDocument: UIDocument {
 }
 
 /// Observing.
-public extension NoteArchiveDocument {
+public extension NoteArchiveDocumentImpl {
   private struct WeakObserver {
     weak var observer: NoteArchiveDocumentObserver?
     init(_ observer: NoteArchiveDocumentObserver) { self.observer = observer }
@@ -243,7 +278,7 @@ public extension NoteArchiveDocument {
 }
 
 /// Load / save support
-private extension NoteArchiveDocument {
+private extension NoteArchiveDocumentImpl {
   static func loadNoteArchive(
     from wrapper: FileWrapper,
     parsingRules: ParsingRules
@@ -295,7 +330,7 @@ private extension NoteArchiveDocument {
 }
 
 /// Making NSErrors...
-public extension NoteArchiveDocument {
+public extension NoteArchiveDocumentImpl {
   static let errorDomain = "NoteArchiveDocument"
 
   enum ErrorCode: String, CaseIterable {
@@ -309,7 +344,7 @@ public extension NoteArchiveDocument {
   func error(for code: ErrorCode) -> NSError {
     let index = ErrorCode.allCases.firstIndex(of: code)!
     return NSError(
-      domain: NoteArchiveDocument.errorDomain,
+      domain: NoteArchiveDocumentImpl.errorDomain,
       code: index,
       userInfo: [NSLocalizedDescriptionKey: code.rawValue]
     )
@@ -319,7 +354,7 @@ public extension NoteArchiveDocument {
   func wrapError(code: ErrorCode, innerError: Error) -> NSError {
     let index = ErrorCode.allCases.firstIndex(of: code)!
     return NSError(
-      domain: NoteArchiveDocument.errorDomain,
+      domain: NoteArchiveDocumentImpl.errorDomain,
       code: index,
       userInfo: [
         NSLocalizedDescriptionKey: code.rawValue,
@@ -331,7 +366,7 @@ public extension NoteArchiveDocument {
 
 // MARK: - Study sessions
 
-public extension NoteArchiveDocument {
+public extension NoteArchiveDocumentImpl {
   /// Computes a studySession for the relevant pages in the notebook.
   /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
   /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
@@ -351,7 +386,7 @@ public extension NoteArchiveDocument {
 
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
-  internal func synchronousStudySession(
+  func synchronousStudySession(
     filter: ((String, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
@@ -432,7 +467,7 @@ public extension NoteArchiveDocument {
 
 // MARK: - MarkdownEditingTextViewImageStoring
 
-extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
+extension NoteArchiveDocumentImpl: MarkdownEditingTextViewImageStoring {
   public func markdownEditingTextView(
     _ textView: MarkdownEditingTextView,
     store imageData: Data,
@@ -444,7 +479,7 @@ extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
 
 // MARK: - Images
 
-extension NoteArchiveDocument {
+extension NoteArchiveDocumentImpl {
   /// Stores asset data into the document.
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key

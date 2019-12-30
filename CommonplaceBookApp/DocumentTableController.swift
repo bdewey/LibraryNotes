@@ -184,7 +184,7 @@ extension DocumentTableController: UITableViewDelegate {
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }) {
+          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }, date: Date()) {
             self.delegate?.presentStudySessionViewController(for: $0)
             completion(true)
           }
@@ -335,7 +335,7 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    notebook.studySession { studySession in
+    notebook.studySession(filter: nil, date: Date()) { studySession in
       self.cardsPerDocument = studySession
         .reduce(into: [String: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1

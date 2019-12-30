@@ -47,7 +47,7 @@ extension ClozeCard: Challenge {
   }
 
   public func challengeView(
-    document: UIDocument,
+    document: NoteArchiveDocument,
     properties: CardDocumentProperties
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)

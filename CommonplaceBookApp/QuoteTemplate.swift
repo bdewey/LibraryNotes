@@ -72,7 +72,7 @@ extension QuoteTemplate: Challenge {
   }
 
   public func challengeView(
-    document: UIDocument,
+    document: NoteArchiveDocument,
     properties: CardDocumentProperties
   ) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)

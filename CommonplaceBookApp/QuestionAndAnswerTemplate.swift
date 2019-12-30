@@ -63,7 +63,7 @@ extension QuestionAndAnswerTemplate: Challenge {
     return ChallengeIdentifier(templateDigest: templateIdentifier, index: 0)
   }
 
-  public func challengeView(document: UIDocument, properties: CardDocumentProperties) -> ChallengeView {
+  public func challengeView(document: NoteArchiveDocument, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     let attributionNodes = properties.parsingRules.parse(properties.attributionMarkdown)
     if let attributionNode = attributionNodes.first {
@@ -79,9 +79,7 @@ extension QuestionAndAnswerTemplate: Challenge {
     var renderer = MarkdownAttributedStringRenderer(
       textStyle: .body
     )
-    if let noteArchiveDocument = document as? NoteArchiveDocument {
-      noteArchiveDocument.addImageRenderer(to: &renderer.renderFunctions)
-    }
+    document.addImageRenderer(to: &renderer.renderFunctions)
     view.front = renderer.render(node: node.question).trimmingTrailingWhitespace()
     view.back = renderer.render(node: node.answer).trimmingTrailingWhitespace()
     return view

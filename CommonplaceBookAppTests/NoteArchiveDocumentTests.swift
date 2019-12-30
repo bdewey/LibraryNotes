@@ -110,8 +110,8 @@ extension NoteArchiveDocumentTests {
     XCTAssertEqual(document.studyLog.count, logCount)
   }
 
-  private func openDocument(fileURL: URL) -> NoteArchiveDocument {
-    let document = NoteArchiveDocument(
+  private func openDocument(fileURL: URL) -> NoteArchiveDocumentImpl {
+    let document = NoteArchiveDocumentImpl(
       fileURL: fileURL,
       parsingRules: parsingRules
     )
@@ -124,7 +124,7 @@ extension NoteArchiveDocumentTests {
     return document
   }
 
-  private func closeDocument(_ document: NoteArchiveDocument) {
+  private func closeDocument(_ document: NoteArchiveDocumentImpl) {
     let didClose = expectation(description: "did close")
     document.close { success in
       XCTAssertTrue(success)

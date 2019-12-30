@@ -101,7 +101,7 @@ struct AddVocabularyViewPreviews: PreviewProvider {
       parsingRules: ParsingRules()
     )
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("test.notebundle")
-    return EditVocabularyView(notebook: NoteArchiveDocument(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
+    return EditVocabularyView(notebook: NoteArchiveDocumentImpl(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
       .environmentObject(ImageSearchRequest())
   }
 }

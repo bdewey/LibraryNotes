@@ -31,7 +31,7 @@ public protocol Challenge {
   ///                       loading images.
   /// - parameter properties: Relevant properties of `document`
   func challengeView(
-    document: UIDocument,
+    document: NoteArchiveDocument,
     properties: CardDocumentProperties
   ) -> ChallengeView
 }

@@ -102,7 +102,7 @@ final class DocumentListViewController: UIViewController {
     tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    notebook.studySession { [weak self] in
+    notebook.studySession(filter: nil, date: Date()) { [weak self] in
       self?.studySession = $0
     }
     dataSource.performUpdates(animated: false)
@@ -187,7 +187,7 @@ final class DocumentListViewController: UIViewController {
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
     let hashtag = currentHashtag
-    notebook.studySession(filter: filter) {
+    notebook.studySession(filter: filter, date: Date()) {
       guard self.currentHashtag == hashtag else { return }
       self.studySession = $0
     }
@@ -323,7 +323,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    notebook.updateStudySessionResults(session)
+    notebook.updateStudySessionResults(session, on: Date())
     updateStudySession()
   }
 

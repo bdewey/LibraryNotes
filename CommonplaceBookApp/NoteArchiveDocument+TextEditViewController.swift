@@ -3,8 +3,8 @@
 import CocoaLumberjack
 import Foundation
 
-extension NoteArchiveDocument: TextEditViewControllerDelegate {
-  func textEditViewController(
+extension NoteArchiveDocumentImpl {
+  public func textEditViewController(
     _ viewController: TextEditViewController,
     didChange markdown: String
   ) {
@@ -25,7 +25,7 @@ extension NoteArchiveDocument: TextEditViewControllerDelegate {
     }
   }
 
-  func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
+  public func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
     if hasUnsavedChanges {
       save(to: fileURL, for: .forOverwriting, completionHandler: nil)
     }
