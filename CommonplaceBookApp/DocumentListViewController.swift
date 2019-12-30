@@ -34,7 +34,7 @@ final class DocumentListViewController: UIViewController {
     self.navigationItem.rightBarButtonItem = studyButton
     self.notebookSubscription = notebook.notePropertiesDidChange
       .receive(on: DispatchQueue.main)
-      .sink { [weak self] _ in
+      .sink { [weak self] in
         self?.updateStudySession()
       }
   }

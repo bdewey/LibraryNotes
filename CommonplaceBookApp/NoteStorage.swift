@@ -12,7 +12,7 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
-  var notePropertiesDidChange: PassthroughSubject<[NoteIdentifier: NoteProperties], Never> { get }
+  var notePropertiesDidChange: PassthroughSubject<Void, Never> { get }
   func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String
 
   /// Blocking function that gets the study session. Safe to call from background threads. Part of the protocol to make testing easier.

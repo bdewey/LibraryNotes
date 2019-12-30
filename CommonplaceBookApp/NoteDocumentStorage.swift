@@ -57,7 +57,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
   }
 
-  public let notePropertiesDidChange = PassthroughSubject<[NoteIdentifier: NoteProperties], Never>()
+  public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
@@ -208,7 +208,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 /// Observing.
 public extension NoteDocumentStorage {
   internal func notifyObservers(of noteProperties: [NoteIdentifier: NoteProperties]) {
-    notePropertiesDidChange.send(noteProperties)
+    notePropertiesDidChange.send()
   }
 }
 

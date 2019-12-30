@@ -98,7 +98,7 @@ public final class DocumentTableController: NSObject {
   public func startObservingNotebook() {
     notebookSubscription = notebook.notePropertiesDidChange
       .receive(on: DispatchQueue.main)
-      .sink { [weak self] _ in
+      .sink { [weak self] in
         self?.updateCardsPerDocument()
       }
     updateCardsPerDocument()
