@@ -87,7 +87,7 @@ public final class TextEditViewController: UIViewController {
   }
 
   /// Identifier of the page we are editing.
-  public var pageIdentifier: PageIdentifier?
+  public var pageIdentifier: NoteIdentifier?
 
   private static func formatters(
   ) -> [NodeType: RenderedMarkdown.FormattingFunction] {

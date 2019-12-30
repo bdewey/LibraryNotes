@@ -51,13 +51,13 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// Accessor for the page properties.
-  public var pageProperties: [PageIdentifier: PageProperties] {
+  public var pageProperties: [NoteIdentifier: PageProperties] {
     return noteArchiveQueue.sync {
       noteArchive.pageProperties
     }
   }
 
-  public let pagePropertiesDidChange = PassthroughSubject<[PageIdentifier: PageProperties], Never>()
+  public let pagePropertiesDidChange = PassthroughSubject<[NoteIdentifier: PageProperties], Never>()
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
@@ -67,14 +67,14 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     return Array(hashtags).sorted()
   }
 
-  public func currentTextContents(for pageIdentifier: PageIdentifier) throws -> String {
+  public func currentTextContents(for pageIdentifier: NoteIdentifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
       try noteArchive.currentText(for: pageIdentifier)
     }
   }
 
-  public func changeTextContents(for pageIdentifier: PageIdentifier, to text: String) {
+  public func changeTextContents(for pageIdentifier: NoteIdentifier, to text: String) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
       noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
@@ -83,7 +83,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for pageIdentifier: PageIdentifier, to pageProperties: PageProperties) {
+  public func changePageProperties(for pageIdentifier: NoteIdentifier, to pageProperties: PageProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
       noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
@@ -107,7 +107,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     })
   }
 
-  public func deletePage(pageIdentifier: PageIdentifier) throws {
+  public func deletePage(pageIdentifier: NoteIdentifier) throws {
     noteArchiveQueue.sync {
       noteArchive.removeNote(for: pageIdentifier)
     }
@@ -207,7 +207,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
 /// Observing.
 public extension NoteDocumentStorage {
-  internal func notifyObservers(of pageProperties: [PageIdentifier: PageProperties]) {
+  internal func notifyObservers(of pageProperties: [NoteIdentifier: PageProperties]) {
     pagePropertiesDidChange.send(pageProperties)
   }
 }
@@ -305,7 +305,7 @@ public extension NoteDocumentStorage {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   func synchronousStudySession(
-    filter: ((PageIdentifier, PageProperties) -> Bool)? = nil,
+    filter: ((NoteIdentifier, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
@@ -365,7 +365,7 @@ public extension NoteDocumentStorage {
     }
   }
 
-  func insertPageProperties(_ pageProperties: PageProperties) -> PageIdentifier {
+  func insertPageProperties(_ pageProperties: PageProperties) -> NoteIdentifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
       noteArchive.insertPageProperties(pageProperties)
