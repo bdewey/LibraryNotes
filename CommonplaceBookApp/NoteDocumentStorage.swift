@@ -51,13 +51,13 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// Accessor for the page properties.
-  public var pageProperties: [String: PageProperties] {
+  public var pageProperties: [PageIdentifier: PageProperties] {
     return noteArchiveQueue.sync {
-      noteArchive.pageProperties
+      noteArchive.pageProperties.asPageIdentifierDictionary()
     }
   }
 
-  public let pagePropertiesDidChange = PassthroughSubject<[String: PageProperties], Never>()
+  public let pagePropertiesDidChange = PassthroughSubject<[PageIdentifier: PageProperties], Never>()
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
@@ -67,26 +67,26 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     return Array(hashtags).sorted()
   }
 
-  public func currentTextContents(for pageIdentifier: String) throws -> String {
+  public func currentTextContents(for pageIdentifier: PageIdentifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
-      try noteArchive.currentText(for: pageIdentifier)
+      try noteArchive.currentText(for: pageIdentifier.rawValue)
     }
   }
 
-  public func changeTextContents(for pageIdentifier: String, to text: String) {
+  public func changeTextContents(for pageIdentifier: PageIdentifier, to text: String) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
+      noteArchive.updateText(for: pageIdentifier.rawValue, to: text, contentChangeTime: Date())
     }
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for pageIdentifier: String, to pageProperties: PageProperties) {
+  public func changePageProperties(for pageIdentifier: PageIdentifier, to pageProperties: PageProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
+      noteArchive.updatePageProperties(for: pageIdentifier.rawValue, to: pageProperties)
     }
     invalidateSavedSnippets()
   }
@@ -107,11 +107,11 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     })
   }
 
-  public func deletePage(pageIdentifier: String) throws {
+  public func deletePage(pageIdentifier: PageIdentifier) throws {
     noteArchiveQueue.sync {
-      noteArchive.removeNote(for: pageIdentifier)
+      noteArchive.removeNote(for: pageIdentifier.rawValue)
     }
-    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier], completionHandler: nil)
+    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
     notifyObservers(of: pageProperties)
   }
@@ -139,7 +139,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
         parsingRules: parsingRules
       )
       noteArchive.addToSpotlight()
-      let pageProperties = noteArchive.pageProperties
+      let pageProperties = noteArchive.pageProperties.asPageIdentifierDictionary()
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(pageProperties.count) pages")
       notifyObservers(of: pageProperties)
@@ -207,7 +207,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
 /// Observing.
 public extension NoteDocumentStorage {
-  internal func notifyObservers(of pageProperties: [String: PageProperties]) {
+  internal func notifyObservers(of pageProperties: [PageIdentifier: PageProperties]) {
     pagePropertiesDidChange.send(pageProperties)
   }
 }
@@ -305,12 +305,12 @@ public extension NoteDocumentStorage {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   func synchronousStudySession(
-    filter: ((String, PageProperties) -> Bool)? = nil,
+    filter: ((PageIdentifier, PageProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
-    let properties = noteArchiveQueue.sync { noteArchive.pageProperties }
+    let properties = noteArchiveQueue.sync { noteArchive.pageProperties.asPageIdentifierDictionary() }
     return properties
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
@@ -365,10 +365,10 @@ public extension NoteDocumentStorage {
     }
   }
 
-  func insertPageProperties(_ pageProperties: PageProperties) -> String {
+  func insertPageProperties(_ pageProperties: PageProperties) -> PageIdentifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
-      noteArchive.insertPageProperties(pageProperties)
+      PageIdentifier(rawValue: noteArchive.insertPageProperties(pageProperties))
     }
   }
 
@@ -444,5 +444,12 @@ private extension Data {
     ]
     let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
     return image
+  }
+}
+
+extension Dictionary where Key == String {
+  func asPageIdentifierDictionary() -> [PageIdentifier: Value] {
+    let tuples = self.map { (key: PageIdentifier(rawValue: $0.key), value: $0.value) }
+    return [PageIdentifier: Value](uniqueKeysWithValues: tuples)
   }
 }

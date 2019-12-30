@@ -7,7 +7,7 @@ import MiniMarkdown
 /// of the document.
 public struct CardDocumentProperties {
   /// The document name that the card came from.
-  public let documentName: String
+  public let documentName: PageIdentifier
 
   /// Attribution to use when displaying cards from the document, with markdown formatting.
   public let attributionMarkdown: String
@@ -15,7 +15,7 @@ public struct CardDocumentProperties {
   /// Parsing rules for the document content, including `attributionMarkdown`
   public let parsingRules: ParsingRules
 
-  public init(documentName: String, attributionMarkdown: String, parsingRules: ParsingRules) {
+  public init(documentName: PageIdentifier, attributionMarkdown: String, parsingRules: ParsingRules) {
     self.documentName = documentName
     self.attributionMarkdown = attributionMarkdown
     self.parsingRules = parsingRules

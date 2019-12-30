@@ -33,7 +33,7 @@ final class VocabularyViewController: UIViewController {
   }
 
   /// Identifier of the page. If nil, it means we're working with unsaved content.
-  var pageIdentifier: String?
+  var pageIdentifier: PageIdentifier?
 
   private lazy var addCardButton: UIBarButtonItem = {
     UIBarButtonItem(image: .add, style: .plain, target: self, action: #selector(didTapAddButton))

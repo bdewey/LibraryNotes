@@ -29,7 +29,7 @@ public extension NoteDocumentStorage {
           contentChangeDate: contentChangeDate,
           importDate: importDate
         )
-        self.notifyObservers(of: self.noteArchive.pageProperties)
+        self.notifyObservers(of: self.noteArchive.pageProperties.asPageIdentifierDictionary())
         self.invalidateSavedSnippets()
         DDLogInfo("Finished importing file \(fileName)")
         if let completion = completion {
