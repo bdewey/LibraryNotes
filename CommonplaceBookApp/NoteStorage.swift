@@ -13,8 +13,8 @@ public struct PageIdentifier: Hashable, RawRepresentable {
     self.rawValue = UUID().uuidString
   }
 
-  public init<S: StringProtocol>(rawValue: S) {
-    self.rawValue = String(rawValue)
+  public init(rawValue: String) {
+    self.rawValue = rawValue
   }
 }
 

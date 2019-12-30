@@ -526,7 +526,7 @@ private extension NoteArchive {
       .compactMap { line -> (PageIdentifier, String)? in
         let components = line.split(separator: " ")
         guard components.count == 2 else { return nil }
-        return (PageIdentifier(rawValue: components[0]), String(components[1]))
+        return (PageIdentifier(rawValue: String(components[0])), String(components[1]))
       }
     return Dictionary(uniqueKeysWithValues: keyValuePairs)
   }
