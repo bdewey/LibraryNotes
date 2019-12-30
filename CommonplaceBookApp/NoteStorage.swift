@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import Combine
 import Foundation
 import MiniMarkdown
 
@@ -11,8 +12,7 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
-  func addObserver(_ observer: NoteArchiveDocumentObserver)
-  func removeObserver(_ observer: NoteArchiveDocumentObserver)
+  var pagePropertiesDidChange: PassthroughSubject<[String: PageProperties], Never> { get }
   func currentTextContents(for pageIdentifier: String) throws -> String
 
   /// Computes a studySession for the relevant pages in the notebook.
@@ -66,9 +66,3 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   )
 }
 
-public protocol NoteArchiveDocumentObserver: AnyObject {
-  func noteArchiveDocument(
-    _ document: NoteStorage,
-    didUpdatePageProperties properties: [String: PageProperties]
-  )
-}

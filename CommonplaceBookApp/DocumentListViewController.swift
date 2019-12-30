@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import CoreServices
 import CoreSpotlight
 import MiniMarkdown
@@ -31,7 +32,11 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.rightBarButtonItem = studyButton
-    notebook.addObserver(self)
+    notebookSubscription = notebook.pagePropertiesDidChange
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] _ in
+        self?.updateStudySession()
+      }
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -42,6 +47,7 @@ final class DocumentListViewController: UIViewController {
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
+  private var notebookSubscription: AnyCancellable?
 
   private lazy var documentBrowserButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "folder")
@@ -329,14 +335,5 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
-  }
-}
-
-extension DocumentListViewController: NoteArchiveDocumentObserver {
-  func noteArchiveDocument(
-    _ document: NoteStorage,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    updateStudySession()
   }
 }

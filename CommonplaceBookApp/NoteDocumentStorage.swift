@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import CoreSpotlight
 import DataCompression
 import MiniMarkdown
@@ -49,15 +50,14 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
-  /// The observers.
-  private var observers: [WeakObserver] = []
-
   /// Accessor for the page properties.
   public var pageProperties: [String: PageProperties] {
     return noteArchiveQueue.sync {
       noteArchive.pageProperties
     }
   }
+
+  public let pagePropertiesDidChange = PassthroughSubject<[String: PageProperties], Never>()
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
@@ -207,31 +207,8 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
 /// Observing.
 public extension NoteDocumentStorage {
-  private struct WeakObserver {
-    weak var observer: NoteArchiveDocumentObserver?
-    init(_ observer: NoteArchiveDocumentObserver) { self.observer = observer }
-  }
-
-  func addObserver(_ observer: NoteArchiveDocumentObserver) {
-    assert(Thread.isMainThread)
-    observers.append(WeakObserver(observer))
-  }
-
-  func removeObserver(_ observer: NoteArchiveDocumentObserver) {
-    assert(Thread.isMainThread)
-    observers.removeAll(where: { $0.observer === observer })
-  }
-
   internal func notifyObservers(of pageProperties: [String: PageProperties]) {
-    guard Thread.isMainThread else {
-      DispatchQueue.main.async {
-        self.notifyObservers(of: pageProperties)
-      }
-      return
-    }
-    for observerWrapper in observers {
-      observerWrapper.observer?.noteArchiveDocument(self, didUpdatePageProperties: pageProperties)
-    }
+    pagePropertiesDidChange.send(pageProperties)
   }
 }
 

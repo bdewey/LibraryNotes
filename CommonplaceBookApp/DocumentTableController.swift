@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import MiniMarkdown
 import UIKit
 
@@ -92,13 +93,20 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: DataSource
 
+  private var notebookSubscription: AnyCancellable?
+
   public func startObservingNotebook() {
-    notebook.addObserver(self)
+    notebookSubscription = notebook.pagePropertiesDidChange
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] _ in
+        self?.updateCardsPerDocument()
+      }
     updateCardsPerDocument()
   }
 
   public func stopObservingNotebook() {
-    notebook.removeObserver(self)
+    notebookSubscription?.cancel()
+    notebookSubscription = nil
   }
 
   public func performUpdates(animated: Bool) {
@@ -225,17 +233,6 @@ extension DocumentTableController: UITableViewDelegate {
     case .documents:
       return 0
     }
-  }
-}
-
-// MARK: - NoteArchiveDocumentObserver
-
-extension DocumentTableController: NoteArchiveDocumentObserver {
-  public func noteArchiveDocument(
-    _ document: NoteStorage,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    updateCardsPerDocument()
   }
 }
 
