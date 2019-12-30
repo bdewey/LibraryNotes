@@ -20,7 +20,7 @@ final class VocabularyViewController: UIViewController {
   let notebook: NoteStorage
 
   /// The page that stores our vocabulary.
-  var properties = PageProperties() {
+  var properties = NoteProperties() {
     didSet {
       title = properties.title
       dataSource.apply(makeSnapshot(), animatingDifferences: true)

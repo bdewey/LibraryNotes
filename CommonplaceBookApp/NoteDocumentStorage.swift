@@ -51,17 +51,17 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// Accessor for the page properties.
-  public var pageProperties: [NoteIdentifier: PageProperties] {
+  public var noteProperties: [NoteIdentifier: NoteProperties] {
     return noteArchiveQueue.sync {
-      noteArchive.pageProperties
+      noteArchive.noteProperties
     }
   }
 
-  public let pagePropertiesDidChange = PassthroughSubject<[NoteIdentifier: PageProperties], Never>()
+  public let notePropertiesDidChange = PassthroughSubject<[NoteIdentifier: NoteProperties], Never>()
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
-    let hashtags = pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
+    let hashtags = noteProperties.values.reduce(into: Set<String>()) { hashtags, props in
       hashtags.formUnion(props.hashtags)
     }
     return Array(hashtags).sorted()
@@ -83,10 +83,10 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for noteIdentifier: NoteIdentifier, to pageProperties: PageProperties) {
+  public func changePageProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: noteIdentifier, to: pageProperties)
+      noteArchive.updatePageProperties(for: noteIdentifier, to: noteProperties)
     }
     invalidateSavedSnippets()
   }
@@ -101,7 +101,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       }
       // swiftlint:disable:next empty_count
       if count > 0 {
-        self.notifyObservers(of: self.pageProperties)
+        self.notifyObservers(of: self.noteProperties)
       }
       self.propertyBatchUpdateTimer = nil
     })
@@ -113,7 +113,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
     CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [noteIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
-    notifyObservers(of: pageProperties)
+    notifyObservers(of: noteProperties)
   }
 
   private enum BundleWrapperKey {
@@ -139,10 +139,10 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
         parsingRules: parsingRules
       )
       noteArchive.addToSpotlight()
-      let pageProperties = noteArchive.pageProperties
+      let noteProperties = noteArchive.noteProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
-      DDLogInfo("Loaded \(pageProperties.count) pages")
-      notifyObservers(of: pageProperties)
+      DDLogInfo("Loaded \(noteProperties.count) pages")
+      notifyObservers(of: noteProperties)
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
     }
@@ -207,8 +207,8 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
 /// Observing.
 public extension NoteDocumentStorage {
-  internal func notifyObservers(of pageProperties: [NoteIdentifier: PageProperties]) {
-    pagePropertiesDidChange.send(pageProperties)
+  internal func notifyObservers(of noteProperties: [NoteIdentifier: NoteProperties]) {
+    notePropertiesDidChange.send(noteProperties)
   }
 }
 
@@ -305,12 +305,12 @@ public extension NoteDocumentStorage {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   func synchronousStudySession(
-    filter: ((NoteIdentifier, PageProperties) -> Bool)? = nil,
+    filter: ((NoteIdentifier, NoteProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
-    let properties = noteArchiveQueue.sync { noteArchive.pageProperties }
+    let properties = noteArchiveQueue.sync { noteArchive.noteProperties }
     return properties
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
@@ -365,10 +365,10 @@ public extension NoteDocumentStorage {
     }
   }
 
-  func insertPageProperties(_ pageProperties: PageProperties) -> NoteIdentifier {
+  func insertPageProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
-      noteArchive.insertPageProperties(pageProperties)
+      noteArchive.insertPageProperties(noteProperties)
     }
   }
 
@@ -379,7 +379,7 @@ public extension NoteDocumentStorage {
   func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
-    notifyObservers(of: pageProperties)
+    notifyObservers(of: noteProperties)
   }
 }
 

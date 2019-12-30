@@ -96,7 +96,7 @@ public final class DocumentTableController: NSObject {
   private var notebookSubscription: AnyCancellable?
 
   public func startObservingNotebook() {
-    notebookSubscription = notebook.pagePropertiesDidChange
+    notebookSubscription = notebook.notePropertiesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] _ in
         self?.updateCardsPerDocument()
@@ -150,11 +150,11 @@ extension DocumentTableController: UITableViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
-      if viewProperties.pageProperties.sha1Digest == nil {
+      if viewProperties.noteProperties.sha1Digest == nil {
         // This is a vocabulary page, not a text page.
         let vc = VocabularyViewController(notebook: notebook)
         vc.noteIdentifier = viewProperties.pageKey
-        vc.properties = viewProperties.pageProperties
+        vc.properties = viewProperties.noteProperties
         delegate?.showDetailViewController(vc)
         return
       }
@@ -276,7 +276,7 @@ private extension DocumentTableController {
     /// UUID for this page
     let pageKey: NoteIdentifier
     /// Page properties (serialized into the document)
-    let pageProperties: PageProperties
+    let noteProperties: NoteProperties
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
   }
@@ -300,10 +300,10 @@ private extension DocumentTableController {
     else {
       preconditionFailure("Forgot to register the right kind of cell")
     }
-    titleRenderer.markdown = viewProperties.pageProperties.title
+    titleRenderer.markdown = viewProperties.noteProperties.title
     cell.titleLabel.attributedText = titleRenderer.attributedString
-    cell.accessibilityLabel = viewProperties.pageProperties.title
-    var detailString = viewProperties.pageProperties.hashtags.joined(separator: ", ")
+    cell.accessibilityLabel = viewProperties.noteProperties.title
+    var detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
     if viewProperties.cardCount > 0 {
       if !detailString.isEmpty { detailString += ". " }
       if viewProperties.cardCount == 1 {
@@ -320,7 +320,7 @@ private extension DocumentTableController {
       ]
     )
     let now = Date()
-    let dateDelta = now.timeIntervalSince(viewProperties.pageProperties.timestamp)
+    let dateDelta = now.timeIntervalSince(viewProperties.noteProperties.timestamp)
     cell.ageLabel.attributedText = NSAttributedString(
       string: DateComponentsFormatter.age.string(from: dateDelta) ?? "",
       attributes: [
@@ -359,7 +359,7 @@ private extension DocumentTableController {
     }
     snapshot.appendSections([.documents])
 
-    let propertiesFilteredByHashtag = notebook.pageProperties
+    let propertiesFilteredByHashtag = notebook.noteProperties
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)
@@ -371,10 +371,10 @@ private extension DocumentTableController {
 
     let objects = propertiesFilteredByHashtag
       .compactMap { tuple in
-        ViewProperties(pageKey: tuple.key, pageProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
+        ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
       }
       .sorted(
-        by: { $0.pageProperties.timestamp > $1.pageProperties.timestamp }
+        by: { $0.noteProperties.timestamp > $1.noteProperties.timestamp }
       )
       .map {
         Item.page($0)

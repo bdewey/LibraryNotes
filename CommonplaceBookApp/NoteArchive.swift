@@ -17,8 +17,8 @@ public struct NoteArchive {
   public init(parsingRules: ParsingRules, textSerialization: String) throws {
     self.parsingRules = parsingRules
     self.archive = try TextSnippetArchive(textSerialization: textSerialization)
-    self.pagePropertiesVersionHistory = try NoteArchive.getVersionHistory(from: archive)
-    if let identifier = pagePropertiesVersionHistory.last?.digest {
+    self.notePropertiesVersionHistory = try NoteArchive.getVersionHistory(from: archive)
+    if let identifier = notePropertiesVersionHistory.last?.digest {
       self.pagePropertyDigests = try NoteArchive.getPageManifest(
         from: archive,
         manifestIdentifier: identifier
@@ -35,7 +35,7 @@ public struct NoteArchive {
   private var archive = TextSnippetArchive()
 
   /// All persisted versions of the archive. We store deltas between versions so *hopefully* it's not too expensive to keep everything around.
-  private var pagePropertiesVersionHistory: [Version] = []
+  private var notePropertiesVersionHistory: [Version] = []
 
   /// Mapping of page UUID (constant across revisions) to the current page properties digest
   private var pagePropertyDigests: [NoteIdentifier: String] = [:]
@@ -44,16 +44,16 @@ public struct NoteArchive {
   private var pageContentsCache: [NoteIdentifier: PageContents] = [:]
 
   /// Returns the current mapping of page id to page properties
-  public var pageProperties: [NoteIdentifier: PageProperties] {
-    let archiveVersion = pagePropertyDigests.compactMapValues { propertyDigest -> PageProperties? in
+  public var noteProperties: [NoteIdentifier: NoteProperties] {
+    let archiveVersion = pagePropertyDigests.compactMapValues { propertyDigest -> NoteProperties? in
       guard
         let snippet = archive.snippets[propertyDigest],
-        let properties = try? PageProperties(snippet) else {
+        let properties = try? NoteProperties(snippet) else {
         return nil
       }
       return properties
     }
-    let cacheVersion = pageContentsCache.compactMapValues { $0.pageProperties }
+    let cacheVersion = pageContentsCache.compactMapValues { $0.noteProperties }
     return archiveVersion.merging(cacheVersion, uniquingKeysWith: { _, new in new })
   }
 
@@ -79,7 +79,7 @@ public struct NoteArchive {
 
   /// Timestamps of all of the versions stored in this archive.
   public var versions: [Date] {
-    return pagePropertiesVersionHistory.map { $0.timestamp }
+    return notePropertiesVersionHistory.map { $0.timestamp }
   }
 
   /// Our file import dates
@@ -115,8 +115,8 @@ public struct NoteArchive {
   }
 
   /// Inserts "naked properties" into the archive -- PageProperties that are directly manipulated, not derived from text.
-  public mutating func insertPageProperties(_ pageProperties: PageProperties) -> NoteIdentifier {
-    var pageContents = PageContents(pageProperties: pageProperties)
+  public mutating func insertPageProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
+    var pageContents = PageContents(noteProperties: noteProperties)
     pageContents.dirty = true
     let key = NoteIdentifier()
     pageContentsCache[key] = pageContents
@@ -192,15 +192,15 @@ public struct NoteArchive {
   }
 
   /// Updates naked page properties.
-  /// - precondition: pageProperties is not associated with content
+  /// - precondition: noteProperties is not associated with content
   /// - parameter noteIdentifier: The permanent identifier for the properties
-  /// - parameter pageProperties: The properties to update.
+  /// - parameter noteProperties: The properties to update.
   public mutating func updatePageProperties(
     for noteIdentifier: NoteIdentifier,
-    to pageProperties: PageProperties
+    to noteProperties: NoteProperties
   ) {
-    precondition(pageProperties.sha1Digest == nil)
-    pageContentsCache[noteIdentifier] = PageContents(dirty: true, pageProperties: pageProperties)
+    precondition(noteProperties.sha1Digest == nil)
+    pageContentsCache[noteIdentifier] = PageContents(dirty: true, noteProperties: noteProperties)
   }
 
   /// Updates all page properties that are stale in the contents cache.
@@ -208,7 +208,7 @@ public struct NoteArchive {
   @discardableResult
   public mutating func batchUpdatePageProperties() -> Int {
     let updated = archive.updatePageProperties(
-      in: pageContentsCache.filter { $0.value.pagePropertiesStale },
+      in: pageContentsCache.filter { $0.value.notePropertiesStale },
       parsingRules: parsingRules
     )
     pageContentsCache.merge(updated, uniquingKeysWith: { _, new in new })
@@ -223,18 +223,18 @@ public struct NoteArchive {
   public mutating func archivePageManifestVersion(timestamp: Date) throws {
     try flushContentsCache()
     let version = Version(timestamp: timestamp, digest: archivePageManifest())
-    if let existingVersion = pagePropertiesVersionHistory.last,
+    if let existingVersion = notePropertiesVersionHistory.last,
       existingVersion.digest == version.digest {
       // The new version is identical to the old version -- no-op.
       return
     }
-    if let existingVersion = pagePropertiesVersionHistory.last,
+    if let existingVersion = notePropertiesVersionHistory.last,
       let oldManifestSnippet = archive.snippets[existingVersion.digest],
       let newManifestSnippet = archive.snippets[version.digest] {
       newManifestSnippet.encodeAsDiff(from: nil)
       oldManifestSnippet.encodeAsDiff(from: newManifestSnippet)
     }
-    pagePropertiesVersionHistory.append(version)
+    notePropertiesVersionHistory.append(version)
     try archiveVersionHistory()
   }
 }
@@ -278,8 +278,8 @@ public extension NoteArchive {
   /// Adds all of the current contents of this NoteArchive to Spotlight.
   func addToSpotlight(completion: ((Error?) -> Void)? = nil) {
     do {
-      let toIndex = try pageProperties.map { noteIdentifier, pageProperties in
-        (noteIdentifier, pageProperties, try currentText(for: noteIdentifier))
+      let toIndex = try noteProperties.map { noteIdentifier, noteProperties in
+        (noteIdentifier, noteProperties, try currentText(for: noteIdentifier))
       }
       let items = toIndex.map(searchableItem)
       CSSearchableIndex.default().deleteAllSearchableItems { _ in
@@ -304,12 +304,12 @@ public extension NoteArchive {
 
   private func searchableItem(
     noteIdentifier: NoteIdentifier,
-    pageProperties: PageProperties,
+    noteProperties: NoteProperties,
     pageContents: String
   ) -> CSSearchableItem {
     let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypePlainText as String)
-    attributes.title = pageProperties.title
-    attributes.keywords = pageProperties.hashtags
+    attributes.title = noteProperties.title
+    attributes.keywords = noteProperties.hashtags
     attributes.contentDescription = pageContents
     let item = CSSearchableItem(uniqueIdentifier: noteIdentifier.rawValue, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
     return item
@@ -319,10 +319,10 @@ public extension NoteArchive {
     noteIdentifier: NoteIdentifier,
     pageContents: PageContents
   ) -> CSSearchableItem? {
-    guard let pageProperties = pageContents.pageProperties else {
+    guard let noteProperties = pageContents.noteProperties else {
       return nil
     }
-    return searchableItem(noteIdentifier: noteIdentifier, pageProperties: pageProperties, pageContents: pageContents.text ?? "")
+    return searchableItem(noteIdentifier: noteIdentifier, noteProperties: noteProperties, pageContents: pageContents.text ?? "")
   }
 }
 
@@ -361,21 +361,21 @@ private extension NoteArchive {
     var text: String?
     var modifiedTimestamp: Date
     var dirty: Bool
-    var pageProperties: PageProperties?
-    var pagePropertiesStale: Bool
+    var noteProperties: NoteProperties?
+    var notePropertiesStale: Bool
 
     init(
       text: String? = nil,
       modifiedTimestamp: Date? = nil,
       dirty: Bool = false,
-      pageProperties: PageProperties? = nil,
-      pagePropertiesStale: Bool = false
+      noteProperties: NoteProperties? = nil,
+      notePropertiesStale: Bool = false
     ) {
       self.text = text
-      self.modifiedTimestamp = modifiedTimestamp ?? pageProperties?.timestamp ?? Date.distantPast
+      self.modifiedTimestamp = modifiedTimestamp ?? noteProperties?.timestamp ?? Date.distantPast
       self.dirty = dirty
-      self.pageProperties = pageProperties
-      self.pagePropertiesStale = pagePropertiesStale
+      self.noteProperties = noteProperties
+      self.notePropertiesStale = notePropertiesStale
     }
 
     /// Updates text.
@@ -383,7 +383,7 @@ private extension NoteArchive {
       self.text = text
       self.modifiedTimestamp = modifiedTimestamp
       dirty = true
-      pagePropertiesStale = true
+      notePropertiesStale = true
     }
   }
 
@@ -420,7 +420,7 @@ private extension NoteArchive {
       // If there is text associated with these contents, make sure the text is in the archive.
       let newTextSnippet = contents.text.map { archive.insert($0) }
       // Because we updated all page properties, safe to force-unwrap
-      let newPropertiesSnippet = archive.insert(try contents.pageProperties!.makeSnippet())
+      let newPropertiesSnippet = archive.insert(try contents.noteProperties!.makeSnippet())
       pageContentsCache[noteIdentifier]?.dirty = false
       modifiedPageCount += 1
 
@@ -464,12 +464,12 @@ private extension NoteArchive {
   /// - throws: `RetrievalError.noSuchPage` if the page was not found in the archive.
   func currentPageProperties(
     for noteIdentifier: NoteIdentifier
-  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
+  ) throws -> (snippet: TextSnippet, properties: NoteProperties) {
     guard let propertiesDigest = pagePropertyDigests[noteIdentifier],
       let propertiesSnippet = archive.snippets[propertiesDigest] else {
       throw RetrievalError.noSuchPage(noteIdentifier)
     }
-    return (propertiesSnippet, try PageProperties(propertiesSnippet))
+    return (propertiesSnippet, try NoteProperties(propertiesSnippet))
   }
 
   /// Writes the version history array into the archive.
@@ -477,7 +477,7 @@ private extension NoteArchive {
   /// - throws: `TextSnippetArchive.Error` if there is a problem creating the symbolic reference to the version snippet
   ///           in the archive.
   mutating func archiveVersionHistory() throws {
-    let history = pagePropertiesVersionHistory.reversed()
+    let history = notePropertiesVersionHistory.reversed()
       .map { $0.description }.joined(separator: "\n")
     try archive.setSymbolicReference(key: "versions", text: history)
   }
@@ -535,11 +535,11 @@ private extension NoteArchive {
   mutating func archivePageProperties(
     from text: String,
     timestamp: Date
-  ) throws -> (snippet: TextSnippet, properties: PageProperties) {
+  ) throws -> (snippet: TextSnippet, properties: NoteProperties) {
     let textSnippet = archive.insert(text)
     let nodes = parsingRules.parse(text)
     let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
-    let properties = PageProperties(
+    let properties = NoteProperties(
       sha1Digest: textSnippet.sha1Digest,
       timestamp: timestamp,
       hashtags: nodes.hashtags,
@@ -562,7 +562,7 @@ private extension TextSnippetArchive {
   ) -> [NoteIdentifier: NoteArchive.PageContents] {
     pageContents.mapValues { pageContent in
       guard
-        pageContent.pagePropertiesStale,
+        pageContent.notePropertiesStale,
         let text = pageContent.text
       else {
         return pageContent
@@ -570,14 +570,14 @@ private extension TextSnippetArchive {
       var pageContent = pageContent
       let nodes = parsingRules.parse(text)
       let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &self)
-      pageContent.pageProperties = PageProperties(
+      pageContent.noteProperties = NoteProperties(
         sha1Digest: TextSnippet(text).sha1Digest,
         timestamp: pageContent.modifiedTimestamp,
         hashtags: nodes.hashtags,
         title: String(nodes.title.split(separator: "\n").first ?? ""),
         cardTemplates: challengeTemplateKeys.map { $0.description }
       )
-      pageContent.pagePropertiesStale = false
+      pageContent.notePropertiesStale = false
       return pageContent
     }
   }

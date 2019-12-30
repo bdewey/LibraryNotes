@@ -32,7 +32,7 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.rightBarButtonItem = studyButton
-    self.notebookSubscription = notebook.pagePropertiesDidChange
+    self.notebookSubscription = notebook.notePropertiesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] _ in
         self?.updateStudySession()
@@ -189,7 +189,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let filter: (NoteIdentifier, PageProperties) -> Bool = (currentHashtag == nil)
+    let filter: (NoteIdentifier, NoteProperties) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
     let hashtag = currentHashtag

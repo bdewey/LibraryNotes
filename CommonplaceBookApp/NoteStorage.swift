@@ -12,12 +12,12 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
-  var pagePropertiesDidChange: PassthroughSubject<[NoteIdentifier: PageProperties], Never> { get }
+  var notePropertiesDidChange: PassthroughSubject<[NoteIdentifier: NoteProperties], Never> { get }
   func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String
 
   /// Blocking function that gets the study session. Safe to call from background threads. Part of the protocol to make testing easier.
   func synchronousStudySession(
-    filter: ((NoteIdentifier, PageProperties) -> Bool)?,
+    filter: ((NoteIdentifier, NoteProperties) -> Bool)?,
     date: Date
   ) -> StudySession
 
@@ -30,7 +30,7 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
   func updateStudySessionResults(_ studySession: StudySession, on date: Date)
-  var pageProperties: [NoteIdentifier: PageProperties] { get }
+  var noteProperties: [NoteIdentifier: NoteProperties] { get }
   var parsingRules: ParsingRules { get }
 
   /// Adds a renderer tthat knows how to render images using assets from this document
@@ -42,8 +42,8 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
   func storeAssetData(_ data: Data, typeHint: String) -> String
-  func changePageProperties(for noteIdentifier: NoteIdentifier, to pageProperties: PageProperties)
-  func insertPageProperties(_ pageProperties: PageProperties) -> NoteIdentifier
+  func changePageProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties)
+  func insertPageProperties(_ noteProperties: NoteProperties) -> NoteIdentifier
   func insertChallengeTemplate(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey
   func challengeTemplate(for keyString: String) -> ChallengeTemplate?
   var studyLog: StudyLog { get }
@@ -62,7 +62,7 @@ extension NoteStorage {
   /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   func studySession(
-    filter: ((NoteIdentifier, PageProperties) -> Bool)? = nil,
+    filter: ((NoteIdentifier, NoteProperties) -> Bool)? = nil,
     date: Date = Date(),
     completion: @escaping (StudySession) -> Void
   ) {

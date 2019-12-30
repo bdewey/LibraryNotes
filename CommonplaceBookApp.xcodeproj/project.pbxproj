@@ -73,7 +73,7 @@
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */; };
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
-		D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* PageProperties.swift */; };
+		D37E6D36228D9DD8006CD0FA /* NoteProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B023BAA5FA00A44F1C /* NoteIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
@@ -212,7 +212,7 @@
 		D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableViewCell.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
-		D37E6D35228D9DD8006CD0FA /* PageProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageProperties.swift; sourceTree = "<group>"; };
+		D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteProperties.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIdentifier.swift; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
@@ -385,11 +385,11 @@
 				D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */,
 				D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */,
 				D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */,
+				D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */,
 				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
-				D37E6D35228D9DD8006CD0FA /* PageProperties.swift */,
 				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
 				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
 				D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */,
@@ -724,7 +724,7 @@
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteDocumentStorage.swift in Sources */,
-				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
+				D37E6D36228D9DD8006CD0FA /* NoteProperties.swift in Sources */,
 				D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
