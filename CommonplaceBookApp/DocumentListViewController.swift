@@ -25,7 +25,7 @@ final class DocumentListViewController: UIViewController {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteArchiveDocument
+    notebook: NoteStorage
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
@@ -38,7 +38,7 @@ final class DocumentListViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public let notebook: NoteArchiveDocument
+  public let notebook: NoteStorage
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
@@ -334,7 +334,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 
 extension DocumentListViewController: NoteArchiveDocumentObserver {
   func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
+    _ document: NoteStorage,
     didUpdatePageProperties properties: [String: PageProperties]
   ) {
     updateStudySession()

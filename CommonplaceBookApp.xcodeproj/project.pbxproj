@@ -86,7 +86,8 @@
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
-		D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */; };
+		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
+		D3D3688E229C579200E4D062 /* NoteDocumentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */; };
 		D3D36890229C61F500E4D062 /* NoteArchiveDocument+Importing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
 		D3D50A2D231AC8EB007440F1 /* VocabularyChallengeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D50A2C231AC8EB007440F1 /* VocabularyChallengeTemplate.swift */; };
@@ -223,7 +224,8 @@
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswer.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
-		D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocument.swift; sourceTree = "<group>"; };
+		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
+		D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDocumentStorage.swift; sourceTree = "<group>"; };
 		D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+Importing.swift"; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3D50A2C231AC8EB007440F1 /* VocabularyChallengeTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyChallengeTemplate.swift; sourceTree = "<group>"; };
@@ -370,15 +372,17 @@
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
+				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
 				D3591501231C340100883AC4 /* LocaleAwareTextField.swift */,
 				D3FD46A52329257C008FDAE4 /* LoggingSpeechSynthesizer.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
-				D3D3688D229C579200E4D062 /* NoteArchiveDocument.swift */,
 				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
 				D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */,
+				D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */,
+				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
@@ -411,7 +415,6 @@
 				D3591503231C3AC800883AC4 /* View+Locale.swift */,
 				D3D50A2C231AC8EB007440F1 /* VocabularyChallengeTemplate.swift */,
 				D30D261723193F9A0031AA20 /* VocabularyViewController.swift */,
-				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -692,6 +695,7 @@
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
+				D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */,
 				D31AFACA229D61EE00ED2B76 /* ClozeCard.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D33F646F22981E38008C3A92 /* TextSnippet.swift in Sources */,
@@ -715,7 +719,7 @@
 				D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
-				D3D3688E229C579200E4D062 /* NoteArchiveDocument.swift in Sources */,
+				D3D3688E229C579200E4D062 /* NoteDocumentStorage.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* PageProperties.swift in Sources */,
 				D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,

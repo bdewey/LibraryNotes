@@ -7,7 +7,7 @@ import UIKit
 
 /// Allows editing a vocabulary list.
 final class VocabularyViewController: UIViewController {
-  init(notebook: NoteArchiveDocument) {
+  init(notebook: NoteStorage) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
   }
@@ -17,7 +17,7 @@ final class VocabularyViewController: UIViewController {
   }
 
   /// The notebook we write changes back to
-  let notebook: NoteArchiveDocument
+  let notebook: NoteStorage
 
   /// The page that stores our vocabulary.
   var properties = PageProperties() {

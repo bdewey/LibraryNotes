@@ -1,4 +1,4 @@
-// Copyright © 2019 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import MiniMarkdown
@@ -63,7 +63,7 @@ extension QuestionAndAnswerTemplate: Challenge {
     return ChallengeIdentifier(templateDigest: templateIdentifier, index: 0)
   }
 
-  public func challengeView(document: NoteArchiveDocument, properties: CardDocumentProperties) -> ChallengeView {
+  public func challengeView(document: NoteStorage, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     let attributionNodes = properties.parsingRules.parse(properties.attributionMarkdown)
     if let attributionNode = attributionNodes.first {

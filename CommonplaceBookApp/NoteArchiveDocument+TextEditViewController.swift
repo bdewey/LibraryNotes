@@ -3,7 +3,7 @@
 import CocoaLumberjack
 import Foundation
 
-extension NoteArchiveDocumentImpl {
+extension NoteDocumentStorage {
   public func textEditViewController(
     _ viewController: TextEditViewController,
     didChange markdown: String

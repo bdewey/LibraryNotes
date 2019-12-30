@@ -4,7 +4,7 @@ import CocoaLumberjack
 import UIKit
 
 /// Importing existing files into the archive.
-public extension NoteArchiveDocumentImpl {
+public extension NoteDocumentStorage {
   /// Asynchronously imports the contents of a file into the archive.
   ///
   /// - note: If this file has already been imported (determined by the same change date
@@ -66,7 +66,7 @@ public extension NoteArchiveDocumentImpl {
   }
 }
 
-private extension NoteArchiveDocumentImpl {
+private extension NoteDocumentStorage {
   func importFileMetadataItems(
     _ items: [FileMetadata],
     from metadataProvider: FileMetadataProvider,

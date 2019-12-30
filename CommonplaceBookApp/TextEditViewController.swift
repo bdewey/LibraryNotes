@@ -13,7 +13,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  public init(notebook: NoteArchiveDocument) {
+  public init(notebook: NoteStorage) {
     self.parsingRules = notebook.parsingRules
 
     var renderers = TextEditViewController.renderers
@@ -41,7 +41,7 @@ public final class TextEditViewController: UIViewController {
 
   /// Constructs a new blank document that will save back to `notebook` on changes.
   static func makeBlankDocument(
-    notebook: NoteArchiveDocument,
+    notebook: NoteStorage,
     currentHashtag: String?,
     autoFirstResponder: Bool
   ) -> TextEditViewController {
@@ -203,11 +203,11 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Lifecycle
 
-  override public func loadView() {
+  public override func loadView() {
     view = textView
   }
 
-  override public func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
     navigationItem.leftItemsSupplementBackButton = true
@@ -218,7 +218,7 @@ public final class TextEditViewController: UIViewController {
   /// If true, the text view will become first responder upon becoming visible.
   public var autoFirstResponder = false
 
-  override public func viewWillAppear(_ animated: Bool) {
+  public override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     textView.contentOffset = CGPoint(x: 0, y: -1 * textView.adjustedContentInset.top)
     if autoFirstResponder {
@@ -231,7 +231,7 @@ public final class TextEditViewController: UIViewController {
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
 
-  override public func viewWillLayoutSubviews() {
+  public override func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     adjustMargins(size: view.frame.size)
   }
@@ -258,7 +258,7 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Paste
 
-  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+  public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
     DDLogDebug("Checking if we can perform action \(action)")
     if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
       DDLogDebug("Looks like you want to paste an image! Okay!")
@@ -267,7 +267,7 @@ public final class TextEditViewController: UIViewController {
     return super.canPerformAction(action, withSender: sender)
   }
 
-  override public func paste(itemProviders: [NSItemProvider]) {
+  public override func paste(itemProviders: [NSItemProvider]) {
     DDLogInfo("Pasting \(itemProviders)")
   }
 }

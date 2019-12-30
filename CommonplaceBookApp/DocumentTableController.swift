@@ -19,7 +19,7 @@ public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteArchiveDocument
+    notebook: NoteStorage
   ) {
     self.notebook = notebook
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
@@ -83,12 +83,13 @@ public final class DocumentTableController: NSObject {
   /// Delegate.
   internal weak var delegate: DocumentTableControllerDelegate?
 
-  private let notebook: NoteArchiveDocument
+  private let notebook: NoteStorage
   private var cardsPerDocument = [String: Int]() {
     didSet {
       performUpdates(animated: true)
     }
   }
+
   private let dataSource: DataSource
 
   public func startObservingNotebook() {
@@ -231,7 +232,7 @@ extension DocumentTableController: UITableViewDelegate {
 
 extension DocumentTableController: NoteArchiveDocumentObserver {
   public func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
+    _ document: NoteStorage,
     didUpdatePageProperties properties: [String: PageProperties]
   ) {
     updateCardsPerDocument()
@@ -348,7 +349,7 @@ private extension DocumentTableController {
   }
 
   static func snapshot(
-    for notebook: NoteArchiveDocument,
+    for notebook: NoteStorage,
     cardsPerDocument: [String: Int],
     hashtags: [String],
     filteredHashtag: String?,

@@ -30,7 +30,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return loadingViewController
   }()
 
-  var noteArchiveDocument: NoteArchiveDocument?
+  var noteArchiveDocument: NoteStorage?
   /// If non-nil, we want to open this page initially upon opening the document.
   var initialPageIdentifier: String?
 
@@ -202,7 +202,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
     DDLogInfo("Opening document at \(url)")
-    let noteArchiveDocument = NoteArchiveDocumentImpl(
+    let noteArchiveDocument = NoteDocumentStorage(
       fileURL: url,
       parsingRules: ParsingRules.commonplace
     )
@@ -249,7 +249,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
     let url = directoryURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("notebundle")
-    let document = NoteArchiveDocumentImpl(fileURL: url, parsingRules: ParsingRules.commonplace)
+    let document = NoteDocumentStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     document.save(to: url, for: .forCreating) { saveSuccess in
       guard saveSuccess else {
         DDLogError("Could not save document to \(url): \(document.previousError?.localizedDescription ?? "nil")")

@@ -99,7 +99,7 @@ final class NoteArchiveDocumentTests: XCTestCase {
 
 extension NoteArchiveDocumentTests {
   private func verifyDocument(
-    _ document: NoteArchiveDocument,
+    _ document: NoteStorage,
     pageCount: Int,
     challengeTemplateCount: Int,
     logCount: Int
@@ -110,8 +110,8 @@ extension NoteArchiveDocumentTests {
     XCTAssertEqual(document.studyLog.count, logCount)
   }
 
-  private func openDocument(fileURL: URL) -> NoteArchiveDocumentImpl {
-    let document = NoteArchiveDocumentImpl(
+  private func openDocument(fileURL: URL) -> NoteDocumentStorage {
+    let document = NoteDocumentStorage(
       fileURL: fileURL,
       parsingRules: parsingRules
     )
@@ -124,7 +124,7 @@ extension NoteArchiveDocumentTests {
     return document
   }
 
-  private func closeDocument(_ document: NoteArchiveDocumentImpl) {
+  private func closeDocument(_ document: NoteDocumentStorage) {
     let didClose = expectation(description: "did close")
     document.close { success in
       XCTAssertTrue(success)
@@ -133,7 +133,7 @@ extension NoteArchiveDocumentTests {
     waitForExpectations(timeout: 3, handler: nil)
   }
 
-  private func loadAllPages(into document: NoteArchiveDocument, expectToLoad: Bool = true) {
+  private func loadAllPages(into document: NoteStorage, expectToLoad: Bool = true) {
     let allLoadsFinished = expectation(description: "Loaded all pages")
     document.importFileMetadataItems(
       metadataProvider.fileMetadata,
