@@ -65,4 +65,3 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
     completion: (() -> Void)?
   )
 }
-
