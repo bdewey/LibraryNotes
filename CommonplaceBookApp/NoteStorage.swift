@@ -15,16 +15,6 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   var pagePropertiesDidChange: PassthroughSubject<[String: PageProperties], Never> { get }
   func currentTextContents(for pageIdentifier: String) throws -> String
 
-  /// Computes a studySession for the relevant pages in the notebook.
-  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
-  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
-  /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
-  func studySession(
-    filter: ((String, PageProperties) -> Bool)?,
-    date: Date,
-    completion: @escaping (StudySession) -> Void
-  )
-
   /// Blocking function that gets the study session. Safe to call from background threads. Part of the protocol to make testing easier.
   func synchronousStudySession(
     filter: ((String, PageProperties) -> Bool)?,
@@ -64,4 +54,23 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
     importDate: Date,
     completion: (() -> Void)?
   )
+}
+
+extension NoteStorage {
+  /// Computes a studySession for the relevant pages in the notebook.
+  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
+  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
+  /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
+  func studySession(
+    filter: ((String, PageProperties) -> Bool)? = nil,
+    date: Date = Date(),
+    completion: @escaping (StudySession) -> Void
+  ) {
+    DispatchQueue.global(qos: .default).async {
+      let result = self.synchronousStudySession(filter: filter, date: date)
+      DispatchQueue.main.async {
+        completion(result)
+      }
+    }
+  }
 }

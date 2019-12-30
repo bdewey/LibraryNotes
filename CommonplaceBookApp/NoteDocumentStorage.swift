@@ -302,23 +302,6 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  /// Computes a studySession for the relevant pages in the notebook.
-  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
-  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
-  /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
-  func studySession(
-    filter: ((String, PageProperties) -> Bool)? = nil,
-    date: Date = Date(),
-    completion: @escaping (StudySession) -> Void
-  ) {
-    DispatchQueue.global(qos: .default).async {
-      let result = self.synchronousStudySession(filter: filter, date: date)
-      DispatchQueue.main.async {
-        completion(result)
-      }
-    }
-  }
-
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   func synchronousStudySession(
