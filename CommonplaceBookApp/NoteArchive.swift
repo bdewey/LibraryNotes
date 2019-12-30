@@ -131,17 +131,17 @@ public struct NoteArchive {
 
   /// Removes a note from the archive.
   /// - throws: `RetrievalError.noSuchPage` if the page does not exist.
-  public mutating func removeNote(for pageIdentifier: NoteIdentifier) {
-    pageContentsCache.removeValue(forKey: pageIdentifier)
-    pagePropertyDigests.removeValue(forKey: pageIdentifier)
+  public mutating func removeNote(for noteIdentifier: NoteIdentifier) {
+    pageContentsCache.removeValue(forKey: noteIdentifier)
+    pagePropertyDigests.removeValue(forKey: noteIdentifier)
   }
 
   /// Gets the current version of the text for a particular page.
-  public func currentText(for pageIdentifier: NoteIdentifier) throws -> String {
-    if let text = pageContentsCache[pageIdentifier]?.text {
+  public func currentText(for noteIdentifier: NoteIdentifier) throws -> String {
+    if let text = pageContentsCache[noteIdentifier]?.text {
       return text
     }
-    let properties = try currentPageProperties(for: pageIdentifier).properties
+    let properties = try currentPageProperties(for: noteIdentifier).properties
     guard let digest = properties.sha1Digest, let noteSnippet = archive.snippets[digest] else {
       throw RetrievalError.noSuchText(properties.sha1Digest ?? "nil")
     }
@@ -168,39 +168,39 @@ public struct NoteArchive {
     return try YAMLDecoder().decode(klass, from: encodedText, userInfo: [.markdownParsingRules: parsingRules])
   }
 
-  /// Updates the text associated with `pageIdentifier` to `text`, creating a new version
+  /// Updates the text associated with `noteIdentifier` to `text`, creating a new version
   /// in the process.
   ///
-  /// - parameter pageIdentifier: The page identifier to update
+  /// - parameter noteIdentifier: The page identifier to update
   /// - parameter text: The new text of the page
   /// - parameter contentChangeTime: The *content change* timestamp of the text
-  /// - note: If `text` is not different from the current value associated with `pageIdentifier`,
+  /// - note: If `text` is not different from the current value associated with `noteIdentifier`,
   ///         this operation is a no-op. No new version gets created.
   public mutating func updateText(
-    for pageIdentifier: NoteIdentifier,
+    for noteIdentifier: NoteIdentifier,
     to text: String,
     contentChangeTime timestamp: Date
   ) {
-    if pageContentsCache[pageIdentifier] != nil {
-      pageContentsCache[pageIdentifier]!.setText(text, modifiedTimestamp: timestamp)
+    if pageContentsCache[noteIdentifier] != nil {
+      pageContentsCache[noteIdentifier]!.setText(text, modifiedTimestamp: timestamp)
       return
     } else {
       var contents = PageContents()
       contents.setText(text, modifiedTimestamp: timestamp)
-      pageContentsCache[pageIdentifier] = contents
+      pageContentsCache[noteIdentifier] = contents
     }
   }
 
   /// Updates naked page properties.
   /// - precondition: pageProperties is not associated with content
-  /// - parameter pageIdentifier: The permanent identifier for the properties
+  /// - parameter noteIdentifier: The permanent identifier for the properties
   /// - parameter pageProperties: The properties to update.
   public mutating func updatePageProperties(
-    for pageIdentifier: NoteIdentifier,
+    for noteIdentifier: NoteIdentifier,
     to pageProperties: PageProperties
   ) {
     precondition(pageProperties.sha1Digest == nil)
-    pageContentsCache[pageIdentifier] = PageContents(dirty: true, pageProperties: pageProperties)
+    pageContentsCache[noteIdentifier] = PageContents(dirty: true, pageProperties: pageProperties)
   }
 
   /// Updates all page properties that are stale in the contents cache.
@@ -253,18 +253,18 @@ public extension NoteArchive {
     if let importRecord = importRecords[fileName] {
       if !contentChangeDate.closeEnough(to: importRecord.changeDate) {
         updateText(
-          for: importRecord.pageIdentifier,
+          for: importRecord.noteIdentifier,
           to: text,
           contentChangeTime: contentChangeDate
         )
       }
     } else {
-      let pageIdentifier = try insertNote(
+      let noteIdentifier = try insertNote(
         text,
         contentChangeTime: contentChangeDate
       )
       importRecords[fileName] = FileImportRecord(
-        pageIdentifier: pageIdentifier,
+        noteIdentifier: noteIdentifier,
         changeDate: contentChangeDate
       )
       try archiveFileImportRecords(importRecords)
@@ -278,8 +278,8 @@ public extension NoteArchive {
   /// Adds all of the current contents of this NoteArchive to Spotlight.
   func addToSpotlight(completion: ((Error?) -> Void)? = nil) {
     do {
-      let toIndex = try pageProperties.map { pageIdentifier, pageProperties in
-        (pageIdentifier, pageProperties, try currentText(for: pageIdentifier))
+      let toIndex = try pageProperties.map { noteIdentifier, pageProperties in
+        (noteIdentifier, pageProperties, try currentText(for: noteIdentifier))
       }
       let items = toIndex.map(searchableItem)
       CSSearchableIndex.default().deleteAllSearchableItems { _ in
@@ -303,7 +303,7 @@ public extension NoteArchive {
   }
 
   private func searchableItem(
-    pageIdentifier: NoteIdentifier,
+    noteIdentifier: NoteIdentifier,
     pageProperties: PageProperties,
     pageContents: String
   ) -> CSSearchableItem {
@@ -311,18 +311,18 @@ public extension NoteArchive {
     attributes.title = pageProperties.title
     attributes.keywords = pageProperties.hashtags
     attributes.contentDescription = pageContents
-    let item = CSSearchableItem(uniqueIdentifier: pageIdentifier.rawValue, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
+    let item = CSSearchableItem(uniqueIdentifier: noteIdentifier.rawValue, domainIdentifier: "org.brians-brain.CommonplaceBookApp", attributeSet: attributes)
     return item
   }
 
   private func searchableItem(
-    pageIdentifier: NoteIdentifier,
+    noteIdentifier: NoteIdentifier,
     pageContents: PageContents
   ) -> CSSearchableItem? {
     guard let pageProperties = pageContents.pageProperties else {
       return nil
     }
-    return searchableItem(pageIdentifier: pageIdentifier, pageProperties: pageProperties, pageContents: pageContents.text ?? "")
+    return searchableItem(noteIdentifier: noteIdentifier, pageProperties: pageProperties, pageContents: pageContents.text ?? "")
   }
 }
 
@@ -390,7 +390,7 @@ private extension NoteArchive {
   /// Represents a specific file that has been imported into the archive.
   struct FileImportRecord: Codable {
     /// The UUID representing the page that holds the file contents.
-    let pageIdentifier: NoteIdentifier
+    let noteIdentifier: NoteIdentifier
     /// The changeDate of the file at the time it was imported.
     let changeDate: Date
   }
@@ -416,17 +416,17 @@ private extension NoteArchive {
     var modifiedPageCount = 0
     // Make sure all properties are up to date
     batchUpdatePageProperties()
-    for (pageIdentifier, contents) in pageContentsCache where contents.dirty {
+    for (noteIdentifier, contents) in pageContentsCache where contents.dirty {
       // If there is text associated with these contents, make sure the text is in the archive.
       let newTextSnippet = contents.text.map { archive.insert($0) }
       // Because we updated all page properties, safe to force-unwrap
       let newPropertiesSnippet = archive.insert(try contents.pageProperties!.makeSnippet())
-      pageContentsCache[pageIdentifier]?.dirty = false
+      pageContentsCache[noteIdentifier]?.dirty = false
       modifiedPageCount += 1
 
       // If there was already content for this page in the archive, delta-encode it.
-      guard let (existingPropertiesSnippet, existingProperties) = try? currentPageProperties(for: pageIdentifier) else {
-        pagePropertyDigests[pageIdentifier] = newPropertiesSnippet.sha1Digest
+      guard let (existingPropertiesSnippet, existingProperties) = try? currentPageProperties(for: noteIdentifier) else {
+        pagePropertyDigests[noteIdentifier] = newPropertiesSnippet.sha1Digest
         continue
       }
       // New content is the same as the old content
@@ -449,7 +449,7 @@ private extension NoteArchive {
           existingTextSnippet.encodeAsDiff(from: newTextSnippet)
         }
       }
-      pagePropertyDigests[pageIdentifier] = newPropertiesSnippet.sha1Digest
+      pagePropertyDigests[noteIdentifier] = newPropertiesSnippet.sha1Digest
     }
     return modifiedPageCount
   }
@@ -459,15 +459,15 @@ private extension NoteArchive {
   /// - note: We return both the snippet and the decoded properties so we have the option of adding delta encoding to the snippet
   /// if we are updating the contents of the page.
   ///
-  /// - parameter pageIdentifier: the page to retrieve properties for
+  /// - parameter noteIdentifier: the page to retrieve properties for
   /// - returns: A tuple containing the TextSnippet of serialized properties and the deserialized version of the properties
   /// - throws: `RetrievalError.noSuchPage` if the page was not found in the archive.
   func currentPageProperties(
-    for pageIdentifier: NoteIdentifier
+    for noteIdentifier: NoteIdentifier
   ) throws -> (snippet: TextSnippet, properties: PageProperties) {
-    guard let propertiesDigest = pagePropertyDigests[pageIdentifier],
+    guard let propertiesDigest = pagePropertyDigests[noteIdentifier],
       let propertiesSnippet = archive.snippets[propertiesDigest] else {
-      throw RetrievalError.noSuchPage(pageIdentifier)
+      throw RetrievalError.noSuchPage(noteIdentifier)
     }
     return (propertiesSnippet, try PageProperties(propertiesSnippet))
   }
@@ -512,7 +512,7 @@ private extension NoteArchive {
   /// Loads a specific version of the page manifest from the archive.
   /// - parameter archive: The archive to load from.
   /// - parameter manifestIdentifier: The sha1Digest of a specific version of a manifest.
-  /// - returns: a dictionary mapping pageIdentifiers to sha1Digests of specific versions of pages.
+  /// - returns: a dictionary mapping noteIdentifiers to sha1Digests of specific versions of pages.
   /// - throws: `RetrievalError.noSuchPage` if the manifest is not in the archive.
   static func getPageManifest(
     from archive: TextSnippetArchive,

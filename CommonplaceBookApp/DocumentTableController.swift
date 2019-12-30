@@ -12,7 +12,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
-  func documentTableDidDeleteDocument(with pageIdentifier: NoteIdentifier)
+  func documentTableDidDeleteDocument(with noteIdentifier: NoteIdentifier)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -153,7 +153,7 @@ extension DocumentTableController: UITableViewDelegate {
       if viewProperties.pageProperties.sha1Digest == nil {
         // This is a vocabulary page, not a text page.
         let vc = VocabularyViewController(notebook: notebook)
-        vc.pageIdentifier = viewProperties.pageKey
+        vc.noteIdentifier = viewProperties.pageKey
         vc.properties = viewProperties.pageProperties
         delegate?.showDetailViewController(vc)
         return
@@ -168,7 +168,7 @@ extension DocumentTableController: UITableViewDelegate {
       let textEditViewController = TextEditViewController(
         notebook: notebook
       )
-      textEditViewController.pageIdentifier = viewProperties.pageKey
+      textEditViewController.noteIdentifier = viewProperties.pageKey
       textEditViewController.markdown = markdown
       textEditViewController.delegate = notebook
       delegate?.showDetailViewController(textEditViewController)
@@ -185,7 +185,7 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
+        try? self.notebook.deletePage(noteIdentifier: properties.pageKey)
         self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }

@@ -77,10 +77,10 @@ final class DocumentListViewController: UIViewController {
 
   private lazy var tableView: UITableView = DocumentTableController.makeTableView()
 
-  internal func showPage(with pageIdentifier: NoteIdentifier) {
+  internal func showPage(with noteIdentifier: NoteIdentifier) {
     let markdown: String
     do {
-      markdown = try notebook.currentTextContents(for: pageIdentifier)
+      markdown = try notebook.currentTextContents(for: noteIdentifier)
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
       return
@@ -88,7 +88,7 @@ final class DocumentListViewController: UIViewController {
     let textEditViewController = TextEditViewController(
       notebook: notebook
     )
-    textEditViewController.pageIdentifier = pageIdentifier
+    textEditViewController.noteIdentifier = noteIdentifier
     textEditViewController.markdown = markdown
     textEditViewController.delegate = notebook
     showDetailViewController(textEditViewController)
@@ -237,7 +237,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     searchController.dismiss(animated: true, completion: nil)
   }
 
-  func documentTableDidDeleteDocument(with pageIdentifier: NoteIdentifier) {
+  func documentTableDidDeleteDocument(with noteIdentifier: NoteIdentifier) {
     guard
       let splitViewController = self.splitViewController,
       splitViewController.viewControllers.count > 1,
@@ -246,7 +246,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     else {
       return
     }
-    if detailViewController.pageIdentifier == pageIdentifier {
+    if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
       showDetailViewController(
         TextEditViewController.makeBlankDocument(

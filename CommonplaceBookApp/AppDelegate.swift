@@ -224,9 +224,9 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     wrappedViewController.modalPresentationStyle = .fullScreen
     wrappedViewController.modalTransitionStyle = .crossDissolve
     controller.present(wrappedViewController, animated: animated, completion: nil)
-    let pageIdentifierCopy = initialPageIdentifier
+    let noteIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
-      pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
+      noteIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
       let properties: [String: String] = [
         "Success": success.description,
         "documentState": String(describing: noteArchiveDocument.documentState),
@@ -299,7 +299,7 @@ extension AppDelegate: UISplitViewControllerDelegate {
     //
     // In our case, if the textEditViewController doesn't represent a real page, we don't
     // want to show it.
-    return textEditViewController.pageIdentifier == nil
+    return textEditViewController.noteIdentifier == nil
   }
 }
 

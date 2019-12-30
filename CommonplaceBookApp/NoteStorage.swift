@@ -6,14 +6,14 @@ import MiniMarkdown
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
-  func changeTextContents(for pageIdentifier: NoteIdentifier, to text: String)
+  func changeTextContents(for noteIdentifier: NoteIdentifier, to text: String)
 
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
   var pagePropertiesDidChange: PassthroughSubject<[NoteIdentifier: PageProperties], Never> { get }
-  func currentTextContents(for pageIdentifier: NoteIdentifier) throws -> String
+  func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String
 
   /// Blocking function that gets the study session. Safe to call from background threads. Part of the protocol to make testing easier.
   func synchronousStudySession(
@@ -23,7 +23,7 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
 
   /// All hashtags used across all pages, sorted.
   var hashtags: [String] { get }
-  func deletePage(pageIdentifier: NoteIdentifier) throws
+  func deletePage(noteIdentifier: NoteIdentifier) throws
 
   /// Update the notebook with the result of a study session.
   ///
@@ -42,7 +42,7 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
   func storeAssetData(_ data: Data, typeHint: String) -> String
-  func changePageProperties(for pageIdentifier: NoteIdentifier, to pageProperties: PageProperties)
+  func changePageProperties(for noteIdentifier: NoteIdentifier, to pageProperties: PageProperties)
   func insertPageProperties(_ pageProperties: PageProperties) -> NoteIdentifier
   func insertChallengeTemplate(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey
   func challengeTemplate(for keyString: String) -> ChallengeTemplate?

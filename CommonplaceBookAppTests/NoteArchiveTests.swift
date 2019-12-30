@@ -215,25 +215,25 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      let pageIdentifier = try archive.insertNote(
+      let noteIdentifier = try archive.insertNote(
         Examples.vocabulary.rawValue,
         contentChangeTime: now
       )
       try archive.archivePageManifestVersion(timestamp: now)
       archive.updateText(
-        for: pageIdentifier,
+        for: noteIdentifier,
         to: Examples.vocabulary.rawValue + "blah\n",
         contentChangeTime: now.addingTimeInterval(3600)
       )
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(3600))
       archive.updateText(
-        for: pageIdentifier,
+        for: noteIdentifier,
         to: Examples.vocabulary.rawValue,
         contentChangeTime: now.addingTimeInterval(7200)
       )
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(7200))
       XCTAssertEqual(archive.versions.count, 3)
-      XCTAssertEqual(Examples.vocabulary.rawValue, try archive.currentText(for: pageIdentifier))
+      XCTAssertEqual(Examples.vocabulary.rawValue, try archive.currentText(for: noteIdentifier))
     } catch {
       XCTFail("Unexpected error: \(error)")
     }

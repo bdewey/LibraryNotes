@@ -67,26 +67,26 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     return Array(hashtags).sorted()
   }
 
-  public func currentTextContents(for pageIdentifier: NoteIdentifier) throws -> String {
+  public func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
-      try noteArchive.currentText(for: pageIdentifier)
+      try noteArchive.currentText(for: noteIdentifier)
     }
   }
 
-  public func changeTextContents(for pageIdentifier: NoteIdentifier, to text: String) {
+  public func changeTextContents(for noteIdentifier: NoteIdentifier, to text: String) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
+      noteArchive.updateText(for: noteIdentifier, to: text, contentChangeTime: Date())
     }
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for pageIdentifier: NoteIdentifier, to pageProperties: PageProperties) {
+  public func changePageProperties(for noteIdentifier: NoteIdentifier, to pageProperties: PageProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
+      noteArchive.updatePageProperties(for: noteIdentifier, to: pageProperties)
     }
     invalidateSavedSnippets()
   }
@@ -107,11 +107,11 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     })
   }
 
-  public func deletePage(pageIdentifier: NoteIdentifier) throws {
+  public func deletePage(noteIdentifier: NoteIdentifier) throws {
     noteArchiveQueue.sync {
-      noteArchive.removeNote(for: pageIdentifier)
+      noteArchive.removeNote(for: noteIdentifier)
     }
-    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier.rawValue], completionHandler: nil)
+    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [noteIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
     notifyObservers(of: pageProperties)
   }

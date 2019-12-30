@@ -24,16 +24,16 @@ final class VocabularyViewController: UIViewController {
     didSet {
       title = properties.title
       dataSource.apply(makeSnapshot(), animatingDifferences: true)
-      if let pageIdentifier = pageIdentifier {
-        notebook.changePageProperties(for: pageIdentifier, to: properties)
+      if let noteIdentifier = noteIdentifier {
+        notebook.changePageProperties(for: noteIdentifier, to: properties)
       } else {
-        pageIdentifier = notebook.insertPageProperties(properties)
+        noteIdentifier = notebook.insertPageProperties(properties)
       }
     }
   }
 
   /// Identifier of the page. If nil, it means we're working with unsaved content.
-  var pageIdentifier: NoteIdentifier?
+  var noteIdentifier: NoteIdentifier?
 
   private lazy var addCardButton: UIBarButtonItem = {
     UIBarButtonItem(image: .add, style: .plain, target: self, action: #selector(didTapAddButton))

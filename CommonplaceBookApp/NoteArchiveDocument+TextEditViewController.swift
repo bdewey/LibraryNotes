@@ -8,15 +8,15 @@ extension NoteDocumentStorage {
     _ viewController: TextEditViewController,
     didChange markdown: String
   ) {
-    if let pageIdentifier = viewController.pageIdentifier {
-      changeTextContents(for: pageIdentifier, to: markdown)
+    if let noteIdentifier = viewController.noteIdentifier {
+      changeTextContents(for: noteIdentifier, to: markdown)
     } else {
       let now = Date()
       do {
-        let pageIdentifier = try noteArchiveQueue.sync {
+        let noteIdentifier = try noteArchiveQueue.sync {
           try noteArchive.insertNote(markdown, contentChangeTime: now)
         }
-        viewController.pageIdentifier = pageIdentifier
+        viewController.noteIdentifier = noteIdentifier
         invalidateSavedSnippets()
         notifyObservers(of: pageProperties)
       } catch {
