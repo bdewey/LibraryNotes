@@ -9,8 +9,12 @@ import MiniMarkdown
 public struct PageIdentifier: Hashable, RawRepresentable {
   public let rawValue: String
 
-  public init(rawValue: String) {
-    self.rawValue = rawValue
+  public init() {
+    self.rawValue = UUID().uuidString
+  }
+
+  public init<S: StringProtocol>(rawValue: S) {
+    self.rawValue = String(rawValue)
   }
 }
 

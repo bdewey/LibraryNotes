@@ -53,7 +53,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   /// Accessor for the page properties.
   public var pageProperties: [PageIdentifier: PageProperties] {
     return noteArchiveQueue.sync {
-      noteArchive.pageProperties.asPageIdentifierDictionary()
+      noteArchive.pageProperties
     }
   }
 
@@ -70,14 +70,14 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   public func currentTextContents(for pageIdentifier: PageIdentifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
-      try noteArchive.currentText(for: pageIdentifier.rawValue)
+      try noteArchive.currentText(for: pageIdentifier)
     }
   }
 
   public func changeTextContents(for pageIdentifier: PageIdentifier, to text: String) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updateText(for: pageIdentifier.rawValue, to: text, contentChangeTime: Date())
+      noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
     }
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
@@ -86,7 +86,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   public func changePageProperties(for pageIdentifier: PageIdentifier, to pageProperties: PageProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: pageIdentifier.rawValue, to: pageProperties)
+      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
     }
     invalidateSavedSnippets()
   }
@@ -109,7 +109,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
   public func deletePage(pageIdentifier: PageIdentifier) throws {
     noteArchiveQueue.sync {
-      noteArchive.removeNote(for: pageIdentifier.rawValue)
+      noteArchive.removeNote(for: pageIdentifier)
     }
     CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
@@ -139,7 +139,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
         parsingRules: parsingRules
       )
       noteArchive.addToSpotlight()
-      let pageProperties = noteArchive.pageProperties.asPageIdentifierDictionary()
+      let pageProperties = noteArchive.pageProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(pageProperties.count) pages")
       notifyObservers(of: pageProperties)
@@ -310,7 +310,7 @@ public extension NoteDocumentStorage {
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
-    let properties = noteArchiveQueue.sync { noteArchive.pageProperties.asPageIdentifierDictionary() }
+    let properties = noteArchiveQueue.sync { noteArchive.pageProperties }
     return properties
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
@@ -368,7 +368,7 @@ public extension NoteDocumentStorage {
   func insertPageProperties(_ pageProperties: PageProperties) -> PageIdentifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
-      PageIdentifier(rawValue: noteArchive.insertPageProperties(pageProperties))
+      noteArchive.insertPageProperties(pageProperties)
     }
   }
 
@@ -444,12 +444,5 @@ private extension Data {
     ]
     let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
     return image
-  }
-}
-
-extension Dictionary where Key == String {
-  func asPageIdentifierDictionary() -> [PageIdentifier: Value] {
-    let tuples = self.map { (key: PageIdentifier(rawValue: $0.key), value: $0.value) }
-    return [PageIdentifier: Value](uniqueKeysWithValues: tuples)
   }
 }

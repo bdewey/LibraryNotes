@@ -16,7 +16,7 @@ extension NoteDocumentStorage {
         let pageIdentifier = try noteArchiveQueue.sync {
           try noteArchive.insertNote(markdown, contentChangeTime: now)
         }
-        viewController.pageIdentifier = PageIdentifier(rawValue: pageIdentifier)
+        viewController.pageIdentifier = pageIdentifier
         invalidateSavedSnippets()
         notifyObservers(of: pageProperties)
       } catch {
