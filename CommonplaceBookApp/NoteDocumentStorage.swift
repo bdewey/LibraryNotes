@@ -51,7 +51,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
   /// Accessor for the page properties.
-  public var noteProperties: [NoteIdentifier: NoteProperties] {
+  public var noteProperties: [Note.Identifier: NoteProperties] {
     return noteArchiveQueue.sync {
       noteArchive.noteProperties
     }
@@ -59,14 +59,14 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
   public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
-  public func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String {
+  public func currentTextContents(for noteIdentifier: Note.Identifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
       try noteArchive.currentText(for: noteIdentifier)
     }
   }
 
-  public func changeTextContents(for noteIdentifier: NoteIdentifier, to text: String) {
+  public func changeTextContents(for noteIdentifier: Note.Identifier, to text: String) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
       noteArchive.updateText(for: noteIdentifier, to: text, contentChangeTime: Date())
@@ -75,7 +75,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     schedulePropertyBatchUpdate()
   }
 
-  public func setNoteProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties) {
+  public func setNoteProperties(for noteIdentifier: Note.Identifier, to noteProperties: NoteProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
       noteArchive.updatePageProperties(for: noteIdentifier, to: noteProperties)
@@ -99,7 +99,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     })
   }
 
-  public func deleteNote(noteIdentifier: NoteIdentifier) throws {
+  public func deleteNote(noteIdentifier: Note.Identifier) throws {
     noteArchiveQueue.sync {
       noteArchive.removeNote(for: noteIdentifier)
     }
@@ -316,7 +316,7 @@ public extension NoteDocumentStorage {
     }
   }
 
-  func insertNoteProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
+  func insertNoteProperties(_ noteProperties: NoteProperties) -> Note.Identifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
       noteArchive.insertNoteProperties(noteProperties)

@@ -12,7 +12,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
-  func documentTableDidDeleteDocument(with noteIdentifier: NoteIdentifier)
+  func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -61,7 +61,7 @@ public final class DocumentTableController: NSObject {
   }
 
   /// If non-nil, only pages with these identifiers will be shown.
-  public var filteredPageIdentifiers: Set<NoteIdentifier>? {
+  public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
       performUpdates(animated: true)
     }
@@ -85,7 +85,7 @@ public final class DocumentTableController: NSObject {
   internal weak var delegate: DocumentTableControllerDelegate?
 
   private let notebook: NoteStorage
-  private var cardsPerDocument = [NoteIdentifier: Int]() {
+  private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       performUpdates(animated: true)
     }
@@ -274,7 +274,7 @@ private extension DocumentTableController {
   /// All properties needed to display a document cell.
   struct ViewProperties: Hashable {
     /// UUID for this page
-    let pageKey: NoteIdentifier
+    let pageKey: Note.Identifier
     /// Page properties (serialized into the document)
     let noteProperties: NoteProperties
     /// How many cards are eligible for study in this page (dynamic and not serialized)
@@ -335,7 +335,7 @@ private extension DocumentTableController {
   func updateCardsPerDocument() {
     notebook.studySession(filter: nil, date: Date()) { studySession in
       self.cardsPerDocument = studySession
-        .reduce(into: [NoteIdentifier: Int]()) { cardsPerDocument, card in
+        .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
         }
       DDLogInfo(
@@ -347,10 +347,10 @@ private extension DocumentTableController {
 
   static func snapshot(
     for notebook: NoteStorage,
-    cardsPerDocument: [NoteIdentifier: Int],
+    cardsPerDocument: [Note.Identifier: Int],
     hashtags: [String],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<NoteIdentifier>?
+    filteredPageIdentifiers: Set<Note.Identifier>?
   ) -> Snapshot {
     var snapshot = Snapshot()
     if !hashtags.isEmpty {

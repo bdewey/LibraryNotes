@@ -77,7 +77,7 @@ final class DocumentListViewController: UIViewController {
 
   private lazy var tableView: UITableView = DocumentTableController.makeTableView()
 
-  internal func showPage(with noteIdentifier: NoteIdentifier) {
+  internal func showPage(with noteIdentifier: Note.Identifier) {
     let markdown: String
     do {
       markdown = try notebook.currentTextContents(for: noteIdentifier)
@@ -189,7 +189,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let filter: (NoteIdentifier, NoteProperties) -> Bool = (currentHashtag == nil)
+    let filter: (Note.Identifier, NoteProperties) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
     let hashtag = currentHashtag
@@ -237,7 +237,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     searchController.dismiss(animated: true, completion: nil)
   }
 
-  func documentTableDidDeleteDocument(with noteIdentifier: NoteIdentifier) {
+  func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
       let splitViewController = self.splitViewController,
       splitViewController.viewControllers.count > 1,
@@ -298,9 +298,9 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     DDLogInfo("Issuing query: \(queryString)")
     currentSpotlightQuery?.cancel()
     let query = CSSearchQuery(queryString: queryString, attributes: nil)
-    var allIdentifiers: [NoteIdentifier] = []
+    var allIdentifiers: [Note.Identifier] = []
     query.foundItemsHandler = { items in
-      allIdentifiers.append(contentsOf: items.map { NoteIdentifier(rawValue: $0.uniqueIdentifier) })
+      allIdentifiers.append(contentsOf: items.map { Note.Identifier(rawValue: $0.uniqueIdentifier) })
     }
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")

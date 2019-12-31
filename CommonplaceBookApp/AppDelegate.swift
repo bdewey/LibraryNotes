@@ -32,7 +32,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   var noteArchiveDocument: NoteStorage?
   /// If non-nil, we want to open this page initially upon opening the document.
-  var initialPageIdentifier: NoteIdentifier?
+  var initialPageIdentifier: Note.Identifier?
 
   @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
   @UserDefault("has_run_0", defaultValue: false) var hasRun: Bool
@@ -103,7 +103,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         break
       }
       DDLogInfo("Opening page \(uniqueIdentifier)")
-      initialPageIdentifier = NoteIdentifier(rawValue: uniqueIdentifier)
+      initialPageIdentifier = Note.Identifier(rawValue: uniqueIdentifier)
     default:
       break
     }

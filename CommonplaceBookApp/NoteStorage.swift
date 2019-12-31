@@ -8,13 +8,13 @@ import UIKit
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
   /// This is the main data stored in this container.
-  var noteProperties: [NoteIdentifier: NoteProperties] { get }
+  var noteProperties: [Note.Identifier: NoteProperties] { get }
 
   /// This publisher sends a signal whenver `noteProperties` changed.
   var notePropertiesDidChange: PassthroughSubject<Void, Never> { get }
 
   /// Deletes a note.
-  func deleteNote(noteIdentifier: NoteIdentifier) throws
+  func deleteNote(noteIdentifier: Note.Identifier) throws
 
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
@@ -26,10 +26,10 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   // manipulation of the note properties.
 
   /// Creates a new note to contain the given note properties.
-  func insertNoteProperties(_ noteProperties: NoteProperties) -> NoteIdentifier
+  func insertNoteProperties(_ noteProperties: NoteProperties) -> Note.Identifier
 
   /// Replaces the note properties for an existing note.
-  func setNoteProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties)
+  func setNoteProperties(for noteIdentifier: Note.Identifier, to noteProperties: NoteProperties)
 
   // MARK: - Challenge template manipulation
 
@@ -42,10 +42,10 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   // MARK: - Text contents
 
   /// Gets the current text contents for a note.
-  func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String
+  func currentTextContents(for noteIdentifier: Note.Identifier) throws -> String
 
   /// Changes the text contents for a note.
-  func changeTextContents(for noteIdentifier: NoteIdentifier, to text: String)
+  func changeTextContents(for noteIdentifier: Note.Identifier, to text: String)
 
   // MARK: - Asset storage.
 
@@ -87,7 +87,7 @@ extension NoteStorage {
   /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   public func studySession(
-    filter: ((NoteIdentifier, NoteProperties) -> Bool)? = nil,
+    filter: ((Note.Identifier, NoteProperties) -> Bool)? = nil,
     date: Date = Date(),
     completion: @escaping (StudySession) -> Void
   ) {
@@ -102,7 +102,7 @@ extension NoteStorage {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   internal func synchronousStudySession(
-    filter: ((NoteIdentifier, NoteProperties) -> Bool)? = nil,
+    filter: ((Note.Identifier, NoteProperties) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }

@@ -75,7 +75,7 @@
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
 		D37E6D36228D9DD8006CD0FA /* NoteProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
-		D38862B023BAA5FA00A44F1C /* NoteIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */; };
+		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
@@ -214,7 +214,7 @@
 		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteProperties.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
-		D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIdentifier.swift; sourceTree = "<group>"; };
+		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
@@ -380,11 +380,11 @@
 				D3FD46A52329257C008FDAE4 /* LoggingSpeechSynthesizer.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
+				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
 				D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */,
 				D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */,
-				D38862AF23BAA5FA00A44F1C /* NoteIdentifier.swift */,
 				D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */,
 				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
@@ -692,7 +692,6 @@
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
-				D38862B023BAA5FA00A44F1C /* NoteIdentifier.swift in Sources */,
 				D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */,
 				D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */,
 				D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */,
@@ -723,6 +722,7 @@
 				D33F64772298CE8E008C3A92 /* TextSnippetArchive+ChallengeTemplate.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
+				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3D3688E229C579200E4D062 /* NoteDocumentStorage.swift in Sources */,
 				D37E6D36228D9DD8006CD0FA /* NoteProperties.swift in Sources */,
 				D35E90C7230C5AD300A46B3F /* UserDefault.swift in Sources */,
