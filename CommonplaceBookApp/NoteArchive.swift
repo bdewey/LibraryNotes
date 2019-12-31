@@ -173,20 +173,22 @@ public struct NoteArchive {
   ///
   /// - parameter noteIdentifier: The page identifier to update
   /// - parameter text: The new text of the page
+  /// - parameter noteProperties: Computed noteProperties to match the text. If nil, the existing properties are marked stale and computed later.
   /// - parameter contentChangeTime: The *content change* timestamp of the text
   /// - note: If `text` is not different from the current value associated with `noteIdentifier`,
   ///         this operation is a no-op. No new version gets created.
   public mutating func updateText(
     for noteIdentifier: NoteIdentifier,
     to text: String,
+    noteProperties: NoteProperties? = nil,
     contentChangeTime timestamp: Date
   ) {
     if pageContentsCache[noteIdentifier] != nil {
-      pageContentsCache[noteIdentifier]!.setText(text, modifiedTimestamp: timestamp)
+      pageContentsCache[noteIdentifier]!.setText(text, properties: noteProperties, modifiedTimestamp: timestamp)
       return
     } else {
       var contents = PageContents()
-      contents.setText(text, modifiedTimestamp: timestamp)
+      contents.setText(text, properties: noteProperties, modifiedTimestamp: timestamp)
       pageContentsCache[noteIdentifier] = contents
     }
   }
@@ -379,11 +381,16 @@ private extension NoteArchive {
     }
 
     /// Updates text.
-    mutating func setText(_ text: String, modifiedTimestamp: Date) {
+    mutating func setText(_ text: String, properties: NoteProperties? = nil, modifiedTimestamp: Date) {
       self.text = text
       self.modifiedTimestamp = modifiedTimestamp
       dirty = true
-      notePropertiesStale = true
+      if let properties = properties {
+        self.noteProperties = properties
+        notePropertiesStale = false
+      } else {
+        notePropertiesStale = true
+      }
     }
   }
 
