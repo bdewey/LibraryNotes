@@ -287,40 +287,6 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
-  // TODO: On debug builds, this is *really* slow. Worth optimizing.
-  func synchronousStudySession(
-    filter: ((NoteIdentifier, NoteProperties) -> Bool)? = nil,
-    date: Date = Date()
-  ) -> StudySession {
-    let filter = filter ?? { _, _ in true }
-    let suppressionDates = studyLog.identifierSuppressionDates()
-    let properties = noteArchiveQueue.sync { noteArchive.noteProperties }
-    return properties
-      .filter { filter($0.key, $0.value) }
-      .map { (name, reviewProperties) -> StudySession in
-        let challengeTemplates = reviewProperties.cardTemplates
-          .compactMap(challengeTemplate(for:))
-        // TODO: Filter down to eligible cards
-        let eligibleCards = challengeTemplates.cards
-          .filter { challenge -> Bool in
-            guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-              return true
-            }
-            return date >= suppressionDate
-          }
-        return StudySession(
-          eligibleCards,
-          properties: CardDocumentProperties(
-            documentName: name,
-            attributionMarkdown: reviewProperties.title,
-            parsingRules: self.parsingRules
-          )
-        )
-      }
-      .reduce(into: StudySession()) { $0 += $1 }
-  }
-
   func challengeTemplate(for keyString: String) -> ChallengeTemplate? {
     guard let key = ChallengeTemplateArchiveKey(keyString) else {
       DDLogError("Expected a challenge key: \(keyString)")
@@ -396,38 +362,5 @@ extension NoteDocumentStorage {
       assetsWrapper.addFileWrapper(imageFileWrapper)
     }
     return "\(BundleWrapperKey.assets)/\(key)"
-  }
-
-  /// Adds a renderer tthat knows how to render images using assets from this document
-  /// - parameter renderers: The collection of render functions
-  public func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { [weak self] node, attributes in
-      guard
-        let self = self,
-        let imageNode = node as? Image,
-        let data = self.data(for: imageNode.url),
-        let image = data.image(maxSize: 200)
-      else {
-        return NSAttributedString(string: node.markdown, attributes: attributes)
-      }
-      let attachment = NSTextAttachment()
-      attachment.image = image
-      return NSAttributedString(attachment: attachment)
-    }
-  }
-}
-
-private extension Data {
-  func image(maxSize: CGFloat) -> UIImage? {
-    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
-      return nil
-    }
-    let options: [NSString: NSObject] = [
-      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
-      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
-      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
-    ]
-    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
-    return image
   }
 }
