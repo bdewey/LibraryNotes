@@ -59,14 +59,6 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
   public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
-  /// All hashtags used across all pages, sorted.
-  public var hashtags: [String] {
-    let hashtags = noteProperties.values.reduce(into: Set<String>()) { hashtags, props in
-      hashtags.formUnion(props.hashtags)
-    }
-    return Array(hashtags).sorted()
-  }
-
   public func currentTextContents(for noteIdentifier: NoteIdentifier) throws -> String {
     assert(Thread.isMainThread)
     return try noteArchiveQueue.sync {
@@ -83,7 +75,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties) {
+  public func setNoteProperties(for noteIdentifier: NoteIdentifier, to noteProperties: NoteProperties) {
     assert(Thread.isMainThread)
     noteArchiveQueue.sync {
       noteArchive.updatePageProperties(for: noteIdentifier, to: noteProperties)
@@ -101,19 +93,19 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       }
       // swiftlint:disable:next empty_count
       if count > 0 {
-        self.notifyObservers(of: self.noteProperties)
+        self.notePropertiesDidChange.send()
       }
       self.propertyBatchUpdateTimer = nil
     })
   }
 
-  public func deletePage(noteIdentifier: NoteIdentifier) throws {
+  public func deleteNote(noteIdentifier: NoteIdentifier) throws {
     noteArchiveQueue.sync {
       noteArchive.removeNote(for: noteIdentifier)
     }
     CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [noteIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
-    notifyObservers(of: noteProperties)
+    notePropertiesDidChange.send()
   }
 
   private enum BundleWrapperKey {
@@ -142,7 +134,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       let noteProperties = noteArchive.noteProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(noteProperties.count) pages")
-      notifyObservers(of: noteProperties)
+      notePropertiesDidChange.send()
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
     }
@@ -202,13 +194,6 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       currentWrapper = nextWrapper
     }
     return currentWrapper.regularFileContents
-  }
-}
-
-/// Observing.
-public extension NoteDocumentStorage {
-  internal func notifyObservers(of noteProperties: [NoteIdentifier: NoteProperties]) {
-    notePropertiesDidChange.send()
   }
 }
 
@@ -365,10 +350,10 @@ public extension NoteDocumentStorage {
     }
   }
 
-  func insertPageProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
+  func insertNoteProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
     invalidateSavedSnippets()
     return noteArchiveQueue.sync {
-      noteArchive.insertPageProperties(noteProperties)
+      noteArchive.insertNoteProperties(noteProperties)
     }
   }
 
@@ -379,7 +364,7 @@ public extension NoteDocumentStorage {
   func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
-    notifyObservers(of: noteProperties)
+    notePropertiesDidChange.send()
   }
 }
 

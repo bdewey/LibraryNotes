@@ -18,7 +18,7 @@ extension NoteDocumentStorage {
         }
         viewController.noteIdentifier = noteIdentifier
         invalidateSavedSnippets()
-        notifyObservers(of: noteProperties)
+        notePropertiesDidChange.send()
       } catch {
         DDLogError("Unexpected error creating page: \(error)")
       }

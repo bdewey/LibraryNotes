@@ -25,9 +25,9 @@ final class VocabularyViewController: UIViewController {
       title = properties.title
       dataSource.apply(makeSnapshot(), animatingDifferences: true)
       if let noteIdentifier = noteIdentifier {
-        notebook.changePageProperties(for: noteIdentifier, to: properties)
+        notebook.setNoteProperties(for: noteIdentifier, to: properties)
       } else {
-        noteIdentifier = notebook.insertPageProperties(properties)
+        noteIdentifier = notebook.insertNoteProperties(properties)
       }
     }
   }

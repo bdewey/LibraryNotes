@@ -185,7 +185,7 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.notebook.deletePage(noteIdentifier: properties.pageKey)
+        try? self.notebook.deleteNote(noteIdentifier: properties.pageKey)
         self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }

@@ -247,7 +247,7 @@ final class NoteArchiveTests: XCTestCase {
       properties.title = "Vocabulary List with a Really Long Title"
       properties.hashtags = ["#testing"]
       properties.timestamp = now
-      let key = archive.insertPageProperties(properties)
+      let key = archive.insertNoteProperties(properties)
       let roundTrip = archive.noteProperties[key]
       XCTAssertEqual(roundTrip, properties)
       try archive.archivePageManifestVersion(timestamp: now)

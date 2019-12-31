@@ -115,7 +115,7 @@ public struct NoteArchive {
   }
 
   /// Inserts "naked properties" into the archive -- PageProperties that are directly manipulated, not derived from text.
-  public mutating func insertPageProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
+  public mutating func insertNoteProperties(_ noteProperties: NoteProperties) -> NoteIdentifier {
     var pageContents = PageContents(noteProperties: noteProperties)
     pageContents.dirty = true
     let key = NoteIdentifier()
