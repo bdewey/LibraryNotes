@@ -189,7 +189,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let filter: (Note.Identifier, NoteProperties) -> Bool = (currentHashtag == nil)
+    let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
     let hashtag = currentHashtag

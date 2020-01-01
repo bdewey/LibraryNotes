@@ -98,7 +98,7 @@ extension NoteStorage {
   /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   public func studySession(
-    filter: ((Note.Identifier, NoteProperties) -> Bool)? = nil,
+    filter: ((Note.Identifier, Note.Metadata) -> Bool)? = nil,
     date: Date = Date(),
     completion: @escaping (StudySession) -> Void
   ) {
@@ -113,16 +113,15 @@ extension NoteStorage {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   internal func synchronousStudySession(
-    filter: ((Note.Identifier, NoteProperties) -> Bool)? = nil,
+    filter: ((Note.Identifier, Note.Metadata) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     let suppressionDates = studyLog.identifierSuppressionDates()
-    return noteProperties
+    return allMetadata
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
-        let challengeTemplates = reviewProperties.cardTemplates
-          .compactMap(challengeTemplate(for:))
+        let challengeTemplates = (try? note(noteIdentifier: name).challengeTemplates) ?? []
         // TODO: Filter down to eligible cards
         let eligibleCards = challengeTemplates.cards
           .filter { challenge -> Bool in
