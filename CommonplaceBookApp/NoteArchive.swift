@@ -616,26 +616,6 @@ private extension NoteArchive {
       }
     return Dictionary(uniqueKeysWithValues: keyValuePairs)
   }
-
-  /// Synchronously extract properties & challenge templates from the contents of a file.
-  mutating func archivePageProperties(
-    from text: String,
-    timestamp: Date
-  ) throws -> (snippet: TextSnippet, properties: NoteProperties) {
-    let textSnippet = archive.insert(text)
-    let nodes = parsingRules.parse(text)
-    let challengeTemplateKeys = nodes.archiveChallengeTemplates(to: &archive)
-    let properties = NoteProperties(
-      sha1Digest: textSnippet.sha1Digest,
-      timestamp: timestamp,
-      hashtags: nodes.hashtags,
-      title: String(nodes.title.split(separator: "\n").first ?? ""),
-      cardTemplates: challengeTemplateKeys.map { $0.description }
-    )
-    let propertiesSnippet = try properties.makeSnippet()
-    archive.insert(propertiesSnippet)
-    return (propertiesSnippet, properties)
-  }
 }
 
 private extension TextSnippetArchive {
