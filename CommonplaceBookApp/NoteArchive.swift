@@ -449,6 +449,7 @@ private extension NoteArchive {
       guard text != self.text else { return }
       self.text = text
       dirty = true
+      notePropertiesStale = true // Need to compute a new sha1digest for the content
     }
 
     mutating func setChallengeTemplateKeys(_ challengeTemplateKeys: [String]) {
@@ -467,6 +468,7 @@ private extension NoteArchive {
       noteProperties.hashtags = noteMetadata.hashtags.sorted()
       noteProperties.timestamp = noteMetadata.timestamp
       self.noteProperties = noteProperties
+      self.modifiedTimestamp = noteMetadata.timestamp
       dirty = true
     }
   }

@@ -287,7 +287,7 @@ extension AppDelegate: UISplitViewControllerDelegate {
   ) -> Bool {
     guard
       let navigationController = secondaryViewController as? UINavigationController,
-      let textEditViewController = navigationController.visibleViewController as? TextEditViewController
+      let textEditViewController = navigationController.visibleViewController as? SavingTextEditViewController
     else {
       assertionFailure()
       return false

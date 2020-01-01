@@ -80,7 +80,7 @@ final class DocumentListViewController: UIViewController {
   internal func showPage(with noteIdentifier: Note.Identifier) {
     let markdown: String
     do {
-      markdown = try notebook.currentTextContents(for: noteIdentifier)
+      markdown = try notebook.note(noteIdentifier: noteIdentifier).text ?? ""
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
       return
@@ -90,8 +90,8 @@ final class DocumentListViewController: UIViewController {
     )
     textEditViewController.noteIdentifier = noteIdentifier
     textEditViewController.markdown = markdown
-    textEditViewController.delegate = notebook
-    showDetailViewController(textEditViewController)
+    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, parsingRules: notebook.parsingRules, noteStorage: notebook)
+    showDetailViewController(savingWrapper)
   }
 
   // MARK: - Lifecycle

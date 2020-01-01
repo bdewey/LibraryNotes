@@ -11,7 +11,7 @@
 		637F8B0C22AE186100698868 /* MiniMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = 637F8B0B22AE186100698868 /* MiniMarkdown */; };
 		BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
-		D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */; };
+		D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */; };
 		D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */; };
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
 		D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D261723193F9A0031AA20 /* VocabularyViewController.swift */; };
@@ -147,7 +147,7 @@
 		C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C69D2589A8BFE5C01679833D /* Pods-CommonplaceBookApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CommonplaceBookApp.release.xcconfig"; path = "Pods/Target Support Files/Pods-CommonplaceBookApp/Pods-CommonplaceBookApp.release.xcconfig"; sourceTree = "<group>"; };
 		D30B0242229E513C00F3B459 /* StudyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLog.swift; sourceTree = "<group>"; };
-		D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteArchiveDocument+TextEditViewController.swift"; sourceTree = "<group>"; };
+		D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingTextEditViewController.swift; sourceTree = "<group>"; };
 		D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ParsingRules+CommonplaceBook.swift"; sourceTree = "<group>"; };
 		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
 		D30D261723193F9A0031AA20 /* VocabularyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyViewController.swift; sourceTree = "<group>"; };
@@ -383,7 +383,6 @@
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688F229C61F500E4D062 /* NoteArchiveDocument+Importing.swift */,
-				D30B0244229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift */,
 				D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */,
 				D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */,
 				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
@@ -396,6 +395,7 @@
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
+				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
 				D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */,
@@ -673,7 +673,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D33F64752298C70C008C3A92 /* NoteArchive.swift in Sources */,
-				D30B0245229EB88900F3B459 /* NoteArchiveDocument+TextEditViewController.swift in Sources */,
+				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
 				D374AB6B229655BA00F54561 /* TextSnippetArchive.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D31AFACB229D61EE00ED2B76 /* ChallengeTemplate.swift in Sources */,

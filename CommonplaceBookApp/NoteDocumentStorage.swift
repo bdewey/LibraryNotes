@@ -73,31 +73,24 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       let updatedNote = updateBlock(existingNote)
       try noteArchive.updateNote(updatedNote, for: noteIdentifier)
     }
-  }
-
-  public func createNote(_ note: Note) throws -> Note.Identifier {
-    try noteArchiveQueue.sync {
-      try noteArchive.createNote(note)
-    }
-  }
-
-  public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
-
-  public func currentTextContents(for noteIdentifier: Note.Identifier) throws -> String {
-    assert(Thread.isMainThread)
-    return try noteArchiveQueue.sync {
-      try noteArchive.currentText(for: noteIdentifier)
-    }
-  }
-
-  public func changeTextContents(for noteIdentifier: Note.Identifier, to text: String) {
-    assert(Thread.isMainThread)
-    noteArchiveQueue.sync {
-      noteArchive.updateText(for: noteIdentifier, to: text, contentChangeTime: Date())
-    }
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
   }
+
+  public func createNote(_ note: Note) throws -> Note.Identifier {
+    let identifier = try noteArchiveQueue.sync {
+      try noteArchive.createNote(note)
+    }
+    invalidateSavedSnippets()
+    schedulePropertyBatchUpdate()
+    return identifier
+  }
+
+  public func flush() {
+    save(to: fileURL, for: .forOverwriting, completionHandler: nil)
+  }
+
+  public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
   public func setNoteProperties(for noteIdentifier: Note.Identifier, to noteProperties: NoteProperties) {
     assert(Thread.isMainThread)
@@ -346,18 +339,6 @@ public extension NoteDocumentStorage {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
     notePropertiesDidChange.send()
-  }
-}
-
-// MARK: - MarkdownEditingTextViewImageStoring
-
-extension NoteDocumentStorage: MarkdownEditingTextViewImageStoring {
-  public func markdownEditingTextView(
-    _ textView: MarkdownEditingTextView,
-    store imageData: Data,
-    suffix: String
-  ) -> String {
-    return storeAssetData(imageData, typeHint: suffix)
   }
 }
 

@@ -160,7 +160,7 @@ extension DocumentTableController: UITableViewDelegate {
       }
       let markdown: String
       do {
-        markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
+        markdown = try notebook.note(noteIdentifier: viewProperties.pageKey).text ?? ""
       } catch {
         DDLogError("Unexpected error loading page: \(error)")
         return
@@ -170,8 +170,8 @@ extension DocumentTableController: UITableViewDelegate {
       )
       textEditViewController.noteIdentifier = viewProperties.pageKey
       textEditViewController.markdown = markdown
-      textEditViewController.delegate = notebook
-      delegate?.showDetailViewController(textEditViewController)
+      let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: viewProperties.pageKey, parsingRules: notebook.parsingRules, noteStorage: notebook)
+      delegate?.showDetailViewController(savingWrapper)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
     }

@@ -6,15 +6,12 @@ import MiniMarkdown
 import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
-public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
+public protocol NoteStorage: AnyObject {
   /// This is the main data stored in this container.
   var noteProperties: [Note.Identifier: NoteProperties] { get }
 
   /// This publisher sends a signal whenver `noteProperties` changed.
   var notePropertiesDidChange: PassthroughSubject<Void, Never> { get }
-
-  /// Deletes a note.
-  func deleteNote(noteIdentifier: Note.Identifier) throws
 
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
@@ -35,6 +32,12 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// Creates a new note.
   func createNote(_ note: Note) throws -> Note.Identifier
 
+  /// Deletes a note.
+  func deleteNote(noteIdentifier: Note.Identifier) throws
+
+  /// Ensure contents are saved to stable storage.
+  func flush()
+
   // MARK: - Direct property manipulation
 
   // Often, the note properties are implicitly updated when note content changes. However, to
@@ -54,14 +57,6 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
 
   /// Retrieves a challenge template.
   func challengeTemplate(for keyString: String) -> ChallengeTemplate?
-
-  // MARK: - Text contents
-
-  /// Gets the current text contents for a note.
-  func currentTextContents(for noteIdentifier: Note.Identifier) throws -> String
-
-  /// Changes the text contents for a note.
-  func changeTextContents(for noteIdentifier: Note.Identifier, to text: String)
 
   // MARK: - Asset storage.
 

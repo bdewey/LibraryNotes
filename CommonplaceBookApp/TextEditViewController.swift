@@ -44,11 +44,10 @@ public final class TextEditViewController: UIViewController {
     notebook: NoteStorage,
     currentHashtag: String?,
     autoFirstResponder: Bool
-  ) -> TextEditViewController {
+  ) -> SavingTextEditViewController {
     var initialText = "# "
     let initialOffset = initialText.count
     initialText += "\n"
-    // TODO: Turn this long sequence of properties into a computed property. This is gross.
     if let hashtag = currentHashtag {
       initialText += hashtag
       initialText += "\n"
@@ -57,16 +56,16 @@ public final class TextEditViewController: UIViewController {
     viewController.markdown = initialText
     viewController.selectedRange = NSRange(location: initialOffset, length: 0)
     viewController.autoFirstResponder = autoFirstResponder
-    viewController.delegate = notebook
-    return viewController
+    return SavingTextEditViewController(
+      viewController,
+      noteIdentifier: nil,
+      parsingRules: notebook.parsingRules,
+      noteStorage: notebook
+    )
   }
 
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
-  }
-
-  deinit {
-    delegate?.textEditViewControllerDidClose(self)
   }
 
   // Init-time state.
@@ -229,6 +228,11 @@ public final class TextEditViewController: UIViewController {
     adjustMargins(size: view!.bounds.size)
     let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
     UIMenuController.shared.menuItems = [highlightMenuItem]
+  }
+
+  public override func viewDidDisappear(_ animated: Bool) {
+    super.viewDidDisappear(animated)
+    delegate?.textEditViewControllerDidClose(self)
   }
 
   public override func viewWillLayoutSubviews() {
