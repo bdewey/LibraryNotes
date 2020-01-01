@@ -57,6 +57,30 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
   }
 
+  public var allMetadata: [Note.Identifier: Note.Metadata] {
+    noteProperties.mapValues { $0.asNoteMetadata() }
+  }
+
+  public func note(noteIdentifier: Note.Identifier) throws -> Note {
+    return try noteArchiveQueue.sync {
+      try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
+    }
+  }
+
+  public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
+    try noteArchiveQueue.sync {
+      let existingNote = try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
+      let updatedNote = updateBlock(existingNote)
+      try noteArchive.updateNote(updatedNote, for: noteIdentifier)
+    }
+  }
+
+  public func createNote(_ note: Note) throws -> Note.Identifier {
+    try noteArchiveQueue.sync {
+      try noteArchive.createNote(note)
+    }
+  }
+
   public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
   public func currentTextContents(for noteIdentifier: Note.Identifier) throws -> String {
@@ -292,17 +316,8 @@ public extension NoteDocumentStorage {
       DDLogError("Expected a challenge key: \(keyString)")
       return nil
     }
-    if let cachedTemplate = challengeTemplateCache.object(forKey: keyString as NSString) {
-      return cachedTemplate
-    }
-    do {
-      let template = try noteArchive.challengeTemplate(for: key)
-      template.templateIdentifier = key.digest
-      challengeTemplateCache.setObject(template, forKey: keyString as NSString)
-      return template
-    } catch {
-      DDLogError("Unexpected error getting challenge template: \(error)")
-      return nil
+    return try? noteArchiveQueue.sync {
+      try noteArchive.challengeTemplate(for: key, challengeTemplateCache: challengeTemplateCache)
     }
   }
 
@@ -362,5 +377,11 @@ extension NoteDocumentStorage {
       assetsWrapper.addFileWrapper(imageFileWrapper)
     }
     return "\(BundleWrapperKey.assets)/\(key)"
+  }
+}
+
+internal extension NoteProperties {
+  func asNoteMetadata() -> Note.Metadata {
+    Note.Metadata(timestamp: timestamp, hashtags: hashtags, title: title)
   }
 }

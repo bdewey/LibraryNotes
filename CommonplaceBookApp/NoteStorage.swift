@@ -19,6 +19,22 @@ public protocol NoteStorage: TextEditViewControllerDelegate, MarkdownEditingText
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
 
+  // MARK: - v2 API
+
+  /// Metadata for all notes in the store.
+  var allMetadata: [Note.Identifier: Note.Metadata] { get }
+
+  /// Gets a note with a specific identifier.
+  func note(noteIdentifier: Note.Identifier) throws -> Note
+
+  /// Updates a note.
+  /// - parameter noteIdentifier: The identifier of the note to update.
+  /// - parameter updateBlock: A block that receives the current value of the note and returns the updated value.
+  func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws
+
+  /// Creates a new note.
+  func createNote(_ note: Note) throws -> Note.Identifier
+
   // MARK: - Direct property manipulation
 
   // Often, the note properties are implicitly updated when note content changes. However, to

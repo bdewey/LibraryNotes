@@ -99,6 +99,46 @@ public struct NoteArchive {
     return archive.textSerialized()
   }
 
+  /// APIv2: Retrieve a Note for an identifier.
+  public func note(noteIdentifier: Note.Identifier, challengeTemplateCache: NSCache<NSString, ChallengeTemplate>) throws -> Note {
+    guard let properties = noteProperties[noteIdentifier] else {
+      throw RetrievalError.noSuchPage(noteIdentifier)
+    }
+    // Not all notes have text, so it's OK for this to fail and be nil
+    let text = try? currentText(for: noteIdentifier)
+    let challengeTemplates = properties.cardTemplates.compactMap { keyString -> ChallengeTemplate? in
+      guard let key = ChallengeTemplateArchiveKey(keyString) else { return nil }
+      return try? challengeTemplate(for: key, challengeTemplateCache: challengeTemplateCache)
+    }
+    return Note(metadata: properties.asNoteMetadata(), text: text, challengeTemplates: challengeTemplates)
+  }
+
+  /// APIv2: Update a note. In this API, there's no notion of having the text & the challenge templates being stale and computed
+  /// by the storage layer; the caller must ensure that `note` is consistent before calling this API.
+  ///
+  /// However, to prevent version explosion, this does write to `pageContentsCache`. You must later call `archivePageManfiestVersion`
+  /// to write contents from the cache into the archive.
+  public mutating func updateNote(_ note: Note, for noteIdentifier: Note.Identifier) throws {
+    var pageContents = pageContentsCache[noteIdentifier, default: PageContents()]
+    // Insert all templates
+    let challengeTemplateKeys = try note.challengeTemplates
+      .map {
+        try insertChallengeTemplate($0).description
+      }
+      .sorted()
+    pageContents.setChallengeTemplateKeys(challengeTemplateKeys)
+    pageContents.setText(note.text)
+    pageContents.setNoteMetadata(note.metadata)
+    pageContentsCache[noteIdentifier] = pageContents
+  }
+
+  /// APIv2: Creates a new note.
+  public mutating func createNote(_ note: Note) throws -> Note.Identifier {
+    let identifier = Note.Identifier()
+    try updateNote(note, for: identifier)
+    return identifier
+  }
+
   /// Creates a new page with the given text.
   /// - returns: An identifier that can be used to return the current version of this page
   ///            at any point in time.
@@ -152,7 +192,14 @@ public struct NoteArchive {
   /// - parameter key: A reference to a specific challenge template in the archive.
   /// - throws: `RetrievalError.noSuchTemplateKey` if the specific challenge text does not exist in the archive.
   /// - throws: `RetrievalError.noSuchTemplateClass` if this key uses an unknown challenge template.
-  public func challengeTemplate(for key: ChallengeTemplateArchiveKey) throws -> ChallengeTemplate {
+  public func challengeTemplate(
+    for key: ChallengeTemplateArchiveKey,
+    challengeTemplateCache: NSCache<NSString, ChallengeTemplate>
+  ) throws -> ChallengeTemplate {
+    let cacheKey: NSString = key.description as NSString
+    if let cachedTemplate = challengeTemplateCache.object(forKey: cacheKey) {
+      return cachedTemplate
+    }
     guard let snippet = archive.snippets[key.digest] else {
       throw RetrievalError.noSuchTemplateKey(key.digest)
     }
@@ -160,12 +207,17 @@ public struct NoteArchive {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
     if let fromYaml = try? YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules]) {
+      fromYaml.templateIdentifier = key.digest
+      challengeTemplateCache.setObject(fromYaml, forKey: cacheKey)
       return fromYaml
     }
     // Try encoding the snippet as a YAML string, then decoding as klass.
     // This will accomodate single-value-container types that didn't go through the YAML encoder.
     let encodedText = try YAMLEncoder().encode(snippet.text)
-    return try YAMLDecoder().decode(klass, from: encodedText, userInfo: [.markdownParsingRules: parsingRules])
+    let yamlRetry = try YAMLDecoder().decode(klass, from: encodedText, userInfo: [.markdownParsingRules: parsingRules])
+    yamlRetry.templateIdentifier = key.digest
+    challengeTemplateCache.setObject(yamlRetry, forKey: cacheKey)
+    return yamlRetry
   }
 
   /// Updates the text associated with `noteIdentifier` to `text`, creating a new version
@@ -391,6 +443,31 @@ private extension NoteArchive {
       } else {
         notePropertiesStale = true
       }
+    }
+
+    mutating func setText(_ text: String?) {
+      guard text != self.text else { return }
+      self.text = text
+      dirty = true
+    }
+
+    mutating func setChallengeTemplateKeys(_ challengeTemplateKeys: [String]) {
+      guard challengeTemplateKeys != noteProperties?.cardTemplates else { return }
+      if noteProperties == nil {
+        noteProperties = NoteProperties(cardTemplates: challengeTemplateKeys)
+      } else {
+        noteProperties?.cardTemplates = challengeTemplateKeys
+      }
+      dirty = true
+    }
+
+    mutating func setNoteMetadata(_ noteMetadata: Note.Metadata) {
+      var noteProperties = self.noteProperties ?? NoteProperties()
+      noteProperties.title = noteMetadata.title
+      noteProperties.hashtags = noteMetadata.hashtags.sorted()
+      noteProperties.timestamp = noteMetadata.timestamp
+      self.noteProperties = noteProperties
+      dirty = true
     }
   }
 
