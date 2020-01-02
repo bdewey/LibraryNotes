@@ -104,7 +104,7 @@ extension NoteArchiveDocumentTests {
     challengeTemplateCount: Int,
     logCount: Int
   ) {
-    XCTAssertEqual(document.noteProperties.count, pageCount)
+    XCTAssertEqual(document.allMetadata.count, pageCount)
     // TODO: Re-enable
 //    XCTAssertEqual(document.noteBundle.challengeTemplates.count, challengeTemplateCount)
     XCTAssertEqual(document.studyLog.count, logCount)

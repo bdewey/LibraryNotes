@@ -7,9 +7,6 @@ import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: AnyObject {
-  /// This is the main data stored in this container.
-  var noteProperties: [Note.Identifier: NoteProperties] { get }
-
   /// This publisher sends a signal whenver `noteProperties` changed.
   var notePropertiesDidChange: PassthroughSubject<Void, Never> { get }
 
@@ -124,7 +121,7 @@ extension NoteStorage {
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
-    let hashtags = noteProperties.values.reduce(into: Set<String>()) { hashtags, props in
+    let hashtags = allMetadata.values.reduce(into: Set<String>()) { hashtags, props in
       hashtags.formUnion(props.hashtags)
     }
     return Array(hashtags).sorted()
