@@ -16,6 +16,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     self.noteArchive = NoteArchive(parsingRules: parsingRules)
+    notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     super.init(fileURL: url)
   }
 
@@ -90,7 +91,8 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
-  public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
+  public let notesDidChange: AnyPublisher<Void, Never>
+  private let notesDidChangeSubject = PassthroughSubject<Void, Never>()
 
   private var propertyBatchUpdateTimer: Timer?
 
@@ -102,7 +104,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       }
       // swiftlint:disable:next empty_count
       if count > 0 {
-        self.notePropertiesDidChange.send()
+        self.notesDidChangeSubject.send()
       }
       self.propertyBatchUpdateTimer = nil
     })
@@ -114,7 +116,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
     CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [noteIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
-    notePropertiesDidChange.send()
+    notesDidChangeSubject.send()
   }
 
   private enum BundleWrapperKey {
@@ -143,7 +145,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
       let noteProperties = noteArchive.noteProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
       DDLogInfo("Loaded \(noteProperties.count) pages")
-      notePropertiesDidChange.send()
+      notesDidChangeSubject.send()
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
     }
@@ -303,7 +305,7 @@ public extension NoteDocumentStorage {
   func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
-    notePropertiesDidChange.send()
+    notesDidChangeSubject.send()
   }
 }
 

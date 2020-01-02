@@ -7,16 +7,14 @@ import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: AnyObject {
-  /// This publisher sends a signal whenver `noteProperties` changed.
-  var notePropertiesDidChange: PassthroughSubject<Void, Never> { get }
-
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
 
-  // MARK: - v2 API
-
   /// Metadata for all notes in the store.
   var allMetadata: [Note.Identifier: Note.Metadata] { get }
+
+  /// This publisher sends a signal whenver `noteProperties` changed.
+  var notesDidChange: AnyPublisher<Void, Never> { get }
 
   /// Gets a note with a specific identifier.
   func note(noteIdentifier: Note.Identifier) throws -> Note

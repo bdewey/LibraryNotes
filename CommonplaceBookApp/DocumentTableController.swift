@@ -96,7 +96,7 @@ public final class DocumentTableController: NSObject {
   private var notebookSubscription: AnyCancellable?
 
   public func startObservingNotebook() {
-    notebookSubscription = notebook.notePropertiesDidChange
+    notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateCardsPerDocument()

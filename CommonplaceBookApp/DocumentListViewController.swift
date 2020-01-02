@@ -32,7 +32,7 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.rightBarButtonItem = studyButton
-    self.notebookSubscription = notebook.notePropertiesDidChange
+    self.notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateStudySession()
