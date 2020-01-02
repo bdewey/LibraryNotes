@@ -1,6 +1,6 @@
 # Changelog
 
-## Uncomitted
+## [0.14.0] - 2020-01-02
 
 ### Changed
 
