@@ -48,15 +48,6 @@ final class NoteArchiveDocumentTests: XCTestCase {
       challengeTemplateCount: expectedChallengeTemplateCount,
       logCount: 0
     )
-
-    // Re-importing pages shouldn't change anything. I already have this data.
-    loadAllPages(into: roundTripDocument, expectToLoad: false)
-    verifyDocument(
-      roundTripDocument,
-      pageCount: metadataProvider.fileMetadata.count,
-      challengeTemplateCount: expectedChallengeTemplateCount,
-      logCount: 0
-    )
     closeDocument(roundTripDocument)
   }
 
@@ -134,15 +125,11 @@ extension NoteArchiveDocumentTests {
   }
 
   private func loadAllPages(into document: NoteStorage, expectToLoad: Bool = true) {
-    let allLoadsFinished = expectation(description: "Loaded all pages")
-    document.importFileMetadataItems(
-      metadataProvider.fileMetadata,
-      from: metadataProvider,
-      importDate: Date()
-    ) {
-      allLoadsFinished.fulfill()
+    for metadata in metadataProvider.fileMetadata {
+      let markdown = try! metadataProvider.text(for: metadata)
+      let note = Note(markdown: markdown, parsingRules: document.parsingRules)
+      _ = try! document.createNote(note)
     }
-    waitForExpectations(timeout: 3, handler: nil)
   }
 }
 

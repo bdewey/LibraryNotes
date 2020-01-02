@@ -58,15 +58,6 @@ public protocol NoteStorage: AnyObject {
 
   /// The complete record of all study sessions.
   var studyLog: StudyLog { get }
-
-  // MARK: - Importing
-
-  func importFileMetadataItems(
-    _ items: [FileMetadata],
-    from metadataProvider: FileMetadataProvider,
-    importDate: Date,
-    completion: (() -> Void)?
-  )
 }
 
 extension NoteStorage {
