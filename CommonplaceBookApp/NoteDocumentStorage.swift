@@ -92,14 +92,6 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
 
   public let notePropertiesDidChange = PassthroughSubject<Void, Never>()
 
-  public func setNoteProperties(for noteIdentifier: Note.Identifier, to noteProperties: NoteProperties) {
-    assert(Thread.isMainThread)
-    noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: noteIdentifier, to: noteProperties)
-    }
-    invalidateSavedSnippets()
-  }
-
   private var propertyBatchUpdateTimer: Timer?
 
   private func schedulePropertyBatchUpdate() {
@@ -304,33 +296,6 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  func challengeTemplate(for keyString: String) -> ChallengeTemplate? {
-    guard let key = ChallengeTemplateArchiveKey(keyString) else {
-      DDLogError("Expected a challenge key: \(keyString)")
-      return nil
-    }
-    return try? noteArchiveQueue.sync {
-      try noteArchive.challengeTemplate(for: key, challengeTemplateCache: challengeTemplateCache)
-    }
-  }
-
-  /// Inserts a challenge template into the archive.
-  func insertChallengeTemplate(
-    _ challengeTemplate: ChallengeTemplate
-  ) throws -> ChallengeTemplateArchiveKey {
-    // TODO: Use the cache
-    return try noteArchiveQueue.sync {
-      try noteArchive.insertChallengeTemplate(challengeTemplate)
-    }
-  }
-
-  func insertNoteProperties(_ noteProperties: NoteProperties) -> Note.Identifier {
-    invalidateSavedSnippets()
-    return noteArchiveQueue.sync {
-      noteArchive.insertNoteProperties(noteProperties)
-    }
-  }
-
   /// Update the notebook with the result of a study session.
   ///
   /// - parameter studySession: The completed study session.
@@ -363,6 +328,11 @@ extension NoteDocumentStorage {
 
 internal extension NoteProperties {
   func asNoteMetadata() -> Note.Metadata {
-    Note.Metadata(timestamp: timestamp, hashtags: hashtags, title: title)
+    Note.Metadata(
+      timestamp: timestamp,
+      hashtags: hashtags,
+      title: title,
+      containsText: sha1Digest != nil
+    )
   }
 }

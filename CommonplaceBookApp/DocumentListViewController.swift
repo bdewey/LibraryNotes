@@ -150,7 +150,7 @@ final class DocumentListViewController: UIViewController {
 
   private func makeBlankVocabularyPage() {
     let viewController = VocabularyViewController(notebook: notebook)
-    viewController.properties.title = "Test Vocabulary"
+    viewController.note.metadata.title = "Test Vocabulary"
     splitViewController?.showDetailViewController(
       UINavigationController(rootViewController: viewController),
       sender: nil
@@ -191,7 +191,7 @@ final class DocumentListViewController: UIViewController {
   private func updateStudySession() {
     let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
-      : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
+      : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
     notebook.studySession(filter: filter, date: Date()) {
       guard self.currentHashtag == hashtag else { return }

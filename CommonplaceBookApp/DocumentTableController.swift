@@ -150,12 +150,17 @@ extension DocumentTableController: UITableViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
-      if viewProperties.noteProperties.sha1Digest == nil {
+      if !viewProperties.noteProperties.containsText {
         // This is a vocabulary page, not a text page.
-        let vc = VocabularyViewController(notebook: notebook)
-        vc.noteIdentifier = viewProperties.pageKey
-        vc.properties = viewProperties.noteProperties
-        delegate?.showDetailViewController(vc)
+        do {
+          let note = try notebook.note(noteIdentifier: viewProperties.pageKey)
+          let vc = VocabularyViewController(notebook: notebook)
+          vc.noteIdentifier = viewProperties.pageKey
+          vc.note = note
+          delegate?.showDetailViewController(vc)
+        } catch {
+          DDLogError("Could not load vocabulary page: \(error)")
+        }
         return
       }
       let markdown: String
@@ -276,7 +281,7 @@ private extension DocumentTableController {
     /// UUID for this page
     let pageKey: Note.Identifier
     /// Page properties (serialized into the document)
-    let noteProperties: NoteProperties
+    let noteProperties: Note.Metadata
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
   }
@@ -359,7 +364,7 @@ private extension DocumentTableController {
     }
     snapshot.appendSections([.documents])
 
-    let propertiesFilteredByHashtag = notebook.noteProperties
+    let propertiesFilteredByHashtag = notebook.allMetadata
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)

@@ -38,26 +38,6 @@ public protocol NoteStorage: AnyObject {
   /// Ensure contents are saved to stable storage.
   func flush()
 
-  // MARK: - Direct property manipulation
-
-  // Often, the note properties are implicitly updated when note content changes. However, to
-  // support some kinds of notes (like "vocabulary lists" as an experiment), we allow direct
-  // manipulation of the note properties.
-
-  /// Creates a new note to contain the given note properties.
-  func insertNoteProperties(_ noteProperties: NoteProperties) -> Note.Identifier
-
-  /// Replaces the note properties for an existing note.
-  func setNoteProperties(for noteIdentifier: Note.Identifier, to noteProperties: NoteProperties)
-
-  // MARK: - Challenge template manipulation
-
-  /// Inserts a new challenge template into the store.
-  func insertChallengeTemplate(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey
-
-  /// Retrieves a challenge template.
-  func challengeTemplate(for keyString: String) -> ChallengeTemplate?
-
   // MARK: - Asset storage.
 
   /// Gets data contained in a file wrapper

@@ -16,25 +16,30 @@ public struct Note {
     }
   }
 
-  public struct Metadata {
+  public struct Metadata: Hashable {
     /// Last modified time of the page.
-    public var timestamp: Date = Date()
+    public var timestamp: Date
 
     /// Hashtags present in the page.
     /// - note: Need to keep sorted to make comparisons canonical. Can't be a Set or serialization isn't canonical :-(
-    public var hashtags: [String] = []
+    public var hashtags: [String]
 
     /// Title of the page. May include Markdown formatting.
-    public var title: String = ""
+    public var title: String
+
+    /// Does this note contain text or not?
+    public var containsText: Bool
 
     public init(
       timestamp: Date = Date(),
       hashtags: [String] = [],
-      title: String = ""
+      title: String = "",
+      containsText: Bool = false
     ) {
       self.timestamp = timestamp
       self.hashtags = hashtags
       self.title = title
+      self.containsText = containsText
     }
   }
 
