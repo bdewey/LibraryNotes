@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "GRDB",
+        "repositoryURL": "https://github.com/groue/GRDB.swift.git",
+        "state": {
+          "branch": null,
+          "revision": "985794e7332f563e69c8cb8b65a1666a57c9abc6",
+          "version": "4.7.0"
+        }
+      },
+      {
         "package": "MiniMarkdown",
         "repositoryURL": "https://github.com/bdewey/MiniMarkdown.git",
         "state": {

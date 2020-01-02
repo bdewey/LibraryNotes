@@ -77,9 +77,12 @@
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
+		D38862B923BE4C1C00A44F1C /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D38862B823BE4C1C00A44F1C /* GRDB */; };
+		D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */; };
 		D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
+		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
@@ -216,9 +219,11 @@
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
+		D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorage.swift; sourceTree = "<group>"; };
 		D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteArchiveDocumentTests.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
+		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTemplate.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
@@ -259,6 +264,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				637F8B0C22AE186100698868 /* MiniMarkdown in Frameworks */,
+				D38862B923BE4C1C00A44F1C /* GRDB in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D32A1BAC229D8A8A00B78576 /* DiffMatchPatch.framework in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
@@ -385,6 +391,7 @@
 				D33F64742298C70C008C3A92 /* NoteArchive.swift */,
 				D3D3688D229C579200E4D062 /* NoteDocumentStorage.swift */,
 				D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */,
+				D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */,
 				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
@@ -431,13 +438,14 @@
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D39015C1229025EA0097B182 /* NoteArchiveDocumentTests.swift */,
 				D33F647A22999F52008C3A92 /* NoteArchiveTests.swift */,
+				D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */,
+				D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */,
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
 				D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */,
+				D31E6A0222A1581E005B7C1C /* StudyLogTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 				D374AB6C229657C900F54561 /* TextArchiveTests.swift */,
-				D31E6A0222A1581E005B7C1C /* StudyLogTests.swift */,
-				D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -473,6 +481,7 @@
 			name = CommonplaceBookApp;
 			packageProductDependencies = (
 				637F8B0B22AE186100698868 /* MiniMarkdown */,
+				D38862B823BE4C1C00A44F1C /* GRDB */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */;
@@ -559,6 +568,7 @@
 			mainGroup = D3DC5EB620EC9B0100F0B74B;
 			packageReferences = (
 				637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */,
+				D38862B723BE4C1C00A44F1C /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -714,6 +724,7 @@
 				D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */,
 				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
+				D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D31AFAC6229D61EE00ED2B76 /* StudyMetadata.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,
@@ -761,6 +772,7 @@
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
+				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,
 				D31E6A0322A1581E005B7C1C /* StudyLogTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D39015C2229025EA0097B182 /* NoteArchiveDocumentTests.swift in Sources */,
@@ -1115,6 +1127,14 @@
 				minimumVersion = 0.13.0;
 			};
 		};
+		D38862B723BE4C1C00A44F1C /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.7.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1122,6 +1142,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 637F8B0A22AE186100698868 /* XCRemoteSwiftPackageReference "MiniMarkdown" */;
 			productName = MiniMarkdown;
+		};
+		D38862B823BE4C1C00A44F1C /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D38862B723BE4C1C00A44F1C /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
