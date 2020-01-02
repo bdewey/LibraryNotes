@@ -4,7 +4,7 @@ import Foundation
 import Yams
 
 /// Metadata about pages in a NoteBundle.
-public struct PageProperties: Codable, Hashable {
+public struct NoteProperties: Codable, Hashable {
   /// SHA-1 digest of the contents of the page.
   public var sha1Digest: String?
 
@@ -43,6 +43,6 @@ public struct PageProperties: Codable, Hashable {
 
   /// Construct PageProperties from encoded YAML.
   public init(_ snippet: TextSnippet) throws {
-    self = try YAMLDecoder().decode(PageProperties.self, from: snippet.text)
+    self = try YAMLDecoder().decode(NoteProperties.self, from: snippet.text)
   }
 }

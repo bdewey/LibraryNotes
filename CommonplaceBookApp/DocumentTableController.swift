@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import MiniMarkdown
 import UIKit
 
@@ -11,7 +12,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
-  func documentTableDidDeleteDocument(with pageIdentifier: String)
+  func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -19,7 +20,7 @@ public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteArchiveDocument
+    notebook: NoteStorage
   ) {
     self.notebook = notebook
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
@@ -60,7 +61,7 @@ public final class DocumentTableController: NSObject {
   }
 
   /// If non-nil, only pages with these identifiers will be shown.
-  public var filteredPageIdentifiers: Set<String>? {
+  public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
       performUpdates(animated: true)
     }
@@ -83,21 +84,29 @@ public final class DocumentTableController: NSObject {
   /// Delegate.
   internal weak var delegate: DocumentTableControllerDelegate?
 
-  private let notebook: NoteArchiveDocument
-  private var cardsPerDocument = [String: Int]() {
+  private let notebook: NoteStorage
+  private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       performUpdates(animated: true)
     }
   }
+
   private let dataSource: DataSource
 
+  private var notebookSubscription: AnyCancellable?
+
   public func startObservingNotebook() {
-    notebook.addObserver(self)
+    notebookSubscription = notebook.notesDidChange
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] in
+        self?.updateCardsPerDocument()
+      }
     updateCardsPerDocument()
   }
 
   public func stopObservingNotebook() {
-    notebook.removeObserver(self)
+    notebookSubscription?.cancel()
+    notebookSubscription = nil
   }
 
   public func performUpdates(animated: Bool) {
@@ -141,17 +150,22 @@ extension DocumentTableController: UITableViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
-      if viewProperties.pageProperties.sha1Digest == nil {
+      if !viewProperties.noteProperties.containsText {
         // This is a vocabulary page, not a text page.
-        let vc = VocabularyViewController(notebook: notebook)
-        vc.pageIdentifier = viewProperties.pageKey
-        vc.properties = viewProperties.pageProperties
-        delegate?.showDetailViewController(vc)
+        do {
+          let note = try notebook.note(noteIdentifier: viewProperties.pageKey)
+          let vc = VocabularyViewController(notebook: notebook)
+          vc.noteIdentifier = viewProperties.pageKey
+          vc.note = note
+          delegate?.showDetailViewController(vc)
+        } catch {
+          DDLogError("Could not load vocabulary page: \(error)")
+        }
         return
       }
       let markdown: String
       do {
-        markdown = try notebook.currentTextContents(for: viewProperties.pageKey)
+        markdown = try notebook.note(noteIdentifier: viewProperties.pageKey).text ?? ""
       } catch {
         DDLogError("Unexpected error loading page: \(error)")
         return
@@ -159,10 +173,10 @@ extension DocumentTableController: UITableViewDelegate {
       let textEditViewController = TextEditViewController(
         notebook: notebook
       )
-      textEditViewController.pageIdentifier = viewProperties.pageKey
+      textEditViewController.noteIdentifier = viewProperties.pageKey
       textEditViewController.markdown = markdown
-      textEditViewController.delegate = notebook
-      delegate?.showDetailViewController(textEditViewController)
+      let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: viewProperties.pageKey, parsingRules: notebook.parsingRules, noteStorage: notebook)
+      delegate?.showDetailViewController(savingWrapper)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
     }
@@ -176,7 +190,7 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.notebook.deletePage(pageIdentifier: properties.pageKey)
+        try? self.notebook.deleteNote(noteIdentifier: properties.pageKey)
         self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }
@@ -184,7 +198,7 @@ extension DocumentTableController: UITableViewDelegate {
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }) {
+          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }, date: Date()) {
             self.delegate?.presentStudySessionViewController(for: $0)
             completion(true)
           }
@@ -227,17 +241,6 @@ extension DocumentTableController: UITableViewDelegate {
   }
 }
 
-// MARK: - NoteArchiveDocumentObserver
-
-extension DocumentTableController: NoteArchiveDocumentObserver {
-  public func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    updateCardsPerDocument()
-  }
-}
-
 // MARK: - Private
 
 private extension DocumentTableController {
@@ -276,9 +279,9 @@ private extension DocumentTableController {
   /// All properties needed to display a document cell.
   struct ViewProperties: Hashable {
     /// UUID for this page
-    let pageKey: String
+    let pageKey: Note.Identifier
     /// Page properties (serialized into the document)
-    let pageProperties: PageProperties
+    let noteProperties: Note.Metadata
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
   }
@@ -302,10 +305,10 @@ private extension DocumentTableController {
     else {
       preconditionFailure("Forgot to register the right kind of cell")
     }
-    titleRenderer.markdown = viewProperties.pageProperties.title
+    titleRenderer.markdown = viewProperties.noteProperties.title
     cell.titleLabel.attributedText = titleRenderer.attributedString
-    cell.accessibilityLabel = viewProperties.pageProperties.title
-    var detailString = viewProperties.pageProperties.hashtags.joined(separator: ", ")
+    cell.accessibilityLabel = viewProperties.noteProperties.title
+    var detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
     if viewProperties.cardCount > 0 {
       if !detailString.isEmpty { detailString += ". " }
       if viewProperties.cardCount == 1 {
@@ -322,7 +325,7 @@ private extension DocumentTableController {
       ]
     )
     let now = Date()
-    let dateDelta = now.timeIntervalSince(viewProperties.pageProperties.timestamp)
+    let dateDelta = now.timeIntervalSince(viewProperties.noteProperties.timestamp)
     cell.ageLabel.attributedText = NSAttributedString(
       string: DateComponentsFormatter.age.string(from: dateDelta) ?? "",
       attributes: [
@@ -335,9 +338,9 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    notebook.studySession { studySession in
+    notebook.studySession(filter: nil, date: Date()) { studySession in
       self.cardsPerDocument = studySession
-        .reduce(into: [String: Int]()) { cardsPerDocument, card in
+        .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
         }
       DDLogInfo(
@@ -348,11 +351,11 @@ private extension DocumentTableController {
   }
 
   static func snapshot(
-    for notebook: NoteArchiveDocument,
-    cardsPerDocument: [String: Int],
+    for notebook: NoteStorage,
+    cardsPerDocument: [Note.Identifier: Int],
     hashtags: [String],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<String>?
+    filteredPageIdentifiers: Set<Note.Identifier>?
   ) -> Snapshot {
     var snapshot = Snapshot()
     if !hashtags.isEmpty {
@@ -361,7 +364,7 @@ private extension DocumentTableController {
     }
     snapshot.appendSections([.documents])
 
-    let propertiesFilteredByHashtag = notebook.pageProperties
+    let propertiesFilteredByHashtag = notebook.allMetadata
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)
@@ -373,10 +376,10 @@ private extension DocumentTableController {
 
     let objects = propertiesFilteredByHashtag
       .compactMap { tuple in
-        ViewProperties(pageKey: tuple.key, pageProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
+        ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
       }
       .sorted(
-        by: { $0.pageProperties.timestamp > $1.pageProperties.timestamp }
+        by: { $0.noteProperties.timestamp > $1.noteProperties.timestamp }
       )
       .map {
         Item.page($0)

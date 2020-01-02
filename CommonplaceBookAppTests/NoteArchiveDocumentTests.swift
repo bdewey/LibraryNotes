@@ -48,15 +48,6 @@ final class NoteArchiveDocumentTests: XCTestCase {
       challengeTemplateCount: expectedChallengeTemplateCount,
       logCount: 0
     )
-
-    // Re-importing pages shouldn't change anything. I already have this data.
-    loadAllPages(into: roundTripDocument, expectToLoad: false)
-    verifyDocument(
-      roundTripDocument,
-      pageCount: metadataProvider.fileMetadata.count,
-      challengeTemplateCount: expectedChallengeTemplateCount,
-      logCount: 0
-    )
     closeDocument(roundTripDocument)
   }
 
@@ -99,19 +90,19 @@ final class NoteArchiveDocumentTests: XCTestCase {
 
 extension NoteArchiveDocumentTests {
   private func verifyDocument(
-    _ document: NoteArchiveDocument,
+    _ document: NoteStorage,
     pageCount: Int,
     challengeTemplateCount: Int,
     logCount: Int
   ) {
-    XCTAssertEqual(document.pageProperties.count, pageCount)
+    XCTAssertEqual(document.allMetadata.count, pageCount)
     // TODO: Re-enable
 //    XCTAssertEqual(document.noteBundle.challengeTemplates.count, challengeTemplateCount)
     XCTAssertEqual(document.studyLog.count, logCount)
   }
 
-  private func openDocument(fileURL: URL) -> NoteArchiveDocument {
-    let document = NoteArchiveDocument(
+  private func openDocument(fileURL: URL) -> NoteDocumentStorage {
+    let document = NoteDocumentStorage(
       fileURL: fileURL,
       parsingRules: parsingRules
     )
@@ -124,7 +115,7 @@ extension NoteArchiveDocumentTests {
     return document
   }
 
-  private func closeDocument(_ document: NoteArchiveDocument) {
+  private func closeDocument(_ document: NoteDocumentStorage) {
     let didClose = expectation(description: "did close")
     document.close { success in
       XCTAssertTrue(success)
@@ -133,16 +124,12 @@ extension NoteArchiveDocumentTests {
     waitForExpectations(timeout: 3, handler: nil)
   }
 
-  private func loadAllPages(into document: NoteArchiveDocument, expectToLoad: Bool = true) {
-    let allLoadsFinished = expectation(description: "Loaded all pages")
-    document.importFileMetadataItems(
-      metadataProvider.fileMetadata,
-      from: metadataProvider,
-      importDate: Date()
-    ) {
-      allLoadsFinished.fulfill()
+  private func loadAllPages(into document: NoteStorage, expectToLoad: Bool = true) {
+    for metadata in metadataProvider.fileMetadata {
+      let markdown = try! metadataProvider.text(for: metadata)
+      let note = Note(markdown: markdown, parsingRules: document.parsingRules)
+      _ = try! document.createNote(note)
     }
-    waitForExpectations(timeout: 3, handler: nil)
   }
 }
 

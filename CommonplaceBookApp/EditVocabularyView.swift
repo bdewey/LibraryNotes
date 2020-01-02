@@ -8,7 +8,7 @@ import SwiftUI
 /// It will dismiss automatically on tapping Done.
 struct EditVocabularyView: View {
   /// Notebook -- needed to save image assets.
-  let notebook: NoteArchiveDocument
+  let notebook: NoteStorage
 
   /// Holds the results from an image search.
   @EnvironmentObject var imageSearchRequest: ImageSearchRequest
@@ -101,7 +101,7 @@ struct AddVocabularyViewPreviews: PreviewProvider {
       parsingRules: ParsingRules()
     )
     let url = FileManager.default.temporaryDirectory.appendingPathComponent("test.notebundle")
-    return EditVocabularyView(notebook: NoteArchiveDocument(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
+    return EditVocabularyView(notebook: NoteDocumentStorage(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
       .environmentObject(ImageSearchRequest())
   }
 }

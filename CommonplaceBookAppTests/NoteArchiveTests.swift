@@ -63,9 +63,9 @@ final class NoteArchiveTests: XCTestCase {
         to: modifiedText,
         contentChangeTime: now.addingTimeInterval(3600)
       )
-      XCTAssertEqual(archive.pageProperties.count, 0)
+      XCTAssertEqual(archive.noteProperties.count, 0)
       archive.batchUpdatePageProperties()
-      XCTAssertEqual(archive.pageProperties.count, 1)
+      XCTAssertEqual(archive.noteProperties.count, 1)
       XCTAssertEqual(archive.versions.count, 0)
       XCTAssertEqual(modifiedText, try archive.currentText(for: noteIdentifier))
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(3601))
@@ -97,8 +97,8 @@ final class NoteArchiveTests: XCTestCase {
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(7200))
       XCTAssertEqual(archive.versions.count, 1)
       XCTAssertEqual(
-        archive.pageProperties,
-        preModifiedArchive.pageProperties,
+        archive.noteProperties,
+        preModifiedArchive.noteProperties,
         "Archives do not match"
       )
     } catch {
@@ -157,7 +157,7 @@ final class NoteArchiveTests: XCTestCase {
       )
       try regeneratedArchive.archivePageManifestVersion(timestamp: now)
       XCTAssertEqual(regeneratedArchive.versions.count, 2)
-      XCTAssertEqual(regeneratedArchive.pageProperties.count, 2)
+      XCTAssertEqual(regeneratedArchive.noteProperties.count, 2)
       print(regeneratedArchive.textSerialized())
     } catch {
       XCTFail("Unexpected error: \(error)")
@@ -192,7 +192,7 @@ final class NoteArchiveTests: XCTestCase {
       archive.removeNote(for: victim)
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(3601))
       XCTAssertEqual(archive.versions.count, 3)
-      XCTAssertEqual(archive.pageProperties.count, 11)
+      XCTAssertEqual(archive.noteProperties.count, 11)
       let serialized = archive.textSerialized()
       print(serialized)
       let roundTrip = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
@@ -215,25 +215,25 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     let now = Date()
     do {
-      let pageIdentifier = try archive.insertNote(
+      let noteIdentifier = try archive.insertNote(
         Examples.vocabulary.rawValue,
         contentChangeTime: now
       )
       try archive.archivePageManifestVersion(timestamp: now)
       archive.updateText(
-        for: pageIdentifier,
+        for: noteIdentifier,
         to: Examples.vocabulary.rawValue + "blah\n",
         contentChangeTime: now.addingTimeInterval(3600)
       )
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(3600))
       archive.updateText(
-        for: pageIdentifier,
+        for: noteIdentifier,
         to: Examples.vocabulary.rawValue,
         contentChangeTime: now.addingTimeInterval(7200)
       )
       try archive.archivePageManifestVersion(timestamp: now.addingTimeInterval(7200))
       XCTAssertEqual(archive.versions.count, 3)
-      XCTAssertEqual(Examples.vocabulary.rawValue, try archive.currentText(for: pageIdentifier))
+      XCTAssertEqual(Examples.vocabulary.rawValue, try archive.currentText(for: noteIdentifier))
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
@@ -243,12 +243,12 @@ final class NoteArchiveTests: XCTestCase {
     var archive = NoteArchive(parsingRules: parsingRules)
     do {
       let now = Date()
-      var properties = PageProperties()
+      var properties = NoteProperties()
       properties.title = "Vocabulary List with a Really Long Title"
       properties.hashtags = ["#testing"]
       properties.timestamp = now
-      let key = archive.insertPageProperties(properties)
-      let roundTrip = archive.pageProperties[key]
+      let key = archive.insertNoteProperties(properties)
+      let roundTrip = archive.noteProperties[key]
       XCTAssertEqual(roundTrip, properties)
       try archive.archivePageManifestVersion(timestamp: now)
       properties.cardTemplates = [
@@ -260,7 +260,7 @@ final class NoteArchiveTests: XCTestCase {
       let serialized = archive.textSerialized()
       print(serialized)
       let newArchive = try NoteArchive(parsingRules: parsingRules, textSerialization: serialized)
-      XCTAssertEqual(newArchive.pageProperties[key], properties)
+      XCTAssertEqual(newArchive.noteProperties[key], properties)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }

@@ -103,11 +103,11 @@ extension VocabularyChallengeTemplate {
     public let parsingRules: ParsingRules
 
     public func challengeView(
-      document: UIDocument,
+      document: NoteStorage,
       properties: CardDocumentProperties
     ) -> ChallengeView {
       var image: UIImage?
-      if let notebook = document as? NoteArchiveDocument,
+      if let notebook = document as? NoteStorage,
         let assetKey = imageAsset,
         let data = notebook.data(for: assetKey),
         let documentImage = UIImage(data: data) {

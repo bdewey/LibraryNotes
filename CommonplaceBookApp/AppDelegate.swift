@@ -30,9 +30,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return loadingViewController
   }()
 
-  var noteArchiveDocument: NoteArchiveDocument?
+  var noteArchiveDocument: NoteStorage?
   /// If non-nil, we want to open this page initially upon opening the document.
-  var initialPageIdentifier: String?
+  var initialPageIdentifier: Note.Identifier?
 
   @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
   @UserDefault("has_run_0", defaultValue: false) var hasRun: Bool
@@ -103,7 +103,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         break
       }
       DDLogInfo("Opening page \(uniqueIdentifier)")
-      initialPageIdentifier = uniqueIdentifier
+      initialPageIdentifier = Note.Identifier(rawValue: uniqueIdentifier)
     default:
       break
     }
@@ -202,7 +202,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
     DDLogInfo("Opening document at \(url)")
-    let noteArchiveDocument = NoteArchiveDocument(
+    let noteArchiveDocument = NoteDocumentStorage(
       fileURL: url,
       parsingRules: ParsingRules.commonplace
     )
@@ -224,9 +224,9 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     wrappedViewController.modalPresentationStyle = .fullScreen
     wrappedViewController.modalTransitionStyle = .crossDissolve
     controller.present(wrappedViewController, animated: animated, completion: nil)
-    let pageIdentifierCopy = initialPageIdentifier
+    let noteIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in
-      pageIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
+      noteIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
       let properties: [String: String] = [
         "Success": success.description,
         "documentState": String(describing: noteArchiveDocument.documentState),
@@ -249,7 +249,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
     let url = directoryURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("notebundle")
-    let document = NoteArchiveDocument(fileURL: url, parsingRules: ParsingRules.commonplace)
+    let document = NoteDocumentStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     document.save(to: url, for: .forCreating) { saveSuccess in
       guard saveSuccess else {
         DDLogError("Could not save document to \(url): \(document.previousError?.localizedDescription ?? "nil")")
@@ -287,7 +287,7 @@ extension AppDelegate: UISplitViewControllerDelegate {
   ) -> Bool {
     guard
       let navigationController = secondaryViewController as? UINavigationController,
-      let textEditViewController = navigationController.visibleViewController as? TextEditViewController
+      let textEditViewController = navigationController.visibleViewController as? SavingTextEditViewController
     else {
       assertionFailure()
       return false
@@ -299,7 +299,7 @@ extension AppDelegate: UISplitViewControllerDelegate {
     //
     // In our case, if the textEditViewController doesn't represent a real page, we don't
     // want to show it.
-    return textEditViewController.pageIdentifier == nil
+    return textEditViewController.noteIdentifier == nil
   }
 }
 

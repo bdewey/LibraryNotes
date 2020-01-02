@@ -7,7 +7,7 @@ import UIKit
 
 /// Allows editing a vocabulary list.
 final class VocabularyViewController: UIViewController {
-  init(notebook: NoteArchiveDocument) {
+  init(notebook: NoteStorage) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
   }
@@ -17,23 +17,27 @@ final class VocabularyViewController: UIViewController {
   }
 
   /// The notebook we write changes back to
-  let notebook: NoteArchiveDocument
+  let notebook: NoteStorage
 
   /// The page that stores our vocabulary.
-  var properties = PageProperties() {
+  var note = Note() {
     didSet {
-      title = properties.title
-      dataSource.apply(makeSnapshot(), animatingDifferences: true)
-      if let pageIdentifier = pageIdentifier {
-        notebook.changePageProperties(for: pageIdentifier, to: properties)
-      } else {
-        pageIdentifier = notebook.insertPageProperties(properties)
+      do {
+        if let noteIdentifier = noteIdentifier {
+          try notebook.updateNote(noteIdentifier: noteIdentifier, updateBlock: { _ in note })
+        } else {
+          noteIdentifier = try notebook.createNote(note)
+        }
+        title = note.metadata.title
+        dataSource.apply(makeSnapshot(), animatingDifferences: true)
+      } catch {
+        DDLogError("Unexpected error updating note: \(error)")
       }
     }
   }
 
   /// Identifier of the page. If nil, it means we're working with unsaved content.
-  var pageIdentifier: String?
+  var noteIdentifier: Note.Identifier?
 
   private lazy var addCardButton: UIBarButtonItem = {
     UIBarButtonItem(image: .add, style: .plain, target: self, action: #selector(didTapAddButton))
@@ -55,23 +59,18 @@ final class VocabularyViewController: UIViewController {
   }
 
   private func commit(template: VocabularyChallengeTemplate, indexPath: IndexPath?) {
-    do {
-      let key = try notebook.insertChallengeTemplate(template)
-      if let index = indexPath?.item {
-        // indexPath is reversed, so I need to re-reverse to edit the right model object
-        properties.cardTemplates[properties.cardTemplates.count - index - 1] = key.description
-      } else {
-        properties.cardTemplates.append(key.description)
-      }
-    } catch {
-      DDLogError("Unexpected error: \(error)")
+    if let index = indexPath?.item {
+      // indexPath is reversed, so I need to re-reverse to edit the right model object
+      note.challengeTemplates[note.challengeTemplates.count - index - 1] = template
+    } else {
+      note.challengeTemplates.append(template)
     }
   }
 
   private func deleteTemplate(at indexPath: IndexPath) {
     // Reverse to get index
-    let index = properties.cardTemplates.count - indexPath.item - 1
-    properties.cardTemplates.remove(at: index)
+    let index = note.challengeTemplates.count - indexPath.item - 1
+    note.challengeTemplates.remove(at: index)
   }
 
   private lazy var tableView: UITableView = {
@@ -164,9 +163,8 @@ private extension VocabularyViewController {
   func makeSnapshot() -> Snapshot {
     var snapshot = VocabularyViewController.Snapshot()
     snapshot.appendSections([.vocabularyItems])
-    let items = properties.cardTemplates
+    let items = note.challengeTemplates
       .reversed()
-      .compactMap(notebook.challengeTemplate(for:))
       .compactMap { $0 as? VocabularyChallengeTemplate }
     snapshot.appendItems(items)
     return snapshot

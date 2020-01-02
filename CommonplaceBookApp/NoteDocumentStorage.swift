@@ -1,27 +1,22 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import CoreSpotlight
 import DataCompression
 import MiniMarkdown
 import MobileCoreServices
 import UIKit
 
-public protocol NoteArchiveDocumentObserver: AnyObject {
-  func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String: PageProperties]
-  )
-}
-
-/// A UIDocument that contains a NoteArchive and a StudyLog.
-public final class NoteArchiveDocument: UIDocument {
+/// Concrete implementation of NoteStorage that keeps data in a file system package with a compressed TextSnippetArchive and compressed study log.
+public final class NoteDocumentStorage: UIDocument, NoteStorage {
   /// Designated initializer.
   /// - parameter fileURL: The URL of the document
   /// - parameter parsingRules: Defines how to parse markdown inside the notes
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     self.noteArchive = NoteArchive(parsingRules: parsingRules)
+    notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     super.init(fileURL: url)
   }
 
@@ -56,47 +51,48 @@ public final class NoteArchiveDocument: UIDocument {
 
   private let challengeTemplateCache = NSCache<NSString, ChallengeTemplate>()
 
-  /// The observers.
-  private var observers: [WeakObserver] = []
-
   /// Accessor for the page properties.
-  public var pageProperties: [String: PageProperties] {
+  public var noteProperties: [Note.Identifier: NoteProperties] {
     return noteArchiveQueue.sync {
-      noteArchive.pageProperties
+      noteArchive.noteProperties
     }
   }
 
-  /// All hashtags used across all pages, sorted.
-  public var hashtags: [String] {
-    let hashtags = pageProperties.values.reduce(into: Set<String>()) { hashtags, props in
-      hashtags.formUnion(props.hashtags)
-    }
-    return Array(hashtags).sorted()
+  public var allMetadata: [Note.Identifier: Note.Metadata] {
+    noteProperties.mapValues { $0.asNoteMetadata() }
   }
 
-  public func currentTextContents(for pageIdentifier: String) throws -> String {
-    assert(Thread.isMainThread)
+  public func note(noteIdentifier: Note.Identifier) throws -> Note {
     return try noteArchiveQueue.sync {
-      try noteArchive.currentText(for: pageIdentifier)
+      try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
     }
   }
 
-  public func changeTextContents(for pageIdentifier: String, to text: String) {
-    assert(Thread.isMainThread)
-    noteArchiveQueue.sync {
-      noteArchive.updateText(for: pageIdentifier, to: text, contentChangeTime: Date())
+  public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
+    try noteArchiveQueue.sync {
+      let existingNote = try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
+      let updatedNote = updateBlock(existingNote)
+      try noteArchive.updateNote(updatedNote, for: noteIdentifier)
     }
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
   }
 
-  public func changePageProperties(for pageIdentifier: String, to pageProperties: PageProperties) {
-    assert(Thread.isMainThread)
-    noteArchiveQueue.sync {
-      noteArchive.updatePageProperties(for: pageIdentifier, to: pageProperties)
+  public func createNote(_ note: Note) throws -> Note.Identifier {
+    let identifier = try noteArchiveQueue.sync {
+      try noteArchive.createNote(note)
     }
     invalidateSavedSnippets()
+    schedulePropertyBatchUpdate()
+    return identifier
   }
+
+  public func flush() {
+    save(to: fileURL, for: .forOverwriting, completionHandler: nil)
+  }
+
+  public let notesDidChange: AnyPublisher<Void, Never>
+  private let notesDidChangeSubject = PassthroughSubject<Void, Never>()
 
   private var propertyBatchUpdateTimer: Timer?
 
@@ -108,19 +104,19 @@ public final class NoteArchiveDocument: UIDocument {
       }
       // swiftlint:disable:next empty_count
       if count > 0 {
-        self.notifyObservers(of: self.pageProperties)
+        self.notesDidChangeSubject.send()
       }
       self.propertyBatchUpdateTimer = nil
     })
   }
 
-  public func deletePage(pageIdentifier: String) throws {
+  public func deleteNote(noteIdentifier: Note.Identifier) throws {
     noteArchiveQueue.sync {
-      noteArchive.removeNote(for: pageIdentifier)
+      noteArchive.removeNote(for: noteIdentifier)
     }
-    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [pageIdentifier], completionHandler: nil)
+    CSSearchableIndex.default().deleteSearchableItems(withIdentifiers: [noteIdentifier.rawValue], completionHandler: nil)
     invalidateSavedSnippets()
-    notifyObservers(of: pageProperties)
+    notesDidChangeSubject.send()
   }
 
   private enum BundleWrapperKey {
@@ -139,17 +135,17 @@ public final class NoteArchiveDocument: UIDocument {
       throw error(for: .unexpectedContentType)
     }
     topLevelFileWrapper = wrapper
-    studyLog = NoteArchiveDocument.loadStudyLog(from: wrapper)
+    studyLog = NoteDocumentStorage.loadStudyLog(from: wrapper)
     do {
-      let noteArchive = try NoteArchiveDocument.loadNoteArchive(
+      let noteArchive = try NoteDocumentStorage.loadNoteArchive(
         from: wrapper,
         parsingRules: parsingRules
       )
       noteArchive.addToSpotlight()
-      let pageProperties = noteArchive.pageProperties
+      let noteProperties = noteArchive.noteProperties
       noteArchiveQueue.sync { self.noteArchive = noteArchive }
-      DDLogInfo("Loaded \(pageProperties.count) pages")
-      notifyObservers(of: pageProperties)
+      DDLogInfo("Loaded \(noteProperties.count) pages")
+      notesDidChangeSubject.send()
     } catch {
       throw wrapError(code: .textSnippetsDeserializeError, innerError: error)
     }
@@ -200,7 +196,7 @@ public final class NoteArchiveDocument: UIDocument {
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
-  internal func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
+  public func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
     var currentWrapper = topLevelFileWrapper
     for pathComponent in fileWrapperKey.split(separator: "/") {
       guard let nextWrapper = currentWrapper.fileWrappers?[String(pathComponent)] else {
@@ -212,38 +208,8 @@ public final class NoteArchiveDocument: UIDocument {
   }
 }
 
-/// Observing.
-public extension NoteArchiveDocument {
-  private struct WeakObserver {
-    weak var observer: NoteArchiveDocumentObserver?
-    init(_ observer: NoteArchiveDocumentObserver) { self.observer = observer }
-  }
-
-  func addObserver(_ observer: NoteArchiveDocumentObserver) {
-    assert(Thread.isMainThread)
-    observers.append(WeakObserver(observer))
-  }
-
-  func removeObserver(_ observer: NoteArchiveDocumentObserver) {
-    assert(Thread.isMainThread)
-    observers.removeAll(where: { $0.observer === observer })
-  }
-
-  internal func notifyObservers(of pageProperties: [String: PageProperties]) {
-    guard Thread.isMainThread else {
-      DispatchQueue.main.async {
-        self.notifyObservers(of: pageProperties)
-      }
-      return
-    }
-    for observerWrapper in observers {
-      observerWrapper.observer?.noteArchiveDocument(self, didUpdatePageProperties: pageProperties)
-    }
-  }
-}
-
 /// Load / save support
-private extension NoteArchiveDocument {
+private extension NoteDocumentStorage {
   static func loadNoteArchive(
     from wrapper: FileWrapper,
     parsingRules: ParsingRules
@@ -295,7 +261,7 @@ private extension NoteArchiveDocument {
 }
 
 /// Making NSErrors...
-public extension NoteArchiveDocument {
+public extension NoteDocumentStorage {
   static let errorDomain = "NoteArchiveDocument"
 
   enum ErrorCode: String, CaseIterable {
@@ -309,7 +275,7 @@ public extension NoteArchiveDocument {
   func error(for code: ErrorCode) -> NSError {
     let index = ErrorCode.allCases.firstIndex(of: code)!
     return NSError(
-      domain: NoteArchiveDocument.errorDomain,
+      domain: NoteDocumentStorage.errorDomain,
       code: index,
       userInfo: [NSLocalizedDescriptionKey: code.rawValue]
     )
@@ -319,7 +285,7 @@ public extension NoteArchiveDocument {
   func wrapError(code: ErrorCode, innerError: Error) -> NSError {
     let index = ErrorCode.allCases.firstIndex(of: code)!
     return NSError(
-      domain: NoteArchiveDocument.errorDomain,
+      domain: NoteDocumentStorage.errorDomain,
       code: index,
       userInfo: [
         NSLocalizedDescriptionKey: code.rawValue,
@@ -331,94 +297,7 @@ public extension NoteArchiveDocument {
 
 // MARK: - Study sessions
 
-public extension NoteArchiveDocument {
-  /// Computes a studySession for the relevant pages in the notebook.
-  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
-  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
-  /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
-  func studySession(
-    filter: ((String, PageProperties) -> Bool)? = nil,
-    date: Date = Date(),
-    completion: @escaping (StudySession) -> Void
-  ) {
-    DispatchQueue.global(qos: .default).async {
-      let result = self.synchronousStudySession(filter: filter, date: date)
-      DispatchQueue.main.async {
-        completion(result)
-      }
-    }
-  }
-
-  /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
-  // TODO: On debug builds, this is *really* slow. Worth optimizing.
-  internal func synchronousStudySession(
-    filter: ((String, PageProperties) -> Bool)? = nil,
-    date: Date = Date()
-  ) -> StudySession {
-    let filter = filter ?? { _, _ in true }
-    let suppressionDates = studyLog.identifierSuppressionDates()
-    let properties = noteArchiveQueue.sync { noteArchive.pageProperties }
-    return properties
-      .filter { filter($0.key, $0.value) }
-      .map { (name, reviewProperties) -> StudySession in
-        let challengeTemplates = reviewProperties.cardTemplates
-          .compactMap(challengeTemplate(for:))
-        // TODO: Filter down to eligible cards
-        let eligibleCards = challengeTemplates.cards
-          .filter { challenge -> Bool in
-            guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-              return true
-            }
-            return date >= suppressionDate
-          }
-        return StudySession(
-          eligibleCards,
-          properties: CardDocumentProperties(
-            documentName: name,
-            attributionMarkdown: reviewProperties.title,
-            parsingRules: self.parsingRules
-          )
-        )
-      }
-      .reduce(into: StudySession()) { $0 += $1 }
-  }
-
-  func challengeTemplate(for keyString: String) -> ChallengeTemplate? {
-    guard let key = ChallengeTemplateArchiveKey(keyString) else {
-      DDLogError("Expected a challenge key: \(keyString)")
-      return nil
-    }
-    if let cachedTemplate = challengeTemplateCache.object(forKey: keyString as NSString) {
-      return cachedTemplate
-    }
-    do {
-      let template = try noteArchive.challengeTemplate(for: key)
-      template.templateIdentifier = key.digest
-      challengeTemplateCache.setObject(template, forKey: keyString as NSString)
-      return template
-    } catch {
-      DDLogError("Unexpected error getting challenge template: \(error)")
-      return nil
-    }
-  }
-
-  /// Inserts a challenge template into the archive.
-  func insertChallengeTemplate(
-    _ challengeTemplate: ChallengeTemplate
-  ) throws -> ChallengeTemplateArchiveKey {
-    // TODO: Use the cache
-    return try noteArchiveQueue.sync {
-      try noteArchive.insertChallengeTemplate(challengeTemplate)
-    }
-  }
-
-  func insertPageProperties(_ pageProperties: PageProperties) -> String {
-    invalidateSavedSnippets()
-    return noteArchiveQueue.sync {
-      noteArchive.insertPageProperties(pageProperties)
-    }
-  }
-
+public extension NoteDocumentStorage {
   /// Update the notebook with the result of a study session.
   ///
   /// - parameter studySession: The completed study session.
@@ -426,25 +305,13 @@ public extension NoteArchiveDocument {
   func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
     studyLog.updateStudySessionResults(studySession, on: date)
     invalidateSavedStudyLog()
-    notifyObservers(of: pageProperties)
-  }
-}
-
-// MARK: - MarkdownEditingTextViewImageStoring
-
-extension NoteArchiveDocument: MarkdownEditingTextViewImageStoring {
-  public func markdownEditingTextView(
-    _ textView: MarkdownEditingTextView,
-    store imageData: Data,
-    suffix: String
-  ) -> String {
-    return storeAssetData(imageData, typeHint: suffix)
+    notesDidChangeSubject.send()
   }
 }
 
 // MARK: - Images
 
-extension NoteArchiveDocument {
+extension NoteDocumentStorage {
   /// Stores asset data into the document.
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
@@ -459,37 +326,15 @@ extension NoteArchiveDocument {
     }
     return "\(BundleWrapperKey.assets)/\(key)"
   }
-
-  /// Adds a renderer tthat knows how to render images using assets from this document
-  /// - parameter renderers: The collection of render functions
-  public func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { [weak self] node, attributes in
-      guard
-        let self = self,
-        let imageNode = node as? Image,
-        let data = self.data(for: imageNode.url),
-        let image = data.image(maxSize: 200)
-      else {
-        return NSAttributedString(string: node.markdown, attributes: attributes)
-      }
-      let attachment = NSTextAttachment()
-      attachment.image = image
-      return NSAttributedString(attachment: attachment)
-    }
-  }
 }
 
-private extension Data {
-  func image(maxSize: CGFloat) -> UIImage? {
-    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
-      return nil
-    }
-    let options: [NSString: NSObject] = [
-      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
-      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
-      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
-    ]
-    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
-    return image
+internal extension NoteProperties {
+  func asNoteMetadata() -> Note.Metadata {
+    Note.Metadata(
+      timestamp: timestamp,
+      hashtags: hashtags,
+      title: title,
+      containsText: sha1Digest != nil
+    )
   }
 }

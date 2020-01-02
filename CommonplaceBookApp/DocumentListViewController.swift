@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Combine
 import CoreServices
 import CoreSpotlight
 import MiniMarkdown
@@ -25,23 +26,28 @@ final class DocumentListViewController: UIViewController {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteArchiveDocument
+    notebook: NoteStorage
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = "Interactive Notebook"
     self.navigationItem.rightBarButtonItem = studyButton
-    notebook.addObserver(self)
+    self.notebookSubscription = notebook.notesDidChange
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] in
+        self?.updateStudySession()
+      }
   }
 
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public let notebook: NoteArchiveDocument
+  public let notebook: NoteStorage
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var currentSpotlightQuery: CSSearchQuery?
+  private var notebookSubscription: AnyCancellable?
 
   private lazy var documentBrowserButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "folder")
@@ -71,10 +77,10 @@ final class DocumentListViewController: UIViewController {
 
   private lazy var tableView: UITableView = DocumentTableController.makeTableView()
 
-  internal func showPage(with pageIdentifier: String) {
+  internal func showPage(with noteIdentifier: Note.Identifier) {
     let markdown: String
     do {
-      markdown = try notebook.currentTextContents(for: pageIdentifier)
+      markdown = try notebook.note(noteIdentifier: noteIdentifier).text ?? ""
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
       return
@@ -82,10 +88,10 @@ final class DocumentListViewController: UIViewController {
     let textEditViewController = TextEditViewController(
       notebook: notebook
     )
-    textEditViewController.pageIdentifier = pageIdentifier
+    textEditViewController.noteIdentifier = noteIdentifier
     textEditViewController.markdown = markdown
-    textEditViewController.delegate = notebook
-    showDetailViewController(textEditViewController)
+    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, parsingRules: notebook.parsingRules, noteStorage: notebook)
+    showDetailViewController(savingWrapper)
   }
 
   // MARK: - Lifecycle
@@ -102,7 +108,7 @@ final class DocumentListViewController: UIViewController {
     tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    notebook.studySession { [weak self] in
+    notebook.studySession(filter: nil, date: Date()) { [weak self] in
       self?.studySession = $0
     }
     dataSource.performUpdates(animated: false)
@@ -144,7 +150,7 @@ final class DocumentListViewController: UIViewController {
 
   private func makeBlankVocabularyPage() {
     let viewController = VocabularyViewController(notebook: notebook)
-    viewController.properties.title = "Test Vocabulary"
+    viewController.note.metadata.title = "Test Vocabulary"
     splitViewController?.showDetailViewController(
       UINavigationController(rootViewController: viewController),
       sender: nil
@@ -183,11 +189,11 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let filter: (String, PageProperties) -> Bool = (currentHashtag == nil)
+    let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
-      : { _, properties in properties.hashtags.contains(self.currentHashtag!) }
+      : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
-    notebook.studySession(filter: filter) {
+    notebook.studySession(filter: filter, date: Date()) {
       guard self.currentHashtag == hashtag else { return }
       self.studySession = $0
     }
@@ -231,7 +237,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     searchController.dismiss(animated: true, completion: nil)
   }
 
-  func documentTableDidDeleteDocument(with pageIdentifier: String) {
+  func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
       let splitViewController = self.splitViewController,
       splitViewController.viewControllers.count > 1,
@@ -240,7 +246,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     else {
       return
     }
-    if detailViewController.pageIdentifier == pageIdentifier {
+    if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
       showDetailViewController(
         TextEditViewController.makeBlankDocument(
@@ -292,9 +298,9 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     DDLogInfo("Issuing query: \(queryString)")
     currentSpotlightQuery?.cancel()
     let query = CSSearchQuery(queryString: queryString, attributes: nil)
-    var allIdentifiers: [String] = []
+    var allIdentifiers: [Note.Identifier] = []
     query.foundItemsHandler = { items in
-      allIdentifiers.append(contentsOf: items.map { $0.uniqueIdentifier })
+      allIdentifiers.append(contentsOf: items.map { Note.Identifier(rawValue: $0.uniqueIdentifier) })
     }
     query.completionHandler = { _ in
       DDLogInfo("Found identifiers: \(allIdentifiers)")
@@ -323,20 +329,11 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    notebook.updateStudySessionResults(session)
+    notebook.updateStudySessionResults(session, on: Date())
     updateStudySession()
   }
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
-  }
-}
-
-extension DocumentListViewController: NoteArchiveDocumentObserver {
-  func noteArchiveDocument(
-    _ document: NoteArchiveDocument,
-    didUpdatePageProperties properties: [String: PageProperties]
-  ) {
-    updateStudySession()
   }
 }

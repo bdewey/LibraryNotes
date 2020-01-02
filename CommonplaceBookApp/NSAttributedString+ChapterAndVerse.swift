@@ -61,7 +61,7 @@ extension NSAttributedString {
     guard
       let index = string.index(string.endIndex, offsetBy: -1 * rangeToTrim.count, limitedBy: string.startIndex)
     else {
-        return self
+      return self
     }
     let nsRange = NSRange(index ..< string.endIndex, in: string)
     // swiftlint:disable:next force_cast

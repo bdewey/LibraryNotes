@@ -20,7 +20,7 @@ public final class StudyViewController: UIViewController {
   /// - parameter delegate: TSIA.
   public init(
     studySession: StudySession,
-    notebook: NoteArchiveDocument,
+    notebook: NoteStorage,
     delegate: StudyViewControllerDelegate
   ) {
     self.studySession = studySession
@@ -37,7 +37,7 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   /// The document we are studying from
-  private let notebook: NoteArchiveDocument
+  private let notebook: NoteStorage
 
   private weak var delegate: StudyViewControllerDelegate?
 

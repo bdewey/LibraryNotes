@@ -1,5 +1,11 @@
 # Changelog
 
+## Uncomitted
+
+### Changed
+
+- Internally, storage now goes through a `NoteStorage` protocol instance. This is the abstraction layer that will let me experiment with a sqlite file format.
+
 ## [0.13.0] - 2019-09-28
 
 ### Changed
