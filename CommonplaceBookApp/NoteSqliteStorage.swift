@@ -80,16 +80,23 @@ public final class NoteSqliteStorage: NSObject {
     }
     let identifier = Note.Identifier()
     try dbQueue.write { db in
-      let sqliteNote = Sqlite.Note(
-        id: identifier.rawValue,
-        title: note.metadata.title,
-        modifiedTimestamp: note.metadata.timestamp,
-        contents: note.text
-      )
-      _ = try JSONEncoder().encode(sqliteNote)
-      try sqliteNote.insert(db)
+      try writeNote(note, with: identifier, to: db, createNew: true)
     }
     return identifier
+  }
+
+  /// Updates a note.
+  /// - parameter noteIdentifier: The identifier of the note to update.
+  /// - parameter updateBlock: A block that receives the current value of the note and returns the updated value.
+  public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      let existingNote = try loadNote(with: noteIdentifier, from: db)
+      let updatedNote = updateBlock(existingNote)
+      try writeNote(updatedNote, with: noteIdentifier, to: db, createNew: false)
+    }
   }
 
   /// Gets a note with a specific identifier.
@@ -98,19 +105,7 @@ public final class NoteSqliteStorage: NSObject {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db -> Note in
-      guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: noteIdentifier.rawValue) else {
-        throw Error.noSuchNote
-      }
-      return Note(
-        metadata: Note.Metadata(
-          timestamp: sqliteNote.modifiedTimestamp,
-          hashtags: [],
-          title: sqliteNote.title,
-          containsText: sqliteNote.contents != nil
-        ),
-        text: sqliteNote.contents,
-        challengeTemplates: []
-      )
+      return try loadNote(with: noteIdentifier, from: db)
     }
   }
 }
@@ -148,6 +143,36 @@ private extension NoteSqliteStorage {
     case .none:
       preconditionFailure()
     }
+  }
+
+  func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database, createNew: Bool) throws {
+    let sqliteNote = Sqlite.Note(
+      id: identifier.rawValue,
+      title: note.metadata.title,
+      modifiedTimestamp: note.metadata.timestamp,
+      contents: note.text
+    )
+    if createNew {
+      try sqliteNote.insert(db)
+    } else {
+      try sqliteNote.update(db)
+    }
+  }
+
+  func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
+    guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue) else {
+      throw Error.noSuchNote
+    }
+    return Note(
+      metadata: Note.Metadata(
+        timestamp: sqliteNote.modifiedTimestamp,
+        hashtags: [],
+        title: sqliteNote.title,
+        containsText: sqliteNote.contents != nil
+      ),
+      text: sqliteNote.contents,
+      challengeTemplates: []
+    )
   }
 
   /// Makes sure the database is up-to-date.

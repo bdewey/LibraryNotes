@@ -41,18 +41,25 @@ final class NoteSqliteStorageTests: XCTestCase {
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
-    let note = Note(
-      metadata: Note.Metadata(
-        timestamp: Date(),
-        hashtags: [],
-        title: "Testing",
-        containsText: true
-      ),
-      text: "This is a test",
-      challengeTemplates: []
-    )
     do {
+      let identifier = try database.createNote(Note.simpleTest)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(Note.simpleTest, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  func testUpdateSimpleNote() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      var note = Note.simpleTest
       let identifier = try database.createNote(note)
+      note.text = "Version 2.0 text"
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in note })
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(note, roundTripNote)
     } catch {
@@ -74,4 +81,17 @@ private extension NoteSqliteStorageTests {
     waitForExpectations(timeout: 3, handler: nil)
     return database
   }
+}
+
+private extension Note {
+  static let simpleTest = Note(
+    metadata: Note.Metadata(
+      timestamp: Date(),
+      hashtags: [],
+      title: "Testing",
+      containsText: true
+    ),
+    text: "This is a test",
+    challengeTemplates: []
+  )
 }
