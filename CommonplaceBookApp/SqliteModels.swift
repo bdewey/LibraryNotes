@@ -19,6 +19,9 @@ enum Sqlite {
       static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
       static let contents = Column(CodingKeys.contents)
     }
+
+    static let noteHashtags = hasMany(NoteHashtag.self)
+    static let hashtags = hasMany(Hashtag.self, through: noteHashtags, using: NoteHashtag.hashtag)
   }
 
   /// Core record for the `hashtag` table
@@ -32,19 +35,16 @@ enum Sqlite {
 
   /// Core record for the `noteHashtag` association
   struct NoteHashtag: Codable, FetchableRecord, PersistableRecord {
-    var id: Int64?
     var noteId: String
     var hashtagId: String
 
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-      id = rowID
-    }
-
     enum Columns {
-      static let id = Column(CodingKeys.id)
       static let noteId = Column(CodingKeys.noteId)
       static let hashtagId = Column(CodingKeys.hashtagId)
     }
+
+    static let note = belongsTo(Note.self)
+    static let hashtag = belongsTo(Hashtag.self)
   }
 
   struct ChallengeTemplate: Codable, FetchableRecord, PersistableRecord {

@@ -66,6 +66,21 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testRoundTripHashtagNoteContents() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      let identifier = try database.createNote(Note.withHashtags)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(Note.withHashtags, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
 }
 
 private extension NoteSqliteStorageTests {
@@ -88,6 +103,17 @@ private extension Note {
     metadata: Note.Metadata(
       timestamp: Date(),
       hashtags: [],
+      title: "Testing",
+      containsText: true
+    ),
+    text: "This is a test",
+    challengeTemplates: []
+  )
+
+  static let withHashtags = Note(
+    metadata: Note.Metadata(
+      timestamp: Date(),
+      hashtags: ["#ashtag"],
       title: "Testing",
       containsText: true
     ),

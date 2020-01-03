@@ -157,16 +157,32 @@ private extension NoteSqliteStorage {
     } else {
       try sqliteNote.update(db)
     }
+    for hashtag in note.metadata.hashtags {
+      _ = try fetchOrCreateHashtag(hashtag, in: db)
+      let associationRecord = Sqlite.NoteHashtag(noteId: identifier.rawValue, hashtagId: hashtag)
+      try associationRecord.save(db)
+    }
+  }
+
+  func fetchOrCreateHashtag(_ hashtag: String, in db: Database) throws -> Sqlite.Hashtag {
+    if let existing = try Sqlite.Hashtag.fetchOne(db, key: hashtag) {
+      return existing
+    }
+    let newRecord = Sqlite.Hashtag(id: hashtag)
+    try newRecord.insert(db)
+    return newRecord
   }
 
   func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
     guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue) else {
       throw Error.noSuchNote
     }
+    let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
+    let hashtags = hashtagRecords.map { $0.hashtagId }
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
-        hashtags: [],
+        hashtags: hashtags,
         title: sqliteNote.title,
         containsText: sqliteNote.contents != nil
       ),
@@ -193,7 +209,6 @@ private extension NoteSqliteStorage {
       })
 
       try database.create(table: "noteHashtag", body: { table in
-        table.autoIncrementedPrimaryKey("id")
         table.column("noteId", .text)
           .notNull()
           .indexed()
@@ -202,6 +217,7 @@ private extension NoteSqliteStorage {
           .notNull()
           .indexed()
           .references("hashtag", onDelete: .cascade)
+        table.primaryKey(["noteId", "hashtagId"])
       })
 
       try database.create(table: "challengeTemplate", body: { table in
