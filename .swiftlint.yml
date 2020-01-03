@@ -19,6 +19,8 @@ opt_in_rules:
 identifier_name:
   excluded:
     - i
+    - id
+    - db
 
 line_length: 100
 

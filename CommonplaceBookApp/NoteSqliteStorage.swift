@@ -30,6 +30,8 @@ public final class NoteSqliteStorage: NSObject {
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
     case databaseAlreadyOpen = "The database is already open."
+    case databaseIsNotOpen = "The database is not open."
+    case noSuchNote = "The specified note does not exist."
   }
 
   /// Opens the database.
@@ -69,6 +71,47 @@ public final class NoteSqliteStorage: NSObject {
       }
     }
     completionHandler?(coordinatorError ?? innerError)
+  }
+
+  /// Creates a new note.
+  public func createNote(_ note: Note) throws -> Note.Identifier {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    let identifier = Note.Identifier()
+    try dbQueue.write { db in
+      let sqliteNote = Sqlite.Note(
+        id: identifier.rawValue,
+        title: note.metadata.title,
+        modifiedTimestamp: note.metadata.timestamp,
+        contents: note.text
+      )
+      _ = try JSONEncoder().encode(sqliteNote)
+      try sqliteNote.insert(db)
+    }
+    return identifier
+  }
+
+  /// Gets a note with a specific identifier.
+  public func note(noteIdentifier: Note.Identifier) throws -> Note {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read { db -> Note in
+      guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: noteIdentifier.rawValue) else {
+        throw Error.noSuchNote
+      }
+      return Note(
+        metadata: Note.Metadata(
+          timestamp: sqliteNote.modifiedTimestamp,
+          hashtags: [],
+          title: sqliteNote.title,
+          containsText: sqliteNote.contents != nil
+        ),
+        text: sqliteNote.contents,
+        challengeTemplates: []
+      )
+    }
   }
 }
 

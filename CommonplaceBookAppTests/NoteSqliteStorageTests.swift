@@ -1,4 +1,4 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
 import MiniMarkdown
@@ -25,13 +25,39 @@ final class NoteSqliteStorageTests: XCTestCase {
 
   func testCanSaveEmptyDatabase() {
     let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
     let saveExpectation = expectation(description: "did save")
     database.saveIfNeeded { error in
       XCTAssertNil(error)
       saveExpectation.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)
-    print("Saved database to \(database.fileURL.path)")
+  }
+
+  func testRoundTripSimpleNoteContents() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    let note = Note(
+      metadata: Note.Metadata(
+        timestamp: Date(),
+        hashtags: [],
+        title: "Testing",
+        containsText: true
+      ),
+      text: "This is a test",
+      challengeTemplates: []
+    )
+    do {
+      let identifier = try database.createNote(note)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(note, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
   }
 }
 

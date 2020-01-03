@@ -3,51 +3,91 @@
 import Foundation
 import GRDB
 
+// swiftlint:disable nesting
+
 enum Sqlite {
   /// Core record for the `note` table
-  struct Note: Codable {
+  struct Note: Codable, FetchableRecord, PersistableRecord {
     var id: String
     var title: String
     var modifiedTimestamp: Date
     var contents: String?
+
+    enum Columns {
+      static let id = Column(CodingKeys.id)
+      static let title = Column(CodingKeys.title)
+      static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
+      static let contents = Column(CodingKeys.contents)
+    }
   }
 
   /// Core record for the `hashtag` table
-  struct Hashtag: Codable {
+  struct Hashtag: Codable, FetchableRecord, PersistableRecord {
     var id: String
+
+    enum Columns {
+      static let id = Column(CodingKeys.id)
+    }
   }
 
   /// Core record for the `noteHashtag` association
-  struct NoteHashtag: Codable {
+  struct NoteHashtag: Codable, FetchableRecord, PersistableRecord {
     var id: Int64?
     var noteId: String
     var hashtagId: String
-  }
-}
 
-extension Sqlite.Note: FetchableRecord, PersistableRecord {
-  enum Columns {
-    static let id = Column(CodingKeys.id)
-    static let title = Column(CodingKeys.title)
-    static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
-    static let contents = Column(CodingKeys.contents)
-  }
-}
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
 
-extension Sqlite.Hashtag: FetchableRecord, PersistableRecord {
-  enum Columns {
-    static let id = Column(CodingKeys.id)
-  }
-}
-
-extension Sqlite.NoteHashtag: FetchableRecord, PersistableRecord {
-  enum Columns {
-    static let id = Column(CodingKeys.id)
-    static let noteId = Column(CodingKeys.noteId)
-    static let hashtagId = Column(CodingKeys.hashtagId)
+    enum Columns {
+      static let id = Column(CodingKeys.id)
+      static let noteId = Column(CodingKeys.noteId)
+      static let hashtagId = Column(CodingKeys.hashtagId)
+    }
   }
 
-  mutating func didInsert(with rowID: Int64, for column: String?) {
-    id = rowID
+  struct ChallengeTemplate: Codable, FetchableRecord, PersistableRecord {
+    var id: Int64?
+    var text: String
+    var rawValue: String
+    var noteId: String
+
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
+
+    enum Columns {
+      static let id = Column(CodingKeys.id)
+      static let text = Column(CodingKeys.text)
+      static let rawValue = Column(CodingKeys.rawValue)
+      static let noteId = Column(CodingKeys.noteId)
+    }
+  }
+
+  struct Challenge: Codable, FetchableRecord, PersistableRecord {
+    var id: Int64?
+    var index: Int
+    var reviewCount: Int
+    var totalCorrect: Int
+    var totalIncorrect: Int
+    var due: Date
+    var challengeTemplateId: Int64
+
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
+  }
+
+  struct StudyLogEntry: Codable, FetchableRecord, PersistableRecord {
+    var id: Int64?
+    var timestamp: Date
+    var correct: Int
+    var incorrect: Int
+    var challengeId: Int64
+
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
   }
 }
