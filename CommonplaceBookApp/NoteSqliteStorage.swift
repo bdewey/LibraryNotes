@@ -157,10 +157,18 @@ private extension NoteSqliteStorage {
     } else {
       try sqliteNote.update(db)
     }
-    for hashtag in note.metadata.hashtags {
-      _ = try fetchOrCreateHashtag(hashtag, in: db)
-      let associationRecord = Sqlite.NoteHashtag(noteId: identifier.rawValue, hashtagId: hashtag)
+    let inMemoryHashtags = Set(note.metadata.hashtags)
+    let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
+      .map { $0.id }
+      .asSet()
+    for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
+      _ = try fetchOrCreateHashtag(newHashtag, in: db)
+      let associationRecord = Sqlite.NoteHashtag(noteId: identifier.rawValue, hashtagId: newHashtag)
       try associationRecord.save(db)
+    }
+    for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
+      let deleted = try Sqlite.NoteHashtag.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtagId": obsoleteHashtag])
+      assert(deleted)
     }
   }
 
@@ -268,4 +276,9 @@ private extension NoteSqliteStorage {
 extension NoteSqliteStorage: NSFilePresenter {
   public var presentedItemURL: URL? { fileURL }
   public var presentedItemOperationQueue: OperationQueue { OperationQueue.main }
+}
+
+private extension Sequence where Element: Hashable {
+  /// Converts the receiver into a set.
+  func asSet() -> Set<Element> { Set(self) }
 }

@@ -22,6 +22,10 @@ enum Sqlite {
 
     static let noteHashtags = hasMany(NoteHashtag.self)
     static let hashtags = hasMany(Hashtag.self, through: noteHashtags, using: NoteHashtag.hashtag)
+
+    var hashtags: QueryInterfaceRequest<Hashtag> {
+      return request(for: Note.hashtags)
+    }
   }
 
   /// Core record for the `hashtag` table

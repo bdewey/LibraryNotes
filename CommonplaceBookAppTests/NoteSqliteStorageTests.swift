@@ -81,6 +81,27 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
   }
 
+  func testUpdateHashtags() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      let identifier = try database.createNote(Note.withHashtags)
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
+        var note = oldNote
+        note.metadata.hashtags = ["#updated"]
+        return note
+      })
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      var expectedNote = Note.withHashtags
+      expectedNote.metadata.hashtags = ["#updated"]
+      XCTAssertEqual(expectedNote, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
 }
 
 private extension NoteSqliteStorageTests {
