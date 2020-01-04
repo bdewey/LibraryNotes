@@ -115,6 +115,21 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testRemoveChallengesFromNote() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      let identifier = try database.createNote(Note.withChallenges)
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in Note.simpleTest })
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(Note.simpleTest, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {

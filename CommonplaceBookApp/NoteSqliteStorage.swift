@@ -193,6 +193,10 @@ private extension NoteSqliteStorage {
       )
       try record.insert(db)
     }
+    for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
+      let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
+      assert(deleted)
+    }
   }
 
   func fetchOrCreateHashtag(_ hashtag: String, in db: Database) throws -> Sqlite.Hashtag {
