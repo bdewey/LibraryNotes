@@ -74,6 +74,32 @@ public final class NoteSqliteStorage: NSObject {
     completionHandler?(coordinatorError ?? innerError)
   }
 
+  public var allMetadata: [Note.Identifier: Note.Metadata] {
+    guard let dbQueue = dbQueue else {
+      DDLogError("Trying to query metadata but the database is closed")
+      return [:]
+    }
+    do {
+      return try dbQueue.read { db -> [Note.Identifier: Note.Metadata] in
+        let metadata = try Sqlite.NoteMetadata.fetchAll(db, Sqlite.NoteMetadata.request)
+        let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
+          let metadata = Note.Metadata(
+            timestamp: metadataItem.modifiedTimestamp,
+            hashtags: metadataItem.hashtags.map { $0.id },
+            title: metadataItem.title,
+            containsText: metadataItem.noteTextId != nil
+          )
+          let noteIdentifier = Note.Identifier(rawValue: metadataItem.id)
+          return (key: noteIdentifier, value: metadata)
+        }
+        return Dictionary(uniqueKeysWithValues: tuples)
+      }
+    } catch {
+      DDLogError("Unexpected error fetching metadata: \(error)")
+      return [:]
+    }
+  }
+
   /// Creates a new note.
   public func createNote(_ note: Note) throws -> Note.Identifier {
     guard let dbQueue = dbQueue else {
@@ -146,12 +172,28 @@ private extension NoteSqliteStorage {
     }
   }
 
+  func writeNoteText(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws -> Int64? {
+    guard let noteText = noteText else {
+      return nil
+    }
+    if var existingRecord = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue]) {
+      existingRecord.text = noteText
+      try existingRecord.update(db)
+      return existingRecord.id
+    } else {
+      var newRecord = Sqlite.NoteText(id: nil, text: noteText, noteId: identifier.rawValue)
+      try newRecord.insert(db)
+      return newRecord.id
+    }
+  }
+
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database, createNew: Bool) throws {
+    let textId = try writeNoteText(note.text, with: identifier, to: db)
     let sqliteNote = Sqlite.Note(
       id: identifier.rawValue,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
-      contents: note.text
+      noteTextId: textId
     )
     if createNew {
       try sqliteNote.insert(db)
@@ -228,14 +270,18 @@ private extension NoteSqliteStorage {
       template.templateIdentifier = challengeTemplateRecord.id
       return template
     }
+    let noteText = try sqliteNote.noteTextId.flatMap { noteTextId -> String? in
+      let record = try Sqlite.NoteText.fetchOne(db, key: noteTextId)
+      return record!.text
+    }
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
         hashtags: hashtags,
         title: sqliteNote.title,
-        containsText: sqliteNote.contents != nil
+        containsText: sqliteNote.noteTextId != nil
       ),
-      text: sqliteNote.contents,
+      text: noteText,
       challengeTemplates: challengeTemplates
     )
   }
@@ -246,11 +292,20 @@ private extension NoteSqliteStorage {
     var migrator = DatabaseMigrator()
 
     migrator.registerMigration("initialSchema") { database in
+      try database.create(table: "noteText", body: { table in
+        table.autoIncrementedPrimaryKey("id")
+        table.column("text", .text).notNull()
+        table.column("noteId", .text).notNull().indexed().unique()
+      })
+
       try database.create(table: "note", body: { table in
         table.column("id", .text).primaryKey()
         table.column("title", .text).notNull().defaults(to: "")
         table.column("modifiedTimestamp", .datetime).notNull()
-        table.column("contents", .text)
+        table.column("noteTextId", .integer)
+          .unique()
+          .indexed()
+          .references("noteText", onDelete: .setNull)
       })
 
       try database.create(table: "hashtag", body: { table in

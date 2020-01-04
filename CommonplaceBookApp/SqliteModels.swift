@@ -11,13 +11,12 @@ enum Sqlite {
     var id: String
     var title: String
     var modifiedTimestamp: Date
-    var contents: String?
+    var noteTextId: Int64?
 
     enum Columns {
       static let id = Column(CodingKeys.id)
       static let title = Column(CodingKeys.title)
       static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
-      static let contents = Column(CodingKeys.contents)
     }
 
     static let noteHashtags = hasMany(NoteHashtag.self)
@@ -29,6 +28,29 @@ enum Sqlite {
 
     static let challengeTemplates = hasMany(ChallengeTemplate.self)
     var challengeTemplates: QueryInterfaceRequest<ChallengeTemplate> { request(for: Note.challengeTemplates) }
+
+    static let noteText = belongsTo(NoteText.self)
+  }
+
+  /// Result structure from fetching a Note plus all of its hashtags
+  struct NoteMetadata: Decodable, FetchableRecord {
+    var id: String
+    var title: String
+    var modifiedTimestamp: Date
+    var noteTextId: Int64?
+    var hashtags: [Hashtag]
+
+    static let request = Note.including(all: Note.hashtags)
+  }
+
+  struct NoteText: Codable, FetchableRecord, MutablePersistableRecord {
+    var id: Int64?
+    var text: String
+    var noteId: String
+
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
   }
 
   /// Core record for the `hashtag` table
@@ -70,7 +92,7 @@ enum Sqlite {
     static let note = belongsTo(Note.self)
   }
 
-  struct Challenge: Codable, FetchableRecord, PersistableRecord {
+  struct Challenge: Codable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var index: Int
     var reviewCount: Int
@@ -84,7 +106,7 @@ enum Sqlite {
     }
   }
 
-  struct StudyLogEntry: Codable, FetchableRecord, PersistableRecord {
+  struct StudyLogEntry: Codable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var timestamp: Date
     var correct: Int
