@@ -32,6 +32,7 @@ public final class NoteSqliteStorage: NSObject {
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
     case noSuchNote = "The specified note does not exist."
+    case unknownChallengeType = "The challenge template uses an unknown type."
   }
 
   /// Opens the database.
@@ -170,6 +171,28 @@ private extension NoteSqliteStorage {
       let deleted = try Sqlite.NoteHashtag.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtagId": obsoleteHashtag])
       assert(deleted)
     }
+
+    for template in note.challengeTemplates where template.templateIdentifier == nil {
+      template.templateIdentifier = UUID().uuidString
+    }
+    let inMemoryChallengeTemplates = Set(note.challengeTemplates.map({ $0.templateIdentifier! }))
+    let onDiskChallengeTemplates = ((try? sqliteNote.challengeTemplates.fetchAll(db)) ?? [])
+      .map { $0.id }
+      .asSet()
+
+    let encoder = JSONEncoder()
+    for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
+      let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
+      let templateData = try encoder.encode(template)
+      let templateString = String(data: templateData, encoding: .utf8)!
+      let record = Sqlite.ChallengeTemplate(
+        id: newTemplateIdentifier,
+        type: template.type.rawValue,
+        rawValue: templateString,
+        noteId: identifier.rawValue
+      )
+      try record.insert(db)
+    }
   }
 
   func fetchOrCreateHashtag(_ hashtag: String, in db: Database) throws -> Sqlite.Hashtag {
@@ -187,6 +210,20 @@ private extension NoteSqliteStorage {
     }
     let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtagId }
+    let challengeTemplateRecords = try Sqlite.ChallengeTemplate
+      .filter(Sqlite.ChallengeTemplate.Columns.noteId == identifier.rawValue)
+      .fetchAll(db)
+    let decoder = JSONDecoder()
+    decoder.userInfo = [.markdownParsingRules: parsingRules]
+    let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
+      guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
+        throw Error.unknownChallengeType
+      }
+      let templateData = challengeTemplateRecord.rawValue.data(using: .utf8)!
+      let template = try decoder.decode(klass, from: templateData)
+      template.templateIdentifier = challengeTemplateRecord.id
+      return template
+    }
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
@@ -195,7 +232,7 @@ private extension NoteSqliteStorage {
         containsText: sqliteNote.contents != nil
       ),
       text: sqliteNote.contents,
-      challengeTemplates: []
+      challengeTemplates: challengeTemplates
     )
   }
 
@@ -229,7 +266,7 @@ private extension NoteSqliteStorage {
       })
 
       try database.create(table: "challengeTemplate", body: { table in
-        table.autoIncrementedPrimaryKey("id")
+        table.column("id", .text).primaryKey()
         table.column("type", .text).notNull()
         table.column("rawValue", .text).notNull()
         table.column("noteId", .text)

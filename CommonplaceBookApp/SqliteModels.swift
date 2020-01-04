@@ -26,6 +26,9 @@ enum Sqlite {
     var hashtags: QueryInterfaceRequest<Hashtag> {
       return request(for: Note.hashtags)
     }
+
+    static let challengeTemplates = hasMany(ChallengeTemplate.self)
+    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplate> { request(for: Note.challengeTemplates) }
   }
 
   /// Core record for the `hashtag` table
@@ -52,21 +55,19 @@ enum Sqlite {
   }
 
   struct ChallengeTemplate: Codable, FetchableRecord, PersistableRecord {
-    var id: Int64?
-    var text: String
+    var id: String
+    var type: String
     var rawValue: String
     var noteId: String
 
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-      id = rowID
-    }
-
     enum Columns {
       static let id = Column(CodingKeys.id)
-      static let text = Column(CodingKeys.text)
+      static let type = Column(CodingKeys.type)
       static let rawValue = Column(CodingKeys.rawValue)
       static let noteId = Column(CodingKeys.noteId)
     }
+
+    static let note = belongsTo(Note.self)
   }
 
   struct Challenge: Codable, FetchableRecord, PersistableRecord {

@@ -102,6 +102,19 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
   }
 
+  func testUpdateNoteWithChallenges() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      let identifier = try database.createNote(Note.withChallenges)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(Note.withChallenges, roundTripNote)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {
@@ -141,4 +154,11 @@ private extension Note {
     text: "This is a test",
     challengeTemplates: []
   )
+
+  static let withChallenges = Note(markdown: """
+# Shakespeare quotes
+
+> To be, or not to be, that is the question. (Hamlet)
+
+""", parsingRules: ParsingRules())
 }

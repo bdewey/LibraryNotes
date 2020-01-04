@@ -11,7 +11,8 @@ public extension Note {
       metadata: Note.Metadata(
         timestamp: Date(),
         hashtags: nodes.hashtags,
-        title: String(nodes.title.split(separator: "\n").first ?? "")
+        title: String(nodes.title.split(separator: "\n").first ?? ""),
+        containsText: true
       ),
       text: markdown,
       challengeTemplates: nodes.makeChallengeTemplates()
