@@ -35,6 +35,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   public enum Error: String, Swift.Error {
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
+    case noSuchAsset = "The specified asset does not exist."
     case noSuchNote = "The specified note does not exist."
     case unknownChallengeType = "The challenge template uses an unknown type."
   }
@@ -168,13 +169,27 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     })
   }
 
-  public func data<S>(for fileWrapperKey: S) -> Data? where S: StringProtocol {
-    return nil
+  public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read { db in
+      guard let asset = try Sqlite.Asset.fetchOne(db, key: String(fileWrapperKey)) else {
+        throw Error.noSuchAsset
+      }
+      return asset.data
+    }
   }
 
   public func storeAssetData(_ data: Data, typeHint: String) throws -> String {
-    assertionFailure()
-    return ""
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.write { db in
+      let asset = Sqlite.Asset(hash: data.sha1Digest(), typeHint: typeHint, data: data)
+      try asset.save(db)
+      return asset.hash
+    }
   }
 
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date) {
