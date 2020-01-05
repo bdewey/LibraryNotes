@@ -16,7 +16,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     self.noteArchive = NoteArchive(parsingRules: parsingRules)
-    notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
+    self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     super.init(fileURL: url)
   }
 

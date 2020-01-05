@@ -56,7 +56,7 @@ public final class NoteSqliteStorage: NSObject {
       changeMonitoringPipeline = DatabaseRegionObservation(tracking: [
         Sqlite.Note.all(),
       ]).publisher(in: dbQueue)
-        .tryMap({ db in try Self.fetchAllMetadata(from: db) })
+        .tryMap { db in try Self.fetchAllMetadata(from: db) }
         .sink(
           receiveCompletion: { completion in
             switch completion {
@@ -69,7 +69,7 @@ public final class NoteSqliteStorage: NSObject {
           receiveValue: { [weak self] allMetadata in
             self?.allMetadata = allMetadata
           }
-      )
+        )
       completionHandler?(nil)
     } catch {
       completionHandler?(error)
@@ -142,7 +142,7 @@ public final class NoteSqliteStorage: NSObject {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db -> Note in
-      return try loadNote(with: noteIdentifier, from: db)
+      try loadNote(with: noteIdentifier, from: db)
     }
   }
 }
@@ -227,7 +227,7 @@ private extension NoteSqliteStorage {
     for template in note.challengeTemplates where template.templateIdentifier == nil {
       template.templateIdentifier = UUID().uuidString
     }
-    let inMemoryChallengeTemplates = Set(note.challengeTemplates.map({ $0.templateIdentifier! }))
+    let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
     let onDiskChallengeTemplates = ((try? sqliteNote.challengeTemplates.fetchAll(db)) ?? [])
       .map { $0.id }
       .asSet()

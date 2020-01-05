@@ -201,9 +201,9 @@ private extension Note {
   )
 
   static let withChallenges = Note(markdown: """
-# Shakespeare quotes
+  # Shakespeare quotes
 
-> To be, or not to be, that is the question. (Hamlet)
+  > To be, or not to be, that is the question. (Hamlet)
 
-""", parsingRules: ParsingRules())
+  """, parsingRules: ParsingRules())
 }

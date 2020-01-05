@@ -468,7 +468,7 @@ private extension NoteArchive {
       noteProperties.hashtags = noteMetadata.hashtags.sorted()
       noteProperties.timestamp = noteMetadata.timestamp
       self.noteProperties = noteProperties
-      self.modifiedTimestamp = noteMetadata.timestamp
+      modifiedTimestamp = noteMetadata.timestamp
       dirty = true
     }
   }
