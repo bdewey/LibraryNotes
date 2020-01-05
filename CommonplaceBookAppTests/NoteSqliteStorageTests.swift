@@ -1,6 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CommonplaceBookApp
+@testable import CommonplaceBookApp
 import MiniMarkdown
 import XCTest
 
@@ -164,8 +164,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   func testDeleteNote() {
     let database = makeAndOpenEmptyDatabase()
     defer {
-      database.saveIfNeeded()
-      print(database.fileURL.path)
+      try? FileManager.default.removeItem(at: database.fileURL)
     }
     do {
       let identifier = try database.createNote(Note.withHashtags)
@@ -173,6 +172,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTAssertEqual(Note.withHashtags, roundTripNote)
       try database.deleteNote(noteIdentifier: identifier)
       XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
+      XCTAssertEqual(0, try database.countOfTextRows())
     } catch {
       XCTFail("Unexpected error: \(error)")
     }

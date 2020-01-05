@@ -11,7 +11,7 @@ enum Sqlite {
     var id: String
     var title: String
     var modifiedTimestamp: Date
-    var noteTextId: Int64?
+    var hasText: Bool
 
     enum Columns {
       static let id = Column(CodingKeys.id)
@@ -37,7 +37,7 @@ enum Sqlite {
     var id: String
     var title: String
     var modifiedTimestamp: Date
-    var noteTextId: Int64?
+    var hasText: Bool
     var hashtags: [Hashtag]
 
     static let request = Note.including(all: Note.hashtags)

@@ -154,6 +154,15 @@ public final class NoteSqliteStorage: NSObject {
       try Sqlite.Note.deleteOne(db, key: noteIdentifier.rawValue)
     }
   }
+
+  internal func countOfTextRows() throws -> Int {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read({ db in
+      return try Sqlite.NoteText.fetchCount(db)
+    })
+  }
 }
 
 // MARK: - Private
@@ -191,6 +200,7 @@ private extension NoteSqliteStorage {
     }
   }
 
+  @discardableResult
   func writeNoteText(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws -> Int64? {
     guard let noteText = noteText else {
       return nil
@@ -207,18 +217,18 @@ private extension NoteSqliteStorage {
   }
 
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database, createNew: Bool) throws {
-    let textId = try writeNoteText(note.text, with: identifier, to: db)
     let sqliteNote = Sqlite.Note(
       id: identifier.rawValue,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
-      noteTextId: textId
+      hasText: note.text != nil
     )
     if createNew {
       try sqliteNote.insert(db)
     } else {
       try sqliteNote.update(db)
     }
+    try writeNoteText(note.text, with: identifier, to: db)
     let inMemoryHashtags = Set(note.metadata.hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .map { $0.id }
@@ -267,7 +277,7 @@ private extension NoteSqliteStorage {
         timestamp: metadataItem.modifiedTimestamp,
         hashtags: metadataItem.hashtags.map { $0.id },
         title: metadataItem.title,
-        containsText: metadataItem.noteTextId != nil
+        containsText: metadataItem.hasText
       )
       let noteIdentifier = Note.Identifier(rawValue: metadataItem.id)
       return (key: noteIdentifier, value: metadata)
@@ -304,16 +314,13 @@ private extension NoteSqliteStorage {
       template.templateIdentifier = challengeTemplateRecord.id
       return template
     }
-    let noteText = try sqliteNote.noteTextId.flatMap { noteTextId -> String? in
-      let record = try Sqlite.NoteText.fetchOne(db, key: noteTextId)
-      return record!.text
-    }
+    let noteText = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
         hashtags: hashtags,
         title: sqliteNote.title,
-        containsText: sqliteNote.noteTextId != nil
+        containsText: sqliteNote.hasText
       ),
       text: noteText,
       challengeTemplates: challengeTemplates
@@ -326,20 +333,17 @@ private extension NoteSqliteStorage {
     var migrator = DatabaseMigrator()
 
     migrator.registerMigration("initialSchema") { database in
-      try database.create(table: "noteText", body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("text", .text).notNull()
-        table.column("noteId", .text).notNull().indexed().unique()
-      })
-
       try database.create(table: "note", body: { table in
         table.column("id", .text).primaryKey()
         table.column("title", .text).notNull().defaults(to: "")
         table.column("modifiedTimestamp", .datetime).notNull()
-        table.column("noteTextId", .integer)
-          .unique()
-          .indexed()
-          .references("noteText", onDelete: .setNull)
+        table.column("hasText", .boolean).notNull()
+      })
+
+      try database.create(table: "noteText", body: { table in
+        table.autoIncrementedPrimaryKey("id")
+        table.column("text", .text).notNull()
+        table.column("noteId", .text).notNull().indexed().unique().references("note", onDelete: .cascade)
       })
 
       try database.create(table: "hashtag", body: { table in
