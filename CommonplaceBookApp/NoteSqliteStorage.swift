@@ -145,6 +145,15 @@ public final class NoteSqliteStorage: NSObject {
       try loadNote(with: noteIdentifier, from: db)
     }
   }
+
+  public func deleteNote(noteIdentifier: Note.Identifier) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    _ = try dbQueue.write { db in
+      try Sqlite.Note.deleteOne(db, key: noteIdentifier.rawValue)
+    }
+  }
 }
 
 // MARK: - Private
