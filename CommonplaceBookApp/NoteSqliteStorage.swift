@@ -13,6 +13,7 @@ public final class NoteSqliteStorage: NSObject {
   public init(fileURL: URL, parsingRules: ParsingRules) {
     self.fileURL = fileURL
     self.parsingRules = parsingRules
+    self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
   }
 
   /// URL to the sqlite file
@@ -26,6 +27,9 @@ public final class NoteSqliteStorage: NSObject {
 
   /// Set to `true` if there are unsaved changes in the in-memory database.
   private var hasUnsavedChanges = false
+
+  /// Pipeline monitoring for changes in the database.
+  private var changeMonitoringPipeline: AnyCancellable?
 
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
@@ -46,6 +50,26 @@ public final class NoteSqliteStorage: NSObject {
       let dbQueue = try memoryDatabaseQueue(fileURL: fileURL)
       hasUnsavedChanges = try runMigrations(on: dbQueue)
       self.dbQueue = dbQueue
+      allMetadata = try dbQueue.read { db in
+        try Self.fetchAllMetadata(from: db)
+      }
+      changeMonitoringPipeline = DatabaseRegionObservation(tracking: [
+        Sqlite.Note.all(),
+      ]).publisher(in: dbQueue)
+        .tryMap({ db in try Self.fetchAllMetadata(from: db) })
+        .sink(
+          receiveCompletion: { completion in
+            switch completion {
+            case .failure(let error):
+              DDLogError("Unexpected error monitoring database: \(error)")
+            case .finished:
+              DDLogInfo("Monitoring pipeline shutting down")
+            }
+          },
+          receiveValue: { [weak self] allMetadata in
+            self?.allMetadata = allMetadata
+          }
+      )
       completionHandler?(nil)
     } catch {
       completionHandler?(error)
@@ -74,31 +98,17 @@ public final class NoteSqliteStorage: NSObject {
     completionHandler?(coordinatorError ?? innerError)
   }
 
-  public var allMetadata: [Note.Identifier: Note.Metadata] {
-    guard let dbQueue = dbQueue else {
-      DDLogError("Trying to query metadata but the database is closed")
-      return [:]
+  public var allMetadata: [Note.Identifier: Note.Metadata] = [:] {
+    willSet {
+      assert(Thread.isMainThread)
     }
-    do {
-      return try dbQueue.read { db -> [Note.Identifier: Note.Metadata] in
-        let metadata = try Sqlite.NoteMetadata.fetchAll(db, Sqlite.NoteMetadata.request)
-        let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
-          let metadata = Note.Metadata(
-            timestamp: metadataItem.modifiedTimestamp,
-            hashtags: metadataItem.hashtags.map { $0.id },
-            title: metadataItem.title,
-            containsText: metadataItem.noteTextId != nil
-          )
-          let noteIdentifier = Note.Identifier(rawValue: metadataItem.id)
-          return (key: noteIdentifier, value: metadata)
-        }
-        return Dictionary(uniqueKeysWithValues: tuples)
-      }
-    } catch {
-      DDLogError("Unexpected error fetching metadata: \(error)")
-      return [:]
+    didSet {
+      notesDidChangeSubject.send()
     }
   }
+
+  public let notesDidChange: AnyPublisher<Void, Never>
+  private let notesDidChangeSubject = PassthroughSubject<Void, Never>()
 
   /// Creates a new note.
   public func createNote(_ note: Note) throws -> Note.Identifier {
@@ -239,6 +249,21 @@ private extension NoteSqliteStorage {
       let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
       assert(deleted)
     }
+  }
+
+  static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: Note.Metadata] {
+    let metadata = try Sqlite.NoteMetadata.fetchAll(db, Sqlite.NoteMetadata.request)
+    let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
+      let metadata = Note.Metadata(
+        timestamp: metadataItem.modifiedTimestamp,
+        hashtags: metadataItem.hashtags.map { $0.id },
+        title: metadataItem.title,
+        containsText: metadataItem.noteTextId != nil
+      )
+      let noteIdentifier = Note.Identifier(rawValue: metadataItem.id)
+      return (key: noteIdentifier, value: metadata)
+    }
+    return Dictionary(uniqueKeysWithValues: tuples)
   }
 
   func fetchOrCreateHashtag(_ hashtag: String, in db: Database) throws -> Sqlite.Hashtag {
