@@ -87,7 +87,7 @@ final class VocabularyViewController: UIViewController {
       }
       cell.textLabel?.text = template.front.text
       cell.detailTextLabel?.text = template.back.text
-      if let key = template.imageAsset, let data = self?.notebook.data(for: key), let image = UIImage(data: data) {
+      if let key = template.imageAsset, let data = try? self?.notebook.data(for: key), let image = UIImage(data: data) {
         cell.imageView?.image = image
       } else {
         cell.imageView?.image = nil

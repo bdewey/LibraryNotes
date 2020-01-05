@@ -109,7 +109,7 @@ extension VocabularyChallengeTemplate {
       var image: UIImage?
       if let notebook = document as? NoteStorage,
         let assetKey = imageAsset,
-        let data = notebook.data(for: assetKey),
+        let data = try? notebook.data(for: assetKey),
         let documentImage = UIImage(data: data) {
         image = documentImage
       }

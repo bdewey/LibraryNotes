@@ -75,7 +75,7 @@ struct EditVocabularyView: View {
   private var selectedImage: SwiftUI.Image? {
     if
       let key = vocabularyTemplate.imageAsset,
-      let data = notebook.data(for: key),
+      let data = try? notebook.data(for: key),
       let uiImage = UIImage(data: data) {
       return Image(uiImage: uiImage)
     } else {
@@ -87,9 +87,10 @@ struct EditVocabularyView: View {
   // TODO: Only store asset data when we commit this association?
   private func onSelectedImage(encodedImage: EncodedImage) {
     DDLogInfo("Selected image: \(encodedImage)")
-    let key = notebook.storeAssetData(encodedImage.data, typeHint: encodedImage.encoding)
-    DDLogInfo("Saved image data as asset \(key)")
-    vocabularyTemplate.imageAsset = key
+    if let key = try? notebook.storeAssetData(encodedImage.data, typeHint: encodedImage.encoding) {
+      DDLogInfo("Saved image data as asset \(key)")
+      vocabularyTemplate.imageAsset = key
+    }
   }
 }
 

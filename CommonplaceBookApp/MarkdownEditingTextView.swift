@@ -11,7 +11,7 @@ public protocol MarkdownEditingTextViewImageStoring: AnyObject {
   /// - parameter imageData: The image data to store
   /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
   /// - returns: A string key that can locate this image later.
-  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) -> String
+  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String
 }
 
 /// Custom UITextView subclass that overrides "copy" to copy Markdown.
@@ -49,13 +49,13 @@ public final class MarkdownEditingTextView: UITextView {
       let imageKey: String?
       if let jpegData = UIPasteboard.general.data(forPasteboardType: kUTTypeJPEG as String) {
         DDLogInfo("Got JPEG data = \(jpegData.count) bytes")
-        imageKey = imageStorage.markdownEditingTextView(self, store: jpegData, suffix: "jpeg")
+        imageKey = try? imageStorage.markdownEditingTextView(self, store: jpegData, suffix: "jpeg")
       } else if let pngData = UIPasteboard.general.data(forPasteboardType: kUTTypePNG as String) {
         DDLogInfo("Got PNG data = \(pngData.count) bytes")
-        imageKey = imageStorage.markdownEditingTextView(self, store: pngData, suffix: "png")
+        imageKey = try? imageStorage.markdownEditingTextView(self, store: pngData, suffix: "png")
       } else if let convertedData = image.jpegData(compressionQuality: 0.8) {
         DDLogInfo("Did JPEG conversion ourselves = \(convertedData.count) bytes")
-        imageKey = imageStorage.markdownEditingTextView(self, store: convertedData, suffix: "jpeg")
+        imageKey = try? imageStorage.markdownEditingTextView(self, store: convertedData, suffix: "jpeg")
       } else {
         DDLogError("Could not get image data")
         imageKey = nil

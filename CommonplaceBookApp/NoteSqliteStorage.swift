@@ -9,7 +9,7 @@ import MiniMarkdown
 
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
-public final class NoteSqliteStorage: NSObject {
+public final class NoteSqliteStorage: NSObject, NoteStorage {
   public init(fileURL: URL, parsingRules: ParsingRules) {
     self.fileURL = fileURL
     self.parsingRules = parsingRules
@@ -98,6 +98,10 @@ public final class NoteSqliteStorage: NSObject {
     completionHandler?(coordinatorError ?? innerError)
   }
 
+  public func flush() {
+    saveIfNeeded()
+  }
+
   public var allMetadata: [Note.Identifier: Note.Metadata] = [:] {
     willSet {
       assert(Thread.isMainThread)
@@ -163,6 +167,21 @@ public final class NoteSqliteStorage: NSObject {
       return try Sqlite.NoteText.fetchCount(db)
     })
   }
+
+  public func data<S>(for fileWrapperKey: S) -> Data? where S: StringProtocol {
+    return nil
+  }
+
+  public func storeAssetData(_ data: Data, typeHint: String) throws -> String {
+    assertionFailure()
+    return ""
+  }
+
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date) {
+    assertionFailure()
+  }
+
+  public let studyLog = StudyLog()
 }
 
 // MARK: - Private
@@ -393,6 +412,12 @@ private extension NoteSqliteStorage {
         table.column("challengeId", .integer)
           .notNull()
           .references("challenge", onDelete: .cascade)
+      })
+
+      try database.create(table: "asset", body: { table in
+        table.column("hash", .text).primaryKey()
+        table.column("typeHint", .text).notNull()
+        table.column("data", .blob).notNull()
       })
     }
 

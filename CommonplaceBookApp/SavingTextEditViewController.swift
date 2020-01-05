@@ -92,7 +92,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
-  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) -> String {
-    return noteStorage.storeAssetData(imageData, typeHint: suffix)
+  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String {
+    return try noteStorage.storeAssetData(imageData, typeHint: suffix)
   }
 }

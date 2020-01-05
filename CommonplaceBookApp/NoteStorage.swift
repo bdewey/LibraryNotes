@@ -38,13 +38,13 @@ public protocol NoteStorage: AnyObject {
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
-  func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
+  func data<S: StringProtocol>(for fileWrapperKey: S) throws -> Data?
 
   /// Stores asset data into the document.
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  func storeAssetData(_ data: Data, typeHint: String) -> String
+  func storeAssetData(_ data: Data, typeHint: String) throws -> String
 
   // MARK: - Study sessions
 
@@ -123,7 +123,7 @@ extension NoteStorage {
       guard
         let self = self,
         let imageNode = node as? Image,
-        let data = self.data(for: imageNode.url),
+        let data = try? self.data(for: imageNode.url),
         let image = data.image(maxSize: 200)
       else {
         return NSAttributedString(string: node.markdown, attributes: attributes)

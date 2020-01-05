@@ -117,4 +117,10 @@ enum Sqlite {
       id = rowID
     }
   }
+
+  struct Asset: Codable, FetchableRecord, PersistableRecord {
+    var hash: String
+    var typeHint: String
+    var data: Data
+  }
 }
