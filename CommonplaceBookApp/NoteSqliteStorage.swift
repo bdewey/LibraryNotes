@@ -26,10 +26,13 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   private var dbQueue: DatabaseQueue?
 
   /// Set to `true` if there are unsaved changes in the in-memory database.
-  private var hasUnsavedChanges = false
+  public private(set) var hasUnsavedChanges = false
 
   /// Pipeline monitoring for changes in the database.
-  private var changeMonitoringPipeline: AnyCancellable?
+  private var metadataUpdatePipeline: AnyCancellable?
+
+  /// Pipeline for monitoring for unsaved changes to the in-memory database.
+  private var hasUnsavedChangesPipeline: AnyCancellable?
 
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
@@ -55,7 +58,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       allMetadata = try dbQueue.read { db in
         try Self.fetchAllMetadata(from: db)
       }
-      changeMonitoringPipeline = DatabaseRegionObservation(tracking: [
+      metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
         Sqlite.Note.all(),
       ]).publisher(in: dbQueue)
         .tryMap { db in try Self.fetchAllMetadata(from: db) }
@@ -70,6 +73,26 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
           },
           receiveValue: { [weak self] allMetadata in
             self?.allMetadata = allMetadata
+          }
+        )
+      hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
+        Sqlite.Note.all(),
+        Sqlite.NoteText.all(),
+        Sqlite.NoteHashtag.all(),
+        Sqlite.StudyLogEntry.all(),
+        Sqlite.Asset.all(),
+      ]).publisher(in: dbQueue)
+        .sink(
+          receiveCompletion: { completion in
+            switch completion {
+            case .failure(let error):
+              DDLogError("Unexpected error monitoring database: \(error)")
+            case .finished:
+              DDLogInfo("hasUnsavedChanges shutting down")
+            }
+          },
+          receiveValue: { [weak self] _ in
+            self?.hasUnsavedChanges = true
           }
         )
       completionHandler?(nil)

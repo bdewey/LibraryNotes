@@ -42,7 +42,10 @@ final class NoteSqliteStorageTests: XCTestCase {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
     do {
+      database.saveIfNeeded()
+      XCTAssertFalse(database.hasUnsavedChanges)
       let identifier = try database.createNote(Note.simpleTest)
+      XCTAssertTrue(database.hasUnsavedChanges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.simpleTest, roundTripNote)
     } catch {
@@ -88,11 +91,14 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
     do {
       let identifier = try database.createNote(Note.withHashtags)
+      database.saveIfNeeded()
+      XCTAssertFalse(database.hasUnsavedChanges)
       try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
         var note = oldNote
         note.metadata.hashtags = ["#updated"]
         return note
       })
+      XCTAssertTrue(database.hasUnsavedChanges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       var expectedNote = Note.withHashtags
       expectedNote.metadata.hashtags = ["#updated"]
@@ -170,7 +176,10 @@ final class NoteSqliteStorageTests: XCTestCase {
       let identifier = try database.createNote(Note.withHashtags)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withHashtags, roundTripNote)
+      database.saveIfNeeded()
+      XCTAssertFalse(database.hasUnsavedChanges)
       try database.deleteNote(noteIdentifier: identifier)
+      XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
       XCTAssertEqual(0, try database.countOfTextRows())
     } catch {
@@ -185,7 +194,10 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
     do {
       let data = "Hello, world!".data(using: .utf8)!
+      database.saveIfNeeded()
+      XCTAssertFalse(database.hasUnsavedChanges)
       let identifier = try database.storeAssetData(data, typeHint: "public/text")
+      XCTAssertTrue(database.hasUnsavedChanges)
       let roundTrip = try database.data(for: identifier)
       XCTAssertEqual(data, roundTrip)
     } catch {
@@ -200,12 +212,15 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
     do {
       _ = try database.createNote(Note.withChallenges)
+      database.saveIfNeeded()
+      XCTAssertFalse(database.hasUnsavedChanges)
       var studySession = database.synchronousStudySession()
       XCTAssertEqual(1, studySession.count)
       while studySession.currentCard != nil {
         studySession.recordAnswer(correct: true)
       }
       try database.updateStudySessionResults(studySession, on: Date())
+      XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertEqual(database.studyLog.count, studySession.count)
     } catch {
       XCTFail("Unexpected error: \(error)")
