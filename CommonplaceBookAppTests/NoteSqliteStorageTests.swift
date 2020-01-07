@@ -4,27 +4,24 @@
 import MiniMarkdown
 import XCTest
 
+// swiftlint:disable force_try
+
 final class NoteSqliteStorageTests: XCTestCase {
   func testCanOpenNonexistantFile() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     try? FileManager.default.removeItem(at: database.fileURL)
   }
 
   func testCannotOpenTwice() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
-    let openExpectation = expectation(description: "Did open")
-    database.open { error in
-      XCTAssertNotNil(error)
-      openExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 3, handler: nil)
+    XCTAssertThrowsError(try database.open())
   }
 
   func testCanSaveEmptyDatabase() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -32,7 +29,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testRoundTripSimpleNoteContents() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -49,7 +46,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testUpdateSimpleNote() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -66,7 +63,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testRoundTripHashtagNoteContents() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -80,7 +77,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testUpdateHashtags() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -104,7 +101,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testUpdateNoteWithChallenges() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -118,7 +115,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testRemoveChallengesFromNote() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -133,7 +130,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testNotesShowUpInAllMetadata() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -147,7 +144,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testCreatingNoteSendsNotification() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -163,7 +160,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testDeleteNote() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -183,7 +180,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testStoreData() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -201,7 +198,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   }
 
   func testStudyLog() {
-    let database = makeAndOpenEmptyDatabase()
+    let database = try! makeAndOpenEmptyDatabase()
     defer {
       try? FileManager.default.removeItem(at: database.fileURL)
     }
@@ -221,19 +218,53 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testSaveWhenExitScope() {
+    do {
+      let fileURL: URL
+      let identifier: Note.Identifier
+      do {
+        let database = try makeAndOpenEmptyDatabase()
+        fileURL = database.fileURL
+        identifier = try database.createNote(Note.withHashtags)
+      }
+      do {
+        let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules())
+        try database.open()
+        let roundTripNote = try database.note(noteIdentifier: identifier)
+        XCTAssertEqual(Note.withHashtags, roundTripNote)
+      }
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  func testAutosaveHappens() {
+    do {
+      let database = try makeAndOpenEmptyDatabase()
+      defer {
+        try? FileManager.default.removeItem(at: database.fileURL)
+      }
+      let autosaveExpectation = expectation(description: "did autosave")
+      let autosaveListener = database.didAutosave.sink {
+        autosaveExpectation.fulfill()
+      }
+      _ = try database.createNote(Note.simpleTest)
+      XCTAssertTrue(database.hasUnsavedChanges)
+      waitForExpectations(timeout: 3, handler: nil)
+      XCTAssertFalse(database.hasUnsavedChanges)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {
   @discardableResult
-  func makeAndOpenEmptyDatabase() -> NoteSqliteStorage {
+  func makeAndOpenEmptyDatabase(autosaveTimeInterval: TimeInterval = 0.5) throws -> NoteSqliteStorage {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules())
-    let openExpectation = expectation(description: "Did open")
-    database.open { error in
-      XCTAssertNil(error)
-      openExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 3, handler: nil)
+    let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules(), autosaveTimeInterval: autosaveTimeInterval)
+    try database.open()
     return database
   }
 }

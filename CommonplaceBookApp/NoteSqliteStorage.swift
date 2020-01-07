@@ -10,10 +10,17 @@ import MiniMarkdown
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 public final class NoteSqliteStorage: NSObject, NoteStorage {
-  public init(fileURL: URL, parsingRules: ParsingRules) {
+  public init(fileURL: URL, parsingRules: ParsingRules, autosaveTimeInterval: TimeInterval = 10) {
     self.fileURL = fileURL
     self.parsingRules = parsingRules
+    self.autosaveTimeInterval = autosaveTimeInterval
     self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
+    self.didAutosave = autosaveSubject.eraseToAnyPublisher()
+  }
+
+  deinit {
+    autosaveTimer = nil
+    try? flush()
   }
 
   /// URL to the sqlite file
@@ -37,6 +44,22 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   /// Pipeline for monitoring for unsaved changes to the in-memory database.
   private var hasUnsavedChangesPipeline: AnyCancellable?
 
+  /// How long to wait before autosaving.
+  private let autosaveTimeInterval: TimeInterval
+
+  /// The actual autosave timer.
+  private var autosaveTimer: Timer? {
+    willSet {
+      autosaveTimer?.invalidate()
+    }
+  }
+
+  /// Private publisher to let outside observers know autosave happened.
+  private let autosaveSubject = PassthroughSubject<Void, Never>()
+
+  /// Notification when autosave happens.
+  public let didAutosave: AnyPublisher<Void, Never>
+
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
     case databaseAlreadyOpen = "The database is already open."
@@ -50,59 +73,62 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 
   /// Opens the database.
   /// - parameter completionHandler: A handler called after opening the database. If the error is nil, the database opened successfully.
-  public func open(completionHandler: ((Swift.Error?) -> Void)? = nil) {
+  public func open() throws {
     guard dbQueue == nil else {
-      completionHandler?(Error.databaseAlreadyOpen)
-      return
+      throw Error.databaseAlreadyOpen
     }
-    do {
-      let dbQueue = try memoryDatabaseQueue(fileURL: fileURL)
-      hasUnsavedChanges = try runMigrations(on: dbQueue)
-      self.dbQueue = dbQueue
-      allMetadata = try dbQueue.read { db in
-        try Self.fetchAllMetadata(from: db)
+    let dbQueue = try memoryDatabaseQueue(fileURL: fileURL)
+    hasUnsavedChanges = try runMigrations(on: dbQueue)
+    self.dbQueue = dbQueue
+    allMetadata = try dbQueue.read { db in
+      try Self.fetchAllMetadata(from: db)
+    }
+    metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
+      Sqlite.Note.all(),
+    ]).publisher(in: dbQueue)
+      .tryMap { db in try Self.fetchAllMetadata(from: db) }
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            DDLogError("Unexpected error monitoring database: \(error)")
+          case .finished:
+            DDLogInfo("Monitoring pipeline shutting down")
+          }
+        },
+        receiveValue: { [weak self] allMetadata in
+          self?.allMetadata = allMetadata
+        }
+      )
+    hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
+      Sqlite.Note.all(),
+      Sqlite.NoteText.all(),
+      Sqlite.NoteHashtag.all(),
+      Sqlite.StudyLogEntry.all(),
+      Sqlite.Asset.all(),
+    ]).publisher(in: dbQueue)
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            DDLogError("Unexpected error monitoring database: \(error)")
+          case .finished:
+            DDLogInfo("hasUnsavedChanges shutting down")
+          }
+        },
+        receiveValue: { [weak self] _ in
+          self?.hasUnsavedChanges = true
+        }
+      )
+    autosaveTimer = Timer.scheduledTimer(withTimeInterval: autosaveTimeInterval, repeats: true, block: { [weak self] _ in
+        do {
+          try self?.flush()
+          self?.autosaveSubject.send()
+        } catch {
+          DDLogInfo("Error autosaving: \(error)")
+        }
       }
-      metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
-        Sqlite.Note.all(),
-      ]).publisher(in: dbQueue)
-        .tryMap { db in try Self.fetchAllMetadata(from: db) }
-        .sink(
-          receiveCompletion: { completion in
-            switch completion {
-            case .failure(let error):
-              DDLogError("Unexpected error monitoring database: \(error)")
-            case .finished:
-              DDLogInfo("Monitoring pipeline shutting down")
-            }
-          },
-          receiveValue: { [weak self] allMetadata in
-            self?.allMetadata = allMetadata
-          }
-        )
-      hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
-        Sqlite.Note.all(),
-        Sqlite.NoteText.all(),
-        Sqlite.NoteHashtag.all(),
-        Sqlite.StudyLogEntry.all(),
-        Sqlite.Asset.all(),
-      ]).publisher(in: dbQueue)
-        .sink(
-          receiveCompletion: { completion in
-            switch completion {
-            case .failure(let error):
-              DDLogError("Unexpected error monitoring database: \(error)")
-            case .finished:
-              DDLogInfo("hasUnsavedChanges shutting down")
-            }
-          },
-          receiveValue: { [weak self] _ in
-            self?.hasUnsavedChanges = true
-          }
-        )
-      completionHandler?(nil)
-    } catch {
-      completionHandler?(error)
-    }
+    )
   }
 
   /// Ensures contents are saved to stable storage.
@@ -194,9 +220,9 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    return try dbQueue.read({ db in
-      return try Sqlite.NoteText.fetchCount(db)
-    })
+    return try dbQueue.read { db in
+      try Sqlite.NoteText.fetchCount(db)
+    }
   }
 
   public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
@@ -274,8 +300,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
               incorrect: $0.studyLogEntry.incorrect
             )
           )
-      }
-      .forEach { log.append($0) }
+        }
+        .forEach { log.append($0) }
       return log
     } catch {
       DDLogError("Unexpected error fetching study log: \(error)")
@@ -565,7 +591,11 @@ extension NoteSqliteStorage: NSFilePresenter {
 
   public func presentedItemDidChange() {
     dbQueue = nil
-    open()
+    do {
+      try open()
+    } catch {
+      DDLogError("Unexpected error re-opening database after external change: \(error)")
+    }
   }
 }
 
