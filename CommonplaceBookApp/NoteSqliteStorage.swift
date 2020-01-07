@@ -37,6 +37,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     case databaseIsNotOpen = "The database is not open."
     case noSuchAsset = "The specified asset does not exist."
     case noSuchNote = "The specified note does not exist."
+    case unknownChallengeTemplate = "The challenge template does not exist."
     case unknownChallengeType = "The challenge template uses an unknown type."
   }
 
@@ -192,11 +193,66 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func updateStudySessionResults(_ studySession: StudySession, on date: Date) {
-    assertionFailure()
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      for (identifier, statistics) in studySession.results {
+        guard
+          let templateKey = identifier.templateDigest,
+          let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey),
+          let challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == identifier.index).fetchOne(db)
+        else {
+          throw Error.unknownChallengeTemplate
+        }
+
+        var entry = Sqlite.StudyLogEntry(
+          id: nil,
+          timestamp: date,
+          correct: statistics.correct,
+          incorrect: statistics.incorrect,
+          challengeId: challenge.id!
+        )
+        try entry.insert(db)
+      }
+    }
   }
 
-  public let studyLog = StudyLog()
+  public var studyLog: StudyLog {
+    var log = StudyLog()
+    do {
+      guard let dbQueue = dbQueue else {
+        throw Error.databaseIsNotOpen
+      }
+      let entries = try dbQueue.read { db -> [Sqlite.StudyLogEntryInfo] in
+        let request = Sqlite.StudyLogEntry
+          .order(Sqlite.StudyLogEntry.Columns.timestamp)
+          .including(required: Sqlite.StudyLogEntry.challenge)
+        return try Sqlite.StudyLogEntryInfo
+          .fetchAll(db, request)
+      }
+      entries
+        .map {
+          StudyLog.Entry(
+            timestamp: $0.studyLogEntry.timestamp,
+            identifier: ChallengeIdentifier(
+              templateDigest: $0.challenge.challengeTemplateId,
+              index: $0.challenge.index
+            ),
+            statistics: AnswerStatistics(
+              correct: $0.studyLogEntry.correct,
+              incorrect: $0.studyLogEntry.incorrect
+            )
+          )
+      }
+      .forEach { log.append($0) }
+      return log
+    } catch {
+      DDLogError("Unexpected error fetching study log: \(error)")
+    }
+    return log
+  }
 }
 
 // MARK: - Private
@@ -297,6 +353,10 @@ private extension NoteSqliteStorage {
         noteId: identifier.rawValue
       )
       try record.insert(db)
+      for index in template.challenges.indices {
+        var challengeRecord = Sqlite.Challenge(index: index, challengeTemplateId: newTemplateIdentifier)
+        try challengeRecord.insert(db)
+      }
     }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
       let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
@@ -413,7 +473,7 @@ private extension NoteSqliteStorage {
         table.column("totalCorrect", .integer).notNull().defaults(to: 0)
         table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
         table.column("due", .datetime)
-        table.column("challengeTemplateId", .integer)
+        table.column("challengeTemplateId", .text)
           .notNull()
           .indexed()
           .references("challengeTemplate", onDelete: .cascade)

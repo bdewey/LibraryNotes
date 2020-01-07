@@ -90,20 +90,30 @@ enum Sqlite {
     }
 
     static let note = belongsTo(Note.self)
+    static let challenges = hasMany(Challenge.self)
+
+    var challenges: QueryInterfaceRequest<Challenge> { request(for: ChallengeTemplate.challenges) }
   }
 
   struct Challenge: Codable, FetchableRecord, MutablePersistableRecord {
     var id: Int64?
     var index: Int
-    var reviewCount: Int
-    var totalCorrect: Int
-    var totalIncorrect: Int
-    var due: Date
-    var challengeTemplateId: Int64
+    var reviewCount: Int = 0
+    var totalCorrect: Int = 0
+    var totalIncorrect: Int = 0
+    var due: Date?
+    var challengeTemplateId: String
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
       id = rowID
     }
+
+    enum Columns {
+      static let index = Column(CodingKeys.index)
+      static let challengeTemplateId = Column(CodingKeys.challengeTemplateId)
+    }
+
+    static let challengeTemplate = belongsTo(ChallengeTemplate.self)
   }
 
   struct StudyLogEntry: Codable, FetchableRecord, MutablePersistableRecord {
@@ -116,6 +126,18 @@ enum Sqlite {
     mutating func didInsert(with rowID: Int64, for column: String?) {
       id = rowID
     }
+
+    enum Columns {
+      static let timestamp = Column(CodingKeys.timestamp)
+    }
+
+    static let challenge = belongsTo(Challenge.self)
+  }
+
+  /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
+  struct StudyLogEntryInfo: Codable, FetchableRecord {
+    var studyLogEntry: StudyLogEntry
+    var challenge: Challenge
   }
 
   struct Asset: Codable, FetchableRecord, PersistableRecord {

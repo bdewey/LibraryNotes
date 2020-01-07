@@ -329,8 +329,12 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    notebook.updateStudySessionResults(session, on: Date())
-    updateStudySession()
+    do {
+      try notebook.updateStudySessionResults(session, on: Date())
+      updateStudySession()
+    } catch {
+      DDLogError("Unexpected error recording study session results: \(error)")
+    }
   }
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {

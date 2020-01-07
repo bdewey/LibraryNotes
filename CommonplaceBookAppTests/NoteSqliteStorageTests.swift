@@ -192,6 +192,25 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testStudyLog() {
+    let database = makeAndOpenEmptyDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
+    }
+    do {
+      _ = try database.createNote(Note.withChallenges)
+      var studySession = database.synchronousStudySession()
+      XCTAssertEqual(1, studySession.count)
+      while studySession.currentCard != nil {
+        studySession.recordAnswer(correct: true)
+      }
+      try database.updateStudySessionResults(studySession, on: Date())
+      XCTAssertEqual(database.studyLog.count, studySession.count)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {

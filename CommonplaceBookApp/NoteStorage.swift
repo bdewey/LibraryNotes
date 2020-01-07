@@ -52,7 +52,7 @@ public protocol NoteStorage: AnyObject {
   ///
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date)
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws
 
   /// The complete record of all study sessions.
   var studyLog: StudyLog { get }
