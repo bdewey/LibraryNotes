@@ -31,7 +31,7 @@ public protocol NoteStorage: AnyObject {
   func deleteNote(noteIdentifier: Note.Identifier) throws
 
   /// Ensure contents are saved to stable storage.
-  func flush()
+  func flush() throws
 
   // MARK: - Asset storage.
 

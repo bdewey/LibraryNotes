@@ -86,7 +86,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
     saveIfNeeded {
       DDLogInfo("SavingTextEditViewController: Flushing and canceling timer")
-      self.noteStorage.flush()
+      try? self.noteStorage.flush()
       self.autosaveTimer?.invalidate()
       self.autosaveTimer = nil
     }

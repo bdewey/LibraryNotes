@@ -28,6 +28,9 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   /// Set to `true` if there are unsaved changes in the in-memory database.
   public private(set) var hasUnsavedChanges = false
 
+  /// Set to false to temporarily disable writing
+  private var isWriteable = true
+
   /// Pipeline monitoring for changes in the database.
   private var metadataUpdatePipeline: AnyCancellable?
 
@@ -40,6 +43,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     case databaseIsNotOpen = "The database is not open."
     case noSuchAsset = "The specified asset does not exist."
     case noSuchNote = "The specified note does not exist."
+    case notWriteable = "The database is not currently writeable."
     case unknownChallengeTemplate = "The challenge template does not exist."
     case unknownChallengeType = "The challenge template uses an unknown type."
   }
@@ -101,12 +105,13 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  /// Saves the database if there are any unsaved changes.
-  /// - parameter completionHandler: A handler called after state is known to be saved. If the error is nil, everything happened successfully.
-  public func saveIfNeeded(completionHandler: ((Swift.Error?) -> Void)? = nil) {
+  /// Ensures contents are saved to stable storage.
+  public func flush() throws {
     guard let dbQueue = dbQueue, hasUnsavedChanges else {
-      completionHandler?(nil)
       return
+    }
+    guard isWriteable else {
+      throw Error.notWriteable
     }
     let coordinator = NSFileCoordinator(filePresenter: self)
     var coordinatorError: NSError?
@@ -120,11 +125,12 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
         innerError = error
       }
     }
-    completionHandler?(coordinatorError ?? innerError)
-  }
-
-  public func flush() {
-    saveIfNeeded()
+    if let coordinatorError = coordinatorError {
+      throw coordinatorError
+    }
+    if let innerError = innerError {
+      throw innerError
+    }
   }
 
   public var allMetadata: [Note.Identifier: Note.Metadata] = [:] {
@@ -533,6 +539,34 @@ private extension NoteSqliteStorage {
 extension NoteSqliteStorage: NSFilePresenter {
   public var presentedItemURL: URL? { fileURL }
   public var presentedItemOperationQueue: OperationQueue { OperationQueue.main }
+
+  public func savePresentedItemChanges(completionHandler: @escaping (Swift.Error?) -> Void) {
+    do {
+      try flush()
+      completionHandler(nil)
+    } catch {
+      completionHandler(error)
+    }
+  }
+
+  public func relinquishPresentedItem(toReader reader: @escaping ((() -> Void)?) -> Void) {
+    isWriteable = false
+    reader {
+      self.isWriteable = true
+    }
+  }
+
+  public func relinquishPresentedItem(toWriter writer: @escaping ((() -> Void)?) -> Void) {
+    isWriteable = false
+    writer {
+      self.isWriteable = true
+    }
+  }
+
+  public func presentedItemDidChange() {
+    dbQueue = nil
+    open()
+  }
 }
 
 private extension Sequence where Element: Hashable {
