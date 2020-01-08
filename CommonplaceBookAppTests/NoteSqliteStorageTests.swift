@@ -257,6 +257,34 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testConversion() {
+    let bundle = Bundle(for: Self.self)
+    guard let notebundleURL = bundle.url(forResource: "archive", withExtension: "notebundle") else {
+      XCTFail("Could not file test content to migrate")
+      return
+    }
+    let destinationURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("destination")
+      .appendingPathExtension("sqlite")
+    try? FileManager.default.removeItem(at: destinationURL)
+    let parsingRules = ParsingRules()
+    let notebundle = NoteDocumentStorage(fileURL: notebundleURL, parsingRules: parsingRules)
+    let openHappened = expectation(description: "open happened")
+    notebundle.open { success in
+      XCTAssert(success)
+      let destination = NoteSqliteStorage(fileURL: destinationURL, parsingRules: parsingRules)
+      do {
+        try destination.open()
+        try notebundle.migrate(to: destination)
+        print("Copied archive to \(destination.fileURL.path)")
+      } catch {
+        XCTFail("Unexpected error copying contents: \(error)")
+      }
+      openHappened.fulfill()
+    }
+    waitForExpectations(timeout: 10, handler: nil)
+  }
 }
 
 private extension NoteSqliteStorageTests {
