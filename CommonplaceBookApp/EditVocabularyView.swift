@@ -87,9 +87,13 @@ struct EditVocabularyView: View {
   // TODO: Only store asset data when we commit this association?
   private func onSelectedImage(encodedImage: EncodedImage) {
     DDLogInfo("Selected image: \(encodedImage)")
-    if let key = try? notebook.storeAssetData(encodedImage.data, typeHint: encodedImage.encoding) {
-      DDLogInfo("Saved image data as asset \(key)")
+    let key = encodedImage.data.sha1Digest() + "." + encodedImage.encoding
+    do {
+      try notebook.storeAssetData(encodedImage.data, key: key)
       vocabularyTemplate.imageAsset = key
+      DDLogInfo("Saved image data as asset \(key)")
+    } catch {
+      DDLogError("Unexpected error saving image: \(error)")
     }
   }
 }

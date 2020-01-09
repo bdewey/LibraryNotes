@@ -120,7 +120,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
           self?.hasUnsavedChanges = true
         }
       )
-    autosaveTimer = Timer.scheduledTimer(withTimeInterval: autosaveTimeInterval, repeats: true, block: { [weak self] _ in
+    autosaveTimer = Timer.scheduledTimer(
+      withTimeInterval: autosaveTimeInterval, repeats: true, block: { [weak self] _ in
         do {
           try self?.flush()
           self?.autosaveSubject.send()
@@ -225,6 +226,21 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
+  public var assetKeys: [String] {
+    do {
+      guard let dbQueue = dbQueue else {
+        throw Error.databaseIsNotOpen
+      }
+      return try dbQueue.read { db in
+        let request = Sqlite.Asset.select([Sqlite.Asset.Columns.id])
+        return try String.fetchAll(db, request)
+      }
+    } catch {
+      DDLogError("Unexpected error getting asset keys: \(error)")
+      return []
+    }
+  }
+
   public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
@@ -237,14 +253,13 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func storeAssetData(_ data: Data, typeHint: String) throws -> String {
+  public func storeAssetData(_ data: Data, key: String) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.write { db in
-      let asset = Sqlite.Asset(hash: data.sha1Digest(), typeHint: typeHint, data: data)
+      let asset = Sqlite.Asset(id: key, data: data)
       try asset.save(db)
-      return asset.hash
     }
   }
 
@@ -545,8 +560,7 @@ private extension NoteSqliteStorage {
       })
 
       try database.create(table: "asset", body: { table in
-        table.column("hash", .text).primaryKey()
-        table.column("typeHint", .text).notNull()
+        table.column("id", .text).primaryKey()
         table.column("data", .blob).notNull()
       })
     }

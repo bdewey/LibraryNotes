@@ -40,11 +40,14 @@ public protocol NoteStorage: AnyObject {
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   func data<S: StringProtocol>(for fileWrapperKey: S) throws -> Data?
 
+  /// All assets.
+  var assetKeys: [String] { get }
+
   /// Stores asset data into the document.
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  func storeAssetData(_ data: Data, typeHint: String) throws -> String
+  func storeAssetData(_ data: Data, key: String) throws
 
   // MARK: - Study sessions
 

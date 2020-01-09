@@ -14,5 +14,13 @@ public extension NoteStorage {
       // TODO: This gives notes new UUIDs in the destination. Is that OK?
       _ = try destination.createNote(note)
     }
+
+    for assetKey in assetKeys {
+      if let data = try self.data(for: assetKey) {
+        // TODO: We don't get to set the key for the asset? That will break image rendering.
+        // TODO: Oh no, how do I get the type hint?
+        _ = try destination.storeAssetData(data, key: assetKey)
+      }
+    }
   }
 }

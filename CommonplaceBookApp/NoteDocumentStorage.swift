@@ -197,14 +197,14 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
   public func data<S: StringProtocol>(for fileWrapperKey: S) -> Data? {
-    var currentWrapper = topLevelFileWrapper
-    for pathComponent in fileWrapperKey.split(separator: "/") {
-      guard let nextWrapper = currentWrapper.fileWrappers?[String(pathComponent)] else {
-        return nil
-      }
-      currentWrapper = nextWrapper
+    return assetsFileWrapper.fileWrappers?[String(fileWrapperKey)]?.regularFileContents
+  }
+
+  public var assetKeys: [String] {
+    guard let assetFileWrappers = assetsFileWrapper.fileWrappers else {
+      return []
     }
-    return currentWrapper.regularFileContents
+    return Array(assetFileWrappers.keys)
   }
 }
 
@@ -316,15 +316,13 @@ extension NoteDocumentStorage {
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  public func storeAssetData(_ data: Data, typeHint: String) -> String {
-    let key = "\(data.sha1Digest()).\(typeHint)"
+  public func storeAssetData(_ data: Data, key: String) {
     let assetsWrapper = assetsFileWrapper
     if assetsWrapper.fileWrappers![key] == nil {
       let imageFileWrapper = FileWrapper(regularFileWithContents: data)
       imageFileWrapper.preferredFilename = key
       assetsWrapper.addFileWrapper(imageFileWrapper)
     }
-    return "\(BundleWrapperKey.assets)/\(key)"
   }
 }
 

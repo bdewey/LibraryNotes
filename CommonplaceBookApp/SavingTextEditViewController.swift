@@ -93,6 +93,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String {
-    return try noteStorage.storeAssetData(imageData, typeHint: suffix)
+    let key = imageData.sha1Digest() + "." + suffix
+    try noteStorage.storeAssetData(imageData, key: key)
+    return key
   }
 }

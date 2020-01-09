@@ -141,8 +141,11 @@ enum Sqlite {
   }
 
   struct Asset: Codable, FetchableRecord, PersistableRecord {
-    var hash: String
-    var typeHint: String
+    var id: String
     var data: Data
+
+    enum Columns {
+      static let id = Column(CodingKeys.id)
+    }
   }
 }
