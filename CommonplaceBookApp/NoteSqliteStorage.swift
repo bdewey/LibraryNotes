@@ -253,13 +253,14 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func storeAssetData(_ data: Data, key: String) throws {
+  public func storeAssetData(_ data: Data, key: String) throws -> String {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.write { db in
       let asset = Sqlite.Asset(id: key, data: data)
       try asset.save(db)
+      return key
     }
   }
 

@@ -188,8 +188,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       let data = "Hello, world!".data(using: .utf8)!
       try database.flush()
       XCTAssertFalse(database.hasUnsavedChanges)
-      let key = "test.txt"
-      try database.storeAssetData(data, key: key)
+      let key = try database.storeAssetData(data, key: "test.txt")
       XCTAssertTrue(database.hasUnsavedChanges)
       let roundTrip = try database.data(for: key)
       XCTAssertEqual(data, roundTrip)

@@ -89,9 +89,9 @@ struct EditVocabularyView: View {
     DDLogInfo("Selected image: \(encodedImage)")
     let key = encodedImage.data.sha1Digest() + "." + encodedImage.encoding
     do {
-      try notebook.storeAssetData(encodedImage.data, key: key)
-      vocabularyTemplate.imageAsset = key
-      DDLogInfo("Saved image data as asset \(key)")
+      let actualKey = try notebook.storeAssetData(encodedImage.data, key: key)
+      vocabularyTemplate.imageAsset = actualKey
+      DDLogInfo("Saved image data as asset \(actualKey)")
     } catch {
       DDLogError("Unexpected error saving image: \(error)")
     }

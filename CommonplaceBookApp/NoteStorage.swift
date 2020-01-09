@@ -47,7 +47,7 @@ public protocol NoteStorage: AnyObject {
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  func storeAssetData(_ data: Data, key: String) throws
+  func storeAssetData(_ data: Data, key: String) throws -> String
 
   // MARK: - Study sessions
 
