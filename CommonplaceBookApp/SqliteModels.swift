@@ -101,6 +101,7 @@ enum Sqlite {
     var reviewCount: Int = 0
     var totalCorrect: Int = 0
     var totalIncorrect: Int = 0
+    var lastReview: Date?
     var due: Date?
     var challengeTemplateId: String
 

@@ -8,11 +8,19 @@ public extension NoteStorage {
     let metadata = allMetadata
     for identifier in metadata.keys {
       let note = try self.note(noteIdentifier: identifier)
+      var oldToNewTemplateIdentifier = [String: String]()
       for template in note.challengeTemplates {
-        template.templateIdentifier = nil
+        let newIdentifier = UUID().uuidString
+        oldToNewTemplateIdentifier[template.templateIdentifier!] = newIdentifier
+        template.templateIdentifier = newIdentifier
       }
       // TODO: This gives notes new UUIDs in the destination. Is that OK?
       _ = try destination.createNote(note)
+      for entry in studyLog.filter({ oldToNewTemplateIdentifier.keys.contains($0.identifier.templateDigest!) }) {
+        var entry = entry
+        entry.identifier.templateDigest = oldToNewTemplateIdentifier[entry.identifier.templateDigest!]
+        try destination.recordStudyEntry(entry)
+      }
     }
 
     for assetKey in assetKeys {

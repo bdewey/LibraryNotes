@@ -268,7 +268,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       .appendingPathComponent("destination")
       .appendingPathExtension("sqlite")
     try? FileManager.default.removeItem(at: destinationURL)
-    let parsingRules = ParsingRules()
+    let parsingRules = ParsingRules.commonplace
     let notebundle = NoteDocumentStorage(fileURL: notebundleURL, parsingRules: parsingRules)
     let openHappened = expectation(description: "open happened")
     notebundle.open { success in
@@ -291,7 +291,7 @@ private extension NoteSqliteStorageTests {
   @discardableResult
   func makeAndOpenEmptyDatabase(autosaveTimeInterval: TimeInterval = 0.5) throws -> NoteSqliteStorage {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules(), autosaveTimeInterval: autosaveTimeInterval)
+    let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules.commonplace, autosaveTimeInterval: autosaveTimeInterval)
     try database.open()
     return database
   }
@@ -325,5 +325,5 @@ private extension Note {
 
   > To be, or not to be, that is the question. (Hamlet)
 
-  """, parsingRules: ParsingRules())
+  """, parsingRules: ParsingRules.commonplace)
 }

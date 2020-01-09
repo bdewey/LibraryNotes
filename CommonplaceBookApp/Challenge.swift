@@ -7,7 +7,7 @@ import UIKit
 /// Uniquely identifies a challenge.
 public struct ChallengeIdentifier: Hashable {
   /// The SHA1 digest of the template that created this challenge.
-  public let templateDigest: String?
+  public var templateDigest: String?
 
   /// The index of this challenge in the template's challenges array.
   public let index: Int

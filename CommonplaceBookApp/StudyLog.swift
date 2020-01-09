@@ -7,9 +7,9 @@ public struct StudyLog {
   public init() {}
 
   public struct Entry: Hashable, Comparable {
-    public let timestamp: Date
-    public let identifier: ChallengeIdentifier
-    public let statistics: AnswerStatistics
+    public var timestamp: Date
+    public var identifier: ChallengeIdentifier
+    public var statistics: AnswerStatistics
 
     public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
       assert(identifier.templateDigest != nil)

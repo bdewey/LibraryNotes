@@ -307,12 +307,8 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  /// Update the notebook with the result of a study session.
-  ///
-  /// - parameter studySession: The completed study session.
-  /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
-    studyLog.updateStudySessionResults(studySession, on: date)
+  func recordStudyEntry(_ entry: StudyLog.Entry) throws {
+    studyLog.append(entry)
     invalidateSavedStudyLog()
     notesDidChangeSubject.send()
   }

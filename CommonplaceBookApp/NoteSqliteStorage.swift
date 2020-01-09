@@ -264,29 +264,44 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws {
+  public func recordStudyEntry(_ entry: StudyLog.Entry) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
     try dbQueue.write { db in
-      for (identifier, statistics) in studySession.results {
-        guard
-          let templateKey = identifier.templateDigest,
-          let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey),
-          let challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == identifier.index).fetchOne(db)
-        else {
-          throw Error.unknownChallengeTemplate
-        }
-
-        var entry = Sqlite.StudyLogEntry(
-          id: nil,
-          timestamp: date,
-          correct: statistics.correct,
-          incorrect: statistics.incorrect,
-          challengeId: challenge.id!
-        )
-        try entry.insert(db)
+      guard
+        let templateKey = entry.identifier.templateDigest,
+        let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey),
+        var challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == entry.identifier.index).fetchOne(db)
+      else {
+        throw Error.unknownChallengeTemplate
       }
+
+      var record = Sqlite.StudyLogEntry(
+        id: nil,
+        timestamp: entry.timestamp,
+        correct: entry.statistics.correct,
+        incorrect: entry.statistics.incorrect,
+        challengeId: challenge.id!
+      )
+      try record.insert(db)
+
+      challenge.reviewCount += 1
+      challenge.totalCorrect += entry.statistics.correct
+      challenge.totalIncorrect += entry.statistics.incorrect
+
+      if let lastReview = challenge.lastReview {
+        // The minimum delta is 1 day
+        let delta = Swift.max(entry.timestamp.timeIntervalSince(lastReview), TimeInterval.day)
+        let factor = pow(2.0, 1.0 - Double(entry.statistics.incorrect))
+        let nextDate = entry.timestamp.addingTimeInterval(delta * factor)
+        challenge.lastReview = entry.timestamp
+        challenge.due = nextDate
+      } else {
+        challenge.lastReview = entry.timestamp
+        challenge.due = entry.timestamp.addingTimeInterval(TimeInterval.day)
+      }
+      try challenge.update(db)
     }
   }
 
@@ -543,6 +558,7 @@ private extension NoteSqliteStorage {
         table.column("reviewCount", .integer).notNull().defaults(to: 0)
         table.column("totalCorrect", .integer).notNull().defaults(to: 0)
         table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
+        table.column("lastReview", .datetime)
         table.column("due", .datetime)
         table.column("challengeTemplateId", .text)
           .notNull()

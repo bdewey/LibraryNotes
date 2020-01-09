@@ -51,11 +51,7 @@ public protocol NoteStorage: AnyObject {
 
   // MARK: - Study sessions
 
-  /// Update the notebook with the result of a study session.
-  ///
-  /// - parameter studySession: The completed study session.
-  /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws
+  func recordStudyEntry(_ entry: StudyLog.Entry) throws
 
   /// The complete record of all study sessions.
   var studyLog: StudyLog { get }
@@ -109,6 +105,19 @@ extension NoteStorage {
         )
       }
       .reduce(into: StudySession()) { $0 += $1 }
+  }
+
+  /// Update the notebook with the result of a study session.
+  ///
+  /// - parameter studySession: The completed study session.
+  /// - parameter date: The date the study session took place.
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws {
+    let entries = studySession.results.map { tuple -> StudyLog.Entry in
+      StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
+    }
+    for entry in entries {
+      try recordStudyEntry(entry)
+    }
   }
 
   /// All hashtags used across all pages, sorted.
