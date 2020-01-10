@@ -7,6 +7,9 @@ import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: AnyObject {
+  /// The URL for the storage.
+  var fileURL: URL { get }
+
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
 
@@ -29,6 +32,9 @@ public protocol NoteStorage: AnyObject {
 
   /// Deletes a note.
   func deleteNote(noteIdentifier: Note.Identifier) throws
+
+  /// Open the storage.
+  func open(completionHandler: ((Bool) -> Void)?)
 
   /// Ensure contents are saved to stable storage.
   func flush() throws

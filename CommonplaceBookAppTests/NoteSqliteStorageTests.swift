@@ -265,8 +265,8 @@ final class NoteSqliteStorageTests: XCTestCase {
       return
     }
     let destinationURL = FileManager.default.temporaryDirectory
-      .appendingPathComponent("destination")
-      .appendingPathExtension("sqlite")
+      .appendingPathComponent("archive")
+      .appendingPathExtension("notedb")
     try? FileManager.default.removeItem(at: destinationURL)
     let parsingRules = ParsingRules.commonplace
     let notebundle = NoteDocumentStorage(fileURL: notebundleURL, parsingRules: parsingRules)

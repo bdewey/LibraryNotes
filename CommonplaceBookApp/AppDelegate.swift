@@ -49,7 +49,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notebundle"])
+    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notebundle", "org.brians-brain.notedb"])
     browser.delegate = self
 
     window.rootViewController = browser
@@ -78,7 +78,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     makeMetadataProvider(completion: { metadataProviderResult in
       switch metadataProviderResult {
       case .success(let metadataProvider):
-        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notebundle"), from: viewController, animated: false)
+        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notedb"), from: viewController, animated: false)
       case .failure(let error):
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
@@ -202,10 +202,18 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
     DDLogInfo("Opening document at \(url)")
-    let noteArchiveDocument = NoteDocumentStorage(
-      fileURL: url,
-      parsingRules: ParsingRules.commonplace
-    )
+    let noteArchiveDocument: NoteStorage
+    if url.pathExtension == "notebundle" {
+      noteArchiveDocument = NoteDocumentStorage(
+        fileURL: url,
+        parsingRules: ParsingRules.commonplace
+      )
+    } else if url.pathExtension == "notedb" {
+      noteArchiveDocument = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
+    } else {
+      assertionFailure("Unknown note format: \(url.pathExtension)")
+      return
+    }
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     documentListViewController.didTapFilesAction = { [weak self] in
@@ -229,8 +237,8 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       noteIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
       let properties: [String: String] = [
         "Success": success.description,
-        "documentState": String(describing: noteArchiveDocument.documentState),
-        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
+//        "documentState": String(describing: noteArchiveDocument.documentState),
+//        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
       DDLogInfo("In open completion handler. \(properties)")
       if success {

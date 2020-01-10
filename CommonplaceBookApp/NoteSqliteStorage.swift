@@ -73,6 +73,17 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 
   /// Opens the database.
   /// - parameter completionHandler: A handler called after opening the database. If the error is nil, the database opened successfully.
+  public func open(completionHandler: ((Bool) -> Void)?) {
+    do {
+      try open()
+      completionHandler?(true)
+    } catch {
+      DDLogError("Unexpected error opening database: \(error)")
+      completionHandler?(false)
+    }
+  }
+
+  /// Synchronous `open` variant.
   public func open() throws {
     guard dbQueue == nil else {
       throw Error.databaseAlreadyOpen
@@ -140,13 +151,27 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     guard isWriteable else {
       throw Error.notWriteable
     }
+    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("notedb")
+    defer {
+      try? FileManager.default.removeItem(at: tempURL)
+    }
+    do {
+      let tempQueue = try DatabaseQueue(path: tempURL.path)
+      try dbQueue.backup(to: tempQueue)
+    }
     let coordinator = NSFileCoordinator(filePresenter: self)
     var coordinatorError: NSError?
     var innerError: Swift.Error?
     coordinator.coordinate(writingItemAt: fileURL, options: [], error: &coordinatorError) { coordinatedURL in
       do {
-        let fileQueue = try DatabaseQueue(path: coordinatedURL.path)
-        try dbQueue.backup(to: fileQueue)
+        let didGetAccess = coordinatedURL.startAccessingSecurityScopedResource()
+        defer {
+          if didGetAccess {
+            coordinatedURL.stopAccessingSecurityScopedResource()
+          }
+        }
+        let newURL = try FileManager.default.replaceItemAt(coordinatedURL, withItemAt: tempURL)
+        assert(newURL == coordinatedURL)
         hasUnsavedChanges = false
       } catch {
         innerError = error
@@ -355,8 +380,17 @@ private extension NoteSqliteStorage {
     coordinator.coordinate(readingItemAt: fileURL, options: [], error: &coordinatorError) { coordinatedURL in
       result = Result {
         let queue = try DatabaseQueue(path: ":memory:")
-        if let fileQueue = try? DatabaseQueue(path: coordinatedURL.path) {
+        do {
+          let didGetAccess = coordinatedURL.startAccessingSecurityScopedResource()
+          defer {
+            if didGetAccess {
+              coordinatedURL.stopAccessingSecurityScopedResource()
+            }
+          }
+          let fileQueue = try DatabaseQueue(path: coordinatedURL.path)
           try fileQueue.backup(to: queue)
+        } catch {
+          DDLogInfo("Unable to load \(coordinatedURL.path): \(error)")
         }
         return queue
       }
@@ -598,6 +632,7 @@ extension NoteSqliteStorage: NSFilePresenter {
   public var presentedItemOperationQueue: OperationQueue { OperationQueue.main }
 
   public func savePresentedItemChanges(completionHandler: @escaping (Swift.Error?) -> Void) {
+    DDLogInfo("NSFilePresenter savePresentedItemChanges")
     do {
       try flush()
       completionHandler(nil)
@@ -607,20 +642,25 @@ extension NoteSqliteStorage: NSFilePresenter {
   }
 
   public func relinquishPresentedItem(toReader reader: @escaping ((() -> Void)?) -> Void) {
+    DDLogInfo("NSFilePresenter relinquishing to a reader")
     isWriteable = false
     reader {
+      DDLogInfo("NSFilePresenter writeable again")
       self.isWriteable = true
     }
   }
 
   public func relinquishPresentedItem(toWriter writer: @escaping ((() -> Void)?) -> Void) {
+    DDLogInfo("NSFilePresenter relinquishing to a writer")
     isWriteable = false
     writer {
+      DDLogInfo("NSFilePresenter writeable again")
       self.isWriteable = true
     }
   }
 
   public func presentedItemDidChange() {
+    DDLogInfo("NSFilePresenter reopening file")
     dbQueue = nil
     do {
       try open()
