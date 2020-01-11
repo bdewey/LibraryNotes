@@ -379,6 +379,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       }
       try challenge.update(db)
     }
+    notesDidChangeSubject.send()
   }
 
   public var studyLog: StudyLog {
