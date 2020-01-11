@@ -30,6 +30,9 @@ enum Sqlite {
     var challengeTemplates: QueryInterfaceRequest<ChallengeTemplate> { request(for: Note.challengeTemplates) }
 
     static let noteText = belongsTo(NoteText.self)
+
+    static let challenges = hasMany(Challenge.self, through: challengeTemplates, using: ChallengeTemplate.challenges)
+    var challenges: QueryInterfaceRequest<Challenge> { request(for: Note.challenges) }
   }
 
   /// Result structure from fetching a Note plus all of its hashtags
@@ -112,6 +115,7 @@ enum Sqlite {
     enum Columns {
       static let index = Column(CodingKeys.index)
       static let challengeTemplateId = Column(CodingKeys.challengeTemplateId)
+      static let due = Column(CodingKeys.due)
     }
 
     static let challengeTemplate = belongsTo(ChallengeTemplate.self)

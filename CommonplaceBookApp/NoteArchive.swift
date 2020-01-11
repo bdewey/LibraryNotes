@@ -139,6 +139,27 @@ public struct NoteArchive {
     return identifier
   }
 
+  public func challenge(
+    noteIdentifier: Note.Identifier,
+    challengeIdentifier: ChallengeIdentifier,
+    challengeTemplateCache: NSCache<NSString, ChallengeTemplate>
+  ) throws -> Challenge {
+    guard let properties = noteProperties[noteIdentifier] else {
+      throw RetrievalError.noSuchPage(noteIdentifier)
+    }
+    for cardTemplateKeyString in properties.cardTemplates {
+      guard
+        let templateKey = ChallengeTemplateArchiveKey(cardTemplateKeyString),
+        templateKey.digest == challengeIdentifier.templateDigest
+      else {
+        continue
+      }
+      let template = try challengeTemplate(for: templateKey, challengeTemplateCache: challengeTemplateCache)
+      return template.challenges[challengeIdentifier.index]
+    }
+    throw RetrievalError.noSuchTemplateKey(challengeIdentifier.templateDigest ?? "nil")
+  }
+
   /// Creates a new page with the given text.
   /// - returns: An identifier that can be used to return the current version of this page
   ///            at any point in time.

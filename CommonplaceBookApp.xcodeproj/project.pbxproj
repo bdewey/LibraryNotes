@@ -16,7 +16,6 @@
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
 		D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D261723193F9A0031AA20 /* VocabularyViewController.swift */; };
 		D3187CA8218B2B1200815772 /* CoverPartiallyPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */; };
-		D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
 		D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */; };
 		D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */; };
@@ -28,8 +27,6 @@
 		D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */; };
 		D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */; };
 		D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */; };
-		D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */; };
-		D31AFAC6229D61EE00ED2B76 /* StudyMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */; };
 		D31AFACA229D61EE00ED2B76 /* ClozeCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA96229D61EB00ED2B76 /* ClozeCard.swift */; };
 		D31AFACB229D61EE00ED2B76 /* ChallengeTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */; };
 		D31AFACE229D61EE00ED2B76 /* Cloze.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA9A229D61EC00ED2B76 /* Cloze.swift */; };
@@ -159,7 +156,6 @@
 		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
 		D30D261723193F9A0031AA20 /* VocabularyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VocabularyViewController.swift; sourceTree = "<group>"; };
 		D3187CA7218B2B1200815772 /* CoverPartiallyPresentationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverPartiallyPresentationController.swift; sourceTree = "<group>"; };
-		D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadataDataSource.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
 		D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeView.swift; sourceTree = "<group>"; };
 		D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TimeInterval+CommonIntervals.swift"; sourceTree = "<group>"; };
@@ -171,8 +167,6 @@
 		D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
 		D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RenderedMarkdown+Stylesheet.swift"; sourceTree = "<group>"; };
 		D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Typography.swift"; sourceTree = "<group>"; };
-		D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IdentifierToStudyMetadata.swift; sourceTree = "<group>"; };
-		D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyMetadata.swift; sourceTree = "<group>"; };
 		D31AFA96229D61EB00ED2B76 /* ClozeCard.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeCard.swift; sourceTree = "<group>"; };
 		D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeTemplate.swift; sourceTree = "<group>"; };
 		D31AFA9A229D61EC00ED2B76 /* Cloze.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cloze.swift; sourceTree = "<group>"; };
@@ -382,7 +376,6 @@
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
-				D31AFA91229D61EB00ED2B76 /* IdentifierToStudyMetadata.swift */,
 				D3E4475B23240CA200F21F91 /* ImageSearchRequest.swift */,
 				D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
@@ -418,8 +411,6 @@
 				D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */,
 				D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */,
 				D30B0242229E513C00F3B459 /* StudyLog.swift */,
-				D31AFA92229D61EB00ED2B76 /* StudyMetadata.swift */,
-				D31AFA78229D61E700ED2B76 /* StudyMetadataDataSource.swift */,
 				D31AFAA1229D61ED00ED2B76 /* StudySession.swift */,
 				D31AFA87229D61E900ED2B76 /* StudyViewController.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
@@ -720,7 +711,6 @@
 				D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */,
 				D30D261823193F9A0031AA20 /* VocabularyViewController.swift in Sources */,
 				D3AD01CE23BEADB7004BB7DF /* SqliteModels.swift in Sources */,
-				D31AFAAC229D61EE00ED2B76 /* StudyMetadataDataSource.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
@@ -741,7 +731,6 @@
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
-				D31AFAC6229D61EE00ED2B76 /* StudyMetadata.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
@@ -773,7 +762,6 @@
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
-				D31AFAC5229D61EE00ED2B76 /* IdentifierToStudyMetadata.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -33,6 +33,18 @@ public protocol NoteStorage: AnyObject {
   /// Deletes a note.
   func deleteNote(noteIdentifier: Note.Identifier) throws
 
+  /// Retrieve a specific challenge.
+  // TODO: When I stop supporting NoteDocumentStorage, I'll no longer need the noteIdentifier.
+  func challenge(
+    noteIdentifier: Note.Identifier,
+    challengeIdentifier: ChallengeIdentifier
+  ) throws -> Challenge
+
+  func eligibleChallengeIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [ChallengeIdentifier]
+
   /// Open the storage.
   func open(completionHandler: ((Bool) -> Void)?)
 
@@ -88,21 +100,12 @@ extension NoteStorage {
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
-    let suppressionDates = studyLog.identifierSuppressionDates()
     return allMetadata
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
-        let challengeTemplates = (try? note(noteIdentifier: name).challengeTemplates) ?? []
-        // TODO: Filter down to eligible cards
-        let eligibleCards = challengeTemplates.cards
-          .filter { challenge -> Bool in
-            guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-              return true
-            }
-            return date >= suppressionDate
-          }
+        let challengeIdentifiers = try? eligibleChallengeIdentifiers(before: date, limitedTo: name)
         return StudySession(
-          eligibleCards,
+          challengeIdentifiers ?? [],
           properties: CardDocumentProperties(
             documentName: name,
             attributionMarkdown: reviewProperties.title,

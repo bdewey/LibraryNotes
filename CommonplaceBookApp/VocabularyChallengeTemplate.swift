@@ -49,8 +49,8 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
     // to manage these identifiers.
     return [
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
     ]
   }
 

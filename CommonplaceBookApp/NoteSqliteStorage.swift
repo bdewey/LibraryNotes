@@ -7,6 +7,8 @@ import GRDB
 import GRDBCombine
 import MiniMarkdown
 
+private var hackDecodeCount = 0
+
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 public final class NoteSqliteStorage: NSObject, NoteStorage {
@@ -46,6 +48,13 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 
   /// How long to wait before autosaving.
   private let autosaveTimeInterval: TimeInterval
+
+  /// Used for decoding challenge templates.
+  private lazy var decoder: JSONDecoder = {
+    let decoder = JSONDecoder()
+    decoder.userInfo = [.markdownParsingRules: parsingRules]
+    return decoder
+  }()
 
   /// The actual autosave timer.
   private var autosaveTimer: Timer? {
@@ -239,6 +248,48 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
     _ = try dbQueue.write { db in
       try Sqlite.Note.deleteOne(db, key: noteIdentifier.rawValue)
+    }
+  }
+
+  public func eligibleChallengeIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [ChallengeIdentifier] {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read { db in
+      let challengeRequest: QueryInterfaceRequest<Sqlite.Challenge>
+      if let noteIdentifier = noteIdentifier {
+        guard let note = try Sqlite.Note.fetchOne(db, key: noteIdentifier.rawValue) else {
+          throw Error.noSuchNote
+        }
+        challengeRequest = note.challenges
+      } else {
+        challengeRequest = Sqlite.Challenge.all()
+      }
+      let records = try challengeRequest
+        .filter(Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due <= date)
+        .fetchAll(db)
+      return records.map {
+        ChallengeIdentifier(templateDigest: $0.challengeTemplateId, index: $0.index)
+      }
+    }
+  }
+
+  public func challenge(
+    noteIdentifier: Note.Identifier,
+    challengeIdentifier: ChallengeIdentifier
+  ) throws -> Challenge {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    guard let templateIdentifier = challengeIdentifier.templateDigest else {
+      throw Error.unknownChallengeTemplate
+    }
+    return try dbQueue.read { db in
+      let template = try challengeTemplate(identifier: templateIdentifier, database: db)
+      return template.challenges[challengeIdentifier.index]
     }
   }
 
@@ -517,16 +568,8 @@ private extension NoteSqliteStorage {
     let challengeTemplateRecords = try Sqlite.ChallengeTemplate
       .filter(Sqlite.ChallengeTemplate.Columns.noteId == identifier.rawValue)
       .fetchAll(db)
-    let decoder = JSONDecoder()
-    decoder.userInfo = [.markdownParsingRules: parsingRules]
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
-      guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
-        throw Error.unknownChallengeType
-      }
-      let templateData = challengeTemplateRecord.rawValue.data(using: .utf8)!
-      let template = try decoder.decode(klass, from: templateData)
-      template.templateIdentifier = challengeTemplateRecord.id
-      return template
+      try challengeTemplate(from: challengeTemplateRecord)
     }
     let noteText = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
     return Note(
@@ -539,6 +582,29 @@ private extension NoteSqliteStorage {
       text: noteText,
       challengeTemplates: challengeTemplates
     )
+  }
+
+  func challengeTemplate(identifier: String, database: Database) throws -> ChallengeTemplate {
+    guard let record = try Sqlite.ChallengeTemplate.fetchOne(database, key: identifier) else {
+      throw Error.unknownChallengeTemplate
+    }
+    return try challengeTemplate(from: record)
+  }
+
+  func challengeTemplate(
+    from challengeTemplateRecord: Sqlite.ChallengeTemplate
+  ) throws -> ChallengeTemplate {
+    guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
+      throw Error.unknownChallengeType
+    }
+    let templateData = challengeTemplateRecord.rawValue.data(using: .utf8)!
+    let template = try decoder.decode(klass, from: templateData)
+    template.templateIdentifier = challengeTemplateRecord.id
+    hackDecodeCount += 1
+    if hackDecodeCount % 20 == 0 {
+      print("Decoded \(hackDecodeCount) templates")
+    }
+    return template
   }
 
   /// Makes sure the database is up-to-date.
