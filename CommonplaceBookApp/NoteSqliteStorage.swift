@@ -164,9 +164,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     defer {
       try? FileManager.default.removeItem(at: tempURL)
     }
-    do {
-      let tempQueue = try DatabaseQueue(path: tempURL.path)
-      try dbQueue.backup(to: tempQueue)
+    try dbQueue.writeWithoutTransaction { db in
+      try db.execute(sql: "VACUUM INTO '\(tempURL.path)'")
     }
     let coordinator = NSFileCoordinator(filePresenter: self)
     var coordinatorError: NSError?
