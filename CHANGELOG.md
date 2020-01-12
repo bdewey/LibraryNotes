@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Commonplace Book now supports a new file format: .notedb, which is a single sqlite file. It is compatible with iCloud Document Storage though.
+- Database storage is the default for new documents.
+- Database storage has full-text search!
+
 ## [0.14.0] - 2020-01-02
 
 ### Changed
