@@ -341,7 +341,7 @@ private extension DocumentTableController {
     notebook.studySession(filter: nil, date: Date()) { studySession in
       self.cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
-          cardsPerDocument[card.properties.documentName] = cardsPerDocument[card.properties.documentName, default: 0] + 1
+          cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
         }
       DDLogInfo(
         "studySession.count = \(studySession.count). " +

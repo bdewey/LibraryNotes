@@ -40,11 +40,7 @@ open class ChallengeTemplate: Codable {
   /// the template before creating any challenges from it.
   ///
   /// Can only be set from nil to non-nil once; immutable once set.
-  public var templateIdentifier: String? {
-    willSet {
-      precondition(templateIdentifier == nil)
-    }
-  }
+  public var templateIdentifier: String?
 
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.

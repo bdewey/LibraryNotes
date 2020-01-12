@@ -3,7 +3,14 @@
 import Foundation
 import MiniMarkdown
 
+/// A sequence of challenges for the learner to respond to.
 public struct StudySession {
+  public struct SessionChallengeIdentifier {
+    public let noteIdentifier: Note.Identifier
+    public let noteTitle: String
+    public let challengeIdentifier: ChallengeIdentifier
+  }
+
   public struct AttributedCard {
     public let card: Challenge
     public let properties: CardDocumentProperties
@@ -15,7 +22,7 @@ public struct StudySession {
   }
 
   /// The current set of cards to study.
-  private var cards: [AttributedCard]
+  private var sessionChallengeIdentifiers: [SessionChallengeIdentifier]
 
   /// The current position in `cards`
   private var currentIndex: Int
@@ -43,52 +50,52 @@ public struct StudySession {
   }
 
   var allIdentifiers: Set<ChallengeIdentifier> {
-    return cards.allIdentifiers
+    return sessionChallengeIdentifiers.allIdentifiers
   }
 
   /// Creates a study session where all cards come from a single document.
-  public init<Cards: Sequence>(
-    _ cards: Cards,
+  public init<ChallengeIdentifiers: Sequence>(
+    _ challengeIdentifiers: ChallengeIdentifiers,
     properties: CardDocumentProperties
-  ) where Cards.Element == Challenge {
-    let documentCards = cards.shuffled().map {
-      AttributedCard(card: $0, attributes: properties)
+  ) where ChallengeIdentifiers.Element == ChallengeIdentifier {
+    let sessionChallengeIdentifiers = challengeIdentifiers.shuffled().map {
+      SessionChallengeIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, challengeIdentifier: $0)
     }
-    self.cards = documentCards
-    currentIndex = self.cards.startIndex
+    self.sessionChallengeIdentifiers = sessionChallengeIdentifiers
+    currentIndex = self.sessionChallengeIdentifiers.startIndex
   }
 
   /// Creates an empty study session.
   public init() {
-    self.cards = []
+    self.sessionChallengeIdentifiers = []
     self.currentIndex = 0
   }
 
   /// The current card to study. Nil if we're done.
-  public var currentCard: AttributedCard? {
-    guard currentIndex < cards.endIndex else { return nil }
-    return cards[currentIndex]
+  public var currentCard: SessionChallengeIdentifier? {
+    guard currentIndex < sessionChallengeIdentifiers.endIndex else { return nil }
+    return sessionChallengeIdentifiers[currentIndex]
   }
 
   /// Record a correct or incorrect answer for the current card, and advance `currentCard`
   public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentCard else { return }
-    let identifier = currentCard.card.challengeIdentifier
-    var statistics = results[currentCard.card.challengeIdentifier, default: AnswerStatistics.empty]
+    let identifier = currentCard.challengeIdentifier
+    var statistics = results[currentCard.challengeIdentifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1
     } else {
       answeredIncorrectly.insert(identifier)
-      cards.append(currentCard)
+      sessionChallengeIdentifiers.append(currentCard)
       statistics.incorrect += 1
     }
-    results[currentCard.card.challengeIdentifier] = statistics
+    results[currentCard.challengeIdentifier] = statistics
     currentIndex += 1
   }
 
   public mutating func limit(to cardCount: Int) {
-    cards = Array(cards.prefix(cardCount))
+    sessionChallengeIdentifiers = Array(sessionChallengeIdentifiers.prefix(cardCount))
   }
 
   public func limiting(to cardCount: Int) -> StudySession {
@@ -99,25 +106,25 @@ public struct StudySession {
 
   /// Number of cards remaining in the study session.
   public var remainingCards: Int {
-    return cards.endIndex - currentIndex
+    return sessionChallengeIdentifiers.endIndex - currentIndex
   }
 
   public static func += (lhs: inout StudySession, rhs: StudySession) {
-    lhs.cards.append(contentsOf: rhs.cards)
-    lhs.cards.shuffle()
+    lhs.sessionChallengeIdentifiers.append(contentsOf: rhs.sessionChallengeIdentifiers)
+    lhs.sessionChallengeIdentifiers.shuffle()
     lhs.currentIndex = 0
   }
 }
 
 extension StudySession: Collection {
-  public var startIndex: Int { return cards.startIndex }
-  public var endIndex: Int { return cards.endIndex }
+  public var startIndex: Int { return sessionChallengeIdentifiers.startIndex }
+  public var endIndex: Int { return sessionChallengeIdentifiers.endIndex }
   public func index(after i: Int) -> Int {
-    return cards.index(after: i)
+    return sessionChallengeIdentifiers.index(after: i)
   }
 
-  public subscript(position: Int) -> AttributedCard {
-    return cards[position]
+  public subscript(position: Int) -> SessionChallengeIdentifier {
+    return sessionChallengeIdentifiers[position]
   }
 }
 
@@ -142,9 +149,9 @@ extension StudySession {
   }
 }
 
-extension Sequence where Element == StudySession.AttributedCard {
+extension Sequence where Element == StudySession.SessionChallengeIdentifier {
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<ChallengeIdentifier> {
-    return reduce(into: Set<ChallengeIdentifier>()) { $0.insert($1.card.challengeIdentifier) }
+    return reduce(into: Set<ChallengeIdentifier>()) { $0.insert($1.challengeIdentifier) }
   }
 }

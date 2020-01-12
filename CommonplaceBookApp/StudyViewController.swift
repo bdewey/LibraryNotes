@@ -235,22 +235,38 @@ public final class StudyViewController: UIViewController {
 
   /// Creates a card view for a card.
   private func makeCardView(
-    for cardFromDocument: StudySession.AttributedCard?,
+    for sessionChallengeIdentifier: StudySession.SessionChallengeIdentifier?,
     completion: @escaping (ChallengeView?) -> Void
   ) {
-    guard let cardFromDocument = cardFromDocument else { completion(nil); return }
-    let cardView = cardFromDocument.card.challengeView(
-      document: notebook,
-      properties: cardFromDocument.properties
-    )
-    cardView.delegate = self
-    view.addSubview(cardView)
-    cardView.snp.makeConstraints { make in
-      make.left.right.equalTo(self.view.readableContentGuide)
-      make.centerY.equalToSuperview()
+    guard let sessionChallengeIdentifier = sessionChallengeIdentifier else {
+      completion(nil)
+      return
     }
-    cardView.layer.cornerRadius = 8
-    completion(cardView)
+    do {
+      let challenge = try notebook.challenge(
+        noteIdentifier: sessionChallengeIdentifier.noteIdentifier,
+        challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
+      )
+      let challengeView = challenge.challengeView(
+        document: notebook,
+        properties: CardDocumentProperties(
+          documentName: sessionChallengeIdentifier.noteIdentifier,
+          attributionMarkdown: sessionChallengeIdentifier.noteTitle,
+          parsingRules: notebook.parsingRules
+        )
+      )
+      challengeView.delegate = self
+      view.addSubview(challengeView)
+      challengeView.snp.makeConstraints { make in
+        make.left.right.equalTo(self.view.readableContentGuide)
+        make.centerY.equalToSuperview()
+      }
+      challengeView.layer.cornerRadius = 8
+      completion(challengeView)
+    } catch {
+      DDLogError("Unexpected error generating challenge view: \(error)")
+      completion(nil)
+    }
   }
 }
 

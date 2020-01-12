@@ -16,7 +16,7 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
   public init(fileURL url: URL, parsingRules: ParsingRules) {
     self.parsingRules = parsingRules
     self.noteArchive = NoteArchive(parsingRules: parsingRules)
-    notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
+    self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     super.init(fileURL: url)
   }
 
@@ -68,6 +68,37 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
   }
 
+  public func eligibleChallengeIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [ChallengeIdentifier] {
+    guard let noteIdentifier = noteIdentifier else {
+      assertionFailure("Note documents don't support returning identifiers from all documents")
+      return []
+    }
+    let suppressionDates = studyLog.identifierSuppressionDates()
+    return try noteArchiveQueue.sync {
+      let note = try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
+      let eligibleCards = note.challengeTemplates.cards
+        .filter { challenge -> Bool in
+          guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
+            return true
+          }
+          return date >= suppressionDate
+        }
+      return eligibleCards.map { $0.challengeIdentifier }
+    }
+  }
+
+  public func challenge(
+    noteIdentifier: Note.Identifier,
+    challengeIdentifier: ChallengeIdentifier
+  ) throws -> Challenge {
+    return try noteArchiveQueue.sync {
+      try noteArchive.challenge(noteIdentifier: noteIdentifier, challengeIdentifier: challengeIdentifier, challengeTemplateCache: challengeTemplateCache)
+    }
+  }
+
   public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
     try noteArchiveQueue.sync {
       let existingNote = try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
@@ -85,6 +116,10 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     invalidateSavedSnippets()
     schedulePropertyBatchUpdate()
     return identifier
+  }
+
+  public func search(for searchPattern: String) throws -> [Note.Identifier] {
+    return []
   }
 
   public func flush() {
@@ -206,6 +241,15 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     }
     return currentWrapper.regularFileContents
   }
+
+  public var assetKeys: [String] {
+    guard let assetFileWrappers = assetsFileWrapper.fileWrappers else {
+      return []
+    }
+    return assetFileWrappers.keys.map {
+      "\(BundleWrapperKey.assets)/\($0)"
+    }
+  }
 }
 
 /// Load / save support
@@ -298,12 +342,8 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  /// Update the notebook with the result of a study session.
-  ///
-  /// - parameter studySession: The completed study session.
-  /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date = Date()) {
-    studyLog.updateStudySessionResults(studySession, on: date)
+  func recordStudyEntry(_ entry: StudyLog.Entry) throws {
+    studyLog.append(entry)
     invalidateSavedStudyLog()
     notesDidChangeSubject.send()
   }
@@ -316,8 +356,7 @@ extension NoteDocumentStorage {
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  public func storeAssetData(_ data: Data, typeHint: String) -> String {
-    let key = "\(data.sha1Digest()).\(typeHint)"
+  public func storeAssetData(_ data: Data, key: String) -> String {
     let assetsWrapper = assetsFileWrapper
     if assetsWrapper.fileWrappers![key] == nil {
       let imageFileWrapper = FileWrapper(regularFileWithContents: data)

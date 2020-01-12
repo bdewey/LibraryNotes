@@ -2,7 +2,7 @@
 
 import Foundation
 
-public struct Note {
+public struct Note: Equatable {
   /// Identifies a note.
   public struct Identifier: Hashable, RawRepresentable {
     public let rawValue: String
@@ -41,6 +41,14 @@ public struct Note {
       self.title = title
       self.containsText = containsText
     }
+
+    public static func == (lhs: Metadata, rhs: Metadata) -> Bool {
+      return
+        abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) < 0.001 &&
+        lhs.hashtags == rhs.hashtags &&
+        lhs.title == rhs.title &&
+        lhs.containsText == rhs.containsText
+    }
   }
 
   public var metadata: Metadata
@@ -55,6 +63,15 @@ public struct Note {
     self.metadata = metadata
     self.text = text
     self.challengeTemplates = challengeTemplates
+  }
+
+  public static func == (lhs: Note, rhs: Note) -> Bool {
+    if lhs.metadata != rhs.metadata || lhs.text != rhs.text {
+      return false
+    }
+    let lhsIdentifiers = Set(lhs.challengeTemplates.map { $0.templateIdentifier })
+    let rhsIdentifiers = Set(rhs.challengeTemplates.map { $0.templateIdentifier })
+    return lhsIdentifiers == rhsIdentifiers
   }
 }
 

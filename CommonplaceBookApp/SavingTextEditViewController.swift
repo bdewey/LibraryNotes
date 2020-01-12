@@ -86,13 +86,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
     saveIfNeeded {
       DDLogInfo("SavingTextEditViewController: Flushing and canceling timer")
-      self.noteStorage.flush()
+      try? self.noteStorage.flush()
       self.autosaveTimer?.invalidate()
       self.autosaveTimer = nil
     }
   }
 
-  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) -> String {
-    return noteStorage.storeAssetData(imageData, typeHint: suffix)
+  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String {
+    let key = imageData.sha1Digest() + "." + suffix
+    return try noteStorage.storeAssetData(imageData, key: key)
   }
 }

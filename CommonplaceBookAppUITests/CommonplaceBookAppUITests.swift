@@ -3,7 +3,7 @@
 import XCTest
 
 private enum Identifiers {
-  static let backButton = "Back"
+  static let backButton = "Interactive Notebook"
   static let currentCardView = "current-card"
   static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"
@@ -68,6 +68,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
   func testNewDocumentButtonWorks() {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     newDocumentButton.tap()
+    application.buttons["Text"].tap()
     waitUntilElementExists(application.textViews[Identifiers.editDocumentView])
   }
 
@@ -90,7 +91,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
   func testTableHasSingleRowAfterClozeContent() {
     createDocument(with: TestContent.singleCloze)
     waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
-    let documentList = application.collectionViews[Identifiers.documentList]
+    let documentList = application.tables[Identifiers.documentList]
     waitUntilElementExists(documentList)
     XCTAssertEqual(documentList.cells.count, 1)
   }
@@ -105,7 +106,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
     waitUntilElementExists(finalTitleLabel)
     wait(
       for: NSPredicate(format: "cells.count == \(numberOfFiles)"),
-      evaluatedWith: application.collectionViews[Identifiers.documentList],
+      evaluatedWith: application.tables[Identifiers.documentList],
       message: "Expected \(numberOfFiles) rows"
     )
   }
@@ -122,15 +123,15 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testRotation() {
     createDocument(with: TestContent.doubleCloze)
-    let collectionView = application.collectionViews[Identifiers.documentList]
-    let cell = collectionView.cells["Two cloze document"]
+    let tableView = application.tables[Identifiers.documentList]
+    let cell = tableView.cells["Two cloze document"]
     waitUntilElementExists(cell)
-    let expectedWidthAfterRotation = collectionView.frame.height
-    XCTAssertEqual(collectionView.frame.width, cell.frame.width)
+    let expectedWidthAfterRotation = tableView.frame.height
+    XCTAssertEqual(tableView.frame.width, cell.frame.width)
     XCUIDevice.shared.orientation = .landscapeLeft
-    XCTAssertTrue(collectionView.exists)
+    XCTAssertTrue(tableView.exists)
     waitUntilElementExists(cell)
-    XCTAssertEqual(collectionView.frame.width, cell.frame.width)
+    XCTAssertEqual(tableView.frame.width, cell.frame.width)
     XCTAssertEqual(expectedWidthAfterRotation, cell.frame.width)
   }
 
@@ -202,20 +203,22 @@ extension CommonplaceBookAppUITests {
 
   private func createDocument(with text: String) {
     application.buttons[Identifiers.newDocumentButton].tap()
+    application.buttons["Text"].tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     editView.typeText(text)
-    editView.buttons[Identifiers.backButton].tap()
+    application.buttons[Identifiers.backButton].tap()
   }
 
   private func createDocument(with text: [String]) {
     application.buttons[Identifiers.newDocumentButton].tap()
+    application.buttons["Text"].tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     for line in text {
       editView.typeText(line)
     }
-    editView.buttons[Identifiers.backButton].tap()
+    application.buttons[Identifiers.backButton].tap()
   }
 
   private func study(expectedCards: Int, noCardsLeft: Bool = true) {
@@ -223,12 +226,10 @@ extension CommonplaceBookAppUITests {
     waitUntilElementEnabled(studyButton)
     studyButton.tap()
     let currentCard = application.otherElements[Identifiers.currentCardView]
-    let gotIt = application.buttons["Got it"]
     for _ in 0 ..< expectedCards {
       waitUntilElementExists(currentCard)
       currentCard.tap()
-      waitUntilElementExists(gotIt)
-      gotIt.tap()
+      currentCard.swipeRight()
     }
     if noCardsLeft {
       // After going through all clozes we should automatically go back to the document list.

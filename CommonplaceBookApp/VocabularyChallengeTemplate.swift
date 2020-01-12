@@ -49,8 +49,8 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
     // to manage these identifiers.
     return [
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
     ]
   }
 
@@ -109,7 +109,7 @@ extension VocabularyChallengeTemplate {
       var image: UIImage?
       if let notebook = document as? NoteStorage,
         let assetKey = imageAsset,
-        let data = notebook.data(for: assetKey),
+        let data = try? notebook.data(for: assetKey),
         let documentImage = UIImage(data: data) {
         image = documentImage
       }

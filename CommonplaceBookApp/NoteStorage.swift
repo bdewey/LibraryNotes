@@ -7,6 +7,9 @@ import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: AnyObject {
+  /// The URL for the storage.
+  var fileURL: URL { get }
+
   /// The parsing rules used to interpret text contents and extract properties from the note.
   var parsingRules: ParsingRules { get }
 
@@ -30,29 +33,45 @@ public protocol NoteStorage: AnyObject {
   /// Deletes a note.
   func deleteNote(noteIdentifier: Note.Identifier) throws
 
+  /// Retrieve a specific challenge.
+  // TODO: When I stop supporting NoteDocumentStorage, I'll no longer need the noteIdentifier.
+  func challenge(
+    noteIdentifier: Note.Identifier,
+    challengeIdentifier: ChallengeIdentifier
+  ) throws -> Challenge
+
+  func eligibleChallengeIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [ChallengeIdentifier]
+
+  func search(for searchPattern: String) throws -> [Note.Identifier]
+
+  /// Open the storage.
+  func open(completionHandler: ((Bool) -> Void)?)
+
   /// Ensure contents are saved to stable storage.
-  func flush()
+  func flush() throws
 
   // MARK: - Asset storage.
 
   /// Gets data contained in a file wrapper
   /// - parameter fileWrapperKey: A path to a named file wrapper. E.g., "assets/image.png"
   /// - returns: The data contained in that wrapper if it exists, nil otherwise.
-  func data<S: StringProtocol>(for fileWrapperKey: S) -> Data?
+  func data<S: StringProtocol>(for fileWrapperKey: S) throws -> Data?
+
+  /// All assets.
+  var assetKeys: [String] { get }
 
   /// Stores asset data into the document.
   /// - parameter data: The asset data to store
   /// - parameter typeHint: A hint about the data type, e.g., "jpeg" -- will be used for the data key
   /// - returns: A key that can be used to get the data later.
-  func storeAssetData(_ data: Data, typeHint: String) -> String
+  func storeAssetData(_ data: Data, key: String) throws -> String
 
   // MARK: - Study sessions
 
-  /// Update the notebook with the result of a study session.
-  ///
-  /// - parameter studySession: The completed study session.
-  /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date)
+  func recordStudyEntry(_ entry: StudyLog.Entry) throws
 
   /// The complete record of all study sessions.
   var studyLog: StudyLog { get }
@@ -83,21 +102,12 @@ extension NoteStorage {
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
-    let suppressionDates = studyLog.identifierSuppressionDates()
     return allMetadata
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
-        let challengeTemplates = (try? note(noteIdentifier: name).challengeTemplates) ?? []
-        // TODO: Filter down to eligible cards
-        let eligibleCards = challengeTemplates.cards
-          .filter { challenge -> Bool in
-            guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-              return true
-            }
-            return date >= suppressionDate
-          }
+        let challengeIdentifiers = try? eligibleChallengeIdentifiers(before: date, limitedTo: name)
         return StudySession(
-          eligibleCards,
+          challengeIdentifiers ?? [],
           properties: CardDocumentProperties(
             documentName: name,
             attributionMarkdown: reviewProperties.title,
@@ -106,6 +116,19 @@ extension NoteStorage {
         )
       }
       .reduce(into: StudySession()) { $0 += $1 }
+  }
+
+  /// Update the notebook with the result of a study session.
+  ///
+  /// - parameter studySession: The completed study session.
+  /// - parameter date: The date the study session took place.
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws {
+    let entries = studySession.results.map { tuple -> StudyLog.Entry in
+      StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
+    }
+    for entry in entries {
+      try recordStudyEntry(entry)
+    }
   }
 
   /// All hashtags used across all pages, sorted.
@@ -123,7 +146,7 @@ extension NoteStorage {
       guard
         let self = self,
         let imageNode = node as? Image,
-        let data = self.data(for: imageNode.url),
+        let data = try? self.data(for: imageNode.url),
         let image = data.image(maxSize: 200)
       else {
         return NSAttributedString(string: node.markdown, attributes: attributes)

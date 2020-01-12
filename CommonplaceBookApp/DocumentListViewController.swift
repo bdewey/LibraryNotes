@@ -46,7 +46,6 @@ final class DocumentListViewController: UIViewController {
   public let notebook: NoteStorage
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
-  private var currentSpotlightQuery: CSSearchQuery?
   private var notebookSubscription: AnyCancellable?
 
   private lazy var documentBrowserButton: UIBarButtonItem = {
@@ -277,16 +276,11 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     guard searchController.isActive else {
       dataSource?.hashtags = []
       dataSource?.filteredPageIdentifiers = nil
-      currentSpotlightQuery = nil
       updateStudySession()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
-    var queryString = """
-    contentDescription == "*\(pattern)*"dc
-    """
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
-      queryString.append(" && keywords == \"\(selectedHashtag)\"dc")
       dataSource?.hashtags = []
       dataSource?.filteredHashtag = selectedHashtag
     } else {
@@ -295,23 +289,13 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
         .filter { $0.fuzzyMatch(pattern: pattern) }
       dataSource?.filteredHashtag = nil
     }
-    DDLogInfo("Issuing query: \(queryString)")
-    currentSpotlightQuery?.cancel()
-    let query = CSSearchQuery(queryString: queryString, attributes: nil)
-    var allIdentifiers: [Note.Identifier] = []
-    query.foundItemsHandler = { items in
-      allIdentifiers.append(contentsOf: items.map { Note.Identifier(rawValue: $0.uniqueIdentifier) })
+    DDLogInfo("Issuing query: \(pattern)")
+    do {
+      let allIdentifiers = try notebook.search(for: pattern)
+      dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
+    } catch {
+      DDLogError("Error issuing full text query: \(error)")
     }
-    query.completionHandler = { _ in
-      DDLogInfo("Found identifiers: \(allIdentifiers)")
-      DispatchQueue.main.async {
-        if searchController.isActive, self.currentSpotlightQuery == query {
-          self.dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
-        }
-      }
-    }
-    query.start()
-    currentSpotlightQuery = query
   }
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
@@ -329,8 +313,12 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     _ studyViewController: StudyViewController,
     didFinishSession session: StudySession
   ) {
-    notebook.updateStudySessionResults(session, on: Date())
-    updateStudySession()
+    do {
+      try notebook.updateStudySessionResults(session, on: Date())
+      updateStudySession()
+    } catch {
+      DDLogError("Unexpected error recording study session results: \(error)")
+    }
   }
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
