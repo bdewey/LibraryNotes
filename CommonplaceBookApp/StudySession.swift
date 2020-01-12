@@ -5,7 +5,6 @@ import MiniMarkdown
 
 /// A sequence of challenges for the learner to respond to.
 public struct StudySession {
-
   public struct SessionChallengeIdentifier {
     public let noteIdentifier: Note.Identifier
     public let noteTitle: String

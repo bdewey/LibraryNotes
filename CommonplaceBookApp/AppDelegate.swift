@@ -245,7 +245,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 //        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
       DDLogInfo("In open completion handler. \(properties)")
-      if success && !self.isUITesting {
+      if success, !self.isUITesting {
         self.openedDocumentBookmark = try? url.bookmarkData()
       }
     })

@@ -80,12 +80,12 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     return try noteArchiveQueue.sync {
       let note = try noteArchive.note(noteIdentifier: noteIdentifier, challengeTemplateCache: challengeTemplateCache)
       let eligibleCards = note.challengeTemplates.cards
-         .filter { challenge -> Bool in
-           guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
-             return true
-           }
-           return date >= suppressionDate
-         }
+        .filter { challenge -> Bool in
+          guard let suppressionDate = suppressionDates[challenge.challengeIdentifier] else {
+            return true
+          }
+          return date >= suppressionDate
+        }
       return eligibleCards.map { $0.challengeIdentifier }
     }
   }

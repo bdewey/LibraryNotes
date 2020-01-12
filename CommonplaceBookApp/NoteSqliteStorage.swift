@@ -239,12 +239,12 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       if !searchPattern.trimmingCharacters(in: .whitespaces).isEmpty {
         let pattern = try db.makeFTS5Pattern(rawPattern: searchPattern.trimmingCharacters(in: .whitespaces).appending("*"), forTable: "noteFullText")
         let sql = """
-SELECT noteText.*
-FROM noteText
-JOIN noteFullText
-  ON noteFullText.rowid = noteText.rowid
-  AND noteFullText MATCH ?
-"""
+        SELECT noteText.*
+        FROM noteText
+        JOIN noteFullText
+          ON noteFullText.rowid = noteText.rowid
+          AND noteFullText MATCH ?
+        """
         let noteTexts = try Sqlite.NoteText.fetchAll(db, sql: sql, arguments: [pattern])
         return noteTexts.map { Note.Identifier(rawValue: $0.noteId) }
       } else {
