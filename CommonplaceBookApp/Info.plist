@@ -6,8 +6,6 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
 	<string>Commonplace</string>
-	<key>UISupportsDocumentBrowser</key>
-	<true/>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -176,6 +174,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
 	<key>UTExportedTypeDeclarations</key>
 	<array>
 		<dict>
@@ -236,12 +236,12 @@
 			</dict>
 		</dict>
 		<dict>
-			<key>UTTypeDescription</key>
-			<string>Note Database</string>
 			<key>UTTypeConformsTo</key>
 			<array>
 				<string>public.data</string>
 			</array>
+			<key>UTTypeDescription</key>
+			<string>Note Database</string>
 			<key>UTTypeIdentifier</key>
 			<string>org.brians-brain.notedb</string>
 			<key>UTTypeTagSpecification</key>
