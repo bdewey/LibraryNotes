@@ -45,6 +45,8 @@ public protocol NoteStorage: AnyObject {
     limitedTo noteIdentifier: Note.Identifier?
   ) throws -> [ChallengeIdentifier]
 
+  func search(for searchPattern: String) throws -> [Note.Identifier]
+
   /// Open the storage.
   func open(completionHandler: ((Bool) -> Void)?)
 

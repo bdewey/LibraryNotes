@@ -231,6 +231,29 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
+  public func search(for searchPattern: String) throws -> [Note.Identifier] {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read { db in
+      if !searchPattern.trimmingCharacters(in: .whitespaces).isEmpty {
+        let pattern = try db.makeFTS5Pattern(rawPattern: searchPattern.trimmingCharacters(in: .whitespaces).appending("*"), forTable: "noteFullText")
+        let sql = """
+SELECT noteText.*
+FROM noteText
+JOIN noteFullText
+  ON noteFullText.rowid = noteText.rowid
+  AND noteFullText MATCH ?
+"""
+        let noteTexts = try Sqlite.NoteText.fetchAll(db, sql: sql, arguments: [pattern])
+        return noteTexts.map { Note.Identifier(rawValue: $0.noteId) }
+      } else {
+        let noteTexts = try Sqlite.NoteText.fetchAll(db)
+        return noteTexts.map { Note.Identifier(rawValue: $0.noteId) }
+      }
+    }
+  }
+
   /// Gets a note with a specific identifier.
   public func note(noteIdentifier: Note.Identifier) throws -> Note {
     guard let dbQueue = dbQueue else {
@@ -625,6 +648,12 @@ private extension NoteSqliteStorage {
         table.column("text", .text).notNull()
         table.column("noteId", .text).notNull().indexed().unique().references("note", onDelete: .cascade)
       })
+
+      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
+        table.synchronize(withTable: "noteText")
+        table.column("text")
+        table.tokenizer = .porter(wrapping: .unicode61())
+      }
 
       try database.create(table: "hashtag", body: { table in
         table.column("id", .text).primaryKey()

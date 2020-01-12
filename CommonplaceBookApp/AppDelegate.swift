@@ -56,7 +56,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     window.makeKeyAndVisible()
     self.window = window
 
-    if let openedDocumentBookmarkData = openedDocumentBookmark {
+    if !isUITesting, let openedDocumentBookmarkData = openedDocumentBookmark {
       DDLogInfo("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
@@ -143,8 +143,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   }
 
+  private lazy var isUITesting: Bool = {
+    CommandLine.arguments.contains("--uitesting")
+  }()
+
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
-    if CommandLine.arguments.contains("--uitesting") {
+    if isUITesting {
       let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
       completion(makeDirectoryProvider(at: container, deleteExistingContents: true))
       return

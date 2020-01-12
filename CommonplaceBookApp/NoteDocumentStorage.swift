@@ -118,6 +118,10 @@ public final class NoteDocumentStorage: UIDocument, NoteStorage {
     return identifier
   }
 
+  public func search(for searchPattern: String) throws -> [Note.Identifier] {
+    return []
+  }
+
   public func flush() {
     save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
