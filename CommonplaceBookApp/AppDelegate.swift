@@ -260,23 +260,17 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
-    let url = directoryURL.appendingPathComponent(UUID().uuidString).appendingPathExtension("notebundle")
-    let document = NoteDocumentStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
-    document.save(to: url, for: .forCreating) { saveSuccess in
-      guard saveSuccess else {
-        DDLogError("Could not save document to \(url): \(document.previousError?.localizedDescription ?? "nil")")
-        importHandler(nil, .none)
-        return
-      }
-      document.close { closeSuccess in
-        guard closeSuccess else {
-          DDLogError("Could not close document at \(url): \(document.previousError?.localizedDescription ?? "nil")")
-          importHandler(nil, .none)
-          return
-        }
-        importHandler(url, .copy)
-      }
+    let url = directoryURL.appendingPathComponent("commonplace").appendingPathExtension("notedb")
+    do {
+      let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
+      try document.open()
+      try document.flush()
+    } catch {
+      DDLogError("Error creating new document: \(error)")
+      importHandler(nil, .none)
+      return
     }
+    importHandler(url, .copy)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
