@@ -7,7 +7,7 @@ import MiniMarkdown
 /// Extensible enum for the different types of card templates.
 /// Also maintains a mapping between each type and the specific CardTemplate class
 /// associated with that type.
-public struct ChallengeTemplateType: RawRepresentable, Equatable {
+public struct ChallengeTemplateType: RawRepresentable, Hashable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way
@@ -35,7 +35,18 @@ public struct ChallengeTemplateType: RawRepresentable, Equatable {
 /// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-open class ChallengeTemplate: Codable {
+open class ChallengeTemplate: RawRepresentable {
+  public var rawValue: String {
+    assertionFailure("Subclasses should override")
+    return ""
+  }
+
+  public init() {}
+  
+  required public init?(rawValue: String) {
+    assertionFailure("Subclasses should call the designated initializer instead.")
+  }
+
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
@@ -48,9 +59,6 @@ open class ChallengeTemplate: Codable {
 
   /// The specific cards from this template.
   open var challenges: [Challenge] { return [] }
-
-  /// Public initializer so we can subclass this outside of this module.
-  public init() {}
 
   public enum CommonErrors: Error {
     /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]

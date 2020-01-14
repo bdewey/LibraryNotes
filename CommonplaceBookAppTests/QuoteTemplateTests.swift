@@ -44,23 +44,14 @@ final class QuoteTemplateTests: XCTestCase {
   func testSerialization() {
     let nodes = ParsingRules().parse(testContent)
     let quoteTemplates = QuoteTemplate.extract(from: nodes)
-    let data = try! JSONEncoder().encode(quoteTemplates)
-    let decoder = JSONDecoder()
-    decoder.userInfo[.markdownParsingRules] = ParsingRules()
-    let decodedTemplates = try! decoder.decode([QuoteTemplate].self, from: data)
+    let strings = quoteTemplates.map { $0.rawValue }
+    let decodedTemplates = strings.map { QuoteTemplate(rawValue: $0) }
     XCTAssertEqual(decodedTemplates, quoteTemplates)
   }
 
   func testYamlEncodingIsJustMarkdown() {
-    do {
-      let text = try YAMLEncoder().encode(contentWithCloze)
-      print(text)
-      let decoder = YAMLDecoder()
-      let decoded = try decoder.decode(QuoteTemplate.self, from: text, userInfo: [.markdownParsingRules: ParsingRules.commonplace])
-      XCTAssertEqual(decoded.challenges.count, 1)
-    } catch {
-      XCTFail("Unexpected error: \(error)")
-    }
+    let decoded = QuoteTemplate(rawValue: contentWithCloze)
+    XCTAssertEqual(decoded?.challenges.count, 1)
   }
 
   func testRenderCloze() {

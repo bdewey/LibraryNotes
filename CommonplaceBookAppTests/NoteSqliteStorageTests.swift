@@ -285,6 +285,36 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
     waitForExpectations(timeout: 20, handler: nil)
   }
+
+  func testChallengeStabilityAcrossUnrelatedEdits() {
+    do {
+      let database = try makeAndOpenEmptyDatabase()
+      defer {
+        try? FileManager.default.removeItem(at: database.fileURL)
+      }
+      let originalText = """
+      # Shakespeare quotes
+
+      > To be, or not to be, that is the question. (Hamlet)
+
+      """
+      let modifiedText = originalText.appending("> Out, out, damn spot! (Macbeth)\n")
+      let noteIdentifier = try database.createNote(Note(markdown: originalText, parsingRules: ParsingRules.commonplace))
+      let originalNote = try database.note(noteIdentifier: noteIdentifier)
+      try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
+        var note = note
+        XCTAssertEqual(note.challengeTemplates.count, 1)
+        note.updateMarkdown(modifiedText, parsingRules: ParsingRules.commonplace)
+        XCTAssertEqual(note.challengeTemplates.count, 2)
+        return note
+      })
+      let modifiedNote = try database.note(noteIdentifier: noteIdentifier)
+      XCTAssertEqual(originalNote.challengeTemplates[0].templateIdentifier, modifiedNote.challengeTemplates[0].templateIdentifier)
+      XCTAssertEqual(2, modifiedNote.challengeTemplates.count)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {
