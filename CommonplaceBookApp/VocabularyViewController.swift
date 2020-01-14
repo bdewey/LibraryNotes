@@ -46,8 +46,7 @@ final class VocabularyViewController: UIViewController {
   @objc private func didTapAddButton() {
     let template = VocabularyChallengeTemplate(
       front: VocabularyChallengeTemplate.Word(text: "", language: "es"),
-      back: VocabularyChallengeTemplate.Word(text: "", language: "en"),
-      parsingRules: notebook.parsingRules
+      back: VocabularyChallengeTemplate.Word(text: "", language: "en")
     )
     let viewController = UIHostingController(
       rootView: EditVocabularyView(notebook: notebook, vocabularyTemplate: template, onCommit: { [weak self] in

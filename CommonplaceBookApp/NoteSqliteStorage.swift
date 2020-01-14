@@ -71,6 +71,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
+    case cannotDecodeTemplate = "Cannot decode challenge template."
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
     case noSuchAsset = "The specified asset does not exist."
@@ -535,11 +536,9 @@ private extension NoteSqliteStorage {
       .map { $0.id }
       .asSet()
 
-    let encoder = JSONEncoder()
     for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
-      let templateData = try encoder.encode(template)
-      let templateString = String(data: templateData, encoding: .utf8)!
+      let templateString = template.rawValue
       let record = Sqlite.ChallengeTemplate(
         id: newTemplateIdentifier,
         type: template.type.rawValue,
@@ -620,8 +619,9 @@ private extension NoteSqliteStorage {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
     }
-    let templateData = challengeTemplateRecord.rawValue.data(using: .utf8)!
-    let template = try decoder.decode(klass, from: templateData)
+    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) else {
+      throw Error.cannotDecodeTemplate
+    }
     template.templateIdentifier = challengeTemplateRecord.id
     hackDecodeCount += 1
     if hackDecodeCount % 20 == 0 {
@@ -763,9 +763,4 @@ extension NoteSqliteStorage: NSFilePresenter {
       DDLogError("Unexpected error re-opening database after external change: \(error)")
     }
   }
-}
-
-private extension Sequence where Element: Hashable {
-  /// Converts the receiver into a set.
-  func asSet() -> Set<Element> { Set(self) }
 }

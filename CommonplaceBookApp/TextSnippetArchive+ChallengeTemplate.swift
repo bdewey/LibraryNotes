@@ -32,7 +32,7 @@ public struct ChallengeTemplateArchiveKey: LosslessStringConvertible, Hashable {
 /// Extensions to do type-safe insertion and extraction of ChallengeTemplate instances.
 public extension TextSnippetArchive {
   mutating func insert(_ challengeTemplate: ChallengeTemplate) throws -> ChallengeTemplateArchiveKey {
-    let text = try YAMLEncoder().encode(challengeTemplate)
+    let text = challengeTemplate.rawValue
     let snippet = insert(text)
     return ChallengeTemplateArchiveKey(
       digest: snippet.sha1Digest,

@@ -9,37 +9,18 @@ extension ChallengeTemplateType {
 }
 
 public final class QuoteTemplate: ChallengeTemplate {
-  public init(quote: BlockQuote) {
+  public init?(quote: BlockQuote) {
     self.quote = quote
     super.init()
   }
 
-  public required convenience init(from decoder: Decoder) throws {
-    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw CommonErrors.noParsingRules
+  public required init?(rawValue: String) {
+    let nodes = ParsingRules.commonplace.parse(rawValue)
+    guard nodes.count == 1, let quote = nodes[0] as? BlockQuote else {
+      return nil
     }
-    let container = try decoder.singleValueContainer()
-    let markdown = try container.decode(String.self)
-    let nodes = parsingRules.parse(markdown)
-    if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
-      self.init(quote: quote)
-    } else {
-      throw CommonErrors.markdownParseError
-    }
-  }
-
-  required convenience init(markdown description: String, parsingRules: ParsingRules) throws {
-    let nodes = parsingRules.parse(description)
-    if nodes.count == 1, let quote = nodes[0] as? BlockQuote {
-      self.init(quote: quote)
-    } else {
-      throw CommonErrors.markdownParseError
-    }
-  }
-
-  public override func encode(to encoder: Encoder) throws {
-    var container = encoder.singleValueContainer()
-    try container.encode(quote.allMarkdown)
+    self.quote = quote
+    super.init()
   }
 
   public override var type: ChallengeTemplateType { return .quote }
@@ -48,6 +29,9 @@ public final class QuoteTemplate: ChallengeTemplate {
   public override var challenges: [Challenge] { return [self] }
 
   public let quote: BlockQuote
+  public override var rawValue: String {
+    return quote.allMarkdown
+  }
 
   public static func extract(
     from markdown: [Node]
@@ -55,7 +39,7 @@ public final class QuoteTemplate: ChallengeTemplate {
     return markdown
       .map { $0.findNodes(where: { $0.type == .blockQuote }) }
       .joined()
-      .map {
+      .compactMap {
         // swiftlint:disable:next force_cast
         QuoteTemplate(quote: $0 as! BlockQuote)
       }

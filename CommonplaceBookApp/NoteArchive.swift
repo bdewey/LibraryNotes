@@ -65,6 +65,7 @@ public struct NoteArchive {
   }
 
   public enum RetrievalError: Error {
+    case cannotDecodeTemplate
     /// A page with the given page identifier does not exist.
     case noSuchPage(Note.Identifier)
     /// A text snippet with the given sha1Digest does not exist.
@@ -227,18 +228,12 @@ public struct NoteArchive {
     guard let klass = ChallengeTemplateType.classMap[key.type] else {
       throw RetrievalError.noSuchTemplateClass(key.type)
     }
-    if let fromYaml = try? YAMLDecoder().decode(klass, from: snippet.text, userInfo: [.markdownParsingRules: parsingRules]) {
-      fromYaml.templateIdentifier = key.digest
-      challengeTemplateCache.setObject(fromYaml, forKey: cacheKey)
-      return fromYaml
+    guard let template = klass.init(rawValue: snippet.text) else {
+      throw RetrievalError.cannotDecodeTemplate
     }
-    // Try encoding the snippet as a YAML string, then decoding as klass.
-    // This will accomodate single-value-container types that didn't go through the YAML encoder.
-    let encodedText = try YAMLEncoder().encode(snippet.text)
-    let yamlRetry = try YAMLDecoder().decode(klass, from: encodedText, userInfo: [.markdownParsingRules: parsingRules])
-    yamlRetry.templateIdentifier = key.digest
-    challengeTemplateCache.setObject(yamlRetry, forKey: cacheKey)
-    return yamlRetry
+    template.templateIdentifier = key.digest
+    challengeTemplateCache.setObject(template, forKey: cacheKey)
+    return template
   }
 
   /// Updates the text associated with `noteIdentifier` to `text`, creating a new version

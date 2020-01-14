@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
+import CocoaLumberjack
 import Combine
 import MiniMarkdown
 import UIKit
@@ -23,16 +24,53 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     }
   }
 
-  @Published public var front: Word
-  @Published public var back: Word
-  @Published public var imageAsset: String?
-  public let parsingRules: ParsingRules
+  /// Used to serialize internal state.
+  private struct State: Codable {
+    var front: Word
+    var back: Word
+    var imageAsset: String?
+  }
 
-  public init(front: Word, back: Word, parsingRules: ParsingRules) {
+  @Published public var front: Word { didSet { memoizedRawValue = nil }}
+  @Published public var back: Word { didSet { memoizedRawValue = nil }}
+  @Published public var imageAsset: String? { didSet { memoizedRawValue = nil }}
+
+  public init(front: Word, back: Word) {
     self.front = front
     self.back = back
-    self.parsingRules = parsingRules
     super.init()
+  }
+
+  public required init?(rawValue: String) {
+    do {
+      let data = rawValue.data(using: .utf8)!
+      let state = try JSONDecoder().decode(State.self, from: data)
+      self.front = state.front
+      self.back = state.back
+      self.imageAsset = state.imageAsset
+      super.init()
+    } catch {
+      DDLogError("Error decoding \(rawValue.debugDescription): \(error)")
+      return nil
+    }
+  }
+
+  private var memoizedRawValue: String?
+
+  public override var rawValue: String {
+    if let memoizedRawValue = memoizedRawValue {
+      return memoizedRawValue
+    }
+    let state = State(front: front, back: back, imageAsset: imageAsset)
+    let encoder = JSONEncoder()
+    do {
+      let data = try encoder.encode(state)
+      memoizedRawValue = String(data: data, encoding: .utf8)
+      return memoizedRawValue ?? ""
+    } catch {
+      DDLogError("Unexpected error serializing template: \(error)")
+      return ""
+    }
   }
 
   public func trimText() {
@@ -49,36 +87,9 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     // TODO: It's awful that I'm hard-coding the prefixes here. There's got to be a better way
     // to manage these identifiers.
     return [
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 0), front: front, back: back, imageAsset: imageAsset, parsingRules: parsingRules),
-      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 1), front: back, back: front, imageAsset: imageAsset, parsingRules: parsingRules),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 0), front: front, back: back, imageAsset: imageAsset),
+      Challenge(challengeIdentifier: ChallengeIdentifier(templateDigest: templateIdentifier!, index: 1), front: back, back: front, imageAsset: imageAsset),
     ]
-  }
-
-  // MARK: - Codable
-
-  enum CodingKeys: String, CodingKey {
-    case front
-    case back
-    case imageAsset
-  }
-
-  required init(from decoder: Decoder) throws {
-    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw CommonErrors.noParsingRules
-    }
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    self.front = try container.decode(Word.self, forKey: .front)
-    self.back = try container.decode(Word.self, forKey: .back)
-    self.imageAsset = try container.decodeIfPresent(String.self, forKey: .imageAsset)
-    self.parsingRules = parsingRules
-    try super.init(from: decoder)
-  }
-
-  public override func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(front, forKey: .front)
-    try container.encode(back, forKey: .back)
-    try container.encodeIfPresent(imageAsset, forKey: .imageAsset)
   }
 }
 
@@ -100,7 +111,6 @@ extension VocabularyChallengeTemplate {
     public let front: Word
     public let back: Word
     public let imageAsset: String?
-    public let parsingRules: ParsingRules
 
     public func challengeView(
       document: NoteStorage,

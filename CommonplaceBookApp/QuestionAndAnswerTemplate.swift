@@ -11,35 +11,25 @@ extension ChallengeTemplateType {
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.
 public final class QuestionAndAnswerTemplate: ChallengeTemplate {
   /// Designated initializer.
-  public init(node: QuestionAndAnswer) {
+  public init?(node: QuestionAndAnswer) {
     self.node = node
     super.init()
   }
 
-  /// Decoding -- parses saved markdown and raises an error if it is not a single QuestionAndAnswer node.
-  required convenience init(from decoder: Decoder) throws {
-    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw CommonErrors.noParsingRules
-    }
-    let container = try decoder.singleValueContainer()
-    let markdown = try container.decode(String.self)
-    let nodes = parsingRules.parse(markdown)
+  required public init?(rawValue: String) {
+    let nodes = ParsingRules.commonplace.parse(rawValue)
     if nodes.count == 1, let node = nodes[0] as? QuestionAndAnswer {
-      self.init(node: node)
+      self.node = node
+      super.init()
     } else {
-      throw CommonErrors.markdownParseError
+      return nil
     }
   }
 
   /// The Q&A node.
   private let node: QuestionAndAnswer
-
-  // MARK: - Codable
-
-  /// Encoding: Writes the markdown into a single value container.
-  public override func encode(to encoder: Encoder) throws {
-    var container = encoder.singleValueContainer()
-    try container.encode(node.allMarkdown)
+  public override var rawValue: String {
+    return node.allMarkdown
   }
 
   // MARK: - Public

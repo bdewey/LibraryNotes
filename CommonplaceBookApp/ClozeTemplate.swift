@@ -26,32 +26,15 @@ public final class ClozeTemplate: ChallengeTemplate {
     super.init()
   }
 
+  public required convenience init?(rawValue: String) {
+    let nodes = ParsingRules.commonplace.parse(rawValue)
+    guard nodes.count == 1 else { return nil }
+    self.init(node: nodes[0])
+  }
+
   public let node: Node
-
-  // MARK: - Codable conformance
-
-  public required convenience init(from decoder: Decoder) throws {
-    guard let parsingRules = decoder.userInfo[.markdownParsingRules] as? ParsingRules else {
-      throw CommonErrors.noParsingRules
-    }
-    let container = try decoder.singleValueContainer()
-    let markdown = try container.decode(String.self)
-    let nodes = parsingRules.parse(markdown)
-    if nodes.count != 1 { throw CommonErrors.markdownParseError }
-    self.init(node: nodes[0])
-  }
-
-  public override func encode(to encoder: Encoder) throws {
-    var container = encoder.singleValueContainer()
-    try container.encode(node.allMarkdown)
-  }
-
-  public required convenience init(markdown description: String, parsingRules: ParsingRules) throws {
-    let nodes = parsingRules.parse(description)
-    if nodes.count != 1 {
-      throw CommonErrors.markdownParseError
-    }
-    self.init(node: nodes[0])
+  public override var rawValue: String {
+    return node.allMarkdown
   }
 
   // MARK: - CardTemplate conformance
@@ -76,7 +59,7 @@ public final class ClozeTemplate: ChallengeTemplate {
     // one time in `clozes`. Deduplicate using pointer identity.
     let clozeSet = Set<ObjectIdentityHashable>(clozes.map { ObjectIdentityHashable($0) })
     DDLogDebug("Found \(clozeSet.count) clozes")
-    return clozeSet.map { ClozeTemplate(node: $0.value) }
+    return clozeSet.compactMap { ClozeTemplate(node: $0.value) }
   }
 }
 

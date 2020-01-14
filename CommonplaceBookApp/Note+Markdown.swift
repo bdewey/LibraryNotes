@@ -18,4 +18,10 @@ public extension Note {
       challengeTemplates: nodes.makeChallengeTemplates()
     )
   }
+
+  mutating func updateMarkdown(_ markdown: String, parsingRules: ParsingRules) {
+    let newNote = Note(markdown: markdown, parsingRules: parsingRules)
+    ChallengeTemplate.assignMatchingTemplateIdentifiers(from: challengeTemplates, to: newNote.challengeTemplates)
+    self = newNote
+  }
 }

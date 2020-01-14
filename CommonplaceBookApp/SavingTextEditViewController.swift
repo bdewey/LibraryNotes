@@ -50,7 +50,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     do {
       if let noteIdentifier = noteIdentifier {
         DDLogInfo("SavingTextEditViewController: Updating note \(noteIdentifier)")
-        try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { _ in note })
+        try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
+          ChallengeTemplate.assignMatchingTemplateIdentifiers(from: oldNote.challengeTemplates, to: note.challengeTemplates)
+          return note
+        })
       } else {
         noteIdentifier = try noteStorage.createNote(note)
         DDLogInfo("SavingTextEditViewController: Created note \(noteIdentifier!)")
