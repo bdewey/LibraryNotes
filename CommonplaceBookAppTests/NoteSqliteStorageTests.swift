@@ -206,7 +206,9 @@ final class NoteSqliteStorageTests: XCTestCase {
       _ = try database.createNote(Note.withChallenges)
       try database.flush()
       XCTAssertFalse(database.hasUnsavedChanges)
-      var studySession = database.synchronousStudySession()
+      // New items aren't eligible for at 3-5 days.
+      let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
+      var studySession = database.synchronousStudySession(date: future)
       XCTAssertEqual(1, studySession.count)
       while studySession.currentCard != nil {
         studySession.recordAnswer(correct: true)

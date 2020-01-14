@@ -102,11 +102,14 @@ enum Sqlite {
     var id: Int64?
     var index: Int
     var reviewCount: Int = 0
+    var lapseCount: Int = 0
     var totalCorrect: Int = 0
     var totalIncorrect: Int = 0
     var lastReview: Date?
+    var idealInterval: Double?
     var due: Date?
     var challengeTemplateId: String
+    var spacedRepetitionFactor: Double = 2.5
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
       id = rowID
