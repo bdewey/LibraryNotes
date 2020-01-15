@@ -6,6 +6,7 @@ import Foundation
 import GRDB
 import GRDBCombine
 import MiniMarkdown
+import Yams
 
 private var hackDecodeCount = 0
 
@@ -628,7 +629,8 @@ private extension NoteSqliteStorage {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
     }
-    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) else {
+    let rawValue = (try? YAMLDecoder().decode(String.self, from: challengeTemplateRecord.rawValue, userInfo: [:])) ?? challengeTemplateRecord.rawValue
+    guard let template = klass.init(rawValue: rawValue) else {
       throw Error.cannotDecodeTemplate
     }
     template.templateIdentifier = challengeTemplateRecord.id
