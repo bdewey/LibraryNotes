@@ -765,24 +765,25 @@ private extension NoteSqliteStorage {
 
   /// Blows away the statistics for each challenge and recomputes them based  upon the study log entries in the database.
   static func recomputeChallenges(in database: Database) throws {
-    try database.execute(sql: """
-    UPDATE challenge
-    SET
-      reviewCount = 0,
-      lapseCount = 0,
-      totalCorrect = 0,
-      lastReview = NULL,
-      idealInterval = NULL,
-      due = NULL,
-      spacedRepetitionFactor = 2.5
-    ;
-    """
+    try database.execute(
+      sql: """
+      UPDATE challenge
+      SET
+        reviewCount = 0,
+        lapseCount = 0,
+        totalCorrect = 0,
+        lastReview = NULL,
+        idealInterval = NULL,
+        due = NULL,
+        spacedRepetitionFactor = 2.5
+      ;
+      """
     )
     let studyEntries = try Sqlite.StudyLogEntry
       .order(Sqlite.StudyLogEntry.Columns.timestamp)
       .fetchCursor(database)
     while let entry = try studyEntries.next() {
-      try self.updateChallenge(for: entry, in: database, buryRelatedChallenges: false)
+      try updateChallenge(for: entry, in: database, buryRelatedChallenges: false)
     }
   }
 }

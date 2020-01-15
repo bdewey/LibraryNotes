@@ -4,16 +4,6 @@ import Foundation
 import MiniMarkdown
 
 extension Array where Element == Node {
-  func archiveChallengeTemplates(
-    to archive: inout TextSnippetArchive
-  ) -> [ChallengeTemplateArchiveKey] {
-    return Swift.Array([
-      archive.insert(contentsOf: ClozeTemplate.extract(from: self)),
-      archive.insert(contentsOf: QuoteTemplate.extract(from: self)),
-      archive.insert(contentsOf: QuestionAndAnswerTemplate.extract(from: self)),
-    ].joined())
-  }
-
   func makeChallengeTemplates() -> [ChallengeTemplate] {
     var results: [ChallengeTemplate] = []
     results.append(contentsOf: ClozeTemplate.extract(from: self))
@@ -27,9 +17,7 @@ extension Array where Element == Node {
   /// - note: If there is a heading anywhere in the nodes, the contents of the first heading
   ///         is the title. Otherwise, the contents of the first non-blank line is the title.
   var title: String {
-    if let heading = self.lazy.compactMap(
-      { $0.first(where: { $0.type == .heading }) }
-    ).first as? Heading {
+    if let heading = self.lazy.compactMap({ $0.first(where: { $0.type == .heading }) }).first as? Heading {
       return String(heading.inlineSlice.substring)
     } else if let notBlank = self.lazy.compactMap({
       $0.first(where: { $0.type != .blank })

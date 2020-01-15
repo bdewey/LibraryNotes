@@ -1,4 +1,4 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -9,7 +9,7 @@ extension ChallengeTemplate {
     from existingTemplates: [ChallengeTemplate],
     to newTemplates: [ChallengeTemplate]
   ) {
-    assert(existingTemplates.allSatisfy({ $0.templateIdentifier != nil }))
+    assert(existingTemplates.allSatisfy { $0.templateIdentifier != nil })
     let existingIdentifiers = newTemplates
       .compactMap { $0.templateIdentifier }
       .asSet()

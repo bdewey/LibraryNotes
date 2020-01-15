@@ -154,10 +154,10 @@ extension DocumentTableController: UITableViewDelegate {
         // This is a vocabulary page, not a text page.
         do {
           let note = try notebook.note(noteIdentifier: viewProperties.pageKey)
-          let vc = VocabularyViewController(notebook: notebook)
-          vc.noteIdentifier = viewProperties.pageKey
-          vc.note = note
-          delegate?.showDetailViewController(vc)
+          let viewController = VocabularyViewController(notebook: notebook)
+          viewController.noteIdentifier = viewProperties.pageKey
+          viewController.note = note
+          delegate?.showDetailViewController(viewController)
         } catch {
           DDLogError("Could not load vocabulary page: \(error)")
         }
@@ -198,10 +198,10 @@ extension DocumentTableController: UITableViewDelegate {
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }, date: Date()) {
+          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
             self.delegate?.presentStudySessionViewController(for: $0)
             completion(true)
-          }
+          })
         }
         studyAction.image = UIImage(systemName: "rectangle.stack")
         studyAction.backgroundColor = UIColor.systemBlue

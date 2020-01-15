@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Removed
+
+- Goodbye, custom notebundle format.
+
 ## [0.16.0] - 2010-01-14
 
 ### Added
