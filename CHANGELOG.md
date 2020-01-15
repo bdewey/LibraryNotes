@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased
+## [0.17.0] - 2020-01-14
 
 ### Removed
 
 - Goodbye, custom notebundle format.
 
-## [0.16.0] - 2010-01-14
+## [0.16.0] - 2020-01-14
 
 ### Added
 
