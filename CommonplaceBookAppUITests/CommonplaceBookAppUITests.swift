@@ -44,6 +44,11 @@ private enum TestContent {
   > It’s a tranquillity born of sheer immensity; it calms with its very magnitude, which renders the merely human of no consequence.
   > Ain’t nothin’ ?[](funnier) than real life, I tell you what. (34)
   """
+
+  static let multipleClozeInOneTemplate = """
+  Multiple clozes in one item
+  - Peter Piper ?[did what?](picked) a ?[unit of pickles](peck) of pickled peppers.
+  """
 }
 
 final class CommonplaceBookAppUITests: XCTestCase {
@@ -116,6 +121,11 @@ final class CommonplaceBookAppUITests: XCTestCase {
     study(expectedCards: 2)
   }
 
+  func testMultipleChallengesFromOneTemplateAreSuppressed() {
+    createDocument(with: TestContent.multipleClozeInOneTemplate)
+    study(expectedCards: 1)
+  }
+
   func testStudyQuotes() {
     createDocument(with: TestContent.quote)
     study(expectedCards: 3)
@@ -176,6 +186,20 @@ extension CommonplaceBookAppUITests {
       for: NSPredicate(format: "isEnabled == true"),
       evaluatedWith: element,
       message: "\(element) did not become enabled",
+      file: file,
+      line: line
+    )
+  }
+
+  private func waitUntilElementDisabled(
+    _ element: XCUIElement,
+    file: String = #file,
+    line: Int = #line
+  ) {
+    wait(
+      for: NSPredicate(format: "isEnabled == false"),
+      evaluatedWith: element,
+      message: "\(element) did not become disabled",
       file: file,
       line: line
     )

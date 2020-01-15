@@ -71,7 +71,7 @@ public protocol NoteStorage: AnyObject {
 
   // MARK: - Study sessions
 
-  func recordStudyEntry(_ entry: StudyLog.Entry) throws
+  func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedChallenges: Bool) throws
 
   /// The complete record of all study sessions.
   var studyLog: StudyLog { get }
@@ -122,12 +122,12 @@ extension NoteStorage {
   ///
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date) throws {
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedChallenges: Bool) throws {
     let entries = studySession.results.map { tuple -> StudyLog.Entry in
       StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
     }
     for entry in entries {
-      try recordStudyEntry(entry)
+      try recordStudyEntry(entry, buryRelatedChallenges: buryRelatedChallenges)
     }
   }
 

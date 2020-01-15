@@ -342,7 +342,7 @@ public extension NoteDocumentStorage {
 // MARK: - Study sessions
 
 public extension NoteDocumentStorage {
-  func recordStudyEntry(_ entry: StudyLog.Entry) throws {
+  func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedChallenges: Bool) throws {
     studyLog.append(entry)
     invalidateSavedStudyLog()
     notesDidChangeSubject.send()

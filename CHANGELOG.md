@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Related challenges are "buried" -- you won't get challenges from the same template in the same day.
 - Significant refactor of `ChallengeTemplate`. They are no longer `Codable` -- instead they are `RawRepresentable`.
 
 ## [0.15.0] - 2020-01-12

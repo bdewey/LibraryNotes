@@ -38,6 +38,15 @@
         }
       },
       {
+        "package": "SpacedRepetitionScheduler",
+        "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
+        "state": {
+          "branch": null,
+          "revision": "8e9b117b69b8038127b0eb25704e3f121edd7a34",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "swift-log",
         "repositoryURL": "https://github.com/apple/swift-log.git",
         "state": {

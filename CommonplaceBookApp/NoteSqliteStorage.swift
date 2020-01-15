@@ -6,6 +6,7 @@ import Foundation
 import GRDB
 import GRDBCombine
 import MiniMarkdown
+import SpacedRepetitionScheduler
 import Yams
 
 private var hackDecodeCount = 0
@@ -364,7 +365,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func recordStudyEntry(_ entry: StudyLog.Entry) throws {
+  public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedChallenges: Bool) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -386,22 +387,33 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       )
       try record.insert(db)
 
-      challenge.reviewCount += 1
+      let delay: TimeInterval
+      if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
+        let idealDate = lastReview.addingTimeInterval(idealInterval)
+        delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
+      } else {
+        delay = 0
+      }
+      let schedulingOptions = SpacedRepetitionScheduler(
+        learningIntervals: [.day],
+        goodGraduatingInterval: 2 * .day
+      ).scheduleItem(challenge.item, afterDelay: delay)
+      let outcome = schedulingOptions[entry.statistics.cardAnswer] ?? schedulingOptions[.again]!
+
+      challenge.applyItem(outcome, on: entry.timestamp)
       challenge.totalCorrect += entry.statistics.correct
       challenge.totalIncorrect += entry.statistics.incorrect
-
-      if let lastReview = challenge.lastReview {
-        // The minimum delta is 1 day
-        let delta = Swift.max(entry.timestamp.timeIntervalSince(lastReview), TimeInterval.day)
-        let factor = pow(2.0, 1.0 - Double(entry.statistics.incorrect))
-        let nextDate = entry.timestamp.addingTimeInterval(delta * factor)
-        challenge.lastReview = entry.timestamp
-        challenge.due = nextDate
-      } else {
-        challenge.lastReview = entry.timestamp
-        challenge.due = entry.timestamp.addingTimeInterval(TimeInterval.day)
-      }
       try challenge.update(db)
+
+      if buryRelatedChallenges {
+        let minimumDue = entry.timestamp.addingTimeInterval(.day)
+        let updates = try Sqlite.Challenge
+          .filter(Sqlite.Challenge.Columns.challengeTemplateId == templateKey &&
+            (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
+          )
+          .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue)
+        DDLogInfo("Buried \(updates) challenge(s)")
+      }
     }
     notesDidChangeSubject.send()
   }
@@ -548,7 +560,10 @@ private extension NoteSqliteStorage {
       )
       try record.insert(db)
       for index in template.challenges.indices {
-        var challengeRecord = Sqlite.Challenge(index: index, challengeTemplateId: newTemplateIdentifier)
+        var challengeRecord = Sqlite.Challenge(
+          index: index,
+          challengeTemplateId: newTemplateIdentifier
+        )
         try challengeRecord.insert(db)
       }
     }
@@ -722,12 +737,18 @@ private extension NoteSqliteStorage {
       })
     }
 
-    let existingMigratinos = try migrator.appliedMigrations(in: databaseQueue)
-    if !existingMigratinos.contains("initialSchema") {
-      try migrator.migrate(databaseQueue)
-      return true
+    migrator.registerMigration("addChallengeFactor") { database in
+      try database.alter(table: "challenge", body: { table in
+        table.add(column: "spacedRepetitionFactor", .double).notNull().defaults(to: 2.5)
+        table.add(column: "lapseCount", .double).notNull().defaults(to: 0)
+        table.add(column: "idealInterval", .double)
+      })
     }
-    return false
+
+    let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
+    try migrator.migrate(databaseQueue)
+    let postMigrations = try migrator.appliedMigrations(in: databaseQueue)
+    return priorMigrations != postMigrations
   }
 }
 
@@ -773,5 +794,50 @@ extension NoteSqliteStorage: NSFilePresenter {
     } catch {
       DDLogError("Unexpected error re-opening database after external change: \(error)")
     }
+  }
+}
+
+private extension Sqlite.Challenge {
+  var item: SpacedRepetitionScheduler.Item {
+    if let due = due, let lastReview = lastReview {
+      let interval = due.timeIntervalSince(lastReview)
+      assert(interval > 0)
+      return SpacedRepetitionScheduler.Item(
+        learningState: .review,
+        reviewCount: reviewCount,
+        lapseCount: lapseCount,
+        interval: idealInterval ?? .day,
+        factor: spacedRepetitionFactor
+      )
+    } else {
+      return SpacedRepetitionScheduler.Item(
+        learningState: .learning(step: 0),
+        reviewCount: reviewCount,
+        lapseCount: lapseCount,
+        interval: idealInterval ?? 0,
+        factor: spacedRepetitionFactor
+      )
+    }
+  }
+
+  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date) {
+    reviewCount = item.reviewCount
+    lapseCount = item.lapseCount
+    spacedRepetitionFactor = item.factor
+    lastReview = date
+    idealInterval = item.interval
+    due = date.addingTimeInterval(item.interval.fuzzed())
+  }
+}
+
+private extension AnswerStatistics {
+  var cardAnswer: CardAnswer {
+    if correct > 0, incorrect == 0 {
+      return .good
+    }
+    if correct > 0, incorrect == 1 {
+      return .hard
+    }
+    return .again
   }
 }

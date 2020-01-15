@@ -74,7 +74,7 @@ final class NoteArchiveDocumentTests: XCTestCase {
     while studySession.currentCard != nil {
       studySession.recordAnswer(correct: true)
     }
-    XCTAssertNoThrow(try document.updateStudySessionResults(studySession, on: Date()))
+    XCTAssertNoThrow(try document.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true))
     XCTAssertEqual(document.studyLog.count, previousLogCount + studySession.count)
 
     // Make sure the study records round-trip.
