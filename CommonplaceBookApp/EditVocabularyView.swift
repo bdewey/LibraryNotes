@@ -97,15 +97,3 @@ struct EditVocabularyView: View {
     }
   }
 }
-
-struct AddVocabularyViewPreviews: PreviewProvider {
-  static var previews: some View {
-    let template = VocabularyChallengeTemplate(
-      front: VocabularyChallengeTemplate.Word(text: "", language: "es"),
-      back: VocabularyChallengeTemplate.Word(text: "", language: "en")
-    )
-    let url = FileManager.default.temporaryDirectory.appendingPathComponent("test.notebundle")
-    return EditVocabularyView(notebook: NoteDocumentStorage(fileURL: url, parsingRules: ParsingRules.commonplace), vocabularyTemplate: template)
-      .environmentObject(ImageSearchRequest())
-  }
-}

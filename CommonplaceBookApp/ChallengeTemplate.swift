@@ -42,8 +42,8 @@ open class ChallengeTemplate: RawRepresentable {
   }
 
   public init() {}
-  
-  required public init?(rawValue: String) {
+
+  public required init?(rawValue: String) {
     assertionFailure("Subclasses should call the designated initializer instead.")
   }
 

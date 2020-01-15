@@ -1,4 +1,4 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 
@@ -7,4 +7,3 @@ public extension Sequence where Element: Hashable {
   /// Converts the receiver into a set.
   func asSet() -> Set<Element> { Set(self) }
 }
-

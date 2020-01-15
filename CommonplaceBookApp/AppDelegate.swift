@@ -49,7 +49,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notebundle", "org.brians-brain.notedb"])
+    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notedb"])
     browser.delegate = self
 
     window.rootViewController = browser
@@ -207,12 +207,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
     DDLogInfo("Opening document at \(url)")
     let noteArchiveDocument: NoteStorage
-    if url.pathExtension == "notebundle" {
-      noteArchiveDocument = NoteDocumentStorage(
-        fileURL: url,
-        parsingRules: ParsingRules.commonplace
-      )
-    } else if url.pathExtension == "notedb" {
+    if url.pathExtension == "notedb" {
       noteArchiveDocument = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     } else {
       assertionFailure("Unknown note format: \(url.pathExtension)")

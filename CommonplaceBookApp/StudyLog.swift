@@ -81,8 +81,7 @@ public struct StudyLog {
   /// Computes dates until which we should suppress the given challenge identifier from further
   /// study.
   public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
-    return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) {
-      suppressionDates, entry in
+    return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
       // We're going to trace what happens to a specific identifier
       let shouldTrace = entry.identifier == ChallengeIdentifier(
         templateDigest: "732ab6d75b1194fbfd73265a573665c113d6f9de",

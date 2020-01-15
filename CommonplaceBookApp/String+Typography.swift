@@ -4,7 +4,7 @@ import Foundation
 
 private let nonWhitespace = CharacterSet.whitespacesAndNewlines.inverted
 
-private struct TypographyConstants {
+private enum TypographyConstants {
   static let openCurlyDoubleQuote: Character = "\u{201c}"
   static let closeCurlyDoubleQuote: Character = "\u{201d}"
   static let openCurlySingleQuote: Character = "\u{2018}"

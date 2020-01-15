@@ -5,8 +5,6 @@ import MiniMarkdown
 import XCTest
 import Yams
 
-// swiftlint:disable force_try
-
 private let testContent = """
 # *Educated*, Tara Westover
 

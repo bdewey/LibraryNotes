@@ -31,9 +31,9 @@ public final class VocabularyChallengeTemplate: ChallengeTemplate, ObservableObj
     var imageAsset: String?
   }
 
-  @Published public var front: Word { didSet { memoizedRawValue = nil }}
-  @Published public var back: Word { didSet { memoizedRawValue = nil }}
-  @Published public var imageAsset: String? { didSet { memoizedRawValue = nil }}
+  @Published public var front: Word { didSet { memoizedRawValue = nil } }
+  @Published public var back: Word { didSet { memoizedRawValue = nil } }
+  @Published public var imageAsset: String? { didSet { memoizedRawValue = nil } }
 
   public init(front: Word, back: Word) {
     self.front = front

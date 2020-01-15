@@ -1,6 +1,10 @@
 excluded:
   - Pods
 
+analyzer_rules:
+  - unused_declaration
+  - unused_import
+
 disabled_rules:
   - todo
   - line_length
@@ -26,7 +30,7 @@ line_length: 100
 
 file_header:
   required_string:  |
-                    // Copyright © 2018-present Brian's Brain. All rights reserved.
+                    // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 trailing_comma:
   mandatory_comma: true

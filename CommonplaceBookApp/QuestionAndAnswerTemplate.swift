@@ -16,7 +16,7 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
     super.init()
   }
 
-  required public init?(rawValue: String) {
+  public required init?(rawValue: String) {
     let nodes = ParsingRules.commonplace.parse(rawValue)
     if nodes.count == 1, let node = nodes[0] as? QuestionAndAnswer {
       self.node = node
