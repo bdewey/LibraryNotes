@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## [0.16.0] - 2010-01-14
 
 ### Added
 
+- Anki-inspired spaced repetition scheduler.
 - *Challenge template stability*. Challenges created from parsing markdown don't have an identity. We now have code that looks for identical-or-close templates from a prior version of a `Note` to preserve the identity of that template.
 
 ### Changed

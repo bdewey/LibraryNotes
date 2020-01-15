@@ -70,9 +70,9 @@
 		D374AB6D229657C900F54561 /* TextArchiveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB6C229657C900F54561 /* TextArchiveTests.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */; };
+		D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */ = {isa = PBXBuildFile; productRef = D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */; };
 		D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */; };
 		D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */; };
-		D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */ = {isa = PBXBuildFile; productRef = D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */; };
 		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
 		D37E6D36228D9DD8006CD0FA /* NoteProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D35228D9DD8006CD0FA /* NoteProperties.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
@@ -957,7 +957,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEAD_CODE_STRIPPING = NO;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -967,7 +967,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.15.0;
+				MARKETING_VERSION = 0.16.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
@@ -986,7 +986,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 18;
+				CURRENT_PROJECT_VERSION = 19;
 				DEAD_CODE_STRIPPING = NO;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -996,7 +996,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.15.0;
+				MARKETING_VERSION = 0.16.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
