@@ -19,7 +19,7 @@ public extension NoteStorage {
       for entry in studyLog.filter({ oldToNewTemplateIdentifier.keys.contains($0.identifier.templateDigest!) }) {
         var entry = entry
         entry.identifier.templateDigest = oldToNewTemplateIdentifier[entry.identifier.templateDigest!]
-        try destination.recordStudyEntry(entry)
+        try destination.recordStudyEntry(entry, buryRelatedChallenges: false)
       }
     }
 

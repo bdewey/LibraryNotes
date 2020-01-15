@@ -364,7 +364,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
   }
 
-  public func recordStudyEntry(_ entry: StudyLog.Entry) throws {
+  public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedChallenges: Bool) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -403,6 +403,16 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       challenge.totalCorrect += entry.statistics.correct
       challenge.totalIncorrect += entry.statistics.incorrect
       try challenge.update(db)
+
+      if buryRelatedChallenges {
+        let minimumDue = entry.timestamp.addingTimeInterval(.day)
+        let updates = try Sqlite.Challenge
+          .filter(Sqlite.Challenge.Columns.challengeTemplateId == templateKey &&
+            (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
+          )
+          .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue)
+        DDLogInfo("Buried \(updates) challenge(s)")
+      }
     }
     notesDidChangeSubject.send()
   }

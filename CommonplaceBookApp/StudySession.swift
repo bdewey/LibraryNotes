@@ -11,16 +11,6 @@ public struct StudySession {
     public let challengeIdentifier: ChallengeIdentifier
   }
 
-  public struct AttributedCard {
-    public let card: Challenge
-    public let properties: CardDocumentProperties
-
-    public init(card: Challenge, attributes: CardDocumentProperties) {
-      self.card = card
-      self.properties = attributes
-    }
-  }
-
   /// The current set of cards to study.
   private var sessionChallengeIdentifiers: [SessionChallengeIdentifier]
 
@@ -101,6 +91,39 @@ public struct StudySession {
   public func limiting(to cardCount: Int) -> StudySession {
     var copy = self
     copy.limit(to: cardCount)
+    return copy
+  }
+
+  public mutating func ensureUniqueChallengeTemplates() {
+    var seenChallengeTemplateIdentifiers = Set<String>()
+    sessionChallengeIdentifiers = sessionChallengeIdentifiers
+      .filter { challengeIdentifier -> Bool in
+        guard let templateIdentifier = challengeIdentifier.challengeIdentifier.templateDigest else {
+          assertionFailure()
+          return false
+        }
+        if seenChallengeTemplateIdentifiers.contains(templateIdentifier) {
+          return false
+        } else {
+          seenChallengeTemplateIdentifiers.insert(templateIdentifier)
+          return true
+        }
+      }
+  }
+
+  public func ensuringUniqueChallengeTemplates() -> StudySession {
+    var copy = self
+    copy.ensureUniqueChallengeTemplates()
+    return copy
+  }
+
+  public mutating func shuffle() {
+    sessionChallengeIdentifiers.shuffle()
+  }
+
+  public func shuffling() -> StudySession {
+    var copy = self
+    copy.shuffle()
     return copy
   }
 

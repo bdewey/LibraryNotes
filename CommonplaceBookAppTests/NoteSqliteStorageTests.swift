@@ -213,7 +213,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       while studySession.currentCard != nil {
         studySession.recordAnswer(correct: true)
       }
-      try database.updateStudySessionResults(studySession, on: Date())
+      try database.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
       XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertEqual(database.studyLog.count, studySession.count)
     } catch {
@@ -317,6 +317,32 @@ final class NoteSqliteStorageTests: XCTestCase {
       XCTFail("Unexpected error: \(error)")
     }
   }
+
+  func testBuryRelatedChallenges() {
+    do {
+      let database = try makeAndOpenEmptyDatabase()
+      defer {
+        try? FileManager.default.removeItem(at: database.fileURL)
+      }
+      _ = try database.createNote(Note.multipleClozes)
+      // New items aren't eligible for at 3-5 days.
+      let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
+      var studySession = database.synchronousStudySession(date: future)
+      XCTAssertEqual(studySession.count, 2)
+      studySession.ensureUniqueChallengeTemplates()
+      XCTAssertEqual(studySession.count, 1)
+      while studySession.currentCard != nil {
+        studySession.recordAnswer(correct: true)
+      }
+      try database.updateStudySessionResults(studySession, on: future, buryRelatedChallenges: true)
+      studySession = database.synchronousStudySession(date: future)
+      XCTAssertEqual(studySession.count, 0)
+      studySession = database.synchronousStudySession(date: future.addingTimeInterval(24 * .hour))
+      XCTAssertEqual(studySession.count, 1)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
 }
 
 private extension NoteSqliteStorageTests {
@@ -358,4 +384,6 @@ private extension Note {
   > To be, or not to be, that is the question. (Hamlet)
 
   """, parsingRules: ParsingRules.commonplace)
+
+  static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).", parsingRules: ParsingRules.commonplace)
 }

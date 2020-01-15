@@ -215,7 +215,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 
   func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
-      studySession: studySession.limiting(to: 20),
+      studySession: studySession.shuffling().ensuringUniqueChallengeTemplates().limiting(to: 20),
       notebook: notebook,
       delegate: self
     )
@@ -314,7 +314,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     do {
-      try notebook.updateStudySessionResults(session, on: Date())
+      try notebook.updateStudySessionResults(session, on: Date(), buryRelatedChallenges: true)
       updateStudySession()
     } catch {
       DDLogError("Unexpected error recording study session results: \(error)")
