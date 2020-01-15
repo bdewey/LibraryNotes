@@ -13,6 +13,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   func presentStudySessionViewController(for studySession: StudySession)
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
+  func showAlert(_ alertMessage: String)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -147,6 +148,7 @@ public final class DocumentTableController: NSObject {
 
 extension DocumentTableController: UITableViewDelegate {
   public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
@@ -168,6 +170,7 @@ extension DocumentTableController: UITableViewDelegate {
         markdown = try notebook.note(noteIdentifier: viewProperties.pageKey).text ?? ""
       } catch {
         DDLogError("Unexpected error loading page: \(error)")
+        delegate?.showAlert("There was an error loading this page: \(error)")
         return
       }
       let textEditViewController = TextEditViewController(

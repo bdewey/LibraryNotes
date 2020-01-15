@@ -109,6 +109,27 @@ final class NoteSqliteStorageTests: XCTestCase {
       let identifier = try database.createNote(Note.withChallenges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withChallenges, roundTripNote)
+      XCTAssertEqual(roundTripNote.challengeTemplates.count, 3)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
+  func testPartialQuoteDoesntFail() {
+    let note = Note(markdown: """
+    # Title
+    >
+
+    """, parsingRules: ParsingRules.commonplace)
+    do {
+      let database = try makeAndOpenEmptyDatabase()
+      defer {
+        try? FileManager.default.removeItem(at: database.fileURL)
+      }
+      let identifier = try database.createNote(note)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(note, roundTripNote)
+      XCTAssertEqual(roundTripNote.challengeTemplates.count, 1)
     } catch {
       XCTFail("Unexpected error: \(error)")
     }
@@ -209,7 +230,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       // New items aren't eligible for at 3-5 days.
       let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
       var studySession = database.synchronousStudySession(date: future)
-      XCTAssertEqual(1, studySession.count)
+      XCTAssertEqual(3, studySession.count)
       while studySession.currentCard != nil {
         studySession.recordAnswer(correct: true)
       }
@@ -384,6 +405,11 @@ private extension Note {
   # Shakespeare quotes
 
   > To be, or not to be, that is the question. (Hamlet)
+
+  * Let's make sure we can encode a ?[](cloze).
+
+  Q: What is the name of this format?
+  A: Question and answer.
 
   """, parsingRules: ParsingRules.commonplace)
 

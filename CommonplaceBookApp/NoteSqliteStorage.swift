@@ -9,8 +9,6 @@ import MiniMarkdown
 import SpacedRepetitionScheduler
 import Yams
 
-private var hackDecodeCount = 0
-
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 public final class NoteSqliteStorage: NSObject, NoteStorage {
@@ -652,15 +650,10 @@ private extension NoteSqliteStorage {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
     }
-    let rawValue = (try? YAMLDecoder().decode(String.self, from: challengeTemplateRecord.rawValue, userInfo: [:])) ?? challengeTemplateRecord.rawValue
-    guard let template = klass.init(rawValue: rawValue) else {
+    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) ?? klass.init(rawValue: challengeTemplateRecord.rawValue.yamlUnescaped) else {
       throw Error.cannotDecodeTemplate
     }
     template.templateIdentifier = challengeTemplateRecord.id
-    hackDecodeCount += 1
-    if hackDecodeCount % 20 == 0 {
-      print("Decoded \(hackDecodeCount) templates")
-    }
     return template
   }
 
@@ -875,5 +868,15 @@ private extension Sqlite.StudyLogEntry {
       return .hard
     }
     return .again
+  }
+}
+
+private extension String {
+  var yamlUnescaped: String {
+    do {
+      return try YAMLDecoder().decode(String.self, from: self, userInfo: [:])
+    } catch {
+      return ""
+    }
   }
 }

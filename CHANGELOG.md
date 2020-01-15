@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.17.1] - 2020-01-15
+
+### Fixed
+
+- Fixed bug where templates would not properly load, blocking everything with the note.
+
 ## [0.17.0] - 2020-01-14
 
 ### Removed
