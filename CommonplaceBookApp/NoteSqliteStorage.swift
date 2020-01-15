@@ -373,7 +373,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       guard
         let templateKey = entry.identifier.templateDigest,
         let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey),
-        var challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == entry.identifier.index).fetchOne(db)
+        let challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == entry.identifier.index).fetchOne(db)
       else {
         throw Error.unknownChallengeTemplate
       }
@@ -386,36 +386,44 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
         challengeId: challenge.id!
       )
       try record.insert(db)
-
-      let delay: TimeInterval
-      if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
-        let idealDate = lastReview.addingTimeInterval(idealInterval)
-        delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
-      } else {
-        delay = 0
-      }
-      let schedulingOptions = SpacedRepetitionScheduler(
-        learningIntervals: [.day],
-        goodGraduatingInterval: 2 * .day
-      ).scheduleItem(challenge.item, afterDelay: delay)
-      let outcome = schedulingOptions[entry.statistics.cardAnswer] ?? schedulingOptions[.again]!
-
-      challenge.applyItem(outcome, on: entry.timestamp)
-      challenge.totalCorrect += entry.statistics.correct
-      challenge.totalIncorrect += entry.statistics.incorrect
-      try challenge.update(db)
-
-      if buryRelatedChallenges {
-        let minimumDue = entry.timestamp.addingTimeInterval(.day)
-        let updates = try Sqlite.Challenge
-          .filter(Sqlite.Challenge.Columns.challengeTemplateId == templateKey &&
-            (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
-          )
-          .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue)
-        DDLogInfo("Buried \(updates) challenge(s)")
-      }
+      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges)
     }
     notesDidChangeSubject.send()
+  }
+
+  private static func updateChallenge(
+    for entry: Sqlite.StudyLogEntry,
+    in db: Database,
+    buryRelatedChallenges: Bool
+  ) throws {
+    var challenge = try Sqlite.Challenge.fetchOne(db, key: entry.challengeId)!
+    let delay: TimeInterval
+    if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
+      let idealDate = lastReview.addingTimeInterval(idealInterval)
+      delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
+    } else {
+      delay = 0
+    }
+    let schedulingOptions = SpacedRepetitionScheduler(
+      learningIntervals: [.day],
+      goodGraduatingInterval: 2 * .day
+    ).scheduleItem(challenge.item, afterDelay: delay)
+    let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
+
+    challenge.applyItem(outcome, on: entry.timestamp)
+    challenge.totalCorrect += entry.correct
+    challenge.totalIncorrect += entry.incorrect
+    try challenge.update(db)
+
+    if buryRelatedChallenges {
+      let minimumDue = entry.timestamp.addingTimeInterval(.day)
+      let updates = try Sqlite.Challenge
+        .filter(Sqlite.Challenge.Columns.challengeTemplateId == challenge.challengeTemplateId &&
+          (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
+        )
+        .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue)
+      DDLogInfo("Buried \(updates) challenge(s)")
+    }
   }
 
   public var studyLog: StudyLog {
@@ -745,10 +753,37 @@ private extension NoteSqliteStorage {
       })
     }
 
+    migrator.registerMigration("scheduler-20200114") { database in
+      try Self.recomputeChallenges(in: database)
+    }
+
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
     let postMigrations = try migrator.appliedMigrations(in: databaseQueue)
     return priorMigrations != postMigrations
+  }
+
+  /// Blows away the statistics for each challenge and recomputes them based  upon the study log entries in the database.
+  static func recomputeChallenges(in database: Database) throws {
+    try database.execute(sql: """
+    UPDATE challenge
+    SET
+      reviewCount = 0,
+      lapseCount = 0,
+      totalCorrect = 0,
+      lastReview = NULL,
+      idealInterval = NULL,
+      due = NULL,
+      spacedRepetitionFactor = 2.5
+    ;
+    """
+    )
+    let studyEntries = try Sqlite.StudyLogEntry
+      .order(Sqlite.StudyLogEntry.Columns.timestamp)
+      .fetchCursor(database)
+    while let entry = try studyEntries.next() {
+      try self.updateChallenge(for: entry, in: database, buryRelatedChallenges: false)
+    }
   }
 }
 
@@ -830,7 +865,7 @@ private extension Sqlite.Challenge {
   }
 }
 
-private extension AnswerStatistics {
+private extension Sqlite.StudyLogEntry {
   var cardAnswer: CardAnswer {
     if correct > 0, incorrect == 0 {
       return .good
