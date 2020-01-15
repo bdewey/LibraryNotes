@@ -7,6 +7,7 @@ import GRDB
 import GRDBCombine
 import MiniMarkdown
 import SpacedRepetitionScheduler
+import Yams
 
 private var hackDecodeCount = 0
 
@@ -566,6 +567,15 @@ private extension NoteSqliteStorage {
         try challengeRecord.insert(db)
       }
     }
+    for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
+      let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
+      guard var record = try Sqlite.ChallengeTemplate.fetchOne(db, key: modifiedTemplateIdentifier) else {
+        assertionFailure("Should be a record")
+        continue
+      }
+      record.rawValue = template.rawValue
+      try record.update(db, columns: [Sqlite.ChallengeTemplate.Columns.rawValue])
+    }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
       let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
       assert(deleted)
@@ -634,7 +644,8 @@ private extension NoteSqliteStorage {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
     }
-    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) else {
+    let rawValue = (try? YAMLDecoder().decode(String.self, from: challengeTemplateRecord.rawValue, userInfo: [:])) ?? challengeTemplateRecord.rawValue
+    guard let template = klass.init(rawValue: rawValue) else {
       throw Error.cannotDecodeTemplate
     }
     template.templateIdentifier = challengeTemplateRecord.id
