@@ -551,6 +551,15 @@ private extension NoteSqliteStorage {
         try challengeRecord.insert(db)
       }
     }
+    for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
+      let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
+      guard var record = try Sqlite.ChallengeTemplate.fetchOne(db, key: modifiedTemplateIdentifier) else {
+        assertionFailure("Should be a record")
+        continue
+      }
+      record.rawValue = template.rawValue
+      try record.update(db, columns: [Sqlite.ChallengeTemplate.Columns.rawValue])
+    }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
       let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
       assert(deleted)
