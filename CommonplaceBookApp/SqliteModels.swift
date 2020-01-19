@@ -156,4 +156,14 @@ enum Sqlite {
       static let id = Column(CodingKeys.id)
     }
   }
+
+  struct Device: Codable, FetchableRecord, MutablePersistableRecord {
+    var id: Int64?
+    var uuid: String
+    var name: String
+
+    mutating func didInsert(with rowID: Int64, for column: String?) {
+      id = rowID
+    }
+  }
 }

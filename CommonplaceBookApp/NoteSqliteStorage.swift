@@ -12,9 +12,10 @@ import Yams
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 public final class NoteSqliteStorage: NSObject, NoteStorage {
-  public init(fileURL: URL, parsingRules: ParsingRules, autosaveTimeInterval: TimeInterval = 10) {
+  public init(fileURL: URL, parsingRules: ParsingRules, device: UIDevice = .current, autosaveTimeInterval: TimeInterval = 10) {
     self.fileURL = fileURL
     self.parsingRules = parsingRules
+    self.device = device
     self.autosaveTimeInterval = autosaveTimeInterval
     self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     self.didAutosave = autosaveSubject.eraseToAnyPublisher()
@@ -30,6 +31,9 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 
   /// Parsing rules used to extract metadata from note contents.
   public let parsingRules: ParsingRules
+
+  /// The device that this instance runs on.
+  public let device: UIDevice
 
   /// Connection to the in-memory database.
   private var dbQueue: DatabaseQueue?
@@ -748,6 +752,14 @@ private extension NoteSqliteStorage {
 
     migrator.registerMigration("scheduler-20200114") { database in
       try Self.recomputeChallenges(in: database)
+    }
+
+    migrator.registerMigration("device-identifiers") { database in
+      try database.create(table: "device", body: { table in
+        table.autoIncrementedPrimaryKey("id")
+        table.column("uuid", .text).notNull().unique().indexed()
+        table.column("name", .text).notNull()
+      })
     }
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
