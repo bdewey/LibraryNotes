@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Compiles with Xcode 11.3.1
+
 ## [0.17.1] - 2020-01-15
 
 ### Fixed
