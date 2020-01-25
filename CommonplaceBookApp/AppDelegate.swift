@@ -34,8 +34,32 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   /// If non-nil, we want to open this page initially upon opening the document.
   var initialPageIdentifier: Note.Identifier?
 
-  @UserDefault("opened_document", defaultValue: nil) var openedDocumentBookmark: Data?
-  @UserDefault("has_run_0", defaultValue: false) var hasRun: Bool
+  private enum UserDefaultKey {
+    static let hasRun = "has_run_0"
+    static let openedDocument = "opened_document"
+  }
+
+  var openedDocumentBookmark: Data? {
+    get {
+      UserDefaults.standard.object(forKey: UserDefaultKey.openedDocument) as? Data
+    }
+    set {
+      if let value = newValue {
+        UserDefaults.standard.set(value, forKey: UserDefaultKey.openedDocument)
+      } else {
+        UserDefaults.standard.removeObject(forKey: UserDefaultKey.openedDocument)
+      }
+    }
+  }
+
+  var hasRun: Bool {
+    get {
+      UserDefaults.standard.object(forKey: UserDefaultKey.hasRun) as? Bool ?? false
+    }
+    set {
+      UserDefaults.standard.set(newValue, forKey: UserDefaultKey.hasRun)
+    }
+  }
 
   func application(
     _ application: UIApplication,

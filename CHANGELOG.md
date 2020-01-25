@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.1] - 2020-01-24
+
+### Fixed
+
+- Crash on manipulating UserDefaults. Introduced when I moved to Xcode 11.3.1 and didn't show up in the simulator because I don't use the UserDefault file-saving path.
+
 ## [0.18.0] - 2020-01-24
 
 ### Changed
