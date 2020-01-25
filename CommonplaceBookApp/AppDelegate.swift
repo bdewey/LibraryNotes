@@ -90,26 +90,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     })
   }
 
-  func application(
-    _ application: UIApplication,
-    continue userActivity: NSUserActivity,
-    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
-  ) -> Bool {
-    switch userActivity.activityType {
-    case CSSearchableItemActionType:
-      guard
-        let uniqueIdentifier = userActivity.userInfo?[CSSearchableItemActivityIdentifier] as? String
-      else {
-        break
-      }
-      DDLogInfo("Opening page \(uniqueIdentifier)")
-      initialPageIdentifier = Note.Identifier(rawValue: uniqueIdentifier)
-    default:
-      break
-    }
-    return true
-  }
-
   private func makeDirectoryProvider(
     at container: URL,
     deleteExistingContents: Bool = false

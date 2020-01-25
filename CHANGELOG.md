@@ -5,6 +5,7 @@
 ### Changed
 
 - Compiles with Xcode 11.3.1
+- Database schema now uses a FlakeID to encapsulate creation time & creation device for notes & challenge templates. If I ever write statistics & merge, this'll be helpful.
 
 ## [0.17.1] - 2020-01-15
 

@@ -95,10 +95,10 @@ public struct StudySession {
   }
 
   public mutating func ensureUniqueChallengeTemplates() {
-    var seenChallengeTemplateIdentifiers = Set<String>()
+    var seenChallengeTemplateIdentifiers = Set<FlakeID>()
     sessionChallengeIdentifiers = sessionChallengeIdentifiers
       .filter { challengeIdentifier -> Bool in
-        guard let templateIdentifier = challengeIdentifier.challengeIdentifier.templateDigest else {
+        guard let templateIdentifier = challengeIdentifier.challengeIdentifier.challengeTemplateID else {
           assertionFailure()
           return false
         }

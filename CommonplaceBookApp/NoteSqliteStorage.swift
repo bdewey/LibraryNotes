@@ -35,6 +35,16 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   /// The device that this instance runs on.
   public let device: UIDevice
 
+  /// The device record associated with this open database on this device. Valid when there is an open database.
+  private var deviceRecord: Sqlite.Device!
+
+  /// Used for generating IDs. Will get created when the database is opened. Only access on the database queue.
+  private var flakeMaker: FlakeMaker!
+
+  public func makeIdentifier() -> FlakeID {
+    flakeMaker.nextValue()
+  }
+
   /// Connection to the in-memory database.
   private var dbQueue: DatabaseQueue?
 
@@ -78,6 +88,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     case cannotDecodeTemplate = "Cannot decode challenge template."
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
+    case noDeviceUUID = "Could note get the device UUID."
     case noSuchAsset = "The specified asset does not exist."
     case noSuchNote = "The specified note does not exist."
     case notWriteable = "The database is not currently writeable."
@@ -108,6 +119,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     allMetadata = try dbQueue.read { db in
       try Self.fetchAllMetadata(from: db)
     }
+    deviceRecord = try currentDeviceRecord()
+    flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
     metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
       Sqlite.Note.all(),
     ]).publisher(in: dbQueue)
@@ -215,7 +228,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    let identifier = Note.Identifier()
+    let identifier = flakeMaker.nextValue()
     try dbQueue.write { db in
       try writeNote(note, with: identifier, to: db, createNew: true)
     }
@@ -251,10 +264,10 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
           AND noteFullText MATCH ?
         """
         let noteTexts = try Sqlite.NoteText.fetchAll(db, sql: sql, arguments: [pattern])
-        return noteTexts.map { Note.Identifier(rawValue: $0.noteId) }
+        return noteTexts.map { $0.noteId }
       } else {
         let noteTexts = try Sqlite.NoteText.fetchAll(db)
-        return noteTexts.map { Note.Identifier(rawValue: $0.noteId) }
+        return noteTexts.map { $0.noteId }
       }
     }
   }
@@ -299,7 +312,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
         .filter(Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due <= date)
         .fetchAll(db)
       return records.map {
-        ChallengeIdentifier(templateDigest: $0.challengeTemplateId, index: $0.index)
+        ChallengeIdentifier(templateDigest: FlakeID(rawValue: $0.challengeTemplateId), index: $0.index)
       }
     }
   }
@@ -311,7 +324,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    guard let templateIdentifier = challengeIdentifier.templateDigest else {
+    guard let templateIdentifier = challengeIdentifier.challengeTemplateID else {
       throw Error.unknownChallengeTemplate
     }
     return try dbQueue.read { db in
@@ -373,8 +386,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
     try dbQueue.write { db in
       guard
-        let templateKey = entry.identifier.templateDigest,
-        let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey),
+        let templateKey = entry.identifier.challengeTemplateID,
+        let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey.rawValue),
         let challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == entry.identifier.index).fetchOne(db)
       else {
         throw Error.unknownChallengeTemplate
@@ -446,7 +459,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
           StudyLog.Entry(
             timestamp: $0.studyLogEntry.timestamp,
             identifier: ChallengeIdentifier(
-              templateDigest: $0.challenge.challengeTemplateId,
+              templateDigest: FlakeID(rawValue: $0.challenge.challengeTemplateId),
               index: $0.challenge.index
             ),
             statistics: AnswerStatistics(
@@ -508,6 +521,33 @@ private extension NoteSqliteStorage {
     }
   }
 
+  /// Makes sure there is a device record for the current device in this database.
+  func currentDeviceRecord() throws -> Sqlite.Device {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.write { db in
+      try currentDeviceRecord(in: db)
+    }
+  }
+
+  /// Given an open database connection, returns the device record for the current device.
+  func currentDeviceRecord(in db: Database) throws -> Sqlite.Device {
+    guard let uuid = device.identifierForVendor?.uuidString else {
+      throw Error.noDeviceUUID
+    }
+    if var existingRecord = try Sqlite.Device.fetchOne(db, key: ["uuid": uuid]) {
+      try existingRecord.updateChanges(db, with: { deviceRecord in
+        deviceRecord.name = device.name
+      })
+      return existingRecord
+    } else {
+      var record = Sqlite.Device(uuid: uuid, name: device.name)
+      try record.insert(db)
+      return record
+    }
+  }
+
   @discardableResult
   func writeNoteText(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws -> Int64? {
     guard let noteText = noteText else {
@@ -518,7 +558,7 @@ private extension NoteSqliteStorage {
       try existingRecord.update(db)
       return existingRecord.id
     } else {
-      var newRecord = Sqlite.NoteText(id: nil, text: noteText, noteId: identifier.rawValue)
+      var newRecord = Sqlite.NoteText(id: nil, text: noteText, noteId: identifier)
       try newRecord.insert(db)
       return newRecord.id
     }
@@ -526,9 +566,10 @@ private extension NoteSqliteStorage {
 
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database, createNew: Bool) throws {
     let sqliteNote = Sqlite.Note(
-      id: identifier.rawValue,
+      id: identifier,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
+      modifiedDevice: Int64(flakeMaker!.instanceNumber),
       hasText: note.text != nil
     )
     if createNew {
@@ -543,7 +584,7 @@ private extension NoteSqliteStorage {
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
       _ = try fetchOrCreateHashtag(newHashtag, in: db)
-      let associationRecord = Sqlite.NoteHashtag(noteId: identifier.rawValue, hashtagId: newHashtag)
+      let associationRecord = Sqlite.NoteHashtag(noteId: identifier, hashtagId: newHashtag)
       try associationRecord.save(db)
     }
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
@@ -552,7 +593,7 @@ private extension NoteSqliteStorage {
     }
 
     for template in note.challengeTemplates where template.templateIdentifier == nil {
-      template.templateIdentifier = UUID().uuidString
+      template.templateIdentifier = flakeMaker.nextValue()
     }
     let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
     let onDiskChallengeTemplates = ((try? sqliteNote.challengeTemplates.fetchAll(db)) ?? [])
@@ -566,20 +607,20 @@ private extension NoteSqliteStorage {
         id: newTemplateIdentifier,
         type: template.type.rawValue,
         rawValue: templateString,
-        noteId: identifier.rawValue
+        noteId: identifier
       )
       try record.insert(db)
       for index in template.challenges.indices {
         var challengeRecord = Sqlite.Challenge(
           index: index,
-          challengeTemplateId: newTemplateIdentifier
+          challengeTemplateId: newTemplateIdentifier.rawValue
         )
         try challengeRecord.insert(db)
       }
     }
     for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
-      guard var record = try Sqlite.ChallengeTemplate.fetchOne(db, key: modifiedTemplateIdentifier) else {
+      guard var record = try Sqlite.ChallengeTemplate.fetchOne(db, key: modifiedTemplateIdentifier.rawValue) else {
         assertionFailure("Should be a record")
         continue
       }
@@ -587,7 +628,7 @@ private extension NoteSqliteStorage {
       try record.update(db, columns: [Sqlite.ChallengeTemplate.Columns.rawValue])
     }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
-      let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier)
+      let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier.rawValue)
       assert(deleted)
     }
   }
@@ -641,8 +682,8 @@ private extension NoteSqliteStorage {
     )
   }
 
-  func challengeTemplate(identifier: String, database: Database) throws -> ChallengeTemplate {
-    guard let record = try Sqlite.ChallengeTemplate.fetchOne(database, key: identifier) else {
+  func challengeTemplate(identifier: FlakeID, database: Database) throws -> ChallengeTemplate {
+    guard let record = try Sqlite.ChallengeTemplate.fetchOne(database, key: identifier.rawValue) else {
       throw Error.unknownChallengeTemplate
     }
     return try challengeTemplate(from: record)
@@ -667,18 +708,8 @@ private extension NoteSqliteStorage {
     var migrator = DatabaseMigrator()
 
     migrator.registerMigration("initialSchema") { database in
-      try database.create(table: "note", body: { table in
-        table.column("id", .text).primaryKey()
-        table.column("title", .text).notNull().defaults(to: "")
-        table.column("modifiedTimestamp", .datetime).notNull()
-        table.column("hasText", .boolean).notNull()
-      })
-
-      try database.create(table: "noteText", body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("text", .text).notNull()
-        table.column("noteId", .text).notNull().indexed().unique().references("note", onDelete: .cascade)
-      })
+      try Sqlite.Note.createV1Table(in: database)
+      try Sqlite.NoteText.createV1Table(in: database)
 
       try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
         table.synchronize(withTable: "noteText")
@@ -690,41 +721,9 @@ private extension NoteSqliteStorage {
         table.column("id", .text).primaryKey()
       })
 
-      try database.create(table: "noteHashtag", body: { table in
-        table.column("noteId", .text)
-          .notNull()
-          .indexed()
-          .references("note", onDelete: .cascade)
-        table.column("hashtagId", .text)
-          .notNull()
-          .indexed()
-          .references("hashtag", onDelete: .cascade)
-        table.primaryKey(["noteId", "hashtagId"])
-      })
-
-      try database.create(table: "challengeTemplate", body: { table in
-        table.column("id", .text).primaryKey()
-        table.column("type", .text).notNull()
-        table.column("rawValue", .text).notNull()
-        table.column("noteId", .text)
-          .notNull()
-          .indexed()
-          .references("note", onDelete: .cascade)
-      })
-
-      try database.create(table: "challenge", body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("index", .integer).notNull()
-        table.column("reviewCount", .integer).notNull().defaults(to: 0)
-        table.column("totalCorrect", .integer).notNull().defaults(to: 0)
-        table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
-        table.column("lastReview", .datetime)
-        table.column("due", .datetime)
-        table.column("challengeTemplateId", .text)
-          .notNull()
-          .indexed()
-          .references("challengeTemplate", onDelete: .cascade)
-      })
+      try Sqlite.NoteHashtag.createV1Table(in: database)
+      try Sqlite.ChallengeTemplate.createV1Table(in: database)
+      try Sqlite.Challenge.createV1Table(in: database)
 
       try database.create(table: "studyLogEntry", body: { table in
         table.autoIncrementedPrimaryKey("id")
@@ -754,12 +753,15 @@ private extension NoteSqliteStorage {
       try Self.recomputeChallenges(in: database)
     }
 
-    migrator.registerMigration("device-identifiers") { database in
+    migrator.registerMigrationWithDeferredForeignKeyCheck("flake-ids") { database in
       try database.create(table: "device", body: { table in
         table.autoIncrementedPrimaryKey("id")
         table.column("uuid", .text).notNull().unique().indexed()
         table.column("name", .text).notNull()
       })
+      let deviceRecord = try self.currentDeviceRecord(in: database)
+      let flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
+      try Sqlite.Note.migrateTableFromV1ToV2(in: database, flakeMaker: flakeMaker)
     }
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)

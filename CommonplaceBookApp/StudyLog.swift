@@ -12,7 +12,7 @@ public struct StudyLog {
     public var statistics: AnswerStatistics
 
     public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
-      assert(identifier.templateDigest != nil)
+      assert(identifier.challengeTemplateID != nil)
       self.timestamp = timestamp
       self.identifier = identifier
       self.statistics = statistics
@@ -20,8 +20,8 @@ public struct StudyLog {
 
     public static func < (lhs: StudyLog.Entry, rhs: StudyLog.Entry) -> Bool {
       if lhs.timestamp != rhs.timestamp { return lhs.timestamp < rhs.timestamp }
-      if lhs.identifier.templateDigest != rhs.identifier.templateDigest {
-        return lhs.identifier.templateDigest! < rhs.identifier.templateDigest!
+      if lhs.identifier.challengeTemplateID != rhs.identifier.challengeTemplateID {
+        return lhs.identifier.challengeTemplateID! < rhs.identifier.challengeTemplateID!
       }
       if lhs.identifier.index != rhs.identifier.index {
         return lhs.identifier.index < rhs.identifier.index
@@ -82,15 +82,7 @@ public struct StudyLog {
   /// study.
   public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
     return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
-      // We're going to trace what happens to a specific identifier
-      let shouldTrace = entry.identifier == ChallengeIdentifier(
-        templateDigest: "732ab6d75b1194fbfd73265a573665c113d6f9de",
-        index: 2
-      )
       guard entry.statistics.correct > 0 else {
-        if shouldTrace {
-          DDLogDebug("StudyLog: Niling date for \(entry)")
-        }
         suppressionDates[entry.identifier] = nil
         return
       }
@@ -99,17 +91,8 @@ public struct StudyLog {
         let delta = Swift.max(entry.timestamp.timeIntervalSince(currentEntry.currentDate), TimeInterval.day)
         let factor = pow(2.0, 1.0 - Double(entry.statistics.incorrect))
         let nextDate = entry.timestamp.addingTimeInterval(delta * factor)
-        if shouldTrace {
-          DDLogDebug(
-            "StudyLog: Updating delta = \(delta / TimeInterval.day) day(s) " +
-              "factor = \(factor) nextDate = \(nextDate)"
-          )
-        }
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: nextDate)
       } else {
-        if shouldTrace {
-          DDLogDebug("StudyLog: nextDate += 1 day")
-        }
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: entry.timestamp.addingTimeInterval(.day))
       }
     }.mapValues { $0.nextDate }
@@ -124,45 +107,5 @@ extension StudyLog: BidirectionalCollection {
 
   public subscript(position: Int) -> Entry {
     return entries[position]
-  }
-}
-
-extension StudyLog: LosslessStringConvertible {
-  public init?(_ description: String) {
-    self.entries = description.split(separator: "\n").map(String.init).compactMap(Entry.init)
-  }
-
-  public var description: String {
-    return entries.map { $0.description }.joined(separator: "\n").appending("\n")
-  }
-}
-
-extension StudyLog.Entry: LosslessStringConvertible {
-  public init?(_ description: String) {
-    let components = description.split(separator: " ")
-    guard
-      components.count == 7,
-      let date = ISO8601DateFormatter().date(from: String(components[0])),
-      let index = Int(components[2]),
-      let correct = Int(components[4]),
-      let incorrect = Int(components[6])
-    else {
-      return nil
-    }
-    self.timestamp = date
-    self.identifier = ChallengeIdentifier(templateDigest: String(components[1]), index: index)
-    self.statistics = AnswerStatistics(correct: correct, incorrect: incorrect)
-  }
-
-  public var description: String {
-    return [
-      ISO8601DateFormatter().string(from: timestamp),
-      identifier.templateDigest,
-      String(describing: identifier.index),
-      "correct",
-      String(statistics.correct),
-      "incorrect",
-      String(statistics.incorrect),
-    ].compactMap { $0 }.joined(separator: " ")
   }
 }
