@@ -1,4 +1,4 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
 import GRDB

@@ -1,6 +1,5 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-
 //
 //  FlakeMaker.swift
 //  MiniFlake
@@ -52,7 +51,7 @@ public struct FlakeID: RawRepresentable, Hashable, Comparable {
      - 12 bits sequence number
      - 10 bits instance ID
      */
-    let rawValue = (millisecondsSinceEpoch << 22) | (Int64(sequenceNumber & 0xFFF) << 10) | Int64(clampedInstanceNumber & (Self.limitInstanceNumber-1))
+    let rawValue = (millisecondsSinceEpoch << 22) | (Int64(sequenceNumber & 0xFFF) << 10) | Int64(clampedInstanceNumber & (Self.limitInstanceNumber - 1))
     self.init(rawValue: rawValue)
   }
 
@@ -116,7 +115,6 @@ extension FlakeID: CustomStringConvertible {
  - 10 bits instance ID
  */
 public class FlakeMaker {
-
   static let limitInstanceNumber = UInt16(0x400)
 
   var lastGenerateTime = Int64(0)
@@ -134,7 +132,7 @@ public class FlakeMaker {
    */
   public func nextValue() -> FlakeID {
     let now = Date.timeIntervalSinceReferenceDate
-    var generateTime = Int64(floor( (now - FlakeID.customEpoch) * 1000) )
+    var generateTime = Int64(floor((now - FlakeID.customEpoch) * 1000))
 
     let sequenceNumberMax = 0x1000
     if generateTime > lastGenerateTime {
@@ -177,6 +175,6 @@ extension FlakeMaker: Hashable {
   }
 }
 
-public func ==(lhs: FlakeMaker, rhs: FlakeMaker) -> Bool {
+public func == (lhs: FlakeMaker, rhs: FlakeMaker) -> Bool {
   return lhs.instanceNumber == rhs.instanceNumber && lhs.lastGenerateTime == rhs.lastGenerateTime && lhs.sequenceNumber == rhs.sequenceNumber
 }

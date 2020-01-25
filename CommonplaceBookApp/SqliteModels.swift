@@ -10,6 +10,7 @@ enum Sqlite {
     case cannotFindNoteID(String)
     case cannotFindTemplateID(String)
   }
+
   /// Result structure from fetching a Note plus all of its hashtags
   struct NoteMetadata: Decodable, FetchableRecord {
     var id: Int64
