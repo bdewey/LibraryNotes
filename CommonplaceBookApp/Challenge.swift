@@ -7,14 +7,14 @@ import UIKit
 /// Uniquely identifies a challenge.
 public struct ChallengeIdentifier: Hashable {
   /// The SHA1 digest of the template that created this challenge.
-  public var templateDigest: String?
+  public var challengeTemplateID: FlakeID?
 
   /// The index of this challenge in the template's challenges array.
   public let index: Int
 
   /// Public initializer.
-  public init(templateDigest: String?, index: Int) {
-    self.templateDigest = templateDigest
+  public init(templateDigest: FlakeID?, index: Int) {
+    self.challengeTemplateID = templateDigest
     self.index = index
   }
 }

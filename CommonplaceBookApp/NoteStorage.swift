@@ -19,6 +19,8 @@ public protocol NoteStorage: AnyObject {
   /// This publisher sends a signal whenver `noteProperties` changed.
   var notesDidChange: AnyPublisher<Void, Never> { get }
 
+  func makeIdentifier() -> FlakeID
+
   /// Gets a note with a specific identifier.
   func note(noteIdentifier: Note.Identifier) throws -> Note
 
