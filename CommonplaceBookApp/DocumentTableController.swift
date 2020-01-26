@@ -50,6 +50,12 @@ public final class DocumentTableController: NSObject {
     updateCardsPerDocument()
   }
 
+  public var challengeDueDate = Date() {
+    didSet {
+      updateCardsPerDocument()
+    }
+  }
+
   /// Convenience to construct an appropriately-configured UITableView to show our data.
   public static func makeTableView() -> UITableView {
     let tableView = UITableView(frame: .zero, style: .plain)
@@ -341,7 +347,7 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    notebook.studySession(filter: nil, date: Date()) { studySession in
+    notebook.studySession(filter: nil, date: challengeDueDate) { studySession in
       self.cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1

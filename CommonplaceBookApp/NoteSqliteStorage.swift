@@ -38,6 +38,14 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   /// The device record associated with this open database on this device. Valid when there is an open database.
   private var deviceRecord: Sqlite.Device!
 
+  /// Our scheduler.
+  public static let scheduler: SpacedRepetitionScheduler = {
+    SpacedRepetitionScheduler(
+      learningIntervals: [.day, 4 * .day],
+      goodGraduatingInterval: 7 * .day
+    )
+  }()
+
   /// Used for generating IDs. Will get created when the database is opened. Only access on the database queue.
   private var flakeMaker: FlakeMaker!
 
@@ -419,10 +427,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     } else {
       delay = 0
     }
-    let schedulingOptions = SpacedRepetitionScheduler(
-      learningIntervals: [.day],
-      goodGraduatingInterval: 2 * .day
-    ).scheduleItem(challenge.item, afterDelay: delay)
+    let schedulingOptions = Self.scheduler.scheduleItem(challenge.item, afterDelay: delay)
     let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
 
     challenge.applyItem(outcome, on: entry.timestamp)
@@ -600,6 +605,8 @@ private extension NoteSqliteStorage {
       .map { $0.id }
       .asSet()
 
+    let today = Date()
+    let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
     for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
       let templateString = template.rawValue
@@ -613,6 +620,7 @@ private extension NoteSqliteStorage {
       for index in template.challenges.indices {
         var challengeRecord = Sqlite.Challenge(
           index: index,
+          due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
           challengeTemplateId: newTemplateIdentifier.rawValue
         )
         try challengeRecord.insert(db)
@@ -853,8 +861,10 @@ private extension Sqlite.Challenge {
         factor: spacedRepetitionFactor
       )
     } else {
+      // Create an item that's *just about to graduate* if we've never seen it before.
+      // That's because we make new items due "last learning interval" after creation
       return SpacedRepetitionScheduler.Item(
-        learningState: .learning(step: 0),
+        learningState: .learning(step: NoteSqliteStorage.scheduler.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,

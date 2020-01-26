@@ -80,7 +80,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     window.makeKeyAndVisible()
     self.window = window
 
-    if !isUITesting, let openedDocumentBookmarkData = openedDocumentBookmark {
+    if !Self.isUITesting, let openedDocumentBookmarkData = openedDocumentBookmark {
       DDLogInfo("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
@@ -147,12 +147,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   }
 
-  private lazy var isUITesting: Bool = {
+  internal static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
 
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
-    if isUITesting {
+    if Self.isUITesting {
       let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
       completion(makeDirectoryProvider(at: container, deleteExistingContents: true))
       return
@@ -244,7 +244,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 //        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
       DDLogInfo("In open completion handler. \(properties)")
-      if success, !self.isUITesting {
+      if success, !Self.isUITesting {
         self.openedDocumentBookmark = try? url.bookmarkData()
       }
     })

@@ -9,6 +9,7 @@ private enum Identifiers {
   static let editDocumentView = "edit-document-view"
   static let newDocumentButton = "new-document"
   static let studyButton = "study-button"
+  static let advanceTimeButton = "advance-time-button"
 }
 
 private enum TestContent {
@@ -84,6 +85,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testStudyButtonEnabledAfterCreatingClozeContent() {
     createDocument(with: TestContent.singleCloze)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
   }
 
@@ -95,6 +97,10 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testTableHasSingleRowAfterClozeContent() {
     createDocument(with: TestContent.singleCloze)
+    let studyButton = application.buttons[Identifiers.studyButton]
+    waitUntilElementExists(studyButton)
+    XCTAssertFalse(studyButton.isEnabled)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
     let documentList = application.tables[Identifiers.documentList]
     waitUntilElementExists(documentList)
@@ -118,16 +124,19 @@ final class CommonplaceBookAppUITests: XCTestCase {
 
   func testStudyFromASingleDocument() {
     createDocument(with: TestContent.doubleCloze)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     study(expectedCards: 2)
   }
 
   func testMultipleChallengesFromOneTemplateAreSuppressed() {
     createDocument(with: TestContent.multipleClozeInOneTemplate)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     study(expectedCards: 1)
   }
 
   func testStudyQuotes() {
     createDocument(with: TestContent.quote)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     study(expectedCards: 3)
   }
 
@@ -152,6 +161,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
       lines.append("All work and no play makes ?[who?](Jack) a dull boy. \(i)\n")
     }
     createDocument(with: lines)
+    tapButton(identifier: Identifiers.advanceTimeButton)
     waitUntilElementExists(application.staticTexts["25 cards."])
     study(expectedCards: 20, noCardsLeft: false)
     waitUntilElementExists(application.staticTexts["5 cards."])
@@ -246,9 +256,7 @@ extension CommonplaceBookAppUITests {
   }
 
   private func study(expectedCards: Int, noCardsLeft: Bool = true) {
-    let studyButton = application.buttons[Identifiers.studyButton]
-    waitUntilElementEnabled(studyButton)
-    studyButton.tap()
+    let studyButton = tapButton(identifier: Identifiers.studyButton)
     let currentCard = application.otherElements[Identifiers.currentCardView]
     for _ in 0 ..< expectedCards {
       waitUntilElementExists(currentCard)
@@ -264,5 +272,13 @@ extension CommonplaceBookAppUITests {
         message: "Studying should be disabled"
       )
     }
+  }
+
+  @discardableResult
+  private func tapButton(identifier: String) -> XCUIElement {
+    let button = application.buttons[identifier]
+    waitUntilElementEnabled(button)
+    button.tap()
+    return button
   }
 }

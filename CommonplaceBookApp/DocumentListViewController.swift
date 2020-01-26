@@ -47,6 +47,15 @@ final class DocumentListViewController: UIViewController {
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var notebookSubscription: AnyCancellable?
+  private var challengeDueDate: Date {
+    get {
+      return dataSource?.challengeDueDate ?? Date()
+    }
+    set {
+      dataSource?.challengeDueDate = newValue
+      updateStudySession()
+    }
+  }
 
   private lazy var documentBrowserButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "folder")
@@ -71,6 +80,18 @@ final class DocumentListViewController: UIViewController {
       action: #selector(startStudySession)
     )
     button.accessibilityIdentifier = "study-button"
+    return button
+  }()
+
+  private lazy var advanceTimeButton: UIBarButtonItem = {
+    let icon = UIImage(systemName: "clock")
+    let button = UIBarButtonItem(
+      image: icon,
+      style: .plain,
+      target: self,
+      action: #selector(advanceTime)
+    )
+    button.accessibilityIdentifier = "advance-time-button"
     return button
   }()
 
@@ -122,6 +143,9 @@ final class DocumentListViewController: UIViewController {
 
     navigationItem.leftBarButtonItem = documentBrowserButton
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
+    if AppDelegate.isUITesting {
+      navigationItem.rightBarButtonItems?.append(advanceTimeButton)
+    }
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -187,12 +211,16 @@ final class DocumentListViewController: UIViewController {
     presentStudySessionViewController(for: studySession)
   }
 
+  @objc private func advanceTime() {
+    challengeDueDate = challengeDueDate.addingTimeInterval(7 * .day)
+  }
+
   private func updateStudySession() {
     let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
-    notebook.studySession(filter: filter, date: Date()) {
+    notebook.studySession(filter: filter, date: challengeDueDate) {
       guard self.currentHashtag == hashtag else { return }
       self.studySession = $0
     }
@@ -320,7 +348,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     do {
-      try notebook.updateStudySessionResults(session, on: Date(), buryRelatedChallenges: true)
+      try notebook.updateStudySessionResults(session, on: challengeDueDate, buryRelatedChallenges: true)
       updateStudySession()
     } catch {
       DDLogError("Unexpected error recording study session results: \(error)")
