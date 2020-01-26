@@ -141,6 +141,9 @@ final class DocumentListViewController: UIViewController {
     searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
+    /// We'll look for all challenges that are due by the start of the next day.
+    challengeDueDate = Calendar.current.startOfDay(for: Date().addingTimeInterval(.day))
+
     navigationItem.leftBarButtonItem = documentBrowserButton
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
     if AppDelegate.isUITesting {

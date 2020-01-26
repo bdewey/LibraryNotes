@@ -5,6 +5,7 @@
 ### Changed
 
 - New challenges are now scheduled around 4 days in advance (fuzzed) ... the thought being *you just created this content so you remember it now*. But will you still remember it in a few days?
+- We look for all challenges that would be due today... so it doesn't matter if you study in the morning or the night.
 
 ## [0.18.1] - 2020-01-24
 
