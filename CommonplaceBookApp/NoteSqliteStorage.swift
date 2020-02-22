@@ -585,15 +585,13 @@ private extension NoteSqliteStorage {
     try writeNoteText(note.text, with: identifier, to: db)
     let inMemoryHashtags = Set(note.metadata.hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
-      .map { $0.id }
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
-      _ = try fetchOrCreateHashtag(newHashtag, in: db)
-      let associationRecord = Sqlite.NoteHashtag(noteId: identifier, hashtagId: newHashtag)
+      let associationRecord = Sqlite.NoteHashtag(noteId: identifier, hashtag: newHashtag)
       try associationRecord.save(db)
     }
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
-      let deleted = try Sqlite.NoteHashtag.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtagId": obsoleteHashtag])
+      let deleted = try Sqlite.NoteHashtag.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtag": obsoleteHashtag])
       assert(deleted)
     }
 
@@ -646,7 +644,7 @@ private extension NoteSqliteStorage {
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
       let metadata = Note.Metadata(
         timestamp: metadataItem.modifiedTimestamp,
-        hashtags: metadataItem.hashtags.map { $0.id },
+        hashtags: metadataItem.noteHashtags.map { $0.hashtag },
         title: metadataItem.title,
         containsText: metadataItem.hasText
       )
@@ -656,21 +654,12 @@ private extension NoteSqliteStorage {
     return Dictionary(uniqueKeysWithValues: tuples)
   }
 
-  func fetchOrCreateHashtag(_ hashtag: String, in db: Database) throws -> Sqlite.Hashtag {
-    if let existing = try Sqlite.Hashtag.fetchOne(db, key: hashtag) {
-      return existing
-    }
-    let newRecord = Sqlite.Hashtag(id: hashtag)
-    try newRecord.insert(db)
-    return newRecord
-  }
-
   func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
     guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue) else {
       throw Error.noSuchNote
     }
     let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
-    let hashtags = hashtagRecords.map { $0.hashtagId }
+    let hashtags = hashtagRecords.map { $0.hashtag }
     let challengeTemplateRecords = try Sqlite.ChallengeTemplate
       .filter(Sqlite.ChallengeTemplate.Columns.noteId == identifier.rawValue)
       .fetchAll(db)
@@ -770,6 +759,11 @@ private extension NoteSqliteStorage {
       let deviceRecord = try self.currentDeviceRecord(in: database)
       let flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
       try Sqlite.Note.migrateTableFromV1ToV2(in: database, flakeMaker: flakeMaker)
+    }
+
+    migrator.registerMigration("no-hashtag-table") { database in
+      try Sqlite.NoteHashtag.migrateTableFromV2ToV3(in: database)
+      try database.drop(table: "hashtag")
     }
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)

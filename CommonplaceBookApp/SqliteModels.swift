@@ -17,18 +17,9 @@ enum Sqlite {
     var title: String
     var modifiedTimestamp: Date
     var hasText: Bool
-    var hashtags: [Hashtag]
+    var noteHashtags: [NoteHashtag]
 
-    static let request = Note.including(all: Note.hashtags)
-  }
-
-  /// Core record for the `hashtag` table
-  struct Hashtag: Codable, FetchableRecord, PersistableRecord {
-    var id: String
-
-    enum Columns {
-      static let id = Column(CodingKeys.id)
-    }
+    static let request = Note.including(all: Note.noteHashtags)
   }
 
   struct StudyLogEntry: Codable, FetchableRecord, MutablePersistableRecord {

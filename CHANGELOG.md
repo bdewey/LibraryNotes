@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Got rid of the "hashtag" table; we just need "noteHashtag".
+
 ## [0.19.0] - 2020-01-26
 
 ### Changed

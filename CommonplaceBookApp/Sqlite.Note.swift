@@ -62,10 +62,11 @@ extension Sqlite {
     }
 
     static let noteHashtags = hasMany(NoteHashtag.self)
-    static let hashtags = hasMany(Hashtag.self, through: noteHashtags, using: NoteHashtag.hashtag)
 
-    var hashtags: QueryInterfaceRequest<Hashtag> {
-      return request(for: Note.hashtags)
+    var hashtags: QueryInterfaceRequest<String> {
+      NoteHashtag
+        .filter(NoteHashtag.Columns.noteId == self.id.rawValue)
+        .select(NoteHashtag.Columns.hashtag, as: String.self)
     }
 
     static let challengeTemplates = hasMany(ChallengeTemplate.self)
