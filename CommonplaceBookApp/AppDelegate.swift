@@ -209,7 +209,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
-    DDLogInfo("Opening document at \(url)")
+    DDLogInfo("Opening document at \"\(url.path)\"")
     let noteArchiveDocument: NoteStorage
     if url.pathExtension == "notedb" {
       noteArchiveDocument = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
