@@ -11,6 +11,7 @@ extension Sqlite {
     var modifiedTimestamp: Date
     var modifiedDevice: Int64
     var hasText: Bool
+    var deleted: Bool
 
     static func createV1Table(in database: Database) throws {
       try database.create(table: "note", body: { table in
@@ -59,22 +60,96 @@ extension Sqlite {
       static let id = Column(CodingKeys.id)
       static let title = Column(CodingKeys.title)
       static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
+      static let deleted = Column(CodingKeys.deleted)
     }
 
     static let noteHashtags = hasMany(NoteHashtag.self)
 
     var hashtags: QueryInterfaceRequest<String> {
       NoteHashtag
-        .filter(NoteHashtag.Columns.noteId == self.id.rawValue)
+        .filter(NoteHashtag.Columns.noteId == id.rawValue)
         .select(NoteHashtag.Columns.hashtag, as: String.self)
     }
 
     static let challengeTemplates = hasMany(ChallengeTemplate.self)
     var challengeTemplates: QueryInterfaceRequest<ChallengeTemplate> { request(for: Note.challengeTemplates) }
 
-    static let noteText = belongsTo(NoteText.self)
+    /// The association between this note and its text.
+    static let noteText = hasOne(NoteText.self)
+
+    /// A query that returns the text associated with this note.
+    var noteText: QueryInterfaceRequest<NoteText> { request(for: Note.noteText) }
 
     static let challenges = hasMany(Challenge.self, through: challengeTemplates, using: ChallengeTemplate.challenges)
     var challenges: QueryInterfaceRequest<Challenge> { request(for: Note.challenges) }
+
+    /// The association between this note and the device it was last changed on.
+    static let device = belongsTo(Device.self)
+  }
+}
+
+extension Sqlite.Note {
+  /// Knows how to merge notes between a local and remote database.
+  struct MergeInfo: MergeInfoRecord, Decodable {
+    // MARK: - Stored properties
+
+    var id: FlakeID
+    var modifiedTimestamp: Date
+    var device: Sqlite.Device
+
+    // MARK: - Computed properties
+
+    static var cursorRequest: QueryInterfaceRequest<Self> {
+      Sqlite.Note
+        .including(required: Sqlite.Note.device)
+        .asRequest(of: Sqlite.Note.MergeInfo.self)
+    }
+
+    var instanceRequest: QueryInterfaceRequest<Self> {
+      Sqlite.Note
+        .including(required: Sqlite.Note.device)
+        .filter(key: id.rawValue)
+        .asRequest(of: Sqlite.Note.MergeInfo.self)
+    }
+
+    var timestamp: Date { modifiedTimestamp }
+    var deviceUUID: String { device.uuid }
+
+    func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
+      guard
+        var note = try Sqlite.Note.filter(key: id.rawValue).fetchOne(sourceDatabase)
+      else {
+        return
+      }
+      if let device = try Sqlite.Device.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase) {
+        note.modifiedDevice = device.id!
+      } else {
+        var device = self.device
+        device.id = nil
+        device.latestChange = note.modifiedTimestamp
+        try device.insert(destinationDatabase)
+        note.modifiedDevice = device.id!
+      }
+
+      try Sqlite.Note.deleteOne(destinationDatabase, key: id.rawValue)
+      try note.insert(destinationDatabase)
+      try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
+        let record = Sqlite.NoteHashtag(noteId: id, hashtag: hashtag)
+        try record.insert(destinationDatabase)
+      }
+      try note.noteText.fetchAll(sourceDatabase).forEach { noteText in
+        var noteText = noteText
+        noteText.id = nil
+        try noteText.insert(destinationDatabase)
+      }
+      try note.challengeTemplates.fetchAll(sourceDatabase).forEach { challengeTemplate in
+        try challengeTemplate.insert(destinationDatabase)
+      }
+      try note.challenges.fetchAll(sourceDatabase).forEach { challenge in
+        var challenge = challenge
+        challenge.id = nil
+        try challenge.insert(destinationDatabase)
+      }
+    }
   }
 }

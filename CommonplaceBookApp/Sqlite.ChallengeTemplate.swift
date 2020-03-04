@@ -17,7 +17,14 @@ extension Sqlite {
       static let noteId = Column(CodingKeys.noteId)
     }
 
+    /// The note that the challenge template is associated with
     static let note = belongsTo(Note.self)
+
+    /// A query that will return the note associated with this template.
+    var note: QueryInterfaceRequest<Note> {
+      request(for: Self.note)
+    }
+
     static let challenges = hasMany(Challenge.self)
 
     var challenges: QueryInterfaceRequest<Challenge> { request(for: ChallengeTemplate.challenges) }
