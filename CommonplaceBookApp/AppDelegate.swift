@@ -257,19 +257,20 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     openDocument(at: url, from: controller, animated: true)
   }
 
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
+  func documentBrowser(
+    _ controller: UIDocumentBrowserViewController,
+    didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
+  ) {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
     let url = directoryURL.appendingPathComponent("commonplace").appendingPathExtension("notedb")
-    do {
-      let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
-      try document.open()
-      try document.flush()
-    } catch {
-      DDLogError("Error creating new document: \(error)")
-      importHandler(nil, .none)
-      return
+    let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
+    document.save(to: url, for: .forCreating) { success in
+      if success {
+        importHandler(url, .copy)
+      } else {
+        importHandler(nil, .none)
+      }
     }
-    importHandler(url, .copy)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {

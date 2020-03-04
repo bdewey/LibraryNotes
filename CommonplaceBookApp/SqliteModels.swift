@@ -17,6 +17,7 @@ enum Sqlite {
     var title: String
     var modifiedTimestamp: Date
     var hasText: Bool
+    var deleted: Bool
     var noteHashtags: [NoteHashtag]
 
     static let request = Note.including(all: Note.noteHashtags)
@@ -59,6 +60,14 @@ enum Sqlite {
     var id: Int64?
     var uuid: String
     var name: String
+
+    /// The latest change authored by this device.
+    // TODO: Consider using an update sequence number instead.
+    var latestChange: Date
+
+    enum Columns {
+      static let uuid = Column(CodingKeys.uuid)
+    }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
       id = rowID

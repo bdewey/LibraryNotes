@@ -9,31 +9,40 @@ import MiniMarkdown
 import SpacedRepetitionScheduler
 import Yams
 
+// swiftlint:disable file_length
+
+/// Used to identify the device that authors changes.
+public protocol DeviceIdentifying {
+  /// A UUID uniquely identifying this device.
+  var identifierForVendor: UUID? { get }
+
+  /// A human-readable name for this device.
+  var name: String { get }
+}
+
+/// UIDevice conforms to DeviceIdentifying.
+extension UIDevice: DeviceIdentifying {}
+
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
-public final class NoteSqliteStorage: NSObject, NoteStorage {
-  public init(fileURL: URL, parsingRules: ParsingRules, device: UIDevice = .current, autosaveTimeInterval: TimeInterval = 10) {
-    self.fileURL = fileURL
+public final class NoteSqliteStorage: UIDocument, NoteStorage {
+  /// Designated initializer.
+  public init(
+    fileURL: URL,
+    parsingRules: ParsingRules,
+    device: DeviceIdentifying = UIDevice.current
+  ) {
     self.parsingRules = parsingRules
     self.device = device
-    self.autosaveTimeInterval = autosaveTimeInterval
     self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
-    self.didAutosave = autosaveSubject.eraseToAnyPublisher()
+    super.init(fileURL: fileURL)
   }
-
-  deinit {
-    autosaveTimer = nil
-    try? flush()
-  }
-
-  /// URL to the sqlite file
-  public let fileURL: URL
 
   /// Parsing rules used to extract metadata from note contents.
   public let parsingRules: ParsingRules
 
   /// The device that this instance runs on.
-  public let device: UIDevice
+  public let device: DeviceIdentifying
 
   /// The device record associated with this open database on this device. Valid when there is an open database.
   private var deviceRecord: Sqlite.Device!
@@ -54,22 +63,23 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   }
 
   /// Connection to the in-memory database.
-  private var dbQueue: DatabaseQueue?
-
-  /// Set to `true` if there are unsaved changes in the in-memory database.
-  public private(set) var hasUnsavedChanges = false
-
-  /// Set to false to temporarily disable writing
-  private var isWriteable = true
+  private var dbQueue: DatabaseQueue? {
+    didSet {
+      if let queue = dbQueue {
+        do {
+          try monitorDatabaseQueue(queue)
+        } catch {
+          DDLogError("Unexpected error monitoring queue for changes: \(error)")
+        }
+      }
+    }
+  }
 
   /// Pipeline monitoring for changes in the database.
   private var metadataUpdatePipeline: AnyCancellable?
 
   /// Pipeline for monitoring for unsaved changes to the in-memory database.
   private var hasUnsavedChangesPipeline: AnyCancellable?
-
-  /// How long to wait before autosaving.
-  private let autosaveTimeInterval: TimeInterval
 
   /// Used for decoding challenge templates.
   private lazy var decoder: JSONDecoder = {
@@ -78,19 +88,6 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     return decoder
   }()
 
-  /// The actual autosave timer.
-  private var autosaveTimer: Timer? {
-    willSet {
-      autosaveTimer?.invalidate()
-    }
-  }
-
-  /// Private publisher to let outside observers know autosave happened.
-  private let autosaveSubject = PassthroughSubject<Void, Never>()
-
-  /// Notification when autosave happens.
-  public let didAutosave: AnyPublisher<Void, Never>
-
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
     case cannotDecodeTemplate = "Cannot decode challenge template."
@@ -98,125 +95,121 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     case databaseIsNotOpen = "The database is not open."
     case noDeviceUUID = "Could note get the device UUID."
     case noSuchAsset = "The specified asset does not exist."
+    case noSuchChallenge = "The specified challenge does not exist."
     case noSuchNote = "The specified note does not exist."
     case notWriteable = "The database is not currently writeable."
     case unknownChallengeTemplate = "The challenge template does not exist."
     case unknownChallengeType = "The challenge template uses an unknown type."
   }
 
-  /// Opens the database.
-  /// - parameter completionHandler: A handler called after opening the database. If the error is nil, the database opened successfully.
-  public func open(completionHandler: ((Bool) -> Void)?) {
-    do {
-      try open()
-      completionHandler?(true)
-    } catch {
-      DDLogError("Unexpected error opening database: \(error)")
-      completionHandler?(false)
+  public override func open(completionHandler: ((Bool) -> Void)? = nil) {
+    super.open { success in
+      DDLogInfo("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
+      NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
+      self.handleDocumentStateChanged()
+      completionHandler?(success)
     }
   }
 
-  /// Synchronous `open` variant.
-  public func open() throws {
-    guard dbQueue == nil else {
-      throw Error.databaseAlreadyOpen
-    }
-    let dbQueue = try memoryDatabaseQueue(fileURL: fileURL)
-    hasUnsavedChanges = try runMigrations(on: dbQueue)
-    self.dbQueue = dbQueue
-    allMetadata = try dbQueue.read { db in
-      try Self.fetchAllMetadata(from: db)
-    }
-    deviceRecord = try currentDeviceRecord()
-    flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
-    metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
-      Sqlite.Note.all(),
-    ]).publisher(in: dbQueue)
-      .tryMap { db in try Self.fetchAllMetadata(from: db) }
-      .sink(
-        receiveCompletion: { completion in
-          switch completion {
-          case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
-          case .finished:
-            DDLogInfo("Monitoring pipeline shutting down")
-          }
-        },
-        receiveValue: { [weak self] allMetadata in
-          self?.allMetadata = allMetadata
-        }
-      )
-    hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
-      Sqlite.Note.all(),
-      Sqlite.NoteText.all(),
-      Sqlite.NoteHashtag.all(),
-      Sqlite.StudyLogEntry.all(),
-      Sqlite.Asset.all(),
-    ]).publisher(in: dbQueue)
-      .sink(
-        receiveCompletion: { completion in
-          switch completion {
-          case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
-          case .finished:
-            DDLogInfo("hasUnsavedChanges shutting down")
-          }
-        },
-        receiveValue: { [weak self] _ in
-          self?.hasUnsavedChanges = true
-        }
-      )
-    autosaveTimer = Timer.scheduledTimer(
-      withTimeInterval: autosaveTimeInterval, repeats: true, block: { [weak self] _ in
-        do {
-          try self?.flush()
-          self?.autosaveSubject.send()
-        } catch {
-          DDLogInfo("Error autosaving: \(error)")
-        }
-      }
-    )
+  public override func close(completionHandler: ((Bool) -> Void)? = nil) {
+    NotificationCenter.default.removeObserver(self)
+    super.close(completionHandler: completionHandler)
   }
 
-  /// Ensures contents are saved to stable storage.
-  public func flush() throws {
-    guard let dbQueue = dbQueue, hasUnsavedChanges else {
+  /// Merges new content from another storage container into this storage container.
+  public func merge(other: NoteSqliteStorage) throws -> MergeResult {
+    guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    let result = try localQueue.merge(remoteQueue: remoteQueue)
+    if !result.isEmpty {
+      notesDidChangeSubject.send()
+    }
+    return result
+  }
+
+  @objc private func handleDocumentStateChanged() {
+    guard documentState.contains(.inConflict) else {
       return
     }
-    guard isWriteable else {
-      throw Error.notWriteable
-    }
-    let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("notedb")
-    defer {
-      try? FileManager.default.removeItem(at: tempURL)
-    }
-    try dbQueue.writeWithoutTransaction { db in
-      try db.execute(sql: "VACUUM INTO '\(tempURL.path)'")
-    }
-    let coordinator = NSFileCoordinator(filePresenter: self)
-    var coordinatorError: NSError?
-    var innerError: Swift.Error?
-    coordinator.coordinate(writingItemAt: fileURL, options: [], error: &coordinatorError) { coordinatedURL in
-      do {
-        let didGetAccess = coordinatedURL.startAccessingSecurityScopedResource()
+    DDLogInfo("UIDocument: Handling conflict")
+    do {
+      var conflictMergeResults = MergeResult()
+      for conflictVersion in NSFileVersion.unresolvedConflictVersionsOfItem(at: fileURL) ?? [] {
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("notedb")
+        try conflictVersion.replaceItem(at: tempURL, options: [])
         defer {
-          if didGetAccess {
-            coordinatedURL.stopAccessingSecurityScopedResource()
+          try? FileManager.default.removeItem(at: tempURL)
+        }
+        let conflictQueue = try memoryDatabaseQueue(fileURL: tempURL)
+        if let dbQueue = dbQueue {
+          let result = try dbQueue.merge(remoteQueue: conflictQueue)
+          DDLogInfo("UIDocument: Merged conflict version: \(result)")
+          conflictMergeResults += result
+        } else {
+          DDLogInfo("UIDocument: Trying to resolve conflict but dbQueue is nil?")
+          dbQueue = conflictQueue
+        }
+        conflictVersion.isResolved = true
+        try conflictVersion.remove()
+      }
+      DDLogInfo("UIDocument: Finished resolving conflicts")
+      try NSFileVersion.removeOtherVersionsOfItem(at: fileURL)
+      if !conflictMergeResults.isEmpty {
+        notesDidChangeSubject.send()
+      }
+    } catch {
+      DDLogError("UIDocument: Unexpected error resolving conflict: \(error)")
+    }
+  }
+
+  public override func read(from url: URL) throws {
+    // TODO: Optionally merge the changes from disk into memory?
+    DDLogInfo("UIDocument: Reading content from '\(url.path)'")
+    let dbQueue = try memoryDatabaseQueue(fileURL: url)
+    DispatchQueue.main.async {
+      if let inMemoryQueue = self.dbQueue {
+        if dbQueue.deviceVersionVector == inMemoryQueue.deviceVersionVector {
+          DDLogInfo("UIDocument: On-disk content is the same as memory; ignoring")
+        } else if dbQueue.deviceVersionVector > inMemoryQueue.deviceVersionVector {
+          DDLogInfo("UIDocument: On-disk data is strictly greater than in-memory; overwriting")
+          self.dbQueue = dbQueue
+        } else {
+          DDLogInfo("UIDocument: **Merging** disk contents with memory.\nDisk: \(dbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
+          do {
+            let result = try inMemoryQueue.merge(remoteQueue: dbQueue)
+            DDLogInfo("UIDocument: Merged disk results \(result)")
+            if !result.isEmpty {
+              self.notesDidChangeSubject.send()
+            }
+          } catch {
+            DDLogError("UIDocument: Could not merge disk contents! \(error)")
           }
         }
-        let newURL = try FileManager.default.replaceItemAt(coordinatedURL, withItemAt: tempURL)
-        assert(newURL == coordinatedURL)
-        hasUnsavedChanges = false
-      } catch {
-        innerError = error
+      } else {
+        DDLogInfo("UIDocument: Nothing in memory, using the disk image")
+        self.dbQueue = dbQueue
       }
     }
-    if let coordinatorError = coordinatorError {
-      throw coordinatorError
+  }
+
+  public override func writeContents(
+    _ contents: Any,
+    to url: URL,
+    for saveOperation: UIDocument.SaveOperation,
+    originalContentsURL: URL?
+  ) throws {
+    guard let dbQueue = dbQueue else {
+      return
     }
-    if let innerError = innerError {
-      throw innerError
+    DDLogInfo("UIDocument: Writing content to '\(url.path)'")
+    try dbQueue.writeWithoutTransaction { db in
+      try db.execute(sql: "VACUUM INTO '\(url.path)'")
     }
+  }
+
+  public func flush() throws {
+    save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
   public var allMetadata: [Note.Identifier: Note.Metadata] = [:] {
@@ -238,7 +231,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     }
     let identifier = flakeMaker.nextValue()
     try dbQueue.write { db in
-      try writeNote(note, with: identifier, to: db, createNew: true)
+      try writeNote(note, with: identifier, to: db)
     }
     return identifier
   }
@@ -253,7 +246,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     try dbQueue.write { db in
       let existingNote = try loadNote(with: noteIdentifier, from: db)
       let updatedNote = updateBlock(existingNote)
-      try writeNote(updatedNote, with: noteIdentifier, to: db, createNew: false)
+      try writeNote(updatedNote, with: noteIdentifier, to: db)
     }
   }
 
@@ -295,7 +288,18 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     _ = try dbQueue.write { db in
-      try Sqlite.Note.deleteOne(db, key: noteIdentifier.rawValue)
+      guard var note = try Sqlite.Note.filter(key: noteIdentifier.rawValue).fetchOne(db) else {
+        return
+      }
+      var device = try currentDeviceRecord(in: db)
+      try note.noteText.deleteAll(db)
+      try note.challengeTemplates.deleteAll(db)
+      note.deleted = true
+      note.modifiedDevice = device.id!
+      note.modifiedTimestamp = Date()
+      device.latestChange = max(device.latestChange, note.modifiedTimestamp)
+      try device.update(db)
+      try note.update(db)
     }
   }
 
@@ -336,7 +340,7 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
       throw Error.unknownChallengeTemplate
     }
     return try dbQueue.read { db in
-      let template = try challengeTemplate(identifier: templateIdentifier, database: db)
+      let template = try Self.challengeTemplate(identifier: templateIdentifier, database: db)
       return template.challenges[challengeIdentifier.index]
     }
   }
@@ -409,7 +413,8 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
         challengeId: challenge.id!
       )
       try record.insert(db)
-      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges)
+      let deviceID = Int64(flakeMaker.instanceNumber)
+      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, deviceID: deviceID)
     }
     notesDidChangeSubject.send()
   }
@@ -417,9 +422,11 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
   private static func updateChallenge(
     for entry: Sqlite.StudyLogEntry,
     in db: Database,
-    buryRelatedChallenges: Bool
+    buryRelatedChallenges: Bool,
+    deviceID: Int64
   ) throws {
     var challenge = try Sqlite.Challenge.fetchOne(db, key: entry.challengeId)!
+    var device = try Sqlite.Device.fetchOne(db, key: deviceID)!
     let delay: TimeInterval
     if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
@@ -430,10 +437,13 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
     let schedulingOptions = Self.scheduler.scheduleItem(challenge.item, afterDelay: delay)
     let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
 
-    challenge.applyItem(outcome, on: entry.timestamp)
+    challenge.applyItem(outcome, on: entry.timestamp, from: deviceID)
     challenge.totalCorrect += entry.correct
     challenge.totalIncorrect += entry.incorrect
     try challenge.update(db)
+    try device.updateChanges(db, with: { innerDevice in
+      innerDevice.latestChange = max(innerDevice.latestChange, entry.timestamp)
+    })
 
     if buryRelatedChallenges {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
@@ -485,6 +495,56 @@ public final class NoteSqliteStorage: NSObject, NoteStorage {
 // MARK: - Private
 
 private extension NoteSqliteStorage {
+  /// Watch this db queue for changes.
+  func monitorDatabaseQueue(_ dbQueue: DatabaseQueue) throws {
+    if try runMigrations(on: dbQueue) {
+      updateChangeCount(.done)
+    }
+    allMetadata = try dbQueue.read { db in
+      try Self.fetchAllMetadata(from: db)
+    }
+    deviceRecord = try currentDeviceRecord()
+    flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
+    metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
+      Sqlite.Note.all(),
+    ]).publisher(in: dbQueue)
+      .tryMap { db in try Self.fetchAllMetadata(from: db) }
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            DDLogError("Unexpected error monitoring database: \(error)")
+          case .finished:
+            DDLogInfo("Monitoring pipeline shutting down")
+          }
+        },
+        receiveValue: { [weak self] allMetadata in
+          self?.allMetadata = allMetadata
+        }
+      )
+    hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
+      Sqlite.Note.all(),
+      Sqlite.NoteText.all(),
+      Sqlite.NoteHashtag.all(),
+      Sqlite.Challenge.all(),
+      Sqlite.StudyLogEntry.all(),
+      Sqlite.Asset.all(),
+    ]).publisher(in: dbQueue)
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            DDLogError("Unexpected error monitoring database: \(error)")
+          case .finished:
+            DDLogInfo("hasUnsavedChanges shutting down")
+          }
+        },
+        receiveValue: { [weak self] _ in
+          self?.updateChangeCount(.done)
+        }
+      )
+  }
+
   /// Creates an in-memory database queue for the contents of the file at `fileURL`
   /// - note: If fileURL does not exist, this method returns an empty database queue.
   /// - parameter fileURL: The file URL to read.
@@ -547,10 +607,18 @@ private extension NoteSqliteStorage {
       })
       return existingRecord
     } else {
-      var record = Sqlite.Device(uuid: uuid, name: device.name)
+      var record = Sqlite.Device(uuid: uuid, name: device.name, latestChange: Date())
       try record.insert(db)
       return record
     }
+  }
+
+  func createInitialDeviceIdentifier(in db: Database) throws -> Int64 {
+    guard let uuid = device.identifierForVendor?.uuidString else {
+      throw Error.noDeviceUUID
+    }
+    try db.execute(sql: "INSERT INTO device (uuid, name) VALUES (?, ?)", arguments: [uuid, device.name])
+    return db.lastInsertedRowID
   }
 
   @discardableResult
@@ -569,19 +637,22 @@ private extension NoteSqliteStorage {
     }
   }
 
-  func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database, createNew: Bool) throws {
+  func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
     let sqliteNote = Sqlite.Note(
       id: identifier,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
       modifiedDevice: Int64(flakeMaker!.instanceNumber),
-      hasText: note.text != nil
+      hasText: note.text != nil,
+      deleted: false
     )
-    if createNew {
-      try sqliteNote.insert(db)
-    } else {
-      try sqliteNote.update(db)
-    }
+    try sqliteNote.save(db)
+
+    // Make sure we have the right timestamp in the device table
+    var device = try currentDeviceRecord(in: db)
+    device.latestChange = max(note.metadata.timestamp, device.latestChange)
+    try device.update(db)
+
     try writeNoteText(note.text, with: identifier, to: db)
     let inMemoryHashtags = Set(note.metadata.hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
@@ -618,8 +689,10 @@ private extension NoteSqliteStorage {
       for index in template.challenges.indices {
         var challengeRecord = Sqlite.Challenge(
           index: index,
-          due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
-          challengeTemplateId: newTemplateIdentifier.rawValue
+          due: today /* .addingTimeInterval(newChallengeDelay.fuzzed()) */,
+          challengeTemplateId: newTemplateIdentifier.rawValue,
+          modifiedDevice: Int64(flakeMaker!.instanceNumber),
+          timestamp: note.metadata.timestamp
         )
         try challengeRecord.insert(db)
       }
@@ -640,7 +713,11 @@ private extension NoteSqliteStorage {
   }
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: Note.Metadata] {
-    let metadata = try Sqlite.NoteMetadata.fetchAll(db, Sqlite.NoteMetadata.request)
+    let metadata = try Sqlite.Note
+      .filter(Sqlite.Note.Columns.deleted == false)
+      .including(all: Sqlite.Note.noteHashtags)
+      .asRequest(of: Sqlite.NoteMetadata.self)
+      .fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
       let metadata = Note.Metadata(
         timestamp: metadataItem.modifiedTimestamp,
@@ -655,7 +732,10 @@ private extension NoteSqliteStorage {
   }
 
   func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
-    guard let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue) else {
+    guard
+      let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue),
+      !sqliteNote.deleted
+    else {
       throw Error.noSuchNote
     }
     let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
@@ -664,7 +744,7 @@ private extension NoteSqliteStorage {
       .filter(Sqlite.ChallengeTemplate.Columns.noteId == identifier.rawValue)
       .fetchAll(db)
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
-      try challengeTemplate(from: challengeTemplateRecord)
+      try Self.challengeTemplate(from: challengeTemplateRecord)
     }
     let noteText = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
     return Note(
@@ -679,14 +759,14 @@ private extension NoteSqliteStorage {
     )
   }
 
-  func challengeTemplate(identifier: FlakeID, database: Database) throws -> ChallengeTemplate {
+  static func challengeTemplate(identifier: FlakeID, database: Database) throws -> ChallengeTemplate {
     guard let record = try Sqlite.ChallengeTemplate.fetchOne(database, key: identifier.rawValue) else {
       throw Error.unknownChallengeTemplate
     }
     return try challengeTemplate(from: record)
   }
 
-  func challengeTemplate(
+  static func challengeTemplate(
     from challengeTemplateRecord: Sqlite.ChallengeTemplate
   ) throws -> ChallengeTemplate {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
@@ -746,18 +826,14 @@ private extension NoteSqliteStorage {
       })
     }
 
-    migrator.registerMigration("scheduler-20200114") { database in
-      try Self.recomputeChallenges(in: database)
-    }
-
     migrator.registerMigrationWithDeferredForeignKeyCheck("flake-ids") { database in
       try database.create(table: "device", body: { table in
         table.autoIncrementedPrimaryKey("id")
         table.column("uuid", .text).notNull().unique().indexed()
         table.column("name", .text).notNull()
       })
-      let deviceRecord = try self.currentDeviceRecord(in: database)
-      let flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
+      let deviceID = try self.createInitialDeviceIdentifier(in: database)
+      let flakeMaker = FlakeMaker(instanceNumber: Int(deviceID))
       try Sqlite.Note.migrateTableFromV1ToV2(in: database, flakeMaker: flakeMaker)
     }
 
@@ -766,79 +842,25 @@ private extension NoteSqliteStorage {
       try database.drop(table: "hashtag")
     }
 
+    migrator.registerMigration("latestChangePerDevice") { database in
+      try database.alter(table: "device", body: { table in
+        table.add(column: "latestChange", .datetime).notNull().defaults(to: Date())
+      })
+
+      let currentDevice = try self.currentDeviceRecord(in: database)
+      try Sqlite.Challenge.migrateTableFromV2ToV3(in: database, currentDeviceID: currentDevice.id!)
+    }
+
+    migrator.registerMigration("noteTombstone") { database in
+      try database.alter(table: "note", body: { table in
+        table.add(column: "deleted", .boolean).notNull().defaults(to: false)
+      })
+    }
+
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
     let postMigrations = try migrator.appliedMigrations(in: databaseQueue)
     return priorMigrations != postMigrations
-  }
-
-  /// Blows away the statistics for each challenge and recomputes them based  upon the study log entries in the database.
-  static func recomputeChallenges(in database: Database) throws {
-    try database.execute(
-      sql: """
-      UPDATE challenge
-      SET
-        reviewCount = 0,
-        lapseCount = 0,
-        totalCorrect = 0,
-        lastReview = NULL,
-        idealInterval = NULL,
-        due = NULL,
-        spacedRepetitionFactor = 2.5
-      ;
-      """
-    )
-    let studyEntries = try Sqlite.StudyLogEntry
-      .order(Sqlite.StudyLogEntry.Columns.timestamp)
-      .fetchCursor(database)
-    while let entry = try studyEntries.next() {
-      try updateChallenge(for: entry, in: database, buryRelatedChallenges: false)
-    }
-  }
-}
-
-// MARK: - NSFilePresenter
-
-extension NoteSqliteStorage: NSFilePresenter {
-  public var presentedItemURL: URL? { fileURL }
-  public var presentedItemOperationQueue: OperationQueue { OperationQueue.main }
-
-  public func savePresentedItemChanges(completionHandler: @escaping (Swift.Error?) -> Void) {
-    DDLogInfo("NSFilePresenter savePresentedItemChanges")
-    do {
-      try flush()
-      completionHandler(nil)
-    } catch {
-      completionHandler(error)
-    }
-  }
-
-  public func relinquishPresentedItem(toReader reader: @escaping ((() -> Void)?) -> Void) {
-    DDLogInfo("NSFilePresenter relinquishing to a reader")
-    isWriteable = false
-    reader {
-      DDLogInfo("NSFilePresenter writeable again")
-      self.isWriteable = true
-    }
-  }
-
-  public func relinquishPresentedItem(toWriter writer: @escaping ((() -> Void)?) -> Void) {
-    DDLogInfo("NSFilePresenter relinquishing to a writer")
-    isWriteable = false
-    writer {
-      DDLogInfo("NSFilePresenter writeable again")
-      self.isWriteable = true
-    }
-  }
-
-  public func presentedItemDidChange() {
-    DDLogInfo("NSFilePresenter reopening file")
-    dbQueue = nil
-    do {
-      try open()
-    } catch {
-      DDLogError("Unexpected error re-opening database after external change: \(error)")
-    }
   }
 }
 
@@ -867,13 +889,15 @@ private extension Sqlite.Challenge {
     }
   }
 
-  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date) {
+  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, from deviceID: Int64) {
     reviewCount = item.reviewCount
     lapseCount = item.lapseCount
     spacedRepetitionFactor = item.factor
     lastReview = date
     idealInterval = item.interval
     due = date.addingTimeInterval(item.interval.fuzzed())
+    timestamp = date
+    modifiedDevice = deviceID
   }
 }
 
@@ -896,5 +920,77 @@ private extension String {
     } catch {
       return ""
     }
+  }
+}
+
+private extension Database {
+  func updateDeviceTable(with knowledge: VersionVector) throws {
+    for (uuid, date) in knowledge.versions {
+      if var device = try Sqlite.Device.filter(key: ["uuid": uuid]).fetchOne(self) {
+        device.latestChange = max(device.latestChange, date)
+        try device.save(self)
+      } else {
+        var device = Sqlite.Device(id: nil, uuid: uuid, name: "Unknown", latestChange: date)
+        try device.insert(self)
+      }
+    }
+  }
+}
+
+private extension DatabaseQueue {
+  var deviceVersionVector: VersionVector {
+    read { db in
+      let devices = (try? Sqlite.Device.fetchAll(db)) ?? []
+      return VersionVector(devices)
+    }
+  }
+
+  /// Merges new content from another storage container into this storage container.
+  func merge(remoteQueue: DatabaseQueue) throws -> MergeResult {
+    let localKnowledge = deviceVersionVector
+    let remoteKnowlege = remoteQueue.deviceVersionVector
+    var result = MergeResult()
+    try remoteQueue.read { remoteDatabase in
+      try write { localDatabase in
+        result += try VersionVector.merge(
+          recordType: Sqlite.Note.MergeInfo.self,
+          from: remoteDatabase,
+          sourceKnowledge: remoteKnowlege,
+          to: localDatabase,
+          destinationKnowledge: localKnowledge
+        )
+        result += try VersionVector.merge(
+          recordType: Sqlite.Challenge.MergeInfo.self,
+          from: remoteDatabase,
+          sourceKnowledge: remoteKnowlege,
+          to: localDatabase,
+          destinationKnowledge: localKnowledge
+        )
+        let combinedKnowledge = localKnowledge.union(remoteKnowlege)
+        try localDatabase.updateDeviceTable(with: combinedKnowledge)
+      }
+    }
+    return result
+  }
+}
+
+private extension VersionVector {
+  init(_ devices: [Sqlite.Device]) {
+    for device in devices {
+      versions[device.uuid] = device.latestChange
+    }
+  }
+}
+
+extension UIDocument.State: CustomStringConvertible {
+  public var description: String {
+    var strings: [String] = []
+    if self.contains(.closed) { strings.append("Closed") }
+    if self.contains(.editingDisabled) { strings.append("Editing Disabled") }
+    if self.contains(.inConflict) { strings.append("Conflict") }
+    if self.contains(.normal) { strings.append("Normal") }
+    if self.contains(.progressAvailable) { strings.append("Progress available") }
+    if self.contains(.savingError) { strings.append("Saving error") }
+    return strings.joined(separator: ", ")
   }
 }

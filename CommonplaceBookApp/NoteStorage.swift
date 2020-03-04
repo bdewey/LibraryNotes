@@ -52,6 +52,9 @@ public protocol NoteStorage: AnyObject {
   /// Open the storage.
   func open(completionHandler: ((Bool) -> Void)?)
 
+  /// Close the storage.
+  func close(completionHandler: ((Bool) -> Void)?)
+
   /// Ensure contents are saved to stable storage.
   func flush() throws
 

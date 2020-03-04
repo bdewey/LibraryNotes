@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- Can merge notes and challenges using a last-writer-wins policy
+
 ### Changed
 
+- Use UIDocument instead of NSFilePresenter / NSFileCoordinator directly. I now think it's safe to keep the document open when backgrounding
 - Got rid of the "hashtag" table; we just need "noteHashtag".
 
 ## [0.19.0] - 2020-01-26
