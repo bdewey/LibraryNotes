@@ -47,6 +47,7 @@ public final class DocumentTableController: NSObject {
     }
     super.init()
     tableView.delegate = self
+    tableView.refreshControl = refreshControl
     updateCardsPerDocument()
   }
 
@@ -55,6 +56,12 @@ public final class DocumentTableController: NSObject {
       updateCardsPerDocument()
     }
   }
+
+  private lazy var refreshControl: UIRefreshControl = {
+    let control = UIRefreshControl()
+    control.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
+    return control
+  }()
 
   /// Convenience to construct an appropriately-configured UITableView to show our data.
   public static func makeTableView() -> UITableView {
@@ -200,6 +207,7 @@ extension DocumentTableController: UITableViewDelegate {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
         try? self.notebook.deleteNote(noteIdentifier: properties.pageKey)
+        try? self.notebook.flush()
         self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }
@@ -344,6 +352,12 @@ private extension DocumentTableController {
     )
     cell.setNeedsLayout()
     return cell
+  }
+
+  @objc func handleRefreshControl() {
+    notebook.refresh { _ in
+      self.refreshControl.endRefreshing()
+    }
   }
 
   func updateCardsPerDocument() {

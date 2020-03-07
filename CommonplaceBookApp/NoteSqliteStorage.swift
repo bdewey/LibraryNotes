@@ -110,7 +110,9 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     case unknownChallengeType = "The challenge template uses an unknown type."
   }
 
-  public override func open(completionHandler: ((Bool) -> Void)? = nil) {
+  public typealias IOCompletionHandler = (Bool) -> Void
+
+  public override func open(completionHandler: IOCompletionHandler? = nil) {
     super.open { success in
       DDLogInfo("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
@@ -119,9 +121,27 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     }
   }
 
-  public override func close(completionHandler: ((Bool) -> Void)? = nil) {
+  public override func close(completionHandler: IOCompletionHandler? = nil) {
     NotificationCenter.default.removeObserver(self)
+    deviceRecord = nil
+    flakeMaker = nil
+    metadataUpdatePipeline?.cancel()
+    metadataUpdatePipeline = nil
+    hasUnsavedChangesPipeline?.cancel()
+    hasUnsavedChangesPipeline = nil
+    dbQueue = nil
     super.close(completionHandler: completionHandler)
+  }
+
+  public func refresh(completionHandler: IOCompletionHandler?) {
+    DDLogInfo("UIDocument: Attempting to refresh content")
+    do {
+      try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
+      completionHandler?(true)
+    } catch {
+      DDLogError("UIDocument: Error initiating download: \(error)")
+      completionHandler?(false)
+    }
   }
 
   /// Merges new content from another storage container into this storage container.
