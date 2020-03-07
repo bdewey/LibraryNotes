@@ -5,6 +5,7 @@
 ### Added
 
 - Schema change: Use update sequence numbers to drive merging
+- Not sure if it's needed, but pull-to-refresh!
 
 ## [0.20.1] - 2020-03-07
 
