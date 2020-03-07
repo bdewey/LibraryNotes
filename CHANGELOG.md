@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Schema change: Use update sequence numbers to drive merging
+
 ## [0.20.1] - 2020-03-07
 
 ### Changed

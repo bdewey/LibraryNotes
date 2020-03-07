@@ -18,6 +18,9 @@ public protocol MergeInfoRecord: FetchableRecord {
   /// The device UUID that this record was modified on.
   var deviceUUID: String { get }
 
+  /// The update sequence number for latest modification of this record. USNs are monitonically increasing on the device.
+  var updateSequenceNumber: Int64 { get }
+
   /// Copy the underlying data from one database to another.
   func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws
 
@@ -61,7 +64,7 @@ public struct MergeResult: Equatable, CustomStringConvertible {
 
 public extension MergeInfoRecord {
   func sameChange(as otherRecord: Self) -> Bool {
-    return timestamp == otherRecord.timestamp && deviceUUID == otherRecord.deviceUUID
+    return updateSequenceNumber == otherRecord.updateSequenceNumber && deviceUUID == otherRecord.deviceUUID
   }
 
   /// Implements "last writer wins"
@@ -82,6 +85,6 @@ private extension Database {
     guard let device = try? Sqlite.Device.fetchOne(self, key: ["uuid": mergeInfoRecord.deviceUUID]) else {
       return false
     }
-    return device.latestChange >= mergeInfoRecord.timestamp
+    return device.updateSequenceNumber >= mergeInfoRecord.updateSequenceNumber
   }
 }
