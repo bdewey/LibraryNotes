@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.20.1] - 2020-03-07
+
+### Changed
+
+- Don't actually write document content unless there are changes; prevents unneeded uploads to iCloud (and therefore might reduce conflict chances?).
+
 ## [0.20.0] - 2020-03-04
 
 ### Added

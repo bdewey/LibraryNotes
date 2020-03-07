@@ -199,7 +199,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     for saveOperation: UIDocument.SaveOperation,
     originalContentsURL: URL?
   ) throws {
-    guard let dbQueue = dbQueue else {
+    guard let dbQueue = dbQueue, hasUnsavedChanges else {
       return
     }
     DDLogInfo("UIDocument: Writing content to '\(url.path)'")
