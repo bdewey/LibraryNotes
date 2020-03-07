@@ -12,6 +12,7 @@ extension Sqlite {
     var modifiedDevice: Int64
     var hasText: Bool
     var deleted: Bool
+    var updateSequenceNumber: Int64
 
     static func createV1Table(in database: Database) throws {
       try database.create(table: "note", body: { table in
@@ -96,6 +97,7 @@ extension Sqlite.Note {
     var id: FlakeID
     var modifiedTimestamp: Date
     var device: Sqlite.Device
+    var updateSequenceNumber: Int64
 
     // MARK: - Computed properties
 
@@ -126,7 +128,7 @@ extension Sqlite.Note {
       } else {
         var device = self.device
         device.id = nil
-        device.latestChange = note.modifiedTimestamp
+        device.updateSequenceNumber = updateSequenceNumber
         try device.insert(destinationDatabase)
         note.modifiedDevice = device.id!
       }

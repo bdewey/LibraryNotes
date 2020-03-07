@@ -18,6 +18,7 @@ extension Sqlite {
     var spacedRepetitionFactor: Double = 2.5
     var modifiedDevice: Int64
     var timestamp: Date
+    var updateSequenceNumber: Int64
 
     mutating func didInsert(with rowID: Int64, for column: String?) {
       id = rowID
@@ -29,6 +30,7 @@ extension Sqlite {
       static let due = Column(CodingKeys.due)
       static let modifiedDevice = Column(CodingKeys.modifiedDevice)
       static let timestamp = Column(CodingKeys.timestamp)
+      static let updateSequenceNumber = Column(CodingKeys.updateSequenceNumber)
     }
 
     static let challengeTemplate = belongsTo(ChallengeTemplate.self)
@@ -148,6 +150,7 @@ extension Sqlite.Challenge {
     var challengeTemplateId: Int64
     var timestamp: Date
     var device: Sqlite.Device
+    var updateSequenceNumber: Int64
 
     // MARK: - Computed properties
 
@@ -177,7 +180,7 @@ extension Sqlite.Challenge {
       } else {
         var deviceRecord = device
         deviceRecord.id = nil
-        deviceRecord.latestChange = .distantPast
+        deviceRecord.updateSequenceNumber = updateSequenceNumber
         try deviceRecord.insert(destinationDatabase)
         originRecord.modifiedDevice = deviceRecord.id!
       }

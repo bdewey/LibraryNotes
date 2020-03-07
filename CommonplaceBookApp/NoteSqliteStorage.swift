@@ -23,6 +23,14 @@ public protocol DeviceIdentifying {
 /// UIDevice conforms to DeviceIdentifying.
 extension UIDevice: DeviceIdentifying {}
 
+/// Identifier for a specific change to the database.
+private struct UpdateKey {
+  /// The device ID that the change came from.
+  let deviceID: Int64
+  /// The specific sequence number for this change on this device.
+  let updateSequenceNumber: Int64
+}
+
 /// Implementation of the NoteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 public final class NoteSqliteStorage: UIDocument, NoteStorage {
@@ -291,14 +299,13 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       guard var note = try Sqlite.Note.filter(key: noteIdentifier.rawValue).fetchOne(db) else {
         return
       }
-      var device = try currentDeviceRecord(in: db)
+      let updateKey = try self.updateKey(changeDescription: "DELETE NOTE \(noteIdentifier)", in: db)
       try note.noteText.deleteAll(db)
       try note.challengeTemplates.deleteAll(db)
       note.deleted = true
-      note.modifiedDevice = device.id!
+      note.modifiedDevice = updateKey.deviceID
       note.modifiedTimestamp = Date()
-      device.latestChange = max(device.latestChange, note.modifiedTimestamp)
-      try device.update(db)
+      note.updateSequenceNumber = updateKey.updateSequenceNumber
       try note.update(db)
     }
   }
@@ -413,8 +420,8 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         challengeId: challenge.id!
       )
       try record.insert(db)
-      let deviceID = Int64(flakeMaker.instanceNumber)
-      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, deviceID: deviceID)
+      let updateKey = try self.updateKey(changeDescription: "UPDATE CHALLENGE \(entry.identifier.index) WHERE CHALLENGE TEMPLATE = \(templateKey) BURY = \(buryRelatedChallenges)", in: db)
+      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, updateKey: updateKey)
     }
     notesDidChangeSubject.send()
   }
@@ -423,10 +430,9 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     for entry: Sqlite.StudyLogEntry,
     in db: Database,
     buryRelatedChallenges: Bool,
-    deviceID: Int64
+    updateKey: UpdateKey
   ) throws {
     var challenge = try Sqlite.Challenge.fetchOne(db, key: entry.challengeId)!
-    var device = try Sqlite.Device.fetchOne(db, key: deviceID)!
     let delay: TimeInterval
     if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
@@ -437,13 +443,10 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     let schedulingOptions = Self.scheduler.scheduleItem(challenge.item, afterDelay: delay)
     let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
 
-    challenge.applyItem(outcome, on: entry.timestamp, from: deviceID)
+    challenge.applyItem(outcome, on: entry.timestamp, updateKey: updateKey)
     challenge.totalCorrect += entry.correct
     challenge.totalIncorrect += entry.incorrect
     try challenge.update(db)
-    try device.updateChanges(db, with: { innerDevice in
-      innerDevice.latestChange = max(innerDevice.latestChange, entry.timestamp)
-    })
 
     if buryRelatedChallenges {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
@@ -451,7 +454,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         .filter(Sqlite.Challenge.Columns.challengeTemplateId == challenge.challengeTemplateId &&
           (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
         )
-        .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue)
+        .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue, Sqlite.Challenge.Columns.modifiedDevice <- updateKey.deviceID, Sqlite.Challenge.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
       DDLogInfo("Buried \(updates) challenge(s)")
     }
   }
@@ -607,7 +610,7 @@ private extension NoteSqliteStorage {
       })
       return existingRecord
     } else {
-      var record = Sqlite.Device(uuid: uuid, name: device.name, latestChange: Date())
+      var record = Sqlite.Device(uuid: uuid, name: device.name, updateSequenceNumber: -1)
       try record.insert(db)
       return record
     }
@@ -637,21 +640,41 @@ private extension NoteSqliteStorage {
     }
   }
 
+  /// Creates a change log entry for a change, and returns the key identifying the change.
+  /// - Parameters:
+  ///   - changeDescription: The change being made
+  ///   - database: The writeable database in which the change will be made.
+  /// - Throws: Database errors
+  /// - Returns: The key identifying this change.
+  func updateKey(
+    changeDescription: String,
+    in database: Database
+  ) throws -> UpdateKey {
+    var device = try currentDeviceRecord(in: database)
+    device.updateSequenceNumber += 1
+    try device.update(database)
+    let changeLog = Sqlite.ChangeLog(
+      deviceID: device.id!,
+      updateSequenceNumber: device.updateSequenceNumber,
+      timestamp: Date(),
+      changeDescription: changeDescription
+    )
+    try changeLog.insert(database)
+    return UpdateKey(deviceID: device.id!, updateSequenceNumber: device.updateSequenceNumber)
+  }
+
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
+    let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
     let sqliteNote = Sqlite.Note(
       id: identifier,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
-      modifiedDevice: Int64(flakeMaker!.instanceNumber),
+      modifiedDevice: updateKey.deviceID,
       hasText: note.text != nil,
-      deleted: false
+      deleted: false,
+      updateSequenceNumber: updateKey.updateSequenceNumber
     )
     try sqliteNote.save(db)
-
-    // Make sure we have the right timestamp in the device table
-    var device = try currentDeviceRecord(in: db)
-    device.latestChange = max(note.metadata.timestamp, device.latestChange)
-    try device.update(db)
 
     try writeNoteText(note.text, with: identifier, to: db)
     let inMemoryHashtags = Set(note.metadata.hashtags)
@@ -687,12 +710,17 @@ private extension NoteSqliteStorage {
       )
       try record.insert(db)
       for index in template.challenges.indices {
+        let updateKey = try self.updateKey(
+          changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newTemplateIdentifier)",
+          in: db
+        )
         var challengeRecord = Sqlite.Challenge(
           index: index,
           due: today /* .addingTimeInterval(newChallengeDelay.fuzzed()) */,
           challengeTemplateId: newTemplateIdentifier.rawValue,
-          modifiedDevice: Int64(flakeMaker!.instanceNumber),
-          timestamp: note.metadata.timestamp
+          modifiedDevice: updateKey.deviceID,
+          timestamp: note.metadata.timestamp,
+          updateSequenceNumber: updateKey.updateSequenceNumber
         )
         try challengeRecord.insert(db)
       }
@@ -827,11 +855,7 @@ private extension NoteSqliteStorage {
     }
 
     migrator.registerMigrationWithDeferredForeignKeyCheck("flake-ids") { database in
-      try database.create(table: "device", body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("uuid", .text).notNull().unique().indexed()
-        table.column("name", .text).notNull()
-      })
+      try Sqlite.Device.createV1Table(in: database)
       let deviceID = try self.createInitialDeviceIdentifier(in: database)
       let flakeMaker = FlakeMaker(instanceNumber: Int(deviceID))
       try Sqlite.Note.migrateTableFromV1ToV2(in: database, flakeMaker: flakeMaker)
@@ -847,14 +871,29 @@ private extension NoteSqliteStorage {
         table.add(column: "latestChange", .datetime).notNull().defaults(to: Date())
       })
 
-      let currentDevice = try self.currentDeviceRecord(in: database)
-      try Sqlite.Challenge.migrateTableFromV2ToV3(in: database, currentDeviceID: currentDevice.id!)
+      let deviceID = try Int64.fetchOne(
+        database,
+        sql: "SELECT id FROM device WHERE uuid = ?",
+        arguments: [self.device.identifierForVendor!.uuidString]
+      )!
+      try Sqlite.Challenge.migrateTableFromV2ToV3(in: database, currentDeviceID: deviceID)
     }
 
     migrator.registerMigration("noteTombstone") { database in
       try database.alter(table: "note", body: { table in
         table.add(column: "deleted", .boolean).notNull().defaults(to: false)
       })
+    }
+
+    migrator.registerMigrationWithDeferredForeignKeyCheck("updateSequenceNumber") { database in
+      try Sqlite.ChangeLog.createV1Table(in: database)
+      try database.alter(table: "note", body: { table in
+        table.add(column: "updateSequenceNumber", .integer).notNull().defaults(to: 0)
+      })
+      try database.alter(table: "challenge", body: { table in
+        table.add(column: "updateSequenceNumber", .integer).notNull().defaults(to: 0)
+      })
+      try Sqlite.Device.migrateTableFromV1ToV2(in: database)
     }
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
@@ -889,7 +928,7 @@ private extension Sqlite.Challenge {
     }
   }
 
-  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, from deviceID: Int64) {
+  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, updateKey: UpdateKey) {
     reviewCount = item.reviewCount
     lapseCount = item.lapseCount
     spacedRepetitionFactor = item.factor
@@ -897,7 +936,8 @@ private extension Sqlite.Challenge {
     idealInterval = item.interval
     due = date.addingTimeInterval(item.interval.fuzzed())
     timestamp = date
-    modifiedDevice = deviceID
+    modifiedDevice = updateKey.deviceID
+    updateSequenceNumber = updateKey.updateSequenceNumber
   }
 }
 
@@ -925,12 +965,12 @@ private extension String {
 
 private extension Database {
   func updateDeviceTable(with knowledge: VersionVector) throws {
-    for (uuid, date) in knowledge.versions {
+    for (uuid, updateSequenceNumber) in knowledge.versions {
       if var device = try Sqlite.Device.filter(key: ["uuid": uuid]).fetchOne(self) {
-        device.latestChange = max(device.latestChange, date)
+        device.updateSequenceNumber = max(device.updateSequenceNumber, updateSequenceNumber)
         try device.save(self)
       } else {
-        var device = Sqlite.Device(id: nil, uuid: uuid, name: "Unknown", latestChange: date)
+        var device = Sqlite.Device(id: nil, uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
         try device.insert(self)
       }
     }
@@ -977,7 +1017,7 @@ private extension DatabaseQueue {
 private extension VersionVector {
   init(_ devices: [Sqlite.Device]) {
     for device in devices {
-      versions[device.uuid] = device.latestChange
+      versions[device.uuid] = device.updateSequenceNumber
     }
   }
 }

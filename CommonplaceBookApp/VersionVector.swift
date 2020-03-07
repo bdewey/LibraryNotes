@@ -8,7 +8,7 @@ import GRDB
 /// It is a mapping between device ID and the latest timestamp of a change authored by that device.
 // TODO: Make this generic over "identifier" and "sequence"
 public struct VersionVector: Hashable, Comparable, CustomStringConvertible {
-  public var versions: [String: Date] = [:]
+  public var versions: [String: Int64] = [:]
 
   /// `rhs > lhs` iff:
   /// - At least one version component exists in `rhs` that is greater than `lhs`
@@ -54,7 +54,7 @@ public struct VersionVector: Hashable, Comparable, CustomStringConvertible {
   public var description: String {
     var items: [String] = []
     for item in versions.keys.sorted() {
-      items.append("\(item) \(versions[item]!.timeIntervalSinceReferenceDate)")
+      items.append("\(item) \(versions[item] ?? -1)")
     }
     return items.joined(separator: "\n")
   }
@@ -64,7 +64,7 @@ public struct VersionVector: Hashable, Comparable, CustomStringConvertible {
     guard let date = versions[mergeInfoRecord.deviceUUID] else {
       return false
     }
-    return date >= mergeInfoRecord.timestamp
+    return date >= mergeInfoRecord.updateSequenceNumber
   }
 
   /// The core merge algorithm. Iterates through all records in `sourceDatabase` and copies them to `destinationDatabase`
