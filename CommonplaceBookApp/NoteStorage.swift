@@ -58,6 +58,9 @@ public protocol NoteStorage: AnyObject {
   /// Ensure contents are saved to stable storage.
   func flush() throws
 
+  /// Attempt to pull new content from iCloud.
+  func refresh(completionHandler: ((Bool) -> Void)?)
+
   // MARK: - Asset storage.
 
   /// Gets data contained in a file wrapper
