@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The "age indicator" label now updates once per minute to a rounded-down value of the last modified time
+
 ## [0.21.0] - 2020-03-07
 
 ### Added

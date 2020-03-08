@@ -341,16 +341,7 @@ private extension DocumentTableController {
         .foregroundColor: UIColor.secondaryLabel,
       ]
     )
-    let now = Date()
-    let dateDelta = now.timeIntervalSince(viewProperties.noteProperties.timestamp)
-    cell.ageLabel.attributedText = NSAttributedString(
-      string: DateComponentsFormatter.age.string(from: dateDelta) ?? "",
-      attributes: [
-        .font: UIFont.preferredFont(forTextStyle: .caption1),
-        .foregroundColor: UIColor.secondaryLabel,
-      ]
-    )
-    cell.setNeedsLayout()
+    cell.documentModifiedTimestamp = viewProperties.noteProperties.timestamp
     return cell
   }
 
