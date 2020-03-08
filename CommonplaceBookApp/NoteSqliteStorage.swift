@@ -123,6 +123,13 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
 
   public override func close(completionHandler: IOCompletionHandler? = nil) {
     NotificationCenter.default.removeObserver(self)
+    super.close { success in
+      self.cleanupAfterClose()
+      completionHandler?(success)
+    }
+  }
+
+  private func cleanupAfterClose() {
     deviceRecord = nil
     flakeMaker = nil
     metadataUpdatePipeline?.cancel()
@@ -130,7 +137,6 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     hasUnsavedChangesPipeline?.cancel()
     hasUnsavedChangesPipeline = nil
     dbQueue = nil
-    super.close(completionHandler: completionHandler)
   }
 
   public func refresh(completionHandler: IOCompletionHandler?) {

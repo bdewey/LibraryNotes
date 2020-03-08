@@ -267,8 +267,7 @@ private extension NoteSqliteStorageMergeTests {
       .flatMap { tuple in
         Self.openDatabase(device: .remote, fileURL: tuple.1).map { (tuple.0, $0) }
       }
-      .tryMap { tuple -> Bool in
-        let (localStorage, remoteStorage) = tuple
+      .tryMap { localStorage, remoteStorage -> Bool in
         try testCase.localModificationBlock?(localStorage)
         try testCase.remoteModificationBlock?(remoteStorage)
         try localStorage.merge(other: remoteStorage)
