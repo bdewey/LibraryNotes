@@ -141,14 +141,26 @@ final class DocumentListViewController: UIViewController {
     searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
-    /// We'll look for all challenges that are due by the start of the next day.
-    challengeDueDate = Calendar.current.startOfDay(for: Date().addingTimeInterval(.day))
+    /// Update the challenge due date as time passes, app foregrounds, etc.
+    updateChallengeDueDatePipeline = Just(Date())
+      .merge(with: makeForegroundDatePublisher(), Timer.publish(every: .hour, on: .main, in: .common).autoconnect())
+      .map { Calendar.current.startOfDay(for: $0.addingTimeInterval(.day)) }
+      .assign(to: \.challengeDueDate, on: self)
 
     navigationItem.leftBarButtonItem = documentBrowserButton
     navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItems?.append(advanceTimeButton)
     }
+  }
+
+  private var updateChallengeDueDatePipeline: AnyCancellable?
+
+  private func makeForegroundDatePublisher() -> AnyPublisher<Date, Never> {
+    NotificationCenter.default
+      .publisher(for: UIApplication.willEnterForegroundNotification)
+      .map { _ in Date() }
+      .eraseToAnyPublisher()
   }
 
   override func viewWillAppear(_ animated: Bool) {
