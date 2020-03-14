@@ -4,4 +4,5 @@ import UIKit
 
 extension UIColor {
   static let grailBackground = UIColor(named: "grailBackground")
+  static let grailSecondaryBackground = UIColor(named: "grailSecondaryBackground")
 }

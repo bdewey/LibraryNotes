@@ -120,7 +120,7 @@ public final class TextEditViewController: UIViewController {
     formatters[.clozeHint] = {
       $1.color = UIColor.secondaryLabel
     }
-    formatters[.hashtag] = { $1.backgroundColor = UIColor.secondarySystemBackground }
+    formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
     formatters[.blockQuote] = {
       $1.italic = true
       $1.blockquoteBorderColor = UIColor.systemGreen
