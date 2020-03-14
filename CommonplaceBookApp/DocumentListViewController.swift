@@ -30,7 +30,7 @@ final class DocumentListViewController: UIViewController {
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = "Interactive Notebook"
+    self.navigationItem.title = AppDelegate.appName
     self.navigationItem.rightBarButtonItem = studyButton
     self.notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)

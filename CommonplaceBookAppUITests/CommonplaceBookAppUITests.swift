@@ -3,7 +3,7 @@
 import XCTest
 
 private enum Identifiers {
-  static let backButton = "Interactive Notebook"
+  static let backButton = "Grail Diary"
   static let currentCardView = "current-card"
   static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"

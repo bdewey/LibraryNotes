@@ -11,6 +11,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   let useCloud = true
 
+  public static let appName = "Grail Diary"
+
   private enum Error: String, Swift.Error {
     case noCloud = "Not signed in to iCloud"
   }
@@ -26,7 +28,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   private lazy var loadingViewController: LoadingViewController = {
     let loadingViewController = LoadingViewController()
-    loadingViewController.title = "Interactive Notebook"
+    loadingViewController.title = AppDelegate.appName
     return loadingViewController
   }()
 
@@ -264,11 +266,20 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
     let url = directoryURL.appendingPathComponent("commonplace").appendingPathExtension("notedb")
     let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
-    document.save(to: url, for: .forCreating) { success in
-      if success {
-        importHandler(url, .copy)
-      } else {
+    DDLogInfo("Attempting to create a document at \(url.path)")
+    document.open { openSuccess in
+      guard openSuccess else {
+        DDLogError("Could not open document")
         importHandler(nil, .none)
+        return
+      }
+      document.save(to: url, for: .forCreating) { saveSuccess in
+        if saveSuccess {
+          importHandler(url, .copy)
+        } else {
+          DDLogError("Could not create document")
+          importHandler(nil, .none)
+        }
       }
     }
   }
