@@ -177,7 +177,7 @@ public final class TextEditViewController: UIViewController {
     let textContainer = NSTextContainer()
     layoutManager.addTextContainer(textContainer)
     let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = UIColor.systemBackground
+    textView.backgroundColor = .grailBackground
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     textView.pasteConfiguration = UIPasteConfiguration(
       acceptableTypeIdentifiers: [

@@ -106,6 +106,7 @@
 		D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */; };
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
 		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
+		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 		D3FD46A62329257C008FDAE4 /* LoggingSpeechSynthesizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FD46A52329257C008FDAE4 /* LoggingSpeechSynthesizer.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 		D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */; };
@@ -252,6 +253,7 @@
 		D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonplaceBookAppUITests.swift; sourceTree = "<group>"; };
 		D3E98F0721D470B2008445DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticColor.swift; sourceTree = "<group>"; };
 		D3FD46A52329257C008FDAE4 /* LoggingSpeechSynthesizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggingSpeechSynthesizer.swift; sourceTree = "<group>"; };
 		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
 		D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditingTextView.swift; sourceTree = "<group>"; };
@@ -401,10 +403,13 @@
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
+				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D3198DB023DBCA0F0098A9D9 /* Sqlite.Challenge.swift */,
 				D3198DAE23DB5F6B0098A9D9 /* Sqlite.ChallengeTemplate.swift */,
+				D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */,
+				D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */,
 				D3198DA623D8859B0098A9D9 /* Sqlite.Note.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */,
 				D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */,
@@ -425,8 +430,6 @@
 				D3591503231C3AC800883AC4 /* View+Locale.swift */,
 				D3D50A2C231AC8EB007440F1 /* VocabularyChallengeTemplate.swift */,
 				D30D261723193F9A0031AA20 /* VocabularyViewController.swift */,
-				D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */,
-				D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -735,6 +738,7 @@
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
+				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
 				D3E4475E23247A3D00F21F91 /* ImageSearchResultsView.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,

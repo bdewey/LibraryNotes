@@ -236,6 +236,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
     wrappedViewController.modalPresentationStyle = .fullScreen
     wrappedViewController.modalTransitionStyle = .crossDissolve
+    wrappedViewController.view.tintColor = .systemOrange
     controller.present(wrappedViewController, animated: animated, completion: nil)
     let noteIdentifierCopy = initialPageIdentifier
     noteArchiveDocument.open(completionHandler: { success in

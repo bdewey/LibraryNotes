@@ -32,7 +32,7 @@ final class DocumentTableViewCell: UITableViewCell {
       make.right.equalToSuperview().inset(8)
     }
 
-    backgroundColor = UIColor.systemBackground
+    backgroundColor = .grailBackground
     divider.backgroundColor = UIColor.separator
 
     timestampUpdatingPipeline = Just(Date())

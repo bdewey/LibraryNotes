@@ -67,7 +67,7 @@ public final class DocumentTableController: NSObject {
   public static func makeTableView() -> UITableView {
     let tableView = UITableView(frame: .zero, style: .plain)
     tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    tableView.backgroundColor = UIColor.systemBackground
+    tableView.backgroundColor = .grailBackground
     tableView.accessibilityIdentifier = "document-list"
     tableView.estimatedRowHeight = 72
     tableView.separatorStyle = .none
