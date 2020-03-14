@@ -15,6 +15,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   private enum Error: String, Swift.Error {
     case noCloud = "Not signed in to iCloud"
+    case unknownFormat = "Unknown file format"
   }
 
   // This is here to force initialization of the CardTemplateType, which registers the class
@@ -54,15 +55,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
   }
 
-  var hasRun: Bool {
-    get {
-      UserDefaults.standard.object(forKey: UserDefaultKey.hasRun) as? Bool ?? false
-    }
-    set {
-      UserDefaults.standard.set(newValue, forKey: UserDefaultKey.hasRun)
-    }
-  }
-
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -75,37 +67,41 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.notedb"])
+    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.graildiary"])
     browser.delegate = self
 
     window.rootViewController = browser
     window.makeKeyAndVisible()
     self.window = window
 
+    var didOpenSavedDocument = false
     if !Self.isUITesting, let openedDocumentBookmarkData = openedDocumentBookmark {
       DDLogInfo("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
         let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
         DDLogInfo("Successfully resolved url: \(url)")
-        openDocument(at: url, from: browser, animated: false)
+        try openDocument(at: url, from: browser, animated: false)
+        didOpenSavedDocument = true
       } catch {
-        DDLogError("Unexpected error: \(error.localizedDescription)")
+        DDLogError("Unexpected error opening document: \(error.localizedDescription)")
       }
-    } else if !(hasRun ?? false) || UIApplication.isSimulator {
+    }
+    if !didOpenSavedDocument {
       DDLogInfo("Trying to open the default document")
       openDefaultDocument(from: browser)
     }
-    hasRun = true
     return true
   }
 
   private func openDefaultDocument(from viewController: UIDocumentBrowserViewController) {
     makeMetadataProvider(completion: { metadataProviderResult in
-      switch metadataProviderResult {
-      case .success(let metadataProvider):
-        self.openDocument(at: metadataProvider.container.appendingPathComponent("archive.notedb"), from: viewController, animated: false)
-      case .failure(let error):
+      let openResult = metadataProviderResult.flatMap { metadataProvider in
+        Result {
+          try self.openDocument(at: metadataProvider.container.appendingPathComponent("diary.grail"), from: viewController, animated: false)
+        }
+      }
+      if case .failure(let error) = openResult {
         let messageText = "Error opening Notebook: \(error.localizedDescription)"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
@@ -210,19 +206,18 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// Opens a document.
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
-  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) {
+  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) throws {
     DDLogInfo("Opening document at \"\(url.path)\"")
     let noteArchiveDocument: NoteStorage
-    if url.pathExtension == "notedb" {
+    if url.pathExtension == "grail" {
       noteArchiveDocument = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     } else {
-      assertionFailure("Unknown note format: \(url.pathExtension)")
-      return
+      throw Error.unknownFormat
     }
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
     let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
     documentListViewController.didTapFilesAction = { [weak self] in
-      if UIApplication.isSimulator {
+      if UIApplication.isSimulator && false {
         let messageText = "Document browser doesn't work in the simulator"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
@@ -257,7 +252,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
     guard let url = documentURLs.first else { return }
-    openDocument(at: url, from: controller, animated: true)
+    try? openDocument(at: url, from: controller, animated: true)
   }
 
   func documentBrowser(
@@ -265,7 +260,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
   ) {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
-    let url = directoryURL.appendingPathComponent("commonplace").appendingPathExtension("notedb")
+    let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
     let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     DDLogInfo("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
@@ -287,7 +282,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
     DDLogInfo("Imported document to \(destinationURL)")
-    openDocument(at: destinationURL, from: controller, animated: true)
+    try? openDocument(at: destinationURL, from: controller, animated: true)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {

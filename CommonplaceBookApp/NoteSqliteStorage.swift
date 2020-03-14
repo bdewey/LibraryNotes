@@ -170,7 +170,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     do {
       var conflictMergeResults = MergeResult()
       for conflictVersion in NSFileVersion.unresolvedConflictVersionsOfItem(at: fileURL) ?? [] {
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("notedb")
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("grail")
         try conflictVersion.replaceItem(at: tempURL, options: [])
         defer {
           try? FileManager.default.removeItem(at: tempURL)
