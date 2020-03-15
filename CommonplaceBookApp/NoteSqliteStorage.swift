@@ -839,87 +839,21 @@ private extension NoteSqliteStorage {
     var migrator = DatabaseMigrator()
 
     migrator.registerMigration("initialSchema") { database in
+      try Sqlite.Device.createV1Table(in: database)
       try Sqlite.Note.createV1Table(in: database)
       try Sqlite.NoteText.createV1Table(in: database)
+      try Sqlite.NoteHashtag.createV1Table(in: database)
+      try Sqlite.ChallengeTemplate.createV1Table(in: database)
+      try Sqlite.Challenge.createV1Table(in: database)
+      try Sqlite.StudyLogEntry.createV1Table(in: database)
+      try Sqlite.Asset.createV1Table(in: database)
+      try Sqlite.ChangeLog.createV1Table(in: database)
 
       try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
         table.synchronize(withTable: "noteText")
         table.column("text")
         table.tokenizer = .porter(wrapping: .unicode61())
       }
-
-      try database.create(table: "hashtag", body: { table in
-        table.column("id", .text).primaryKey()
-      })
-
-      try Sqlite.NoteHashtag.createV1Table(in: database)
-      try Sqlite.ChallengeTemplate.createV1Table(in: database)
-      try Sqlite.Challenge.createV1Table(in: database)
-
-      try database.create(table: "studyLogEntry", body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("timestamp", .datetime).notNull()
-        table.column("correct", .integer).notNull().defaults(to: 0)
-        table.column("incorrect", .integer).notNull().defaults(to: 0)
-        table.column("challengeId", .integer)
-          .notNull()
-          .references("challenge", onDelete: .cascade)
-      })
-
-      try database.create(table: "asset", body: { table in
-        table.column("id", .text).primaryKey()
-        table.column("data", .blob).notNull()
-      })
-    }
-
-    migrator.registerMigration("addChallengeFactor") { database in
-      try database.alter(table: "challenge", body: { table in
-        table.add(column: "spacedRepetitionFactor", .double).notNull().defaults(to: 2.5)
-        table.add(column: "lapseCount", .double).notNull().defaults(to: 0)
-        table.add(column: "idealInterval", .double)
-      })
-    }
-
-    migrator.registerMigrationWithDeferredForeignKeyCheck("flake-ids") { database in
-      try Sqlite.Device.createV1Table(in: database)
-      let deviceID = try self.createInitialDeviceIdentifier(in: database)
-      let flakeMaker = FlakeMaker(instanceNumber: Int(deviceID))
-      try Sqlite.Note.migrateTableFromV1ToV2(in: database, flakeMaker: flakeMaker)
-    }
-
-    migrator.registerMigration("no-hashtag-table") { database in
-      try Sqlite.NoteHashtag.migrateTableFromV2ToV3(in: database)
-      try database.drop(table: "hashtag")
-    }
-
-    migrator.registerMigration("latestChangePerDevice") { database in
-      try database.alter(table: "device", body: { table in
-        table.add(column: "latestChange", .datetime).notNull().defaults(to: Date())
-      })
-
-      let deviceID = try Int64.fetchOne(
-        database,
-        sql: "SELECT id FROM device WHERE uuid = ?",
-        arguments: [self.device.identifierForVendor!.uuidString]
-      )!
-      try Sqlite.Challenge.migrateTableFromV2ToV3(in: database, currentDeviceID: deviceID)
-    }
-
-    migrator.registerMigration("noteTombstone") { database in
-      try database.alter(table: "note", body: { table in
-        table.add(column: "deleted", .boolean).notNull().defaults(to: false)
-      })
-    }
-
-    migrator.registerMigrationWithDeferredForeignKeyCheck("updateSequenceNumber") { database in
-      try Sqlite.ChangeLog.createV1Table(in: database)
-      try database.alter(table: "note", body: { table in
-        table.add(column: "updateSequenceNumber", .integer).notNull().defaults(to: 0)
-      })
-      try database.alter(table: "challenge", body: { table in
-        table.add(column: "updateSequenceNumber", .integer).notNull().defaults(to: 0)
-      })
-      try Sqlite.Device.migrateTableFromV1ToV2(in: database)
     }
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)

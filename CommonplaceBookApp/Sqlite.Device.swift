@@ -15,24 +15,7 @@ extension Sqlite {
         table.autoIncrementedPrimaryKey("id")
         table.column("uuid", .text).notNull().unique().indexed()
         table.column("name", .text).notNull()
-      })
-    }
-
-    static func createV2Table(in database: Database, named name: String) throws {
-      try database.create(table: name, body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("uuid", .text).notNull().unique().indexed()
-        table.column("name", .text).notNull()
         table.column("updateSequenceNumber", .integer).notNull()
-      })
-    }
-
-    static func migrateTableFromV1ToV2(in database: Database) throws {
-      try database.alter(table: "device", body: { table in
-        table.add(column: "updateSequenceNumber", .integer).notNull().defaults(to: 0)
-      })
-      try database.rewriteTable(named: "device", columns: "id, uuid, name, updateSequenceNumber", tableBuilder: { tableName in
-        try Self.createV2Table(in: database, named: tableName)
       })
     }
 

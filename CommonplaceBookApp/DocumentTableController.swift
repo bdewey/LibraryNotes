@@ -14,6 +14,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   func documentSearchResultsDidSelectHashtag(_ hashtag: String)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
+  func showPage(with noteIdentifier: Note.Identifier)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -178,21 +179,7 @@ extension DocumentTableController: UITableViewDelegate {
         }
         return
       }
-      let markdown: String
-      do {
-        markdown = try notebook.note(noteIdentifier: viewProperties.pageKey).text ?? ""
-      } catch {
-        DDLogError("Unexpected error loading page: \(error)")
-        delegate?.showAlert("There was an error loading this page: \(error)")
-        return
-      }
-      let textEditViewController = TextEditViewController(
-        notebook: notebook
-      )
-      textEditViewController.noteIdentifier = viewProperties.pageKey
-      textEditViewController.markdown = markdown
-      let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: viewProperties.pageKey, parsingRules: notebook.parsingRules, noteStorage: notebook)
-      delegate?.showDetailViewController(savingWrapper)
+      delegate?.showPage(with: viewProperties.pageKey)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
     }
