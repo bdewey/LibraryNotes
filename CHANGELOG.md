@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Show the title in the page title bar
+
 ### Changed
 
 - Got rid of a bunch of migration code -- there's only one file that matters and it's up to date.
@@ -10,6 +14,8 @@
 
 - Nav bar color on iPad now uses the color scheme
 - New document creation logic now fixed
+- The split view controller button is back!
+- If you delete the visible page, once again you see a blank page
 
 ## [0.22.0] - 2020-03-14
 
