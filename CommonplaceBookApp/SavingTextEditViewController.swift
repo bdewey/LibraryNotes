@@ -36,6 +36,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     })
     navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
     navigationItem.leftItemsSupplementBackButton = true
+    navigationItem.largeTitleDisplayMode = .never
   }
 
   required init?(coder: NSCoder) {
