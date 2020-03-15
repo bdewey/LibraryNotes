@@ -260,7 +260,14 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     _ controller: UIDocumentBrowserViewController,
     didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
   ) {
-    let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
+    let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    do {
+      try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+      DDLogInfo("Created directory at \(directoryURL)")
+    } catch {
+      DDLogError("Unable to create temporary directory at \(directoryURL.path): \(error)")
+      importHandler(nil, .none)
+    }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
     let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
     DDLogInfo("Attempting to create a document at \(url.path)")
@@ -272,7 +279,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       }
       document.save(to: url, for: .forCreating) { saveSuccess in
         if saveSuccess {
-          importHandler(url, .copy)
+          importHandler(url, .move)
         } else {
           DDLogError("Could not create document")
           importHandler(nil, .none)

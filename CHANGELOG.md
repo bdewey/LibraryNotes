@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+### Changed
+
+- Got rid of a bunch of migration code -- there's only one file that matters and it's up to date.
+
 ### Fixed
 
 - Nav bar color on iPad now uses the color scheme
+- New document creation logic now fixed
 
 ## [0.22.0] - 2020-03-14
 

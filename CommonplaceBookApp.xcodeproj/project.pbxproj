@@ -76,6 +76,8 @@
 		D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */; };
 		D393F2BC241439EE00A6DABB /* Sqlite.ChangeLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */; };
 		D393F2BE24143CC100A6DABB /* Sqlite.Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */; };
+		D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */; };
+		D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */; };
 		D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */; };
 		D3A58F15240D469700CE3251 /* VersionVector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F14240D469700CE3251 /* VersionVector.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
@@ -218,6 +220,8 @@
 		D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorage.swift; sourceTree = "<group>"; };
 		D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.ChangeLog.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Device.swift; sourceTree = "<group>"; };
+		D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.StudyLogEntry.swift; sourceTree = "<group>"; };
+		D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Asset.swift; sourceTree = "<group>"; };
 		D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeableRecord.swift; sourceTree = "<group>"; };
 		D3A58F14240D469700CE3251 /* VersionVector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionVector.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
@@ -414,6 +418,8 @@
 				D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */,
 				D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */,
 				D3AD01CD23BEADB7004BB7DF /* SqliteModels.swift */,
+				D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */,
+				D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
 				D31AFA8F229D61EB00ED2B76 /* String+Typography.swift */,
 				D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */,
@@ -754,8 +760,10 @@
 				D3FD46A62329257C008FDAE4 /* LoggingSpeechSynthesizer.swift in Sources */,
 				D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
+				D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */,
 				D33F647122982366008C3A92 /* Array+Node.swift in Sources */,
 				D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */,
+				D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* Sqlite.Note.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,

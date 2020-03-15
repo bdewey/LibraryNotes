@@ -19,32 +19,6 @@ final class FileMetadataTests: XCTestCase {
     }
   }
 
-  func testLocalMetadataForDeck() {
-    do {
-      let url = directoryURL.appendingPathComponent("testLocalMetadata.deck")
-      let sampleContent = "Hello world!\n"
-      try sampleContent.write(to: url, atomically: true, encoding: .utf8)
-      defer { try? FileManager.default.removeItem(at: url) }
-      let metadata = try FileMetadata(fileURL: url)
-      XCTAssertEqual(metadata.contentType, "org.brians-brain.swiftflash")
-    } catch {
-      XCTFail(String(describing: error))
-    }
-  }
-
-  func testLocalMetadataForTextbundle() {
-    do {
-      let url = directoryURL.appendingPathComponent("testLocalMetadata.textbundle")
-      let sampleContent = "Hello world!\n"
-      try sampleContent.write(to: url, atomically: true, encoding: .utf8)
-      defer { try? FileManager.default.removeItem(at: url) }
-      let metadata = try FileMetadata(fileURL: url)
-      XCTAssertEqual(metadata.contentType, "org.textbundle.package")
-    } catch {
-      XCTFail(String(describing: error))
-    }
-  }
-
   func testLocalMetadataForJSON() {
     do {
       let url = directoryURL.appendingPathComponent("testLocalMetadata.json")
