@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.22.0] - 2020-03-14
+
+### Changed
+
+- New branding! The app is now called Grail Diary and has a color scheme inspired by an old leather-bound book.
+
 ## [0.21.1] - 2020-03-08
 
 ### Changed
