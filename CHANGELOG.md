@@ -17,6 +17,10 @@
 - The split view controller button is back!
 - If you delete the visible page, once again you see a blank page
 
+### Removed
+
+- All stuff about vocabulary challenges. This is no longer an Anki-like program; its focus is _writing_.
+
 ## [0.22.0] - 2020-03-14
 
 ### Changed

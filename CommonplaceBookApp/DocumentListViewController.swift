@@ -187,30 +187,6 @@ final class DocumentListViewController: UIViewController {
     showDetailViewController(viewController)
   }
 
-  private func makeBlankVocabularyPage() {
-    let viewController = VocabularyViewController(notebook: notebook)
-    viewController.note.metadata.title = "Test Vocabulary"
-    splitViewController?.showDetailViewController(
-      UINavigationController(rootViewController: viewController),
-      sender: nil
-    )
-  }
-
-  @objc private func didTapNewDocument() {
-    let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-    let textAction = UIAlertAction(title: "Text", style: .default) { [weak self] _ in
-      self?.makeBlankTextDocument()
-    }
-    alertController.addAction(textAction)
-    let vocabularyAction = UIAlertAction(title: "Vocabulary", style: .default) { [weak self] _ in
-      self?.makeBlankVocabularyPage()
-    }
-    alertController.addAction(vocabularyAction)
-    alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-    alertController.popoverPresentationController?.barButtonItem = newDocumentButton
-    present(alertController, animated: true)
-  }
-
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {

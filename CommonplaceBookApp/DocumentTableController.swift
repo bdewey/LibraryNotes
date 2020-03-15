@@ -166,19 +166,6 @@ extension DocumentTableController: UITableViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
-      if !viewProperties.noteProperties.containsText {
-        // This is a vocabulary page, not a text page.
-        do {
-          let note = try notebook.note(noteIdentifier: viewProperties.pageKey)
-          let viewController = VocabularyViewController(notebook: notebook)
-          viewController.noteIdentifier = viewProperties.pageKey
-          viewController.note = note
-          delegate?.showDetailViewController(viewController)
-        } catch {
-          DDLogError("Could not load vocabulary page: \(error)")
-        }
-        return
-      }
       delegate?.showPage(with: viewProperties.pageKey)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
