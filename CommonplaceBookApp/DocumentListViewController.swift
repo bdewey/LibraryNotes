@@ -66,7 +66,7 @@ final class DocumentListViewController: UIViewController {
 
   private lazy var newDocumentButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "plus.circle")
-    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapNewDocument))
+    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(makeBlankTextDocument))
     button.accessibilityIdentifier = "new-document"
     return button
   }()
@@ -177,7 +177,7 @@ final class DocumentListViewController: UIViewController {
     didTapFilesAction?()
   }
 
-  private func makeBlankTextDocument() {
+  @objc private func makeBlankTextDocument() {
     let viewController = TextEditViewController.makeBlankDocument(
       notebook: notebook,
       currentHashtag: currentHashtag,
