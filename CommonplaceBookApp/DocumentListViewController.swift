@@ -247,8 +247,10 @@ final class DocumentListViewController: UIViewController {
 extension DocumentListViewController: DocumentTableControllerDelegate {
   func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
+      let navigationController = UINavigationController(rootViewController: detailViewController)
+      navigationController.navigationBar.barTintColor = .grailBackground
       splitViewController.showDetailViewController(
-        UINavigationController(rootViewController: detailViewController),
+        navigationController,
         sender: self
       )
     } else if let navigationController = navigationController {

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Nav bar color on iPad now uses the color scheme
+
 ## [0.22.0] - 2020-03-14
 
 ### Changed
