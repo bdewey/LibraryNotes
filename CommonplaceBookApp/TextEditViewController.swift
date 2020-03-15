@@ -208,8 +208,6 @@ public final class TextEditViewController: UIViewController {
 
   public override func viewDidLoad() {
     super.viewDidLoad()
-    navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
-    navigationItem.leftItemsSupplementBackButton = true
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
   }

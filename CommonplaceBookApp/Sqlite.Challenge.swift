@@ -50,41 +50,6 @@ extension Sqlite {
         table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
         table.column("lastReview", .datetime)
         table.column("due", .datetime)
-        table.column("challengeTemplateId", .text)
-          .notNull()
-          .indexed()
-          .references("challengeTemplate", onDelete: .cascade)
-      })
-    }
-
-    static func createV2Table(in database: Database, named tableName: String) throws {
-      try database.create(table: tableName, body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("index", .integer).notNull()
-        table.column("reviewCount", .integer).notNull().defaults(to: 0)
-        table.column("totalCorrect", .integer).notNull().defaults(to: 0)
-        table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
-        table.column("lastReview", .datetime)
-        table.column("due", .datetime)
-        table.column("spacedRepetitionFactor", .double).notNull().defaults(to: 2.5)
-        table.column("lapseCount", .double).notNull().defaults(to: 0)
-        table.column("idealInterval", .double)
-        table.column("challengeTemplateId", .integer)
-          .notNull()
-          .indexed()
-          .references("challengeTemplate", onDelete: .cascade)
-      })
-    }
-
-    static func createV3Table(in database: Database, named tableName: String) throws {
-      try database.create(table: tableName, body: { table in
-        table.autoIncrementedPrimaryKey("id")
-        table.column("index", .integer).notNull()
-        table.column("reviewCount", .integer).notNull().defaults(to: 0)
-        table.column("totalCorrect", .integer).notNull().defaults(to: 0)
-        table.column("totalIncorrect", .integer).notNull().defaults(to: 0)
-        table.column("lastReview", .datetime)
-        table.column("due", .datetime)
         table.column("spacedRepetitionFactor", .double).notNull().defaults(to: 2.5)
         table.column("lapseCount", .double).notNull().defaults(to: 0)
         table.column("idealInterval", .double)
@@ -98,40 +63,9 @@ extension Sqlite {
           .references("device", onDelete: .cascade)
         table.column("timestamp", .datetime)
           .notNull()
+        table.column("updateSequenceNumber", .integer).notNull()
       })
-      try database.create(index: "byChallengeTemplateIndex", on: tableName, columns: ["index", "challengeTemplateId"], unique: true)
-    }
-
-    static func migrateTableFromV1ToV2(in database: Database) throws {
-      try database.alter(table: "challenge", body: { table in
-        table.add(column: "challengeTemplateFlakeID", .integer).notNull().defaults(to: 0)
-      })
-      let update = try database.makeUpdateStatement(
-        sql: "UPDATE challenge SET challengeTemplateFlakeID = :flakeID WHERE id = :id"
-      )
-      try database.updateRows(selectSql: "SELECT id, challengeTemplateId FROM challenge", updateStatement: update) { row in
-        let id: Int64 = row["id"]
-        let challengeTemplateID: String = row["challengeTemplateId"]
-        guard let flakeId = try Int.fetchOne(database, ChallengeTemplate.select(sql: "templateFlakeId").filter(key: challengeTemplateID)) else {
-          throw MigrationError.cannotFindTemplateID(challengeTemplateID)
-        }
-        return ["flakeID": flakeId, "id": id]
-      }
-      try database.rewriteTable(named: "challenge", columns: "id, `index`, reviewCount, totalCorrect, totalIncorrect, lastReview, due, spacedRepetitionFactor, lapseCount, idealInterval, challengeTemplateFlakeID", tableBuilder: { tableName in
-        try Self.createV2Table(in: database, named: tableName)
-      })
-    }
-
-    static func migrateTableFromV2ToV3(in database: Database, currentDeviceID: Int64) throws {
-      try database.alter(table: "challenge", body: { table in
-        table.add(column: "modifiedDevice", .integer)
-        table.add(column: "timestamp", .datetime)
-      })
-      try updateAll(database, Columns.modifiedDevice <- currentDeviceID)
-      try updateAll(database, Columns.timestamp <- Date())
-      try database.rewriteTable(named: "challenge", columns: "*", tableBuilder: { tableName in
-        try Self.createV3Table(in: database, named: tableName)
-      })
+      try database.create(index: "byChallengeTemplateIndex", on: "challenge", columns: ["index", "challengeTemplateId"], unique: true)
     }
   }
 }

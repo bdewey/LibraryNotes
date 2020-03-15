@@ -98,9 +98,9 @@ final class DocumentListViewController: UIViewController {
   private lazy var tableView: UITableView = DocumentTableController.makeTableView()
 
   internal func showPage(with noteIdentifier: Note.Identifier) {
-    let markdown: String
+    let note: Note
     do {
-      markdown = try notebook.note(noteIdentifier: noteIdentifier).text ?? ""
+      note = try notebook.note(noteIdentifier: noteIdentifier)
     } catch {
       DDLogError("Unexpected error loading page: \(error)")
       return
@@ -109,8 +109,9 @@ final class DocumentListViewController: UIViewController {
       notebook: notebook
     )
     textEditViewController.noteIdentifier = noteIdentifier
-    textEditViewController.markdown = markdown
+    textEditViewController.markdown = note.text ?? ""
     let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, parsingRules: notebook.parsingRules, noteStorage: notebook)
+    savingWrapper.setTitleMarkdown(note.metadata.title)
     showDetailViewController(savingWrapper)
   }
 
@@ -288,7 +289,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       let splitViewController = self.splitViewController,
       splitViewController.viewControllers.count > 1,
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
-      let detailViewController = navigationController.viewControllers.first as? TextEditViewController
+      let detailViewController = navigationController.viewControllers.first as? SavingTextEditViewController
     else {
       return
     }

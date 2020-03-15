@@ -19,17 +19,23 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.parsingRules = parsingRules
     self.noteStorage = noteStorage
     super.init(nibName: nil, bundle: nil)
-    view.addSubview(viewController.view)
-    viewController.view.snp.makeConstraints { make in
+  }
+
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    view.addSubview(textEditViewController.view)
+    textEditViewController.view.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
-    addChild(viewController)
-    viewController.didMove(toParent: self)
-    viewController.delegate = self
+    addChild(textEditViewController)
+    textEditViewController.didMove(toParent: self)
+    textEditViewController.delegate = self
     self.autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
       if self?.hasUnsavedChanges ?? false { DDLogInfo("SavingTextEditViewController: autosave") }
       self?.saveIfNeeded()
     })
+    navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem
+    navigationItem.leftItemsSupplementBackButton = true
   }
 
   required init?(coder: NSCoder) {
@@ -44,9 +50,18 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?
 
+  internal func setTitleMarkdown(_ markdown: String) {
+    let nodes = parsingRules.parse(markdown)
+    let attributedTitle = nodes
+      .map { return MarkdownAttributedStringRenderer.textOnly.render(node: $0) }
+      .joined()
+    navigationItem.title = attributedTitle.string
+  }
+
   /// Writes a note to storage.
   private func updateNote(_ note: Note) {
     assert(Thread.isMainThread)
+    setTitleMarkdown(note.metadata.title)
     do {
       if let noteIdentifier = noteIdentifier {
         DDLogInfo("SavingTextEditViewController: Updating note \(noteIdentifier)")

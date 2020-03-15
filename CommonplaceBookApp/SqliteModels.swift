@@ -23,36 +23,10 @@ enum Sqlite {
     static let request = Note.including(all: Note.noteHashtags)
   }
 
-  struct StudyLogEntry: Codable, FetchableRecord, MutablePersistableRecord {
-    var id: Int64?
-    var timestamp: Date
-    var correct: Int
-    var incorrect: Int
-    var challengeId: Int64
-
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-      id = rowID
-    }
-
-    enum Columns {
-      static let timestamp = Column(CodingKeys.timestamp)
-    }
-
-    static let challenge = belongsTo(Challenge.self)
-  }
-
   /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
   struct StudyLogEntryInfo: Codable, FetchableRecord {
     var studyLogEntry: StudyLogEntry
     var challenge: Challenge
   }
 
-  struct Asset: Codable, FetchableRecord, PersistableRecord {
-    var id: String
-    var data: Data
-
-    enum Columns {
-      static let id = Column(CodingKeys.id)
-    }
-  }
 }
