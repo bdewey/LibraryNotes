@@ -89,11 +89,6 @@ public final class StudyViewController: UIViewController {
         self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
         self.currentCardView?.alpha = 1
       }) { _ in
-        if let utterances = self.currentCardView?.introductoryUtterances {
-          for utterance in utterances {
-            PersonalitySpeechSynthesizer.spanish.speak(utterance)
-          }
-        }
         if let current = self.currentCardView {
           current.becomeFirstResponder()
           current.accessibilityIdentifier = "current-card"

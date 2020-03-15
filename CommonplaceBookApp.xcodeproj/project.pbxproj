@@ -26,7 +26,6 @@
 		D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */; };
 		D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA83229D61E800ED2B76 /* Challenge.swift */; };
 		D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */; };
-		D31AFABA229D61EE00ED2B76 /* BingTranslation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA86229D61E900ED2B76 /* BingTranslation.swift */; };
 		D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA87229D61E900ED2B76 /* StudyViewController.swift */; };
 		D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */; };
 		D31AFAC1229D61EE00ED2B76 /* RenderedMarkdown+Stylesheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */; };
@@ -41,7 +40,6 @@
 		D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */; };
 		D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */; };
 		D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */; };
-		D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */; };
 		D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */; };
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
@@ -54,8 +52,6 @@
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
 		D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3446D3F23FAF20400BC269A /* Note+TestContent.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
-		D3591502231C340100883AC4 /* LocaleAwareTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3591501231C340100883AC4 /* LocaleAwareTextField.swift */; };
-		D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3591503231C3AC800883AC4 /* View+Locale.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -67,7 +63,6 @@
 		D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */ = {isa = PBXBuildFile; productRef = D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */; };
 		D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */; };
 		D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */; };
-		D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D33228D7AC6006CD0FA /* Observable.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
@@ -88,7 +83,6 @@
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
-		D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C1F404210E73DA00F92E85 /* EditableDocument.swift */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
@@ -99,9 +93,6 @@
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
 		D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */; };
-		D3E4475C23240CA200F21F91 /* ImageSearchRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4475B23240CA200F21F91 /* ImageSearchRequest.swift */; };
-		D3E4475E23247A3D00F21F91 /* ImageSearchResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */; };
-		D3E4476023254FAF00F21F91 /* EncodedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E4475F23254FAF00F21F91 /* EncodedImage.swift */; };
 		D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */; };
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
 		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
@@ -164,7 +155,6 @@
 		D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardDocumentProperties.swift; sourceTree = "<group>"; };
 		D31AFA83229D61E800ED2B76 /* Challenge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Challenge.swift; sourceTree = "<group>"; };
 		D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+SwiftFlash.swift"; sourceTree = "<group>"; };
-		D31AFA86229D61E900ED2B76 /* BingTranslation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BingTranslation.swift; sourceTree = "<group>"; };
 		D31AFA87229D61E900ED2B76 /* StudyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyViewController.swift; sourceTree = "<group>"; };
 		D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
 		D31AFA8D229D61E900ED2B76 /* RenderedMarkdown+Stylesheet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "RenderedMarkdown+Stylesheet.swift"; sourceTree = "<group>"; };
@@ -179,7 +169,6 @@
 		D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnswerStatistics.swift; sourceTree = "<group>"; };
 		D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TwoSidedCardView.swift; sourceTree = "<group>"; };
 		D31AFAA8229D61ED00ED2B76 /* DayComponents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponents.swift; sourceTree = "<group>"; };
-		D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonalitySpeechSynthesizer.swift; sourceTree = "<group>"; };
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
@@ -193,8 +182,6 @@
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
-		D3591501231C340100883AC4 /* LocaleAwareTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleAwareTextField.swift; sourceTree = "<group>"; };
-		D3591503231C3AC800883AC4 /* View+Locale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Locale.swift"; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageMergeTests.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -207,7 +194,6 @@
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateMatcher.swift; sourceTree = "<group>"; };
 		D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Set.swift"; sourceTree = "<group>"; };
-		D37E6D33228D7AC6006CD0FA /* Observable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Observable.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
@@ -227,7 +213,6 @@
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
-		D3C1F404210E73DA00F92E85 /* EditableDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditableDocument.swift; sourceTree = "<group>"; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswer.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
@@ -242,9 +227,6 @@
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlakeMaker.swift; sourceTree = "<group>"; };
-		D3E4475B23240CA200F21F91 /* ImageSearchRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSearchRequest.swift; sourceTree = "<group>"; };
-		D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageSearchResultsView.swift; sourceTree = "<group>"; };
-		D3E4475F23254FAF00F21F91 /* EncodedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncodedImage.swift; sourceTree = "<group>"; };
 		D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudFileMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -343,7 +325,6 @@
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D33F647022982366008C3A92 /* Array+Node.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
-				D31AFA86229D61E900ED2B76 /* BingTranslation.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D31AFA83229D61E800ED2B76 /* Challenge.swift */,
 				D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */,
@@ -364,21 +345,16 @@
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
 				D375D33D20EDA08F00EAB4F0 /* DocumentTableViewCell.swift */,
-				D3C1F404210E73DA00F92E85 /* EditableDocument.swift */,
-				D3E4475F23254FAF00F21F91 /* EncodedImage.swift */,
 				D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */,
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
-				D3E4475B23240CA200F21F91 /* ImageSearchRequest.swift */,
-				D3E4475D23247A3D00F21F91 /* ImageSearchResultsView.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
-				D3591501231C340100883AC4 /* LocaleAwareTextField.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
@@ -388,10 +364,8 @@
 				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D3AD01D623C55291004BB7DF /* NoteStorage+Migration.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
-				D37E6D33228D7AC6006CD0FA /* Observable.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
 				D30BD4F722A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift */,
-				D31AFAAA229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift */,
 				D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
@@ -423,7 +397,6 @@
 				D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D3A58F14240D469700CE3251 /* VersionVector.swift */,
-				D3591503231C3AC800883AC4 /* View+Locale.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -692,19 +665,15 @@
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
 				D30BD4F822A0B13B007E1F31 /* ParsingRules+CommonplaceBook.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
-				D37E6D34228D7AC6006CD0FA /* Observable.swift in Sources */,
 				D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */,
-				D3E4476023254FAF00F21F91 /* EncodedImage.swift in Sources */,
-				D3591502231C340100883AC4 /* LocaleAwareTextField.swift in Sources */,
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuoteTemplate.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
-				D3591504231C3AC800883AC4 /* View+Locale.swift in Sources */,
 				D3AD01CE23BEADB7004BB7DF /* SqliteModels.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
@@ -715,15 +684,12 @@
 				D31AFACE229D61EE00ED2B76 /* Cloze.swift in Sources */,
 				D393F2BE24143CC100A6DABB /* Sqlite.Device.swift in Sources */,
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
-				D31AFADE229D61EE00ED2B76 /* PersonalitySpeechSynthesizer.swift in Sources */,
-				D3E4475C23240CA200F21F91 /* ImageSearchRequest.swift in Sources */,
 				D3A58F15240D469700CE3251 /* VersionVector.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
-				D3C1F405210E73DA00F92E85 /* EditableDocument.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
@@ -731,7 +697,6 @@
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
-				D3E4475E23247A3D00F21F91 /* ImageSearchResultsView.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D3198DB123DBCA0F0098A9D9 /* Sqlite.Challenge.swift in Sources */,
@@ -754,7 +719,6 @@
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAF23DB5F6B0098A9D9 /* Sqlite.ChallengeTemplate.swift in Sources */,
-				D31AFABA229D61EE00ED2B76 /* BingTranslation.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* Sqlite.NoteText.swift in Sources */,
 				D393F2BC241439EE00A6DABB /* Sqlite.ChangeLog.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,

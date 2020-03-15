@@ -11,8 +11,6 @@ public protocol ChallengeViewDelegate: class {
 open class ChallengeView: UIControl {
   public weak var delegate: ChallengeViewDelegate?
 
-  var introductoryUtterances: [AVSpeechUtterance]? { return nil }
-
   public override init(frame: CGRect) {
     super.init(frame: frame)
     commonInit()
