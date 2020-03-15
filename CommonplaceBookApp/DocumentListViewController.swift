@@ -263,8 +263,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       delegate: self
     )
     studyVC.title = navigationItem.title
+    let navigationController = UINavigationController(rootViewController: studyVC)
+    navigationController.navigationBar.barTintColor = .grailBackground
     present(
-      UINavigationController(rootViewController: studyVC),
+      navigationController,
       animated: true,
       completion: nil
     )

@@ -147,7 +147,7 @@ public final class StudyViewController: UIViewController {
       make.top.equalTo(doneImageView.snp.bottom).offset(16)
     }
     studySession.studySessionStartDate = Date()
-    view.backgroundColor = UIColor.systemGroupedBackground
+    view.backgroundColor = .grailGroupedBackground
     configureUI(animated: false, completion: nil)
     // Assumes we're presented in a navigation controller
     navigationController?.presentationController?.delegate = self
@@ -256,6 +256,7 @@ public final class StudyViewController: UIViewController {
         )
       )
       challengeView.delegate = self
+      challengeView.backgroundColor = .grailSecondaryGroupedBackground
       view.addSubview(challengeView)
       challengeView.snp.makeConstraints { make in
         make.left.right.equalTo(self.view.readableContentGuide)

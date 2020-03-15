@@ -183,6 +183,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       rootViewController: documentListViewController
     )
     primaryNavigationController.navigationBar.prefersLargeTitles = true
+    primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
     let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
     let detailViewController = UINavigationController(
