@@ -23,7 +23,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   private let knownCardTemplateTypes: [ChallengeTemplateType] = [
     .cloze,
     .quote,
-    .vocabulary,
     .questionAndAnswer,
   ]
 
