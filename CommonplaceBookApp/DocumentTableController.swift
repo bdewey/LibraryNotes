@@ -6,7 +6,7 @@ import MiniMarkdown
 import UIKit
 
 /// Knows how to perform key actions with the document
-protocol DocumentTableControllerDelegate: AnyObject {
+public protocol DocumentTableControllerDelegate: AnyObject {
   /// Shows a TextEditViewController in the detail view.
   func showDetailViewController(_ detailViewController: UIViewController)
   /// Initiates studying.
@@ -15,6 +15,7 @@ protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
+  func documentTableDidRequestReview()
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -22,10 +23,13 @@ public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteStorage
+    notebook: NoteStorage,
+    delegate: DocumentTableControllerDelegate
   ) {
     self.notebook = notebook
+    self.delegate = delegate
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
+    tableView.register(ButtonCell.self, forCellReuseIdentifier: ReuseIdentifiers.review)
     let titleRenderer = RenderedMarkdown.makeTitleRenderer()
     self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
       switch item {
@@ -44,12 +48,28 @@ public final class DocumentTableController: NSObject {
         cell.backgroundColor = .secondarySystemBackground
         cell.textLabel?.text = hashtag
         return cell
+      case .review(let count):
+        // swiftlint:disable:next force_cast
+        let cell = tableView.dequeueReusableCell(withIdentifier: ReuseIdentifiers.review, for: indexPath) as! ButtonCell
+        cell.backgroundColor = .grailBackground
+        cell.button.setTitle("Review (\(count))", for: .normal)
+        cell.button.contentHorizontalAlignment = .left
+        cell.button.isEnabled = (count > 0) // swiftlint:disable:this empty_count
+        cell.button.accessibilityIdentifier = "study-button"
+        cell.tapHandler = { [weak delegate] in
+          delegate?.documentTableDidRequestReview()
+        }
+        return cell
       }
     }
     super.init()
     tableView.delegate = self
     tableView.refreshControl = refreshControl
     updateCardsPerDocument()
+  }
+
+  @objc private func didTapReview() {
+    delegate?.documentTableDidRequestReview()
   }
 
   public var challengeDueDate = Date() {
@@ -96,8 +116,15 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  /// The number of items that the learner can review.
+  public var reviewItemCount: Int = 0 {
+    didSet {
+      performUpdates(animated: true)
+    }
+  }
+
   /// Delegate.
-  internal weak var delegate: DocumentTableControllerDelegate?
+  private(set) weak var delegate: DocumentTableControllerDelegate?
 
   private let notebook: NoteStorage
   private var cardsPerDocument = [Note.Identifier: Int]() {
@@ -130,7 +157,8 @@ public final class DocumentTableController: NSObject {
       cardsPerDocument: cardsPerDocument,
       hashtags: hashtags,
       filteredHashtag: filteredHashtag,
-      filteredPageIdentifiers: filteredPageIdentifiers
+      filteredPageIdentifiers: filteredPageIdentifiers,
+      reviewItemCount: reviewItemCount
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate)
@@ -150,6 +178,8 @@ public final class DocumentTableController: NSObject {
         if lhsPage.pageKey != rhsPage.pageKey { return true }
       case (.hashtag(let lhsHashtag), .hashtag(let rhsHashtag)):
         if lhsHashtag != rhsHashtag { return true }
+      case (.review, .review):
+        return false
       default:
         return true
       }
@@ -169,6 +199,8 @@ extension DocumentTableController: UITableViewDelegate {
       delegate?.showPage(with: viewProperties.pageKey)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
+    case .review:
+      delegate?.documentTableDidRequestReview()
     }
   }
 
@@ -198,7 +230,7 @@ extension DocumentTableController: UITableViewDelegate {
         studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
-    case .hashtag:
+    case .hashtag, .review:
       // NOTHING
       break
     }
@@ -214,7 +246,7 @@ extension DocumentTableController: UITableViewDelegate {
     switch section {
     case .hashtags:
       label.text = "Hashtag"
-    case .documents:
+    case .documents, .review:
       return nil
     }
     return label
@@ -226,7 +258,7 @@ extension DocumentTableController: UITableViewDelegate {
     case .hashtags:
       let font = UIFont.preferredFont(forTextStyle: .subheadline)
       return font.lineHeight + 8
-    case .documents:
+    case .documents, .review:
       return 0
     }
   }
@@ -249,18 +281,23 @@ private extension DocumentTableController {
   enum DocumentSection {
     /// List of available hashtags
     case hashtags
+    /// Buttons to quiz/review on notebook contents
+    case review
     /// List of documents.
     case documents
   }
 
   enum Item: Hashable, CustomStringConvertible {
     case hashtag(String)
+    case review(Int)
     case page(ViewProperties)
 
     var description: String {
       switch self {
       case .hashtag(let hashtag):
         return hashtag
+      case .review:
+        return "Review"
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
       }
@@ -280,6 +317,7 @@ private extension DocumentTableController {
   enum ReuseIdentifiers {
     static let documentCell = "DocumentCollectionViewCell"
     static let hashtag = "HashtagCell"
+    static let review = "ReviewCell"
   }
 
   static func cell(
@@ -343,13 +381,16 @@ private extension DocumentTableController {
     cardsPerDocument: [Note.Identifier: Int],
     hashtags: [String],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<Note.Identifier>?
+    filteredPageIdentifiers: Set<Note.Identifier>?,
+    reviewItemCount: Int
   ) -> Snapshot {
     var snapshot = Snapshot()
     if !hashtags.isEmpty {
       snapshot.appendSections([.hashtags])
       snapshot.appendItems(hashtags.map { Item.hashtag($0) })
     }
+    snapshot.appendSections([.review])
+    snapshot.appendItems([.review(reviewItemCount)])
     snapshot.appendSections([.documents])
 
     let propertiesFilteredByHashtag = notebook.allMetadata
