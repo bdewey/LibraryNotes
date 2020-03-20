@@ -65,6 +65,10 @@ public final class DocumentTableController: NSObject {
     super.init()
     tableView.delegate = self
     tableView.refreshControl = refreshControl
+    let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self](_, _) in
+      self?.updateDataSourceIfNeeded()
+    }
+    CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
     updateCardsPerDocument()
   }
 
@@ -75,6 +79,16 @@ public final class DocumentTableController: NSObject {
   public var challengeDueDate = Date() {
     didSet {
       updateCardsPerDocument()
+    }
+  }
+
+  private var needsPerformUpdates = false
+  private var isPerformingUpdates = false
+
+  private func updateDataSourceIfNeeded() {
+    if needsPerformUpdates && !isPerformingUpdates {
+      performUpdates(animated: true)
+      needsPerformUpdates = false
     }
   }
 
@@ -98,28 +112,28 @@ public final class DocumentTableController: NSObject {
   /// If non-nil, only pages with these identifiers will be shown.
   public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
-      performUpdates(animated: true)
+      needsPerformUpdates = true
     }
   }
 
   /// If not empty, show a list of hashtags as a section in the table.
   public var hashtags: [String] = [] {
     didSet {
-      performUpdates(animated: true)
+      needsPerformUpdates = true
     }
   }
 
   /// If set, only show pages that contain this hashtag.
   public var filteredHashtag: String? {
     didSet {
-      performUpdates(animated: true)
+      needsPerformUpdates = true
     }
   }
 
   /// The number of items that the learner can review.
   public var reviewItemCount: Int = 0 {
     didSet {
-      performUpdates(animated: true)
+      needsPerformUpdates = true
     }
   }
 
@@ -129,7 +143,7 @@ public final class DocumentTableController: NSObject {
   private let notebook: NoteStorage
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
-      performUpdates(animated: true)
+      needsPerformUpdates = true
     }
   }
 
@@ -161,7 +175,11 @@ public final class DocumentTableController: NSObject {
       reviewItemCount: reviewItemCount
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
-    dataSource.apply(snapshot, animatingDifferences: reallyAnimate)
+
+    isPerformingUpdates = true
+    dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
+      self.isPerformingUpdates = false
+    }
   }
 
   /// Compares lhs & rhs to see if the differences are worth animating.
@@ -172,14 +190,20 @@ public final class DocumentTableController: NSObject {
     // The only way to get through this loop and return false is if every item in the left hand
     // side and the right hand side, in order, have matching hashtags or page identifiers.
     // In that case, whatever difference that exists between the snapshots is "minor"
-    for (lhsItem, rhsItem) in zip(lhs.itemIdentifiers, rhs.itemIdentifiers) {
+    let itemsToCompare = zip(lhs.itemIdentifiers, rhs.itemIdentifiers)
+    for (lhsItem, rhsItem) in itemsToCompare {
       switch (lhsItem, rhsItem) {
       case (.page(let lhsPage), .page(let rhsPage)):
-        if lhsPage.pageKey != rhsPage.pageKey { return true }
+        if lhsPage.pageKey != rhsPage.pageKey {
+          return true
+        }
       case (.hashtag(let lhsHashtag), .hashtag(let rhsHashtag)):
-        if lhsHashtag != rhsHashtag { return true }
+        if lhsHashtag != rhsHashtag {
+          return true
+        }
       case (.review, .review):
-        return false
+        // These items do nothing to affect "major differences"
+        continue
       default:
         return true
       }
@@ -337,15 +361,7 @@ private extension DocumentTableController {
     titleRenderer.markdown = viewProperties.noteProperties.title
     cell.titleLabel.attributedText = titleRenderer.attributedString
     cell.accessibilityLabel = viewProperties.noteProperties.title
-    var detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
-    if viewProperties.cardCount > 0 {
-      if !detailString.isEmpty { detailString += ". " }
-      if viewProperties.cardCount == 1 {
-        detailString += "1 card."
-      } else {
-        detailString += "\(viewProperties.cardCount) cards."
-      }
-    }
+    let detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
     cell.detailLabel.attributedText = NSAttributedString(
       string: detailString,
       attributes: [
@@ -354,6 +370,9 @@ private extension DocumentTableController {
       ]
     )
     cell.documentModifiedTimestamp = viewProperties.noteProperties.timestamp
+    if let font = titleRenderer.defaultAttributes[.font] as? UIFont {
+      cell.verticalPadding = max(20, font.lineHeight.roundedToScreenScale() * 1.5)
+    }
     return cell
   }
 
@@ -408,7 +427,7 @@ private extension DocumentTableController {
         ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
       }
       .sorted(
-        by: { $0.noteProperties.timestamp > $1.noteProperties.timestamp }
+        by: { $0.pageKey > $1.pageKey }
       )
       .map {
         Item.page($0)
@@ -416,5 +435,12 @@ private extension DocumentTableController {
     snapshot.appendItems(objects)
     DDLogDebug("Generating snapshot with \(objects.count) entries: \(objects)")
     return snapshot
+  }
+}
+
+private extension CGFloat {
+  func roundedToScreenScale(_ rule: FloatingPointRoundingRule = .toNearestOrAwayFromZero) -> CGFloat {
+    let scale: CGFloat = 1.0 / UIScreen.main.scale
+    return scale * (self / scale).rounded(rule)
   }
 }

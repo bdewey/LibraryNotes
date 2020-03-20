@@ -8,39 +8,18 @@ final class DocumentTableViewCell: UITableViewCell {
   override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-    let verticalStack = UIStackView(arrangedSubviews: [titleLabel, detailLabel])
-    verticalStack.axis = .vertical
-    verticalStack.alignment = .leading
-    titleLabel.numberOfLines = 0
 
-    let horizontalStack = UIStackView(arrangedSubviews: [ageLabel, verticalStack])
-    horizontalStack.alignment = .center
-
-    contentView.addSubview(horizontalStack)
+    contentView.addSubview(labelStack)
     contentView.addSubview(divider)
-    horizontalStack.snp.makeConstraints { make in
-      make.edges.equalToSuperview().inset(8)
-      make.height.greaterThanOrEqualTo(72)
-    }
-    ageLabel.snp.makeConstraints { make in
-      make.width.equalTo(56)
-    }
+    remakeLabelStackConstraints()
     divider.snp.makeConstraints { make in
       make.height.equalTo(1)
-      make.width.equalTo(verticalStack.snp.width)
       make.bottom.equalToSuperview()
-      make.right.equalToSuperview().inset(8)
+      make.left.right.equalToSuperview().inset(20)
     }
 
     backgroundColor = .grailBackground
     divider.backgroundColor = UIColor.separator
-
-    timestampUpdatingPipeline = Just(Date())
-      .merge(with: Timer.publish(every: .minute, on: .main, in: .common).autoconnect())
-      .combineLatest(documentModifiedTimestampSubject)
-      .sink { [weak self] currentTime, modifiedTime in
-        self?.updateAgeLabel(currentTime: currentTime, modifiedTime: modifiedTime)
-      }
   }
 
   required init?(coder aDecoder: NSCoder) {
@@ -54,26 +33,25 @@ final class DocumentTableViewCell: UITableViewCell {
 
   let titleLabel = UILabel(frame: .zero)
   let detailLabel = UILabel(frame: .zero)
+  var verticalPadding: CGFloat = 20 {
+    didSet {
+      remakeLabelStackConstraints()
+    }
+  }
 
-  private var timestampUpdatingPipeline: AnyCancellable?
-  private let ageLabel = UILabel(frame: .zero)
-
+  private lazy var labelStack: UIStackView = {
+    let verticalStack = UIStackView(arrangedSubviews: [titleLabel, detailLabel])
+    verticalStack.axis = .vertical
+    verticalStack.alignment = .leading
+    titleLabel.numberOfLines = 0
+    return verticalStack
+  }()
   private let divider = UIView(frame: .zero)
   private var documentModifiedTimestampSubject = CurrentValueSubject<Date?, Never>(nil)
 
-  private func updateAgeLabel(currentTime: Date, modifiedTime: Date?) {
-    guard let modifiedTime = modifiedTime else {
-      ageLabel.text = ""
-      return
+  private func remakeLabelStackConstraints() {
+    labelStack.snp.remakeConstraints { make in
+      make.edges.equalToSuperview().inset(UIEdgeInsets(top: verticalPadding, left: 20, bottom: verticalPadding, right: 20))
     }
-    let dateDelta = currentTime.timeIntervalSince(modifiedTime)
-    ageLabel.attributedText = NSAttributedString(
-      string: DateComponentsFormatter.age.string(from: dateDelta) ?? "",
-      attributes: [
-        .font: UIFont.preferredFont(forTextStyle: .caption1),
-        .foregroundColor: UIColor.secondaryLabel,
-      ]
-    )
-    setNeedsLayout()
   }
 }
