@@ -52,27 +52,83 @@ public final class StudyViewController: UIViewController {
 
   /// Just holds the "correct" versus "incorrect" color whilst swiping
   private lazy var colorWashView: UIView = {
+    let view = UIView(frame: .zero)
+    return view
+  }()
+
+  private lazy var blurView: UIVisualEffectView = {
     let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
     return view
   }()
 
-  /// Holds the description of what the swipe action is doing.
-  /// `currentDynamicItem` adjusts its alpha based on how far the swipe is proceeding
-  private lazy var swipeDescriptionLabel: UILabel = {
-    let label = UILabel(frame: .zero)
-    label.font = UIFont.preferredFont(forTextStyle: .headline)
-    label.textColor = .label
-    return label
-  }()
+  private enum SwipeOutcome: String, CaseIterable {
+    case correct = "I got it right"
+    case incorrect = "Need to review"
+    case dismiss = "Dismiss"
 
-  /// The current text we are showing in the swipe description.
-  /// Memoized here to minimize layout calculations while panning.
-  private var swipeDescriptionText: String? {
-    didSet {
-      if oldValue != swipeDescriptionText {
-        swipeDescriptionLabel.text = swipeDescriptionText
-        swipeDescriptionLabel.sizeToFit()
+    func makeLabel() -> UILabel {
+      let label = UILabel(frame: .zero)
+      label.font = UIFont.preferredFont(forTextStyle: .headline)
+      label.textColor = .label
+      label.text = self.rawValue
+      label.sizeToFit()
+      return label
+    }
+
+    var washColor: UIColor {
+      switch self {
+      case .correct:
+        return .systemGreen
+      case .incorrect:
+        return .systemRed
+      case .dismiss:
+        return .clear
       }
+    }
+
+    var gestureDirection: CGFloat {
+      switch self {
+      case .correct:
+        return 0
+      case .incorrect:
+        return CGFloat.pi
+      case .dismiss:
+        return CGFloat.pi / 2
+      }
+    }
+
+    init?(direction: CGFloat, epsilon: CGFloat = 0.2) {
+      for possibility in SwipeOutcome.allCases {
+        if possibility.gestureDirection.plusOrMinus(epsilon).contains(direction) {
+          self = possibility
+          return
+        }
+      }
+      return nil
+    }
+
+    static func messageAndAlpha(for point: CGPoint, origin: CGPoint = .zero) -> (SwipeOutcome, CGFloat)? {
+      let minimumDragDistance: CGFloat = 100
+      let vector = CGVector(origin: origin, destination: point)
+      guard let message = SwipeOutcome(direction: vector.direction) else {
+        return nil
+      }
+      let alpha = min(1, vector.magnitude / minimumDragDistance)
+      return (message, alpha)
+    }
+  }
+
+  private var statusMessageLabels: [SwipeOutcome: UILabel] = [:]
+
+  private func setAlpha(_ alpha: CGFloat, for statusMessage: SwipeOutcome) {
+    for (labelMessage, label) in statusMessageLabels {
+      label.alpha = (labelMessage == statusMessage) ? alpha : 0
+    }
+  }
+
+  private func hideAllStatusMessages() {
+    for (_, label) in statusMessageLabels {
+      label.alpha = 0
     }
   }
 
@@ -89,11 +145,11 @@ public final class StudyViewController: UIViewController {
       oldValue?.alpha = 0
       oldValue?.removeFromSuperview()
       cardSnapBehavior.map { animator.removeBehavior($0) }
-      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, colorWashView: colorWashView, swipeDescriptionLabel: swipeDescriptionLabel, centerX: view.center.x) }
+      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0,  origin: view.center, viewController: self) }
       attachPanGestureRecognizer()
       UIView.animate(withDuration: 0.2, animations: {
         self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
-        self.swipeDescriptionLabel.alpha = 0
+        self.hideAllStatusMessages()
         self.currentCardView?.alpha = 1
       }) { finished in
         DDLogInfo("Animation finished = \(finished)")
@@ -138,10 +194,14 @@ public final class StudyViewController: UIViewController {
   public override func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(colorWashView)
-    view.addSubview(swipeDescriptionLabel)
+    view.addSubview(blurView)
+    makeStatusLabels()
     view.addSubview(doneImageView)
     view.addSubview(progressView)
     colorWashView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
+    blurView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
     doneImageView.snp.makeConstraints { make in
@@ -152,15 +212,24 @@ public final class StudyViewController: UIViewController {
       make.centerY.equalTo(doneImageView.snp.centerY)
       make.right.equalTo(doneImageView.snp.left).offset(-8)
     }
-    swipeDescriptionLabel.snp.makeConstraints { make in
-      make.centerX.equalToSuperview()
-      make.top.equalTo(doneImageView).offset(-16)
+    for (_, label) in statusMessageLabels {
+      label.snp.makeConstraints { make in
+        make.centerX.equalToSuperview()
+        make.top.equalTo(doneImageView).offset(-16)
+      }
     }
     studySession.studySessionStartDate = Date()
-    view.backgroundColor = .grailGroupedBackground
     configureUI(animated: false, completion: nil)
     // Assumes we're presented in a navigation controller
     navigationController?.presentationController?.delegate = self
+  }
+
+  private func makeStatusLabels() {
+    for message in SwipeOutcome.allCases {
+      let label = message.makeLabel()
+      statusMessageLabels[message] = label
+      view.addSubview(label)
+    }
   }
 
   public override func viewDidAppear(_ animated: Bool) {
@@ -182,22 +251,23 @@ public final class StudyViewController: UIViewController {
       cardSnapBehavior.map { animator.removeBehavior($0) }
     case .changed:
       currentCard.center = view.center + translation
-      if isAnswerVisible {
-        swipeDescriptionLabel.text = (translation.x > 0) ? "I got it right" : "Need to review"
-      }
     case .ended:
       var correct: Bool?
       var shouldDismiss = false
-      let moveAmount = view.bounds.width * 0.25
-      if isAnswerVisible, translation.x > moveAmount {
-        snap.snapPoint = CGPoint(x: view.center.x + view.frame.width, y: view.center.y)
-        correct = true
-      } else if isAnswerVisible, translation.x < -1 * moveAmount {
-        snap.snapPoint = CGPoint(x: view.center.x - view.frame.width, y: view.center.y)
-        correct = false
-      } else if translation.y > view.bounds.height * 0.25 {
-        shouldDismiss = true
-        snap.snapPoint = CGPoint(x: view.center.x, y: view.center.y + view.frame.height)
+      if let (message, alpha) = SwipeOutcome.messageAndAlpha(for: translation), alpha >= 1 {
+        switch (message, isAnswerVisible) {
+        case (.correct, true):
+          snap.snapPoint = CGPoint(x: view.center.x + view.frame.width, y: view.center.y)
+          correct = true
+        case (.incorrect, true):
+          snap.snapPoint = CGPoint(x: view.center.x - view.frame.width, y: view.center.y)
+          correct = false
+        case (.dismiss, _):
+          shouldDismiss = true
+          snap.snapPoint = CGPoint(x: view.center.x, y: view.center.y + view.frame.height)
+        default:
+          snap.snapPoint = view.center
+        }
       } else {
         snap.snapPoint = view.center
       }
@@ -302,52 +372,54 @@ extension StudyViewController: UIAdaptivePresentationControllerDelegate {
   }
 }
 
-/// Changes the color wash of `colorWashView` as the position of `view` changes.
-private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
-  init(view: UIView, colorWashView: UIView, swipeDescriptionLabel: UILabel, centerX: CGFloat) {
-    self.view = view
-    self.colorWashView = colorWashView
-    self.swipeDescriptionLabel = swipeDescriptionLabel
-    self.centerX = centerX
-  }
-
-  let view: UIView
-  var shouldChangeColor = false
-  private let colorWashView: UIView
-  private let swipeDescriptionLabel: UILabel
-
-  var centerX: CGFloat {
-    didSet {
-      configureUI()
+private extension StudyViewController {
+  /// Changes the color wash of `colorWashView` as the position of `view` changes.
+  final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
+    init(view: UIView, origin: CGPoint, viewController: StudyViewController) {
+      self.view = view
+      self.origin = origin
+      self.viewController = viewController
     }
-  }
 
-  var center: CGPoint {
-    get { view.center }
-    set {
-      view.center = newValue
-      configureUI()
+    let view: UIView
+    weak var viewController: StudyViewController?
+    var shouldChangeColor = false
+
+    var origin: CGPoint {
+      didSet {
+        configureUI()
+      }
     }
-  }
 
-  var bounds: CGRect {
-    get { view.bounds }
-    set { view.bounds = newValue }
-  }
+    var center: CGPoint {
+      get { view.center }
+      set {
+        view.center = newValue
+        configureUI()
+      }
+    }
 
-  var transform: CGAffineTransform {
-    get { view.transform }
-    set { view.transform = newValue }
-  }
+    var bounds: CGRect {
+      get { view.bounds }
+      set { view.bounds = newValue }
+    }
 
-  private func configureUI() {
-    guard shouldChangeColor else { return }
-    let deltaX = center.x - centerX
-    let colorWash = deltaX < 0 ? UIColor.systemRed : UIColor.systemGreen
-    let alpha = min(abs(deltaX) / 100.0, 1.0)
-    let intensity = alpha * 0.4
-    swipeDescriptionLabel.alpha = alpha
-    colorWashView.backgroundColor = colorWash.withAlphaComponent(intensity)
+    var transform: CGAffineTransform {
+      get { view.transform }
+      set { view.transform = newValue }
+    }
+
+    private func configureUI() {
+      guard shouldChangeColor else { return }
+      if let (message, alpha) = SwipeOutcome.messageAndAlpha(for: center, origin: origin) {
+        let intensity = alpha * 0.4
+        viewController?.setAlpha(alpha, for: message)
+        viewController?.colorWashView.backgroundColor = message.washColor.withAlphaComponent(intensity)
+      } else {
+        viewController?.hideAllStatusMessages()
+        viewController?.colorWashView.backgroundColor = .clear
+      }
+    }
   }
 }
 
@@ -364,5 +436,25 @@ extension CGPoint {
 
   static func += (lhs: inout CGPoint, rhs: CGPoint) {
     lhs = CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+  }
+}
+
+extension CGVector {
+  init(origin: CGPoint, destination: CGPoint) {
+    self.init(dx: destination.x - origin.x, dy: destination.y - origin.y)
+  }
+
+  var magnitude: CGFloat {
+    sqrt(dx * dx + dy * dy)
+  }
+
+  var direction: CGFloat {
+    atan2(dy, dx)
+  }
+}
+
+extension CGFloat {
+  func plusOrMinus(_ delta: CGFloat) -> Range<CGFloat> {
+    return (self - delta) ..< (self + delta)
   }
 }

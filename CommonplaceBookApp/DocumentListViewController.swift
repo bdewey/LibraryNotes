@@ -230,20 +230,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       delegate: self
     )
     studyVC.title = navigationItem.title
-    let shouldWrapInNavigationController = false
-    let vcToPresent: UIViewController
-    if shouldWrapInNavigationController {
-      let navigationController = UINavigationController(rootViewController: studyVC)
-      navigationController.navigationBar.barTintColor = .grailBackground
-      vcToPresent = navigationController
-    } else {
-      vcToPresent = studyVC
-    }
-    vcToPresent.view.tintColor = view.tintColor
-    vcToPresent.modalTransitionStyle = .crossDissolve
-    vcToPresent.modalPresentationStyle = .overFullScreen
+    studyVC.modalTransitionStyle = .crossDissolve
+    studyVC.modalPresentationStyle = .overFullScreen
     present(
-      vcToPresent,
+      studyVC,
       animated: true,
       completion: nil
     )
