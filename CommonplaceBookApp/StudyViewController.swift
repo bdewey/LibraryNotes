@@ -29,6 +29,12 @@ public final class StudyViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
   }
 
+  private func finishStudySession() {
+    studySession.studySessionEndDate = Date()
+    delegate?.studyViewController(self, didFinishSession: studySession)
+    dismiss(animated: true, completion: nil)
+  }
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -46,8 +52,7 @@ public final class StudyViewController: UIViewController {
 
   /// Just holds the "correct" versus "incorrect" color whilst swiping
   private lazy var colorWashView: UIView = {
-    let view = UIView(frame: .zero)
-    view.backgroundColor = .clear
+    let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
     return view
   }()
 
@@ -85,20 +90,30 @@ public final class StudyViewController: UIViewController {
       oldValue?.removeFromSuperview()
       cardSnapBehavior.map { animator.removeBehavior($0) }
       currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, colorWashView: colorWashView, swipeDescriptionLabel: swipeDescriptionLabel, centerX: view.center.x) }
+      attachPanGestureRecognizer()
       UIView.animate(withDuration: 0.2, animations: {
         self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
+        self.swipeDescriptionLabel.alpha = 0
         self.currentCardView?.alpha = 1
-      }) { _ in
+      }) { finished in
+        DDLogInfo("Animation finished = \(finished)")
         if let current = self.currentCardView {
           current.becomeFirstResponder()
           current.accessibilityIdentifier = "current-card"
-          // TODO: Refactor so I don't have to force unwrap
-          let snapBehavior = UISnapBehavior(item: self.currentDynamicItem!, snapTo: self.view.center)
-          self.animator.addBehavior(snapBehavior)
-          self.cardSnapBehavior = snapBehavior
+          self.attachSnapBehavior()
         }
       }
     }
+  }
+
+  private func attachSnapBehavior() {
+    // TODO: Refactor so I don't have to force unwrap
+    guard let dynamicItem = currentDynamicItem, dynamicItem.bounds.size != .zero else {
+      return
+    }
+    let snapBehavior = UISnapBehavior(item: dynamicItem, snapTo: view.center)
+    animator.addBehavior(snapBehavior)
+    cardSnapBehavior = snapBehavior
   }
 
   private func attachPanGestureRecognizer() {
@@ -130,7 +145,7 @@ public final class StudyViewController: UIViewController {
       make.edges.equalToSuperview()
     }
     doneImageView.snp.makeConstraints { make in
-      make.right.top.equalTo(view.safeAreaLayoutGuide).inset(16)
+      make.right.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
     }
     progressView.snp.makeConstraints { make in
       make.left.equalTo(view.safeAreaLayoutGuide).inset(16)
@@ -139,7 +154,7 @@ public final class StudyViewController: UIViewController {
     }
     swipeDescriptionLabel.snp.makeConstraints { make in
       make.centerX.equalToSuperview()
-      make.top.equalTo(doneImageView.snp.bottom).offset(16)
+      make.top.equalTo(doneImageView).offset(-16)
     }
     studySession.studySessionStartDate = Date()
     view.backgroundColor = .grailGroupedBackground
@@ -148,37 +163,50 @@ public final class StudyViewController: UIViewController {
     navigationController?.presentationController?.delegate = self
   }
 
-  public override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
-    currentDynamicItem?.centerX = view.center.x
+  public override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    attachSnapBehavior()
   }
 
   @objc private func didPan(sender: UIPanGestureRecognizer) {
-    guard let currentCard = currentDynamicItem, let snap = cardSnapBehavior else { return }
+    guard
+      let currentCard = currentDynamicItem,
+      let isAnswerVisible = currentCardView?.isAnswerVisible,
+      let snap = cardSnapBehavior
+    else {
+      return
+    }
     let translation = sender.translation(in: currentCard.view)
     switch sender.state {
     case .began:
       cardSnapBehavior.map { animator.removeBehavior($0) }
     case .changed:
       currentCard.center = view.center + translation
-      if translation.x > 0 {
-        swipeDescriptionLabel.text = "I got it right"
-      } else {
-        swipeDescriptionLabel.text = "Need to review"
+      if isAnswerVisible {
+        swipeDescriptionLabel.text = (translation.x > 0) ? "I got it right" : "Need to review"
       }
     case .ended:
       var correct: Bool?
-      if translation.x > 100.0 {
+      var shouldDismiss = false
+      let moveAmount = view.bounds.width * 0.25
+      if isAnswerVisible, translation.x > moveAmount {
         snap.snapPoint = CGPoint(x: view.center.x + view.frame.width, y: view.center.y)
         correct = true
-      } else if translation.x < -100.0 {
+      } else if isAnswerVisible, translation.x < -1 * moveAmount {
         snap.snapPoint = CGPoint(x: view.center.x - view.frame.width, y: view.center.y)
         correct = false
+      } else if translation.y > view.bounds.height * 0.25 {
+        shouldDismiss = true
+        snap.snapPoint = CGPoint(x: view.center.x, y: view.center.y + view.frame.height)
       } else {
         snap.snapPoint = view.center
       }
       cardSnapBehavior.map { animator.addBehavior($0) }
-      if let correct = correct {
+      if shouldDismiss {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+          self.finishStudySession()
+        }
+      } else if let correct = correct {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
           // TODO: Get rid of force unwrap
           self.userDidRespond(correct: correct)
@@ -251,13 +279,11 @@ public final class StudyViewController: UIViewController {
         )
       )
       challengeView.delegate = self
-      challengeView.backgroundColor = .grailSecondaryGroupedBackground
       view.addSubview(challengeView)
       challengeView.snp.makeConstraints { make in
         make.left.right.equalTo(self.view.readableContentGuide)
         make.centerY.equalToSuperview()
       }
-      challengeView.layer.cornerRadius = 8
       completion(challengeView)
     } catch {
       DDLogError("Unexpected error generating challenge view: \(error)")
@@ -286,6 +312,7 @@ private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
   }
 
   let view: UIView
+  var shouldChangeColor = false
   private let colorWashView: UIView
   private let swipeDescriptionLabel: UILabel
 
@@ -314,18 +341,19 @@ private final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
   }
 
   private func configureUI() {
+    guard shouldChangeColor else { return }
     let deltaX = center.x - centerX
     let colorWash = deltaX < 0 ? UIColor.systemRed : UIColor.systemGreen
     let alpha = min(abs(deltaX) / 100.0, 1.0)
-    swipeDescriptionLabel.alpha = alpha
     let intensity = alpha * 0.4
+    swipeDescriptionLabel.alpha = alpha
     colorWashView.backgroundColor = colorWash.withAlphaComponent(intensity)
   }
 }
 
 extension StudyViewController: ChallengeViewDelegate {
   public func challengeViewDidRevealAnswer(_ challengeView: ChallengeView) {
-    attachPanGestureRecognizer()
+    currentDynamicItem?.shouldChangeColor = true
   }
 }
 

@@ -65,7 +65,7 @@ public final class DocumentTableController: NSObject {
     super.init()
     tableView.delegate = self
     tableView.refreshControl = refreshControl
-    let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self](_, _) in
+    let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
       self?.updateDataSourceIfNeeded()
     }
     CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
@@ -86,7 +86,7 @@ public final class DocumentTableController: NSObject {
   private var isPerformingUpdates = false
 
   private func updateDataSourceIfNeeded() {
-    if needsPerformUpdates && !isPerformingUpdates {
+    if needsPerformUpdates, !isPerformingUpdates {
       performUpdates(animated: true)
       needsPerformUpdates = false
     }
@@ -427,7 +427,7 @@ private extension DocumentTableController {
         ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
       }
       .sorted(
-        by: { $0.pageKey > $1.pageKey }
+        by: { $0.noteProperties.timestamp > $1.noteProperties.timestamp }
       )
       .map {
         Item.page($0)

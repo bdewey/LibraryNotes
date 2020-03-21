@@ -1,8 +1,9 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+// Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import UIKit
 
 extension UIColor {
+  static let grailTint = UIColor.systemOrange
   static let grailBackground = UIColor(named: "grailBackground")
   static let grailSecondaryBackground = UIColor(named: "grailSecondaryBackground")
 
