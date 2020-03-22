@@ -61,72 +61,90 @@ public final class StudyViewController: UIViewController {
     return view
   }()
 
-  private enum SwipeOutcome: String, CaseIterable {
-    case correct = "I got it right"
-    case incorrect = "Need to review"
-    case dismiss = "Dismiss"
+  private struct Swipe: Identifiable {
+    var id: CGVector.Direction { classifier.direction }
+    let classifier: LinearPanTranslationClassifier
+    let message: String
+    let color: UIColor
+    let requiresVisibleAnswer: Bool
+    let correct: Bool?
+    let shouldDismiss: Bool
+    let snapPoint: (UIView) -> CGPoint
 
     func makeLabel() -> UILabel {
       let label = UILabel(frame: .zero)
       label.font = UIFont.preferredFont(forTextStyle: .headline)
       label.textColor = .label
-      label.text = self.rawValue
+      label.text = message
       label.sizeToFit()
       return label
     }
+  }
 
-    var washColor: UIColor {
-      switch self {
-      case .correct:
-        return .systemGreen
-      case .incorrect:
-        return .systemRed
-      case .dismiss:
-        return .clear
+  private let swipeClassifiers: [Swipe] = [
+    Swipe(
+      classifier: LinearPanTranslationClassifier(direction: .down),
+      message: "Dismiss",
+      color: .clear,
+      requiresVisibleAnswer: false,
+      correct: nil,
+      shouldDismiss: true,
+      snapPoint: { CGPoint(x: $0.center.x, y: $0.center.y + $0.frame.height) }
+    ),
+    Swipe(
+      classifier: LinearPanTranslationClassifier(direction: .right),
+      message: "I got it right",
+      color: .systemGreen,
+      requiresVisibleAnswer: true,
+      correct: true,
+      shouldDismiss: false,
+      snapPoint: { CGPoint(x: $0.center.x + $0.frame.width, y: $0.center.y) }
+    ),
+    Swipe(
+      classifier: LinearPanTranslationClassifier(direction: .left),
+      message: "Need to review",
+      color: .systemRed,
+      requiresVisibleAnswer: true,
+      correct: false,
+      shouldDismiss: false,
+      snapPoint: { CGPoint(x: $0.center.x - $0.frame.width, y: $0.center.y) }
+    ),
+  ]
+
+  /// Given a pan gesture in the view and whether or not the answer is currently visible, returns the best Swipe
+  /// corresponding to that gesture and a mesure of how strongly we match.
+  private func bestSwipe(for vector: CGVector, answerVisible: Bool) -> (Swipe, CGFloat)? {
+    swipeClassifiers
+      .compactMap { swipe -> (Swipe, CGFloat)? in
+        if swipe.requiresVisibleAnswer, !answerVisible {
+          return nil
+        }
+        return (swipe, swipe.classifier.matchStrength(vector: vector))
       }
-    }
-
-    var gestureDirection: CGFloat {
-      switch self {
-      case .correct:
-        return 0
-      case .incorrect:
-        return CGFloat.pi
-      case .dismiss:
-        return CGFloat.pi / 2
-      }
-    }
-
-    init?(direction: CGFloat, epsilon: CGFloat = 0.2) {
-      for possibility in SwipeOutcome.allCases {
-        if possibility.gestureDirection.plusOrMinus(epsilon).contains(direction) {
-          self = possibility
-          return
+      .reduce(nil) { (priorResult, tuple) -> (Swipe, CGFloat)? in
+        guard let result = priorResult else {
+          return tuple
+        }
+        if tuple.1 > result.1 {
+          return tuple
+        } else {
+          return result
         }
       }
-      return nil
-    }
+  }
 
-    static func messageAndAlpha(for point: CGPoint, origin: CGPoint = .zero) -> (SwipeOutcome, CGFloat)? {
-      let minimumDragDistance: CGFloat = 100
-      let vector = CGVector(origin: origin, destination: point)
-      guard let message = SwipeOutcome(direction: vector.direction) else {
-        return nil
-      }
-      let alpha = min(1, vector.magnitude / minimumDragDistance)
-      return (message, alpha)
+  /// Mapping of possible swipe gestures with labels that tell the person we are going to match that swipe.
+  private var statusMessageLabels: [Swipe.ID: UILabel] = [:]
+
+  /// Sets the alpha of a particular swipe label to `alpha` and all other labels to zero.
+  private func setAlpha(_ alpha: CGFloat, for swipe: Swipe) {
+    for (swipeID, label) in statusMessageLabels {
+      label.alpha = (swipeID == swipe.id) ? alpha : 0
     }
   }
 
-  private var statusMessageLabels: [SwipeOutcome: UILabel] = [:]
-
-  private func setAlpha(_ alpha: CGFloat, for statusMessage: SwipeOutcome) {
-    for (labelMessage, label) in statusMessageLabels {
-      label.alpha = (labelMessage == statusMessage) ? alpha : 0
-    }
-  }
-
-  private func hideAllStatusMessages() {
+  /// Sets the alpha for all swipe messages to 0.
+  private func hideAllSwipeMessages() {
     for (_, label) in statusMessageLabels {
       label.alpha = 0
     }
@@ -145,11 +163,11 @@ public final class StudyViewController: UIViewController {
       oldValue?.alpha = 0
       oldValue?.removeFromSuperview()
       cardSnapBehavior.map { animator.removeBehavior($0) }
-      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0,  origin: view.center, viewController: self) }
+      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, origin: view.center, viewController: self) }
       attachPanGestureRecognizer()
       UIView.animate(withDuration: 0.2, animations: {
         self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
-        self.hideAllStatusMessages()
+        self.hideAllSwipeMessages()
         self.currentCardView?.alpha = 1
       }) { finished in
         DDLogInfo("Animation finished = \(finished)")
@@ -225,9 +243,9 @@ public final class StudyViewController: UIViewController {
   }
 
   private func makeStatusLabels() {
-    for message in SwipeOutcome.allCases {
-      let label = message.makeLabel()
-      statusMessageLabels[message] = label
+    for swipe in swipeClassifiers {
+      let label = swipe.makeLabel()
+      statusMessageLabels[swipe.id] = label
       view.addSubview(label)
     }
   }
@@ -254,22 +272,10 @@ public final class StudyViewController: UIViewController {
     case .ended:
       var correct: Bool?
       var shouldDismiss = false
-      if let (message, alpha) = SwipeOutcome.messageAndAlpha(for: translation), alpha >= 1 {
-        switch (message, isAnswerVisible) {
-        case (.correct, true):
-          snap.snapPoint = CGPoint(x: view.center.x + view.frame.width, y: view.center.y)
-          correct = true
-        case (.incorrect, true):
-          snap.snapPoint = CGPoint(x: view.center.x - view.frame.width, y: view.center.y)
-          correct = false
-        case (.dismiss, _):
-          shouldDismiss = true
-          snap.snapPoint = CGPoint(x: view.center.x, y: view.center.y + view.frame.height)
-        default:
-          snap.snapPoint = view.center
-        }
-      } else {
-        snap.snapPoint = view.center
+      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: isAnswerVisible), strength >= 1 {
+        correct = swipe.correct
+        shouldDismiss = swipe.shouldDismiss
+        snap.snapPoint = swipe.snapPoint(view)
       }
       cardSnapBehavior.map { animator.addBehavior($0) }
       if shouldDismiss {
@@ -410,13 +416,13 @@ private extension StudyViewController {
     }
 
     private func configureUI() {
-      guard shouldChangeColor else { return }
-      if let (message, alpha) = SwipeOutcome.messageAndAlpha(for: center, origin: origin) {
+      let vector = CGVector(origin: origin, destination: center)
+      if let (swipe, alpha) = viewController?.bestSwipe(for: vector, answerVisible: shouldChangeColor) {
         let intensity = alpha * 0.4
-        viewController?.setAlpha(alpha, for: message)
-        viewController?.colorWashView.backgroundColor = message.washColor.withAlphaComponent(intensity)
+        viewController?.setAlpha(alpha, for: swipe)
+        viewController?.colorWashView.backgroundColor = swipe.color.withAlphaComponent(intensity)
       } else {
-        viewController?.hideAllStatusMessages()
+        viewController?.hideAllSwipeMessages()
         viewController?.colorWashView.backgroundColor = .clear
       }
     }
@@ -436,20 +442,6 @@ extension CGPoint {
 
   static func += (lhs: inout CGPoint, rhs: CGPoint) {
     lhs = CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
-  }
-}
-
-extension CGVector {
-  init(origin: CGPoint, destination: CGPoint) {
-    self.init(dx: destination.x - origin.x, dy: destination.y - origin.y)
-  }
-
-  var magnitude: CGFloat {
-    sqrt(dx * dx + dy * dy)
-  }
-
-  var direction: CGFloat {
-    atan2(dy, dx)
   }
 }
 
