@@ -9,6 +9,7 @@ public protocol ChallengeViewDelegate: class {
 }
 
 open class ChallengeView: UIControl {
+  public var isAnswerVisible = false
   public weak var delegate: ChallengeViewDelegate?
 
   public override init(frame: CGRect) {

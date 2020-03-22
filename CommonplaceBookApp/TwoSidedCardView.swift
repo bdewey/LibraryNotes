@@ -26,7 +26,8 @@ public final class TwoSidedCardView: ChallengeView {
   }
 
   private func commonInit() {
-    [contextLabel, frontLabel, backLabel].forEach { addSubview($0) }
+    [background, contextLabel, frontLabel, backLabel].forEach { addSubview($0) }
+    backgroundColor = .clear
     createConstraints()
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
     setAnswerVisible(false, animated: false)
@@ -36,6 +37,9 @@ public final class TwoSidedCardView: ChallengeView {
   private var backLabelConstraints: ConstraintMakerEditable?
 
   private func createConstraints() {
+    background.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
     contextLabel.snp.makeConstraints { make in
       make.top.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
     }
@@ -70,6 +74,15 @@ public final class TwoSidedCardView: ChallengeView {
     set { backLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 
+  private let background: UIView = {
+    let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+    view.layer.cornerRadius = 8
+    view.isUserInteractionEnabled = false
+    view.backgroundColor = .grailSecondaryGroupedBackground
+    view.clipsToBounds = true
+    return view
+  }()
+
   private let contextLabel: UILabel = {
     let contextLabel = UILabel(frame: .zero)
     contextLabel.numberOfLines = 0
@@ -95,6 +108,7 @@ public final class TwoSidedCardView: ChallengeView {
   }()
 
   private func setAnswerVisible(_ answerVisible: Bool, animated: Bool) {
+    isAnswerVisible = answerVisible
     let animations = {
       self.frontLabel.alpha = answerVisible ? 0 : 1
       self.backLabel.alpha = answerVisible ? 1 : 0

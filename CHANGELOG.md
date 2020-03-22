@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- We have a review button in the list, not a bar button item. 
+- The new review button says how man items there are to review.
+- Studying is now a full screen affair with translucent backgrounds.
+- Consistent right alignment
+- Got rid of the "days since modified" counter
+
 ## [0.23.0] - 2020-03-15
 
 ### Added

@@ -31,7 +31,6 @@ final class DocumentListViewController: UIViewController {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
     self.navigationItem.title = AppDelegate.appName
-    self.navigationItem.rightBarButtonItem = studyButton
     self.notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
@@ -68,18 +67,6 @@ final class DocumentListViewController: UIViewController {
     let icon = UIImage(systemName: "plus.circle")
     let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(makeBlankTextDocument))
     button.accessibilityIdentifier = "new-document"
-    return button
-  }()
-
-  private lazy var studyButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "rectangle.stack")
-    let button = UIBarButtonItem(
-      image: icon,
-      style: .plain,
-      target: self,
-      action: #selector(startStudySession)
-    )
-    button.accessibilityIdentifier = "study-button"
     return button
   }()
 
@@ -121,9 +108,9 @@ final class DocumentListViewController: UIViewController {
     super.viewDidLoad()
     let dataSource = DocumentTableController(
       tableView: tableView,
-      notebook: notebook
+      notebook: notebook,
+      delegate: self
     )
-    dataSource.delegate = self
     self.dataSource = dataSource
     view.addSubview(tableView)
     tableView.snp.makeConstraints { make in
@@ -149,7 +136,7 @@ final class DocumentListViewController: UIViewController {
       .assign(to: \.challengeDueDate, on: self)
 
     navigationItem.leftBarButtonItem = documentBrowserButton
-    navigationItem.rightBarButtonItems = [newDocumentButton, studyButton]
+    navigationItem.rightBarButtonItems = [newDocumentButton]
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItems?.append(advanceTimeButton)
     }
@@ -190,11 +177,7 @@ final class DocumentListViewController: UIViewController {
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {
-      if let studySession = studySession {
-        studyButton.isEnabled = !studySession.isEmpty
-      } else {
-        studyButton.isEnabled = false
-      }
+      dataSource?.reviewItemCount = studySession?.count ?? 0
     }
   }
 
@@ -222,6 +205,11 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
+  func documentTableDidRequestReview() {
+    guard let studySession = studySession else { return }
+    presentStudySessionViewController(for: studySession)
+  }
+
   func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
       let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -242,10 +230,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       delegate: self
     )
     studyVC.title = navigationItem.title
-    let navigationController = UINavigationController(rootViewController: studyVC)
-    navigationController.navigationBar.barTintColor = .grailBackground
+    studyVC.modalTransitionStyle = .crossDissolve
+    studyVC.modalPresentationStyle = .overFullScreen
     present(
-      navigationController,
+      studyVC,
       animated: true,
       completion: nil
     )
