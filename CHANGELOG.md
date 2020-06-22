@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.24.1] - 2020-06-22
+
+Nothing changed! Just a version bump to refresh the TestFlight build.
+
 ## [0.24.0] - 2020-03-21
 
 ### Changed
