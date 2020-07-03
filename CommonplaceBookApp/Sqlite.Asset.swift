@@ -16,7 +16,7 @@ extension Sqlite {
     }
 
     enum Columns {
-      static let id = Column(CodingKeys.id)
+      static let id = Column(Asset.CodingKeys.id)
     }
   }
 }

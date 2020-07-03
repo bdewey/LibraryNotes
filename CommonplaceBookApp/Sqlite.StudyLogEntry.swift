@@ -28,7 +28,7 @@ extension Sqlite {
     }
 
     enum Columns {
-      static let timestamp = Column(CodingKeys.timestamp)
+      static let timestamp = Column(StudyLogEntry.CodingKeys.timestamp)
     }
 
     static let challenge = belongsTo(Challenge.self)

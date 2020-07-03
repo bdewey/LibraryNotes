@@ -25,12 +25,12 @@ extension Sqlite {
     }
 
     enum Columns {
-      static let index = Column(CodingKeys.index)
-      static let challengeTemplateId = Column(CodingKeys.challengeTemplateId)
-      static let due = Column(CodingKeys.due)
-      static let modifiedDevice = Column(CodingKeys.modifiedDevice)
-      static let timestamp = Column(CodingKeys.timestamp)
-      static let updateSequenceNumber = Column(CodingKeys.updateSequenceNumber)
+      static let index = Column(Challenge.CodingKeys.index)
+      static let challengeTemplateId = Column(Challenge.CodingKeys.challengeTemplateId)
+      static let due = Column(Challenge.CodingKeys.due)
+      static let modifiedDevice = Column(Challenge.CodingKeys.modifiedDevice)
+      static let timestamp = Column(Challenge.CodingKeys.timestamp)
+      static let updateSequenceNumber = Column(Challenge.CodingKeys.updateSequenceNumber)
     }
 
     static let challengeTemplate = belongsTo(ChallengeTemplate.self)
