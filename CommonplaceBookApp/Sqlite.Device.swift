@@ -20,7 +20,7 @@ extension Sqlite {
     }
 
     enum Columns {
-      static let uuid = Column(CodingKeys.uuid)
+      static let uuid = Column(Device.CodingKeys.uuid)
     }
 
     mutating func didInsert(with rowID: Int64, for column: String?) {

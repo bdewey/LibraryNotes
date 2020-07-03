@@ -10,8 +10,8 @@ extension Sqlite {
     var hashtag: String
 
     enum Columns {
-      static let noteId = Column(CodingKeys.noteId)
-      static let hashtag = Column(CodingKeys.hashtag)
+      static let noteId = Column(NoteHashtag.CodingKeys.noteId)
+      static let hashtag = Column(NoteHashtag.CodingKeys.hashtag)
     }
 
     static let note = belongsTo(Note.self)
