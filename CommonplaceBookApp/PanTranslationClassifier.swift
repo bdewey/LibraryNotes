@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import CocoaLumberjack
 import UIKit
 
 /// The job of a PanTranslationClassifier is to determine determine if the `translation` of a UIPanGestureRecognizer
@@ -16,12 +17,14 @@ public protocol PanTranslationClassifier {
 public struct LinearPanTranslationClassifier: PanTranslationClassifier {
   public init(
     direction: CGVector.Direction,
-    epsilon: CGFloat = 0.3,
-    triggeringMagnitude: CGFloat = 100
+    epsilon: CGFloat = CGFloat.pi / 4,
+    triggeringMagnitude: CGFloat = 100,
+    debug: Bool = false
   ) {
     self.direction = direction
     self.epsilon = epsilon
     self.triggeringMagnitude = triggeringMagnitude
+    self.debug = debug
   }
 
   /// Direction, in radians, of the specific direction.
@@ -33,8 +36,11 @@ public struct LinearPanTranslationClassifier: PanTranslationClassifier {
   /// How large the pan gesture translation must be to match
   public let triggeringMagnitude: CGFloat
 
+  /// If true we log debugging about triggering the classifier
+  public var debug: Bool
+
   public func matchStrength(vector: CGVector) -> CGFloat {
-    let angleDelta = abs(vector.direction.rawValue - direction.rawValue)
+    let angleDelta = min(abs(vector.direction.rawValue - direction.rawValue), abs(vector.direction.rawValue + 2 * CGFloat.pi - direction.rawValue))
     let directionFactor = angleDelta
       .unitScale(zero: epsilon / 2, one: epsilon)
       .clamped(to: 0 ... 1)
@@ -42,6 +48,9 @@ public struct LinearPanTranslationClassifier: PanTranslationClassifier {
     let magnitudeFactor = vector.magnitude
       .unitScale(zero: triggeringMagnitude / 2, one: triggeringMagnitude)
       .clamped(to: 0 ... 1)
+    if debug {
+      DDLogDebug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
+    }
     return directionFactor * magnitudeFactor
   }
 }
