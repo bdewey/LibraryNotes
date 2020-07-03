@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.0] - 2020-07-03
+
+### Changed
+
+- Builds with Xcode 12 beta
+- Swipe gesture is much more accepting
+
 ## [0.24.1] - 2020-06-22
 
 Nothing changed! Just a version bump to refresh the TestFlight build.
