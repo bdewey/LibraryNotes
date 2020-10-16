@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.25.1] - 2020-10-16
+
+### Changed
+
+- Built with Xcode 12.1 GM
+
 ## [0.25.0] - 2020-07-03
 
 ### Changed
