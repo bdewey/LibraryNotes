@@ -90,6 +90,7 @@
 		D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
+		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
@@ -223,6 +224,7 @@
 		D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswer.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
+		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -357,6 +359,7 @@
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
+				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
@@ -697,6 +700,7 @@
 				D3A58F15240D469700CE3251 /* VersionVector.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
+				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
@@ -924,7 +928,7 @@
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -953,7 +957,7 @@
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

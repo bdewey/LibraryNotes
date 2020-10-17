@@ -168,7 +168,7 @@ final class DocumentListViewController: UIViewController {
   @objc private func makeBlankTextDocument() {
     let viewController = TextEditViewController.makeBlankDocument(
       notebook: notebook,
-      currentHashtag: currentHashtag,
+      currentHashtag: dataSource?.filteredHashtag,
       autoFirstResponder: true
     )
     showDetailViewController(viewController)
@@ -191,12 +191,13 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
+    let currentHashtag = dataSource?.filteredHashtag
     let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
     notebook.studySession(filter: filter, date: challengeDueDate) {
-      guard self.currentHashtag == hashtag else { return }
+      guard currentHashtag == hashtag else { return }
       self.studySession = $0
     }
   }
@@ -262,7 +263,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       showDetailViewController(
         TextEditViewController.makeBlankDocument(
           notebook: notebook,
-          currentHashtag: currentHashtag,
+          currentHashtag: dataSource?.filteredHashtag,
           autoFirstResponder: false
         )
       )
@@ -276,12 +277,16 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 }
 
-// MARK: - Private
-
-private extension DocumentListViewController {
-  /// If there is currently a hashtag active in the search bar, return it.
-  var currentHashtag: String? {
-    return navigationItem.searchController?.searchBar.searchTextField.tokens.first?.representedObject as? String
+extension DocumentListViewController: NotebookStructureViewControllerDelegate {
+  func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
+    let hashtag: String?
+    switch structure {
+    case .allNotes:
+      hashtag = nil
+    case .hashtag(let selectedHashtag):
+      hashtag = selectedHashtag
+    }
+    dataSource?.filteredHashtag = hashtag
   }
 }
 
@@ -292,19 +297,15 @@ private extension DocumentListViewController {
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else {
-      dataSource?.hashtags = []
       dataSource?.filteredPageIdentifiers = nil
       updateStudySession()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
-      dataSource?.hashtags = []
       dataSource?.filteredHashtag = selectedHashtag
     } else {
       DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
-      dataSource?.hashtags = notebook.hashtags
-        .filter { $0.fuzzyMatch(pattern: pattern) }
       dataSource?.filteredHashtag = nil
     }
     DDLogInfo("Issuing query: \(pattern)")
@@ -318,7 +319,6 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     DDLogInfo("searchBarTextDidEndEditing")
-    dataSource?.hashtags = []
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {

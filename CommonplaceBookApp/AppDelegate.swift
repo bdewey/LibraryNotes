@@ -178,13 +178,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   private func wrapViewController(
     _ documentListViewController: DocumentListViewController
   ) -> UIViewController {
-    let primaryNavigationController = UINavigationController(
+    let supplementaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
     )
+    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
+    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+
+    let hashtagViewController = NotebookStructureViewController(
+      notebook: documentListViewController.notebook
+    )
+    hashtagViewController.delegate = documentListViewController
+    let primaryNavigationController = UINavigationController(rootViewController: hashtagViewController)
     primaryNavigationController.navigationBar.prefersLargeTitles = true
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
-    let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
+    let splitViewController = UISplitViewController(style: .tripleColumn)
     let detailViewController = UINavigationController(
       rootViewController:
       TextEditViewController.makeBlankDocument(
@@ -193,8 +201,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         autoFirstResponder: false
       )
     )
-    splitViewController.viewControllers = [primaryNavigationController, detailViewController]
-    splitViewController.preferredDisplayMode = .allVisible
+    splitViewController.viewControllers = [
+      primaryNavigationController,
+      supplementaryNavigationController,
+      detailViewController,
+    ]
+    splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.delegate = self
     return splitViewController
   }

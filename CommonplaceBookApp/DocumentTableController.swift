@@ -116,13 +116,6 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  /// If not empty, show a list of hashtags as a section in the table.
-  public var hashtags: [String] = [] {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
-
   /// If set, only show pages that contain this hashtag.
   public var filteredHashtag: String? {
     didSet {
@@ -169,7 +162,6 @@ public final class DocumentTableController: NSObject {
     let snapshot = DocumentTableController.snapshot(
       for: notebook,
       cardsPerDocument: cardsPerDocument,
-      hashtags: hashtags,
       filteredHashtag: filteredHashtag,
       filteredPageIdentifiers: filteredPageIdentifiers,
       reviewItemCount: reviewItemCount
@@ -260,32 +252,6 @@ extension DocumentTableController: UITableViewDelegate {
     }
     return UISwipeActionsConfiguration(actions: actions)
   }
-
-  public func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-    let section = dataSource.snapshot().sectionIdentifiers[section]
-    let label = UILabel(frame: .zero)
-    label.font = UIFont.preferredFont(forTextStyle: .subheadline)
-    label.textColor = .secondaryLabel
-    label.backgroundColor = .secondarySystemBackground
-    switch section {
-    case .hashtags:
-      label.text = "Hashtag"
-    case .documents, .review:
-      return nil
-    }
-    return label
-  }
-
-  public func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-    let section = dataSource.snapshot().sectionIdentifiers[section]
-    switch section {
-    case .hashtags:
-      let font = UIFont.preferredFont(forTextStyle: .subheadline)
-      return font.lineHeight + 8
-    case .documents, .review:
-      return 0
-    }
-  }
 }
 
 // MARK: - Private
@@ -303,8 +269,6 @@ private extension DocumentTableController {
 
   /// Sections of the collection view
   enum DocumentSection {
-    /// List of available hashtags
-    case hashtags
     /// Buttons to quiz/review on notebook contents
     case review
     /// List of documents.
@@ -398,16 +362,11 @@ private extension DocumentTableController {
   static func snapshot(
     for notebook: NoteStorage,
     cardsPerDocument: [Note.Identifier: Int],
-    hashtags: [String],
     filteredHashtag: String?,
     filteredPageIdentifiers: Set<Note.Identifier>?,
     reviewItemCount: Int
   ) -> Snapshot {
     var snapshot = Snapshot()
-    if !hashtags.isEmpty {
-      snapshot.appendSections([.hashtags])
-      snapshot.appendItems(hashtags.map { Item.hashtag($0) })
-    }
     snapshot.appendSections([.review])
     snapshot.appendItems([.review(reviewItemCount)])
     snapshot.appendSections([.documents])
