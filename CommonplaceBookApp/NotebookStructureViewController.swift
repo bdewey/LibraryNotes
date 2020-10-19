@@ -70,6 +70,8 @@ final class NotebookStructureViewController: UIViewController {
       make.edges.equalToSuperview()
     }
     updateSnapshot()
+    // start with "all notes" selected.
+    collectionView.selectItem(at: dataSource.indexPath(for: .allNotes), animated: false, scrollPosition: [])
     notebookSubscription = notebook.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }

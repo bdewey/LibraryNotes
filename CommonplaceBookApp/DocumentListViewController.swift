@@ -30,7 +30,8 @@ final class DocumentListViewController: UIViewController {
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = AppDelegate.appName
+    // assume we are showing "all notes" initially.
+    self.navigationItem.title = NotebookStructureViewController.StructureIdentifier.allNotes.description
     self.notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
