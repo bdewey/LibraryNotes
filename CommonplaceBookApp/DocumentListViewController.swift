@@ -163,7 +163,7 @@ final class DocumentListViewController: UIViewController {
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {
-      dataSource?.reviewItemCount = studySession?.count ?? 0
+      updateToolbar()
     }
   }
 
@@ -187,16 +187,37 @@ final class DocumentListViewController: UIViewController {
       self.studySession = $0
     }
   }
+
+  private func updateToolbar() {
+    let countLabel = UILabel(frame: .zero)
+    let noteCount = dataSource?.noteCount ?? 0
+    countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
+    countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+    countLabel.sizeToFit()
+
+    let itemsToReview = studySession?.count ?? 0
+    let reviewButton = UIBarButtonItem(title: "Review (\(itemsToReview))", style: .plain, target: self, action: #selector(performReview))
+    reviewButton.isEnabled = itemsToReview > 0
+
+    let countItem = UIBarButtonItem(customView: countLabel)
+    toolbarItems = [
+      reviewButton,
+      UIBarButtonItem.flexibleSpace(),
+      countItem,
+      UIBarButtonItem.flexibleSpace(),
+      newDocumentButton,
+    ]
+  }
+
+  @objc private func performReview() {
+    guard let studySession = studySession else { return }
+    presentStudySessionViewController(for: studySession)
+  }
 }
 
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func documentTableDidRequestReview() {
-    guard let studySession = studySession else { return }
-    presentStudySessionViewController(for: studySession)
-  }
-
   func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
       let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -263,17 +284,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int) {
-    let countLabel = UILabel(frame: .zero)
-    countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
-    countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
-    countLabel.sizeToFit()
-
-    let countItem = UIBarButtonItem(customView: countLabel)
-    toolbarItems = [
-      countItem,
-      UIBarButtonItem.flexibleSpace(),
-      newDocumentButton,
-    ]
+    updateToolbar()
   }
 }
 
@@ -289,6 +300,7 @@ extension DocumentListViewController: NotebookStructureViewControllerDelegate {
       title = selectedHashtag
     }
     dataSource?.filteredHashtag = hashtag
+    updateStudySession()
   }
 }
 

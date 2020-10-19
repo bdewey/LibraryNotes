@@ -15,7 +15,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
-  func documentTableDidRequestReview()
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -30,7 +29,6 @@ public final class DocumentTableController: NSObject {
     self.notebook = notebook
     self.delegate = delegate
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
-    tableView.register(ButtonCell.self, forCellReuseIdentifier: ReuseIdentifiers.review)
     let titleRenderer = RenderedMarkdown.makeTitleRenderer()
     self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
       switch item {
@@ -49,18 +47,6 @@ public final class DocumentTableController: NSObject {
         cell.backgroundColor = .secondarySystemBackground
         cell.textLabel?.text = hashtag
         return cell
-      case .review(let count):
-        // swiftlint:disable:next force_cast
-        let cell = tableView.dequeueReusableCell(withIdentifier: ReuseIdentifiers.review, for: indexPath) as! ButtonCell
-        cell.backgroundColor = .grailBackground
-        cell.button.setTitle("Review (\(count))", for: .normal)
-        cell.button.contentHorizontalAlignment = .left
-        cell.button.isEnabled = (count > 0) // swiftlint:disable:this empty_count
-        cell.button.accessibilityIdentifier = "study-button"
-        cell.tapHandler = { [weak delegate] in
-          delegate?.documentTableDidRequestReview()
-        }
-        return cell
       }
     }
     super.init()
@@ -73,14 +59,14 @@ public final class DocumentTableController: NSObject {
     updateCardsPerDocument()
   }
 
-  @objc private func didTapReview() {
-    delegate?.documentTableDidRequestReview()
-  }
-
   public var challengeDueDate = Date() {
     didSet {
       updateCardsPerDocument()
     }
+  }
+
+  public var noteCount: Int {
+    dataSource.snapshot().numberOfItems(inSection: .documents)
   }
 
   private var needsPerformUpdates = false
@@ -124,13 +110,6 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  /// The number of items that the learner can review.
-  public var reviewItemCount: Int = 0 {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
-
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
@@ -164,8 +143,7 @@ public final class DocumentTableController: NSObject {
       for: notebook,
       cardsPerDocument: cardsPerDocument,
       filteredHashtag: filteredHashtag,
-      filteredPageIdentifiers: filteredPageIdentifiers,
-      reviewItemCount: reviewItemCount
+      filteredPageIdentifiers: filteredPageIdentifiers
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -195,9 +173,6 @@ public final class DocumentTableController: NSObject {
         if lhsHashtag != rhsHashtag {
           return true
         }
-      case (.review, .review):
-        // These items do nothing to affect "major differences"
-        continue
       default:
         return true
       }
@@ -217,8 +192,6 @@ extension DocumentTableController: UITableViewDelegate {
       delegate?.showPage(with: viewProperties.pageKey)
     case .hashtag(let hashtag):
       delegate?.documentSearchResultsDidSelectHashtag(hashtag)
-    case .review:
-      delegate?.documentTableDidRequestReview()
     }
   }
 
@@ -248,7 +221,7 @@ extension DocumentTableController: UITableViewDelegate {
         studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
-    case .hashtag, .review:
+    case .hashtag:
       // NOTHING
       break
     }
@@ -271,23 +244,18 @@ private extension DocumentTableController {
 
   /// Sections of the collection view
   enum DocumentSection {
-    /// Buttons to quiz/review on notebook contents
-    case review
     /// List of documents.
     case documents
   }
 
   enum Item: Hashable, CustomStringConvertible {
     case hashtag(String)
-    case review(Int)
     case page(ViewProperties)
 
     var description: String {
       switch self {
       case .hashtag(let hashtag):
         return hashtag
-      case .review:
-        return "Review"
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
       }
@@ -307,7 +275,6 @@ private extension DocumentTableController {
   enum ReuseIdentifiers {
     static let documentCell = "DocumentCollectionViewCell"
     static let hashtag = "HashtagCell"
-    static let review = "ReviewCell"
   }
 
   static func cell(
@@ -365,12 +332,9 @@ private extension DocumentTableController {
     for notebook: NoteStorage,
     cardsPerDocument: [Note.Identifier: Int],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<Note.Identifier>?,
-    reviewItemCount: Int
+    filteredPageIdentifiers: Set<Note.Identifier>?
   ) -> Snapshot {
     var snapshot = Snapshot()
-    snapshot.appendSections([.review])
-    snapshot.appendItems([.review(reviewItemCount)])
     snapshot.appendSections([.documents])
 
     let propertiesFilteredByHashtag = notebook.allMetadata
