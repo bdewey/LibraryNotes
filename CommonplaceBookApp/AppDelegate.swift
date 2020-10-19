@@ -6,8 +6,22 @@ import Logging
 import MiniMarkdown
 import UIKit
 
+@objc protocol AppCommands {
+  func openNewFile()
+}
+
+enum AppCommandsButtonItems {
+  static let documentBrowser: UIBarButtonItem = {
+    let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
+    button.accessibilityIdentifier = "open-files"
+    return button
+  }()
+}
+
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
+  static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
+
   var window: UIWindow?
   let useCloud = true
 
@@ -147,6 +161,22 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   internal static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
+
+  @objc func openNewFile() {
+    guard let documentListViewController = window?.rootViewController else {
+      return
+    }
+    if UIApplication.isSimulator && false {
+      let messageText = "Document browser doesn't work in the simulator"
+      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alertController.addAction(okAction)
+      documentListViewController.present(alertController, animated: true, completion: nil)
+    } else {
+      openedDocumentBookmark = nil
+      documentListViewController.dismiss(animated: true, completion: nil)
+    }
+  }
 
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
     if Self.isUITesting {

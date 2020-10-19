@@ -16,6 +16,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
   func documentTableDidRequestReview()
+  func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
@@ -172,6 +173,7 @@ public final class DocumentTableController: NSObject {
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
+    delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
   }
 
   /// Compares lhs & rhs to see if the differences are worth animating.

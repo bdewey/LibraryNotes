@@ -43,10 +43,10 @@ final class NotebookStructureViewController: UIViewController {
   private var notebookSubscription: AnyCancellable?
 
   private lazy var collectionView: UICollectionView = {
-    let config = UICollectionLayoutListConfiguration(appearance: .sidebar)
+    var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
+    config.backgroundColor = .grailBackground
     let layout = UICollectionViewCompositionalLayout.list(using: config)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-    view.backgroundColor = .grailBackground
     view.delegate = self
     return view
   }()
@@ -73,6 +73,8 @@ final class NotebookStructureViewController: UIViewController {
     notebookSubscription = notebook.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
+    navigationController?.setToolbarHidden(false, animated: false)
+    toolbarItems = [AppCommandsButtonItems.documentBrowser]
   }
 
   private func updateSnapshot() {

@@ -56,16 +56,8 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private lazy var documentBrowserButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "folder")
-    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapFiles))
-    button.accessibilityIdentifier = "open-files"
-    return button
-  }()
-
   private lazy var newDocumentButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "plus.circle")
-    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(makeBlankTextDocument))
+    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(makeBlankTextDocument))
     button.accessibilityIdentifier = "new-document"
     return button
   }()
@@ -134,9 +126,7 @@ final class DocumentListViewController: UIViewController {
       .merge(with: makeForegroundDatePublisher(), Timer.publish(every: .hour, on: .main, in: .common).autoconnect())
       .map { Calendar.current.startOfDay(for: $0.addingTimeInterval(.day)) }
       .assign(to: \.challengeDueDate, on: self)
-
-    navigationItem.leftBarButtonItem = documentBrowserButton
-    navigationItem.rightBarButtonItems = [newDocumentButton]
+    navigationController?.setToolbarHidden(false, animated: false)
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItems?.append(advanceTimeButton)
     }
@@ -159,10 +149,6 @@ final class DocumentListViewController: UIViewController {
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
     dataSource?.stopObservingNotebook()
-  }
-
-  @objc private func didTapFiles() {
-    didTapFilesAction?()
   }
 
   @objc private func makeBlankTextDocument() {
@@ -275,6 +261,20 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     present(alert, animated: true, completion: nil)
   }
+
+  func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int) {
+    let countLabel = UILabel(frame: .zero)
+    countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
+    countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+    countLabel.sizeToFit()
+
+    let countItem = UIBarButtonItem(customView: countLabel)
+    toolbarItems = [
+      countItem,
+      UIBarButtonItem.flexibleSpace(),
+      newDocumentButton,
+    ]
+  }
 }
 
 extension DocumentListViewController: NotebookStructureViewControllerDelegate {
@@ -283,8 +283,10 @@ extension DocumentListViewController: NotebookStructureViewControllerDelegate {
     switch structure {
     case .allNotes:
       hashtag = nil
+      title = "All Notes"
     case .hashtag(let selectedHashtag):
       hashtag = selectedHashtag
+      title = selectedHashtag
     }
     dataSource?.filteredHashtag = hashtag
   }
