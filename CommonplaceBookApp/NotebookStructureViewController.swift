@@ -91,6 +91,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     if let structureIdentifier = dataSource.itemIdentifier(for: indexPath) {
       delegate?.notebookStructureViewController(self, didSelect: structureIdentifier)
+      splitViewController?.show(.supplementary)
     }
   }
 }
