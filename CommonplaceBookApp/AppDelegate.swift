@@ -6,8 +6,22 @@ import Logging
 import MiniMarkdown
 import UIKit
 
+@objc protocol AppCommands {
+  func openNewFile()
+}
+
+enum AppCommandsButtonItems {
+  static let documentBrowser: UIBarButtonItem = {
+    let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
+    button.accessibilityIdentifier = "open-files"
+    return button
+  }()
+}
+
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
+  static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
+
   var window: UIWindow?
   let useCloud = true
 
@@ -148,6 +162,22 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     CommandLine.arguments.contains("--uitesting")
   }()
 
+  @objc func openNewFile() {
+    guard let documentListViewController = window?.rootViewController else {
+      return
+    }
+    if UIApplication.isSimulator && false {
+      let messageText = "Document browser doesn't work in the simulator"
+      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alertController.addAction(okAction)
+      documentListViewController.present(alertController, animated: true, completion: nil)
+    } else {
+      openedDocumentBookmark = nil
+      documentListViewController.dismiss(animated: true, completion: nil)
+    }
+  }
+
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
     if Self.isUITesting {
       let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
@@ -178,13 +208,21 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   private func wrapViewController(
     _ documentListViewController: DocumentListViewController
   ) -> UIViewController {
-    let primaryNavigationController = UINavigationController(
+    let supplementaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
     )
+    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
+    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+
+    let hashtagViewController = NotebookStructureViewController(
+      notebook: documentListViewController.notebook
+    )
+    hashtagViewController.delegate = documentListViewController
+    let primaryNavigationController = UINavigationController(rootViewController: hashtagViewController)
     primaryNavigationController.navigationBar.prefersLargeTitles = true
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
-    let splitViewController = UISplitViewController(nibName: nil, bundle: nil)
+    let splitViewController = UISplitViewController(style: .tripleColumn)
     let detailViewController = UINavigationController(
       rootViewController:
       TextEditViewController.makeBlankDocument(
@@ -193,8 +231,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         autoFirstResponder: false
       )
     )
-    splitViewController.viewControllers = [primaryNavigationController, detailViewController]
-    splitViewController.preferredDisplayMode = .allVisible
+    splitViewController.viewControllers = [
+      primaryNavigationController,
+      supplementaryNavigationController,
+      detailViewController,
+    ]
+    splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.delegate = self
     return splitViewController
   }

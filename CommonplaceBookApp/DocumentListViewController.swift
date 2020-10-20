@@ -30,7 +30,8 @@ final class DocumentListViewController: UIViewController {
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
-    self.navigationItem.title = AppDelegate.appName
+    // assume we are showing "all notes" initially.
+    self.navigationItem.title = NotebookStructureViewController.StructureIdentifier.allNotes.description
     self.notebookSubscription = notebook.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
@@ -56,16 +57,8 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private lazy var documentBrowserButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "folder")
-    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(didTapFiles))
-    button.accessibilityIdentifier = "open-files"
-    return button
-  }()
-
   private lazy var newDocumentButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "plus.circle")
-    let button = UIBarButtonItem(image: icon, style: .plain, target: self, action: #selector(makeBlankTextDocument))
+    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(makeBlankTextDocument))
     button.accessibilityIdentifier = "new-document"
     return button
   }()
@@ -134,9 +127,7 @@ final class DocumentListViewController: UIViewController {
       .merge(with: makeForegroundDatePublisher(), Timer.publish(every: .hour, on: .main, in: .common).autoconnect())
       .map { Calendar.current.startOfDay(for: $0.addingTimeInterval(.day)) }
       .assign(to: \.challengeDueDate, on: self)
-
-    navigationItem.leftBarButtonItem = documentBrowserButton
-    navigationItem.rightBarButtonItems = [newDocumentButton]
+    navigationController?.setToolbarHidden(false, animated: false)
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItems?.append(advanceTimeButton)
     }
@@ -161,14 +152,10 @@ final class DocumentListViewController: UIViewController {
     dataSource?.stopObservingNotebook()
   }
 
-  @objc private func didTapFiles() {
-    didTapFilesAction?()
-  }
-
   @objc private func makeBlankTextDocument() {
     let viewController = TextEditViewController.makeBlankDocument(
       notebook: notebook,
-      currentHashtag: currentHashtag,
+      currentHashtag: dataSource?.filteredHashtag,
       autoFirstResponder: true
     )
     showDetailViewController(viewController)
@@ -177,7 +164,7 @@ final class DocumentListViewController: UIViewController {
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {
-      dataSource?.reviewItemCount = studySession?.count ?? 0
+      updateToolbar()
     }
   }
 
@@ -191,25 +178,47 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
+    let currentHashtag = dataSource?.filteredHashtag
     let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
     notebook.studySession(filter: filter, date: challengeDueDate) {
-      guard self.currentHashtag == hashtag else { return }
+      guard currentHashtag == hashtag else { return }
       self.studySession = $0
     }
+  }
+
+  private func updateToolbar() {
+    let countLabel = UILabel(frame: .zero)
+    let noteCount = dataSource?.noteCount ?? 0
+    countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
+    countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+    countLabel.sizeToFit()
+
+    let itemsToReview = studySession?.count ?? 0
+    let reviewButton = UIBarButtonItem(title: "Review (\(itemsToReview))", style: .plain, target: self, action: #selector(performReview))
+    reviewButton.isEnabled = itemsToReview > 0
+
+    let countItem = UIBarButtonItem(customView: countLabel)
+    toolbarItems = [
+      reviewButton,
+      UIBarButtonItem.flexibleSpace(),
+      countItem,
+      UIBarButtonItem.flexibleSpace(),
+      newDocumentButton,
+    ]
+  }
+
+  @objc private func performReview() {
+    guard let studySession = studySession else { return }
+    presentStudySessionViewController(for: studySession)
   }
 }
 
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func documentTableDidRequestReview() {
-    guard let studySession = studySession else { return }
-    presentStudySessionViewController(for: studySession)
-  }
-
   func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
       let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -262,7 +271,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       showDetailViewController(
         TextEditViewController.makeBlankDocument(
           notebook: notebook,
-          currentHashtag: currentHashtag,
+          currentHashtag: dataSource?.filteredHashtag,
           autoFirstResponder: false
         )
       )
@@ -274,14 +283,25 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     present(alert, animated: true, completion: nil)
   }
+
+  func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int) {
+    updateToolbar()
+  }
 }
 
-// MARK: - Private
-
-private extension DocumentListViewController {
-  /// If there is currently a hashtag active in the search bar, return it.
-  var currentHashtag: String? {
-    return navigationItem.searchController?.searchBar.searchTextField.tokens.first?.representedObject as? String
+extension DocumentListViewController: NotebookStructureViewControllerDelegate {
+  func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
+    let hashtag: String?
+    switch structure {
+    case .allNotes:
+      hashtag = nil
+      title = "All Notes"
+    case .hashtag(let selectedHashtag):
+      hashtag = selectedHashtag
+      title = selectedHashtag
+    }
+    dataSource?.filteredHashtag = hashtag
+    updateStudySession()
   }
 }
 
@@ -292,19 +312,15 @@ private extension DocumentListViewController {
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else {
-      dataSource?.hashtags = []
       dataSource?.filteredPageIdentifiers = nil
       updateStudySession()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
     if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
-      dataSource?.hashtags = []
       dataSource?.filteredHashtag = selectedHashtag
     } else {
       DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
-      dataSource?.hashtags = notebook.hashtags
-        .filter { $0.fuzzyMatch(pattern: pattern) }
       dataSource?.filteredHashtag = nil
     }
     DDLogInfo("Issuing query: \(pattern)")
@@ -318,7 +334,6 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     DDLogInfo("searchBarTextDidEndEditing")
-    dataSource?.hashtags = []
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {

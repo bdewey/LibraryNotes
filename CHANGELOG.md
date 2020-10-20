@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- iOS 14!
+- Three column / sidebar UI
+- Many buttons moved to the toolbar
+
 ## [0.25.1] - 2020-10-16
 
 ### Changed
@@ -21,7 +29,7 @@ Nothing changed! Just a version bump to refresh the TestFlight build.
 
 ### Changed
 
-- We have a review button in the list, not a bar button item. 
+- We have a review button in the list, not a bar button item.
 - The new review button says how man items there are to review.
 - Studying is now a full screen affair with translucent backgrounds.
 - Consistent right alignment
