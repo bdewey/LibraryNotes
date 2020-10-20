@@ -43,9 +43,14 @@ final class NotebookStructureViewController: UIViewController {
   private var notebookSubscription: AnyCancellable?
 
   private lazy var collectionView: UICollectionView = {
-    var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
-    config.backgroundColor = .grailBackground
-    let layout = UICollectionViewCompositionalLayout.list(using: config)
+    let layout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) in
+      var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
+      config.backgroundColor = .grailBackground
+      // the first section has no header; everything else gets a header.
+      config.headerMode = (sectionIndex == 0) ? .none : .supplementary
+      let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
+      return section
+    }
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
     view.delegate = self
     return view
@@ -58,9 +63,22 @@ final class NotebookStructureViewController: UIViewController {
       contentConfiguration.textProperties.color = .label
       cell.contentConfiguration = contentConfiguration
     }
-    return UICollectionViewDiffableDataSource(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
+    let dataSource = UICollectionViewDiffableDataSource<Section, StructureIdentifier>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
+
+    dataSource.supplementaryViewProvider = { [weak dataSource] (collectionView, kind, indexPath) in
+      guard kind == UICollectionView.elementKindSectionHeader, dataSource?.snapshot().indexOfSection(.hashtags) == indexPath.section else {
+        return nil
+      }
+      let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, _) in
+        var headerConfiguration = UIListContentConfiguration.sidebarHeader()
+        headerConfiguration.text = "Tags"
+        headerView.contentConfiguration = headerConfiguration
+      }
+      return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
+    }
+    return dataSource
   }()
 
   override func viewDidLoad() {
