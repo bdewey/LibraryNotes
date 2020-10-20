@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.26.0] - 2020-10-20
 
 ### Changed
 
