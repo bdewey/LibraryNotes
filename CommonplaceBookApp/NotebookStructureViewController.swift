@@ -97,12 +97,19 @@ final class NotebookStructureViewController: UIViewController {
     toolbarItems = [AppCommandsButtonItems.documentBrowser]
   }
 
+  override func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    navigationController?.setToolbarHidden(false, animated: false)
+  }
+
   private func updateSnapshot() {
     var snapshot = NSDiffableDataSourceSnapshot<Section, StructureIdentifier>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
-    snapshot.appendSections([.hashtags])
-    snapshot.appendItems(notebook.hashtags.map { .hashtag($0) })
+    if !notebook.hashtags.isEmpty {
+      snapshot.appendSections([.hashtags])
+      snapshot.appendItems(notebook.hashtags.map { .hashtag($0) })
+    }
     dataSource.apply(snapshot)
   }
 }

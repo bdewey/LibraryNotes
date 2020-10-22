@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Toolbars show consistently
+- If there are no hashtags, no longer shows a "Tags" header with no content
+
 ## [0.26.0] - 2020-10-20
 
 ### Changed

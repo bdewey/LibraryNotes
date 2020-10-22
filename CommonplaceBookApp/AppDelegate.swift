@@ -363,6 +363,10 @@ extension AppDelegate: UISplitViewControllerDelegate {
     // want to show it.
     return textEditViewController.noteIdentifier == nil
   }
+
+  func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
+    return .supplementary
+  }
 }
 
 struct LogHandlerFactory {
