@@ -20,6 +20,16 @@ extension NSComparisonPredicate {
   }
 }
 
+extension UIResponder {
+  func printResponderChain() {
+    var responder: UIResponder? = self
+    while let currentResponder = responder {
+      print(currentResponder)
+      responder = currentResponder.next
+    }
+  }
+}
+
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
   /// Designated initializer.
@@ -44,6 +54,21 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let notebook: NoteStorage
+
+  public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
+    let hashtag: String?
+    switch focusedStructure {
+    case .allNotes:
+      hashtag = nil
+      title = "All Notes"
+    case .hashtag(let selectedHashtag):
+      hashtag = selectedHashtag
+      title = selectedHashtag
+    }
+    dataSource?.filteredHashtag = hashtag
+    updateStudySession()
+  }
+
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var notebookSubscription: AnyCancellable?
@@ -56,12 +81,6 @@ final class DocumentListViewController: UIViewController {
       updateStudySession()
     }
   }
-
-  private lazy var newDocumentButton: UIBarButtonItem = {
-    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: self, action: #selector(makeBlankTextDocument))
-    button.accessibilityIdentifier = "new-document"
-    return button
-  }()
 
   private lazy var advanceTimeButton: UIBarButtonItem = {
     let icon = UIImage(systemName: "clock")
@@ -152,13 +171,8 @@ final class DocumentListViewController: UIViewController {
     dataSource?.stopObservingNotebook()
   }
 
-  @objc private func makeBlankTextDocument() {
-    let viewController = TextEditViewController.makeBlankDocument(
-      notebook: notebook,
-      currentHashtag: dataSource?.filteredHashtag,
-      autoFirstResponder: true
-    )
-    showDetailViewController(viewController)
+  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    updateToolbar()
   }
 
   /// Stuff we can study based on the current selected documents.
@@ -201,13 +215,16 @@ final class DocumentListViewController: UIViewController {
     reviewButton.isEnabled = itemsToReview > 0
 
     let countItem = UIBarButtonItem(customView: countLabel)
-    toolbarItems = [
+    var toolbarItems = [
       reviewButton,
       UIBarButtonItem.flexibleSpace(),
       countItem,
       UIBarButtonItem.flexibleSpace(),
-      newDocumentButton,
     ]
+    if splitViewController?.isCollapsed ?? false {
+      toolbarItems.append(AppCommandsButtonItems.newNote())
+    }
+    self.toolbarItems = toolbarItems
   }
 
   @objc private func performReview() {
@@ -248,15 +265,6 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     )
   }
 
-  func documentSearchResultsDidSelectHashtag(_ hashtag: String) {
-    guard let searchController = navigationItem.searchController else { return }
-    let token = UISearchToken(icon: nil, text: hashtag)
-    token.representedObject = hashtag
-    searchController.searchBar.searchTextField.tokens = [token]
-    searchController.searchBar.searchTextField.text = ""
-    searchController.dismiss(animated: true, completion: nil)
-  }
-
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
       let splitViewController = self.splitViewController,
@@ -289,22 +297,6 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 }
 
-extension DocumentListViewController: NotebookStructureViewControllerDelegate {
-  func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
-    let hashtag: String?
-    switch structure {
-    case .allNotes:
-      hashtag = nil
-      title = "All Notes"
-    case .hashtag(let selectedHashtag):
-      hashtag = selectedHashtag
-      title = selectedHashtag
-    }
-    dataSource?.filteredHashtag = hashtag
-    updateStudySession()
-  }
-}
-
 // MARK: - Search
 
 /// Everything needed for search.
@@ -317,12 +309,6 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
       return
     }
     let pattern = searchController.searchBar.text ?? ""
-    if let selectedHashtag = searchController.searchBar.searchTextField.tokens.first?.representedObject as? String {
-      dataSource?.filteredHashtag = selectedHashtag
-    } else {
-      DDLogInfo("No selected hashtag. isActive = \(searchController.isActive)")
-      dataSource?.filteredHashtag = nil
-    }
     DDLogInfo("Issuing query: \(pattern)")
     do {
       let allIdentifiers = try notebook.search(for: pattern)

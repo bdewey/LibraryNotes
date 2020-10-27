@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Follows the UI convention of Apple Notes. When collapsed, there is a "compose" button in the toolbar on all columns. When expanded, the "compose" button is in the navigation bar of the detail column.
+
 ### Fixed
 
 - Toolbars show consistently

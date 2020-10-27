@@ -56,6 +56,7 @@
 		D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36214652334F607008C8FF4 /* LayoutManager.swift */; };
+		D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362CC2E25431C6E00462683 /* NotebookViewController.swift */; };
 		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */; };
 		D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */; };
@@ -189,6 +190,7 @@
 		D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageMergeTests.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
+		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
 		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanTranslationClassifier.swift; sourceTree = "<group>"; };
 		D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGVector+Extensions.swift"; sourceTree = "<group>"; };
@@ -406,6 +408,7 @@
 				D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D3A58F14240D469700CE3251 /* VersionVector.swift */,
+				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -718,6 +721,7 @@
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
+				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
 				D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */,
 				D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,

@@ -11,7 +11,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showDetailViewController(_ detailViewController: UIViewController)
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
-  func documentSearchResultsDidSelectHashtag(_ hashtag: String)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
@@ -39,14 +38,6 @@ public final class DocumentTableController: NSObject {
           viewProperties: viewProperties,
           titleRenderer: titleRenderer
         )
-      case .hashtag(let hashtag):
-        var cell: UITableViewCell! = tableView.dequeueReusableCell(withIdentifier: ReuseIdentifiers.hashtag)
-        if cell == nil {
-          cell = UITableViewCell(style: .default, reuseIdentifier: ReuseIdentifiers.hashtag)
-        }
-        cell.backgroundColor = .secondarySystemBackground
-        cell.textLabel?.text = hashtag
-        return cell
       }
     }
     super.init()
@@ -160,17 +151,14 @@ public final class DocumentTableController: NSObject {
       return true
     }
     // The only way to get through this loop and return false is if every item in the left hand
-    // side and the right hand side, in order, have matching hashtags or page identifiers.
+    // side and the right hand side, in order, have matching page identifiers.
     // In that case, whatever difference that exists between the snapshots is "minor"
+    // (e.g., other page properties differ)
     let itemsToCompare = zip(lhs.itemIdentifiers, rhs.itemIdentifiers)
     for (lhsItem, rhsItem) in itemsToCompare {
       switch (lhsItem, rhsItem) {
       case (.page(let lhsPage), .page(let rhsPage)):
         if lhsPage.pageKey != rhsPage.pageKey {
-          return true
-        }
-      case (.hashtag(let lhsHashtag), .hashtag(let rhsHashtag)):
-        if lhsHashtag != rhsHashtag {
           return true
         }
       default:
@@ -190,8 +178,6 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey)
-    case .hashtag(let hashtag):
-      delegate?.documentSearchResultsDidSelectHashtag(hashtag)
     }
   }
 
@@ -221,9 +207,6 @@ extension DocumentTableController: UITableViewDelegate {
         studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
-    case .hashtag:
-      // NOTHING
-      break
     }
     return UISwipeActionsConfiguration(actions: actions)
   }
@@ -249,13 +232,10 @@ private extension DocumentTableController {
   }
 
   enum Item: Hashable, CustomStringConvertible {
-    case hashtag(String)
     case page(ViewProperties)
 
     var description: String {
       switch self {
-      case .hashtag(let hashtag):
-        return hashtag
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
       }

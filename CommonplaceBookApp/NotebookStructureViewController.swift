@@ -94,15 +94,42 @@ final class NotebookStructureViewController: UIViewController {
       self?.updateSnapshot()
     }
     navigationController?.setToolbarHidden(false, animated: false)
-    toolbarItems = [AppCommandsButtonItems.documentBrowser]
   }
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     navigationController?.setToolbarHidden(false, animated: false)
+    configureToolbar()
   }
 
-  private func updateSnapshot() {
+  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    configureToolbar()
+  }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension NotebookStructureViewController: UICollectionViewDelegate {
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    if let structureIdentifier = dataSource.itemIdentifier(for: indexPath) {
+      delegate?.notebookStructureViewController(self, didSelect: structureIdentifier)
+      splitViewController?.show(.supplementary)
+    }
+  }
+}
+
+// MARK: - Private
+
+private extension NotebookStructureViewController {
+  func configureToolbar() {
+    var toolbarItems = [AppCommandsButtonItems.documentBrowser(), UIBarButtonItem.flexibleSpace()]
+    if splitViewController?.isCollapsed ?? false {
+      toolbarItems.append(AppCommandsButtonItems.newNote())
+    }
+    self.toolbarItems = toolbarItems
+  }
+
+  func updateSnapshot() {
     var snapshot = NSDiffableDataSourceSnapshot<Section, StructureIdentifier>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
@@ -111,14 +138,5 @@ final class NotebookStructureViewController: UIViewController {
       snapshot.appendItems(notebook.hashtags.map { .hashtag($0) })
     }
     dataSource.apply(snapshot)
-  }
-}
-
-extension NotebookStructureViewController: UICollectionViewDelegate {
-  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    if let structureIdentifier = dataSource.itemIdentifier(for: indexPath) {
-      delegate?.notebookStructureViewController(self, didSelect: structureIdentifier)
-      splitViewController?.show(.supplementary)
-    }
   }
 }

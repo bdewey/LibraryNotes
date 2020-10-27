@@ -7,19 +7,26 @@ import MiniMarkdown
 import UIKit
 
 @objc protocol AppCommands {
+  func makeNewNote()
   func openNewFile()
 }
 
 enum AppCommandsButtonItems {
-  static let documentBrowser: UIBarButtonItem = {
+  static func documentBrowser() -> UIBarButtonItem {
     let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
     button.accessibilityIdentifier = "open-files"
     return button
-  }()
+  }
+
+  static func newNote() -> UIBarButtonItem {
+    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: nil, action: #selector(AppCommands.makeNewNote))
+    button.accessibilityIdentifier = "new-document"
+    return button
+  }
 }
 
 @UIApplicationMain
-final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
   static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
 
   var window: UIWindow?
@@ -46,16 +53,17 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
     return loadingViewController
   }()
 
+  /// The currently open NoteStorage. TODO: Pick a consistent name for this thing!
   var noteArchiveDocument: NoteStorage?
-  /// If non-nil, we want to open this page initially upon opening the document.
-  var initialPageIdentifier: Note.Identifier?
+  /// The top-level UISplitViewController that is showing the note contents.
+  var topLevelViewController: NotebookViewController?
 
   private enum UserDefaultKey {
     static let hasRun = "has_run_0"
     static let openedDocument = "opened_document"
   }
 
-  var openedDocumentBookmark: Data? {
+  static var openedDocumentBookmark: Data? {
     get {
       UserDefaults.standard.object(forKey: UserDefaultKey.openedDocument) as? Data
     }
@@ -88,7 +96,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
     self.window = window
 
     var didOpenSavedDocument = false
-    if !Self.isUITesting, let openedDocumentBookmarkData = openedDocumentBookmark {
+    if !Self.isUITesting, let openedDocumentBookmarkData = Self.openedDocumentBookmark {
       DDLogInfo("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
@@ -162,22 +170,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
     CommandLine.arguments.contains("--uitesting")
   }()
 
-  @objc func openNewFile() {
-    guard let documentListViewController = window?.rootViewController else {
-      return
-    }
-    if UIApplication.isSimulator && false {
-      let messageText = "Document browser doesn't work in the simulator"
-      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-      alertController.addAction(okAction)
-      documentListViewController.present(alertController, animated: true, completion: nil)
-    } else {
-      openedDocumentBookmark = nil
-      documentListViewController.dismiss(animated: true, completion: nil)
-    }
-  }
-
   private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
     if Self.isUITesting {
       let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
@@ -204,41 +196,30 @@ final class AppDelegate: UIResponder, UIApplicationDelegate, AppCommands {
       completion(makeDirectoryProvider(at: directoryURL))
     }
   }
+}
 
-  private func wrapViewController(
-    _ documentListViewController: DocumentListViewController
-  ) -> UIViewController {
-    let supplementaryNavigationController = UINavigationController(
-      rootViewController: documentListViewController
-    )
-    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
-    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+// MARK: - AppCommands
+//
+// Implements system-wide menu responses
+extension AppDelegate: AppCommands {
+  @objc func openNewFile() {
+    guard let documentListViewController = window?.rootViewController else {
+      return
+    }
+    if UIApplication.isSimulator && false {
+      let messageText = "Document browser doesn't work in the simulator"
+      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alertController.addAction(okAction)
+      documentListViewController.present(alertController, animated: true, completion: nil)
+    } else {
+      AppDelegate.openedDocumentBookmark = nil
+      documentListViewController.dismiss(animated: true, completion: nil)
+    }
+  }
 
-    let hashtagViewController = NotebookStructureViewController(
-      notebook: documentListViewController.notebook
-    )
-    hashtagViewController.delegate = documentListViewController
-    let primaryNavigationController = UINavigationController(rootViewController: hashtagViewController)
-    primaryNavigationController.navigationBar.prefersLargeTitles = true
-    primaryNavigationController.navigationBar.barTintColor = .grailBackground
-
-    let splitViewController = UISplitViewController(style: .tripleColumn)
-    let detailViewController = UINavigationController(
-      rootViewController:
-      TextEditViewController.makeBlankDocument(
-        notebook: documentListViewController.notebook,
-        currentHashtag: nil,
-        autoFirstResponder: false
-      )
-    )
-    splitViewController.viewControllers = [
-      primaryNavigationController,
-      supplementaryNavigationController,
-      detailViewController,
-    ]
-    splitViewController.preferredDisplayMode = .oneBesideSecondary
-    splitViewController.delegate = self
-    return splitViewController
+  @objc func makeNewNote() {
+    topLevelViewController?.makeNewNote()
   }
 }
 
@@ -257,27 +238,12 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       throw Error.unknownFormat
     }
     DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
-    let documentListViewController = DocumentListViewController(notebook: noteArchiveDocument)
-    documentListViewController.didTapFilesAction = { [weak self] in
-      if UIApplication.isSimulator && false {
-        let messageText = "Document browser doesn't work in the simulator"
-        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alertController.addAction(okAction)
-        documentListViewController.present(alertController, animated: true, completion: nil)
-      } else {
-        self?.openedDocumentBookmark = nil
-        documentListViewController.dismiss(animated: true, completion: nil)
-      }
-    }
-    let wrappedViewController: UIViewController = wrapViewController(documentListViewController)
-    wrappedViewController.modalPresentationStyle = .fullScreen
-    wrappedViewController.modalTransitionStyle = .crossDissolve
-    wrappedViewController.view.tintColor = .systemOrange
-    controller.present(wrappedViewController, animated: animated, completion: nil)
-    let noteIdentifierCopy = initialPageIdentifier
+    let viewController = NotebookViewController(notebook: noteArchiveDocument)
+    viewController.modalPresentationStyle = .fullScreen
+    viewController.modalTransitionStyle = .crossDissolve
+    viewController.view.tintColor = .systemOrange
+    controller.present(viewController, animated: animated, completion: nil)
     noteArchiveDocument.open(completionHandler: { success in
-      noteIdentifierCopy.flatMap { documentListViewController.showPage(with: $0) }
       let properties: [String: String] = [
         "Success": success.description,
 //        "documentState": String(describing: noteArchiveDocument.documentState),
@@ -285,10 +251,10 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       ]
       DDLogInfo("In open completion handler. \(properties)")
       if success, !Self.isUITesting {
-        self.openedDocumentBookmark = try? url.bookmarkData()
+        Self.openedDocumentBookmark = try? url.bookmarkData()
       }
     })
-    initialPageIdentifier = nil
+    self.topLevelViewController = viewController
     self.noteArchiveDocument = noteArchiveDocument
   }
 
