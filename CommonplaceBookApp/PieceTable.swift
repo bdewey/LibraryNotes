@@ -167,8 +167,10 @@ extension PieceTable: Collection {
     let bounds = boundsExpression.relative(to: self)
     guard !bounds.isEmpty else { return [] }
     let count = distance(from: bounds.lowerBound, to: bounds.upperBound)
-    var results = Array<unichar>(unsafeUninitializedCapacity: count, initializingWith: { _, _ in })
-    copyCharacters(at: bounds, to: &results)
+    let results = [unichar](unsafeUninitializedCapacity: count) { buffer, initializedCount in
+      copyCharacters(at: bounds, to: buffer.baseAddress!)
+      initializedCount = count
+    }
     return results
   }
 

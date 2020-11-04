@@ -101,6 +101,7 @@
 		D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
+		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
 		D3D05D2B25507C89007C443A /* IncrementalParsingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* IncrementalParsingBuffer.swift */; };
 		D3D05D2C25507C89007C443A /* IncrementalParsingTextStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */; };
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
@@ -251,6 +252,7 @@
 		D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswer.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
+		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
 		D3D05D2925507C89007C443A /* IncrementalParsingBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingBuffer.swift; sourceTree = "<group>"; };
 		D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingTextStorage.swift; sourceTree = "<group>"; };
 		D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PieceTable+SafeUnicodeBuffer.swift"; sourceTree = "<group>"; };
@@ -462,6 +464,7 @@
 		D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
 			isa = PBXGroup;
 			children = (
+				D3CFF2D225533DA500A008FD /* PieceTableTests.swift */,
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
 				D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */,
 				D541A99F21B0C07C0048182A /* FileMetadataTests.swift */,
@@ -815,6 +818,7 @@
 				D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
+				D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */,
 				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,
 				D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
@@ -1042,6 +1046,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookAppTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1066,6 +1071,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = CommonplaceBookAppTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

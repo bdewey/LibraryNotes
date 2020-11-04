@@ -295,7 +295,7 @@ private extension NoteSqliteStorageMergeTests {
         try modificationBlock?(database)
         return database
       }
-      .flatMap { database in
+      .flatMap { database -> Future<URL, Error> in
         Future { promise in
           database.close { _ in
             promise(.success(database.fileURL))
