@@ -16,12 +16,9 @@ public final class TextEditViewController: UIViewController {
   public init(notebook: NoteStorage) {
     self.parsingRules = notebook.parsingRules
 
-    var renderers = TextEditViewController.renderers
-    notebook.addImageRenderer(to: &renderers)
     self.textStorage = TextEditViewController.makeTextStorage(
       parsingRules: parsingRules,
-      formatters: TextEditViewController.formatters(),
-      renderers: renderers
+      formatters: TextEditViewController.formatters()
     )
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
@@ -134,33 +131,9 @@ public final class TextEditViewController: UIViewController {
     return formatters
   }
 
-  private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
-    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { node, attributes in
-      let listItem = node as! ListItem // swiftlint:disable:this force_cast
-      let text = String(listItem.slice.string[listItem.markerRange])
-      let replacement = listItem.listType == .unordered
-        ? "\u{2022}\t"
-        : text.replacingOccurrences(of: " ", with: "\t")
-      return NSAttributedString(string: replacement, attributes: attributes)
-    }
-    renderers[.delimiter] = { node, attributes in
-      var text = String(node.slice.substring)
-      if node.parent is Heading || node.parent is BlockQuote || node.parent is QuestionAndAnswer.PrefixedLine {
-        text = text.replacingOccurrences(of: " ", with: "\t")
-      }
-      return NSAttributedString(
-        string: text,
-        attributes: attributes
-      )
-    }
-    return renderers
-  }()
-
   private static func makeTextStorage(
     parsingRules: ParsingRules,
-    formatters: [NewNodeType: FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction]
+    formatters: [NewNodeType: FormattingFunction]
   ) -> IncrementalParsingTextStorage {
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: .body),
