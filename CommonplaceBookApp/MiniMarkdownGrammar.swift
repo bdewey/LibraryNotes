@@ -54,6 +54,9 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     }
   }
 
+  /// Singleton for convenience.
+  public static let shared = MiniMarkdownGrammar()
+
   public private(set) lazy var start: ParsingRule = block
     .repeating(0...)
     .wrapping(in: .document)

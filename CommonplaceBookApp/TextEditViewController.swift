@@ -71,17 +71,17 @@ public final class TextEditViewController: UIViewController {
   // Init-time state.
 
   private let parsingRules: ParsingRules
-  private let textStorage: MiniMarkdownTextStorage
+  private let textStorage: IncrementalParsingTextStorage
 
   public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 
   /// The markdown
   public var markdown: String {
     get {
-      return textStorage.markdown
+      return textStorage.rawText
     }
     set {
-      textStorage.markdown = newValue
+      textStorage.rawText = newValue
     }
   }
 
@@ -89,11 +89,11 @@ public final class TextEditViewController: UIViewController {
   public var noteIdentifier: Note.Identifier?
 
   private static func formatters(
-  ) -> [NodeType: RenderedMarkdown.FormattingFunction] {
-    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-    formatters[.heading] = {
-      let heading = $0 as! Heading // swiftlint:disable:this force_cast
-      switch heading.headingLevel {
+  ) -> [NewNodeType: FormattingFunction] {
+    var formatters: [NewNodeType: FormattingFunction] = [:]
+    formatters[.header] = {
+      let headingLevel = $0.children[0].length
+      switch headingLevel {
       case 1:
         $1.textStyle = .title1
       case 2:
@@ -105,27 +105,32 @@ public final class TextEditViewController: UIViewController {
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { delimiter, attributes in
-      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
-        attributes.bold = true
-        attributes.listLevel = 1
-      } else {
-        attributes.color = UIColor.quaternaryLabel
-      }
+      attributes.color = .quaternaryLabel
+      // TODO: Support Q&A cards
+//      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
+//        attributes.bold = true
+//        attributes.listLevel = 1
+//      } else {
+//        attributes.color = UIColor.quaternaryLabel
+//      }
     }
-    formatters[.bold] = { $1.bold = true }
+    formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
-    formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.codeSpan] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
-    formatters[.clozeHint] = {
-      $1.color = UIColor.secondaryLabel
-    }
+
+    // TODO
+//    formatters[.codeSpan] = { $1.familyName = "Menlo" }
+//    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
+//    formatters[.clozeHint] = {
+//      $1.color = UIColor.secondaryLabel
+//    }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
-    formatters[.blockQuote] = {
-      $1.italic = true
-      $1.blockquoteBorderColor = UIColor.systemOrange
-      $1.listLevel += 1
-    }
+
+    // TODO
+//    formatters[.blockQuote] = {
+//      $1.italic = true
+//      $1.blockquoteBorderColor = UIColor.systemOrange
+//      $1.listLevel += 1
+//    }
     return formatters
   }
 
@@ -154,20 +159,16 @@ public final class TextEditViewController: UIViewController {
 
   private static func makeTextStorage(
     parsingRules: ParsingRules,
-    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
+    formatters: [NewNodeType: FormattingFunction],
     renderers: [NodeType: RenderedMarkdown.RenderFunction]
-  ) -> MiniMarkdownTextStorage {
-    let textStorage = MiniMarkdownTextStorage(
-      parsingRules: parsingRules,
-      formatters: formatters,
-      renderers: renderers
-    )
-    textStorage.defaultAttributes = [
+  ) -> IncrementalParsingTextStorage {
+    var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: .body),
       .foregroundColor: UIColor.label,
     ]
-    textStorage.defaultAttributes.headIndent = 28
-    textStorage.defaultAttributes.firstLineHeadIndent = 28
+    defaultAttributes.headIndent = 28
+    defaultAttributes.firstLineHeadIndent = 28
+    let textStorage = IncrementalParsingTextStorage(grammar: MiniMarkdownGrammar.shared, defaultAttributes: defaultAttributes, formattingFunctions: formatters, replacementFunctions: [:])
     return textStorage
   }
 
@@ -282,9 +283,11 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    delegate?.textEditViewController(self, didChange: self.textStorage.markdown)
+    delegate?.textEditViewController(self, didChange: self.textStorage.rawText)
   }
 }
+
+// MARK: - UITextViewDelegate
 
 extension TextEditViewController: UITextViewDelegate {
   func replaceCharacters(in range: NSRange, with str: String) {
@@ -299,47 +302,50 @@ extension TextEditViewController: UITextViewDelegate {
   ) -> Bool {
     // We do syntax highlighting. Don't do typing attributes, ever.
     textView.typingAttributes = [:]
-    guard range.length == 0 else { return true }
-    if text == "\n" {
-      if let currentNode = textStorage.node(at: range.location),
-        let listItem = currentNode.findFirstAncestor(
-          where: { $0.type == .listItem }
-        ) as? ListItem {
-        if listItem.isEmpty {
-          // List termination! Someone's hitting return on a list item that contains nothing.
-          // Erase this marker.
-          replaceCharacters(
-            in: NSRange(
-              location: listItem.initialLocationPair.rendered,
-              length: listItem.markdown.count
-            ),
-            with: "\n"
-          )
-          return false
-        }
-        switch listItem.listType {
-        case .unordered:
-          replaceCharacters(in: range, with: "\n* ")
-        case .ordered:
-          if let containerNumber = listItem.orderedListNumber {
-            replaceCharacters(in: range, with: "\n\(containerNumber + 1). ")
-          } else {
-            return true
-          }
-        }
-      } else if line(at: range.location).hasPrefix("Q: ") {
-        replaceCharacters(in: range, with: "\nA: ")
-      } else if line(at: range.location).hasPrefix("A:\t") {
-        replaceCharacters(in: range, with: "\n\nQ: ")
-      } else {
-        // To make this be a separate paragraph in any conventional Markdown processor, we need
-        // the blank line.
-        replaceCharacters(in: range, with: "\n\n")
-      }
-      return false
-    } else {
-      return true
-    }
+    return true
+
+    // TODO
+//    guard range.length == 0 else { return true }
+//    if text == "\n" {
+//      if let currentNode = textStorage.node(at: range.location),
+//        let listItem = currentNode.findFirstAncestor(
+//          where: { $0.type == .listItem }
+//        ) as? ListItem {
+//        if listItem.isEmpty {
+//          // List termination! Someone's hitting return on a list item that contains nothing.
+//          // Erase this marker.
+//          replaceCharacters(
+//            in: NSRange(
+//              location: listItem.initialLocationPair.rendered,
+//              length: listItem.markdown.count
+//            ),
+//            with: "\n"
+//          )
+//          return false
+//        }
+//        switch listItem.listType {
+//        case .unordered:
+//          replaceCharacters(in: range, with: "\n* ")
+//        case .ordered:
+//          if let containerNumber = listItem.orderedListNumber {
+//            replaceCharacters(in: range, with: "\n\(containerNumber + 1). ")
+//          } else {
+//            return true
+//          }
+//        }
+//      } else if line(at: range.location).hasPrefix("Q: ") {
+//        replaceCharacters(in: range, with: "\nA: ")
+//      } else if line(at: range.location).hasPrefix("A:\t") {
+//        replaceCharacters(in: range, with: "\n\nQ: ")
+//      } else {
+//        // To make this be a separate paragraph in any conventional Markdown processor, we need
+//        // the blank line.
+//        replaceCharacters(in: range, with: "\n\n")
+//      }
+//      return false
+//    } else {
+//      return true
+//    }
   }
 
   /// Gets the line of text that contains a given location.

@@ -42,17 +42,3 @@ public enum ParsingError: Swift.Error {
   /// - parameter length: How much of the buffer was consumed by the grammar.
   case incompleteParsing(length: Int)
 }
-
-public extension SafeUnicodeBuffer {
-  /// Parses the contents of the buffer.
-  /// - Throws: If the grammar could not parse the entire contents, throws `Error.incompleteParsing`. If the grammar resulted in more than one resulting node, throws `Error.ambiguousParsing`.
-  /// - Returns: The single node at the root of the syntax tree resulting from parsing `buffer`
-  func parse(grammar: PackratGrammar, memoizationTable: MemoizationTable) throws -> NewNode {
-    memoizationTable.reserveCapacity(count + 1)
-    let result = grammar.start.parsingResult(from: self, at: 0, memoizationTable: memoizationTable)
-    guard let node = result.node, node.length == count else {
-      throw ParsingError.incompleteParsing(length: result.node?.length ?? result.length)
-    }
-    return node
-  }
-}

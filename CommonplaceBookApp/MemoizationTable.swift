@@ -27,16 +27,29 @@ public protocol PackratGrammar {
 public final class MemoizationTable: CustomStringConvertible {
   /// Designated initializer.
   /// - Parameters:
-  ///   - buffer: The content to parse.
   ///   - grammar: The grammar rules to apply to the contents of `buffer`
   // TODO: This should probably take a block that constructs a grammar rather than a grammar
-  public init() {
+  public init(grammar: PackratGrammar) {
     self.memoizedResults = []
+    self.grammar = grammar
   }
 
-  public func reserveCapacity(_ capacity: Int) {
-    guard !memoizedResults.isEmpty else { return }
+  public let grammar: PackratGrammar
+
+  private func reserveCapacity(_ capacity: Int) {
     memoizedResults = Array(repeating: MemoColumn(), count: capacity)
+  }
+
+  /// Parses the contents of the buffer.
+  /// - Throws: If the grammar could not parse the entire contents, throws `Error.incompleteParsing`. If the grammar resulted in more than one resulting node, throws `Error.ambiguousParsing`.
+  /// - Returns: The single node at the root of the syntax tree resulting from parsing `buffer`
+  public func parseBuffer(_ buffer: SafeUnicodeBuffer) throws -> NewNode {
+    reserveCapacity(buffer.count + 1)
+    let result = grammar.start.parsingResult(from: buffer, at: 0, memoizationTable: self)
+    guard let node = result.node, node.length == buffer.count else {
+      throw ParsingError.incompleteParsing(length: result.node?.length ?? result.length)
+    }
+    return node
   }
 
   public var description: String {
