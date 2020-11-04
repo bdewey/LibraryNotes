@@ -180,10 +180,10 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   ).wrapping(in: .delimiter).memoize()
 
   lazy var orderedListOpening = InOrder(
-    whitespace.repeating(0...),
-    InOrder(digit.repeating(1 ... 9), Characters([".", ")"])),
-    whitespace.repeating(1 ... 4)
-  ).as(.delimiter).memoize()
+    whitespace.repeating(0...).as(.text).zeroOrOne(),
+    InOrder(digit.repeating(1 ... 9), Characters([".", ")"])).as(.text),
+    whitespace.repeating(1 ... 4).as(.softTab)
+  ).wrapping(in: .delimiter).memoize()
 
   func list(type: ListType, openingDelimiter: ParsingRule) -> ParsingRule {
     let listItem = InOrder(

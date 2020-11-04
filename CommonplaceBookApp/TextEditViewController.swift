@@ -168,7 +168,15 @@ public final class TextEditViewController: UIViewController {
     ]
     defaultAttributes.headIndent = 28
     defaultAttributes.firstLineHeadIndent = 28
-    let textStorage = IncrementalParsingTextStorage(grammar: MiniMarkdownGrammar.shared, defaultAttributes: defaultAttributes, formattingFunctions: formatters, replacementFunctions: [:])
+    let textStorage = IncrementalParsingTextStorage(
+      grammar: MiniMarkdownGrammar.shared,
+      defaultAttributes: defaultAttributes,
+      formattingFunctions: formatters,
+      replacementFunctions: [
+        .softTab: formatTab,
+        .unorderedListOpening: formatBullet,
+      ]
+    )
     return textStorage
   }
 
@@ -381,4 +389,20 @@ private extension TextEditViewController {
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
   }
+}
+
+// MARK: - Replacement functions
+
+private func formatTab(
+  node: NewNode,
+  startIndex: Int
+) -> [unichar] {
+  return Array("\t".utf16)
+}
+
+private func formatBullet(
+  node: NewNode,
+  startIndex: Int
+) -> [unichar] {
+  return Array("\u{2022}".utf16)
 }
