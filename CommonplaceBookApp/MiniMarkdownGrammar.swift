@@ -34,6 +34,8 @@ public extension NewNodeType {
   static let strongEmphasis: NewNodeType = "strong_emphasis"
   static let text: NewNodeType = "text"
   static let unorderedListOpening: NewNodeType = "unordered_list_opening"
+  static let orderedListNumber: NewNodeType = "ordered_list_number"
+  static let orderedListTerminator: NewNodeType = "ordere_list_terminator"
 }
 
 public enum ListType {
@@ -181,7 +183,8 @@ public final class MiniMarkdownGrammar: PackratGrammar {
 
   lazy var orderedListOpening = InOrder(
     whitespace.repeating(0...).as(.text).zeroOrOne(),
-    InOrder(digit.repeating(1 ... 9), Characters([".", ")"])).as(.text),
+    digit.repeating(1 ... 9).as(.orderedListNumber),
+    Characters([".", ")"]).as(.orderedListTerminator),
     whitespace.repeating(1 ... 4).as(.softTab)
   ).wrapping(in: .delimiter).memoize()
 

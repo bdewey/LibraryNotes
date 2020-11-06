@@ -34,6 +34,13 @@ public final class IncrementalParsingBuffer {
   private let memoizationTable: MemoizationTable
   private let grammar: PackratGrammar
   public private(set) var result: Result<NewNode, Error>
+
+  /// Returns the path through the syntax tree to the leaf node that contains `index`.
+  /// - returns: An array of nodes where the first element is the root, and each subsequent node descends one level to the leaf.
+  public func path(to index: Int) -> [AnchoredNode] {
+    guard let root = try? result.get() else { return [] }
+    return root.path(to: index)
+  }
 }
 
 extension IncrementalParsingBuffer: RangeReplaceableSafeUnicodeBuffer {

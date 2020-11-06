@@ -283,50 +283,58 @@ extension TextEditViewController: UITextViewDelegate {
   ) -> Bool {
     // We do syntax highlighting. Don't do typing attributes, ever.
     textView.typingAttributes = [:]
-    return true
 
-    // TODO
-//    guard range.length == 0 else { return true }
-//    if text == "\n" {
-//      if let currentNode = textStorage.node(at: range.location),
-//        let listItem = currentNode.findFirstAncestor(
-//          where: { $0.type == .listItem }
-//        ) as? ListItem {
-//        if listItem.isEmpty {
-//          // List termination! Someone's hitting return on a list item that contains nothing.
-//          // Erase this marker.
-//          replaceCharacters(
-//            in: NSRange(
-//              location: listItem.initialLocationPair.rendered,
-//              length: listItem.markdown.count
-//            ),
-//            with: "\n"
-//          )
-//          return false
-//        }
-//        switch listItem.listType {
-//        case .unordered:
-//          replaceCharacters(in: range, with: "\n* ")
-//        case .ordered:
-//          if let containerNumber = listItem.orderedListNumber {
-//            replaceCharacters(in: range, with: "\n\(containerNumber + 1). ")
-//          } else {
-//            return true
-//          }
-//        }
-//      } else if line(at: range.location).hasPrefix("Q: ") {
-//        replaceCharacters(in: range, with: "\nA: ")
-//      } else if line(at: range.location).hasPrefix("A:\t") {
-//        replaceCharacters(in: range, with: "\n\nQ: ")
-//      } else {
-//        // To make this be a separate paragraph in any conventional Markdown processor, we need
-//        // the blank line.
-//        replaceCharacters(in: range, with: "\n\n")
-//      }
-//      return false
-//    } else {
-//      return true
-//    }
+    // Right now we only do special processing when inserting a newline
+    guard range.length == 0, text == "\n" else { return true }
+    let nodePath = textStorage.path(to: range.location)
+    if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
+      if let paragraph = listItem.first(where: { $0.type == .paragraph }) {
+        let paragraphText = textStorage[paragraph.range]
+        if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+          // List termination! Someone's hitting return on a list item that contains nothing.
+          // Erase this marker.
+          replaceCharacters(
+            in: NSRange(
+              location: listItem.startIndex,
+              length: listItem.node.length
+            ),
+            with: "\n"
+          )
+          return false
+        }
+      }
+
+      // List continuation!
+      //
+      // I'm force-unwrapping here because if there is a list item in the path but no list,
+      // then the grammar is wrong and crashing is appropriate.
+      let list = nodePath.first(where: { $0.node.type == .list })!
+      let listType = list.node[ListTypeKey.self]!
+      switch listType {
+      case .unordered:
+        replaceCharacters(in: range, with: "\n* ")
+      case .ordered:
+        let listNumber: Int
+        if let listNumberNode = listItem.first(where: { $0.type == .orderedListNumber }) {
+          let chars = textStorage[NSRange(location: listNumberNode.startIndex, length: listNumberNode.node.length)]
+          let string = String(utf16CodeUnits: chars, count: chars.count)
+          listNumber = Int(string) ?? 0
+        } else {
+          listNumber = 0
+        }
+        replaceCharacters(in: range, with: "\n\(listNumber + 1). ")
+      }
+      return false
+    } else if line(at: range.location).hasPrefix("Q: ") {
+      replaceCharacters(in: range, with: "\nA: ")
+    } else if line(at: range.location).hasPrefix("A:\t") {
+      replaceCharacters(in: range, with: "\n\nQ: ")
+    } else {
+      // To make this be a separate paragraph in any conventional Markdown processor, we need
+      // the blank line.
+      replaceCharacters(in: range, with: "\n\n")
+    }
+    return false
   }
 
   /// Gets the line of text that contains a given location.

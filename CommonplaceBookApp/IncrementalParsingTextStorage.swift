@@ -92,6 +92,13 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     }
   }
 
+  /// Gets a subset of the available characters in storage.
+  public subscript(range: NSRange) -> [unichar] { buffer[range] }
+
+  /// Returns the path through the syntax tree to the leaf node that contains `index`.
+  /// - returns: An array of nodes where the first element is the root, and each subsequent node descends one level to the leaf.
+  public func path(to index: Int) -> [AnchoredNode] { buffer.path(to: index) }
+
   private func applyReplacements(in node: NewNode, startingIndex: Int, to array: inout [unichar]) {
     guard node.hasTextReplacement else { return }
     if let replacement = node.textReplacement {
@@ -138,9 +145,9 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       return defaultAttributes
     }
     // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
-    let (leaf, startIndex) = try! tree.leafNode(containing: location) // swiftlint:disable:this force_try
-    range?.pointee = NSRange(location: startIndex, length: leaf.length)
-    return leaf.attributedStringAttributes!
+    let leafNode = try! tree.leafNode(containing: location) // swiftlint:disable:this force_try
+    range?.pointee = leafNode.range
+    return leafNode.node.attributedStringAttributes!
   }
 
   /// Sets the attributes for the characters in the specified range to the specified attributes.

@@ -134,6 +134,36 @@ public final class NewNode: CustomStringConvertible {
     return nextChild?.node(at: indexPath.dropFirst())
   }
 
+  /// Enumerates all nodes in the tree in depth-first order.
+  /// - parameter startIndex: The index at which this node starts. (An AnchoredNode knows this, but a NewNode does not and needs to be told.)
+  /// - parameter block: The first parameter is the node, the second parameter is the start index of the node, and set the third parameter to `false` to stop enumeration.
+  public func forEach(startIndex: Int = 0, block: (NewNode, Int, inout Bool) -> Void) {
+    var stop: Bool = false
+    forEach(stop: &stop, startIndex: startIndex, block: block)
+  }
+
+  private func forEach(stop: inout Bool, startIndex: Int, block: (NewNode, Int, inout Bool) -> Void) {
+    guard !stop else { return }
+    block(self, startIndex, &stop)
+    var startIndex = startIndex
+    for child in children where !stop {
+      child.forEach(stop: &stop, startIndex: startIndex, block: block)
+      startIndex += child.length
+    }
+  }
+
+  /// Returns the first (depth-first) node where `predicate` returns true.
+  public func first(where predicate: (NewNode) -> Bool) -> NewNode? {
+    var result: NewNode?
+    forEach { node, _, stop in
+      if predicate(node) {
+        result = node
+        stop = true
+      }
+    }
+    return result
+  }
+
   public enum NodeSearchError: Error {
     case indexOutOfRange
   }
@@ -141,18 +171,18 @@ public final class NewNode: CustomStringConvertible {
   /// Walks down the tree and returns the leaf node that contains a specific index.
   /// - returns: The leaf node containing the index.
   /// - throws: NodeSearchError.indexOutOfRange if the index is not valid.
-  public func leafNode(containing index: Int) throws -> (node: NewNode, startIndex: Int) {
+  public func leafNode(containing index: Int) throws -> AnchoredNode {
     return try leafNode(containing: index, startIndex: 0)
   }
 
   private func leafNode(
     containing index: Int,
     startIndex: Int
-  ) throws -> (node: NewNode, startIndex: Int) {
+  ) throws -> AnchoredNode {
     guard index < startIndex + length else {
       throw NodeSearchError.indexOutOfRange
     }
-    if children.isEmpty { return (self, startIndex) }
+    if children.isEmpty { return AnchoredNode(node: self, startIndex: startIndex) }
     var childIndex = startIndex
     for child in children {
       if index < childIndex + child.length {
@@ -161,6 +191,27 @@ public final class NewNode: CustomStringConvertible {
       childIndex += child.length
     }
     throw NodeSearchError.indexOutOfRange
+  }
+
+  /// Returns the path through the syntax tree to the leaf node that contains `index`.
+  /// - returns: An array of nodes where the first element is the root, and each subsequent node descends one level to the leaf.
+  public func path(to index: Int) -> [AnchoredNode] {
+    var results = [AnchoredNode]()
+    path(to: index, startIndex: 0, results: &results)
+    return results
+  }
+
+  private func path(to index: Int, startIndex: Int, results: inout [AnchoredNode]) {
+    results.append(AnchoredNode(node: self, startIndex: startIndex))
+    if children.isEmpty { return }
+    var childIndex = startIndex
+    for child in children {
+      if index < childIndex + child.length {
+        child.path(to: index, startIndex: childIndex, results: &results)
+        return
+      }
+      childIndex += child.length
+    }
   }
 
   // MARK: - Properties
@@ -180,6 +231,40 @@ public final class NewNode: CustomStringConvertible {
         propertyBag?.removeValue(forKey: key.key)
       }
     }
+  }
+}
+
+/// An "Anchored" node simply contains a node and its starting position in the text. (Start location isn't part of Node because we
+/// reuse nodes across edits.)
+/// This is a class and not a struct because structs-that-contain-reference-types can't easily provide value semantics.
+public final class AnchoredNode {
+  public let node: NewNode
+  public let startIndex: Int
+
+  public init(node: NewNode, startIndex: Int) {
+    self.node = node
+    self.startIndex = startIndex
+  }
+
+  /// Convenience mechanism for getting the range covered by this node.
+  public var range: NSRange { NSRange(location: startIndex, length: node.length) }
+
+  /// Enumerates all of the nodes, depth-first.
+  /// - parameter block: Receives the node, the start index of the node. Set the Bool to `false` to stop enumeration.
+  public func forEach(_ block: (NewNode, Int, inout Bool) -> Void) {
+    node.forEach(startIndex: startIndex, block: block)
+  }
+
+  /// Returns the first AnchoredNode that matches a predicate.
+  public func first(where predicate: (NewNode) -> Bool) -> AnchoredNode? {
+    var result: AnchoredNode?
+    node.forEach(startIndex: startIndex) { (candidate, index, stop) in
+      if predicate(candidate) {
+        result = AnchoredNode(node: candidate, startIndex: index)
+        stop = true
+      }
+    }
+    return result
   }
 }
 
