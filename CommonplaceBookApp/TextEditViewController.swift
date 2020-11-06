@@ -115,7 +115,7 @@ public final class TextEditViewController: UIViewController {
     formatters[.emphasis] = { $1.italic.toggle() }
 
     // TODO
-//    formatters[.codeSpan] = { $1.familyName = "Menlo" }
+    formatters[.code] = { $1.familyName = "Menlo" }
 //    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
 //    formatters[.clozeHint] = {
 //      $1.color = UIColor.secondaryLabel
@@ -123,11 +123,11 @@ public final class TextEditViewController: UIViewController {
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
 
     // TODO
-//    formatters[.blockQuote] = {
-//      $1.italic = true
-//      $1.blockquoteBorderColor = UIColor.systemOrange
-//      $1.listLevel += 1
-//    }
+    formatters[.blockquote] = {
+      $1.italic = true
+      $1.blockquoteBorderColor = UIColor.systemOrange
+      $1.listLevel += 1
+    }
     return formatters
   }
 

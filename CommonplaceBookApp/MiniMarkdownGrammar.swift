@@ -35,7 +35,7 @@ public extension NewNodeType {
   static let text: NewNodeType = "text"
   static let unorderedListOpening: NewNodeType = "unordered_list_opening"
   static let orderedListNumber: NewNodeType = "ordered_list_number"
-  static let orderedListTerminator: NewNodeType = "ordere_list_terminator"
+  static let orderedListTerminator: NewNodeType = "ordered_list_terminator"
 }
 
 public enum ListType {
