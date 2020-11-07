@@ -116,10 +116,10 @@ public final class TextEditViewController: UIViewController {
 
     // TODO
     formatters[.code] = { $1.familyName = "Menlo" }
-//    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
-//    formatters[.clozeHint] = {
-//      $1.color = UIColor.secondaryLabel
-//    }
+    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
+    formatters[.clozeHint] = {
+      $1.color = UIColor.secondaryLabel
+    }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
 
     formatters[.blockquote] = {

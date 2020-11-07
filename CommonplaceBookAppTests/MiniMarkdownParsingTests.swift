@@ -185,6 +185,13 @@ final class MiniMarkdownParsingTests: XCTestCase {
     )
   }
 
+  func testCloze() {
+    parseText(
+      "* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?",
+      expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))"
+    )
+  }
+
   func testFile() {
     let pieceTable = PieceTable(TestStrings.markdownCanonical)
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)

@@ -36,6 +36,9 @@ public extension NewNodeType {
   static let unorderedListOpening: NewNodeType = "unordered_list_opening"
   static let orderedListNumber: NewNodeType = "ordered_list_number"
   static let orderedListTerminator: NewNodeType = "ordered_list_terminator"
+  static let cloze: NewNodeType = "cloze"
+  static let clozeHint: NewNodeType = "cloze_hint"
+  static let clozeAnswer: NewNodeType = "cloze_answer"
 }
 
 public enum ListType {
@@ -131,13 +134,22 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     Literal(")")
   ).as(.image).memoize()
 
+  lazy var cloze = InOrder(
+    Literal("?[").as(.delimiter),
+    Characters(CharacterSet(charactersIn: "\n]").inverted).repeating(0...).as(.clozeHint),
+    Literal("](").as(.delimiter),
+    Characters(CharacterSet(charactersIn: "\n)").inverted).repeating(0...).as(.clozeAnswer),
+    Literal(")").as(.delimiter)
+  ).wrapping(in: .cloze).memoize()
+
   lazy var textStyles = Choice(
     bold,
     italic,
     underlineItalic,
     code,
     hashtag,
-    image
+    image,
+    cloze
   ).memoize()
 
   lazy var styledText = InOrder(
