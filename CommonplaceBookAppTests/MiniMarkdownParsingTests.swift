@@ -129,7 +129,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
 
   func testSingleLineBlockQuote() {
     let example = "> This is a quote with **bold** text."
-    parseText(example, expectedStructure: "(document (blockquote delimiter (paragraph text (strong_emphasis delimiter text delimiter) text)))")
+    parseText(example, expectedStructure: "(document (blockquote (delimiter text tab) (paragraph text (strong_emphasis delimiter text delimiter) text)))")
   }
 
   func testOrderedMarkerCannotBeTenDigits() {
@@ -217,6 +217,7 @@ private extension MiniMarkdownParsingTests {
         print("\n")
         print(tree.debugDescription(withContentsFrom: pieceTable))
         print("\n\n\n")
+        print(TraceBuffer.shared)
       }
       XCTAssertEqual(tree.compactStructure, expectedStructure, "Unexpected structure", file: file, line: line)
       return tree

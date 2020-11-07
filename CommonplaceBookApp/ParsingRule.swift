@@ -83,6 +83,12 @@ open class ParsingRule: CustomStringConvertible {
   public var possibleOpeningCharacters: CharacterSet? {
     return nil
   }
+
+  /// If true, this rule consumes input. (Assertions can succeed or fail but do not consume input.)
+  open var consumesInput: Bool { true }
+
+  /// If true, this rule can succeed without consuming input from the stream. (E.g., a ZeroOrOne rule)
+  open var optional: Bool { false }
 }
 
 open class ParsingRuleWrapper: ParsingRule {
@@ -104,6 +110,9 @@ open class ParsingRuleWrapper: ParsingRule {
   public override var possibleOpeningCharacters: CharacterSet? {
     return rule.possibleOpeningCharacters
   }
+
+  open override var optional: Bool { rule.optional }
+  open override var consumesInput: Bool { rule.consumesInput }
 }
 
 open class ParsingRuleSequenceWrapper: ParsingRule {
@@ -406,6 +415,8 @@ final class RangeRule: ParsingRuleWrapper {
   override var description: String {
     "RANGE \(range) \(rule)"
   }
+
+  override var optional: Bool { range.lowerBound == 0 }
 }
 
 /// Matches an inner rule 0 or 1 times.
@@ -419,6 +430,8 @@ final class ZeroOrOneRule: ParsingRuleWrapper {
     result.setZeroLength()
     return performanceCounters.recordResult(result)
   }
+
+  override var optional: Bool { true }
 }
 
 /// "Absorbs" the range consumed by `rule` into a syntax tree node of type `nodeType`. Any syntax tree nodes produced
@@ -509,27 +522,14 @@ public final class InOrder: ParsingRuleSequenceWrapper {
   private static func possibleOpeningCharacters(for rules: [ParsingRule]) -> CharacterSet? {
     var assertions: CharacterSet?
     var possibilities: CharacterSet? = CharacterSet()
-    var done = false
-    for rule in rules where !done {
-      var rule = rule
-      if let traceRule = rule as? TraceRule {
-        rule = traceRule.rule
-      }
-      switch rule {
-      case let rule as RangeRule:
+    for rule in rules {
+      if !rule.consumesInput {
+        assertions.formIntersection(rule.possibleOpeningCharacters)
+      } else {
         possibilities.formUnion(rule.possibleOpeningCharacters)
-        if rule.range.lowerBound > 0 {
-          done = true
+        if !rule.optional {
+          break
         }
-      case let rule as ZeroOrOneRule:
-        possibilities.formUnion(rule.possibleOpeningCharacters)
-      case let rule as AssertionRule:
-        assertions.formIntersection(rule.possibleOpeningCharacters)
-      case let rule as NotAssertionRule:
-        assertions.formIntersection(rule.possibleOpeningCharacters)
-      default:
-        possibilities.formUnion(rule.possibleOpeningCharacters)
-        done = true
       }
     }
     possibilities.formIntersection(assertions)
@@ -667,6 +667,12 @@ public final class Choice: ParsingRuleSequenceWrapper {
   public override var description: String {
     "CHOICE: \(rules.map(String.init(describing:)).joined(separator: ", "))"
   }
+
+  // This is saying "the choice is optional if all of its subrules are optional"
+  public override var optional: Bool { rules.allSatisfy({ $0.optional }) }
+
+  // If none of the choices consume input, this won't either.
+  public override var consumesInput: Bool { !rules.allSatisfy({ !$0.consumesInput }) }
 }
 
 final class TraceRule: ParsingRuleWrapper {

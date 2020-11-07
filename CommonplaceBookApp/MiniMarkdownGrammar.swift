@@ -161,10 +161,10 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   //       paragraphs.
 
   lazy var blockquoteOpening = InOrder(
-    whitespace.repeating(0 ... 3),
-    Characters([">"]),
-    whitespace.zeroOrOne()
-  ).as(.delimiter).memoize()
+    whitespace.repeating(0 ... 3).as(.text),
+    Characters([">"]).as(.text),
+    whitespace.zeroOrOne().as(.softTab)
+  ).wrapping(in: .delimiter).memoize()
 
   lazy var blockquote = InOrder(
     blockquoteOpening,

@@ -122,7 +122,6 @@ public final class TextEditViewController: UIViewController {
 //    }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
 
-    // TODO
     formatters[.blockquote] = {
       $1.italic = true
       $1.blockquoteBorderColor = UIColor.systemOrange
