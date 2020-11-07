@@ -192,6 +192,25 @@ final class MiniMarkdownParsingTests: XCTestCase {
     )
   }
 
+  func testQandA() {
+    let example = """
+    # Sample file
+
+    Q: Why did I make this file?
+    A: To show how to create Q&A cards.
+
+    Q: Will it have _other_ content?
+    A: Yes! Just to make sure it **works**.
+
+    > And lo, it worked.
+    """
+
+    parseText(
+      example,
+      expectedStructure: "(document (header delimiter tab text) blank_line (question_and_answer (qna_delimiter text tab) (qna_question text) (qna_delimiter text tab) (qna_answer text) text) blank_line (question_and_answer (qna_delimiter text tab) (qna_question text (emphasis delimiter text delimiter) text) (qna_delimiter text tab) (qna_answer text (strong_emphasis delimiter text delimiter) text) text) blank_line (blockquote (delimiter text tab) (paragraph text)))"
+    )
+  }
+
   func testFile() {
     let pieceTable = PieceTable(TestStrings.markdownCanonical)
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)

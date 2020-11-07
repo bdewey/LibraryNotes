@@ -39,6 +39,10 @@ public extension NewNodeType {
   static let cloze: NewNodeType = "cloze"
   static let clozeHint: NewNodeType = "cloze_hint"
   static let clozeAnswer: NewNodeType = "cloze_answer"
+  static let questionAndAnswer: NewNodeType = "question_and_answer"
+  static let qnaQuestion: NewNodeType = "qna_question"
+  static let qnaAnswer: NewNodeType = "qna_answer"
+  static let qnaDelimiter: NewNodeType = "qna_delimiter"
 }
 
 public enum ListType {
@@ -72,6 +76,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     unorderedList,
     orderedList,
     blockquote,
+    questionAndAnswer,
     paragraph
   ).memoize()
 
@@ -88,6 +93,15 @@ public final class MiniMarkdownGrammar: PackratGrammar {
       Choice(newline, dot.assertInverse())
     ).as(.text)
   ).wrapping(in: .header).memoize()
+
+  /// My custom addition to markdown for handling questions-and-answers
+  lazy var questionAndAnswer = InOrder(
+    InOrder(Literal("Q:").as(.text), Literal(" ").as(.softTab)).wrapping(in: .qnaDelimiter),
+    singleLineStyledText.wrapping(in: .qnaQuestion),
+    InOrder(Literal("\nA:").as(.text), Literal(" ").as(.softTab)).wrapping(in: .qnaDelimiter),
+    singleLineStyledText.wrapping(in: .qnaAnswer),
+    paragraphTermination.zeroOrOne().wrapping(in: .text)
+  ).wrapping(in: .questionAndAnswer).memoize()
 
   lazy var paragraph = InOrder(
     nonDelimitedHashtag.zeroOrOne(),
@@ -154,6 +168,12 @@ public final class MiniMarkdownGrammar: PackratGrammar {
 
   lazy var styledText = InOrder(
     InOrder(paragraphTermination.assertInverse(), textStyles.assertInverse(), dot).repeating(0...).as(.text),
+    textStyles.repeating(0...)
+  ).repeating(0...).memoize()
+
+  /// A variant of `styledText` that terminates on the first newline
+  lazy var singleLineStyledText = InOrder(
+    InOrder(Characters(["\n"]).assertInverse(), textStyles.assertInverse(), dot).repeating(0...).as(.text),
     textStyles.repeating(0...)
   ).repeating(0...).memoize()
 

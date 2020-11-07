@@ -111,6 +111,8 @@ public final class TextEditViewController: UIViewController {
 //        attributes.color = UIColor.quaternaryLabel
 //      }
     }
+    formatters[.questionAndAnswer] = { $1.listLevel = 1 }
+    formatters[.qnaDelimiter] = { $1.bold = true }
     formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
 
