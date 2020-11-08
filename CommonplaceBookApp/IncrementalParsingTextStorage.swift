@@ -57,7 +57,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
 
   // MARK: - Stored properties
 
-  private let buffer: IncrementalParsingBuffer
+  public let buffer: IncrementalParsingBuffer
   private let defaultAttributes: AttributedStringAttributes
   private let formattingFunctions: [NewNodeType: FormattingFunction]
   private let replacementFunctions: [NewNodeType: ReplacementFunction]

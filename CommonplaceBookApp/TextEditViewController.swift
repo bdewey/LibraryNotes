@@ -68,7 +68,7 @@ public final class TextEditViewController: UIViewController {
   // Init-time state.
 
   private let parsingRules: ParsingRules
-  private let textStorage: IncrementalParsingTextStorage
+  public let textStorage: IncrementalParsingTextStorage
 
   public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 

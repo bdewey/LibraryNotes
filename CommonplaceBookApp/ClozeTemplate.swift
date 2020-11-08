@@ -61,6 +61,13 @@ public final class ClozeTemplate: ChallengeTemplate {
     DDLogDebug("Found \(clozeSet.count) clozes")
     return clozeSet.compactMap { ClozeTemplate(node: $0.value) }
   }
+
+  public static func extract(from buffer: IncrementalParsingBuffer) -> [ClozeTemplate] {
+    guard let root = try? buffer.result.get() else {
+      return []
+    }
+    return []
+  }
 }
 
 /// Wraps an object to allow hashing based on ObjectIdentifier.

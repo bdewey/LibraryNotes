@@ -109,15 +109,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       completion?()
       return
     }
-    let markdown = textEditViewController.markdown
+    let note = Note(buffer: textEditViewController.textStorage.buffer)
+    self.updateNote(note)
     hasUnsavedChanges = false
-    DispatchQueue.global(qos: .default).async {
-      let note = Note(markdown: markdown, parsingRules: self.parsingRules)
-      DispatchQueue.main.async {
-        self.updateNote(note)
-        completion?()
-      }
-    }
+    completion?()
   }
 
   func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String) {
