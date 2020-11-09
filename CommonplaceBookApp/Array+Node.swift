@@ -6,7 +6,6 @@ import MiniMarkdown
 extension Array where Element == Node {
   func makeChallengeTemplates() -> [ChallengeTemplate] {
     var results: [ChallengeTemplate] = []
-    results.append(contentsOf: ClozeTemplate.extract(from: self))
     results.append(contentsOf: QuoteTemplate.extract(from: self))
     results.append(contentsOf: QuestionAndAnswerTemplate.extract(from: self))
     return results

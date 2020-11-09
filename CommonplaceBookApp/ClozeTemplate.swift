@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import Foundation
-import MiniMarkdown
 import UIKit
 
 extension ChallengeTemplateType {
@@ -19,54 +18,48 @@ extension CodingUserInfoKey {
 public final class ClozeTemplate: ChallengeTemplate {
   public override var type: ChallengeTemplateType { return .cloze }
 
-  /// Designated initializer.
-  /// - parameter node: MiniMarkdown node that contains at least one cloze.
-  public init(node: Node) {
+  public required init?(rawValue: String) {
+    self.markdown = rawValue
+    let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
+    guard let node = try? memoizationTable.parseBuffer(rawValue) else {
+      return nil
+    }
     self.node = node
     super.init()
   }
 
-  public required convenience init?(rawValue: String) {
-    let nodes = ParsingRules.commonplace.parse(rawValue)
-    guard nodes.count == 1 else { return nil }
-    self.init(node: nodes[0])
-  }
-
-  public let node: Node
-  public override var rawValue: String {
-    return node.allMarkdown
-  }
+  public override var rawValue: String { markdown }
+  private let markdown: String
+  private let node: NewNode
 
   // MARK: - CardTemplate conformance
 
   public override var challenges: [Challenge] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
-    let markdown = node.allMarkdown
     return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
-  }
-
-  /// Extracts all cloze templates from a parsed markdown document.
-  /// - parameter markdown: The parsed markdown document.
-  /// - returns: An array of all ClozeTemplates found in the document.
-  public static func extract(from markdown: [Node]) -> [ClozeTemplate] {
-    // Find all paragraphs or list items that contain at least one cloze.
-    let clozes = markdown
-      .map { $0.findNodes(where: { $0.type == .cloze }) }
-      .joined()
-      .compactMap { $0.findFirstAncestor(where: { $0.type == .paragraph || $0.type == .listItem }) }
-
-    // A paragraph or list item that contains more than one cloze will appear more than
-    // one time in `clozes`. Deduplicate using pointer identity.
-    let clozeSet = Set<ObjectIdentityHashable>(clozes.map { ObjectIdentityHashable($0) })
-    DDLogDebug("Found \(clozeSet.count) clozes")
-    return clozeSet.compactMap { ClozeTemplate(node: $0.value) }
   }
 
   public static func extract(from buffer: IncrementalParsingBuffer) -> [ClozeTemplate] {
     guard let root = try? buffer.result.get() else {
       return []
     }
-    return []
+    var clozeParents = [AnchoredNode]()
+    let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
+    anchoredRoot.forEachPath { path, _ in
+      guard path.last?.node.type == .cloze else { return }
+      if let parent = path.reversed().first(where: { $0.node.type == .paragraph || $0.node.type == .listItem }) {
+        clozeParents.append(parent)
+      }
+    }
+    // A paragraph or list item that contains more than one cloze will appear more than
+    // one time in `clozes`. Deduplicate using pointer identity.
+    let clozeSet = Set<ObjectIdentityHashable>(clozeParents.map { ObjectIdentityHashable($0) })
+    DDLogDebug("Found \(clozeSet.count) clozes")
+    return clozeSet.compactMap { wrappedNode -> ClozeTemplate? in
+      let node = wrappedNode.value
+      let chars = buffer[node.range]
+      return ClozeTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
+    }
   }
 }
 

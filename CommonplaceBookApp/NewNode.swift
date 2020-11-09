@@ -152,6 +152,31 @@ public final class NewNode: CustomStringConvertible {
     }
   }
 
+  public func findNodes(where predicate: (NewNode) -> Bool) -> [NewNode] {
+    var results = [NewNode]()
+    forEach { (node, _, _) in
+      if predicate(node) { results.append(node) }
+    }
+    return results
+  }
+
+  public func forEachPath(startIndex: Int = 0, block: ([NewNode], Int, inout Bool) -> Void) {
+    var stop: Bool = false
+    forEachPath(stop: &stop, incomingPath: [], startIndex: startIndex, block: block)
+  }
+
+  private func forEachPath(stop: inout Bool, incomingPath: [NewNode], startIndex: Int, block: ([NewNode], Int, inout Bool) -> Void) {
+    guard !stop else { return }
+    var currentPath = incomingPath
+    currentPath.append(self)
+    block(currentPath, startIndex, &stop)
+    var startIndex = startIndex
+    for child in children where !stop {
+      child.forEachPath(stop: &stop, incomingPath: currentPath, startIndex: startIndex, block: block)
+      startIndex += child.length
+    }
+  }
+
   /// Returns the first (depth-first) node where `predicate` returns true.
   public func first(where predicate: (NewNode) -> Bool) -> NewNode? {
     var result: NewNode?
@@ -253,6 +278,24 @@ public final class AnchoredNode {
   /// - parameter block: Receives the node, the start index of the node. Set the Bool to `false` to stop enumeration.
   public func forEach(_ block: (NewNode, Int, inout Bool) -> Void) {
     node.forEach(startIndex: startIndex, block: block)
+  }
+
+  public func forEachPath(_ block: ([AnchoredNode], inout Bool) -> Void) {
+    var stop = false
+    forEachPath(stop: &stop, path: [], block: block)
+  }
+
+  private func forEachPath(stop: inout Bool, path: [AnchoredNode], block: ([AnchoredNode], inout Bool) -> Void) {
+    guard !stop else { return }
+    var path = path
+    path.append(self)
+    block(path, &stop)
+    var childIndex = startIndex
+    for child in node.children where !stop {
+      let anchoredChild = AnchoredNode(node: child, startIndex: childIndex)
+      anchoredChild.forEachPath(stop: &stop, path: path, block: block)
+      childIndex += child.length
+    }
   }
 
   /// Returns the first AnchoredNode that matches a predicate.

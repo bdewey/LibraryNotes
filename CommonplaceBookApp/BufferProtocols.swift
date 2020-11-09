@@ -32,6 +32,28 @@ public protocol SafeUnicodeBuffer {
   var string: String { get }
 }
 
+/// Make every String a SafeUnicodeBuffer
+extension String: SafeUnicodeBuffer {
+  public subscript(range: NSRange) -> [unichar] {
+    guard
+      let lowerBound = index(startIndex, offsetBy: range.location, limitedBy: endIndex),
+      let upperBound = index(lowerBound, offsetBy: range.length, limitedBy: endIndex)
+    else {
+      return []
+    }
+    return Array(utf16[lowerBound ..< upperBound])
+  }
+
+  public func utf16(at i: Int) -> unichar? {
+    guard let stringIndex = index(startIndex, offsetBy: i, limitedBy: endIndex), stringIndex < endIndex else {
+      return nil
+    }
+    return utf16[stringIndex]
+  }
+
+  public var string: String { self }
+}
+
 public protocol RangeReplaceableSafeUnicodeBuffer: SafeUnicodeBuffer {
   /// Replace the UTF-16 values stored in `range` with the values from `str`.
   mutating func replaceCharacters(in range: NSRange, with str: String)
