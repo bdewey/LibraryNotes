@@ -33,6 +33,7 @@ public extension Note {
   init(buffer: IncrementalParsingBuffer) {
     var challengeTemplates = [ChallengeTemplate]()
     challengeTemplates.append(contentsOf: ClozeTemplate.extract(from: buffer))
+    challengeTemplates.append(contentsOf: QuoteTemplate.extract(from: buffer))
     self.init(
       metadata: Note.Metadata(
         timestamp: Date(),

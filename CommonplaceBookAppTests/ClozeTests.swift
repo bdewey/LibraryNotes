@@ -39,9 +39,8 @@ final class ClozeTests: XCTestCase {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let blocks = parsingRules.parse(example)
-    XCTAssertEqual(blocks.count, 1)
-    let clozeCards = ClozeTemplate.extract(from: blocks).cards as! [ClozeCard] // swiftlint:disable:this force_cast
+    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar.shared)
+    let clozeCards = ClozeTemplate.extract(from: buffer).cards as! [ClozeCard] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
       clozeCards[1].markdown,

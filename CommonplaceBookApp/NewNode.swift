@@ -309,6 +309,16 @@ public final class AnchoredNode {
     }
     return result
   }
+
+  public func findNodes(where predicate: (NewNode) -> Bool) -> [AnchoredNode] {
+    var results = [AnchoredNode]()
+    node.forEach(startIndex: startIndex) { child, startIndex, _ in
+      if predicate(child) {
+        results.append(AnchoredNode(node: child, startIndex: startIndex))
+      }
+    }
+    return results
+  }
 }
 
 // MARK: - Debugging support
