@@ -56,10 +56,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
     """
     var noteIdentifier: Note.Identifier!
-    let withoutHashtagNote = Note(markdown: withoutHashtagText, parsingRules: .commonplace)
+    let withoutHashtagNote = Note(markdown: withoutHashtagText)
     MergeTestCase()
       .withInitialState { storage in
-        noteIdentifier = try storage.createNote(Note(markdown: initialText, parsingRules: .commonplace))
+        noteIdentifier = try storage.createNote(Note(markdown: initialText))
       }
       .performRemoteModification { storage in
         do {
@@ -131,7 +131,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testLocalChangeIsPreserved() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
     MergeTestCase()
       .withInitialState { storage in
@@ -150,7 +150,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testRemoteChangeGetsCopied() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
 
     MergeTestCase()
@@ -169,9 +169,9 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testLastWriterWins() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
-    var conflictingNote = Note(markdown: "I'm going to win! #winning", parsingRules: .commonplace)
+    var conflictingNote = Note(markdown: "I'm going to win! #winning")
     conflictingNote.metadata.timestamp = Date().addingTimeInterval(120)
 
     MergeTestCase()

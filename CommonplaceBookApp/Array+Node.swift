@@ -4,12 +4,6 @@ import Foundation
 import MiniMarkdown
 
 extension Array where Element == Node {
-  func makeChallengeTemplates() -> [ChallengeTemplate] {
-    var results: [ChallengeTemplate] = []
-    results.append(contentsOf: QuestionAndAnswerTemplate.extract(from: self))
-    return results
-  }
-
   /// Extracts the title from an array of nodes.
   ///
   /// - note: If there is a heading anywhere in the nodes, the contents of the first heading

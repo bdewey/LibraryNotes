@@ -10,12 +10,6 @@ extension ChallengeTemplateType {
 
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.
 public final class QuestionAndAnswerTemplate: ChallengeTemplate {
-  /// Designated initializer.
-  public init?(node: QuestionAndAnswer) {
-    self.node = node
-    super.init()
-  }
-
   public required init?(rawValue: String) {
     let nodes = ParsingRules.commonplace.parse(rawValue)
     if nodes.count == 1, let node = nodes[0] as? QuestionAndAnswer {
@@ -36,12 +30,17 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
 
   public override var type: ChallengeTemplateType { return .questionAndAnswer }
 
-  /// Extract templates from parsed minimarkdown.
-  public static func extract(from nodes: [Node]) -> [QuestionAndAnswerTemplate] {
-    return nodes.compactMap { node -> QuestionAndAnswerTemplate? in
-      guard let qNode = node as? QuestionAndAnswer else { return nil }
-      return QuestionAndAnswerTemplate(node: qNode)
-    }
+  public static func extract(from buffer: IncrementalParsingBuffer) -> [QuestionAndAnswerTemplate] {
+    guard let root = try? buffer.result.get() else { return [] }
+    return AnchoredNode(node: root, startIndex: 0)
+      .findNodes(where: { $0.type == .questionAndAnswer })
+      .map {
+        let chars = buffer[$0.range]
+        return String(utf16CodeUnits: chars, count: chars.count)
+      }
+      .compactMap {
+        QuestionAndAnswerTemplate(rawValue: $0)
+      }
   }
 
   /// The single challenge from this template: Ourselves!
