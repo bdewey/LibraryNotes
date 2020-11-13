@@ -37,6 +37,7 @@ public final class MemoizationTable: CustomStringConvertible {
   public let grammar: PackratGrammar
 
   private func reserveCapacity(_ capacity: Int) {
+    assert(memoizedResults.count < capacity)
     memoizedResults = Array(repeating: MemoColumn(), count: capacity)
   }
 
@@ -44,7 +45,9 @@ public final class MemoizationTable: CustomStringConvertible {
   /// - Throws: If the grammar could not parse the entire contents, throws `Error.incompleteParsing`. If the grammar resulted in more than one resulting node, throws `Error.ambiguousParsing`.
   /// - Returns: The single node at the root of the syntax tree resulting from parsing `buffer`
   public func parseBuffer(_ buffer: SafeUnicodeBuffer) throws -> NewNode {
-    reserveCapacity(buffer.count + 1)
+    if memoizedResults.count < buffer.count + 1 {
+      reserveCapacity(buffer.count + 1)
+    }
     let result = grammar.start.parsingResult(from: buffer, at: 0, memoizationTable: self)
     guard let node = result.node, node.length == buffer.count else {
       throw ParsingError.incompleteParsing(length: result.node?.length ?? result.length)
