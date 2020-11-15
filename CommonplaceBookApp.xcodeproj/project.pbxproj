@@ -25,6 +25,8 @@
 		D30D6B532549C44800F5902D /* BufferProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4B2549C44800F5902D /* BufferProtocols.swift */; };
 		D30D6B542549C44800F5902D /* MemoizationTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4C2549C44800F5902D /* MemoizationTable.swift */; };
 		D30D6B552549C44800F5902D /* NewNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4D2549C44800F5902D /* NewNode.swift */; };
+		D30F4028255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F4027255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift */; };
+		D30F402E255D9EDE00AB05EE /* IncrementalParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F402D255D9EDE00AB05EE /* IncrementalParserTests.swift */; };
 		D3198DA723D8859B0098A9D9 /* Sqlite.Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* Sqlite.Note.swift */; };
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
 		D3198DAB23D9DDB50098A9D9 /* Sqlite.NoteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */; };
@@ -178,6 +180,8 @@
 		D30D6B4B2549C44800F5902D /* BufferProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferProtocols.swift; sourceTree = "<group>"; };
 		D30D6B4C2549C44800F5902D /* MemoizationTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoizationTable.swift; sourceTree = "<group>"; };
 		D30D6B4D2549C44800F5902D /* NewNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewNode.swift; sourceTree = "<group>"; };
+		D30F4027255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingTextStorageTests.swift; sourceTree = "<group>"; };
+		D30F402D255D9EDE00AB05EE /* IncrementalParserTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParserTests.swift; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* Sqlite.Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Note.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.NoteText.swift; sourceTree = "<group>"; };
@@ -470,6 +474,8 @@
 		D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
 			isa = PBXGroup;
 			children = (
+				D30F402D255D9EDE00AB05EE /* IncrementalParserTests.swift */,
+				D30F4027255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift */,
 				D3A68EE92556053C0049B8E5 /* TestStrings.swift */,
 				D3A68EE12556040D0049B8E5 /* MiniMarkdownGrammarTests.swift */,
 				D3A68EE22556040D0049B8E5 /* MiniMarkdownParsingTests.swift */,
@@ -828,10 +834,12 @@
 				D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
+				D30F4028255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift in Sources */,
 				D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */,
 				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,
 				D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */,
 				D3A68EE42556040D0049B8E5 /* MiniMarkdownParsingTests.swift in Sources */,
+				D30F402E255D9EDE00AB05EE /* IncrementalParserTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */,
 				D3A68EE32556040D0049B8E5 /* MiniMarkdownGrammarTests.swift in Sources */,

@@ -92,6 +92,28 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     }
   }
 
+  public func rawTextRange(forVisibleRange visibleNSRange: NSRange) -> NSRange {
+    guard
+      let node = try? buffer.result.get(),
+      let visibleRange = Range(visibleNSRange)
+    else {
+      return visibleNSRange
+    }
+    let rawTextIntRange = node.rangeBeforeReplacements(visibleRange)
+    return NSRange(rawTextIntRange)
+  }
+
+  public func visibleTextRange(forRawRange rawNSRange: NSRange) -> NSRange {
+    guard
+      let node = try? buffer.result.get(),
+      let rawRange = Range(rawNSRange)
+    else {
+      return rawNSRange
+    }
+    let visibleIntRange = node.rangeAfterReplacements(rawRange)
+    return NSRange(visibleIntRange)
+  }
+
   /// Gets a subset of the available characters in storage.
   public subscript(range: NSRange) -> [unichar] { buffer[range] }
 
@@ -114,8 +136,14 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     memoizedString = nil
     var changedAttributesRange: Range<Int>?
     beginEditing()
-    buffer.replaceCharacters(in: range, with: str)
-    edited([.editedCharacters], range: range, changeInLength: str.utf16.count - range.length)
+    let bufferRange = rawTextRange(forVisibleRange: range)
+    buffer.replaceCharacters(
+      in: bufferRange,
+      with: str
+    )
+    // Because the edit may change the parse tree, `finalEditedRange` might not be the same as `range`
+    let finalEditedRange = visibleTextRange(forRawRange: bufferRange)
+    edited([.editedCharacters], range: range, changeInLength: str.utf16.count - finalEditedRange.length)
     if case .success(let node) = buffer.result {
       applyAttributes(
         to: node,
@@ -126,7 +154,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     }
     // Deliver delegate messages
     if let range = changedAttributesRange {
-      edited([.editedAttributes], range: NSRange(location: range.lowerBound, length: range.count), changeInLength: 0)
+      edited([.editedAttributes], range: visibleTextRange(forRawRange: NSRange(range)), changeInLength: 0)
     }
     endEditing()
   }
@@ -144,10 +172,19 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       range?.pointee = NSRange(location: 0, length: buffer.count)
       return defaultAttributes
     }
+    var bufferLocation = rawTextRange(forVisibleRange: NSRange(location: location, length: 0)).location
+    repeat {
     // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
-    let leafNode = try! tree.leafNode(containing: location) // swiftlint:disable:this force_try
-    range?.pointee = leafNode.range
-    return leafNode.node.attributedStringAttributes!
+      let leafNode = try! tree.leafNode(containing: bufferLocation) // swiftlint:disable:this force_try
+      let visibleRange = visibleTextRange(forRawRange: leafNode.range)
+      if visibleRange.length > 0 {
+        range?.pointee = visibleRange
+        return leafNode.node.attributedStringAttributes!
+      } else {
+        // We landed on a node that isn't visible in the final result. Skip to the next node.
+        bufferLocation += leafNode.node.length
+      }
+    } while true
   }
 
   /// Sets the attributes for the characters in the specified range to the specified attributes.
@@ -180,6 +217,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     if let replacementFunction = replacementFunctions[node.type], let textReplacement = replacementFunction(node, startingIndex) {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
+      node.textReplacementChangeInLength = textReplacement.count - node.length
       edited([.editedCharacters], range: NSRange(location: startingIndex, length: textReplacement.count), changeInLength: textReplacement.count - node.length)
     } else {
       node.hasTextReplacement = false
@@ -192,6 +230,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       let upperBound = Swift.max(startingIndex + node.length, leafNodeRange?.upperBound ?? Int.min)
       leafNodeRange = lowerBound ..< upperBound
     }
+    var childTextReplacementChangeInLength = 0
     for child in node.children {
       applyAttributes(
         to: child,
@@ -200,8 +239,10 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         leafNodeRange: &leafNodeRange
       )
       childLength += child.length
+      childTextReplacementChangeInLength += child.textReplacementChangeInLength
       node.hasTextReplacement = node.hasTextReplacement || child.hasTextReplacement
     }
+    node.textReplacementChangeInLength += childTextReplacementChangeInLength
   }
 }
 
@@ -220,6 +261,11 @@ private struct NodeTextReplacementKey: NodePropertyKey {
 private struct NodeHasTextReplacementKey: NodePropertyKey {
   typealias Value = Bool
   static let key = "hasTextReplacement"
+}
+
+private struct NodeTextReplacementChangeInLengthKey: NodePropertyKey {
+  typealias Value = Int
+  static let key = "textReplacementChangeInLength"
 }
 
 private extension NewNode {
@@ -249,6 +295,51 @@ private extension NewNode {
     set {
       self[NodeHasTextReplacementKey.self] = newValue
     }
+  }
+
+  var textReplacementChangeInLength: Int {
+    get {
+      self[NodeTextReplacementChangeInLengthKey.self] ?? 0
+    }
+    set {
+      self[NodeTextReplacementChangeInLengthKey.self] = newValue
+    }
+  }
+
+  func changeInLengthBeforeOffset(
+    _ offset: Int,
+    favorLowerBound: Bool
+  ) -> Int {
+    assert(offset >= 0)
+    guard hasTextReplacement else { return 0 }
+    if offset >= length { return textReplacementChangeInLength }
+    if children.isEmpty {
+      if favorLowerBound {
+        return 0
+      } else {
+        return textReplacementChangeInLength
+      }
+    }
+    var childOffset = 0
+    var changeInLength = 0
+    for child in children {
+      if childOffset >= offset { break }
+      changeInLength += child.changeInLengthBeforeOffset(offset - childOffset, favorLowerBound: favorLowerBound)
+      childOffset += child.length
+    }
+    return changeInLength
+  }
+
+  func rangeBeforeReplacements(_ range: Range<Int>) -> Range<Int> {
+    let lowerBound = range.lowerBound - changeInLengthBeforeOffset(range.lowerBound, favorLowerBound: true)
+    let upperBound = range.upperBound - changeInLengthBeforeOffset(range.upperBound, favorLowerBound: false)
+    return lowerBound ..< upperBound
+  }
+
+  func rangeAfterReplacements(_ range: Range<Int>) -> Range<Int> {
+    let lowerBound = range.lowerBound + changeInLengthBeforeOffset(range.lowerBound, favorLowerBound: true)
+    let upperBound = range.upperBound + changeInLengthBeforeOffset(range.upperBound, favorLowerBound: false)
+    return lowerBound ..< upperBound
   }
 
   func childrenAndOffsets(startingAt offset: Int) -> [(child: NewNode, offset: Int)] {
