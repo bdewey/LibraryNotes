@@ -473,7 +473,7 @@ final class WrappingRule: ParsingRuleWrapper {
     var result = rule.parsingResult(from: buffer, at: index, memoizationTable: memoizationTable)
     if !result.succeeded || result.length == 0 { return result }
     if let node = result.node {
-      Swift.assert(node.isFragment)
+      Swift.assert(node.isFragment || node.type == nodeType) // It might already have the right type if we memoized this?
       node.type = nodeType
     } else {
       result.makeNode(type: nodeType)

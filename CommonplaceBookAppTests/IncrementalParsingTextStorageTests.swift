@@ -117,26 +117,7 @@ final class IncrementalParsingTextStorageTests: XCTestCase {
   }
 
   func testVariableLengthReplacements() {
-    let formattingFunctions: [NewNodeType: FormattingFunction] = [
-      .emphasis: { $1.italic = true },
-      .header: { $1.fontSize = 24 },
-      .list: { $1.listLevel += 1 },
-      .strongEmphasis: { $1.bold = true },
-    ]
-    var defaultAttributes: AttributedStringAttributes = [:]
-    defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
-    defaultAttributes.color = .label
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
-    let noDelimiterTextStorage: IncrementalParsingTextStorage = IncrementalParsingTextStorage(
-      grammar: MiniMarkdownGrammar(),
-      defaultAttributes: defaultAttributes,
-      formattingFunctions: formattingFunctions,
-      replacementFunctions: [
-        .softTab: formatTab,
-        .delimiter: { _, _ in [] },
-      ]
-    )
+    let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
     noDelimiterTextStorage.replaceCharacters(in: NSRange(location: 0, length: 0), with: "#### This is a heading")
     XCTAssertEqual(noDelimiterTextStorage.string, "\tThis is a heading")
     XCTAssertEqual(noDelimiterTextStorage.rawTextRange(forVisibleRange: NSRange(location: 0, length: 18)), NSRange(location: 0, length: 22))
@@ -156,6 +137,14 @@ final class IncrementalParsingTextStorageTests: XCTestCase {
       print(effectiveRange)
       location += effectiveRange.length
     }
+  }
+
+  func testQandACardWithReplacements() {
+    let markdown = "Q: Can Q&A cards have *formatting*?\nA: **Yes!** Even `code`!"
+    let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
+    noDelimiterTextStorage.append(NSAttributedString(string: markdown))
+
+    XCTAssertEqual(markdown.count - 8, noDelimiterTextStorage.count)
   }
 
   #if !os(macOS)
@@ -202,6 +191,29 @@ private extension IncrementalParsingTextStorageTests {
       print(plainTextStorage.string.debugDescription)
     }
 //    XCTAssertEqual(textStorage.string, plainTextStorage.string, file: file, line: line)
+  }
+
+  static func makeNoDelimiterStorage() -> IncrementalParsingTextStorage {
+    let formattingFunctions: [NewNodeType: FormattingFunction] = [
+      .emphasis: { $1.italic = true },
+      .header: { $1.fontSize = 24 },
+      .list: { $1.listLevel += 1 },
+      .strongEmphasis: { $1.bold = true },
+    ]
+    var defaultAttributes: AttributedStringAttributes = [:]
+    defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
+    defaultAttributes.color = .label
+    defaultAttributes.headIndent = 28
+    defaultAttributes.firstLineHeadIndent = 28
+    return IncrementalParsingTextStorage(
+      grammar: MiniMarkdownGrammar(),
+      defaultAttributes: defaultAttributes,
+      formattingFunctions: formattingFunctions,
+      replacementFunctions: [
+        .softTab: formatTab,
+        .delimiter: { _, _ in [] },
+      ]
+    )
   }
 }
 

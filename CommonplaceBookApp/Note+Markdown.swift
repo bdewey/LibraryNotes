@@ -49,8 +49,8 @@ public extension IncrementalParsingBuffer {
   var title: String {
     guard let root = try? result.get() else { return "" }
     let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
-    if let header = anchoredRoot.first(where: { $0.type == .header }) {
-      let chars = self[header.range]
+    if let header = anchoredRoot.first(where: { $0.type == .header }), let text = header.first(where: { $0.type == .text }) {
+      let chars = self[text.range]
       return String(utf16CodeUnits: chars, count: chars.count)
     } else if let nonBlank = anchoredRoot.first(where: { $0.type != .blankLine && $0.type != .document }) {
       let chars = self[nonBlank.range]

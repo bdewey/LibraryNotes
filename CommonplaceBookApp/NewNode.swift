@@ -365,6 +365,7 @@ extension NewNode {
     indentLevel: Int
   ) {
     var result = String(repeating: " ", count: 2 * indentLevel)
+    result.append("{\(location), \(length)}")
     result.append(type.rawValue)
     result.append(": ")
     if children.isEmpty {

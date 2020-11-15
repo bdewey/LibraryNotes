@@ -32,7 +32,25 @@ public typealias ReplacementFunction = (NewNode, Int) -> [unichar]?
 
 /// Uses an `IncrementalParsingBuffer` to implement `NSTextStorage`.
 public final class IncrementalParsingTextStorage: NSTextStorage {
+  public struct Settings {
+    var grammar: PackratGrammar
+    var defaultAttributes: AttributedStringAttributes
+    var formattingFunctions: [NewNodeType: FormattingFunction]
+    var replacementFunctions: [NewNodeType: ReplacementFunction]
+  }
+
+  public convenience init(string: String, settings: Settings) {
+    self.init(
+      string: string,
+      grammar: settings.grammar,
+      defaultAttributes: settings.defaultAttributes,
+      formattingFunctions: settings.formattingFunctions,
+      replacementFunctions: settings.replacementFunctions
+    )
+  }
+
   public init(
+    string: String = "",
     grammar: PackratGrammar,
     defaultAttributes: AttributedStringAttributes,
     formattingFunctions: [NewNodeType: FormattingFunction],
@@ -41,8 +59,18 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     self.defaultAttributes = defaultAttributes
     self.formattingFunctions = formattingFunctions
     self.replacementFunctions = replacementFunctions
-    self.buffer = IncrementalParsingBuffer("", grammar: grammar)
+    self.buffer = IncrementalParsingBuffer(string, grammar: grammar)
     super.init()
+    var range: Range<Int>?
+    if case .success(let node) = buffer.result {
+      applyAttributes(
+        to: node,
+        attributes: defaultAttributes,
+        startingIndex: 0,
+        leafNodeRange: &range,
+        deliverDelegateMessages: false
+      )
+    }
   }
 
   required init?(coder: NSCoder) {
@@ -149,7 +177,8 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &changedAttributesRange
+        leafNodeRange: &changedAttributesRange,
+        deliverDelegateMessages: true
       )
     }
     // Deliver delegate messages
@@ -178,6 +207,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       let leafNode = try! tree.leafNode(containing: bufferLocation) // swiftlint:disable:this force_try
       let visibleRange = visibleTextRange(forRawRange: leafNode.range)
       if visibleRange.length > 0 {
+        assert(visibleRange.contains(location))
         range?.pointee = visibleRange
         return leafNode.node.attributedStringAttributes!
       } else {
@@ -206,7 +236,8 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     to node: NewNode,
     attributes: AttributedStringAttributes,
     startingIndex: Int,
-    leafNodeRange: inout Range<Int>?
+    leafNodeRange: inout Range<Int>?,
+    deliverDelegateMessages: Bool
   ) {
     // If we already have attributes we don't need to do anything else.
     guard node[NodeAttributesKey.self] == nil else {
@@ -218,8 +249,14 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
-      edited([.editedCharacters], range: NSRange(location: startingIndex, length: textReplacement.count), changeInLength: textReplacement.count - node.length)
-    } else {
+      if deliverDelegateMessages {
+        edited(
+          [.editedCharacters],
+          range: NSRange(location: startingIndex, length: textReplacement.count),
+          changeInLength: textReplacement.count - node.length
+        )
+      }
+     } else {
       node.hasTextReplacement = false
     }
     node.attributedStringAttributes = attributes
@@ -236,13 +273,45 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         to: child,
         attributes: attributes,
         startingIndex: startingIndex + childLength,
-        leafNodeRange: &leafNodeRange
+        leafNodeRange: &leafNodeRange,
+        deliverDelegateMessages: deliverDelegateMessages
       )
       childLength += child.length
       childTextReplacementChangeInLength += child.textReplacementChangeInLength
       node.hasTextReplacement = node.hasTextReplacement || child.hasTextReplacement
     }
     node.textReplacementChangeInLength += childTextReplacementChangeInLength
+  }
+}
+
+// MARK: - Stylesheets
+// TODO: Move this to a separate file?
+
+public extension IncrementalParsingTextStorage.Settings {
+  static func plainText(
+    textStyle: UIFont.TextStyle,
+    textColor: UIColor = .label,
+    extraAttributes: [NSAttributedString.Key: Any] = [:]
+  ) -> IncrementalParsingTextStorage.Settings {
+    var formattingFunctions = [NewNodeType: FormattingFunction]()
+    var replacementFunctions = [NewNodeType: ReplacementFunction]()
+    formattingFunctions[.emphasis] = { $1.italic = true }
+    formattingFunctions[.strongEmphasis] = { $1.bold = true }
+    formattingFunctions[.code] = { $1.familyName = "Menlo" }
+    replacementFunctions[.delimiter] = { _, _ in [] }
+    replacementFunctions[.clozeHint] = { _, _ in [] }
+    var defaultAttributes: AttributedStringAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: textStyle),
+      .foregroundColor: textColor,
+    ]
+    defaultAttributes.lineHeightMultiple = 1.2
+    defaultAttributes.merge(extraAttributes, uniquingKeysWith: { _, new in new })
+    return IncrementalParsingTextStorage.Settings(
+      grammar: MiniMarkdownGrammar.shared,
+      defaultAttributes: defaultAttributes,
+      formattingFunctions: formattingFunctions,
+      replacementFunctions: replacementFunctions
+    )
   }
 }
 

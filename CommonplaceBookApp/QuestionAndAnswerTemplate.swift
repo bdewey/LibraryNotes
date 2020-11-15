@@ -11,20 +11,13 @@ extension ChallengeTemplateType {
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.
 public final class QuestionAndAnswerTemplate: ChallengeTemplate {
   public required init?(rawValue: String) {
-    let nodes = ParsingRules.commonplace.parse(rawValue)
-    if nodes.count == 1, let node = nodes[0] as? QuestionAndAnswer {
-      self.node = node
-      super.init()
-    } else {
-      return nil
-    }
+    self.markdown = rawValue
+    super.init()
   }
 
   /// The Q&A node.
-  private let node: QuestionAndAnswer
-  public override var rawValue: String {
-    return node.allMarkdown
-  }
+  private let markdown: String
+  public override var rawValue: String { markdown }
 
   // MARK: - Public
 
@@ -54,23 +47,19 @@ extension QuestionAndAnswerTemplate: Challenge {
 
   public func challengeView(document: NoteStorage, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
-    let attributionNodes = properties.parsingRules.parse(properties.attributionMarkdown)
-    if let attributionNode = attributionNodes.first {
-      let attributionRenderer = MarkdownAttributedStringRenderer(
-        textStyle: .subheadline,
-        textColor: .secondaryLabel,
-        extraAttributes: [.kern: 2.0]
-      )
-      view.context = attributionRenderer.render(node: attributionNode).trimmingTrailingWhitespace()
-    } else {
-      view.context = NSAttributedString(string: "")
+    view.context = IncrementalParsingTextStorage(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
+    // TODO: Need to re-invent images :-(
+//    document.addImageRenderer(to: &renderer.renderFunctions)
+    let formattedString = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body))
+    if let node = try? formattedString.buffer.result.get() {
+      let anchoredNode = AnchoredNode(node: node, startIndex: 0)
+      if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
+        view.front = formattedString.attributedSubstring(from: question.range).trimmingTrailingWhitespace()
+      }
+      if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
+        view.back = formattedString.attributedSubstring(from: answer.range).trimmingTrailingWhitespace()
+      }
     }
-    var renderer = MarkdownAttributedStringRenderer(
-      textStyle: .body
-    )
-    document.addImageRenderer(to: &renderer.renderFunctions)
-    view.front = renderer.render(node: node.question).trimmingTrailingWhitespace()
-    view.back = renderer.render(node: node.answer).trimmingTrailingWhitespace()
     return view
   }
 }
