@@ -175,6 +175,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     // Because the edit may change the parse tree, `finalEditedRange` might not be the same as `range`
     let finalEditedRange = visibleTextRange(forRawRange: bufferRange)
     edited([.editedCharacters], range: range, changeInLength: str.utf16.count - finalEditedRange.length)
+    logger.debug("Edit \(range) change in length \(str.utf16.count - finalEditedRange.length)")
     if case .success(let node) = buffer.result {
       applyAttributes(
         to: node,
@@ -187,6 +188,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     // Deliver delegate messages
     if let range = changedAttributesRange {
       edited([.editedAttributes], range: visibleTextRange(forRawRange: NSRange(range)), changeInLength: 0)
+      logger.debug("Changed attributes at \(visibleTextRange(forRawRange: NSRange(range)))")
     }
     endEditing()
   }
@@ -212,7 +214,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       if visibleRange.length > 0 {
         assert(visibleRange.contains(location))
         range?.pointee = visibleRange
-        logger.debug("Found attributes at location \(bufferLocation) for range \(visibleRange)")
+        logger.debug("Found attributes at location \(bufferLocation) for range \(visibleRange) (\(visibleRange.upperBound)), length = \(length)")
         return leafNode.node.attributedStringAttributes!
       } else {
         // We landed on a node that isn't visible in the final result. Skip to the next node.
@@ -259,6 +261,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
           range: NSRange(location: startingIndex, length: textReplacement.count),
           changeInLength: textReplacement.count - node.length
         )
+        logger.debug("Performing text replacement: \(NSRange(location: startingIndex, length: textReplacement.count)) changeInLength \(textReplacement.count - node.length)")
       }
      } else {
       node.hasTextReplacement = false
