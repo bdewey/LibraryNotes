@@ -15,7 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-import CommonplaceBookApp
+@testable import CommonplaceBookApp
 import Foundation
 import XCTest
 
@@ -147,6 +147,20 @@ final class PieceTableTests: XCTestCase {
         index = str.index(after: index)
       }
     }
+  }
+
+  func testIndexMapping() {
+    var pieceTable = PieceTable("# My *header* text")
+    pieceTable.replaceSubrange(pieceTable.startIndex ..< pieceTable.index(pieceTable.startIndex, offsetBy: 2), with: Array("H1\t".utf16))
+    XCTAssertEqual(pieceTable.string, "H1\tMy *header* text")
+    pieceTable.replaceSubrange(pieceTable.index(at: 13) ..< pieceTable.index(at: 14), with: [])
+    pieceTable.replaceSubrange(pieceTable.index(at: 6) ..< pieceTable.index(at: 7), with: [])
+    print(pieceTable)
+    XCTAssertEqual(pieceTable.string, "H1\tMy header text")
+    XCTAssertEqual(pieceTable.indexForOriginalOffset(0), .notFound(lowerBound: nil, upperBound: PieceTable.Index(pieceIndex: 1, contentIndex: 2)))
+    XCTAssertEqual(pieceTable.indexForOriginalOffset(3), .found(at: PieceTable.Index(pieceIndex: 1, contentIndex: 3)))
+    XCTAssertEqual(pieceTable.originalOffsetForIndex(PieceTable.Index(pieceIndex: 1, contentIndex: 3)), .found(at: 3))
+    XCTAssertEqual(pieceTable.originalOffsetForIndex(PieceTable.Index(pieceIndex: 0, contentIndex: 2)), .notFound(lowerBound: nil, upperBound: 2))
   }
 
   /// This never finishes in a reasonable amount of time :-(

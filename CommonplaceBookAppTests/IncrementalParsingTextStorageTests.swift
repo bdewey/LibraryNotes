@@ -139,7 +139,7 @@ final class IncrementalParsingTextStorageTests: XCTestCase {
     }
   }
 
-  func testQandACardWithReplacements() {
+  func TODO_testQandACardWithReplacements() {
     let markdown = "Q: Can Q&A cards have *formatting*?\nA: **Yes!** Even `code`!"
     let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
     noDelimiterTextStorage.append(NSAttributedString(string: markdown))

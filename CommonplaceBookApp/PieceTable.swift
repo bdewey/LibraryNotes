@@ -19,7 +19,7 @@ extension Range where Range.Bound == PieceTable.Index {
 /// It constructs a logical view of the contents from an array of slices of contents from the two arrays.
 public struct PieceTable {
   /// The original, unedited contents
-  private let originalContents: [unichar]
+  private let originalContents: NSString
 
   /// All new characters added to the collection.
   private var addedContents: [unichar]
@@ -43,6 +43,11 @@ public struct PieceTable {
 
     /// True if this piece contains no characters.
     var isEmpty: Bool { startIndex == endIndex }
+
+    /// How many characters are encompassed by this piece.
+    var length: Int { endIndex - startIndex }
+
+    func contains(_ index: Int) -> Bool { (startIndex ..< endIndex).contains(index) }
   }
 
   /// For performance, maintain the current count of UTF-16 characters instead of computing it from walking the pieces.
@@ -52,18 +57,58 @@ public struct PieceTable {
   private var pieces: [Piece]
 
   /// Initialize a piece table with the contents of a string.
-  public init(_ string: String) {
-    self.originalContents = Array(string.utf16)
+  public init(_ originalContents: NSString) {
+    self.originalContents = originalContents
     self.addedContents = []
-    self.count = originalContents.count
-    self.pieces = [Piece(source: .original, startIndex: 0, endIndex: originalContents.count)]
+    self.count = originalContents.length
+    self.pieces = [Piece(source: .original, startIndex: 0, endIndex: originalContents.length)]
+  }
+
+  public init(_ string: String) {
+    self.init(string as NSString)
   }
 
   public init() {
-    self.originalContents = []
-    self.addedContents = []
-    self.count = 0
-    self.pieces = [Piece(source: .original, startIndex: 0, endIndex: 0)]
+    self.init("")
+  }
+
+  /// How far the index is from the start of the collection. Convenient for thinking of 0-based indexing into the collection.
+  public func offset(for index: Index) -> Int { distance(from: startIndex, to: index) }
+
+  public func index(at offset: Int) -> Index { index(startIndex, offsetBy: offset) }
+
+  public enum SearchResult<T>: Equatable where T: Equatable {
+    case found(at: T) // swiftlint:disable:this identifier_name
+    case notFound(lowerBound: T?, upperBound: T?)
+  }
+
+  public func indexForOriginalOffset(_ originalOffset: Int) -> SearchResult<Index> {
+    var previousOriginalIndex: Index?
+    for (index, piece) in pieces.enumerated() where piece.source == .original {
+      if piece.contains(originalOffset) {
+        return .found(at: Index(pieceIndex: index, contentIndex: originalOffset))
+      }
+      if piece.startIndex > originalOffset {
+        // We've gone too far.
+        return .notFound(lowerBound: previousOriginalIndex, upperBound: Index(pieceIndex: index, contentIndex: piece.startIndex))
+      }
+      if !piece.isEmpty {
+        // this is the index of the original content with the highest offset less than the target offset that we've found.
+        previousOriginalIndex = Index(pieceIndex: index, contentIndex: piece.endIndex - 1)
+      }
+    }
+    return .notFound(lowerBound: previousOriginalIndex, upperBound: nil)
+  }
+
+  public func originalOffsetForIndex(_ index: Index) -> SearchResult<Int> {
+    switch pieces[index.pieceIndex].source {
+    case .original:
+      return .found(at: index.contentIndex)
+    case .added:
+      let priorOriginalPiece = pieces.prefix(index.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty })
+      let nextOriginalPiece = pieces.dropFirst(index.pieceIndex).first(where: { $0.source == .original && !$0.isEmpty })
+      return .notFound(lowerBound: priorOriginalPiece.flatMap({ $0.endIndex - 1 }), upperBound: nextOriginalPiece.flatMap({ $0.startIndex }))
+    }
   }
 }
 
@@ -147,19 +192,13 @@ extension PieceTable: Collection {
     return distance
   }
 
-  /// Gets the array for a source.
-  private func sourceArray(for source: PieceSource) -> [unichar] {
-    switch source {
-    case .original:
-      return originalContents
-    case .added:
-      return addedContents
-    }
-  }
-
   public subscript(position: Index) -> unichar {
-    let sourceArray = self.sourceArray(for: pieces[position.pieceIndex].source)
-    return sourceArray[position.contentIndex]
+    switch pieces[position.pieceIndex].source {
+    case .added:
+      return addedContents[position.contentIndex]
+    case .original:
+      return originalContents.character(at: position.contentIndex)
+    }
   }
 
   /// Gets a substring of the PieceTable contents.
@@ -184,10 +223,15 @@ extension PieceTable: Collection {
       let lowerBound = (pieceIndex == bounds.lowerBound.pieceIndex) ? bounds.lowerBound.contentIndex : piece.startIndex
       let upperBound = (pieceIndex == bounds.upperBound.pieceIndex) ? bounds.upperBound.contentIndex : piece.endIndex
       let count = upperBound - lowerBound
-      sourceArray(for: piece.source).withUnsafePointer { arrayPointer in
-        var arrayPointer = arrayPointer
-        arrayPointer += lowerBound
-        buffer.assign(from: arrayPointer, count: count)
+      switch piece.source {
+      case .original:
+        originalContents.getCharacters(buffer, range: NSRange(lowerBound ..< upperBound))
+      case .added:
+        addedContents.withUnsafePointer { arrayPointer in
+          var arrayPointer = arrayPointer
+          arrayPointer += lowerBound
+          buffer.assign(from: arrayPointer, count: count)
+        }
       }
       buffer += count
     }
