@@ -110,6 +110,12 @@ public struct PieceTable {
       return .notFound(lowerBound: priorOriginalPiece.flatMap({ $0.endIndex - 1 }), upperBound: nextOriginalPiece.flatMap({ $0.startIndex }))
     }
   }
+
+  public mutating func revertToOriginal() {
+    addedContents.removeAll()
+    self.count = originalContents.length
+    self.pieces = [Piece(source: .original, startIndex: 0, endIndex: originalContents.length)]
+  }
 }
 
 extension PieceTable: Collection {

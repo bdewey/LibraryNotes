@@ -92,21 +92,19 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
 
   // MARK: - Public
 
-  private var memoizedString: String?
+  private var memoizedString: PieceTableString?
 
   /// The character contents as a single String value.
   // TODO: Memoize
   public override var string: String {
     if let memoizedString = memoizedString {
-      return memoizedString
+      return memoizedString as String
     }
-    var chars = buffer[NSRange(location: 0, length: buffer.count)]
+    memoizedString = PieceTableString(pieceTable: PieceTable(buffer.text))
     if case .success(let node) = buffer.result {
-      applyReplacements(in: node, startingIndex: 0, to: &chars)
+      applyReplacements(in: node, startingIndex: 0, to: memoizedString!)
     }
-    let result = String(utf16CodeUnits: chars, count: chars.count)
-    memoizedString = result
-    return result
+    return memoizedString! as String
   }
 
   /// The character contents as a single String value without any text replacements applied.
@@ -149,13 +147,13 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
   /// - returns: An array of nodes where the first element is the root, and each subsequent node descends one level to the leaf.
   public func path(to index: Int) -> [AnchoredNode] { buffer.path(to: index) }
 
-  private func applyReplacements(in node: NewNode, startingIndex: Int, to array: inout [unichar]) {
+  private func applyReplacements(in node: NewNode, startingIndex: Int, to string: NSMutableString) {
     guard node.hasTextReplacement else { return }
     if let replacement = node.textReplacement {
-      array.replaceSubrange(startingIndex ..< startingIndex + node.length, with: replacement)
+      string.replaceCharacters(in: NSRange(location: startingIndex, length: node.length), with: String(utf16CodeUnits: replacement, count: replacement.count))
     }
     for (child, index) in node.childrenAndOffsets(startingAt: startingIndex).reversed() {
-      applyReplacements(in: child, startingIndex: index, to: &array)
+      applyReplacements(in: child, startingIndex: index, to: string)
     }
   }
 

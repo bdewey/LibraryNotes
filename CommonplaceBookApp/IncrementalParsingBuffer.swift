@@ -25,12 +25,12 @@ public final class IncrementalParsingBuffer {
     let result = Result {
       try memoizationTable.parseBuffer(pieceTable)
     }
-    self.pieceTable = pieceTable
+    self.text = pieceTable
     self.memoizationTable = memoizationTable
     self.result = result
   }
 
-  private let pieceTable: PieceTableString
+  public let text: PieceTableString
   private let memoizationTable: MemoizationTable
   private let grammar: PackratGrammar
   public private(set) var result: Result<NewNode, Error>
@@ -46,21 +46,21 @@ public final class IncrementalParsingBuffer {
 extension IncrementalParsingBuffer: RangeReplaceableSafeUnicodeBuffer {
   public typealias Index = PieceTable.Index
 
-  public var count: Int { pieceTable.count }
+  public var count: Int { text.count }
 
-  public subscript(range: NSRange) -> [unichar] { pieceTable[range] }
+  public subscript(range: NSRange) -> [unichar] { text[range] }
 
   public func utf16(at index: Int) -> unichar? {
-    return pieceTable.utf16(at: index)
+    return text.utf16(at: index)
   }
 
   public func replaceCharacters(in range: NSRange, with str: String) {
-    pieceTable.replaceCharacters(in: range, with: str)
+    text.replaceCharacters(in: range, with: str)
     memoizationTable.applyEdit(originalRange: range, replacementLength: str.utf16.count)
     result = Result {
-      try memoizationTable.parseBuffer(pieceTable)
+      try memoizationTable.parseBuffer(text)
     }
   }
 
-  public var string: String { pieceTable.string }
+  public var string: String { text.string }
 }
