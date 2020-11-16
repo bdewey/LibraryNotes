@@ -80,9 +80,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let factory = LogHandlerFactory()
+    var factory = LogHandlerFactory()
     // Here's how you enable debug logging for different loggers...
-    // factory.logLevelsForLabel["org.brians-brain.MiniMarkdown"] = .debug
+    factory.logLevelsForLabel["IncrementalParsingTextStorage"] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
     DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 

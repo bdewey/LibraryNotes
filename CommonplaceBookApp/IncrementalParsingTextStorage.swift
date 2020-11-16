@@ -21,6 +21,11 @@
   import AppKit
 #endif
 
+import Logging
+
+private let logger = Logger(label: "IncrementalParsingTextStorage")
+
+
 /// Just a handy alias for NSAttributedString attributes
 public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
 
@@ -207,6 +212,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       if visibleRange.length > 0 {
         assert(visibleRange.contains(location))
         range?.pointee = visibleRange
+        logger.debug("Found attributes at location \(bufferLocation) for range \(visibleRange)")
         return leafNode.node.attributedStringAttributes!
       } else {
         // We landed on a node that isn't visible in the final result. Skip to the next node.
