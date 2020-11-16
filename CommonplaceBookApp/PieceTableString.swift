@@ -46,3 +46,16 @@ private let logger = Logger(label: "PieceTableString")
     pieceTable.replaceSubrange(Range(range, in: pieceTable)!, with: aString.utf16)
   }
 }
+
+extension PieceTableString: SafeUnicodeBuffer {
+  public var count: Int { self.length }
+
+  public func utf16(at index: Int) -> unichar? {
+    if index >= length { return nil }
+    return character(at: index)
+  }
+
+  public subscript(range: NSRange) -> [unichar] { pieceTable[range] }
+
+  public var string: String { pieceTable.string }
+}

@@ -19,7 +19,7 @@ import Foundation
 
 public final class IncrementalParsingBuffer {
   public init(_ string: String, grammar: PackratGrammar) {
-    let pieceTable = PieceTable(string)
+    let pieceTable = PieceTableString(pieceTable: PieceTable(string))
     self.grammar = grammar
     let memoizationTable = MemoizationTable(grammar: grammar)
     let result = Result {
@@ -30,7 +30,7 @@ public final class IncrementalParsingBuffer {
     self.result = result
   }
 
-  private var pieceTable: PieceTable
+  private let pieceTable: PieceTableString
   private let memoizationTable: MemoizationTable
   private let grammar: PackratGrammar
   public private(set) var result: Result<NewNode, Error>
@@ -49,10 +49,6 @@ extension IncrementalParsingBuffer: RangeReplaceableSafeUnicodeBuffer {
   public var count: Int { pieceTable.count }
 
   public subscript(range: NSRange) -> [unichar] { pieceTable[range] }
-
-  public subscript<R>(range: R) -> [unichar] where R: RangeExpression, R.Bound == Index {
-    return pieceTable[range]
-  }
 
   public func utf16(at index: Int) -> unichar? {
     return pieceTable.utf16(at: index)
