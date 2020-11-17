@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 import Yams
 
@@ -56,11 +55,7 @@ final class QuoteTemplateTests: XCTestCase {
     let buffer = IncrementalParsingBuffer(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuoteTemplate.extract(from: buffer)
 
-    let renderer = RenderedMarkdown(
-      textStyle: .body,
-      parsingRules: ParsingRules.commonplace
-    )
-    let (front, _) = quoteTemplates[0].renderCardFront(with: renderer)
+    let (front, _) = quoteTemplates[0].renderCardFront()
     XCTAssertEqual(
       front.string,
       "We had to learn for ourselves and, furthermore, we had to teach the despairing men, that it did not really matter what we expected from life, but rather what life expected from us."
