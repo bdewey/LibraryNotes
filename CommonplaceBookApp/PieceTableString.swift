@@ -8,7 +8,7 @@ private let logger = Logger(label: "PieceTableString")
 /// An NSMutableString subclass that uses a PieceTable for its underlying storage.
 @objc public class PieceTableString: NSMutableString {
   /// The underlying storage. Public so mutations can happen directly to its contents.
-  private var pieceTable: PieceTable
+  private(set) public var pieceTable: PieceTable
 
   override public init() {
     self.pieceTable = PieceTable()
@@ -45,6 +45,8 @@ private let logger = Logger(label: "PieceTableString")
   public override func replaceCharacters(in range: NSRange, with aString: String) {
     pieceTable.replaceSubrange(Range(range, in: pieceTable)!, with: aString.utf16)
   }
+
+  public func revertToOriginal() { pieceTable.revertToOriginal() }
 }
 
 extension PieceTableString: SafeUnicodeBuffer {

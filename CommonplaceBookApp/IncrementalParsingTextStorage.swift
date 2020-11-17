@@ -25,7 +25,6 @@ import Logging
 
 private let logger = Logger(label: "IncrementalParsingTextStorage")
 
-
 /// Just a handy alias for NSAttributedString attributes
 public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
 
@@ -65,6 +64,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     self.formattingFunctions = formattingFunctions
     self.replacementFunctions = replacementFunctions
     self.buffer = IncrementalParsingBuffer(string, grammar: grammar)
+    self.memoizedString = PieceTableString(pieceTable: PieceTable(buffer.text))
     super.init()
     var range: Range<Int>?
     if case .success(let node) = buffer.result {
@@ -72,8 +72,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &range,
-        deliverDelegateMessages: false
+        leafNodeRange: &range
       )
     }
   }
@@ -97,26 +96,18 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
 
   // MARK: - Public
 
-  private var memoizedString: PieceTableString?
+  private let memoizedString: PieceTableString
 
   /// The character contents as a single String value.
   // TODO: Memoize
   public override var string: String {
-    if let memoizedString = memoizedString {
-      return memoizedString as String
-    }
-    memoizedString = PieceTableString(pieceTable: PieceTable(buffer.text))
-    if case .success(let node) = buffer.result {
-      applyReplacements(in: node, startingIndex: 0, to: memoizedString!)
-    }
-    return memoizedString! as String
+    return memoizedString as String
   }
 
   /// The character contents as a single String value without any text replacements applied.
   public var rawText: String {
     get {
-      let chars = buffer[NSRange(location: 0, length: buffer.count)]
-      return String(utf16CodeUnits: chars, count: chars.count)
+      buffer.text as String
     }
     set {
       replaceCharacters(in: NSRange(location: 0, length: buffer.count), with: newValue)
@@ -124,25 +115,17 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
   }
 
   public func rawTextRange(forVisibleRange visibleNSRange: NSRange) -> NSRange {
-    guard
-      let node = try? buffer.result.get(),
-      let visibleRange = Range(visibleNSRange)
-    else {
-      return visibleNSRange
-    }
-    let rawTextIntRange = node.rangeBeforeReplacements(visibleRange)
-    return NSRange(rawTextIntRange)
+    let range = Range(visibleNSRange, in: memoizedString.pieceTable)!
+    let lowerBound = memoizedString.pieceTable.findOriginalBound(.lowerBound, forBound: range.lowerBound)
+    let upperBound = memoizedString.pieceTable.findOriginalBound(.upperBound, forBound: range.upperBound)
+    assert(upperBound >= lowerBound)
+    return NSRange(location: lowerBound, length: upperBound - lowerBound)
   }
 
   public func visibleTextRange(forRawRange rawNSRange: NSRange) -> NSRange {
-    guard
-      let node = try? buffer.result.get(),
-      let rawRange = Range(rawNSRange)
-    else {
-      return rawNSRange
-    }
-    let visibleIntRange = node.rangeAfterReplacements(rawRange)
-    return NSRange(visibleIntRange)
+    let lowerBound = memoizedString.pieceTable.findBound(.lowerBound, forOriginalBound: rawNSRange.lowerBound)
+    let upperBound = memoizedString.pieceTable.findBound(.upperBound, forOriginalBound: rawNSRange.upperBound)
+    return NSRange(lowerBound ..< upperBound, in: memoizedString.pieceTable)
   }
 
   /// Gets a subset of the available characters in storage.
@@ -164,28 +147,29 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
 
   /// Replaces the characters in the given range with the characters of the given string.
   public override func replaceCharacters(in range: NSRange, with str: String) {
-    memoizedString = nil
     var changedAttributesRange: Range<Int>?
+    let lengthBeforeChanges = memoizedString.length
     beginEditing()
     let bufferRange = rawTextRange(forVisibleRange: range)
     buffer.replaceCharacters(
       in: bufferRange,
       with: str
     )
-    // Because the edit may change the parse tree, `finalEditedRange` might not be the same as `range`
-    let finalEditedRange = visibleTextRange(forRawRange: bufferRange)
-    edited([.editedCharacters], range: range, changeInLength: str.utf16.count - finalEditedRange.length)
-    logger.debug("Edit \(range) change in length \(str.utf16.count - finalEditedRange.length)")
+    memoizedString.revertToOriginal()
     if case .success(let node) = buffer.result {
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &changedAttributesRange,
-        deliverDelegateMessages: true
+        leafNodeRange: &changedAttributesRange
       )
+      applyReplacements(in: node, startingIndex: 0, to: memoizedString)
     }
     // Deliver delegate messages
+    // Because the edit may change the parse tree, `finalEditedRange` might not be the same as `range`
+    let finalEditedRange = visibleTextRange(forRawRange: bufferRange)
+    edited([.editedCharacters], range: range, changeInLength: memoizedString.length - lengthBeforeChanges)
+    logger.debug("Edit \(range) change in length \(str.utf16.count - finalEditedRange.length)")
     if let range = changedAttributesRange {
       edited([.editedAttributes], range: visibleTextRange(forRawRange: NSRange(range)), changeInLength: 0)
       logger.debug("Changed attributes at \(visibleTextRange(forRawRange: NSRange(range)))")
@@ -242,8 +226,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     to node: NewNode,
     attributes: AttributedStringAttributes,
     startingIndex: Int,
-    leafNodeRange: inout Range<Int>?,
-    deliverDelegateMessages: Bool
+    leafNodeRange: inout Range<Int>?
   ) {
     // If we already have attributes we don't need to do anything else.
     guard node[NodeAttributesKey.self] == nil else {
@@ -255,14 +238,6 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
-      if deliverDelegateMessages {
-        edited(
-          [.editedCharacters],
-          range: NSRange(location: startingIndex, length: textReplacement.count),
-          changeInLength: textReplacement.count - node.length
-        )
-        logger.debug("Performing text replacement: \(NSRange(location: startingIndex, length: textReplacement.count)) changeInLength \(textReplacement.count - node.length)")
-      }
      } else {
       node.hasTextReplacement = false
     }
@@ -280,8 +255,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         to: child,
         attributes: attributes,
         startingIndex: startingIndex + childLength,
-        leafNodeRange: &leafNodeRange,
-        deliverDelegateMessages: deliverDelegateMessages
+        leafNodeRange: &leafNodeRange
       )
       childLength += child.length
       childTextReplacementChangeInLength += child.textReplacementChangeInLength

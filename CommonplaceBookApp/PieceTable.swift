@@ -11,6 +11,15 @@ extension Range where Range.Bound == PieceTable.Index {
   }
 }
 
+extension NSRange {
+  public init<R: RangeExpression>(_ rangeExpression: R, in pieceTable: PieceTable) where R.Bound == PieceTable.Index {
+    let range = rangeExpression.relative(to: pieceTable)
+    let lowerBound = pieceTable.offset(for: range.lowerBound)
+    let upperBound = pieceTable.offset(for: range.upperBound)
+    self.init(location: lowerBound, length: upperBound - lowerBound)
+  }
+}
+
 /// A piece table is a range-replaceable collection of UTF-16 values. At the storage layer, it uses two arrays to store the values:
 ///
 /// 1. Read-only *original contents*
@@ -101,6 +110,10 @@ public struct PieceTable {
   }
 
   public func originalOffsetForIndex(_ index: Index) -> SearchResult<Int> {
+    // special case endIndex?
+    if index == endIndex {
+      return .found(at: originalContents.length)
+    }
     switch pieces[index.pieceIndex].source {
     case .original:
       return .found(at: index.contentIndex)
@@ -108,6 +121,98 @@ public struct PieceTable {
       let priorOriginalPiece = pieces.prefix(index.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty })
       let nextOriginalPiece = pieces.dropFirst(index.pieceIndex).first(where: { $0.source == .original && !$0.isEmpty })
       return .notFound(lowerBound: priorOriginalPiece.flatMap({ $0.endIndex - 1 }), upperBound: nextOriginalPiece.flatMap({ $0.startIndex }))
+    }
+  }
+
+  public enum Bound {
+    case lowerBound
+    case upperBound
+  }
+
+  public func findBound(_ bound: Bound, forOriginalBound originalOffset: Int) -> Index {
+    var previousOriginalPieceIndex: Int?
+    for (index, piece) in pieces.enumerated() where piece.source == .original {
+      if piece.contains(originalOffset) {
+        return Index(pieceIndex: index, contentIndex: originalOffset)
+      }
+      if bound == .upperBound && piece.endIndex == originalOffset {
+        // We're looking for an upper bound at `originalOffset`, and whatever comes after
+        // this current piece is the first thing past `originalOffset`
+        return self.index(after: Index(pieceIndex: index, contentIndex: piece.endIndex - 1))
+      }
+      if piece.startIndex > originalOffset {
+        switch (bound, previousOriginalPieceIndex) {
+        case (.lowerBound, .none):
+          return startIndex
+        case (.lowerBound, .some(let pieceIndex)):
+          if pieceIndex + 1 < pieces.endIndex {
+            let piece = pieces[pieceIndex + 1]
+            return Index(pieceIndex: pieceIndex + 1, contentIndex: piece.startIndex)
+          } else {
+            return endIndex
+          }
+        case (.upperBound, _):
+          return Index(pieceIndex: index, contentIndex: piece.startIndex)
+        }
+      }
+      if !piece.isEmpty {
+        // this is the index of the original content with the highest offset less than the target offset that we've found.
+        previousOriginalPieceIndex = index
+      }
+    }
+    switch bound {
+    case .lowerBound:
+      return startIndex
+    case .upperBound:
+      return endIndex
+    }
+  }
+
+  public func findOriginalBound(_ bound: Bound, forBound updatedBound: Index) -> Int {
+    if updatedBound == endIndex {
+      return originalContents.length
+    }
+    switch pieces[updatedBound.pieceIndex].source {
+    case .original:
+      return updatedBound.contentIndex
+    case .added:
+      switch bound {
+      case .lowerBound:
+        if let priorOriginalPiece = pieces.prefix(updatedBound.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty }) {
+          return priorOriginalPiece.endIndex
+        } else {
+          return 0
+        }
+      case .upperBound:
+        if let nextOriginalPiece = pieces.dropFirst(updatedBound.pieceIndex).first(where: { $0.source == .original && !$0.isEmpty }) {
+          return nextOriginalPiece.startIndex
+        } else {
+          return originalContents.length
+        }
+      }
+    }
+  }
+
+  public var rangeOfChanges: Range<Index> {
+    var lowerBound: Index?
+    var upperBound = startIndex
+
+    for (pieceIndex, piece) in pieces.enumerated() where piece.source == .added && !piece.isEmpty {
+      if lowerBound == nil {
+        lowerBound = Index(pieceIndex: pieceIndex, contentIndex: piece.startIndex)
+      }
+      if pieceIndex + 1 < pieces.count {
+        let nextPiece = pieces[pieceIndex + 1]
+        upperBound = Index(pieceIndex: pieceIndex + 1, contentIndex: nextPiece.startIndex)
+      } else {
+        upperBound = endIndex
+      }
+    }
+
+    if let lowerBound = lowerBound {
+      return lowerBound ..< upperBound
+    } else {
+      return startIndex ..< startIndex
     }
   }
 
