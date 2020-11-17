@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import MiniMarkdown
 import UIKit
 
 extension ChallengeTemplateType {
@@ -54,10 +53,10 @@ extension QuestionAndAnswerTemplate: Challenge {
     if let node = try? formattedString.buffer.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)
       if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
-        view.front = formattedString.attributedSubstring(from: question.range).trimmingTrailingWhitespace()
+        view.front = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: question.range)).trimmingTrailingWhitespace()
       }
       if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
-        view.back = formattedString.attributedSubstring(from: answer.range).trimmingTrailingWhitespace()
+        view.back = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: answer.range)).trimmingTrailingWhitespace()
       }
     }
     return view

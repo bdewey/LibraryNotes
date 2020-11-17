@@ -74,6 +74,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
         startingIndex: 0,
         leafNodeRange: &range
       )
+      applyReplacements(in: node, startingIndex: 0, to: memoizedString)
     }
   }
 
