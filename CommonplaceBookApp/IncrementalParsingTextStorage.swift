@@ -25,9 +25,6 @@ import Logging
 
 private let logger = Logger(label: "IncrementalParsingTextStorage")
 
-/// Just a handy alias for NSAttributedString attributes
-public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
-
 /// A function that modifies NSAttributedString attributes based the syntax tree.
 public typealias FormattingFunction = (NewNode, inout AttributedStringAttributes) -> Void
 

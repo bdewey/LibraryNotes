@@ -29,15 +29,6 @@
         }
       },
       {
-        "package": "MiniMarkdown",
-        "repositoryURL": "https://github.com/bdewey/MiniMarkdown.git",
-        "state": {
-          "branch": null,
-          "revision": "3d14c7489975d40bcf4b089025dacfb86694164a",
-          "version": "0.15.0"
-        }
-      },
-      {
         "package": "SpacedRepetitionScheduler",
         "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
         "state": {
@@ -48,11 +39,11 @@
       },
       {
         "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log.git",
+        "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "74d7b91ceebc85daf387ebb206003f78813f71aa",
-          "version": "1.2.0"
+          "revision": "173f567a2dfec11d74588eea82cecea555bdc0bc",
+          "version": "1.4.0"
         }
       }
     ]
