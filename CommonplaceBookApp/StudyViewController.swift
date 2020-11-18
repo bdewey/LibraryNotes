@@ -350,8 +350,7 @@ public final class StudyViewController: UIViewController {
         document: notebook,
         properties: CardDocumentProperties(
           documentName: sessionChallengeIdentifier.noteIdentifier,
-          attributionMarkdown: sessionChallengeIdentifier.noteTitle,
-          parsingRules: notebook.parsingRules
+          attributionMarkdown: sessionChallengeIdentifier.noteTitle
         )
       )
       challengeView.delegate = self

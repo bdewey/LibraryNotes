@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import MiniMarkdown
 import MobileCoreServices
 import UIKit
 
@@ -14,10 +13,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
   public init(notebook: NoteStorage) {
-    self.parsingRules = notebook.parsingRules
-
     self.textStorage = TextEditViewController.makeTextStorage(
-      parsingRules: parsingRules,
       formatters: TextEditViewController.formatters()
     )
     super.init(nibName: nil, bundle: nil)
@@ -56,7 +52,6 @@ public final class TextEditViewController: UIViewController {
     return SavingTextEditViewController(
       viewController,
       noteIdentifier: nil,
-      parsingRules: notebook.parsingRules,
       noteStorage: notebook
     )
   }
@@ -67,7 +62,6 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  private let parsingRules: ParsingRules
   public let textStorage: IncrementalParsingTextStorage
 
   public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
@@ -133,7 +127,6 @@ public final class TextEditViewController: UIViewController {
   }
 
   private static func makeTextStorage(
-    parsingRules: ParsingRules,
     formatters: [NewNodeType: FormattingFunction]
   ) -> IncrementalParsingTextStorage {
     var defaultAttributes: AttributedStringAttributes = [

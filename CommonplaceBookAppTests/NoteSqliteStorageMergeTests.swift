@@ -244,7 +244,6 @@ private extension NoteSqliteStorageMergeTests {
     return Future<NoteSqliteStorage, Error> { promise in
       let database = NoteSqliteStorage(
         fileURL: fileURL,
-        parsingRules: ParsingRules.commonplace,
         device: device
       )
       database.open { _ in

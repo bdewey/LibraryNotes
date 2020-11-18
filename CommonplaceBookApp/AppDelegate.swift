@@ -3,7 +3,6 @@
 import CocoaLumberjack
 import CoreSpotlight
 import Logging
-import MiniMarkdown
 import UIKit
 
 @objc protocol AppCommands {
@@ -233,7 +232,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     DDLogInfo("Opening document at \"\(url.path)\"")
     let noteArchiveDocument: NoteStorage
     if url.pathExtension == "grail" {
-      noteArchiveDocument = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
+      noteArchiveDocument = NoteSqliteStorage(fileURL: url)
     } else {
       throw Error.unknownFormat
     }
@@ -276,7 +275,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = NoteSqliteStorage(fileURL: url, parsingRules: ParsingRules.commonplace)
+    let document = NoteSqliteStorage(fileURL: url)
     DDLogInfo("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {

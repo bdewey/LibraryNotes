@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import Foundation
-import MiniMarkdown
 import SnapKit
 
 /// Watches for changes from a `TextEditViewController` and saves them to storage.
@@ -11,12 +10,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// Designated initializer.
   /// - parameter viewController: The view controller to monitor.
   /// - parameter noteIdentifier: The identifier for the contents of `viewController`. If nil, the VC holds unsaved content.
-  /// - parameter parsingRules: Rules for parsing the markdown content and extracting metadata.
   /// - parameter noteStorage: Where to save the contents.
-  init(_ viewController: TextEditViewController, noteIdentifier: Note.Identifier?, parsingRules: ParsingRules, noteStorage: NoteStorage) {
+  init(_ viewController: TextEditViewController, noteIdentifier: Note.Identifier?, noteStorage: NoteStorage) {
     self.textEditViewController = viewController
     self.noteIdentifier = noteIdentifier
-    self.parsingRules = parsingRules
     self.noteStorage = noteStorage
     super.init(nibName: nil, bundle: nil)
   }
@@ -26,7 +23,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   internal var noteIdentifier: Note.Identifier?
-  private let parsingRules: ParsingRules
   private let noteStorage: NoteStorage
   private let textEditViewController: TextEditViewController
 
@@ -34,11 +30,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var autosaveTimer: Timer?
 
   internal func setTitleMarkdown(_ markdown: String) {
-    let nodes = parsingRules.parse(markdown)
-    let attributedTitle = nodes
-      .map { return MarkdownAttributedStringRenderer.textOnly.render(node: $0) }
-      .joined()
-    navigationItem.title = attributedTitle.string
+    navigationItem.title = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
   override func viewDidLoad() {

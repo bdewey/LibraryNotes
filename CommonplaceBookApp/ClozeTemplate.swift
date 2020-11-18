@@ -8,12 +8,6 @@ extension ChallengeTemplateType {
   public static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
 }
 
-extension CodingUserInfoKey {
-  /// Used to associate a set of ParsingRules with a decoder. These parsing rules are used
-  /// to parse encoded Markdown into specific nodes.
-  public static let markdownParsingRules = CodingUserInfoKey(rawValue: "markdownParsingRules")!
-}
-
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
 public final class ClozeTemplate: ChallengeTemplate {
   public override var type: ChallengeTemplateType { return .cloze }
