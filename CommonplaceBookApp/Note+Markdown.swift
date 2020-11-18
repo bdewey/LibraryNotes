@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import MiniMarkdown
 
 public extension Note {
   /// Creates a new Note from the contents of a parsed text buffer.

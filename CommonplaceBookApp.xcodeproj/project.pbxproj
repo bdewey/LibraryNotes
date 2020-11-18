@@ -99,7 +99,6 @@
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
-		D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
 		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
@@ -251,7 +250,6 @@
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
-		D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswer.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
 		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
@@ -424,7 +422,6 @@
 				D30D6B282549BD0700F5902D /* PieceTablePlainTextStorage.h */,
 				D30D6B252549BD0700F5902D /* PieceTablePlainTextStorage.m */,
 				D30D6B262549BD0700F5902D /* PieceTableString.swift */,
-				D3C5C7DF232E891200A8BEDF /* QuestionAndAnswer.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
@@ -786,7 +783,6 @@
 				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
 				D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */,
 				D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */,
-				D3C5C7E0232E891200A8BEDF /* QuestionAndAnswer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */,
 				D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */,
