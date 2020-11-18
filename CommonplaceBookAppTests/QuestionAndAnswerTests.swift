@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 
 private let simpleExample = """
@@ -18,20 +17,15 @@ A: Yes! Just to make sure it **works**.
 
 final class QuestionAndAnswerTests: XCTestCase {
   func testParseSimpleExample() {
-    let nodes = ParsingRules.commonplace.parse(simpleExample)
-    XCTAssertEqual(nodes.count, 7)
-    let boldWorlds = nodes[4].children[1].children[2]
-    XCTAssertEqual(boldWorlds.type, .bold)
-    XCTAssertEqual(boldWorlds.allMarkdown, "**works**")
-  }
-
-  func testParseOnlyQuestionAndAnswer() {
-    let text = """
-    Q: Is this a question?
-    A: Yes.
-    """
-    let nodes = ParsingRules.commonplace.parse(text)
-    XCTAssertEqual(nodes.count, 1)
-    XCTAssertEqual(nodes[0].type, .questionAndAnswer)
+    let buffer = IncrementalParsingBuffer(simpleExample, grammar: MiniMarkdownGrammar.shared)
+    guard let tree = try? buffer.result.get() else {
+      XCTFail("Should parse!")
+      return
+    }
+    print(tree.debugDescription(withContentsFrom: simpleExample))
+    XCTAssertEqual(
+      tree.compactStructure,
+      "(document (header delimiter tab text) blank_line (question_and_answer (qna_delimiter text tab) (qna_question text) (qna_delimiter text tab) (qna_answer text) text) blank_line (question_and_answer (qna_delimiter text tab) (qna_question text (emphasis delimiter text delimiter) text) (qna_delimiter text tab) (qna_answer text (strong_emphasis delimiter text delimiter) text) text) blank_line (blockquote (delimiter text tab) (paragraph text)))"
+    )
   }
 }
