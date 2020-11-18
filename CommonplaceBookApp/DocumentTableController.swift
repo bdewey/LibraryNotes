@@ -2,7 +2,6 @@
 
 import CocoaLumberjack
 import Combine
-import MiniMarkdown
 import UIKit
 
 /// Knows how to perform key actions with the document
@@ -28,15 +27,13 @@ public final class DocumentTableController: NSObject {
     self.notebook = notebook
     self.delegate = delegate
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
-    let titleRenderer = RenderedMarkdown.makeTitleRenderer()
     self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
       switch item {
       case .page(let viewProperties):
         return DocumentTableController.cell(
           tableView: tableView,
           indexPath: indexPath,
-          viewProperties: viewProperties,
-          titleRenderer: titleRenderer
+          viewProperties: viewProperties
         )
       }
     }
@@ -260,8 +257,7 @@ private extension DocumentTableController {
   static func cell(
     tableView: UITableView,
     indexPath: IndexPath,
-    viewProperties: ViewProperties,
-    titleRenderer: RenderedMarkdown
+    viewProperties: ViewProperties
   ) -> UITableViewCell? {
     guard
       let cell = tableView.dequeueReusableCell(
@@ -271,8 +267,8 @@ private extension DocumentTableController {
     else {
       preconditionFailure("Forgot to register the right kind of cell")
     }
-    titleRenderer.markdown = viewProperties.noteProperties.title
-    cell.titleLabel.attributedText = titleRenderer.attributedString
+    let title = IncrementalParsingTextStorage(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
+    cell.titleLabel.attributedText = title
     cell.accessibilityLabel = viewProperties.noteProperties.title
     let detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
     cell.detailLabel.attributedText = NSAttributedString(
@@ -283,9 +279,8 @@ private extension DocumentTableController {
       ]
     )
     cell.documentModifiedTimestamp = viewProperties.noteProperties.timestamp
-    if let font = titleRenderer.defaultAttributes[.font] as? UIFont {
-      cell.verticalPadding = max(20, font.lineHeight.roundedToScreenScale() * 1.5)
-    }
+    let font = UIFont.preferredFont(forTextStyle: .headline)
+    cell.verticalPadding = max(20, font.lineHeight.roundedToScreenScale() * 1.5)
     return cell
   }
 

@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import MiniMarkdown
 import UIKit
 
 extension ChallengeTemplateType {
@@ -9,17 +8,8 @@ extension ChallengeTemplateType {
 }
 
 public final class QuoteTemplate: ChallengeTemplate {
-  public init?(quote: BlockQuote) {
-    self.quote = quote
-    super.init()
-  }
-
   public required init?(rawValue: String) {
-    let nodes = ParsingRules.commonplace.parse(rawValue)
-    guard nodes.count == 1, let quote = nodes[0] as? BlockQuote else {
-      return nil
-    }
-    self.quote = quote
+    markdown = rawValue
     super.init()
   }
 
@@ -28,27 +18,26 @@ public final class QuoteTemplate: ChallengeTemplate {
   /// The quote template is itself a card.
   public override var challenges: [Challenge] { return [self] }
 
-  public let quote: BlockQuote
+  private let markdown: String
   public override var rawValue: String {
-    return quote.allMarkdown
+    return markdown
   }
 
-  public static func extract(
-    from markdown: [Node]
-  ) -> [QuoteTemplate] {
-    return markdown
-      .map { $0.findNodes(where: { $0.type == .blockQuote }) }
-      .joined()
-      .compactMap {
-        // swiftlint:disable:next force_cast
-        QuoteTemplate(quote: $0 as! BlockQuote)
+  public static func extract(from buffer: IncrementalParsingBuffer) -> [QuoteTemplate] {
+    guard let root = try? buffer.result.get() else { return [] }
+    let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
+    return anchoredRoot
+      .findNodes(where: { $0.type == .blockquote })
+      .compactMap { node -> QuoteTemplate? in
+        let chars = buffer[node.range]
+        return QuoteTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
       }
   }
 }
 
 extension QuoteTemplate: Challenge {
   public var identifier: String {
-    return quote.allMarkdown
+    return markdown
   }
 
   public var challengeIdentifier: ChallengeIdentifier {
@@ -68,37 +57,28 @@ extension QuoteTemplate: Challenge {
         .kern: 2.0,
       ]
     )
-    let quoteRenderer = RenderedMarkdown(
-      textStyle: .body,
-      parsingRules: properties.parsingRules
-    )
-    let (front, chapterAndVerse) = renderCardFront(with: quoteRenderer)
+    let (front, chapterAndVerse) = renderCardFront()
     view.front = front.trimmingTrailingWhitespace()
-    let attributionRenderer = RenderedMarkdown(
-      textStyle: .caption1,
-      parsingRules: properties.parsingRules
-    )
+    let attribution = IncrementalParsingTextStorage(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, settings: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
     back.append(front.trimmingTrailingWhitespace())
     back.append(NSAttributedString(string: "\n\n"))
-    attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
-    back.append(attributionRenderer.attributedString.trimmingTrailingWhitespace())
+    back.append(attribution.trimmingTrailingWhitespace())
     view.back = back
     return view
   }
 
   public func renderCardFront(
-    with quoteRenderer: RenderedMarkdown
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
-    quoteRenderer.markdown = String(quote.allMarkdown)
-    let chapterAndVerse = quoteRenderer.attributedString.chapterAndVerseAnnotation ?? ""
-    let front = quoteRenderer.attributedString.removingChapterAndVerseAnnotation()
+    let renderedMarkdown = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body))
+    let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""
+    let front = renderedMarkdown.removingChapterAndVerseAnnotation()
     return (front: front, chapterAndVerse: chapterAndVerse)
   }
 }
 
 extension QuoteTemplate: Equatable {
   public static func == (lhs: QuoteTemplate, rhs: QuoteTemplate) -> Bool {
-    return lhs.quote.allMarkdown == rhs.quote.allMarkdown
+    return lhs.markdown == rhs.markdown
   }
 }

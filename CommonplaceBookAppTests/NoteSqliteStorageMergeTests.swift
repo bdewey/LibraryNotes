@@ -2,7 +2,6 @@
 
 import Combine
 @testable import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 
 /// Specific test cases around merging database content.
@@ -56,10 +55,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
     """
     var noteIdentifier: Note.Identifier!
-    let withoutHashtagNote = Note(markdown: withoutHashtagText, parsingRules: .commonplace)
+    let withoutHashtagNote = Note(markdown: withoutHashtagText)
     MergeTestCase()
       .withInitialState { storage in
-        noteIdentifier = try storage.createNote(Note(markdown: initialText, parsingRules: .commonplace))
+        noteIdentifier = try storage.createNote(Note(markdown: initialText))
       }
       .performRemoteModification { storage in
         do {
@@ -131,7 +130,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testLocalChangeIsPreserved() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
     MergeTestCase()
       .withInitialState { storage in
@@ -150,7 +149,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testRemoteChangeGetsCopied() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
 
     MergeTestCase()
@@ -169,9 +168,9 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
 
   func testLastWriterWins() {
     var simpleIdentifier: Note.Identifier!
-    var modifiedNote = Note(markdown: "Updated! #hashtag", parsingRules: .commonplace)
+    var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
-    var conflictingNote = Note(markdown: "I'm going to win! #winning", parsingRules: .commonplace)
+    var conflictingNote = Note(markdown: "I'm going to win! #winning")
     conflictingNote.metadata.timestamp = Date().addingTimeInterval(120)
 
     MergeTestCase()
@@ -244,7 +243,6 @@ private extension NoteSqliteStorageMergeTests {
     return Future<NoteSqliteStorage, Error> { promise in
       let database = NoteSqliteStorage(
         fileURL: fileURL,
-        parsingRules: ParsingRules.commonplace,
         device: device
       )
       database.open { _ in
@@ -295,7 +293,7 @@ private extension NoteSqliteStorageMergeTests {
         try modificationBlock?(database)
         return database
       }
-      .flatMap { database in
+      .flatMap { database -> Future<URL, Error> in
         Future { promise in
           database.close { _ in
             promise(.success(database.fileURL))

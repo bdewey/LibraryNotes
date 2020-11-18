@@ -2,7 +2,6 @@
 
 import CommonCrypto
 import Foundation
-import MiniMarkdown
 
 /// Extensible enum for the different types of card templates.
 /// Also maintains a mapping between each type and the specific CardTemplate class
@@ -61,10 +60,6 @@ open class ChallengeTemplate: RawRepresentable {
   open var challenges: [Challenge] { return [] }
 
   public enum CommonErrors: Error {
-    /// Thrown when there are no ParsingRules in decoder.userInfo[.markdownParsingRules]
-    /// when decoding template.
-    case noParsingRules
-
     /// Thrown when encoded template markdown does not decode to exactly one Node.
     case markdownParseError
   }

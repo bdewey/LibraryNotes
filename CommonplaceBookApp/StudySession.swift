@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import Foundation
-import MiniMarkdown
 
 /// A sequence of challenges for the learner to respond to.
 public struct StudySession {

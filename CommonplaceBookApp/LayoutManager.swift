@@ -2,7 +2,6 @@
 
 import Foundation
 import Logging
-import MiniMarkdown
 import UIKit
 
 private let logger = Logger(label: "org.brians-brian.CommonplaceBookApp.LayoutManager")

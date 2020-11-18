@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import MiniMarkdown
 import MobileCoreServices
 import UIKit
 
@@ -14,14 +13,8 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
   public init(notebook: NoteStorage) {
-    self.parsingRules = notebook.parsingRules
-
-    var renderers = TextEditViewController.renderers
-    notebook.addImageRenderer(to: &renderers)
     self.textStorage = TextEditViewController.makeTextStorage(
-      parsingRules: parsingRules,
-      formatters: TextEditViewController.formatters(),
-      renderers: renderers
+      formatters: TextEditViewController.formatters()
     )
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
@@ -59,7 +52,6 @@ public final class TextEditViewController: UIViewController {
     return SavingTextEditViewController(
       viewController,
       noteIdentifier: nil,
-      parsingRules: notebook.parsingRules,
       noteStorage: notebook
     )
   }
@@ -70,18 +62,17 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  private let parsingRules: ParsingRules
-  private let textStorage: MiniMarkdownTextStorage
+  public let textStorage: IncrementalParsingTextStorage
 
   public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 
   /// The markdown
   public var markdown: String {
     get {
-      return textStorage.markdown
+      return textStorage.rawText
     }
     set {
-      textStorage.markdown = newValue
+      textStorage.rawText = newValue
     }
   }
 
@@ -89,11 +80,11 @@ public final class TextEditViewController: UIViewController {
   public var noteIdentifier: Note.Identifier?
 
   private static func formatters(
-  ) -> [NodeType: RenderedMarkdown.FormattingFunction] {
-    var formatters: [NodeType: RenderedMarkdown.FormattingFunction] = [:]
-    formatters[.heading] = {
-      let heading = $0 as! Heading // swiftlint:disable:this force_cast
-      switch heading.headingLevel {
+  ) -> [NewNodeType: FormattingFunction] {
+    var formatters: [NewNodeType: FormattingFunction] = [:]
+    formatters[.header] = {
+      let headingLevel = $0.children[0].length
+      switch headingLevel {
       case 1:
         $1.textStyle = .title1
       case 2:
@@ -105,23 +96,29 @@ public final class TextEditViewController: UIViewController {
     }
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { delimiter, attributes in
-      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
-        attributes.bold = true
-        attributes.listLevel = 1
-      } else {
-        attributes.color = UIColor.quaternaryLabel
-      }
+      attributes.color = .quaternaryLabel
+      // TODO: Support Q&A cards
+//      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
+//        attributes.bold = true
+//        attributes.listLevel = 1
+//      } else {
+//        attributes.color = UIColor.quaternaryLabel
+//      }
     }
-    formatters[.bold] = { $1.bold = true }
+    formatters[.questionAndAnswer] = { $1.listLevel = 1 }
+    formatters[.qnaDelimiter] = { $1.bold = true }
+    formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
-    formatters[.table] = { $1.familyName = "Menlo" }
-    formatters[.codeSpan] = { $1.familyName = "Menlo" }
+
+    // TODO
+    formatters[.code] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
       $1.color = UIColor.secondaryLabel
     }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
-    formatters[.blockQuote] = {
+
+    formatters[.blockquote] = {
       $1.italic = true
       $1.blockquoteBorderColor = UIColor.systemOrange
       $1.listLevel += 1
@@ -129,45 +126,24 @@ public final class TextEditViewController: UIViewController {
     return formatters
   }
 
-  private static let renderers: [NodeType: RenderedMarkdown.RenderFunction] = {
-    var renderers: [NodeType: RenderedMarkdown.RenderFunction] = [:]
-    renderers[.listItem] = { node, attributes in
-      let listItem = node as! ListItem // swiftlint:disable:this force_cast
-      let text = String(listItem.slice.string[listItem.markerRange])
-      let replacement = listItem.listType == .unordered
-        ? "\u{2022}\t"
-        : text.replacingOccurrences(of: " ", with: "\t")
-      return NSAttributedString(string: replacement, attributes: attributes)
-    }
-    renderers[.delimiter] = { node, attributes in
-      var text = String(node.slice.substring)
-      if node.parent is Heading || node.parent is BlockQuote || node.parent is QuestionAndAnswer.PrefixedLine {
-        text = text.replacingOccurrences(of: " ", with: "\t")
-      }
-      return NSAttributedString(
-        string: text,
-        attributes: attributes
-      )
-    }
-    return renderers
-  }()
-
   private static func makeTextStorage(
-    parsingRules: ParsingRules,
-    formatters: [NodeType: RenderedMarkdown.FormattingFunction],
-    renderers: [NodeType: RenderedMarkdown.RenderFunction]
-  ) -> MiniMarkdownTextStorage {
-    let textStorage = MiniMarkdownTextStorage(
-      parsingRules: parsingRules,
-      formatters: formatters,
-      renderers: renderers
-    )
-    textStorage.defaultAttributes = [
+    formatters: [NewNodeType: FormattingFunction]
+  ) -> IncrementalParsingTextStorage {
+    var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: .body),
       .foregroundColor: UIColor.label,
     ]
-    textStorage.defaultAttributes.headIndent = 28
-    textStorage.defaultAttributes.firstLineHeadIndent = 28
+    defaultAttributes.headIndent = 28
+    defaultAttributes.firstLineHeadIndent = 28
+    let textStorage = IncrementalParsingTextStorage(
+      grammar: MiniMarkdownGrammar.shared,
+      defaultAttributes: defaultAttributes,
+      formattingFunctions: formatters,
+      replacementFunctions: [
+        .softTab: formatTab,
+        .unorderedListOpening: formatBullet,
+      ]
+    )
     return textStorage
   }
 
@@ -282,9 +258,11 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    delegate?.textEditViewController(self, didChange: self.textStorage.markdown)
+    delegate?.textEditViewController(self, didChange: self.textStorage.rawText)
   }
 }
+
+// MARK: - UITextViewDelegate
 
 extension TextEditViewController: UITextViewDelegate {
   func replaceCharacters(in range: NSRange, with str: String) {
@@ -299,47 +277,58 @@ extension TextEditViewController: UITextViewDelegate {
   ) -> Bool {
     // We do syntax highlighting. Don't do typing attributes, ever.
     textView.typingAttributes = [:]
-    guard range.length == 0 else { return true }
-    if text == "\n" {
-      if let currentNode = textStorage.node(at: range.location),
-        let listItem = currentNode.findFirstAncestor(
-          where: { $0.type == .listItem }
-        ) as? ListItem {
-        if listItem.isEmpty {
+
+    // Right now we only do special processing when inserting a newline
+    guard range.length == 0, text == "\n" else { return true }
+    let nodePath = textStorage.path(to: range.location)
+    if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
+      if let paragraph = listItem.first(where: { $0.type == .paragraph }) {
+        let paragraphText = textStorage[paragraph.range]
+        if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
           // List termination! Someone's hitting return on a list item that contains nothing.
           // Erase this marker.
           replaceCharacters(
             in: NSRange(
-              location: listItem.initialLocationPair.rendered,
-              length: listItem.markdown.count
+              location: listItem.startIndex,
+              length: listItem.node.length
             ),
             with: "\n"
           )
           return false
         }
-        switch listItem.listType {
-        case .unordered:
-          replaceCharacters(in: range, with: "\n* ")
-        case .ordered:
-          if let containerNumber = listItem.orderedListNumber {
-            replaceCharacters(in: range, with: "\n\(containerNumber + 1). ")
-          } else {
-            return true
-          }
+      }
+
+      // List continuation!
+      //
+      // I'm force-unwrapping here because if there is a list item in the path but no list,
+      // then the grammar is wrong and crashing is appropriate.
+      let list = nodePath.first(where: { $0.node.type == .list })!
+      let listType = list.node[ListTypeKey.self]!
+      switch listType {
+      case .unordered:
+        replaceCharacters(in: range, with: "\n* ")
+      case .ordered:
+        let listNumber: Int
+        if let listNumberNode = listItem.first(where: { $0.type == .orderedListNumber }) {
+          let chars = textStorage[NSRange(location: listNumberNode.startIndex, length: listNumberNode.node.length)]
+          let string = String(utf16CodeUnits: chars, count: chars.count)
+          listNumber = Int(string) ?? 0
+        } else {
+          listNumber = 0
         }
-      } else if line(at: range.location).hasPrefix("Q: ") {
-        replaceCharacters(in: range, with: "\nA: ")
-      } else if line(at: range.location).hasPrefix("A:\t") {
-        replaceCharacters(in: range, with: "\n\nQ: ")
-      } else {
-        // To make this be a separate paragraph in any conventional Markdown processor, we need
-        // the blank line.
-        replaceCharacters(in: range, with: "\n\n")
+        replaceCharacters(in: range, with: "\n\(listNumber + 1). ")
       }
       return false
+    } else if line(at: range.location).hasPrefix("Q: ") {
+      replaceCharacters(in: range, with: "\nA: ")
+    } else if line(at: range.location).hasPrefix("A:\t") {
+      replaceCharacters(in: range, with: "\n\nQ: ")
     } else {
-      return true
+      // To make this be a separate paragraph in any conventional Markdown processor, we need
+      // the blank line.
+      replaceCharacters(in: range, with: "\n\n")
     }
+    return false
   }
 
   /// Gets the line of text that contains a given location.
@@ -375,4 +364,22 @@ private extension TextEditViewController {
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
   }
+}
+
+// MARK: - Replacement functions
+
+private func formatTab(
+  node: NewNode,
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
+) -> [unichar] {
+  return Array("\t".utf16)
+}
+
+private func formatBullet(
+  node: NewNode,
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
+) -> [unichar] {
+  return Array("\u{2022}".utf16)
 }

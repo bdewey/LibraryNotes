@@ -5,7 +5,6 @@ import Combine
 import Foundation
 import GRDB
 import GRDBCombine
-import MiniMarkdown
 import SpacedRepetitionScheduler
 import Yams
 
@@ -37,17 +36,12 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
   /// Designated initializer.
   public init(
     fileURL: URL,
-    parsingRules: ParsingRules,
     device: DeviceIdentifying = UIDevice.current
   ) {
-    self.parsingRules = parsingRules
     self.device = device
     self.notesDidChange = notesDidChangeSubject.eraseToAnyPublisher()
     super.init(fileURL: fileURL)
   }
-
-  /// Parsing rules used to extract metadata from note contents.
-  public let parsingRules: ParsingRules
 
   /// The device that this instance runs on.
   public let device: DeviceIdentifying
@@ -92,7 +86,6 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
   /// Used for decoding challenge templates.
   private lazy var decoder: JSONDecoder = {
     let decoder = JSONDecoder()
-    decoder.userInfo = [.markdownParsingRules: parsingRules]
     return decoder
   }()
 

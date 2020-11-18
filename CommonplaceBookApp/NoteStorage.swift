@@ -2,16 +2,12 @@
 
 import Combine
 import Foundation
-import MiniMarkdown
 import UIKit
 
 /// Abstract interface for something that can store notes, challenges, and study logs, and can also generate study sessions.
 public protocol NoteStorage: AnyObject {
   /// The URL for the storage.
   var fileURL: URL { get }
-
-  /// The parsing rules used to interpret text contents and extract properties from the note.
-  var parsingRules: ParsingRules { get }
 
   /// Metadata for all notes in the store.
   var allMetadata: [Note.Identifier: Note.Metadata] { get }
@@ -118,8 +114,7 @@ extension NoteStorage {
           challengeIdentifiers ?? [],
           properties: CardDocumentProperties(
             documentName: name,
-            attributionMarkdown: reviewProperties.title,
-            parsingRules: self.parsingRules
+            attributionMarkdown: reviewProperties.title
           )
         )
       }
@@ -147,23 +142,24 @@ extension NoteStorage {
     return Array(hashtags).sorted()
   }
 
+  // TODO: Bring this back in the new architecture
   /// Adds a renderer tthat knows how to render images using assets from this document
   /// - parameter renderers: The collection of render functions
-  public func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
-    renderers[.image] = { [weak self] node, attributes in
-      guard
-        let self = self,
-        let imageNode = node as? Image,
-        let data = try? self.data(for: imageNode.url),
-        let image = data.image(maxSize: 200)
-      else {
-        return NSAttributedString(string: node.markdown, attributes: attributes)
-      }
-      let attachment = NSTextAttachment()
-      attachment.image = image
-      return NSAttributedString(attachment: attachment)
-    }
-  }
+//  public func addImageRenderer(to renderers: inout [NodeType: RenderedMarkdown.RenderFunction]) {
+//    renderers[.image] = { [weak self] node, attributes in
+//      guard
+//        let self = self,
+//        let imageNode = node as? Image,
+//        let data = try? self.data(for: imageNode.url),
+//        let image = data.image(maxSize: 200)
+//      else {
+//        return NSAttributedString(string: node.markdown, attributes: attributes)
+//      }
+//      let attachment = NSTextAttachment()
+//      attachment.image = image
+//      return NSAttributedString(attachment: attachment)
+//    }
+//  }
 }
 
 private extension Data {

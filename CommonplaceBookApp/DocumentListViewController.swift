@@ -4,7 +4,6 @@ import CocoaLumberjack
 import Combine
 import CoreServices
 import CoreSpotlight
-import MiniMarkdown
 import SnapKit
 import UIKit
 
@@ -109,7 +108,7 @@ final class DocumentListViewController: UIViewController {
     )
     textEditViewController.noteIdentifier = noteIdentifier
     textEditViewController.markdown = note.text ?? ""
-    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, parsingRules: notebook.parsingRules, noteStorage: notebook)
+    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, noteStorage: notebook)
     savingWrapper.setTitleMarkdown(note.metadata.title)
     showDetailViewController(savingWrapper)
   }

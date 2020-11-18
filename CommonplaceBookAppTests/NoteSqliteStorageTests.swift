@@ -2,7 +2,6 @@
 
 import Combine
 @testable import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 
 final class NoteSqliteStorageTests: XCTestCase {
@@ -70,7 +69,7 @@ final class NoteSqliteStorageTests: XCTestCase {
     # Title
     >
 
-    """, parsingRules: ParsingRules.commonplace)
+    """)
     makeAndOpenEmptyDatabase { database in
       let identifier = try database.createNote(note)
       let roundTripNote = try database.note(noteIdentifier: identifier)
@@ -155,12 +154,12 @@ final class NoteSqliteStorageTests: XCTestCase {
 
       """
       let modifiedText = originalText.appending("> Out, out, damn spot! (Macbeth)\n")
-      let noteIdentifier = try database.createNote(Note(markdown: originalText, parsingRules: ParsingRules.commonplace))
+      let noteIdentifier = try database.createNote(Note(markdown: originalText))
       let originalNote = try database.note(noteIdentifier: noteIdentifier)
       try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         XCTAssertEqual(note.challengeTemplates.count, 1)
-        note.updateMarkdown(modifiedText, parsingRules: ParsingRules.commonplace)
+        note.updateMarkdown(modifiedText)
         XCTAssertEqual(note.challengeTemplates.count, 2)
         return note
       })
@@ -178,12 +177,12 @@ final class NoteSqliteStorageTests: XCTestCase {
       > To be, or not to be, that is the question.
       """
       let modifiedText = originalText.appending(" (Hamlet)\n")
-      let noteIdentifier = try database.createNote(Note(markdown: originalText, parsingRules: ParsingRules.commonplace))
+      let noteIdentifier = try database.createNote(Note(markdown: originalText))
       let originalNote = try database.note(noteIdentifier: noteIdentifier)
       try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         XCTAssertEqual(note.challengeTemplates.count, 1)
-        note.updateMarkdown(modifiedText, parsingRules: ParsingRules.commonplace)
+        note.updateMarkdown(modifiedText)
         XCTAssertEqual(note.challengeTemplates.count, 1)
         return note
       })
@@ -218,7 +217,7 @@ final class NoteSqliteStorageTests: XCTestCase {
 private extension NoteSqliteStorageTests {
   func makeAndOpenEmptyDatabase(completion: @escaping (NoteSqliteStorage) throws -> Void) {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteSqliteStorage(fileURL: fileURL, parsingRules: ParsingRules.commonplace)
+    let database = NoteSqliteStorage(fileURL: fileURL)
     let completionExpectation = expectation(description: "Expected to call completion routine")
     database.open { success in
       if success {

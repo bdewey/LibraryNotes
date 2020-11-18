@@ -1,17 +1,10 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 @testable import CommonplaceBookApp
-@testable import MiniMarkdown
 import XCTest
 import Yams
 
 final class ClozeTests: XCTestCase {
-  private let parsingRules: ParsingRules = {
-    var parsingRules = ParsingRules()
-    parsingRules.inlineParsers.parsers.insert(Cloze.nodeParser, at: 0)
-    return parsingRules
-  }()
-
   func testFindClozeInText() {
     let example = """
     # Mastering the verb "to be"
@@ -24,41 +17,39 @@ final class ClozeTests: XCTestCase {
        - La nieve ?[to be](es) blanca.
     4. *Estar* with an adjective shows a "change" or "condition."
     """
-    let blocks = parsingRules.parse(example)
-    XCTAssertEqual(blocks[4].type, .list)
-    let clozeNodes = blocks.map { $0.findNodes(where: { $0.type == .cloze }) }.joined()
-    XCTAssertEqual(clozeNodes.count, 1)
-    if let cloze = clozeNodes.first as? Cloze {
-      XCTAssertEqual(cloze.slice.substring, "?[to be](es)")
-      XCTAssertEqual(cloze.hiddenText, "es")
-      XCTAssertEqual(cloze.hint, "to be")
-    }
+    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar())
+    let templates = ClozeTemplate.extract(from: buffer)
+    XCTAssertEqual(templates.count, 1)
   }
 
   func testMultipleClozesInAnItem() {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let blocks = parsingRules.parse(example)
-    XCTAssertEqual(blocks.count, 1)
-    let clozeCards = ClozeTemplate.extract(from: blocks).cards as! [ClozeCard] // swiftlint:disable:this force_cast
+    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar.shared)
+    let clozeCards = ClozeTemplate.extract(from: buffer).cards as! [ClozeCard] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
       clozeCards[1].markdown,
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let cardFrontRenderer = MarkdownAttributedStringRenderer.cardFront(
-      hideClozeAt: clozeCards[0].clozeIndex
-    )
-    let node = parsingRules.parse(clozeCards[0].markdown)[0]
+    let renderedFront = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
     XCTAssertEqual(
-      cardFrontRenderer.render(node: node).string,
+      renderedFront.string,
       "Yo to be de España. ¿De dónde es ustedes?"
     )
     XCTAssertEqual(
-      clozeCards[1].cardFrontRenderer().render(node: node).string,
+      IncrementalParsingTextStorage(
+        string: clozeCards[1].markdown,
+        settings: .clozeRenderer(hidingClozeAt: clozeCards[1].clozeIndex)
+      ).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
+    )
+    let renderedBack = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
+    XCTAssertEqual(
+      renderedBack.string,
+      "Yo soy de España. ¿De dónde es ustedes?"
     )
   }
 
@@ -72,10 +63,12 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = MiniMarkdownTextStorage(
-      parsingRules: parsingRules,
-      formatters: [.cloze: { $1.bold = true }],
-      renderers: [:]
+    let textStorage = IncrementalParsingTextStorage(
+      string: "",
+      grammar: MiniMarkdownGrammar(),
+      defaultAttributes: [:],
+      formattingFunctions: [.cloze: { $1.bold = true }],
+      replacementFunctions: [:]
     )
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)
@@ -98,6 +91,6 @@ final class ClozeTests: XCTestCase {
     // swiftlint:disable:next force_cast
     let actualFont = textStorage.attributes(at: 0, effectiveRange: &testRange)[.font] as! UIFont
     XCTAssert(actualFont.fontDescriptor.symbolicTraits.contains(.traitBold))
-    XCTAssertEqual(testRange, NSRange(location: 0, length: 12))
+    XCTAssertEqual(testRange, NSRange(location: 0, length: 4))
   }
 }

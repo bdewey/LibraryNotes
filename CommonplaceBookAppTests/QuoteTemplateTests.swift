@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 import Yams
 
@@ -32,16 +31,16 @@ private let contentWithCloze = """
 
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
-    let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes)
+    let buffer = IncrementalParsingBuffer(testContent, grammar: MiniMarkdownGrammar.shared)
+    let quoteTemplates = QuoteTemplate.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
     let cards = quoteTemplates.map { $0.challenges }.joined()
     XCTAssertEqual(cards.count, 5)
   }
 
   func testSerialization() {
-    let nodes = ParsingRules().parse(testContent)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes)
+    let buffer = IncrementalParsingBuffer(testContent, grammar: MiniMarkdownGrammar.shared)
+    let quoteTemplates = QuoteTemplate.extract(from: buffer)
     let strings = quoteTemplates.map { $0.rawValue }
     let decodedTemplates = strings.map { QuoteTemplate(rawValue: $0) }
     XCTAssertEqual(decodedTemplates, quoteTemplates)
@@ -53,14 +52,10 @@ final class QuoteTemplateTests: XCTestCase {
   }
 
   func testRenderCloze() {
-    let parsingRules = ParsingRules.commonplace
-    let nodes = parsingRules.parse(contentWithCloze)
-    let quoteTemplates = QuoteTemplate.extract(from: nodes)
-    let renderer = RenderedMarkdown(
-      textStyle: .body,
-      parsingRules: parsingRules
-    )
-    let (front, _) = quoteTemplates[0].renderCardFront(with: renderer)
+    let buffer = IncrementalParsingBuffer(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
+    let quoteTemplates = QuoteTemplate.extract(from: buffer)
+
+    let (front, _) = quoteTemplates[0].renderCardFront()
     XCTAssertEqual(
       front.string,
       "We had to learn for ourselves and, furthermore, we had to teach the despairing men, that it did not really matter what we expected from life, but rather what life expected from us."

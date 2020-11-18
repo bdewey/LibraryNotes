@@ -2,7 +2,6 @@
 
 import CommonplaceBookApp
 import Foundation
-import MiniMarkdown
 
 extension Note {
   static let simpleTest = Note(
@@ -37,7 +36,7 @@ extension Note {
   Q: What is the name of this format?
   A: Question and answer.
 
-  """, parsingRules: ParsingRules.commonplace)
+  """)
 
-  static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).", parsingRules: ParsingRules.commonplace)
+  static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
 }

@@ -3,7 +3,6 @@
 import AVFoundation
 import CocoaLumberjack
 import Foundation
-import MiniMarkdown
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
 /// a hint. The removed word/phrase is a "cloze".
@@ -33,10 +32,8 @@ public struct ClozeCard {
 
   /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
   /// replaced with a hint if present, and highlighted.
-  public func cardFrontRenderer() -> MarkdownAttributedStringRenderer {
-    return MarkdownAttributedStringRenderer.cardFront(
-      hideClozeAt: clozeIndex
-    )
+  public var cardFrontSettings: IncrementalParsingTextStorage.Settings {
+    .clozeRenderer(hidingClozeAt: clozeIndex)
   }
 }
 
@@ -51,33 +48,25 @@ extension ClozeCard: Challenge {
     properties: CardDocumentProperties
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)
-    let nodes = properties.parsingRules.parse(markdown)
-    assert(nodes.count == 1)
-    let node = nodes[0]
     cardView.context = context()
-    let (front, chapterAndVerse) = cardFront(node: node)
-      .decomposedChapterAndVerseAnnotation
+    let (front, chapterAndVerse) = IncrementalParsingTextStorage(string: markdown, settings: cardFrontSettings).decomposedChapterAndVerseAnnotation
     cardView.front = front.trimmingTrailingWhitespace()
     let back = NSMutableAttributedString()
-    back.append(cardBack(node: node).removingChapterAndVerseAnnotation().trimmingTrailingWhitespace())
+    back.append(
+      IncrementalParsingTextStorage(string: markdown, settings: .clozeRenderer(highlightingClozeAt: clozeIndex))
+        .removingChapterAndVerseAnnotation()
+        .trimmingTrailingWhitespace()
+    )
     if !properties.attributionMarkdown.isEmpty {
       back.append(NSAttributedString(string: "\n\n"))
-      let attributionRenderer = RenderedMarkdown(
-        textStyle: .caption1,
-        parsingRules: properties.parsingRules
+      let attribution = IncrementalParsingTextStorage(
+        string: "—" + properties.attributionMarkdown + " " + chapterAndVerse,
+        settings: .plainText(textStyle: .caption1)
       )
-      attributionRenderer.markdown = "—" + properties.attributionMarkdown + " " + chapterAndVerse
-      back.append(attributionRenderer.attributedString.trimmingTrailingWhitespace())
+      back.append(attribution.trimmingTrailingWhitespace())
     }
     cardView.back = back
     return cardView
-  }
-
-  func utterance(node: Node) -> AVSpeechUtterance {
-    let phrase = clozeRenderer.render(node: node).string
-    let utterance = AVSpeechUtterance(string: phrase)
-    utterance.voice = AVSpeechSynthesisVoice(language: "en-GB")
-    return utterance
   }
 
   func context() -> NSAttributedString {
@@ -88,80 +77,122 @@ extension ClozeCard: Challenge {
       attributes: [.font: font, .kern: 2.0, .foregroundColor: UIColor.secondaryLabel]
     )
   }
-
-  func cardFront(node: Node) -> NSAttributedString {
-    return cardFrontRenderer().render(node: node)
-  }
-
-  func cardBack(node: Node) -> NSAttributedString {
-    return MarkdownAttributedStringRenderer
-      .cardBackRenderer(revealingClozeAt: clozeIndex)
-      .render(node: node)
-  }
 }
 
-extension MarkdownAttributedStringRenderer {
-  /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
-  /// highlight the cloze.
-  static func cardFront(
-    hideClozeAt index: Int
-  ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
-    var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node, attributes in
-      guard let cloze = node as? Cloze else { return NSAttributedString() }
-      let shouldHide = renderedCloze == index
-      renderedCloze += 1
+extension IncrementalParsingTextStorage.Settings {
+  static func clozeRenderer(hidingClozeAt index: Int) -> IncrementalParsingTextStorage.Settings {
+    var settings = IncrementalParsingTextStorage.Settings.plainText(textStyle: .body)
+    var replaceClozeCount = 0
+    settings.replacementFunctions[.cloze] = { node, startIndex, buffer in
+      let shouldHide = replaceClozeCount == index
+      replaceClozeCount += 1
       if shouldHide {
-        if cloze.hint.strippingLeadingAndTrailingWhitespace.isEmpty {
-          // There is no real hint. So instead put the hidden text but render it using the
-          // background color. That way it takes up the correct amount of space in the string,
-          // but is still invisible.
-          var attributes = attributes.withClozeHighlight
-          attributes[.foregroundColor] = UIColor.clear
-          return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
+        let hintNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeHint })
+        let hintChars = hintNode.flatMap({ buffer[$0.range] }) ?? []
+        let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
+        if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
+          return Array("   ".utf16)
         } else {
-          return NSAttributedString(
-            string: String(cloze.hint),
-            attributes: attributes.withClozeHighlight
-          )
+          return Array(hint.utf16)
         }
       } else {
-        return NSAttributedString(
-          string: String(cloze.hiddenText),
-          attributes: attributes
-        )
+        if let answerNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeAnswer }) {
+          return buffer[answerNode.range]
+        } else {
+          assertionFailure()
+          return []
+        }
       }
     }
-    return renderer
+
+    var formatClozeCount = 0
+    settings.formattingFunctions[.cloze] = { _, attributes in
+      let shouldHighlight = formatClozeCount == index
+      formatClozeCount += 1
+      if shouldHighlight {
+        attributes[.foregroundColor] = UIColor.secondaryLabel
+        attributes[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+      }
+    }
+    return settings
   }
 
-  /// Builds a renderer that will show and highlight the cloze at clozeIndex.
-  static func cardBackRenderer(
-    revealingClozeAt index: Int
-  ) -> MarkdownAttributedStringRenderer {
-    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
-    var localClozeAttributes = renderer.defaultAttributes.withClozeHighlight
-    localClozeAttributes[.foregroundColor] = UIColor.label
-    var renderedCloze = 0
-    renderer.renderFunctions[.cloze] = { node, attributes in
-      let finalAttributes = renderedCloze == index ? attributes.withClozeHighlight : attributes
-      renderedCloze += 1
-      guard let cloze = node as? Cloze else { return NSAttributedString() }
-      return NSAttributedString(string: String(cloze.hiddenText), attributes: finalAttributes)
+  static func clozeRenderer(highlightingClozeAt index: Int) -> IncrementalParsingTextStorage.Settings {
+    var settings = IncrementalParsingTextStorage.Settings.plainText(textStyle: .body)
+    var formatClozeCount = 0
+    settings.formattingFunctions[.cloze] = { _, attributes in
+      let shouldHighlight = formatClozeCount == index
+      formatClozeCount += 1
+      if shouldHighlight {
+        attributes[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+      }
     }
-    return renderer
+    return settings
   }
 }
 
-private let clozeRenderer: MarkdownAttributedStringRenderer = {
-  var renderer = MarkdownAttributedStringRenderer.textOnly
-  renderer.renderFunctions[.cloze] = { node, _ in
-    guard let cloze = node as? Cloze else { return NSAttributedString() }
-    return NSAttributedString(string: String(cloze.hiddenText))
-  }
-  return renderer
-}()
+//extension MarkdownAttributedStringRenderer {
+//  /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
+//  /// highlight the cloze.
+//  static func cardFront(
+//    hideClozeAt index: Int
+//  ) -> MarkdownAttributedStringRenderer {
+//    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
+//    var renderedCloze = 0
+//    renderer.renderFunctions[.cloze] = { node, attributes in
+//      guard let cloze = node as? Cloze else { return NSAttributedString() }
+//      let shouldHide = renderedCloze == index
+//      renderedCloze += 1
+//      if shouldHide {
+//        if cloze.hint.strippingLeadingAndTrailingWhitespace.isEmpty {
+//          // There is no real hint. So instead put the hidden text but render it using the
+//          // background color. That way it takes up the correct amount of space in the string,
+//          // but is still invisible.
+//          var attributes = attributes.withClozeHighlight
+//          attributes[.foregroundColor] = UIColor.clear
+//          return NSAttributedString(string: String(cloze.hiddenText), attributes: attributes)
+//        } else {
+//          return NSAttributedString(
+//            string: String(cloze.hint),
+//            attributes: attributes.withClozeHighlight
+//          )
+//        }
+//      } else {
+//        return NSAttributedString(
+//          string: String(cloze.hiddenText),
+//          attributes: attributes
+//        )
+//      }
+//    }
+//    return renderer
+//  }
+//
+//  /// Builds a renderer that will show and highlight the cloze at clozeIndex.
+//  static func cardBackRenderer(
+//    revealingClozeAt index: Int
+//  ) -> MarkdownAttributedStringRenderer {
+//    var renderer = MarkdownAttributedStringRenderer(textStyle: .body)
+//    var localClozeAttributes = renderer.defaultAttributes.withClozeHighlight
+//    localClozeAttributes[.foregroundColor] = UIColor.label
+//    var renderedCloze = 0
+//    renderer.renderFunctions[.cloze] = { node, attributes in
+//      let finalAttributes = renderedCloze == index ? attributes.withClozeHighlight : attributes
+//      renderedCloze += 1
+//      guard let cloze = node as? Cloze else { return NSAttributedString() }
+//      return NSAttributedString(string: String(cloze.hiddenText), attributes: finalAttributes)
+//    }
+//    return renderer
+//  }
+//}
+//
+//private let clozeRenderer: MarkdownAttributedStringRenderer = {
+//  var renderer = MarkdownAttributedStringRenderer.textOnly
+//  renderer.renderFunctions[.cloze] = { node, _ in
+//    guard let cloze = node as? Cloze else { return NSAttributedString() }
+//    return NSAttributedString(string: String(cloze.hiddenText))
+//  }
+//  return renderer
+//}()
 
 private extension AttributedStringAttributes {
   var withClozeHighlight: AttributedStringAttributes {
