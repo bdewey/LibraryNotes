@@ -377,14 +377,16 @@ private extension TextEditViewController {
 
 private func formatTab(
   node: NewNode,
-  startIndex: Int
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
 ) -> [unichar] {
   return Array("\t".utf16)
 }
 
 private func formatBullet(
   node: NewNode,
-  startIndex: Int
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
 ) -> [unichar] {
   return Array("\u{2022}".utf16)
 }

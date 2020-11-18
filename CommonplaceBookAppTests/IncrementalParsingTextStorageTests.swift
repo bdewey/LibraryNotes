@@ -21,7 +21,8 @@ import XCTest
 
 private func formatTab(
   node: NewNode,
-  startIndex: Int
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
 ) -> [unichar] {
   return Array("\t".utf16)
 }
@@ -211,7 +212,7 @@ private extension IncrementalParsingTextStorageTests {
       formattingFunctions: formattingFunctions,
       replacementFunctions: [
         .softTab: formatTab,
-        .delimiter: { _, _ in [] },
+        .delimiter: { _, _, _ in [] },
       ]
     )
   }

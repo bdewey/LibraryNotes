@@ -32,7 +32,7 @@ public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
 public typealias FormattingFunction = (NewNode, inout AttributedStringAttributes) -> Void
 
 /// A function that overlays replacements...
-public typealias ReplacementFunction = (NewNode, Int) -> [unichar]?
+public typealias ReplacementFunction = (NewNode, Int, SafeUnicodeBuffer) -> [unichar]?
 
 /// Uses an `IncrementalParsingBuffer` to implement `NSTextStorage`.
 public final class IncrementalParsingTextStorage: NSTextStorage {
@@ -140,9 +140,10 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     guard node.hasTextReplacement else { return }
     if let replacement = node.textReplacement {
       string.replaceCharacters(in: NSRange(location: startingIndex, length: node.length), with: String(utf16CodeUnits: replacement, count: replacement.count))
-    }
-    for (child, index) in node.childrenAndOffsets(startingAt: startingIndex).reversed() {
-      applyReplacements(in: child, startingIndex: index, to: string)
+    } else {
+      for (child, index) in node.childrenAndOffsets(startingAt: startingIndex).reversed() {
+        applyReplacements(in: child, startingIndex: index, to: string)
+      }
     }
   }
 
@@ -235,7 +236,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     }
     var attributes = attributes
     formattingFunctions[node.type]?(node, &attributes)
-    if let replacementFunction = replacementFunctions[node.type], let textReplacement = replacementFunction(node, startingIndex) {
+    if let replacementFunction = replacementFunctions[node.type], let textReplacement = replacementFunction(node, startingIndex, buffer) {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
@@ -280,8 +281,8 @@ public extension IncrementalParsingTextStorage.Settings {
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.strongEmphasis] = { $1.bold = true }
     formattingFunctions[.code] = { $1.familyName = "Menlo" }
-    replacementFunctions[.delimiter] = { _, _ in [] }
-    replacementFunctions[.clozeHint] = { _, _ in [] }
+    replacementFunctions[.delimiter] = { _, _, _ in [] }
+    replacementFunctions[.clozeHint] = { _, _, _ in [] }
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: textStyle),
       .foregroundColor: textColor,
