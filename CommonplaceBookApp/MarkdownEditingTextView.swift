@@ -1,7 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
-import MiniMarkdown
 import MobileCoreServices
 import UIKit
 
@@ -19,9 +18,10 @@ public protocol MarkdownEditingTextViewImageStoring: AnyObject {
 public final class MarkdownEditingTextView: UITextView {
   public override func copy(_ sender: Any?) {
     // swiftlint:disable:next force_cast
-    let markdownTextStorage = textStorage as! MiniMarkdownTextStorage
-    guard let range = markdownTextStorage.markdownRange(for: selectedRange) else { return }
-    UIPasteboard.general.string = String(markdownTextStorage.markdown[range])
+    let markdownTextStorage = textStorage as! IncrementalParsingTextStorage
+    let rawTextRange = markdownTextStorage.rawTextRange(forVisibleRange: selectedRange)
+    guard let stringRange = Range(rawTextRange, in: markdownTextStorage.rawText) else { return }
+    UIPasteboard.general.string = String(markdownTextStorage.rawText[stringRange])
   }
 
   public override func canPaste(_ itemProviders: [NSItemProvider]) -> Bool {
