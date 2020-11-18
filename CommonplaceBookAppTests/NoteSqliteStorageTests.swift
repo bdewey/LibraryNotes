@@ -2,7 +2,6 @@
 
 import Combine
 @testable import CommonplaceBookApp
-import MiniMarkdown
 import XCTest
 
 final class NoteSqliteStorageTests: XCTestCase {

@@ -66,7 +66,6 @@
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36214652334F607008C8FF4 /* LayoutManager.swift */; };
 		D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362CC2E25431C6E00462683 /* NotebookViewController.swift */; };
-		D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */; };
 		D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */; };
 		D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
@@ -217,7 +216,6 @@
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
 		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
-		D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestMetadataProvider.swift; sourceTree = "<group>"; };
 		D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanTranslationClassifier.swift; sourceTree = "<group>"; };
 		D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGVector+Extensions.swift"; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
@@ -476,7 +474,6 @@
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
 				D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
-				D36BC17B21B572ED00935691 /* TestMetadataProvider.swift */,
 			);
 			path = CommonplaceBookAppTests;
 			sourceTree = "<group>";
@@ -813,7 +810,6 @@
 				D3A68EEA2556053C0049B8E5 /* TestStrings.swift in Sources */,
 				D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
-				D36BC17C21B572ED00935691 /* TestMetadataProvider.swift in Sources */,
 				D30F4028255D86F700AB05EE /* IncrementalParsingTextStorageTests.swift in Sources */,
 				D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */,
 				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,

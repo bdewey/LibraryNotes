@@ -2,7 +2,6 @@
 
 import CommonplaceBookApp
 import Foundation
-import MiniMarkdown
 
 extension Note {
   static let simpleTest = Note(
