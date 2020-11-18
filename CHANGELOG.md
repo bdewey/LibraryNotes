@@ -4,6 +4,7 @@
 
 ### Changed
 
+- **Huge** internal rewrite, based on piece tables and incremental packrat parsing of a PEG grammar. Bug risk: **extremely high.**
 - Follows the UI convention of Apple Notes. When collapsed, there is a "compose" button in the toolbar on all columns. When expanded, the "compose" button is in the navigation bar of the detail column.
 
 ### Fixed
