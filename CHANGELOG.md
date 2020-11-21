@@ -2,6 +2,12 @@
 
 ## [0.28.0] - 2020-11-18
 
+### Fixed
+
+- Inline styles applied to a single character didn't get applied
+
+## Unreleased
+
 ### Changed
 
 - **Huge** internal rewrite, based on piece tables and incremental packrat parsing of a PEG grammar. Bug risk: **extremely high.**
