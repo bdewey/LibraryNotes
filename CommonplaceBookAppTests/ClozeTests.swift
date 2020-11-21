@@ -2,7 +2,6 @@
 
 @testable import CommonplaceBookApp
 import XCTest
-import Yams
 
 final class ClozeTests: XCTestCase {
   func testFindClozeInText() {
