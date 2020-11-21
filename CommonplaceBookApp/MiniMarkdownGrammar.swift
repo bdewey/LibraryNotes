@@ -125,7 +125,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
         rightFlanking.assertInverse(),
         paragraphTermination.assertInverse(),
         dot
-      ).repeating(1...).as(.text),
+      ).repeating(0...).as(.text),
       rightFlanking
     ).wrapping(in: nodeType).memoize()
   }
