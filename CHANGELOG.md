@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Removed
+
+- No more Yams pod.
+
 ### Fixed
 
 - Inline styles applied to a single character didn't get applied

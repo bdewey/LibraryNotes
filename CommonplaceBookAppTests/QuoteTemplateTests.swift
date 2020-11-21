@@ -2,7 +2,6 @@
 
 import CommonplaceBookApp
 import XCTest
-import Yams
 
 private let testContent = """
 # *Educated*, Tara Westover

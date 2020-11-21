@@ -6,7 +6,6 @@ import Foundation
 import GRDB
 import GRDBCombine
 import SpacedRepetitionScheduler
-import Yams
 
 // swiftlint:disable file_length
 
@@ -819,7 +818,7 @@ private extension NoteSqliteStorage {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
     }
-    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) ?? klass.init(rawValue: challengeTemplateRecord.rawValue.yamlUnescaped) else {
+    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) else {
       throw Error.cannotDecodeTemplate
     }
     template.templateIdentifier = challengeTemplateRecord.id
@@ -903,16 +902,6 @@ private extension Sqlite.StudyLogEntry {
       return .hard
     }
     return .again
-  }
-}
-
-private extension String {
-  var yamlUnescaped: String {
-    do {
-      return try YAMLDecoder().decode(String.self, from: self, userInfo: [:])
-    } catch {
-      return ""
-    }
   }
 }
 
