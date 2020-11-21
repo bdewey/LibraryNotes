@@ -1,12 +1,12 @@
 # Changelog
 
-## [0.28.0] - 2020-11-18
+## Unreleased
 
 ### Fixed
 
 - Inline styles applied to a single character didn't get applied
 
-## Unreleased
+## [0.28.0] - 2020-11-18
 
 ### Changed
 
