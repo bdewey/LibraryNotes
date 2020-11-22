@@ -76,6 +76,7 @@
 		D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */; };
 		D393F2BC241439EE00A6DABB /* Sqlite.ChangeLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */; };
 		D393F2BE24143CC100A6DABB /* Sqlite.Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */; };
+		D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D2458256AD22900948A72 /* ParsedAttributedString.swift */; };
 		D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */; };
 		D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */; };
 		D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */; };
@@ -226,6 +227,7 @@
 		D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorage.swift; sourceTree = "<group>"; };
 		D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.ChangeLog.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Device.swift; sourceTree = "<group>"; };
+		D39D2458256AD22900948A72 /* ParsedAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedString.swift; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.StudyLogEntry.swift; sourceTree = "<group>"; };
 		D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Asset.swift; sourceTree = "<group>"; };
 		D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeableRecord.swift; sourceTree = "<group>"; };
@@ -376,7 +378,6 @@
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
-				D3D05D2925507C89007C443A /* ParsedString.swift */,
 				D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
@@ -401,6 +402,8 @@
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
 				D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */,
+				D39D2458256AD22900948A72 /* ParsedAttributedString.swift */,
+				D3D05D2925507C89007C443A /* ParsedString.swift */,
 				D30D6B492549C44700F5902D /* ParsingRule.swift */,
 				D30D6B272549BD0700F5902D /* PieceTable.swift */,
 				D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */,
@@ -647,6 +650,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
+				D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */,
 				D30D6B4E2549C44800F5902D /* CharacterSet+Extensions.swift in Sources */,
