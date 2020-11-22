@@ -75,7 +75,7 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
     do {
       try extractMetadata()
     } catch {
-      DDLogError("Unexpected error extracting metadata from \(container): \(error)")
+      Logger.shared.error("Unexpected error extracting metadata from \(container): \(error)")
     }
   }
 }

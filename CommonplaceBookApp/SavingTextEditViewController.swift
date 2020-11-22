@@ -87,7 +87,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier!)")
       }
     } catch {
-      DDLogError("SavingTextEditViewController: Unexpected error saving page: \(error)")
+      Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")
       let alert = UIAlertController(title: "Oops", message: "There was an error saving this note: \(error)", preferredStyle: .alert)
       alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
       present(alert, animated: true, completion: nil)

@@ -58,7 +58,7 @@ public final class MarkdownEditingTextView: UITextView {
         Logger.shared.info("Did JPEG conversion ourselves = \(convertedData.count) bytes")
         imageKey = try? imageStorage.markdownEditingTextView(self, store: convertedData, suffix: "jpeg")
       } else {
-        DDLogError("Could not get image data")
+        Logger.shared.error("Could not get image data")
         imageKey = nil
       }
       if let imageKey = imageKey {

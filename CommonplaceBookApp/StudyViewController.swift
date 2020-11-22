@@ -362,7 +362,7 @@ public final class StudyViewController: UIViewController {
       }
       completion(challengeView)
     } catch {
-      DDLogError("Unexpected error generating challenge view: \(error)")
+      Logger.shared.error("Unexpected error generating challenge view: \(error)")
       completion(nil)
     }
   }

@@ -108,7 +108,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         try openDocument(at: url, from: browser, animated: false)
         didOpenSavedDocument = true
       } catch {
-        DDLogError("Unexpected error opening document: \(error.localizedDescription)")
+        Logger.shared.error("Unexpected error opening document: \(error.localizedDescription)")
       }
     }
     if !didOpenSavedDocument {
@@ -275,7 +275,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
       Logger.shared.info("Created directory at \(directoryURL)")
     } catch {
-      DDLogError("Unable to create temporary directory at \(directoryURL.path): \(error)")
+      Logger.shared.error("Unable to create temporary directory at \(directoryURL.path): \(error)")
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
@@ -283,7 +283,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     Logger.shared.info("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {
-        DDLogError("Could not open document")
+        Logger.shared.error("Could not open document")
         importHandler(nil, .none)
         return
       }
@@ -291,7 +291,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
         if saveSuccess {
           importHandler(url, .move)
         } else {
-          DDLogError("Could not create document")
+          Logger.shared.error("Could not create document")
           importHandler(nil, .none)
         }
       }
@@ -304,7 +304,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
-    DDLogError("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+    Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
   }
 }
 

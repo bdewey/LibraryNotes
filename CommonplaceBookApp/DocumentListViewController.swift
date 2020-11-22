@@ -101,7 +101,7 @@ final class DocumentListViewController: UIViewController {
     do {
       note = try notebook.note(noteIdentifier: noteIdentifier)
     } catch {
-      DDLogError("Unexpected error loading page: \(error)")
+      Logger.shared.error("Unexpected error loading page: \(error)")
       return
     }
     let textEditViewController = TextEditViewController(
@@ -314,7 +314,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
       let allIdentifiers = try notebook.search(for: pattern)
       dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
     } catch {
-      DDLogError("Error issuing full text query: \(error)")
+      Logger.shared.error("Error issuing full text query: \(error)")
     }
   }
 
@@ -336,7 +336,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
       try notebook.updateStudySessionResults(session, on: challengeDueDate, buryRelatedChallenges: true)
       updateStudySession()
     } catch {
-      DDLogError("Unexpected error recording study session results: \(error)")
+      Logger.shared.error("Unexpected error recording study session results: \(error)")
     }
   }
 

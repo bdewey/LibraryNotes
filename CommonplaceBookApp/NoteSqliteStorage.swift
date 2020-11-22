@@ -71,7 +71,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         do {
           try monitorDatabaseQueue(queue)
         } catch {
-          DDLogError("Unexpected error monitoring queue for changes: \(error)")
+          Logger.shared.error("Unexpected error monitoring queue for changes: \(error)")
         }
       }
     }
@@ -138,7 +138,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
       completionHandler?(true)
     } catch {
-      DDLogError("UIDocument: Error initiating download: \(error)")
+      Logger.shared.error("UIDocument: Error initiating download: \(error)")
       completionHandler?(false)
     }
   }
@@ -186,7 +186,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         notesDidChangeSubject.send()
       }
     } catch {
-      DDLogError("UIDocument: Unexpected error resolving conflict: \(error)")
+      Logger.shared.error("UIDocument: Unexpected error resolving conflict: \(error)")
     }
   }
 
@@ -210,7 +210,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
               self.notesDidChangeSubject.send()
             }
           } catch {
-            DDLogError("UIDocument: Could not merge disk contents! \(error)")
+            Logger.shared.error("UIDocument: Could not merge disk contents! \(error)")
           }
         }
       } else {
@@ -390,7 +390,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         return try String.fetchAll(db, request)
       }
     } catch {
-      DDLogError("Unexpected error getting asset keys: \(error)")
+      Logger.shared.error("Unexpected error getting asset keys: \(error)")
       return []
     }
   }
@@ -508,7 +508,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         .forEach { log.append($0) }
       return log
     } catch {
-      DDLogError("Unexpected error fetching study log: \(error)")
+      Logger.shared.error("Unexpected error fetching study log: \(error)")
     }
     return log
   }
@@ -535,7 +535,7 @@ private extension NoteSqliteStorage {
         receiveCompletion: { completion in
           switch completion {
           case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
           case .finished:
             Logger.shared.info("Monitoring pipeline shutting down")
           }
@@ -556,7 +556,7 @@ private extension NoteSqliteStorage {
         receiveCompletion: { completion in
           switch completion {
           case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
           case .finished:
             Logger.shared.info("hasUnsavedChanges shutting down")
           }
