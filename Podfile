@@ -9,7 +9,6 @@ target 'CommonplaceBookApp' do
 
   # Pods for remember
   pod 'DataCompression'
-  pod 'SnapKit'
 
   target 'CommonplaceBookAppTests' do
     inherit! :search_paths

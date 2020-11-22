@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- The project now uses Swift Package Manager to manage SnapKit
+
 ### Removed
 
 - No more Yams pod.

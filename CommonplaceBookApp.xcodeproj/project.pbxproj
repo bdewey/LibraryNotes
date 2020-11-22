@@ -104,6 +104,7 @@
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
+		D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DA1B862569E8AB009DC866 /* SnapKit */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
@@ -287,6 +288,7 @@
 				D3E9B5952564FD4900E47375 /* Logging in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */,
+				D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */,
 				D329BF6023CB8BD5008D59CF /* GRDB in Frameworks */,
 				D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */,
 				BE050A647575E8F075868DF1 /* Pods_CommonplaceBookApp.framework in Frameworks */,
@@ -516,6 +518,7 @@
 				D329BF5F23CB8BD5008D59CF /* GRDB */,
 				D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */,
 				D3E9B5942564FD4900E47375 /* Logging */,
+				D3DA1B862569E8AB009DC866 /* SnapKit */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */;
@@ -605,6 +608,7 @@
 				D329BF5E23CB8BD5008D59CF /* XCRemoteSwiftPackageReference "GRDB" */,
 				D37B0DB723CD476C00F01D29 /* XCRemoteSwiftPackageReference "SpacedRepetitionScheduler" */,
 				D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */,
+				D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -1195,6 +1199,14 @@
 				minimumVersion = 0.7.1;
 			};
 		};
+		D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.1;
+			};
+		};
 		D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-log";
@@ -1220,6 +1232,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D3AD01CF23BEB137004BB7DF /* XCRemoteSwiftPackageReference "GRDBCombine" */;
 			productName = GRDBCombine;
+		};
+		D3DA1B862569E8AB009DC866 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
 		};
 		D3E9B5942564FD4900E47375 /* Logging */ = {
 			isa = XCSwiftPackageProductDependency;
