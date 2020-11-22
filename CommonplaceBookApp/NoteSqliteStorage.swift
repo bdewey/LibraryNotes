@@ -1,12 +1,12 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Combine
 import Foundation
 import GRDB
 import GRDBCombine
 import Logging
 import SpacedRepetitionScheduler
+import UIKit
 
 // swiftlint:disable file_length
 

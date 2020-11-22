@@ -2,7 +2,6 @@
 
 // swiftlint:disable force_cast
 
-import CocoaLumberjack
 import Foundation
 import Logging
 import MobileCoreServices

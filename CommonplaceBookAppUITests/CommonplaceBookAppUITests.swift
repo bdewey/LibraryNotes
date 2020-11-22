@@ -1,5 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import UIKit
 import XCTest
 
 private enum Identifiers {
