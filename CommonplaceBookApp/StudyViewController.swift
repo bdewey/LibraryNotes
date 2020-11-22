@@ -2,6 +2,7 @@
 
 import AVFoundation
 import CocoaLumberjack
+import Logging
 import SnapKit
 import UIKit
 
@@ -170,7 +171,7 @@ public final class StudyViewController: UIViewController {
         self.hideAllSwipeMessages()
         self.currentCardView?.alpha = 1
       }) { finished in
-        DDLogInfo("Animation finished = \(finished)")
+        Logger.shared.info("Animation finished = \(finished)")
         if let current = self.currentCardView {
           current.becomeFirstResponder()
           current.accessibilityIdentifier = "current-card"
@@ -369,7 +370,7 @@ public final class StudyViewController: UIViewController {
 
 extension StudyViewController: UIAdaptivePresentationControllerDelegate {
   public func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-    DDLogInfo("Dismissing study view controller")
+    Logger.shared.info("Dismissing study view controller")
     if !UIApplication.isSimulator {
       studySession.studySessionEndDate = Date()
       delegate?.studyViewController(self, didFinishSession: studySession)

@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Logging
 import UIKit
 
 /// The job of a PanTranslationClassifier is to determine determine if the `translation` of a UIPanGestureRecognizer

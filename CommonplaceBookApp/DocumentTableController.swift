@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Combine
+import Logging
 import UIKit
 
 /// Knows how to perform key actions with the document
@@ -296,9 +297,8 @@ private extension DocumentTableController {
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
         }
-      DDLogInfo(
-        "studySession.count = \(studySession.count). " +
-          "cardsPerDocument has \(self.cardsPerDocument.count) entries"
+      Logger.shared.info(
+        "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
       )
     }
   }

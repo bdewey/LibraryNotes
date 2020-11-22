@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Logging
 import MobileCoreServices
 import UIKit
 
@@ -246,7 +247,7 @@ public final class TextEditViewController: UIViewController {
   }
 
   public override func paste(itemProviders: [NSItemProvider]) {
-    DDLogInfo("Pasting \(itemProviders)")
+    Logger.shared.info("Pasting \(itemProviders)")
   }
 }
 

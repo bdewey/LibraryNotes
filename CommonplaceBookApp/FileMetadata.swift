@@ -4,6 +4,7 @@
 
 import CocoaLumberjack
 import Foundation
+import Logging
 import MobileCoreServices
 
 /// Contains the properties of a file at a point in time (the structure is immutable)

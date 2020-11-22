@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Foundation
+import Logging
 
 public protocol FileMetadataProviderDelegate: class {
   /// Sent when there are new FileMetadata items in the provider.

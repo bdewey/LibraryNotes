@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Foundation
+import Logging
 
 public struct StudyLog {
   public init() {}

@@ -5,6 +5,11 @@ import CoreSpotlight
 import Logging
 import UIKit
 
+extension Logger {
+  fileprivate static let sharedLoggerLabel = "org.brians-brain.grail-diary"
+  public static let shared = Logger(label: sharedLoggerLabel)
+}
+
 @objc protocol AppCommands {
   func makeNewNote()
   func openNewFile()
@@ -79,11 +84,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let factory = LogHandlerFactory()
+    var factory = LogHandlerFactory()
     // Here's how you enable debug logging for different loggers...
-//    factory.logLevelsForLabel["IncrementalParsingTextStorage"] = .debug
+    factory.logLevelsForLabel[Logger.sharedLoggerLabel] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
-    DDLog.add(DDTTYLogger.sharedInstance) // TTY = Xcode console
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
@@ -96,11 +100,11 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var didOpenSavedDocument = false
     if !Self.isUITesting, let openedDocumentBookmarkData = Self.openedDocumentBookmark {
-      DDLogInfo("Bookmark data exists for an open document")
+      Logger.shared.info("Bookmark data exists for an open document")
       var isStale: Bool = false
       do {
         let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
-        DDLogInfo("Successfully resolved url: \(url)")
+        Logger.shared.info("Successfully resolved url: \(url)")
         try openDocument(at: url, from: browser, animated: false)
         didOpenSavedDocument = true
       } catch {
@@ -108,7 +112,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       }
     }
     if !didOpenSavedDocument {
-      DDLogInfo("Trying to open the default document")
+      Logger.shared.info("Trying to open the default document")
       openDefaultDocument(from: browser)
     }
     return true
@@ -178,15 +182,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
 
     if UserDefaults.standard.value(forKey: "use_icloud") == nil {
-      DDLogInfo("Setting default value for use_icloud")
+      Logger.shared.info("Setting default value for use_icloud")
       UserDefaults.standard.setValue(true, forKey: "use_icloud")
     }
     assert(UserDefaults.standard.value(forKey: "use_icloud") != nil)
     if UserDefaults.standard.bool(forKey: "use_icloud") {
-      DDLogInfo("Trying to get documents from iCloud")
+      Logger.shared.info("Trying to get documents from iCloud")
       makeICloudProvider { result in
         let innerResult = result.flatMapError { _ -> Result<FileMetadataProvider, Swift.Error> in
-          DDLogInfo("Error getting iCloud documents; falling back to local")
+          Logger.shared.info("Error getting iCloud documents; falling back to local")
           return self.makeDirectoryProvider(at: directoryURL)
         }
         completion(innerResult)
@@ -229,14 +233,14 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) throws {
-    DDLogInfo("Opening document at \"\(url.path)\"")
+    Logger.shared.info("Opening document at \"\(url.path)\"")
     let noteArchiveDocument: NoteStorage
     if url.pathExtension == "grail" {
       noteArchiveDocument = NoteSqliteStorage(fileURL: url)
     } else {
       throw Error.unknownFormat
     }
-    DDLogInfo("Using document at \(noteArchiveDocument.fileURL)")
+    Logger.shared.info("Using document at \(noteArchiveDocument.fileURL)")
     let viewController = NotebookViewController(notebook: noteArchiveDocument)
     viewController.modalPresentationStyle = .fullScreen
     viewController.modalTransitionStyle = .crossDissolve
@@ -248,7 +252,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 //        "documentState": String(describing: noteArchiveDocument.documentState),
 //        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
       ]
-      DDLogInfo("In open completion handler. \(properties)")
+      Logger.shared.info("In open completion handler. \(properties)")
       if success, !Self.isUITesting {
         Self.openedDocumentBookmark = try? url.bookmarkData()
       }
@@ -269,14 +273,14 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
     let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     do {
       try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-      DDLogInfo("Created directory at \(directoryURL)")
+      Logger.shared.info("Created directory at \(directoryURL)")
     } catch {
       DDLogError("Unable to create temporary directory at \(directoryURL.path): \(error)")
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
     let document = NoteSqliteStorage(fileURL: url)
-    DDLogInfo("Attempting to create a document at \(url.path)")
+    Logger.shared.info("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {
         DDLogError("Could not open document")
@@ -295,7 +299,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-    DDLogInfo("Imported document to \(destinationURL)")
+    Logger.shared.info("Imported document to \(destinationURL)")
     try? openDocument(at: destinationURL, from: controller, animated: true)
   }
 

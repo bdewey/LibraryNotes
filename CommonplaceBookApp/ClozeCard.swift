@@ -2,6 +2,7 @@
 
 import AVFoundation
 import CocoaLumberjack
+import Logging
 import Foundation
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with

@@ -4,6 +4,7 @@ import CocoaLumberjack
 import Combine
 import CoreServices
 import CoreSpotlight
+import Logging
 import SnapKit
 import UIKit
 
@@ -308,7 +309,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
       return
     }
     let pattern = searchController.searchBar.text ?? ""
-    DDLogInfo("Issuing query: \(pattern)")
+    Logger.shared.info("Issuing query: \(pattern)")
     do {
       let allIdentifiers = try notebook.search(for: pattern)
       dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
@@ -318,7 +319,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
   }
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-    DDLogInfo("searchBarTextDidEndEditing")
+    Logger.shared.info("searchBarTextDidEndEditing")
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {

@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Foundation
+import Logging
 import UIKit
 
 extension ChallengeTemplateType {

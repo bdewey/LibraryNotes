@@ -3,6 +3,7 @@
 import CocoaLumberjack
 import Foundation
 import GRDB
+import Logging
 
 /// An in-memory representation of the "knowledge" contained in a database at a point in time.
 /// It is a mapping between device ID and the latest timestamp of a change authored by that device.

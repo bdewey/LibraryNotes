@@ -1,6 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import CocoaLumberjack
+import Logging
 import Foundation
 
 /// Exposes the files in a directory as a FileMetadataProvider.
@@ -64,7 +65,7 @@ public final class DirectoryMetadataProvider: NSObject, FileMetadataProvider {
       includingPropertiesForKeys: nil,
       options: []
     )
-    DDLogInfo("Found \(items.count) items in the container")
+    Logger.shared.info("Found \(items.count) items in the container")
     fileMetadata = try items.map { (url) -> FileMetadata in
       try FileMetadata(fileURL: url)
     }

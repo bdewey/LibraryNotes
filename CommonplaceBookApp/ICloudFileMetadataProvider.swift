@@ -2,6 +2,7 @@
 
 import CocoaLumberjack
 import Foundation
+import Logging
 
 /// A FileMetadataProvider for the iCloud ubiquitous container.
 public final class ICloudFileMetadataProvider: FileMetadataProvider {
