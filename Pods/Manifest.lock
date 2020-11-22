@@ -1,20 +1,16 @@
 PODS:
   - DataCompression (3.5.0)
-  - SnapKit (5.0.0)
 
 DEPENDENCIES:
   - DataCompression
-  - SnapKit
 
 SPEC REPOS:
   trunk:
     - DataCompression
-    - SnapKit
 
 SPEC CHECKSUMS:
   DataCompression: 11afbfe7d6eae7269de6f35d4388691f545642e8
-  SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
 
-PODFILE CHECKSUM: d7a0da1d89cee5a68d15e5b0ac051140989f23a5
+PODFILE CHECKSUM: 263c8d664ce94629e1caa9e3cdc38233650ea97a
 
 COCOAPODS: 1.10.0

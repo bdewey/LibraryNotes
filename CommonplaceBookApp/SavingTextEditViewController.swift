@@ -3,6 +3,7 @@
 import Foundation
 import Logging
 import SnapKit
+import UIKit
 
 /// Watches for changes from a `TextEditViewController` and saves them to storage.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
