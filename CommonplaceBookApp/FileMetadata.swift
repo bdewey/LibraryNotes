@@ -145,7 +145,7 @@ extension FileMetadata {
   private static func downloadItem(_ item: FileMetadata, in container: URL) {
     let fileURL = container.appendingPathComponent(item.fileName)
     downloadQueue.async {
-      DDLogDebug("Downloading " + String(describing: item.fileName))
+      Logger.shared.debug("Downloading \(String(describing: item.fileName))")
       try? FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
     }
   }

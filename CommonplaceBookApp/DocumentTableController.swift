@@ -333,7 +333,7 @@ private extension DocumentTableController {
         Item.page($0)
       }
     snapshot.appendItems(objects)
-    DDLogDebug("Generating snapshot with \(objects.count) entries: \(objects)")
+    Logger.shared.debug("Generating snapshot with \(objects.count) entries: \(objects)")
     return snapshot
   }
 }

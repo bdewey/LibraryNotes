@@ -50,7 +50,7 @@ public struct LinearPanTranslationClassifier: PanTranslationClassifier {
       .unitScale(zero: triggeringMagnitude / 2, one: triggeringMagnitude)
       .clamped(to: 0 ... 1)
     if debug {
-      DDLogDebug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
+      Logger.shared.debug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
     }
     return directionFactor * magnitudeFactor
   }
