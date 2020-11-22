@@ -5,6 +5,7 @@
 ### Removed
 
 - No more Yams pod.
+- No more CocoaLumberjack pod.
 
 ### Fixed
 
