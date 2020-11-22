@@ -85,7 +85,7 @@ public struct VersionVector: Hashable, Comparable, CustomStringConvertible {
         switch (sourceKnowledge.knowsAbout(destinationRecord), destinationKnowledge.knowsAbout(sourceRecord)) {
         case (true, true):
           if !sourceRecord.sameChange(as: destinationRecord) {
-            DDLogWarn("Expected source to equal destination: \(sourceRecord) \(destinationRecord), treating like a conflict")
+            Logger.shared.warning("Expected source to equal destination: \(sourceRecord) \(destinationRecord), treating like a conflict")
             try sourceRecord.resoveConflict(
               with: destinationRecord,
               sourceDatabase: sourceDatabase,
