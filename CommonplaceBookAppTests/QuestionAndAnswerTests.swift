@@ -17,7 +17,7 @@ A: Yes! Just to make sure it **works**.
 
 final class QuestionAndAnswerTests: XCTestCase {
   func testParseSimpleExample() {
-    let buffer = IncrementalParsingBuffer(simpleExample, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(simpleExample, grammar: MiniMarkdownGrammar.shared)
     guard let tree = try? buffer.result.get() else {
       XCTFail("Should parse!")
       return

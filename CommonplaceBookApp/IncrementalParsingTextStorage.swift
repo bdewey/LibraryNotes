@@ -31,7 +31,7 @@ public typealias FormattingFunction = (NewNode, inout AttributedStringAttributes
 /// A function that overlays replacements...
 public typealias ReplacementFunction = (NewNode, Int, SafeUnicodeBuffer) -> [unichar]?
 
-/// Uses an `IncrementalParsingBuffer` to implement `NSTextStorage`.
+/// Uses an `ParsedString` to implement `NSTextStorage`.
 public final class IncrementalParsingTextStorage: NSTextStorage {
   public struct Settings {
     var grammar: PackratGrammar
@@ -60,7 +60,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
     self.defaultAttributes = defaultAttributes
     self.formattingFunctions = formattingFunctions
     self.replacementFunctions = replacementFunctions
-    self.buffer = IncrementalParsingBuffer(string, grammar: grammar)
+    self.buffer = ParsedString(string, grammar: grammar)
     self.memoizedString = PieceTableString(pieceTable: PieceTable(buffer.text))
     super.init()
     var range: Range<Int>?
@@ -87,7 +87,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
 
   // MARK: - Stored properties
 
-  public let buffer: IncrementalParsingBuffer
+  public let buffer: ParsedString
   private let defaultAttributes: AttributedStringAttributes
   private let formattingFunctions: [NewNodeType: FormattingFunction]
   private let replacementFunctions: [NewNodeType: ReplacementFunction]

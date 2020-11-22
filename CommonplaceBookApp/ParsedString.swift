@@ -17,7 +17,19 @@
 
 import Foundation
 
-public final class IncrementalParsingBuffer {
+/// An NSMutableString subclass that parses its contents using the rules of `grammar` and makes
+/// the abstract syntax tree available through `result`
+@objc public final class ParsedString: NSMutableString {
+  override public convenience init() {
+    assertionFailure()
+    self.init("", grammar: MiniMarkdownGrammar.shared)
+  }
+  
+  override public convenience init(capacity: Int) {
+    assertionFailure()
+    self.init("", grammar: MiniMarkdownGrammar.shared)
+  }
+  
   public init(_ string: String, grammar: PackratGrammar) {
     let pieceTable = PieceTableString(pieceTable: PieceTable(string))
     self.grammar = grammar
@@ -28,8 +40,13 @@ public final class IncrementalParsingBuffer {
     self.text = pieceTable
     self.memoizationTable = memoizationTable
     self.result = result
+    super.init()
   }
-
+  
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
   public let text: PieceTableString
   private let memoizationTable: MemoizationTable
   private let grammar: PackratGrammar
@@ -43,7 +60,7 @@ public final class IncrementalParsingBuffer {
   }
 }
 
-extension IncrementalParsingBuffer: RangeReplaceableSafeUnicodeBuffer {
+extension ParsedString: RangeReplaceableSafeUnicodeBuffer {
   public typealias Index = PieceTable.Index
 
   public var count: Int { text.count }
@@ -54,7 +71,7 @@ extension IncrementalParsingBuffer: RangeReplaceableSafeUnicodeBuffer {
     return text.utf16(at: index)
   }
 
-  public func replaceCharacters(in range: NSRange, with str: String) {
+  public override func replaceCharacters(in range: NSRange, with str: String) {
     text.replaceCharacters(in: range, with: str)
     memoizationTable.applyEdit(originalRange: range, replacementLength: str.utf16.count)
     result = Result {

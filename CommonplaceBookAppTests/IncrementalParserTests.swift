@@ -21,20 +21,20 @@ import XCTest
 
 final class IncrementalParserTests: XCTestCase {
   func testSimpleEdit() {
-    let parser = IncrementalParsingBuffer("Testing", grammar: MiniMarkdownGrammar())
+    let parser = ParsedString("Testing", grammar: MiniMarkdownGrammar())
     parser.replaceCharacters(in: NSRange(location: 7, length: 0), with: ", testing")
     validateParser(parser, has: "(document (paragraph text))")
   }
 
   func testInsertBold() {
-    let parser = IncrementalParsingBuffer("Hello world", grammar: MiniMarkdownGrammar())
+    let parser = ParsedString("Hello world", grammar: MiniMarkdownGrammar())
     validateParser(parser, has: "(document (paragraph text))")
     parser.replaceCharacters(in: NSRange(location: 6, length: 0), with: "**awesome** ")
     validateParser(parser, has: "(document (paragraph text (strong_emphasis delimiter text delimiter) text))")
   }
 
   func testInsertCanChangeFormatting() {
-    let parser = IncrementalParsingBuffer("Hello **world*", grammar: MiniMarkdownGrammar())
+    let parser = ParsedString("Hello **world*", grammar: MiniMarkdownGrammar())
     validateParser(parser, has: "(document (paragraph text (emphasis delimiter text delimiter)))")
     TraceBuffer.shared.traceEntries.removeAll()
     parser.replaceCharacters(in: NSRange(location: 14, length: 0), with: "*")
@@ -43,7 +43,7 @@ final class IncrementalParserTests: XCTestCase {
   }
 
   func testDeleteCanChangeFormatting() {
-    let parser = IncrementalParsingBuffer("Hello * world*", grammar: MiniMarkdownGrammar())
+    let parser = ParsedString("Hello * world*", grammar: MiniMarkdownGrammar())
     validateParser(parser, has: "(document (paragraph text))")
     TraceBuffer.shared.traceEntries.removeAll()
     parser.replaceCharacters(in: NSRange(location: 7, length: 1), with: "")
@@ -52,7 +52,7 @@ final class IncrementalParserTests: XCTestCase {
   }
 
   func testDeleteCanChangeFormattingRightFlank() {
-    let parser = IncrementalParsingBuffer("Hello *world *", grammar: MiniMarkdownGrammar())
+    let parser = ParsedString("Hello *world *", grammar: MiniMarkdownGrammar())
     validateParser(parser, has: "(document (paragraph text))")
     TraceBuffer.shared.traceEntries.removeAll()
     parser.replaceCharacters(in: NSRange(location: 12, length: 1), with: "")
@@ -66,7 +66,7 @@ final class IncrementalParserTests: XCTestCase {
 
     I will be editing this **awesome** text and expect most nodes to be reused.
     """
-    let parser = IncrementalParsingBuffer(text, grammar: MiniMarkdownGrammar())
+    let parser = ParsedString(text, grammar: MiniMarkdownGrammar())
     guard let tree = validateParser(parser, has: "(document (header delimiter tab text) blank_line (paragraph text (strong_emphasis delimiter text delimiter) text))") else {
       XCTFail("Expected a tree")
       return
@@ -85,7 +85,7 @@ final class IncrementalParserTests: XCTestCase {
 
   func testAddSentenceToLargeText() {
     let largeText = String(repeating: TestStrings.markdownCanonical, count: 10)
-    let parser = IncrementalParsingBuffer(largeText, grammar: MiniMarkdownGrammar())
+    let parser = ParsedString(largeText, grammar: MiniMarkdownGrammar())
     let toInsert = "\n\nI'm adding some new text with *emphasis* to test incremental parsing.\n\n"
     measure {
       for (i, ch) in toInsert.utf16.enumerated() {
@@ -102,7 +102,7 @@ final class IncrementalParserTests: XCTestCase {
 
 private extension IncrementalParserTests {
   @discardableResult
-  func validateParser(_ parser: IncrementalParsingBuffer, has expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> NewNode? {
+  func validateParser(_ parser: ParsedString, has expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> NewNode? {
     do {
       let tree = try parser.result.get()
       if tree.length != parser.count {

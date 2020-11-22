@@ -16,7 +16,7 @@ final class ClozeTests: XCTestCase {
        - La nieve ?[to be](es) blanca.
     4. *Estar* with an adjective shows a "change" or "condition."
     """
-    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar())
+    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar())
     let templates = ClozeTemplate.extract(from: buffer)
     XCTAssertEqual(templates.count, 1)
   }
@@ -25,7 +25,7 @@ final class ClozeTests: XCTestCase {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar.shared)
     let clozeCards = ClozeTemplate.extract(from: buffer).cards as! [ClozeCard] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(

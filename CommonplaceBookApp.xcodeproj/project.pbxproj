@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
 		D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */; };
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
@@ -98,7 +97,7 @@
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
 		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
-		D3D05D2B25507C89007C443A /* IncrementalParsingBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* IncrementalParsingBuffer.swift */; };
+		D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* ParsedString.swift */; };
 		D3D05D2C25507C89007C443A /* IncrementalParsingTextStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */; };
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
@@ -247,7 +246,7 @@
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
 		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
-		D3D05D2925507C89007C443A /* IncrementalParsingBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingBuffer.swift; sourceTree = "<group>"; };
+		D3D05D2925507C89007C443A /* ParsedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedString.swift; sourceTree = "<group>"; };
 		D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingTextStorage.swift; sourceTree = "<group>"; };
 		D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PieceTable+SafeUnicodeBuffer.swift"; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
@@ -293,7 +292,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3C00BA216D4291AB94336FEA /* Pods_CommonplaceBookAppTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,7 +376,7 @@
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
-				D3D05D2925507C89007C443A /* IncrementalParsingBuffer.swift */,
+				D3D05D2925507C89007C443A /* ParsedString.swift */,
 				D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
@@ -508,7 +506,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EE120EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookAppTests" */;
 			buildPhases = (
-				FCA6B0A8BA294A7968665621 /* [CP] Check Pods Manifest.lock */,
 				D3DC5ED120EC9B0200F0B74B /* Sources */,
 				D3DC5ED220EC9B0200F0B74B /* Frameworks */,
 				D3DC5ED320EC9B0200F0B74B /* Resources */,
@@ -642,24 +639,6 @@
 			shellPath = /bin/sh;
 			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
 		};
-		FCA6B0A8BA294A7968665621 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-CommonplaceBookAppTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -739,7 +718,7 @@
 				D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* Sqlite.Note.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
-				D3D05D2B25507C89007C443A /* IncrementalParsingBuffer.swift in Sources */,
+				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,

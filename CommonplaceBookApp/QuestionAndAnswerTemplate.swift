@@ -22,12 +22,12 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
 
   public override var type: ChallengeTemplateType { return .questionAndAnswer }
 
-  public static func extract(from buffer: IncrementalParsingBuffer) -> [QuestionAndAnswerTemplate] {
-    guard let root = try? buffer.result.get() else { return [] }
+  public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerTemplate] {
+    guard let root = try? parsedString.result.get() else { return [] }
     return AnchoredNode(node: root, startIndex: 0)
       .findNodes(where: { $0.type == .questionAndAnswer })
       .map {
-        let chars = buffer[$0.range]
+        let chars = parsedString[$0.range]
         return String(utf16CodeUnits: chars, count: chars.count)
       }
       .compactMap {

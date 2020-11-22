@@ -23,13 +23,13 @@ public final class QuoteTemplate: ChallengeTemplate {
     return markdown
   }
 
-  public static func extract(from buffer: IncrementalParsingBuffer) -> [QuoteTemplate] {
-    guard let root = try? buffer.result.get() else { return [] }
+  public static func extract(from parsedString: ParsedString) -> [QuoteTemplate] {
+    guard let root = try? parsedString.result.get() else { return [] }
     let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
     return anchoredRoot
       .findNodes(where: { $0.type == .blockquote })
       .compactMap { node -> QuoteTemplate? in
-        let chars = buffer[node.range]
+        let chars = parsedString[node.range]
         return QuoteTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
       }
   }

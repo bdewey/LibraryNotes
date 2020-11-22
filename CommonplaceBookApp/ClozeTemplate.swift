@@ -33,8 +33,8 @@ public final class ClozeTemplate: ChallengeTemplate {
     return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
   }
 
-  public static func extract(from buffer: IncrementalParsingBuffer) -> [ClozeTemplate] {
-    guard let root = try? buffer.result.get() else {
+  public static func extract(from parsedString: ParsedString) -> [ClozeTemplate] {
+    guard let root = try? parsedString.result.get() else {
       return []
     }
     var clozeParents = [AnchoredNode]()
@@ -51,7 +51,7 @@ public final class ClozeTemplate: ChallengeTemplate {
     Logger.shared.debug("Found \(clozeSet.count) clozes")
     return clozeSet.compactMap { wrappedNode -> ClozeTemplate? in
       let node = wrappedNode.value
-      let chars = buffer[node.range]
+      let chars = parsedString[node.range]
       return ClozeTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
     }
   }

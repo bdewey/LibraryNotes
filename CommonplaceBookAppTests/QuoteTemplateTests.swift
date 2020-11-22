@@ -30,7 +30,7 @@ private let contentWithCloze = """
 
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
-    let buffer = IncrementalParsingBuffer(testContent, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuoteTemplate.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
     let cards = quoteTemplates.map { $0.challenges }.joined()
@@ -38,7 +38,7 @@ final class QuoteTemplateTests: XCTestCase {
   }
 
   func testSerialization() {
-    let buffer = IncrementalParsingBuffer(testContent, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuoteTemplate.extract(from: buffer)
     let strings = quoteTemplates.map { $0.rawValue }
     let decodedTemplates = strings.map { QuoteTemplate(rawValue: $0) }
@@ -51,7 +51,7 @@ final class QuoteTemplateTests: XCTestCase {
   }
 
   func testRenderCloze() {
-    let buffer = IncrementalParsingBuffer(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuoteTemplate.extract(from: buffer)
 
     let (front, _) = quoteTemplates[0].renderCardFront()

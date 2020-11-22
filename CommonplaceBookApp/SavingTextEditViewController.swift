@@ -102,7 +102,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       completion?()
       return
     }
-    let note = Note(buffer: textEditViewController.textStorage.buffer)
+    let note = Note(parsedString: textEditViewController.textStorage.buffer)
     self.updateNote(note)
     hasUnsavedChanges = false
     completion?()
