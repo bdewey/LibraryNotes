@@ -59,7 +59,7 @@ extension QuoteTemplate: Challenge {
     )
     let (front, chapterAndVerse) = renderCardFront()
     view.front = front.trimmingTrailingWhitespace()
-    let attribution = IncrementalParsingTextStorage(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, settings: .plainText(textStyle: .caption1))
+    let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, settings: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
     back.append(front.trimmingTrailingWhitespace())
     back.append(NSAttributedString(string: "\n\n"))
@@ -70,7 +70,7 @@ extension QuoteTemplate: Challenge {
 
   public func renderCardFront(
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
-    let renderedMarkdown = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body))
+    let renderedMarkdown = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
     let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""
     let front = renderedMarkdown.removingChapterAndVerseAnnotation()
     return (front: front, chapterAndVerse: chapterAndVerse)

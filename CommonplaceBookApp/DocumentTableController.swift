@@ -267,7 +267,7 @@ private extension DocumentTableController {
     else {
       preconditionFailure("Forgot to register the right kind of cell")
     }
-    let title = IncrementalParsingTextStorage(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
+    let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
     cell.titleLabel.attributedText = title
     cell.accessibilityLabel = viewProperties.noteProperties.title
     let detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")

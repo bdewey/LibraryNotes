@@ -280,7 +280,7 @@ public extension ParsedAttributedString.Settings {
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
     extraAttributes: [NSAttributedString.Key: Any] = [:]
-  ) -> IncrementalParsingTextStorage.Settings {
+  ) -> ParsedAttributedString.Settings {
     var formattingFunctions = [NewNodeType: FormattingFunction]()
     var replacementFunctions = [NewNodeType: ReplacementFunction]()
     formattingFunctions[.emphasis] = { $1.italic = true }
@@ -294,7 +294,7 @@ public extension ParsedAttributedString.Settings {
     ]
     defaultAttributes.lineHeightMultiple = 1.2
     defaultAttributes.merge(extraAttributes, uniquingKeysWith: { _, new in new })
-    return IncrementalParsingTextStorage.Settings(
+    return ParsedAttributedString.Settings(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
       formattingFunctions: formattingFunctions,

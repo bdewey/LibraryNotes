@@ -31,7 +31,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var autosaveTimer: Timer?
 
   internal func setTitleMarkdown(_ markdown: String) {
-    navigationItem.title = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body)).string
+    navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
   override func viewDidLoad() {

@@ -46,10 +46,10 @@ extension QuestionAndAnswerTemplate: Challenge {
 
   public func challengeView(document: NoteStorage, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
-    view.context = IncrementalParsingTextStorage(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
+    view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
     // TODO: Need to re-invent images :-(
 //    document.addImageRenderer(to: &renderer.renderFunctions)
-    let formattedString = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body))
+    let formattedString = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
     if let node = try? formattedString.buffer.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)
       if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {

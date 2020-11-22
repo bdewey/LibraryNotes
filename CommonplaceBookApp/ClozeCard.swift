@@ -33,7 +33,7 @@ public struct ClozeCard {
 
   /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
   /// replaced with a hint if present, and highlighted.
-  public var cardFrontSettings: IncrementalParsingTextStorage.Settings {
+  public var cardFrontSettings: ParsedAttributedString.Settings {
     .clozeRenderer(hidingClozeAt: clozeIndex)
   }
 }
@@ -50,17 +50,17 @@ extension ClozeCard: Challenge {
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)
     cardView.context = context()
-    let (front, chapterAndVerse) = IncrementalParsingTextStorage(string: markdown, settings: cardFrontSettings).decomposedChapterAndVerseAnnotation
+    let (front, chapterAndVerse) = ParsedAttributedString(string: markdown, settings: cardFrontSettings).decomposedChapterAndVerseAnnotation
     cardView.front = front.trimmingTrailingWhitespace()
     let back = NSMutableAttributedString()
     back.append(
-      IncrementalParsingTextStorage(string: markdown, settings: .clozeRenderer(highlightingClozeAt: clozeIndex))
+      ParsedAttributedString(string: markdown, settings: .clozeRenderer(highlightingClozeAt: clozeIndex))
         .removingChapterAndVerseAnnotation()
         .trimmingTrailingWhitespace()
     )
     if !properties.attributionMarkdown.isEmpty {
       back.append(NSAttributedString(string: "\n\n"))
-      let attribution = IncrementalParsingTextStorage(
+      let attribution = ParsedAttributedString(
         string: "—" + properties.attributionMarkdown + " " + chapterAndVerse,
         settings: .plainText(textStyle: .caption1)
       )
@@ -80,9 +80,9 @@ extension ClozeCard: Challenge {
   }
 }
 
-extension IncrementalParsingTextStorage.Settings {
-  static func clozeRenderer(hidingClozeAt index: Int) -> IncrementalParsingTextStorage.Settings {
-    var settings = IncrementalParsingTextStorage.Settings.plainText(textStyle: .body)
+extension ParsedAttributedString.Settings {
+  static func clozeRenderer(hidingClozeAt index: Int) -> ParsedAttributedString.Settings {
+    var settings = ParsedAttributedString.Settings.plainText(textStyle: .body)
     var replaceClozeCount = 0
     settings.replacementFunctions[.cloze] = { node, startIndex, buffer in
       let shouldHide = replaceClozeCount == index
@@ -118,8 +118,8 @@ extension IncrementalParsingTextStorage.Settings {
     return settings
   }
 
-  static func clozeRenderer(highlightingClozeAt index: Int) -> IncrementalParsingTextStorage.Settings {
-    var settings = IncrementalParsingTextStorage.Settings.plainText(textStyle: .body)
+  static func clozeRenderer(highlightingClozeAt index: Int) -> ParsedAttributedString.Settings {
+    var settings = ParsedAttributedString.Settings.plainText(textStyle: .body)
     var formatClozeCount = 0
     settings.formattingFunctions[.cloze] = { _, attributes in
       let shouldHighlight = formatClozeCount == index

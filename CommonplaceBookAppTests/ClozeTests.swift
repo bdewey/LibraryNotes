@@ -33,19 +33,19 @@ final class ClozeTests: XCTestCase {
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let renderedFront = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
+    let renderedFront = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
     XCTAssertEqual(
       renderedFront.string,
       "Yo to be de España. ¿De dónde es ustedes?"
     )
     XCTAssertEqual(
-      IncrementalParsingTextStorage(
+      ParsedAttributedString(
         string: clozeCards[1].markdown,
         settings: .clozeRenderer(hidingClozeAt: clozeCards[1].clozeIndex)
       ).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
-    let renderedBack = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
+    let renderedBack = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
     XCTAssertEqual(
       renderedBack.string,
       "Yo soy de España. ¿De dónde es ustedes?"
