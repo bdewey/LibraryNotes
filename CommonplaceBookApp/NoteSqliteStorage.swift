@@ -1,11 +1,12 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Combine
 import Foundation
 import GRDB
 import GRDBCombine
+import Logging
 import SpacedRepetitionScheduler
+import UIKit
 
 // swiftlint:disable file_length
 
@@ -70,7 +71,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         do {
           try monitorDatabaseQueue(queue)
         } catch {
-          DDLogError("Unexpected error monitoring queue for changes: \(error)")
+          Logger.shared.error("Unexpected error monitoring queue for changes: \(error)")
         }
       }
     }
@@ -106,7 +107,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
 
   public override func open(completionHandler: IOCompletionHandler? = nil) {
     super.open { success in
-      DDLogInfo("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
+      Logger.shared.info("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
       self.handleDocumentStateChanged()
       completionHandler?(success)
@@ -132,12 +133,12 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
   }
 
   public func refresh(completionHandler: IOCompletionHandler?) {
-    DDLogInfo("UIDocument: Attempting to refresh content")
+    Logger.shared.info("UIDocument: Attempting to refresh content")
     do {
       try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
       completionHandler?(true)
     } catch {
-      DDLogError("UIDocument: Error initiating download: \(error)")
+      Logger.shared.error("UIDocument: Error initiating download: \(error)")
       completionHandler?(false)
     }
   }
@@ -158,7 +159,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     guard documentState.contains(.inConflict) else {
       return
     }
-    DDLogInfo("UIDocument: Handling conflict")
+    Logger.shared.info("UIDocument: Handling conflict")
     do {
       var conflictMergeResults = MergeResult()
       for conflictVersion in NSFileVersion.unresolvedConflictVersionsOfItem(at: fileURL) ?? [] {
@@ -170,50 +171,50 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         let conflictQueue = try memoryDatabaseQueue(fileURL: tempURL)
         if let dbQueue = dbQueue {
           let result = try dbQueue.merge(remoteQueue: conflictQueue)
-          DDLogInfo("UIDocument: Merged conflict version: \(result)")
+          Logger.shared.info("UIDocument: Merged conflict version: \(result)")
           conflictMergeResults += result
         } else {
-          DDLogInfo("UIDocument: Trying to resolve conflict but dbQueue is nil?")
+          Logger.shared.info("UIDocument: Trying to resolve conflict but dbQueue is nil?")
           dbQueue = conflictQueue
         }
         conflictVersion.isResolved = true
         try conflictVersion.remove()
       }
-      DDLogInfo("UIDocument: Finished resolving conflicts")
+      Logger.shared.info("UIDocument: Finished resolving conflicts")
       try NSFileVersion.removeOtherVersionsOfItem(at: fileURL)
       if !conflictMergeResults.isEmpty {
         notesDidChangeSubject.send()
       }
     } catch {
-      DDLogError("UIDocument: Unexpected error resolving conflict: \(error)")
+      Logger.shared.error("UIDocument: Unexpected error resolving conflict: \(error)")
     }
   }
 
   public override func read(from url: URL) throws {
     // TODO: Optionally merge the changes from disk into memory?
-    DDLogInfo("UIDocument: Reading content from '\(url.path)'")
+    Logger.shared.info("UIDocument: Reading content from '\(url.path)'")
     let dbQueue = try memoryDatabaseQueue(fileURL: url)
     DispatchQueue.main.async {
       if let inMemoryQueue = self.dbQueue {
         if dbQueue.deviceVersionVector == inMemoryQueue.deviceVersionVector {
-          DDLogInfo("UIDocument: On-disk content is the same as memory; ignoring")
+          Logger.shared.info("UIDocument: On-disk content is the same as memory; ignoring")
         } else if dbQueue.deviceVersionVector > inMemoryQueue.deviceVersionVector {
-          DDLogInfo("UIDocument: On-disk data is strictly greater than in-memory; overwriting")
+          Logger.shared.info("UIDocument: On-disk data is strictly greater than in-memory; overwriting")
           self.dbQueue = dbQueue
         } else {
-          DDLogInfo("UIDocument: **Merging** disk contents with memory.\nDisk: \(dbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
+          Logger.shared.info("UIDocument: **Merging** disk contents with memory.\nDisk: \(dbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
           do {
             let result = try inMemoryQueue.merge(remoteQueue: dbQueue)
-            DDLogInfo("UIDocument: Merged disk results \(result)")
+            Logger.shared.info("UIDocument: Merged disk results \(result)")
             if !result.isEmpty {
               self.notesDidChangeSubject.send()
             }
           } catch {
-            DDLogError("UIDocument: Could not merge disk contents! \(error)")
+            Logger.shared.error("UIDocument: Could not merge disk contents! \(error)")
           }
         }
       } else {
-        DDLogInfo("UIDocument: Nothing in memory, using the disk image")
+        Logger.shared.info("UIDocument: Nothing in memory, using the disk image")
         self.dbQueue = dbQueue
       }
     }
@@ -228,7 +229,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     guard let dbQueue = dbQueue, hasUnsavedChanges else {
       return
     }
-    DDLogInfo("UIDocument: Writing content to '\(url.path)'")
+    Logger.shared.info("UIDocument: Writing content to '\(url.path)'")
     try dbQueue.writeWithoutTransaction { db in
       try db.execute(sql: "VACUUM INTO '\(url.path)'")
     }
@@ -389,7 +390,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         return try String.fetchAll(db, request)
       }
     } catch {
-      DDLogError("Unexpected error getting asset keys: \(error)")
+      Logger.shared.error("Unexpected error getting asset keys: \(error)")
       return []
     }
   }
@@ -473,7 +474,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
           (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
         )
         .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue, Sqlite.Challenge.Columns.modifiedDevice <- updateKey.deviceID, Sqlite.Challenge.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
-      DDLogInfo("Buried \(updates) challenge(s)")
+      Logger.shared.info("Buried \(updates) challenge(s)")
     }
   }
 
@@ -507,7 +508,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         .forEach { log.append($0) }
       return log
     } catch {
-      DDLogError("Unexpected error fetching study log: \(error)")
+      Logger.shared.error("Unexpected error fetching study log: \(error)")
     }
     return log
   }
@@ -534,9 +535,9 @@ private extension NoteSqliteStorage {
         receiveCompletion: { completion in
           switch completion {
           case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
           case .finished:
-            DDLogInfo("Monitoring pipeline shutting down")
+            Logger.shared.info("Monitoring pipeline shutting down")
           }
         },
         receiveValue: { [weak self] allMetadata in
@@ -555,9 +556,9 @@ private extension NoteSqliteStorage {
         receiveCompletion: { completion in
           switch completion {
           case .failure(let error):
-            DDLogError("Unexpected error monitoring database: \(error)")
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
           case .finished:
-            DDLogInfo("hasUnsavedChanges shutting down")
+            Logger.shared.info("hasUnsavedChanges shutting down")
           }
         },
         receiveValue: { [weak self] _ in
@@ -587,7 +588,7 @@ private extension NoteSqliteStorage {
           let fileQueue = try DatabaseQueue(path: coordinatedURL.path)
           try fileQueue.backup(to: queue)
         } catch {
-          DDLogInfo("Unable to load \(coordinatedURL.path): \(error)")
+          Logger.shared.info("Unable to load \(coordinatedURL.path): \(error)")
         }
         return queue
       }

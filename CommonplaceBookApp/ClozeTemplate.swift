@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Foundation
+import Logging
 import UIKit
 
 extension ChallengeTemplateType {
@@ -48,7 +48,7 @@ public final class ClozeTemplate: ChallengeTemplate {
     // A paragraph or list item that contains more than one cloze will appear more than
     // one time in `clozes`. Deduplicate using pointer identity.
     let clozeSet = Set<ObjectIdentityHashable>(clozeParents.map { ObjectIdentityHashable($0) })
-    DDLogDebug("Found \(clozeSet.count) clozes")
+    Logger.shared.debug("Found \(clozeSet.count) clozes")
     return clozeSet.compactMap { wrappedNode -> ClozeTemplate? in
       let node = wrappedNode.value
       let chars = buffer[node.range]

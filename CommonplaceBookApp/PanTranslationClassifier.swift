@@ -1,6 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
+import Logging
 import UIKit
 
 /// The job of a PanTranslationClassifier is to determine determine if the `translation` of a UIPanGestureRecognizer
@@ -49,7 +49,7 @@ public struct LinearPanTranslationClassifier: PanTranslationClassifier {
       .unitScale(zero: triggeringMagnitude / 2, one: triggeringMagnitude)
       .clamped(to: 0 ... 1)
     if debug {
-      DDLogDebug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
+      Logger.shared.debug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
     }
     return directionFactor * magnitudeFactor
   }

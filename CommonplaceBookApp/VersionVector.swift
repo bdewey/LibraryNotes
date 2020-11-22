@@ -1,8 +1,8 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Foundation
 import GRDB
+import Logging
 
 /// An in-memory representation of the "knowledge" contained in a database at a point in time.
 /// It is a mapping between device ID and the latest timestamp of a change authored by that device.
@@ -84,7 +84,7 @@ public struct VersionVector: Hashable, Comparable, CustomStringConvertible {
         switch (sourceKnowledge.knowsAbout(destinationRecord), destinationKnowledge.knowsAbout(sourceRecord)) {
         case (true, true):
           if !sourceRecord.sameChange(as: destinationRecord) {
-            DDLogWarn("Expected source to equal destination: \(sourceRecord) \(destinationRecord), treating like a conflict")
+            Logger.shared.warning("Expected source to equal destination: \(sourceRecord) \(destinationRecord), treating like a conflict")
             try sourceRecord.resoveConflict(
               with: destinationRecord,
               sourceDatabase: sourceDatabase,

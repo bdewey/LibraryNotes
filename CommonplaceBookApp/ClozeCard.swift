@@ -1,8 +1,9 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
 import AVFoundation
-import CocoaLumberjack
+import Logging
 import Foundation
+import UIKit
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
 /// a hint. The removed word/phrase is a "cloze".

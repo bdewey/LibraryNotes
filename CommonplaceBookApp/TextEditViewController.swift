@@ -1,6 +1,6 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
+import Logging
 import MobileCoreServices
 import UIKit
 
@@ -237,16 +237,16 @@ public final class TextEditViewController: UIViewController {
   // MARK: - Paste
 
   public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-    DDLogDebug("Checking if we can perform action \(action)")
+    Logger.shared.debug("Checking if we can perform action \(action)")
     if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
-      DDLogDebug("Looks like you want to paste an image! Okay!")
+      Logger.shared.debug("Looks like you want to paste an image! Okay!")
       return true
     }
     return super.canPerformAction(action, withSender: sender)
   }
 
   public override func paste(itemProviders: [NSItemProvider]) {
-    DDLogInfo("Pasting \(itemProviders)")
+    Logger.shared.info("Pasting \(itemProviders)")
   }
 }
 

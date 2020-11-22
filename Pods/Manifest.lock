@@ -1,26 +1,20 @@
 PODS:
-  - CocoaLumberjack/Core (3.5.3)
-  - CocoaLumberjack/Swift (3.5.3):
-    - CocoaLumberjack/Core
   - DataCompression (3.5.0)
   - SnapKit (5.0.0)
 
 DEPENDENCIES:
-  - CocoaLumberjack/Swift
   - DataCompression
   - SnapKit
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
-    - CocoaLumberjack
+  trunk:
     - DataCompression
     - SnapKit
 
 SPEC CHECKSUMS:
-  CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   DataCompression: 11afbfe7d6eae7269de6f35d4388691f545642e8
   SnapKit: fd22d10eb9aff484d79a8724eab922c1ddf89bcf
 
-PODFILE CHECKSUM: a1a590aeb97afd3152254878b881886187b3fc51
+PODFILE CHECKSUM: d7a0da1d89cee5a68d15e5b0ac051140989f23a5
 
 COCOAPODS: 1.10.0

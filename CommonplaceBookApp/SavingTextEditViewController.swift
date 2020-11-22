@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Foundation
+import Logging
 import SnapKit
 
 /// Watches for changes from a `TextEditViewController` and saves them to storage.
@@ -43,7 +43,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     textEditViewController.didMove(toParent: self)
     textEditViewController.delegate = self
     self.autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      if self?.hasUnsavedChanges ?? false { DDLogInfo("SavingTextEditViewController: autosave") }
+      if self?.hasUnsavedChanges ?? false { Logger.shared.info("SavingTextEditViewController: autosave") }
       self?.saveIfNeeded()
     })
     navigationItem.largeTitleDisplayMode = .never
@@ -76,17 +76,17 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     setTitleMarkdown(note.metadata.title)
     do {
       if let noteIdentifier = noteIdentifier {
-        DDLogInfo("SavingTextEditViewController: Updating note \(noteIdentifier)")
+        Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
         try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
           ChallengeTemplate.assignMatchingTemplateIdentifiers(from: oldNote.challengeTemplates, to: note.challengeTemplates)
           return note
         })
       } else {
         noteIdentifier = try noteStorage.createNote(note)
-        DDLogInfo("SavingTextEditViewController: Created note \(noteIdentifier!)")
+        Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier!)")
       }
     } catch {
-      DDLogError("SavingTextEditViewController: Unexpected error saving page: \(error)")
+      Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")
       let alert = UIAlertController(title: "Oops", message: "There was an error saving this note: \(error)", preferredStyle: .alert)
       alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
       present(alert, animated: true, completion: nil)
@@ -113,7 +113,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
     saveIfNeeded {
-      DDLogInfo("SavingTextEditViewController: Flushing and canceling timer")
+      Logger.shared.info("SavingTextEditViewController: Flushing and canceling timer")
       try? self.noteStorage.flush()
       self.autosaveTimer?.invalidate()
       self.autosaveTimer = nil

@@ -8,7 +8,6 @@ target 'CommonplaceBookApp' do
   platform :ios, '14.0'
 
   # Pods for remember
-  pod 'CocoaLumberjack/Swift'
   pod 'DataCompression'
   pod 'SnapKit'
 

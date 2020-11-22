@@ -1,6 +1,6 @@
 // Copyright © 2020 Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
+import Logging
 import SnapKit
 import UIKit
 
@@ -110,7 +110,7 @@ final class NotebookViewController: UIViewController {
     // I don't know why but you need to wrap this in a nav controller before pushing
     let navController = UINavigationController(rootViewController: viewController)
     notebookSplitViewController.showDetailViewController(navController, sender: nil)
-    DDLogInfo("Created a new view controller for a blank document")
+    Logger.shared.info("Created a new view controller for a blank document")
   }
 }
 

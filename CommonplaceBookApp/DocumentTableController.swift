@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Combine
+import Logging
 import UIKit
 
 /// Knows how to perform key actions with the document
@@ -296,9 +296,8 @@ private extension DocumentTableController {
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
         }
-      DDLogInfo(
-        "studySession.count = \(studySession.count). " +
-          "cardsPerDocument has \(self.cardsPerDocument.count) entries"
+      Logger.shared.info(
+        "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
       )
     }
   }
@@ -333,7 +332,7 @@ private extension DocumentTableController {
         Item.page($0)
       }
     snapshot.appendItems(objects)
-    DDLogDebug("Generating snapshot with \(objects.count) entries: \(objects)")
+    Logger.shared.debug("Generating snapshot with \(objects.count) entries: \(objects)")
     return snapshot
   }
 }

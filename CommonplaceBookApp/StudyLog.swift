@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import Foundation
+import Logging
 
 public struct StudyLog {
   public init() {}

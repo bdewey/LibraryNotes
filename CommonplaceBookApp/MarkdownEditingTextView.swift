@@ -1,7 +1,7 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
-import CocoaLumberjack
 import MobileCoreServices
+import Logging
 import UIKit
 
 public protocol MarkdownEditingTextViewImageStoring: AnyObject {
@@ -25,11 +25,11 @@ public final class MarkdownEditingTextView: UITextView {
   }
 
   public override func canPaste(_ itemProviders: [NSItemProvider]) -> Bool {
-    DDLogInfo("Determining if we can paste from \(itemProviders)")
+    Logger.shared.info("Determining if we can paste from \(itemProviders)")
     let typeIdentifiers = pasteConfiguration!.acceptableTypeIdentifiers
     for itemProvider in itemProviders {
       for typeIdentifier in typeIdentifiers where itemProvider.hasItemConformingToTypeIdentifier(typeIdentifier) {
-        DDLogInfo("Item provider has type \(typeIdentifier) so we can paste")
+        Logger.shared.info("Item provider has type \(typeIdentifier) so we can paste")
         return true
       }
     }
@@ -37,7 +37,7 @@ public final class MarkdownEditingTextView: UITextView {
   }
 
   public override func paste(itemProviders: [NSItemProvider]) {
-    DDLogInfo("Pasting \(itemProviders)")
+    Logger.shared.info("Pasting \(itemProviders)")
     super.paste(itemProviders: itemProviders)
   }
 
@@ -45,33 +45,33 @@ public final class MarkdownEditingTextView: UITextView {
 
   public override func paste(_ sender: Any?) {
     if let image = UIPasteboard.general.image, let imageStorage = self.imageStorage {
-      DDLogInfo("Pasting an image")
+      Logger.shared.info("Pasting an image")
       let imageKey: String?
       if let jpegData = UIPasteboard.general.data(forPasteboardType: kUTTypeJPEG as String) {
-        DDLogInfo("Got JPEG data = \(jpegData.count) bytes")
+        Logger.shared.info("Got JPEG data = \(jpegData.count) bytes")
         imageKey = try? imageStorage.markdownEditingTextView(self, store: jpegData, suffix: "jpeg")
       } else if let pngData = UIPasteboard.general.data(forPasteboardType: kUTTypePNG as String) {
-        DDLogInfo("Got PNG data = \(pngData.count) bytes")
+        Logger.shared.info("Got PNG data = \(pngData.count) bytes")
         imageKey = try? imageStorage.markdownEditingTextView(self, store: pngData, suffix: "png")
       } else if let convertedData = image.jpegData(compressionQuality: 0.8) {
-        DDLogInfo("Did JPEG conversion ourselves = \(convertedData.count) bytes")
+        Logger.shared.info("Did JPEG conversion ourselves = \(convertedData.count) bytes")
         imageKey = try? imageStorage.markdownEditingTextView(self, store: convertedData, suffix: "jpeg")
       } else {
-        DDLogError("Could not get image data")
+        Logger.shared.error("Could not get image data")
         imageKey = nil
       }
       if let imageKey = imageKey {
         textStorage.replaceCharacters(in: selectedRange, with: "![](\(imageKey))")
       }
     } else {
-      DDLogInfo("Using superclass to paste text")
+      Logger.shared.info("Using superclass to paste text")
       super.paste(sender)
     }
   }
 
   public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
     if action == #selector(paste(_:)), UIPasteboard.general.image != nil {
-      DDLogInfo("There's an image on the pasteboard, so allow pasting")
+      Logger.shared.info("There's an image on the pasteboard, so allow pasting")
       return true
     }
     return super.canPerformAction(action, withSender: sender)

@@ -2,8 +2,8 @@
 
 // swiftlint:disable force_cast
 
-import CocoaLumberjack
 import Foundation
+import Logging
 import MobileCoreServices
 
 /// Contains the properties of a file at a point in time (the structure is immutable)
@@ -144,7 +144,7 @@ extension FileMetadata {
   private static func downloadItem(_ item: FileMetadata, in container: URL) {
     let fileURL = container.appendingPathComponent(item.fileName)
     downloadQueue.async {
-      DDLogDebug("Downloading " + String(describing: item.fileName))
+      Logger.shared.debug("Downloading \(String(describing: item.fileName))")
       try? FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
     }
   }
