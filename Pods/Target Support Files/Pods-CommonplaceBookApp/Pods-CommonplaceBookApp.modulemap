@@ -1,6 +1,0 @@
-framework module Pods_CommonplaceBookApp {
-  umbrella header "Pods-CommonplaceBookApp-umbrella.h"
-
-  export *
-  module * { export * }
-}

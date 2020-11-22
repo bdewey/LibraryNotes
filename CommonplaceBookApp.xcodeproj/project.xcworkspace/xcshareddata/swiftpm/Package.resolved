@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/groue/CombineExpectations.git",
         "state": {
           "branch": null,
-          "revision": "40d564be8decfc9a3e8acfec56a42dd845e5c420",
-          "version": "0.3.0"
+          "revision": "96d5604151c94b21fbca6877b237e80af9e821dd",
+          "version": "0.5.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/groue/GRDBCombine.git",
         "state": {
           "branch": null,
-          "revision": "c155a5738448490832c068427b5eec2e4b5f65e3",
-          "version": "0.7.1"
+          "revision": "cbae47a79921fb8df318f31b9c51f9a1245373e6",
+          "version": "0.8.1"
         }
       },
       {

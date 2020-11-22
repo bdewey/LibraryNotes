@@ -4,6 +4,7 @@
 
 ### Changed
 
+- No more Cocoapods! Open the project file, not hte workspace.
 - The project now uses Swift Package Manager to manage SnapKit
 
 ### Removed
