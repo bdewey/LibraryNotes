@@ -105,7 +105,7 @@ public final class IncrementalParsingTextStorage: NSTextStorage {
   /// The character contents as a single String value without any text replacements applied.
   public var rawText: String {
     get {
-      buffer.text as String
+      buffer.text.string
     }
     set {
       replaceCharacters(in: NSRange(location: 0, length: buffer.count), with: newValue)

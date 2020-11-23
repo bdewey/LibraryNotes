@@ -102,13 +102,13 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       completion?()
       return
     }
-    let note = Note(parsedString: textEditViewController.textStorage.buffer)
+    let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
     self.updateNote(note)
     hasUnsavedChanges = false
     completion?()
   }
 
-  func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String) {
+  func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController) {
     hasUnsavedChanges = true
   }
 

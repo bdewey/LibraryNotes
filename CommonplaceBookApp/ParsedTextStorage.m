@@ -20,8 +20,6 @@
 
 @interface ParsedTextStorage () <ParsedAttributedStringDelegate>
 
-@property (nonatomic, strong) ParsedAttributedString *storage;
-
 @end
 
 @implementation ParsedTextStorage {

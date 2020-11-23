@@ -24,6 +24,9 @@ NS_ASSUME_NONNULL_BEGIN
 /// An NSTextStorage implementation that uses a ParsedAttributedString as its underlying storage.
 @interface ParsedTextStorage : NSTextStorage
 
+/// The underlying ParsedAttributedString for this NSTextStorage instance. Exposed to provide access to things like the AST for the contents.
+@property (nonatomic, strong) ParsedAttributedString *storage;
+
 /// Initializes ParsedTextStorage that wraps and underlying `ParsedAttributedString`.
 - (instancetype)initWithStorage:(ParsedAttributedString *)storage NS_DESIGNATED_INITIALIZER;
 
