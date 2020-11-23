@@ -22,12 +22,12 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
 
   public override var type: ChallengeTemplateType { return .questionAndAnswer }
 
-  public static func extract(from buffer: IncrementalParsingBuffer) -> [QuestionAndAnswerTemplate] {
-    guard let root = try? buffer.result.get() else { return [] }
+  public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerTemplate] {
+    guard let root = try? parsedString.result.get() else { return [] }
     return AnchoredNode(node: root, startIndex: 0)
       .findNodes(where: { $0.type == .questionAndAnswer })
       .map {
-        let chars = buffer[$0.range]
+        let chars = parsedString[$0.range]
         return String(utf16CodeUnits: chars, count: chars.count)
       }
       .compactMap {
@@ -46,17 +46,17 @@ extension QuestionAndAnswerTemplate: Challenge {
 
   public func challengeView(document: NoteStorage, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
-    view.context = IncrementalParsingTextStorage(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
+    view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
     // TODO: Need to re-invent images :-(
 //    document.addImageRenderer(to: &renderer.renderFunctions)
-    let formattedString = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body))
-    if let node = try? formattedString.buffer.result.get() {
+    let formattedString = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
+    if let node = try? formattedString.rawString.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)
       if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
-        view.front = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: question.range)).trimmingTrailingWhitespace()
+        view.front = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: question.range)).trimmingTrailingWhitespace()
       }
       if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
-        view.back = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: answer.range)).trimmingTrailingWhitespace()
+        view.back = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: answer.range)).trimmingTrailingWhitespace()
       }
     }
     return view

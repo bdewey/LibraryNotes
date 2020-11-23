@@ -5,7 +5,7 @@ import MobileCoreServices
 import UIKit
 
 public protocol TextEditViewControllerDelegate: AnyObject {
-  func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String)
+  func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
 }
 
@@ -62,17 +62,17 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  public let textStorage: IncrementalParsingTextStorage
+  public let textStorage: ParsedTextStorage
 
   public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
 
   /// The markdown
   public var markdown: String {
     get {
-      return textStorage.rawText
+      return textStorage.storage.rawString as String
     }
     set {
-      textStorage.rawText = newValue
+      textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: newValue)
     }
   }
 
@@ -128,14 +128,14 @@ public final class TextEditViewController: UIViewController {
 
   private static func makeTextStorage(
     formatters: [NewNodeType: FormattingFunction]
-  ) -> IncrementalParsingTextStorage {
+  ) -> ParsedTextStorage {
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: .body),
       .foregroundColor: UIColor.label,
     ]
     defaultAttributes.headIndent = 28
     defaultAttributes.firstLineHeadIndent = 28
-    let textStorage = IncrementalParsingTextStorage(
+    let storage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
       formattingFunctions: formatters,
@@ -144,7 +144,7 @@ public final class TextEditViewController: UIViewController {
         .unorderedListOpening: formatBullet,
       ]
     )
-    return textStorage
+    return ParsedTextStorage(storage: storage)
   }
 
   private lazy var textView: UITextView = {
@@ -258,7 +258,7 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    delegate?.textEditViewController(self, didChange: self.textStorage.rawText)
+    delegate?.textEditViewControllerDidChangeContents(self)
   }
 }
 
@@ -280,10 +280,10 @@ extension TextEditViewController: UITextViewDelegate {
 
     // Right now we only do special processing when inserting a newline
     guard range.length == 0, text == "\n" else { return true }
-    let nodePath = textStorage.path(to: range.location)
+    let nodePath = textStorage.storage.path(to: range.location)
     if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
       if let paragraph = listItem.first(where: { $0.type == .paragraph }) {
-        let paragraphText = textStorage[paragraph.range]
+        let paragraphText = textStorage.storage[paragraph.range]
         if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
           // List termination! Someone's hitting return on a list item that contains nothing.
           // Erase this marker.
@@ -310,7 +310,7 @@ extension TextEditViewController: UITextViewDelegate {
       case .ordered:
         let listNumber: Int
         if let listNumberNode = listItem.first(where: { $0.type == .orderedListNumber }) {
-          let chars = textStorage[NSRange(location: listNumberNode.startIndex, length: listNumberNode.node.length)]
+          let chars = textStorage.storage[NSRange(location: listNumberNode.startIndex, length: listNumberNode.node.length)]
           let string = String(utf16CodeUnits: chars, count: chars.count)
           listNumber = Int(string) ?? 0
         } else {

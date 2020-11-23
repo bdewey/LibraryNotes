@@ -16,7 +16,7 @@ final class ClozeTests: XCTestCase {
        - La nieve ?[to be](es) blanca.
     4. *Estar* with an adjective shows a "change" or "condition."
     """
-    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar())
+    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar())
     let templates = ClozeTemplate.extract(from: buffer)
     XCTAssertEqual(templates.count, 1)
   }
@@ -25,7 +25,7 @@ final class ClozeTests: XCTestCase {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let buffer = IncrementalParsingBuffer(example, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar.shared)
     let clozeCards = ClozeTemplate.extract(from: buffer).cards as! [ClozeCard] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
@@ -33,19 +33,19 @@ final class ClozeTests: XCTestCase {
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let renderedFront = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
+    let renderedFront = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
     XCTAssertEqual(
       renderedFront.string,
       "Yo to be de España. ¿De dónde es ustedes?"
     )
     XCTAssertEqual(
-      IncrementalParsingTextStorage(
+      ParsedAttributedString(
         string: clozeCards[1].markdown,
         settings: .clozeRenderer(hidingClozeAt: clozeCards[1].clozeIndex)
       ).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
-    let renderedBack = IncrementalParsingTextStorage(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
+    let renderedBack = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
     XCTAssertEqual(
       renderedBack.string,
       "Yo soy de España. ¿De dónde es ustedes?"
@@ -62,13 +62,13 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = IncrementalParsingTextStorage(
+    let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
       string: "",
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: [:],
       formattingFunctions: [.cloze: { $1.bold = true }],
       replacementFunctions: [:]
-    )
+    ))
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()

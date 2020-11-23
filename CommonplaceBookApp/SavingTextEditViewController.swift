@@ -31,7 +31,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var autosaveTimer: Timer?
 
   internal func setTitleMarkdown(_ markdown: String) {
-    navigationItem.title = IncrementalParsingTextStorage(string: markdown, settings: .plainText(textStyle: .body)).string
+    navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
   override func viewDidLoad() {
@@ -102,13 +102,13 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       completion?()
       return
     }
-    let note = Note(buffer: textEditViewController.textStorage.buffer)
+    let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
     self.updateNote(note)
     hasUnsavedChanges = false
     completion?()
   }
 
-  func textEditViewController(_ viewController: TextEditViewController, didChange markdown: String) {
+  func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController) {
     hasUnsavedChanges = true
   }
 

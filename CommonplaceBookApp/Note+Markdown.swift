@@ -4,26 +4,26 @@ import Foundation
 
 public extension Note {
   /// Creates a new Note from the contents of a parsed text buffer.
-  init(buffer: IncrementalParsingBuffer) {
+  init(parsedString: ParsedString) {
     var challengeTemplates = [ChallengeTemplate]()
-    challengeTemplates.append(contentsOf: ClozeTemplate.extract(from: buffer))
-    challengeTemplates.append(contentsOf: QuoteTemplate.extract(from: buffer))
-    challengeTemplates.append(contentsOf: QuestionAndAnswerTemplate.extract(from: buffer))
+    challengeTemplates.append(contentsOf: ClozeTemplate.extract(from: parsedString))
+    challengeTemplates.append(contentsOf: QuoteTemplate.extract(from: parsedString))
+    challengeTemplates.append(contentsOf: QuestionAndAnswerTemplate.extract(from: parsedString))
     self.init(
       metadata: Note.Metadata(
         timestamp: Date(),
-        hashtags: buffer.hashtags,
-        title: String(buffer.title.split(separator: "\n").first ?? ""),
+        hashtags: parsedString.hashtags,
+        title: String(parsedString.title.split(separator: "\n").first ?? ""),
         containsText: true
       ),
-      text: buffer.string,
+      text: parsedString.string,
       challengeTemplates: challengeTemplates
     )
   }
 
   init(markdown: String) {
-    let buffer = IncrementalParsingBuffer(markdown, grammar: MiniMarkdownGrammar.shared)
-    self.init(buffer: buffer)
+    let buffer = ParsedString(markdown, grammar: MiniMarkdownGrammar.shared)
+    self.init(parsedString: buffer)
   }
 
   mutating func updateMarkdown(_ markdown: String) {
@@ -33,7 +33,7 @@ public extension Note {
   }
 }
 
-public extension IncrementalParsingBuffer {
+public extension ParsedString {
   var hashtags: [String] {
     guard let root = try? result.get() else { return [] }
     var results = Set<String>()
