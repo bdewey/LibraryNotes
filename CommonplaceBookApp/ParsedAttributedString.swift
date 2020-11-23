@@ -113,7 +113,7 @@ private extension Logger {
   public let rawString: ParsedString
 
   /// The underlying NSString that backs `string`. This is public and exposed to Objective-C to allow O(1) access to the string contents from TextKit.
-  @objc public let _string: PieceTableString
+  @objc public let _string: PieceTableString // swiftlint:disable:this identifier_name
 
   /// The contents of the string. This is derived from `rawString` after applying replacements.
   public override var string: String { _string as String }

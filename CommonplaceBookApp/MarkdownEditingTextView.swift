@@ -1,8 +1,11 @@
 // Copyright © 2017-present Brian's Brain. All rights reserved.
 
+import os
 import MobileCoreServices
 import Logging
 import UIKit
+
+private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "TextView")
 
 public protocol MarkdownEditingTextViewImageStoring: AnyObject {
   /// The text view has an image to store because of a paste or drop operation.
@@ -75,5 +78,11 @@ public final class MarkdownEditingTextView: UITextView {
       return true
     }
     return super.canPerformAction(action, withSender: sender)
+  }
+
+  public override func insertText(_ text: String) {
+    os_signpost(.begin, log: log, name: "keystroke")
+    super.insertText(text)
+    os_signpost(.end, log: log, name: "keystroke")
   }
 }
