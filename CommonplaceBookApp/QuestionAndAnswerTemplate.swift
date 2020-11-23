@@ -50,13 +50,13 @@ extension QuestionAndAnswerTemplate: Challenge {
     // TODO: Need to re-invent images :-(
 //    document.addImageRenderer(to: &renderer.renderFunctions)
     let formattedString = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
-    if let node = try? formattedString.buffer.result.get() {
+    if let node = try? formattedString.rawString.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)
       if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
-        view.front = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: question.range)).trimmingTrailingWhitespace()
+        view.front = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: question.range)).trimmingTrailingWhitespace()
       }
       if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
-        view.back = formattedString.attributedSubstring(from: formattedString.visibleTextRange(forRawRange: answer.range)).trimmingTrailingWhitespace()
+        view.back = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: answer.range)).trimmingTrailingWhitespace()
       }
     }
     return view
