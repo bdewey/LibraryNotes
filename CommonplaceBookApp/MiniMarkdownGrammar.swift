@@ -17,32 +17,32 @@
 
 import Foundation
 
-public extension NewNodeType {
-  static let blankLine: NewNodeType = "blank_line"
-  static let blockquote: NewNodeType = "blockquote"
-  static let code: NewNodeType = "code"
-  static let delimiter: NewNodeType = "delimiter"
-  static let document: NewNodeType = "document"
-  static let emphasis: NewNodeType = "emphasis"
-  static let hashtag: NewNodeType = "hashtag"
-  static let header: NewNodeType = "header"
-  static let image: NewNodeType = "image"
-  static let list: NewNodeType = "list"
-  static let listItem: NewNodeType = "list_item"
-  static let paragraph: NewNodeType = "paragraph"
-  static let softTab: NewNodeType = "tab"
-  static let strongEmphasis: NewNodeType = "strong_emphasis"
-  static let text: NewNodeType = "text"
-  static let unorderedListOpening: NewNodeType = "unordered_list_opening"
-  static let orderedListNumber: NewNodeType = "ordered_list_number"
-  static let orderedListTerminator: NewNodeType = "ordered_list_terminator"
-  static let cloze: NewNodeType = "cloze"
-  static let clozeHint: NewNodeType = "cloze_hint"
-  static let clozeAnswer: NewNodeType = "cloze_answer"
-  static let questionAndAnswer: NewNodeType = "question_and_answer"
-  static let qnaQuestion: NewNodeType = "qna_question"
-  static let qnaAnswer: NewNodeType = "qna_answer"
-  static let qnaDelimiter: NewNodeType = "qna_delimiter"
+public extension SyntaxTreeNodeType {
+  static let blankLine: SyntaxTreeNodeType = "blank_line"
+  static let blockquote: SyntaxTreeNodeType = "blockquote"
+  static let code: SyntaxTreeNodeType = "code"
+  static let delimiter: SyntaxTreeNodeType = "delimiter"
+  static let document: SyntaxTreeNodeType = "document"
+  static let emphasis: SyntaxTreeNodeType = "emphasis"
+  static let hashtag: SyntaxTreeNodeType = "hashtag"
+  static let header: SyntaxTreeNodeType = "header"
+  static let image: SyntaxTreeNodeType = "image"
+  static let list: SyntaxTreeNodeType = "list"
+  static let listItem: SyntaxTreeNodeType = "list_item"
+  static let paragraph: SyntaxTreeNodeType = "paragraph"
+  static let softTab: SyntaxTreeNodeType = "tab"
+  static let strongEmphasis: SyntaxTreeNodeType = "strong_emphasis"
+  static let text: SyntaxTreeNodeType = "text"
+  static let unorderedListOpening: SyntaxTreeNodeType = "unordered_list_opening"
+  static let orderedListNumber: SyntaxTreeNodeType = "ordered_list_number"
+  static let orderedListTerminator: SyntaxTreeNodeType = "ordered_list_terminator"
+  static let cloze: SyntaxTreeNodeType = "cloze"
+  static let clozeHint: SyntaxTreeNodeType = "cloze_hint"
+  static let clozeAnswer: SyntaxTreeNodeType = "cloze_answer"
+  static let questionAndAnswer: SyntaxTreeNodeType = "question_and_answer"
+  static let qnaQuestion: SyntaxTreeNodeType = "qna_question"
+  static let qnaAnswer: SyntaxTreeNodeType = "qna_answer"
+  static let qnaDelimiter: SyntaxTreeNodeType = "qna_delimiter"
 }
 
 public enum ListType {
@@ -50,7 +50,7 @@ public enum ListType {
   case unordered
 }
 
-public enum ListTypeKey: NodePropertyKey {
+public enum ListTypeKey: SyntaxTreeNodePropertyKey {
   public typealias Value = ListType
 
   public static let key = "list_type"
@@ -116,7 +116,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
 
   // MARK: - Inline styles
 
-  func delimitedText(_ nodeType: NewNodeType, delimiter: ParsingRule) -> ParsingRule {
+  func delimitedText(_ nodeType: SyntaxTreeNodeType, delimiter: ParsingRule) -> ParsingRule {
     let rightFlanking = InOrder(nonWhitespace.as(.text), delimiter.as(.delimiter)).memoize()
     return InOrder(
       delimiter.as(.delimiter),

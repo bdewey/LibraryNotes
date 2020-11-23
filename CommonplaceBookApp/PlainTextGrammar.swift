@@ -8,8 +8,8 @@
 
 import Foundation
 
-public extension NewNodeType {
-  static let plainText: NewNodeType = "plain-text"
+public extension SyntaxTreeNodeType {
+  static let plainText: SyntaxTreeNodeType = "plain-text"
 }
 
 /// Just interprets all text as "plain-text"

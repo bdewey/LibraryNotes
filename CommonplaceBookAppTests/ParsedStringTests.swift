@@ -102,7 +102,7 @@ final class ParsedStringTests: XCTestCase {
 
 private extension ParsedStringTests {
   @discardableResult
-  func validateParser(_ parser: ParsedString, has expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> NewNode? {
+  func validateParser(_ parser: ParsedString, has expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> SyntaxTreeNode? {
     do {
       let tree = try parser.result.get()
       if tree.length != parser.count {

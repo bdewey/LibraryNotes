@@ -80,8 +80,8 @@ public final class TextEditViewController: UIViewController {
   public var noteIdentifier: Note.Identifier?
 
   private static func formatters(
-  ) -> [NewNodeType: FormattingFunction] {
-    var formatters: [NewNodeType: FormattingFunction] = [:]
+  ) -> [SyntaxTreeNodeType: FormattingFunction] {
+    var formatters: [SyntaxTreeNodeType: FormattingFunction] = [:]
     formatters[.header] = {
       let headingLevel = $0.children[0].length
       switch headingLevel {
@@ -127,7 +127,7 @@ public final class TextEditViewController: UIViewController {
   }
 
   private static func makeTextStorage(
-    formatters: [NewNodeType: FormattingFunction]
+    formatters: [SyntaxTreeNodeType: FormattingFunction]
   ) -> ParsedTextStorage {
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: .body),
@@ -369,7 +369,7 @@ private extension TextEditViewController {
 // MARK: - Replacement functions
 
 private func formatTab(
-  node: NewNode,
+  node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer
 ) -> [unichar] {
@@ -377,7 +377,7 @@ private func formatTab(
 }
 
 private func formatBullet(
-  node: NewNode,
+  node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer
 ) -> [unichar] {

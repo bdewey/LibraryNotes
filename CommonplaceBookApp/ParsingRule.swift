@@ -145,7 +145,7 @@ open class ParsingRuleSequenceWrapper: ParsingRule {
 
 /// The output of trying to match a rule at an offset into a PieceTable.
 public struct ParsingResult {
-  public init(succeeded: Bool, length: Int = 0, examinedLength: Int = 0, node: NewNode? = nil) {
+  public init(succeeded: Bool, length: Int = 0, examinedLength: Int = 0, node: SyntaxTreeNode? = nil) {
     assert(node == nil || (length == node!.length))
     self.succeeded = succeeded
     self.length = length
@@ -173,12 +173,12 @@ public struct ParsingResult {
   }
 
   /// If we succeeded, what are the parse results? Note that for efficiency some rules may consume input (length > 1) but not actually generate syntax tree nodes.
-  public private(set) var node: NewNode?
+  public private(set) var node: SyntaxTreeNode?
 
   /// Turns the spanned by an "anonymous" result into a typed node.
-  fileprivate mutating func makeNode(type: NewNodeType) {
+  fileprivate mutating func makeNode(type: SyntaxTreeNodeType) {
     assert(node == nil)
-    node = NewNode(type: type, length: length)
+    node = SyntaxTreeNode(type: type, length: length)
   }
 
   /// Marks this result as a failure; useful for truncating in-process results. Notes it leaves `examinedLength` unchanged
@@ -220,11 +220,11 @@ public struct ParsingResult {
     assert(node == nil || node?.length == length)
   }
 
-  private mutating func makeFragmentIfNeeded() -> NewNode {
+  private mutating func makeFragmentIfNeeded() -> SyntaxTreeNode {
     if let existingNode = node {
       return existingNode
     }
-    let node = NewNode(type: .documentFragment, length: 0)
+    let node = SyntaxTreeNode(type: .documentFragment, length: 0)
     self.node = node
     return node
   }
@@ -240,14 +240,14 @@ public struct ParsingResult {
 // MARK: - Deriving rules
 
 public extension ParsingRule {
-  func wrapping(in nodeType: NewNodeType) -> ParsingRule {
+  func wrapping(in nodeType: SyntaxTreeNodeType) -> ParsingRule {
     return WrappingRule(rule: self, nodeType: nodeType)
   }
 
   /// Returns a rule that "absorbs" the contents of the receiver into a syntax tree node of type `nodeType`
   /// - note: "Absorbing" means that all of the nodes in the receiver's `ParsingResult` are discarded, but the resulting span of the
   /// buffer will be covered by this rule's single node.
-  func `as`(_ nodeType: NewNodeType) -> ParsingRule {
+  func `as`(_ nodeType: SyntaxTreeNodeType) -> ParsingRule {
     return AbsorbingMatcher(rule: self, nodeType: nodeType)
   }
 
@@ -285,7 +285,7 @@ public extension ParsingRule {
     return ZeroOrOneRule(self)
   }
 
-  func property<K: NodePropertyKey>(key: K.Type, value: K.Value) -> ParsingRule {
+  func property<K: SyntaxTreeNodePropertyKey>(key: K.Type, value: K.Value) -> ParsingRule {
     return PropertyRule(key: key, value: value, rule: self)
   }
 }
@@ -437,9 +437,9 @@ final class ZeroOrOneRule: ParsingRuleWrapper {
 /// "Absorbs" the range consumed by `rule` into a syntax tree node of type `nodeType`. Any syntax tree nodes produced
 /// by `rule` will be discarded.
 final class AbsorbingMatcher: ParsingRuleWrapper {
-  let nodeType: NewNodeType
+  let nodeType: SyntaxTreeNodeType
 
-  init(rule: ParsingRule, nodeType: NewNodeType) {
+  init(rule: ParsingRule, nodeType: SyntaxTreeNodeType) {
     self.nodeType = nodeType
     super.init(rule)
   }
@@ -462,9 +462,9 @@ final class AbsorbingMatcher: ParsingRuleWrapper {
 
 /// Succeeds if `rule` succeeds, and all of the children of `rule` will be made the children of a new node of type `nodeType`.
 final class WrappingRule: ParsingRuleWrapper {
-  let nodeType: NewNodeType
+  let nodeType: SyntaxTreeNodeType
 
-  init(rule: ParsingRule, nodeType: NewNodeType) {
+  init(rule: ParsingRule, nodeType: SyntaxTreeNodeType) {
     self.nodeType = nodeType
     super.init(rule)
   }
@@ -708,7 +708,7 @@ final class TraceRule: ParsingRuleWrapper {
   }
 }
 
-final class PropertyRule<K: NodePropertyKey>: ParsingRuleWrapper {
+final class PropertyRule<K: SyntaxTreeNodePropertyKey>: ParsingRuleWrapper {
   init(key: K.Type, value: K.Value, rule: ParsingRule) {
     self.key = key
     self.value = value

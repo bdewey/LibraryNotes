@@ -20,7 +20,7 @@ import Foundation
 import XCTest
 
 private func formatTab(
-  node: NewNode,
+  node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer
 ) -> [unichar] {
@@ -33,7 +33,7 @@ final class ParsedTextStorageTests: XCTestCase {
   override func setUp() {
     super.setUp()
     #if !os(macOS)
-      let formattingFunctions: [NewNodeType: FormattingFunction] = [
+      let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
         .emphasis: { $1.italic = true },
         .header: { $1.fontSize = 24 },
         .list: { $1.listLevel += 1 },

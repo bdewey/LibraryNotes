@@ -24,7 +24,7 @@ public final class ClozeTemplate: ChallengeTemplate {
 
   public override var rawValue: String { markdown }
   private let markdown: String
-  private let node: NewNode
+  private let node: SyntaxTreeNode
 
   // MARK: - CardTemplate conformance
 

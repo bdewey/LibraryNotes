@@ -2,7 +2,7 @@ import CommonplaceBookApp
 import XCTest
 
 private func formatTab(
-  node: NewNode,
+  node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer
 ) -> [unichar] {
@@ -12,7 +12,7 @@ private func formatTab(
 final class ParsedAttributedStringTests: XCTestCase {
 
   func testReplacementsAffectStringsButNotRawText() {
-    let formattingFunctions: [NewNodeType: FormattingFunction] = [
+    let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
       .emphasis: { $1.italic = true },
       .header: { $1.fontSize = 24 },
       .list: { $1.listLevel += 1 },
@@ -68,7 +68,7 @@ final class ParsedAttributedStringTests: XCTestCase {
   }
 
   static func makeNoDelimiterStorage() -> ParsedAttributedString {
-    let formattingFunctions: [NewNodeType: FormattingFunction] = [
+    let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
       .emphasis: { $1.italic = true },
       .header: { $1.fontSize = 24 },
       .list: { $1.listLevel += 1 },

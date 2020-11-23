@@ -20,10 +20,10 @@ import Logging
 import UIKit
 
 /// A function that modifies NSAttributedString attributes based the syntax tree.
-public typealias FormattingFunction = (NewNode, inout AttributedStringAttributes) -> Void
+public typealias FormattingFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
 
 /// A function that overlays replacements...
-public typealias ReplacementFunction = (NewNode, Int, SafeUnicodeBuffer) -> [unichar]?
+public typealias ReplacementFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer) -> [unichar]?
 
 private extension Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
@@ -52,8 +52,8 @@ private extension Logger {
   public struct Settings {
     var grammar: PackratGrammar
     var defaultAttributes: AttributedStringAttributes
-    var formattingFunctions: [NewNodeType: FormattingFunction]
-    var replacementFunctions: [NewNodeType: ReplacementFunction]
+    var formattingFunctions: [SyntaxTreeNodeType: FormattingFunction]
+    var replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
   }
 
   public convenience init(string: String, settings: Settings) {
@@ -80,8 +80,8 @@ private extension Logger {
     string: String = "",
     grammar: PackratGrammar,
     defaultAttributes: AttributedStringAttributes,
-    formattingFunctions: [NewNodeType: FormattingFunction],
-    replacementFunctions: [NewNodeType: ReplacementFunction]
+    formattingFunctions: [SyntaxTreeNodeType: FormattingFunction],
+    replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
   ) {
     self.defaultAttributes = defaultAttributes
     self.formattingFunctions = formattingFunctions
@@ -122,10 +122,10 @@ private extension Logger {
   private let defaultAttributes: AttributedStringAttributes
   
   /// A set of functions that customize attributes based upon the nodes in the AST.
-  private let formattingFunctions: [NewNodeType: FormattingFunction]
+  private let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction]
   
   /// A set of functions that replace the contents of `rawString` -- e.g., these can be used to remove delimiters or change spaces to tabs.
-  private let replacementFunctions: [NewNodeType: ReplacementFunction]
+  private let replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
 
   /// Given a range in `string`, computes the equivalent range in `rawString`
   /// - note: Characters from a "replacement" are an atomic unit. If the input range overlaps with part of the characters in a replacement, the resulting range will encompass the entire replacement.
@@ -234,7 +234,7 @@ private extension Logger {
 private extension ParsedAttributedString {
   /// Associates AttributedStringAttributes with this part of the syntax tree.
   func applyAttributes(
-    to node: NewNode,
+    to node: SyntaxTreeNode,
     attributes: AttributedStringAttributes,
     startingIndex: Int,
     leafNodeRange: inout Range<Int>?
@@ -275,7 +275,7 @@ private extension ParsedAttributedString {
     node.textReplacementChangeInLength += childTextReplacementChangeInLength
   }
 
-  func applyReplacements(in node: NewNode, startingIndex: Int, to string: NSMutableString) {
+  func applyReplacements(in node: SyntaxTreeNode, startingIndex: Int, to string: NSMutableString) {
     guard node.hasTextReplacement else { return }
     if let replacement = node.textReplacement {
       string.replaceCharacters(in: NSRange(location: startingIndex, length: node.length), with: String(utf16CodeUnits: replacement, count: replacement.count))
@@ -296,8 +296,8 @@ public extension ParsedAttributedString.Settings {
     textColor: UIColor = .label,
     extraAttributes: [NSAttributedString.Key: Any] = [:]
   ) -> ParsedAttributedString.Settings {
-    var formattingFunctions = [NewNodeType: FormattingFunction]()
-    var replacementFunctions = [NewNodeType: ReplacementFunction]()
+    var formattingFunctions = [SyntaxTreeNodeType: FormattingFunction]()
+    var replacementFunctions = [SyntaxTreeNodeType: ReplacementFunction]()
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.strongEmphasis] = { $1.bold = true }
     formattingFunctions[.code] = { $1.familyName = "Menlo" }
@@ -319,28 +319,28 @@ public extension ParsedAttributedString.Settings {
 }
 
 /// Key for storing the string attributes associated with a node.
-private struct NodeAttributesKey: NodePropertyKey {
+private struct NodeAttributesKey: SyntaxTreeNodePropertyKey {
   typealias Value = AttributedStringAttributes
 
   static let key = "attributes"
 }
 
-private struct NodeTextReplacementKey: NodePropertyKey {
+private struct NodeTextReplacementKey: SyntaxTreeNodePropertyKey {
   typealias Value = [unichar]
   static let key = "textReplacement"
 }
 
-private struct NodeHasTextReplacementKey: NodePropertyKey {
+private struct NodeHasTextReplacementKey: SyntaxTreeNodePropertyKey {
   typealias Value = Bool
   static let key = "hasTextReplacement"
 }
 
-private struct NodeTextReplacementChangeInLengthKey: NodePropertyKey {
+private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
   typealias Value = Int
   static let key = "textReplacementChangeInLength"
 }
 
-private extension NewNode {
+private extension SyntaxTreeNode {
   /// The attributes associated with this node, if set.
   var attributedStringAttributes: AttributedStringAttributes? {
     get {
@@ -414,9 +414,9 @@ private extension NewNode {
     return lowerBound ..< upperBound
   }
 
-  func childrenAndOffsets(startingAt offset: Int) -> [(child: NewNode, offset: Int)] {
+  func childrenAndOffsets(startingAt offset: Int) -> [(child: SyntaxTreeNode, offset: Int)] {
     var offset = offset
-    var results = [(child: NewNode, offset: Int)]()
+    var results = [(child: SyntaxTreeNode, offset: Int)]()
     for child in children {
       results.append((child: child, offset: offset))
       offset += child.length

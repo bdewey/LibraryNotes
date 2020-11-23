@@ -44,7 +44,7 @@ public final class MemoizationTable: CustomStringConvertible {
   /// Parses the contents of the buffer.
   /// - Throws: If the grammar could not parse the entire contents, throws `Error.incompleteParsing`. If the grammar resulted in more than one resulting node, throws `Error.ambiguousParsing`.
   /// - Returns: The single node at the root of the syntax tree resulting from parsing `buffer`
-  public func parseBuffer(_ buffer: SafeUnicodeBuffer) throws -> NewNode {
+  public func parseBuffer(_ buffer: SafeUnicodeBuffer) throws -> SyntaxTreeNode {
     if memoizedResults.count < buffer.count + 1 {
       reserveCapacity(buffer.count + 1)
     }

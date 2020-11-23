@@ -18,7 +18,7 @@
 import Foundation
 
 /// Opaque class representing the type of a markup node.
-public final class NewNodeType: RawRepresentable, ExpressibleByStringLiteral, Hashable, CustomStringConvertible {
+public final class SyntaxTreeNodeType: RawRepresentable, ExpressibleByStringLiteral, Hashable, CustomStringConvertible {
   public init(rawValue: String) {
     self.rawValue = rawValue
   }

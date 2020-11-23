@@ -238,7 +238,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
 
 private extension MiniMarkdownParsingTests {
   @discardableResult
-  func parseText(_ text: String, expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> NewNode? {
+  func parseText(_ text: String, expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> SyntaxTreeNode? {
     do {
       let pieceTable = PieceTable(text)
       let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)

@@ -17,12 +17,12 @@
 
 import Foundation
 
-extension NewNodeType {
-  static let documentFragment: NewNodeType = "{{fragment}}"
+extension SyntaxTreeNodeType {
+  static let documentFragment: SyntaxTreeNodeType = "{{fragment}}"
 }
 
 /// A key for associating values of a specific type with a node.
-public protocol NodePropertyKey {
+public protocol SyntaxTreeNodePropertyKey {
   associatedtype Value
 
   /// The string key used to identify the value in the property bag.
@@ -36,7 +36,7 @@ public protocol NodePropertyKey {
 }
 
 /// Default implementation of getter / setter.
-public extension NodePropertyKey {
+public extension SyntaxTreeNodePropertyKey {
   static func getProperty(from bag: [String: Any]?) -> Value? {
     guard let bag = bag else { return nil }
     if let value = bag[key] {
@@ -56,22 +56,22 @@ public extension NodePropertyKey {
 }
 
 /// A node in the markup language's syntax tree.
-public final class NewNode: CustomStringConvertible {
-  public init(type: NewNodeType, length: Int = 0) {
+public final class SyntaxTreeNode: CustomStringConvertible {
+  public init(type: SyntaxTreeNodeType, length: Int = 0) {
     self.type = type
     self.length = length
   }
 
-  public static func makeFragment() -> NewNode {
-    return NewNode(type: .documentFragment, length: 0)
+  public static func makeFragment() -> SyntaxTreeNode {
+    return SyntaxTreeNode(type: .documentFragment, length: 0)
   }
 
   /// The type of this node.
-  public var type: NewNodeType
+  public var type: SyntaxTreeNodeType
 
   /// If true, this node should be considered a "fragment" (an ordered list of nodes without a root)
   public var isFragment: Bool {
-    return type === NewNodeType.documentFragment
+    return type === SyntaxTreeNodeType.documentFragment
   }
 
   /// The length of the original text covered by this node (and all children).
@@ -83,9 +83,9 @@ public final class NewNode: CustomStringConvertible {
   private var disconnectedFromResult = false
 
   /// Children of this node.
-  public var children = [NewNode]()
+  public var children = [SyntaxTreeNode]()
 
-  public func appendChild(_ child: NewNode) {
+  public func appendChild(_ child: SyntaxTreeNode) {
     length += child.length
     if child.isFragment {
       var fragmentNodes = child.children
@@ -111,7 +111,7 @@ public final class NewNode: CustomStringConvertible {
     if last.disconnectedFromResult {
       last.length += length
     } else {
-      let copy = NewNode(type: last.type, length: last.length + length)
+      let copy = SyntaxTreeNode(type: last.type, length: last.length + length)
       copy.disconnectedFromResult = true
       children[children.count - 1] = copy
     }
@@ -127,7 +127,7 @@ public final class NewNode: CustomStringConvertible {
   }
 
   /// Walks down the tree of nodes to find a specific node.
-  public func node(at indexPath: IndexPath) -> NewNode? {
+  public func node(at indexPath: IndexPath) -> SyntaxTreeNode? {
     if indexPath.isEmpty { return self }
     let nextChild = children.dropFirst(indexPath[0]).first(where: { _ in true })
     assert(nextChild != nil)
@@ -137,12 +137,12 @@ public final class NewNode: CustomStringConvertible {
   /// Enumerates all nodes in the tree in depth-first order.
   /// - parameter startIndex: The index at which this node starts. (An AnchoredNode knows this, but a NewNode does not and needs to be told.)
   /// - parameter block: The first parameter is the node, the second parameter is the start index of the node, and set the third parameter to `false` to stop enumeration.
-  public func forEach(startIndex: Int = 0, block: (NewNode, Int, inout Bool) -> Void) {
+  public func forEach(startIndex: Int = 0, block: (SyntaxTreeNode, Int, inout Bool) -> Void) {
     var stop: Bool = false
     forEach(stop: &stop, startIndex: startIndex, block: block)
   }
 
-  private func forEach(stop: inout Bool, startIndex: Int, block: (NewNode, Int, inout Bool) -> Void) {
+  private func forEach(stop: inout Bool, startIndex: Int, block: (SyntaxTreeNode, Int, inout Bool) -> Void) {
     guard !stop else { return }
     block(self, startIndex, &stop)
     var startIndex = startIndex
@@ -152,20 +152,20 @@ public final class NewNode: CustomStringConvertible {
     }
   }
 
-  public func findNodes(where predicate: (NewNode) -> Bool) -> [NewNode] {
-    var results = [NewNode]()
+  public func findNodes(where predicate: (SyntaxTreeNode) -> Bool) -> [SyntaxTreeNode] {
+    var results = [SyntaxTreeNode]()
     forEach { (node, _, _) in
       if predicate(node) { results.append(node) }
     }
     return results
   }
 
-  public func forEachPath(startIndex: Int = 0, block: ([NewNode], Int, inout Bool) -> Void) {
+  public func forEachPath(startIndex: Int = 0, block: ([SyntaxTreeNode], Int, inout Bool) -> Void) {
     var stop: Bool = false
     forEachPath(stop: &stop, incomingPath: [], startIndex: startIndex, block: block)
   }
 
-  private func forEachPath(stop: inout Bool, incomingPath: [NewNode], startIndex: Int, block: ([NewNode], Int, inout Bool) -> Void) {
+  private func forEachPath(stop: inout Bool, incomingPath: [SyntaxTreeNode], startIndex: Int, block: ([SyntaxTreeNode], Int, inout Bool) -> Void) {
     guard !stop else { return }
     var currentPath = incomingPath
     currentPath.append(self)
@@ -178,8 +178,8 @@ public final class NewNode: CustomStringConvertible {
   }
 
   /// Returns the first (depth-first) node where `predicate` returns true.
-  public func first(where predicate: (NewNode) -> Bool) -> NewNode? {
-    var result: NewNode?
+  public func first(where predicate: (SyntaxTreeNode) -> Bool) -> SyntaxTreeNode? {
+    var result: SyntaxTreeNode?
     forEach { node, _, stop in
       if predicate(node) {
         result = node
@@ -245,7 +245,7 @@ public final class NewNode: CustomStringConvertible {
   private var propertyBag: [String: Any]?
 
   /// Type-safe property accessor.
-  public subscript<K: NodePropertyKey>(key: K.Type) -> K.Value? {
+  public subscript<K: SyntaxTreeNodePropertyKey>(key: K.Type) -> K.Value? {
     get {
       return key.getProperty(from: propertyBag)
     }
@@ -263,10 +263,10 @@ public final class NewNode: CustomStringConvertible {
 /// reuse nodes across edits.)
 /// This is a class and not a struct because structs-that-contain-reference-types can't easily provide value semantics.
 public final class AnchoredNode {
-  public let node: NewNode
+  public let node: SyntaxTreeNode
   public let startIndex: Int
 
-  public init(node: NewNode, startIndex: Int) {
+  public init(node: SyntaxTreeNode, startIndex: Int) {
     self.node = node
     self.startIndex = startIndex
   }
@@ -276,7 +276,7 @@ public final class AnchoredNode {
 
   /// Enumerates all of the nodes, depth-first.
   /// - parameter block: Receives the node, the start index of the node. Set the Bool to `false` to stop enumeration.
-  public func forEach(_ block: (NewNode, Int, inout Bool) -> Void) {
+  public func forEach(_ block: (SyntaxTreeNode, Int, inout Bool) -> Void) {
     node.forEach(startIndex: startIndex, block: block)
   }
 
@@ -299,7 +299,7 @@ public final class AnchoredNode {
   }
 
   /// Returns the first AnchoredNode that matches a predicate.
-  public func first(where predicate: (NewNode) -> Bool) -> AnchoredNode? {
+  public func first(where predicate: (SyntaxTreeNode) -> Bool) -> AnchoredNode? {
     var result: AnchoredNode?
     node.forEach(startIndex: startIndex) { (candidate, index, stop) in
       if predicate(candidate) {
@@ -310,7 +310,7 @@ public final class AnchoredNode {
     return result
   }
 
-  public func findNodes(where predicate: (NewNode) -> Bool) -> [AnchoredNode] {
+  public func findNodes(where predicate: (SyntaxTreeNode) -> Bool) -> [AnchoredNode] {
     var results = [AnchoredNode]()
     node.forEach(startIndex: startIndex) { child, startIndex, _ in
       if predicate(child) {
@@ -323,7 +323,7 @@ public final class AnchoredNode {
 
 // MARK: - Debugging support
 
-extension NewNode {
+extension SyntaxTreeNode {
   /// Returns the structure of this node as a compact s-expression.
   /// For example, `(document ((header text) blank_line paragraph blank_line paragraph)`
   public var compactStructure: String {

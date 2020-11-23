@@ -13,13 +13,13 @@
 		D30D6B2A2549BD0700F5902D /* PieceTableString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B262549BD0700F5902D /* PieceTableString.swift */; };
 		D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B272549BD0700F5902D /* PieceTable.swift */; };
 		D30D6B4E2549C44800F5902D /* CharacterSet+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B462549C44700F5902D /* CharacterSet+Extensions.swift */; };
-		D30D6B4F2549C44800F5902D /* NewNodeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B472549C44700F5902D /* NewNodeType.swift */; };
+		D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B472549C44700F5902D /* SyntaxTreeNodeType.swift */; };
 		D30D6B502549C44800F5902D /* MiniMarkdownGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B482549C44700F5902D /* MiniMarkdownGrammar.swift */; };
 		D30D6B512549C44800F5902D /* ParsingRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B492549C44700F5902D /* ParsingRule.swift */; };
 		D30D6B522549C44800F5902D /* TraceBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4A2549C44700F5902D /* TraceBuffer.swift */; };
 		D30D6B532549C44800F5902D /* BufferProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4B2549C44800F5902D /* BufferProtocols.swift */; };
 		D30D6B542549C44800F5902D /* MemoizationTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4C2549C44800F5902D /* MemoizationTable.swift */; };
-		D30D6B552549C44800F5902D /* NewNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4D2549C44800F5902D /* NewNode.swift */; };
+		D30D6B552549C44800F5902D /* SyntaxTreeNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30D6B4D2549C44800F5902D /* SyntaxTreeNode.swift */; };
 		D30F4028255D86F700AB05EE /* ParsedTextStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F4027255D86F700AB05EE /* ParsedTextStorageTests.swift */; };
 		D30F402E255D9EDE00AB05EE /* ParsedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */; };
 		D3198DA723D8859B0098A9D9 /* Sqlite.Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* Sqlite.Note.swift */; };
@@ -164,13 +164,13 @@
 		D30D6B262549BD0700F5902D /* PieceTableString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableString.swift; sourceTree = "<group>"; };
 		D30D6B272549BD0700F5902D /* PieceTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTable.swift; sourceTree = "<group>"; };
 		D30D6B462549C44700F5902D /* CharacterSet+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CharacterSet+Extensions.swift"; sourceTree = "<group>"; };
-		D30D6B472549C44700F5902D /* NewNodeType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewNodeType.swift; sourceTree = "<group>"; };
+		D30D6B472549C44700F5902D /* SyntaxTreeNodeType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyntaxTreeNodeType.swift; sourceTree = "<group>"; };
 		D30D6B482549C44700F5902D /* MiniMarkdownGrammar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniMarkdownGrammar.swift; sourceTree = "<group>"; };
 		D30D6B492549C44700F5902D /* ParsingRule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsingRule.swift; sourceTree = "<group>"; };
 		D30D6B4A2549C44700F5902D /* TraceBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TraceBuffer.swift; sourceTree = "<group>"; };
 		D30D6B4B2549C44800F5902D /* BufferProtocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BufferProtocols.swift; sourceTree = "<group>"; };
 		D30D6B4C2549C44800F5902D /* MemoizationTable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoizationTable.swift; sourceTree = "<group>"; };
-		D30D6B4D2549C44800F5902D /* NewNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewNode.swift; sourceTree = "<group>"; };
+		D30D6B4D2549C44800F5902D /* SyntaxTreeNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SyntaxTreeNode.swift; sourceTree = "<group>"; };
 		D30F4027255D86F700AB05EE /* ParsedTextStorageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedTextStorageTests.swift; sourceTree = "<group>"; };
 		D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedStringTests.swift; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* Sqlite.Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Note.swift; sourceTree = "<group>"; };
@@ -393,8 +393,6 @@
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
 				D30D6B482549C44700F5902D /* MiniMarkdownGrammar.swift */,
-				D30D6B4D2549C44800F5902D /* NewNode.swift */,
-				D30D6B472549C44700F5902D /* NewNodeType.swift */,
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
@@ -438,6 +436,8 @@
 				D30B0242229E513C00F3B459 /* StudyLog.swift */,
 				D31AFAA1229D61ED00ED2B76 /* StudySession.swift */,
 				D31AFA87229D61E900ED2B76 /* StudyViewController.swift */,
+				D30D6B4D2549C44800F5902D /* SyntaxTreeNode.swift */,
+				D30D6B472549C44700F5902D /* SyntaxTreeNodeType.swift */,
 				D35C72C22189E0720082396D /* TextCollectionViewCell.swift */,
 				D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */,
 				D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */,
@@ -709,7 +709,7 @@
 				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
-				D30D6B4F2549C44800F5902D /* NewNodeType.swift in Sources */,
+				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
 				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
@@ -721,7 +721,7 @@
 				D39D246E256C0E5C00948A72 /* PlainTextGrammar.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
-				D30D6B552549C44800F5902D /* NewNode.swift in Sources */,
+				D30D6B552549C44800F5902D /* SyntaxTreeNode.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
 				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
 				D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */,
