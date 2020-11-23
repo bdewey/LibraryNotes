@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Internal rewrite to clean up the string classes.
+
 ## [0.29.0] - 2020-11-21
 
 ### Changed
