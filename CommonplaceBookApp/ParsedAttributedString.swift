@@ -60,6 +60,16 @@ private extension Logger {
     )
   }
 
+  public override convenience init() {
+    assertionFailure("Are you sure you want a plain-text attributed string?")
+    self.init(
+      grammar: PlainTextGrammar(),
+      defaultAttributes: [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.label],
+      formattingFunctions: [:],
+      replacementFunctions: [:]
+    )
+  }
+
   public init(
     string: String = "",
     grammar: PackratGrammar,
@@ -89,15 +99,15 @@ private extension Logger {
     fatalError("init(coder:) has not been implemented")
   }
   
-  public weak var delegate: ParsedAttributedStringDelegate?
+  @objc public weak var delegate: ParsedAttributedStringDelegate?
 
   // MARK: - Stored properties
 
   /// The "raw" contents of the string. This is what is parsed, and determines what replacements get applied to determine the final contents.
   public let rawString: ParsedString
 
-  /// Private storage for `_string`
-  private let _string: PieceTableString
+  /// The underlying NSString that backs `string`. This is public and exposed to Objective-C to allow O(1) access to the string contents from TextKit.
+  @objc public let _string: PieceTableString
 
   /// The contents of the string. This is derived from `rawString` after applying replacements.
   public override var string: String { _string as String }

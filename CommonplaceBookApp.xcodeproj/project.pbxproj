@@ -77,6 +77,8 @@
 		D393F2BC241439EE00A6DABB /* Sqlite.ChangeLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */; };
 		D393F2BE24143CC100A6DABB /* Sqlite.Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */; };
 		D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D2458256AD22900948A72 /* ParsedAttributedString.swift */; };
+		D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = D39D2467256C013100948A72 /* ParsedTextStorage.m */; };
+		D39D246E256C0E5C00948A72 /* PlainTextGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */; };
 		D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */; };
 		D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */; };
 		D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */; };
@@ -228,6 +230,9 @@
 		D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.ChangeLog.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* Sqlite.Device.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Device.swift; sourceTree = "<group>"; };
 		D39D2458256AD22900948A72 /* ParsedAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedString.swift; sourceTree = "<group>"; };
+		D39D2466256C013100948A72 /* ParsedTextStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParsedTextStorage.h; sourceTree = "<group>"; };
+		D39D2467256C013100948A72 /* ParsedTextStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParsedTextStorage.m; sourceTree = "<group>"; };
+		D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextGrammar.swift; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.StudyLogEntry.swift; sourceTree = "<group>"; };
 		D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Asset.swift; sourceTree = "<group>"; };
 		D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeableRecord.swift; sourceTree = "<group>"; };
@@ -404,10 +409,13 @@
 				D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */,
 				D39D2458256AD22900948A72 /* ParsedAttributedString.swift */,
 				D3D05D2925507C89007C443A /* ParsedString.swift */,
+				D39D2466256C013100948A72 /* ParsedTextStorage.h */,
+				D39D2467256C013100948A72 /* ParsedTextStorage.m */,
 				D30D6B492549C44700F5902D /* ParsingRule.swift */,
 				D30D6B272549BD0700F5902D /* PieceTable.swift */,
 				D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */,
 				D30D6B262549BD0700F5902D /* PieceTableString.swift */,
+				D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */,
 				D339C6FD21EB928700924178 /* QuoteTemplate.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
@@ -664,6 +672,7 @@
 				D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
 				D30D6B522549C44800F5902D /* TraceBuffer.swift in Sources */,
+				D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */,
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D30D6B2A2549BD0700F5902D /* PieceTableString.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
@@ -710,6 +719,7 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
+				D39D246E256C0E5C00948A72 /* PlainTextGrammar.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */,
 				D30D6B552549C44800F5902D /* NewNode.swift in Sources */,
@@ -985,6 +995,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1009,6 +1020,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CommonplaceBookApp.app/CommonplaceBookApp";
