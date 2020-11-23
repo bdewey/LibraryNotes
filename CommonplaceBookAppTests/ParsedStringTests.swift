@@ -19,7 +19,7 @@ import CommonplaceBookApp
 import Foundation
 import XCTest
 
-final class IncrementalParserTests: XCTestCase {
+final class ParsedStringTests: XCTestCase {
   func testSimpleEdit() {
     let parser = ParsedString("Testing", grammar: MiniMarkdownGrammar())
     parser.replaceCharacters(in: NSRange(location: 7, length: 0), with: ", testing")
@@ -100,7 +100,7 @@ final class IncrementalParserTests: XCTestCase {
 
 // MARK: - Private
 
-private extension IncrementalParserTests {
+private extension ParsedStringTests {
   @discardableResult
   func validateParser(_ parser: ParsedString, has expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> NewNode? {
     do {
