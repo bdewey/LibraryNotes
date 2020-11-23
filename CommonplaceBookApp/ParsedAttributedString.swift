@@ -19,6 +19,12 @@ import Foundation
 import Logging
 import UIKit
 
+/// A function that modifies NSAttributedString attributes based the syntax tree.
+public typealias FormattingFunction = (NewNode, inout AttributedStringAttributes) -> Void
+
+/// A function that overlays replacements...
+public typealias ReplacementFunction = (NewNode, Int, SafeUnicodeBuffer) -> [unichar]?
+
 private extension Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
 }

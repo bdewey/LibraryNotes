@@ -102,7 +102,6 @@
 		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
 		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
 		D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* ParsedString.swift */; };
-		D3D05D2C25507C89007C443A /* IncrementalParsingTextStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */; };
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
@@ -256,7 +255,6 @@
 		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
 		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
 		D3D05D2925507C89007C443A /* ParsedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedString.swift; sourceTree = "<group>"; };
-		D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementalParsingTextStorage.swift; sourceTree = "<group>"; };
 		D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PieceTable+SafeUnicodeBuffer.swift"; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
@@ -385,7 +383,6 @@
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
-				D3D05D2A25507C89007C443A /* IncrementalParsingTextStorage.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
@@ -715,7 +712,6 @@
 				D30D6B4F2549C44800F5902D /* NewNodeType.swift in Sources */,
 				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
-				D3D05D2C25507C89007C443A /* IncrementalParsingTextStorage.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D3198DB123DBCA0F0098A9D9 /* Sqlite.Challenge.swift in Sources */,

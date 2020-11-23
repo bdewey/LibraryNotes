@@ -18,10 +18,10 @@ public protocol MarkdownEditingTextViewImageStoring: AnyObject {
 public final class MarkdownEditingTextView: UITextView {
   public override func copy(_ sender: Any?) {
     // swiftlint:disable:next force_cast
-    let markdownTextStorage = textStorage as! IncrementalParsingTextStorage
-    let rawTextRange = markdownTextStorage.rawTextRange(forVisibleRange: selectedRange)
-    guard let stringRange = Range(rawTextRange, in: markdownTextStorage.rawText) else { return }
-    UIPasteboard.general.string = String(markdownTextStorage.rawText[stringRange])
+    let markdownTextStorage = textStorage as! ParsedTextStorage
+    let rawTextRange = markdownTextStorage.storage.rawStringRange(forRange: selectedRange)
+    let characters = markdownTextStorage.storage.rawString[rawTextRange]
+    UIPasteboard.general.string = String(utf16CodeUnits: characters, count: characters.count)
   }
 
   public override func canPaste(_ itemProviders: [NSItemProvider]) -> Bool {

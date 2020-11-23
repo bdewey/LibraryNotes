@@ -62,13 +62,13 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = IncrementalParsingTextStorage(
+    let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
       string: "",
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: [:],
       formattingFunctions: [.cloze: { $1.bold = true }],
       replacementFunctions: [:]
-    )
+    ))
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
