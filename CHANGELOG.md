@@ -4,7 +4,7 @@
 
 ### Changed
 
-- Internal rewrite to clean up the string classes.
+- Internal rewrite to clean up the string classes and move the ParsingTextStorage implementation to Objective-C so it can avoid bridging `string` when working with TextKit.
 
 ## [0.29.0] - 2020-11-21
 
