@@ -81,7 +81,7 @@
 		D39D246E256C0E5C00948A72 /* PlainTextGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */; };
 		D39D247C256C328900948A72 /* ParsedAttributedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D247B256C328900948A72 /* ParsedAttributedStringTests.swift */; };
 		D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */; };
-		D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */; };
+		D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* AssetRecord.swift */; };
 		D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */; };
 		D3A58F15240D469700CE3251 /* VersionVector.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F14240D469700CE3251 /* VersionVector.swift */; };
 		D3A68EE32556040D0049B8E5 /* MiniMarkdownGrammarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A68EE12556040D0049B8E5 /* MiniMarkdownGrammarTests.swift */; };
@@ -235,7 +235,7 @@
 		D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextGrammar.swift; sourceTree = "<group>"; };
 		D39D247B256C328900948A72 /* ParsedAttributedStringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedStringTests.swift; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.StudyLogEntry.swift; sourceTree = "<group>"; };
-		D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.Asset.swift; sourceTree = "<group>"; };
+		D3A5255A241E65350044F8A2 /* AssetRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRecord.swift; sourceTree = "<group>"; };
 		D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeableRecord.swift; sourceTree = "<group>"; };
 		D3A58F14240D469700CE3251 /* VersionVector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionVector.swift; sourceTree = "<group>"; };
 		D3A68EE12556040D0049B8E5 /* MiniMarkdownGrammarTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniMarkdownGrammarTests.swift; sourceTree = "<group>"; };
@@ -332,6 +332,7 @@
 				D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */,
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
+				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
 			);
 			path = Sqlite;
 			sourceTree = "<group>";
@@ -431,7 +432,6 @@
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
-				D3A5255A241E65350044F8A2 /* Sqlite.Asset.swift */,
 				D393F2BB241439EE00A6DABB /* Sqlite.ChangeLog.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */,
 				D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */,
@@ -735,7 +735,7 @@
 				D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */,
 				D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
-				D3A5255B241E65350044F8A2 /* Sqlite.Asset.swift in Sources */,
+				D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */,
 				D3A52559241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,

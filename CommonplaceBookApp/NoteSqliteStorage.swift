@@ -401,7 +401,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         throw Error.databaseIsNotOpen
       }
       return try dbQueue.read { db in
-        let request = Sqlite.Asset.select([Sqlite.Asset.Columns.id])
+        let request = AssetRecord.select([AssetRecord.Columns.id])
         return try String.fetchAll(db, request)
       }
     } catch {
@@ -415,7 +415,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      guard let asset = try Sqlite.Asset.fetchOne(db, key: String(fileWrapperKey)) else {
+      guard let asset = try AssetRecord.fetchOne(db, key: String(fileWrapperKey)) else {
         throw Error.noSuchAsset
       }
       return asset.data
@@ -427,7 +427,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.write { db in
-      let asset = Sqlite.Asset(id: key, data: data)
+      let asset = AssetRecord(id: key, data: data)
       try asset.save(db)
       return key
     }
@@ -565,7 +565,7 @@ private extension NoteSqliteStorage {
       Sqlite.NoteHashtag.all(),
       ChallengeRecord.all(),
       Sqlite.StudyLogEntry.all(),
-      Sqlite.Asset.all(),
+      AssetRecord.all(),
     ]).publisher(in: dbQueue)
       .sink(
         receiveCompletion: { completion in
@@ -854,7 +854,7 @@ private extension NoteSqliteStorage {
       try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)
       try Sqlite.StudyLogEntry.createV1Table(in: database)
-      try Sqlite.Asset.createV1Table(in: database)
+      try AssetRecord.createV1Table(in: database)
       try Sqlite.ChangeLog.createV1Table(in: database)
 
       try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
