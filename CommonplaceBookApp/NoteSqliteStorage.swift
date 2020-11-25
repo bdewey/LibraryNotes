@@ -306,10 +306,10 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
           ON noteFullText.rowid = noteText.rowid
           AND noteFullText MATCH ?
         """
-        let noteTexts = try Sqlite.NoteText.fetchAll(db, sql: sql, arguments: [pattern])
+        let noteTexts = try NoteTextRecord.fetchAll(db, sql: sql, arguments: [pattern])
         return noteTexts.map { $0.noteId }
       } else {
-        let noteTexts = try Sqlite.NoteText.fetchAll(db)
+        let noteTexts = try NoteTextRecord.fetchAll(db)
         return noteTexts.map { $0.noteId }
       }
     }
@@ -391,7 +391,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      try Sqlite.NoteText.fetchCount(db)
+      try NoteTextRecord.fetchCount(db)
     }
   }
 
@@ -561,7 +561,7 @@ private extension NoteSqliteStorage {
       )
     hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
-      Sqlite.NoteText.all(),
+      NoteTextRecord.all(),
       NoteHashtagRecord.all(),
       ChallengeRecord.all(),
       Sqlite.StudyLogEntry.all(),
@@ -663,12 +663,12 @@ private extension NoteSqliteStorage {
     guard let noteText = noteText else {
       return nil
     }
-    if var existingRecord = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue]) {
+    if var existingRecord = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier.rawValue]) {
       existingRecord.text = noteText
       try existingRecord.update(db)
       return existingRecord.id
     } else {
-      var newRecord = Sqlite.NoteText(id: nil, text: noteText, noteId: identifier)
+      var newRecord = NoteTextRecord(id: nil, text: noteText, noteId: identifier)
       try newRecord.insert(db)
       return newRecord.id
     }
@@ -808,7 +808,7 @@ private extension NoteSqliteStorage {
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
       try Self.challengeTemplate(from: challengeTemplateRecord)
     }
-    let noteText = try Sqlite.NoteText.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
+    let noteText = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
@@ -849,7 +849,7 @@ private extension NoteSqliteStorage {
     migrator.registerMigration("initialSchema") { database in
       try DeviceRecord.createV1Table(in: database)
       try NoteRecord.createV1Table(in: database)
-      try Sqlite.NoteText.createV1Table(in: database)
+      try NoteTextRecord.createV1Table(in: database)
       try NoteHashtagRecord.createV1Table(in: database)
       try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)

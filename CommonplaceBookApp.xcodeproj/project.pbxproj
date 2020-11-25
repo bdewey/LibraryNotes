@@ -24,7 +24,7 @@
 		D30F402E255D9EDE00AB05EE /* ParsedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */; };
 		D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* NoteRecord.swift */; };
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
-		D3198DAB23D9DDB50098A9D9 /* Sqlite.NoteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */; };
+		D3198DAB23D9DDB50098A9D9 /* NoteTextRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */; };
 		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
 		D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */; };
 		D3198DB123DBCA0F0098A9D9 /* ChallengeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */; };
@@ -175,7 +175,7 @@
 		D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedStringTests.swift; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
-		D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.NoteText.swift; sourceTree = "<group>"; };
+		D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTextRecord.swift; sourceTree = "<group>"; };
 		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
 		D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateRecord.swift; sourceTree = "<group>"; };
 		D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeRecord.swift; sourceTree = "<group>"; };
@@ -333,6 +333,7 @@
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
 				D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
+				D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
 			);
@@ -434,7 +435,6 @@
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
-				D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */,
 				D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */,
 				D3AD01CD23BEADB7004BB7DF /* SqliteModels.swift */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
@@ -745,7 +745,7 @@
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */,
-				D3198DAB23D9DDB50098A9D9 /* Sqlite.NoteText.swift in Sources */,
+				D3198DAB23D9DDB50098A9D9 /* NoteTextRecord.swift in Sources */,
 				D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozeTemplate.swift in Sources */,
