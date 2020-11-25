@@ -147,7 +147,7 @@ final class DocumentListViewController: UIViewController {
       .assign(to: \.challengeDueDate, on: self)
     navigationController?.setToolbarHidden(false, animated: false)
     if AppDelegate.isUITesting {
-      navigationItem.rightBarButtonItems?.append(advanceTimeButton)
+      navigationItem.rightBarButtonItem = advanceTimeButton
     }
   }
 
@@ -211,6 +211,7 @@ final class DocumentListViewController: UIViewController {
 
     let itemsToReview = studySession?.count ?? 0
     let reviewButton = UIBarButtonItem(title: "Review (\(itemsToReview))", style: .plain, target: self, action: #selector(performReview))
+    reviewButton.accessibilityIdentifier = "study-button"
     reviewButton.isEnabled = itemsToReview > 0
 
     let countItem = UIBarButtonItem(customView: countLabel)

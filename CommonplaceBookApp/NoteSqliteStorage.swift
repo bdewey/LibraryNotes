@@ -735,7 +735,7 @@ private extension NoteSqliteStorage {
         )
         var challengeRecord = Sqlite.Challenge(
           index: index,
-          due: today /* .addingTimeInterval(newChallengeDelay.fuzzed()) */,
+          due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
           challengeTemplateId: newTemplateIdentifier.rawValue,
           modifiedDevice: updateKey.deviceID,
           timestamp: note.metadata.timestamp,

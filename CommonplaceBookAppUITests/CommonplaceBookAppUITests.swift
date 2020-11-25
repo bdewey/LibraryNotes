@@ -4,7 +4,7 @@ import UIKit
 import XCTest
 
 private enum Identifiers {
-  static let backButton = "Grail Diary"
+  static let backButton = "All Notes"
   static let currentCardView = "current-card"
   static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"
@@ -75,7 +75,6 @@ final class CommonplaceBookAppUITests: XCTestCase {
   func testNewDocumentButtonWorks() {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     newDocumentButton.tap()
-    application.buttons["Text"].tap()
     waitUntilElementExists(application.textViews[Identifiers.editDocumentView])
   }
 
@@ -163,9 +162,9 @@ final class CommonplaceBookAppUITests: XCTestCase {
     }
     createDocument(with: lines)
     tapButton(identifier: Identifiers.advanceTimeButton)
-    waitUntilElementExists(application.staticTexts["25 cards."])
+    waitUntilElementExists(application.buttons["Review (25)"])
     study(expectedCards: 20, noCardsLeft: false)
-    waitUntilElementExists(application.staticTexts["5 cards."])
+    waitUntilElementExists(application.buttons["Review (5)"])
   }
 }
 
@@ -238,7 +237,6 @@ extension CommonplaceBookAppUITests {
 
   private func createDocument(with text: String) {
     application.buttons[Identifiers.newDocumentButton].tap()
-    application.buttons["Text"].tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     editView.typeText(text)
@@ -247,7 +245,6 @@ extension CommonplaceBookAppUITests {
 
   private func createDocument(with text: [String]) {
     application.buttons[Identifiers.newDocumentButton].tap()
-    application.buttons["Text"].tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     for line in text {
