@@ -29,7 +29,7 @@ extension Sqlite {
       static let hashtag = Column(NoteHashtag.CodingKeys.hashtag)
     }
 
-    static let note = belongsTo(Note.self)
+    static let note = belongsTo(NoteRecord.self)
 
     static func createV1Table(in database: Database) throws {
       try database.create(table: "noteHashtag", body: { table in

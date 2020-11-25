@@ -330,7 +330,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     _ = try dbQueue.write { db in
-      guard var note = try Sqlite.Note.filter(key: noteIdentifier.rawValue).fetchOne(db) else {
+      guard var note = try NoteRecord.filter(key: noteIdentifier.rawValue).fetchOne(db) else {
         return
       }
       let updateKey = try self.updateKey(changeDescription: "DELETE NOTE \(noteIdentifier)", in: db)
@@ -354,7 +354,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     return try dbQueue.read { db in
       let challengeRequest: QueryInterfaceRequest<ChallengeRecord>
       if let noteIdentifier = noteIdentifier {
-        guard let note = try Sqlite.Note.fetchOne(db, key: noteIdentifier.rawValue) else {
+        guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier.rawValue) else {
           throw Error.noSuchNote
         }
         challengeRequest = note.challenges
@@ -543,7 +543,7 @@ private extension NoteSqliteStorage {
     deviceRecord = try currentDeviceRecord()
     flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
     metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
-      Sqlite.Note.all(),
+      NoteRecord.all(),
     ]).publisher(in: dbQueue)
       .tryMap { db in try Self.fetchAllMetadata(from: db) }
       .sink(
@@ -560,7 +560,7 @@ private extension NoteSqliteStorage {
         }
       )
     hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
-      Sqlite.Note.all(),
+      NoteRecord.all(),
       Sqlite.NoteText.all(),
       Sqlite.NoteHashtag.all(),
       ChallengeRecord.all(),
@@ -699,7 +699,7 @@ private extension NoteSqliteStorage {
 
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
     let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
-    let sqliteNote = Sqlite.Note(
+    let sqliteNote = NoteRecord(
       id: identifier,
       title: note.metadata.title,
       modifiedTimestamp: note.metadata.timestamp,
@@ -775,9 +775,9 @@ private extension NoteSqliteStorage {
   }
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: Note.Metadata] {
-    let metadata = try Sqlite.Note
-      .filter(Sqlite.Note.Columns.deleted == false)
-      .including(all: Sqlite.Note.noteHashtags)
+    let metadata = try NoteRecord
+      .filter(NoteRecord.Columns.deleted == false)
+      .including(all: NoteRecord.noteHashtags)
       .asRequest(of: Sqlite.NoteMetadata.self)
       .fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
@@ -795,7 +795,7 @@ private extension NoteSqliteStorage {
 
   func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
     guard
-      let sqliteNote = try Sqlite.Note.fetchOne(db, key: identifier.rawValue),
+      let sqliteNote = try NoteRecord.fetchOne(db, key: identifier.rawValue),
       !sqliteNote.deleted
     else {
       throw Error.noSuchNote
@@ -848,7 +848,7 @@ private extension NoteSqliteStorage {
 
     migrator.registerMigration("initialSchema") { database in
       try Sqlite.Device.createV1Table(in: database)
-      try Sqlite.Note.createV1Table(in: database)
+      try NoteRecord.createV1Table(in: database)
       try Sqlite.NoteText.createV1Table(in: database)
       try Sqlite.NoteHashtag.createV1Table(in: database)
       try ChallengeTemplateRecord.createV1Table(in: database)
@@ -951,7 +951,7 @@ private extension DatabaseQueue {
     try remoteQueue.read { remoteDatabase in
       try write { localDatabase in
         result += try VersionVector.merge(
-          recordType: Sqlite.Note.MergeInfo.self,
+          recordType: NoteRecord.MergeInfo.self,
           from: remoteDatabase,
           sourceKnowledge: remoteKnowlege,
           to: localDatabase,

@@ -18,9 +18,9 @@
 import Foundation
 import GRDB
 
-extension Sqlite {
   /// Core record for the `note` table
-  struct Note: Codable, FetchableRecord, PersistableRecord {
+  struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
+    static let databaseTableName = "Note"
     var id: FlakeID
     var title: String
     var modifiedTimestamp: Date
@@ -48,32 +48,31 @@ extension Sqlite {
       static let deleted = Column(CodingKeys.deleted)
     }
 
-    static let noteHashtags = hasMany(NoteHashtag.self)
+    static let noteHashtags = hasMany(Sqlite.NoteHashtag.self)
 
     var hashtags: QueryInterfaceRequest<String> {
-      NoteHashtag
-        .filter(NoteHashtag.Columns.noteId == id.rawValue)
-        .select(NoteHashtag.Columns.hashtag, as: String.self)
+      Sqlite.NoteHashtag
+        .filter(Sqlite.NoteHashtag.Columns.noteId == id.rawValue)
+        .select(Sqlite.NoteHashtag.Columns.hashtag, as: String.self)
     }
 
     static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
-    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: Note.challengeTemplates) }
+    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
 
     /// The association between this note and its text.
-    static let noteText = hasOne(NoteText.self)
+    static let noteText = hasOne(Sqlite.NoteText.self)
 
     /// A query that returns the text associated with this note.
-    var noteText: QueryInterfaceRequest<NoteText> { request(for: Note.noteText) }
+    var noteText: QueryInterfaceRequest<Sqlite.NoteText> { request(for: NoteRecord.noteText) }
 
     static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
-    var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: Note.challenges) }
+    var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }
 
     /// The association between this note and the device it was last changed on.
-    static let device = belongsTo(Device.self)
+    static let device = belongsTo(Sqlite.Device.self)
   }
-}
 
-extension Sqlite.Note {
+extension NoteRecord {
   /// Knows how to merge notes between a local and remote database.
   struct MergeInfo: MergeInfoRecord, Decodable {
     // MARK: - Stored properties
@@ -86,16 +85,16 @@ extension Sqlite.Note {
     // MARK: - Computed properties
 
     static var cursorRequest: QueryInterfaceRequest<Self> {
-      Sqlite.Note
-        .including(required: Sqlite.Note.device)
-        .asRequest(of: Sqlite.Note.MergeInfo.self)
+      NoteRecord
+        .including(required: NoteRecord.device)
+        .asRequest(of: NoteRecord.MergeInfo.self)
     }
 
     var instanceRequest: QueryInterfaceRequest<Self> {
-      Sqlite.Note
-        .including(required: Sqlite.Note.device)
+      NoteRecord
+        .including(required: NoteRecord.device)
         .filter(key: id.rawValue)
-        .asRequest(of: Sqlite.Note.MergeInfo.self)
+        .asRequest(of: NoteRecord.MergeInfo.self)
     }
 
     var timestamp: Date { modifiedTimestamp }
@@ -103,7 +102,7 @@ extension Sqlite.Note {
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
       guard
-        var note = try Sqlite.Note.filter(key: id.rawValue).fetchOne(sourceDatabase)
+        var note = try NoteRecord.filter(key: id.rawValue).fetchOne(sourceDatabase)
       else {
         return
       }
@@ -117,7 +116,7 @@ extension Sqlite.Note {
         note.modifiedDevice = device.id!
       }
 
-      try Sqlite.Note.deleteOne(destinationDatabase, key: id.rawValue)
+      try NoteRecord.deleteOne(destinationDatabase, key: id.rawValue)
       try note.insert(destinationDatabase)
       try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
         let record = Sqlite.NoteHashtag(noteId: id, hashtag: hashtag)

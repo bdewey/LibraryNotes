@@ -33,7 +33,7 @@ enum Sqlite {
     var deleted: Bool
     var noteHashtags: [NoteHashtag]
 
-    static let request = Note.including(all: Note.noteHashtags)
+    static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
   }
 
   /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.

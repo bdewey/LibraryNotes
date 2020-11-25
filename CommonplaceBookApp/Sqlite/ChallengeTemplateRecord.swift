@@ -19,6 +19,7 @@ import Foundation
 import GRDB
 
 struct ChallengeTemplateRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "ChallengeTemplate"
   var id: FlakeID
   var type: String
   var rawValue: String
@@ -32,10 +33,10 @@ struct ChallengeTemplateRecord: Codable, FetchableRecord, PersistableRecord {
   }
 
   /// The note that the challenge template is associated with
-  static let note = belongsTo(Sqlite.Note.self)
+  static let note = belongsTo(NoteRecord.self)
 
   /// A query that will return the note associated with this template.
-  var note: QueryInterfaceRequest<Sqlite.Note> {
+  var note: QueryInterfaceRequest<NoteRecord> {
     request(for: Self.note)
   }
 
