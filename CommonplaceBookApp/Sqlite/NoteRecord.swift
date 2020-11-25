@@ -18,59 +18,59 @@
 import Foundation
 import GRDB
 
-  /// Core record for the `note` table
-  struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
-    static let databaseTableName = "Note"
-    var id: FlakeID
-    var title: String
-    var modifiedTimestamp: Date
-    var modifiedDevice: Int64
-    var hasText: Bool
-    var deleted: Bool
-    var updateSequenceNumber: Int64
+/// Core record for the `note` table
+struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "Note"
+  var id: FlakeID
+  var title: String
+  var modifiedTimestamp: Date
+  var modifiedDevice: Int64
+  var hasText: Bool
+  var deleted: Bool
+  var updateSequenceNumber: Int64
 
-    static func createV1Table(in database: Database) throws {
-      try database.create(table: "note", body: { table in
-        table.column("id", .integer).primaryKey()
-        table.column("title", .text).notNull().defaults(to: "")
-        table.column("modifiedTimestamp", .datetime).notNull()
-        table.column("modifiedDevice", .integer).indexed().references("device", onDelete: .setNull)
-        table.column("hasText", .boolean).notNull()
-        table.column("deleted", .boolean).notNull().defaults(to: false)
-        table.column("updateSequenceNumber", .integer).notNull()
-      })
-    }
-
-    enum Columns {
-      static let id = Column(CodingKeys.id)
-      static let title = Column(CodingKeys.title)
-      static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
-      static let deleted = Column(CodingKeys.deleted)
-    }
-
-    static let noteHashtags = hasMany(Sqlite.NoteHashtag.self)
-
-    var hashtags: QueryInterfaceRequest<String> {
-      Sqlite.NoteHashtag
-        .filter(Sqlite.NoteHashtag.Columns.noteId == id.rawValue)
-        .select(Sqlite.NoteHashtag.Columns.hashtag, as: String.self)
-    }
-
-    static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
-    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
-
-    /// The association between this note and its text.
-    static let noteText = hasOne(Sqlite.NoteText.self)
-
-    /// A query that returns the text associated with this note.
-    var noteText: QueryInterfaceRequest<Sqlite.NoteText> { request(for: NoteRecord.noteText) }
-
-    static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
-    var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }
-
-    /// The association between this note and the device it was last changed on.
-    static let device = belongsTo(Sqlite.Device.self)
+  static func createV1Table(in database: Database) throws {
+    try database.create(table: "note", body: { table in
+      table.column("id", .integer).primaryKey()
+      table.column("title", .text).notNull().defaults(to: "")
+      table.column("modifiedTimestamp", .datetime).notNull()
+      table.column("modifiedDevice", .integer).indexed().references("device", onDelete: .setNull)
+      table.column("hasText", .boolean).notNull()
+      table.column("deleted", .boolean).notNull().defaults(to: false)
+      table.column("updateSequenceNumber", .integer).notNull()
+    })
   }
+
+  enum Columns {
+    static let id = Column(CodingKeys.id)
+    static let title = Column(CodingKeys.title)
+    static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
+    static let deleted = Column(CodingKeys.deleted)
+  }
+
+  static let noteHashtags = hasMany(Sqlite.NoteHashtag.self)
+
+  var hashtags: QueryInterfaceRequest<String> {
+    Sqlite.NoteHashtag
+      .filter(Sqlite.NoteHashtag.Columns.noteId == id.rawValue)
+      .select(Sqlite.NoteHashtag.Columns.hashtag, as: String.self)
+  }
+
+  static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
+  var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
+
+  /// The association between this note and its text.
+  static let noteText = hasOne(Sqlite.NoteText.self)
+
+  /// A query that returns the text associated with this note.
+  var noteText: QueryInterfaceRequest<Sqlite.NoteText> { request(for: NoteRecord.noteText) }
+
+  static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
+  var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }
+
+  /// The association between this note and the device it was last changed on.
+  static let device = belongsTo(DeviceRecord.self)
+}
 
 extension NoteRecord {
   /// Knows how to merge notes between a local and remote database.
@@ -79,7 +79,7 @@ extension NoteRecord {
 
     var id: FlakeID
     var modifiedTimestamp: Date
-    var device: Sqlite.Device
+    var device: DeviceRecord
     var updateSequenceNumber: Int64
 
     // MARK: - Computed properties
@@ -106,7 +106,7 @@ extension NoteRecord {
       else {
         return
       }
-      if let device = try Sqlite.Device.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase) {
+      if let device = try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase) {
         note.modifiedDevice = device.id!
       } else {
         var device = self.device

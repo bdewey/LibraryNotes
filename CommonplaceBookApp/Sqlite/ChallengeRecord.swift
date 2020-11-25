@@ -50,7 +50,7 @@ struct ChallengeRecord: Codable, FetchableRecord, MutablePersistableRecord {
 
   static let challengeTemplate = belongsTo(ChallengeTemplateRecord.self)
 
-  static let device = belongsTo(Sqlite.Device.self)
+  static let device = belongsTo(DeviceRecord.self)
 
   var challengeTemplate: QueryInterfaceRequest<ChallengeTemplateRecord> {
     request(for: Self.challengeTemplate)
@@ -97,7 +97,7 @@ extension ChallengeRecord {
     var index: Int64
     var challengeTemplateId: Int64
     var timestamp: Date
-    var device: Sqlite.Device
+    var device: DeviceRecord
     var updateSequenceNumber: Int64
 
     // MARK: - Computed properties
@@ -124,7 +124,7 @@ extension ChallengeRecord {
       else {
         throw MergeError.cannotLoadChallenge
       }
-      if let destinationDevice = try Sqlite.Device.filter(Sqlite.Device.Columns.uuid == device.uuid).fetchOne(destinationDatabase) {
+      if let destinationDevice = try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase) {
         originRecord.modifiedDevice = destinationDevice.id!
       } else {
         var deviceRecord = device

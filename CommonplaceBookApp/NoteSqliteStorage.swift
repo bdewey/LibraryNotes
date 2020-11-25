@@ -62,7 +62,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
   public let device: DeviceIdentifying
 
   /// The device record associated with this open database on this device. Valid when there is an open database.
-  private var deviceRecord: Sqlite.Device!
+  private var deviceRecord: DeviceRecord!
 
   /// Our scheduler.
   public static let scheduler: SpacedRepetitionScheduler = {
@@ -624,7 +624,7 @@ private extension NoteSqliteStorage {
   }
 
   /// Makes sure there is a device record for the current device in this database.
-  func currentDeviceRecord() throws -> Sqlite.Device {
+  func currentDeviceRecord() throws -> DeviceRecord {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -634,17 +634,17 @@ private extension NoteSqliteStorage {
   }
 
   /// Given an open database connection, returns the device record for the current device.
-  func currentDeviceRecord(in db: Database) throws -> Sqlite.Device {
+  func currentDeviceRecord(in db: Database) throws -> DeviceRecord {
     guard let uuid = device.identifierForVendor?.uuidString else {
       throw Error.noDeviceUUID
     }
-    if var existingRecord = try Sqlite.Device.fetchOne(db, key: ["uuid": uuid]) {
+    if var existingRecord = try DeviceRecord.fetchOne(db, key: ["uuid": uuid]) {
       try existingRecord.updateChanges(db, with: { deviceRecord in
         deviceRecord.name = device.name
       })
       return existingRecord
     } else {
-      var record = Sqlite.Device(uuid: uuid, name: device.name, updateSequenceNumber: -1)
+      var record = DeviceRecord(uuid: uuid, name: device.name, updateSequenceNumber: -1)
       try record.insert(db)
       return record
     }
@@ -847,7 +847,7 @@ private extension NoteSqliteStorage {
     var migrator = DatabaseMigrator()
 
     migrator.registerMigration("initialSchema") { database in
-      try Sqlite.Device.createV1Table(in: database)
+      try DeviceRecord.createV1Table(in: database)
       try NoteRecord.createV1Table(in: database)
       try Sqlite.NoteText.createV1Table(in: database)
       try Sqlite.NoteHashtag.createV1Table(in: database)
@@ -924,11 +924,11 @@ private extension Sqlite.StudyLogEntry {
 private extension Database {
   func updateDeviceTable(with knowledge: VersionVector) throws {
     for (uuid, updateSequenceNumber) in knowledge.versions {
-      if var device = try Sqlite.Device.filter(key: ["uuid": uuid]).fetchOne(self) {
+      if var device = try DeviceRecord.filter(key: ["uuid": uuid]).fetchOne(self) {
         device.updateSequenceNumber = max(device.updateSequenceNumber, updateSequenceNumber)
         try device.save(self)
       } else {
-        var device = Sqlite.Device(id: nil, uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
+        var device = DeviceRecord(id: nil, uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
         try device.insert(self)
       }
     }
@@ -938,7 +938,7 @@ private extension Database {
 private extension DatabaseQueue {
   var deviceVersionVector: VersionVector {
     read { db in
-      let devices = (try? Sqlite.Device.fetchAll(db)) ?? []
+      let devices = (try? DeviceRecord.fetchAll(db)) ?? []
       return VersionVector(devices)
     }
   }
@@ -973,7 +973,7 @@ private extension DatabaseQueue {
 }
 
 private extension VersionVector {
-  init(_ devices: [Sqlite.Device]) {
+  init(_ devices: [DeviceRecord]) {
     for device in devices {
       versions[device.uuid] = device.updateSequenceNumber
     }

@@ -97,7 +97,7 @@ public extension MergeInfoRecord {
 private extension Database {
   /// True if this instance of the database "knows" about a specific change.
   func knowsAbout<R: MergeInfoRecord>(_ mergeInfoRecord: R) -> Bool {
-    guard let device = try? Sqlite.Device.fetchOne(self, key: ["uuid": mergeInfoRecord.deviceUUID]) else {
+    guard let device = try? DeviceRecord.fetchOne(self, key: ["uuid": mergeInfoRecord.deviceUUID]) else {
       return false
     }
     return device.updateSequenceNumber >= mergeInfoRecord.updateSequenceNumber
