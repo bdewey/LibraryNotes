@@ -48,12 +48,12 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
     static let deleted = Column(CodingKeys.deleted)
   }
 
-  static let noteHashtags = hasMany(Sqlite.NoteHashtag.self)
+  static let noteHashtags = hasMany(NoteHashtagRecord.self)
 
   var hashtags: QueryInterfaceRequest<String> {
-    Sqlite.NoteHashtag
-      .filter(Sqlite.NoteHashtag.Columns.noteId == id.rawValue)
-      .select(Sqlite.NoteHashtag.Columns.hashtag, as: String.self)
+    NoteHashtagRecord
+      .filter(NoteHashtagRecord.Columns.noteId == id.rawValue)
+      .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
   }
 
   static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
@@ -119,7 +119,7 @@ extension NoteRecord {
       try NoteRecord.deleteOne(destinationDatabase, key: id.rawValue)
       try note.insert(destinationDatabase)
       try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
-        let record = Sqlite.NoteHashtag(noteId: id, hashtag: hashtag)
+        let record = NoteHashtagRecord(noteId: id, hashtag: hashtag)
         try record.insert(destinationDatabase)
       }
       try note.noteText.fetchAll(sourceDatabase).forEach { noteText in

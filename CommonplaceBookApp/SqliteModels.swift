@@ -31,7 +31,7 @@ enum Sqlite {
     var modifiedTimestamp: Date
     var hasText: Bool
     var deleted: Bool
-    var noteHashtags: [NoteHashtag]
+    var noteHashtags: [NoteHashtagRecord]
 
     static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
   }

@@ -18,30 +18,29 @@
 import Foundation
 import GRDB
 
-extension Sqlite {
-  /// Core record for the `noteHashtag` association
-  struct NoteHashtag: Codable, FetchableRecord, PersistableRecord {
-    var noteId: FlakeID
-    var hashtag: String
-
-    enum Columns {
-      static let noteId = Column(NoteHashtag.CodingKeys.noteId)
-      static let hashtag = Column(NoteHashtag.CodingKeys.hashtag)
-    }
-
-    static let note = belongsTo(NoteRecord.self)
-
-    static func createV1Table(in database: Database) throws {
-      try database.create(table: "noteHashtag", body: { table in
-        table.column("noteId", .integer)
-          .notNull()
-          .indexed()
-          .references("note", onDelete: .cascade)
-        table.column("hashtag", .text)
-          .notNull()
-          .indexed()
-        table.primaryKey(["noteId", "hashtag"])
-      })
-    }
+/// Core record for the `noteHashtag` association
+struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "noteHashtag"
+  var noteId: FlakeID
+  var hashtag: String
+  
+  enum Columns {
+    static let noteId = Column(NoteHashtagRecord.CodingKeys.noteId)
+    static let hashtag = Column(NoteHashtagRecord.CodingKeys.hashtag)
+  }
+  
+  static let note = belongsTo(NoteRecord.self)
+  
+  static func createV1Table(in database: Database) throws {
+    try database.create(table: "noteHashtag", body: { table in
+      table.column("noteId", .integer)
+        .notNull()
+        .indexed()
+        .references("note", onDelete: .cascade)
+      table.column("hashtag", .text)
+        .notNull()
+        .indexed()
+      table.primaryKey(["noteId", "hashtag"])
+    })
   }
 }

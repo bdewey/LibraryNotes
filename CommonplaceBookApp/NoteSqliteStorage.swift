@@ -562,7 +562,7 @@ private extension NoteSqliteStorage {
     hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
       Sqlite.NoteText.all(),
-      Sqlite.NoteHashtag.all(),
+      NoteHashtagRecord.all(),
       ChallengeRecord.all(),
       Sqlite.StudyLogEntry.all(),
       AssetRecord.all(),
@@ -715,11 +715,11 @@ private extension NoteSqliteStorage {
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
-      let associationRecord = Sqlite.NoteHashtag(noteId: identifier, hashtag: newHashtag)
+      let associationRecord = NoteHashtagRecord(noteId: identifier, hashtag: newHashtag)
       try associationRecord.save(db)
     }
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
-      let deleted = try Sqlite.NoteHashtag.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtag": obsoleteHashtag])
+      let deleted = try NoteHashtagRecord.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtag": obsoleteHashtag])
       assert(deleted)
     }
 
@@ -800,7 +800,7 @@ private extension NoteSqliteStorage {
     else {
       throw Error.noSuchNote
     }
-    let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
+    let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier.rawValue).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtag }
     let challengeTemplateRecords = try ChallengeTemplateRecord
       .filter(ChallengeTemplateRecord.Columns.noteId == identifier.rawValue)
@@ -850,7 +850,7 @@ private extension NoteSqliteStorage {
       try DeviceRecord.createV1Table(in: database)
       try NoteRecord.createV1Table(in: database)
       try Sqlite.NoteText.createV1Table(in: database)
-      try Sqlite.NoteHashtag.createV1Table(in: database)
+      try NoteHashtagRecord.createV1Table(in: database)
       try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)
       try Sqlite.StudyLogEntry.createV1Table(in: database)

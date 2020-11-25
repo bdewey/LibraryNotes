@@ -25,7 +25,7 @@
 		D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* NoteRecord.swift */; };
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
 		D3198DAB23D9DDB50098A9D9 /* Sqlite.NoteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */; };
-		D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */; };
+		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
 		D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */; };
 		D3198DB123DBCA0F0098A9D9 /* ChallengeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
@@ -176,7 +176,7 @@
 		D3198DA623D8859B0098A9D9 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.NoteText.swift; sourceTree = "<group>"; };
-		D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sqlite.NoteHashtag.swift; sourceTree = "<group>"; };
+		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
 		D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateRecord.swift; sourceTree = "<group>"; };
 		D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeRecord.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
@@ -333,6 +333,7 @@
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
 				D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
+				D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
 			);
 			path = Sqlite;
@@ -433,7 +434,6 @@
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
-				D3198DAC23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift */,
 				D3198DAA23D9DDB50098A9D9 /* Sqlite.NoteText.swift */,
 				D3A52558241E64AB0044F8A2 /* Sqlite.StudyLogEntry.swift */,
 				D3AD01CD23BEADB7004BB7DF /* SqliteModels.swift */,
@@ -732,7 +732,7 @@
 				D30D6B552549C44800F5902D /* SyntaxTreeNode.swift in Sources */,
 				D375D33E20EDA08F00EAB4F0 /* DocumentTableViewCell.swift in Sources */,
 				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
-				D3198DAD23DB3E1B0098A9D9 /* Sqlite.NoteHashtag.swift in Sources */,
+				D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */,
 				D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */,
