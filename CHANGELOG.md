@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## [0.30.0] - 2020-11-23
 
 ### Changed
 
 - Internal rewrite to clean up the string classes and move the ParsingTextStorage implementation to Objective-C so it can avoid bridging `string` when working with TextKit.
+- Rename `NewNode` to `SyntaxTreeNode`
 
 ## [0.29.0] - 2020-11-21
 
