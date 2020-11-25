@@ -251,7 +251,9 @@ extension CommonplaceBookAppUITests {
   }
 
   private func createDocument(with text: String) {
-    application.buttons[Identifiers.newDocumentButton].tap()
+    let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
+    waitUntilElementExists(newDocumentButton)
+    newDocumentButton.tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     editView.typeText(text)

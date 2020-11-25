@@ -18,29 +18,9 @@
 import Foundation
 import GRDB
 
-/// Core record for the `noteHashtag` association
-struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "noteHashtag"
-  var noteId: FlakeID
-  var hashtag: String
-
-  enum Columns {
-    static let noteId = Column(NoteHashtagRecord.CodingKeys.noteId)
-    static let hashtag = Column(NoteHashtagRecord.CodingKeys.hashtag)
-  }
-
-  static let note = belongsTo(NoteRecord.self)
-
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "noteHashtag", body: { table in
-      table.column("noteId", .integer)
-        .notNull()
-        .indexed()
-        .references("note", onDelete: .cascade)
-      table.column("hashtag", .text)
-        .notNull()
-        .indexed()
-      table.primaryKey(["noteId", "hashtag"])
-    })
-  }
+/// Result structure from fetching a Note plus all of its hashtags
+/// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
+struct StudyLogEntryInfo: Codable, FetchableRecord {
+  var studyLogEntry: StudyLogEntryRecord
+  var challenge: ChallengeRecord
 }

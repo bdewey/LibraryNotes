@@ -499,11 +499,11 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       guard let dbQueue = dbQueue else {
         throw Error.databaseIsNotOpen
       }
-      let entries = try dbQueue.read { db -> [Sqlite.StudyLogEntryInfo] in
+      let entries = try dbQueue.read { db -> [StudyLogEntryInfo] in
         let request = StudyLogEntryRecord
           .order(StudyLogEntryRecord.Columns.timestamp)
           .including(required: StudyLogEntryRecord.challenge)
-        return try Sqlite.StudyLogEntryInfo
+        return try StudyLogEntryInfo
           .fetchAll(db, request)
       }
       entries
@@ -778,7 +778,7 @@ private extension NoteSqliteStorage {
     let metadata = try NoteRecord
       .filter(NoteRecord.Columns.deleted == false)
       .including(all: NoteRecord.noteHashtags)
-      .asRequest(of: Sqlite.NoteMetadata.self)
+      .asRequest(of: NoteMetadataRecord.self)
       .fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
       let metadata = Note.Metadata(

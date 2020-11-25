@@ -25,11 +25,11 @@ struct StudyLogEntryRecord: Codable, FetchableRecord, MutablePersistableRecord {
   var correct: Int
   var incorrect: Int
   var challengeId: Int64
-  
+
   mutating func didInsert(with rowID: Int64, for column: String?) {
     id = rowID
   }
-  
+
   static func createV1Table(in database: Database) throws {
     try database.create(table: "studyLogEntry", body: { table in
       table.autoIncrementedPrimaryKey("id")
@@ -41,11 +41,10 @@ struct StudyLogEntryRecord: Codable, FetchableRecord, MutablePersistableRecord {
         .references("challenge", onDelete: .cascade)
     })
   }
-  
+
   enum Columns {
     static let timestamp = Column(StudyLogEntryRecord.CodingKeys.timestamp)
   }
-  
+
   static let challenge = belongsTo(ChallengeRecord.self)
 }
-

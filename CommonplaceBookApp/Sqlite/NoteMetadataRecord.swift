@@ -18,27 +18,13 @@
 import Foundation
 import GRDB
 
-enum Sqlite {
-  enum MigrationError: Error {
-    case cannotFindNoteID(String)
-    case cannotFindTemplateID(String)
-  }
+struct NoteMetadataRecord: Decodable, FetchableRecord {
+  var id: Int64
+  var title: String
+  var modifiedTimestamp: Date
+  var hasText: Bool
+  var deleted: Bool
+  var noteHashtags: [NoteHashtagRecord]
 
-  /// Result structure from fetching a Note plus all of its hashtags
-  struct NoteMetadata: Decodable, FetchableRecord {
-    var id: Int64
-    var title: String
-    var modifiedTimestamp: Date
-    var hasText: Bool
-    var deleted: Bool
-    var noteHashtags: [NoteHashtagRecord]
-
-    static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
-  }
-
-  /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
-  struct StudyLogEntryInfo: Codable, FetchableRecord {
-    var studyLogEntry: StudyLogEntryRecord
-    var challenge: ChallengeRecord
-  }
+  static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
 }

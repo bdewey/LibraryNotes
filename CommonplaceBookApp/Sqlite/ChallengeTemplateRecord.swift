@@ -19,7 +19,7 @@ import Foundation
 import GRDB
 
 struct ChallengeTemplateRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "ChallengeTemplate"
+  static let databaseTableName = "challengeTemplate"
   var id: FlakeID
   var type: String
   var rawValue: String

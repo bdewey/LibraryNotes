@@ -19,7 +19,7 @@ import Foundation
 import GRDB
 
 struct ChallengeRecord: Codable, FetchableRecord, MutablePersistableRecord {
-  static let databaseTableName = "Challenge"
+  static let databaseTableName = "challenge"
   var id: Int64?
   var index: Int
   var reviewCount: Int = 0

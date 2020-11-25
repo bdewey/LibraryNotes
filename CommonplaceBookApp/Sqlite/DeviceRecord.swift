@@ -19,6 +19,7 @@ import Foundation
 import GRDB
 
 struct DeviceRecord: Codable, FetchableRecord, MutablePersistableRecord {
+  static let databaseTableName = "device"
   var id: Int64?
   var uuid: String
   var name: String

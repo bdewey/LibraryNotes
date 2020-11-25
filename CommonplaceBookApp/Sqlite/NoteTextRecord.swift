@@ -24,11 +24,11 @@ struct NoteTextRecord: Codable, FetchableRecord, MutablePersistableRecord {
   var id: Int64?
   var text: String
   var noteId: FlakeID
-  
+
   mutating func didInsert(with rowID: Int64, for column: String?) {
     id = rowID
   }
-  
+
   static func createV1Table(in database: Database) throws {
     try database.create(table: "noteText", body: { table in
       table.autoIncrementedPrimaryKey("id")
@@ -37,4 +37,3 @@ struct NoteTextRecord: Codable, FetchableRecord, MutablePersistableRecord {
     })
   }
 }
-
