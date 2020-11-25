@@ -47,11 +47,9 @@ final class NotebookViewController: UIViewController {
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(notebook: notebook)
-    AppDelegate.openedDocumentBookmark = nil
-    documentListViewController.dismiss(animated: true, completion: nil)
-    documentListViewController.didTapFilesAction = { [weak self] in
+    documentListViewController.didTapFilesAction = { [weak documentListViewController] in
       AppDelegate.openedDocumentBookmark = nil
-      documentListViewController.dismiss(animated: true, completion: nil)
+      documentListViewController?.dismiss(animated: true, completion: nil)
     }
     return documentListViewController
   }()
