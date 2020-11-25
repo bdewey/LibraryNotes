@@ -352,17 +352,17 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let challengeRequest: QueryInterfaceRequest<Sqlite.Challenge>
+      let challengeRequest: QueryInterfaceRequest<ChallengeRecord>
       if let noteIdentifier = noteIdentifier {
         guard let note = try Sqlite.Note.fetchOne(db, key: noteIdentifier.rawValue) else {
           throw Error.noSuchNote
         }
         challengeRequest = note.challenges
       } else {
-        challengeRequest = Sqlite.Challenge.all()
+        challengeRequest = ChallengeRecord.all()
       }
       let records = try challengeRequest
-        .filter(Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due <= date)
+        .filter(ChallengeRecord.Columns.due == nil || ChallengeRecord.Columns.due <= date)
         .fetchAll(db)
       return records.map {
         ChallengeIdentifier(templateDigest: FlakeID(rawValue: $0.challengeTemplateId), index: $0.index)
@@ -441,7 +441,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
       guard
         let templateKey = entry.identifier.challengeTemplateID,
         let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey.rawValue),
-        let challenge = try owningTemplate.challenges.filter(Sqlite.Challenge.Columns.index == entry.identifier.index).fetchOne(db)
+        let challenge = try owningTemplate.challenges.filter(ChallengeRecord.Columns.index == entry.identifier.index).fetchOne(db)
       else {
         throw Error.unknownChallengeTemplate
       }
@@ -466,7 +466,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     buryRelatedChallenges: Bool,
     updateKey: UpdateKey
   ) throws {
-    var challenge = try Sqlite.Challenge.fetchOne(db, key: entry.challengeId)!
+    var challenge = try ChallengeRecord.fetchOne(db, key: entry.challengeId)!
     let delay: TimeInterval
     if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
@@ -484,11 +484,11 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
 
     if buryRelatedChallenges {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
-      let updates = try Sqlite.Challenge
-        .filter(Sqlite.Challenge.Columns.challengeTemplateId == challenge.challengeTemplateId &&
-          (Sqlite.Challenge.Columns.due == nil || Sqlite.Challenge.Columns.due < minimumDue)
+      let updates = try ChallengeRecord
+        .filter(ChallengeRecord.Columns.challengeTemplateId == challenge.challengeTemplateId &&
+          (ChallengeRecord.Columns.due == nil || ChallengeRecord.Columns.due < minimumDue)
         )
-        .updateAll(db, Sqlite.Challenge.Columns.due <- minimumDue, Sqlite.Challenge.Columns.modifiedDevice <- updateKey.deviceID, Sqlite.Challenge.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
+        .updateAll(db, ChallengeRecord.Columns.due <- minimumDue, ChallengeRecord.Columns.modifiedDevice <- updateKey.deviceID, ChallengeRecord.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
       Logger.shared.info("Buried \(updates) challenge(s)")
     }
   }
@@ -563,7 +563,7 @@ private extension NoteSqliteStorage {
       Sqlite.Note.all(),
       Sqlite.NoteText.all(),
       Sqlite.NoteHashtag.all(),
-      Sqlite.Challenge.all(),
+      ChallengeRecord.all(),
       Sqlite.StudyLogEntry.all(),
       Sqlite.Asset.all(),
     ]).publisher(in: dbQueue)
@@ -748,7 +748,7 @@ private extension NoteSqliteStorage {
           changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newTemplateIdentifier)",
           in: db
         )
-        var challengeRecord = Sqlite.Challenge(
+        var challengeRecord = ChallengeRecord(
           index: index,
           due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
           challengeTemplateId: newTemplateIdentifier.rawValue,
@@ -852,7 +852,7 @@ private extension NoteSqliteStorage {
       try Sqlite.NoteText.createV1Table(in: database)
       try Sqlite.NoteHashtag.createV1Table(in: database)
       try Sqlite.ChallengeTemplate.createV1Table(in: database)
-      try Sqlite.Challenge.createV1Table(in: database)
+      try ChallengeRecord.createV1Table(in: database)
       try Sqlite.StudyLogEntry.createV1Table(in: database)
       try Sqlite.Asset.createV1Table(in: database)
       try Sqlite.ChangeLog.createV1Table(in: database)
@@ -871,7 +871,7 @@ private extension NoteSqliteStorage {
   }
 }
 
-private extension Sqlite.Challenge {
+private extension ChallengeRecord {
   var item: SpacedRepetitionScheduler.Item {
     if let due = due, let lastReview = lastReview {
       let interval = due.timeIntervalSince(lastReview)
@@ -958,7 +958,7 @@ private extension DatabaseQueue {
           destinationKnowledge: localKnowledge
         )
         result += try VersionVector.merge(
-          recordType: Sqlite.Challenge.MergeInfo.self,
+          recordType: ChallengeRecord.MergeInfo.self,
           from: remoteDatabase,
           sourceKnowledge: remoteKnowlege,
           to: localDatabase,

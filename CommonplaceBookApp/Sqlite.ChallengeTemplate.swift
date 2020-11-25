@@ -40,9 +40,9 @@ extension Sqlite {
       request(for: Self.note)
     }
 
-    static let challenges = hasMany(Challenge.self)
+    static let challenges = hasMany(ChallengeRecord.self)
 
-    var challenges: QueryInterfaceRequest<Challenge> { request(for: ChallengeTemplate.challenges) }
+    var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: ChallengeTemplate.challenges) }
 
     static func createV1Table(in database: Database) throws {
       try database.create(table: "challengeTemplate", body: { table in

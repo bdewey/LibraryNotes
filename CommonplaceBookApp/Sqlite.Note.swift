@@ -65,8 +65,8 @@ extension Sqlite {
     /// A query that returns the text associated with this note.
     var noteText: QueryInterfaceRequest<NoteText> { request(for: Note.noteText) }
 
-    static let challenges = hasMany(Challenge.self, through: challengeTemplates, using: ChallengeTemplate.challenges)
-    var challenges: QueryInterfaceRequest<Challenge> { request(for: Note.challenges) }
+    static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplate.challenges)
+    var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: Note.challenges) }
 
     /// The association between this note and the device it was last changed on.
     static let device = belongsTo(Device.self)

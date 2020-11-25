@@ -46,6 +46,6 @@ extension Sqlite {
       static let timestamp = Column(StudyLogEntry.CodingKeys.timestamp)
     }
 
-    static let challenge = belongsTo(Challenge.self)
+    static let challenge = belongsTo(ChallengeRecord.self)
   }
 }
