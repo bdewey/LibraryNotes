@@ -687,7 +687,7 @@ private extension NoteSqliteStorage {
     var device = try currentDeviceRecord(in: database)
     device.updateSequenceNumber += 1
     try device.update(database)
-    let changeLog = Sqlite.ChangeLog(
+    let changeLog = ChangeLogRecord(
       deviceID: device.id!,
       updateSequenceNumber: device.updateSequenceNumber,
       timestamp: Date(),
@@ -855,7 +855,7 @@ private extension NoteSqliteStorage {
       try ChallengeRecord.createV1Table(in: database)
       try Sqlite.StudyLogEntry.createV1Table(in: database)
       try AssetRecord.createV1Table(in: database)
-      try Sqlite.ChangeLog.createV1Table(in: database)
+      try ChangeLogRecord.createV1Table(in: database)
 
       try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
         table.synchronize(withTable: "noteText")
