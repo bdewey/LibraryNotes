@@ -4,6 +4,7 @@
 
 ### Changed
 
+- Apache license for this project
 - New material gets scheduled for about 4 days in the future for review
 - Tests pass again
 

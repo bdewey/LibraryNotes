@@ -24,12 +24,12 @@ import Foundation
     assertionFailure()
     self.init("", grammar: MiniMarkdownGrammar.shared)
   }
-  
+
   override public convenience init(capacity: Int) {
     assertionFailure()
     self.init("", grammar: MiniMarkdownGrammar.shared)
   }
-  
+
   public init(_ string: String, grammar: PackratGrammar) {
     let pieceTable = PieceTableString(pieceTable: PieceTable(string))
     self.grammar = grammar
@@ -42,11 +42,12 @@ import Foundation
     self.result = result
     super.init()
   }
-  
+
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   public let text: PieceTableString
   private let memoizationTable: MemoizationTable
   private let grammar: PackratGrammar
@@ -71,7 +72,7 @@ extension ParsedString: RangeReplaceableSafeUnicodeBuffer {
     return text.utf16(at: index)
   }
 
-  public override func replaceCharacters(in range: NSRange, with str: String) {
+  override public func replaceCharacters(in range: NSRange, with str: String) {
     text.replaceCharacters(in: range, with: str)
     memoizationTable.applyEdit(originalRange: range, replacementLength: str.utf16.count)
     result = Result {

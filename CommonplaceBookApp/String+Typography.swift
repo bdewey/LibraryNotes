@@ -1,4 +1,19 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Foundation
 
@@ -85,27 +100,27 @@ private struct TypographyScanner<S: Scannable> {
     while let current = self.current {
       if current == "\"" {
         // Open quote if the next thing is non-space.
-        if self.next?.isNonWhitespace ?? false {
-          self.replaceCurrent(with: TypographyConstants.openCurlyDoubleQuote)
+        if next?.isNonWhitespace ?? false {
+          replaceCurrent(with: TypographyConstants.openCurlyDoubleQuote)
         }
 
         // Close quote if the previous thing is non-space.
-        if self.previous?.isNonWhitespace ?? false {
-          self.replaceCurrent(with: TypographyConstants.closeCurlyDoubleQuote)
+        if previous?.isNonWhitespace ?? false {
+          replaceCurrent(with: TypographyConstants.closeCurlyDoubleQuote)
         }
       }
       if current == "'" {
-        if self.next?.isNonWhitespace ?? false {
-          self.replaceCurrent(with: TypographyConstants.openCurlySingleQuote)
+        if next?.isNonWhitespace ?? false {
+          replaceCurrent(with: TypographyConstants.openCurlySingleQuote)
         }
-        if self.previous?.isNonWhitespace ?? false {
-          self.replaceCurrent(with: TypographyConstants.closeCurlySingleQuote)
+        if previous?.isNonWhitespace ?? false {
+          replaceCurrent(with: TypographyConstants.closeCurlySingleQuote)
         }
       }
-      self.replaceCurrent(if: "--", with: TypographyConstants.emDash)
-      self.replaceCurrent(if: "...", with: TypographyConstants.elipses)
-      self.replaceCurrent(if: "….", with: TypographyConstants.elipses)
-      self.advance()
+      replaceCurrent(if: "--", with: TypographyConstants.emDash)
+      replaceCurrent(if: "...", with: TypographyConstants.elipses)
+      replaceCurrent(if: "….", with: TypographyConstants.elipses)
+      advance()
     }
   }
 }
@@ -147,17 +162,17 @@ extension NSMutableAttributedString: Scannable {
   }
 }
 
-extension String {
-  public var withTypographySubstitutions: String {
+public extension String {
+  var withTypographySubstitutions: String {
     var scanner = TypographyScanner(self)
     scanner.makeTypographySubstitutions()
     return scanner.scannable
   }
 }
 
-extension NSAttributedString {
-  public var withTypographySubstitutions: NSAttributedString {
-    let copy = self.mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
+public extension NSAttributedString {
+  var withTypographySubstitutions: NSAttributedString {
+    let copy = mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
     var scanner = TypographyScanner(copy)
     scanner.makeTypographySubstitutions()
     return scanner.scannable

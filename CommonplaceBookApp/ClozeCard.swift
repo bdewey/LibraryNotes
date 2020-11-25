@@ -1,8 +1,23 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import AVFoundation
-import Logging
 import Foundation
+import Logging
 import UIKit
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
@@ -89,7 +104,7 @@ extension ParsedAttributedString.Settings {
       replaceClozeCount += 1
       if shouldHide {
         let hintNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeHint })
-        let hintChars = hintNode.flatMap({ buffer[$0.range] }) ?? []
+        let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
         let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
         if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
           return Array("   ".utf16)
@@ -132,7 +147,7 @@ extension ParsedAttributedString.Settings {
   }
 }
 
-//extension MarkdownAttributedStringRenderer {
+// extension MarkdownAttributedStringRenderer {
 //  /// Builds a renderer that will replace the cloze at clozeIndex with its hint and
 //  /// highlight the cloze.
 //  static func cardFront(
@@ -184,16 +199,16 @@ extension ParsedAttributedString.Settings {
 //    }
 //    return renderer
 //  }
-//}
+// }
 //
-//private let clozeRenderer: MarkdownAttributedStringRenderer = {
+// private let clozeRenderer: MarkdownAttributedStringRenderer = {
 //  var renderer = MarkdownAttributedStringRenderer.textOnly
 //  renderer.renderFunctions[.cloze] = { node, _ in
 //    guard let cloze = node as? Cloze else { return NSAttributedString() }
 //    return NSAttributedString(string: String(cloze.hiddenText))
 //  }
 //  return renderer
-//}()
+// }()
 
 private extension AttributedStringAttributes {
   var withClozeHighlight: AttributedStringAttributes {

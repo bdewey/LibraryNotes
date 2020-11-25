@@ -22,21 +22,21 @@ private let logger = Logger(label: "org.brians-brain.AttributedStringAttributes"
 
 public typealias AttributedStringAttributes = [NSAttributedString.Key: Any]
 
-extension NSAttributedString.Key {
+public extension NSAttributedString.Key {
   /// A UIColor to use when rendering a vertical bar on the leading edge of a block quote.
-  public static let blockquoteBorderColor = NSAttributedString.Key(rawValue: "verticalBarColor")
+  static let blockquoteBorderColor = NSAttributedString.Key(rawValue: "verticalBarColor")
 }
 
 /// Convenience extensions for working with an NSAttributedString attributes dictionary.
-extension Dictionary where Key == NSAttributedString.Key, Value == Any {
+public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   /// The font attribute.
-  public var font: UIFont {
+  var font: UIFont {
     get { return (self[.font] as? UIFont) ?? UIFont.preferredFont(forTextStyle: .body) }
     set { self[.font] = newValue }
   }
 
   /// Setter only: Sets a dynamic font
-  public var textStyle: UIFont.TextStyle? {
+  var textStyle: UIFont.TextStyle? {
     get { return nil }
     set {
       if let textStyle = newValue {
@@ -48,7 +48,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   }
 
   /// the font family name
-  public var familyName: String {
+  var familyName: String {
     get {
       return font.familyName
     }
@@ -57,7 +57,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var fontSize: CGFloat {
+  var fontSize: CGFloat {
     get {
       return font.pointSize
     }
@@ -67,31 +67,31 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   }
 
   /// Text foreground color.
-  public var color: UIColor? {
+  var color: UIColor? {
     get { return self[.foregroundColor] as? UIColor }
     set { self[.foregroundColor] = newValue }
   }
 
   /// Text background color.
-  public var backgroundColor: UIColor? {
+  var backgroundColor: UIColor? {
     get { return self[.backgroundColor] as? UIColor }
     set { self[.backgroundColor] = newValue }
   }
 
   /// A color to use when drawing a vertical bar to the left side of block quotes
-  public var blockquoteBorderColor: UIColor? {
+  var blockquoteBorderColor: UIColor? {
     get { return self[.blockquoteBorderColor] as? UIColor }
     set { self[.blockquoteBorderColor] = newValue }
   }
 
   /// Desired letter spacing.
-  public var kern: CGFloat {
+  var kern: CGFloat {
     get { return self[.kern] as? CGFloat ?? 0 }
     set { self[.kern] = newValue }
   }
 
   /// Whether the font is bold.
-  public var bold: Bool {
+  var bold: Bool {
     get { return containsSymbolicTrait(.traitBold) }
     set {
       if newValue {
@@ -103,7 +103,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   }
 
   /// Whether the font is italic.
-  public var italic: Bool {
+  var italic: Bool {
     get { return containsSymbolicTrait(.traitItalic) }
     set {
       if newValue {
@@ -115,23 +115,23 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   }
 
   /// Tests if the font contains a given symbolic trait.
-  public func containsSymbolicTrait(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) -> Bool {
+  func containsSymbolicTrait(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) -> Bool {
     return font.fontDescriptor.symbolicTraits.contains(symbolicTrait)
   }
 
   /// Sets a symbolic trait.
-  public mutating func symbolicTraitFormUnion(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
+  mutating func symbolicTraitFormUnion(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
     symbolicTraits = font.fontDescriptor.symbolicTraits.union(symbolicTrait)
   }
 
   /// Clears a symbolic trait.
-  public mutating func symbolicTraitSubtract(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
+  mutating func symbolicTraitSubtract(_ symbolicTrait: UIFontDescriptor.SymbolicTraits) {
     symbolicTraits = font.fontDescriptor.symbolicTraits.subtracting(symbolicTrait)
   }
 
   /// The symbolic traits for the font. Can be nil if there is no font.
   /// Attempts to set the symbolic traits to nil will be ignored.
-  public var symbolicTraits: UIFontDescriptor.SymbolicTraits {
+  var symbolicTraits: UIFontDescriptor.SymbolicTraits {
     get {
       return font.fontDescriptor.symbolicTraits
     }
@@ -145,7 +145,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var paragraphStyle: NSParagraphStyle? {
+  var paragraphStyle: NSParagraphStyle? {
     get { return self[.paragraphStyle] as? NSParagraphStyle }
     set { self[.paragraphStyle] = newValue }
   }
@@ -159,7 +159,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var headIndent: CGFloat {
+  var headIndent: CGFloat {
     get { return paragraphStyle?.headIndent ?? 0 }
     set {
       let style = mutableParagraphStyle
@@ -168,7 +168,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var tailIndent: CGFloat {
+  var tailIndent: CGFloat {
     get { return paragraphStyle?.tailIndent ?? 0 }
     set {
       let style = mutableParagraphStyle
@@ -177,7 +177,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var firstLineHeadIndent: CGFloat {
+  var firstLineHeadIndent: CGFloat {
     get { return paragraphStyle?.firstLineHeadIndent ?? 0 }
     set {
       let style = mutableParagraphStyle
@@ -186,7 +186,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var alignment: NSTextAlignment {
+  var alignment: NSTextAlignment {
     get { return paragraphStyle?.alignment ?? NSParagraphStyle.default.alignment }
     set {
       let style = mutableParagraphStyle
@@ -195,7 +195,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var lineHeightMultiple: CGFloat {
+  var lineHeightMultiple: CGFloat {
     get { return paragraphStyle?.lineHeightMultiple ?? 0 }
     set {
       let style = mutableParagraphStyle
@@ -204,7 +204,7 @@ extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  public var listLevel: Int {
+  var listLevel: Int {
     get { return self[.listLevel] as? Int ?? 0 }
     set {
       self[.listLevel] = newValue
@@ -243,12 +243,12 @@ private extension UIFontDescriptor {
   }
 }
 
-extension NSAttributedString.Key {
-  fileprivate static let listLevel = NSAttributedString.Key(rawValue: "org.brians-brain.list-level")
+private extension NSAttributedString.Key {
+  static let listLevel = NSAttributedString.Key(rawValue: "org.brians-brain.list-level")
 }
 
-extension UIFont {
-  public var attributesDictionary: [NSAttributedString.Key: Any] {
+public extension UIFont {
+  var attributesDictionary: [NSAttributedString.Key: Any] {
     var attributes = [NSAttributedString.Key: Any]()
     attributes.font = self
     attributes.lineHeightMultiple = 1.2

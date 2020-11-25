@@ -1,8 +1,23 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
-import os
-import MobileCoreServices
 import Logging
+import MobileCoreServices
+import os
 import UIKit
 
 private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "TextView")
@@ -19,7 +34,7 @@ public protocol MarkdownEditingTextViewImageStoring: AnyObject {
 /// Custom UITextView subclass that overrides "copy" to copy Markdown.
 // TODO: Move renderers, MiniMarkdown text storage management, etc. to this class.
 public final class MarkdownEditingTextView: UITextView {
-  public override func copy(_ sender: Any?) {
+  override public func copy(_ sender: Any?) {
     // swiftlint:disable:next force_cast
     let markdownTextStorage = textStorage as! ParsedTextStorage
     let rawTextRange = markdownTextStorage.storage.rawStringRange(forRange: selectedRange)
@@ -27,7 +42,7 @@ public final class MarkdownEditingTextView: UITextView {
     UIPasteboard.general.string = String(utf16CodeUnits: characters, count: characters.count)
   }
 
-  public override func canPaste(_ itemProviders: [NSItemProvider]) -> Bool {
+  override public func canPaste(_ itemProviders: [NSItemProvider]) -> Bool {
     Logger.shared.info("Determining if we can paste from \(itemProviders)")
     let typeIdentifiers = pasteConfiguration!.acceptableTypeIdentifiers
     for itemProvider in itemProviders {
@@ -39,14 +54,14 @@ public final class MarkdownEditingTextView: UITextView {
     return false
   }
 
-  public override func paste(itemProviders: [NSItemProvider]) {
+  override public func paste(itemProviders: [NSItemProvider]) {
     Logger.shared.info("Pasting \(itemProviders)")
     super.paste(itemProviders: itemProviders)
   }
 
   public weak var imageStorage: MarkdownEditingTextViewImageStoring?
 
-  public override func paste(_ sender: Any?) {
+  override public func paste(_ sender: Any?) {
     if let image = UIPasteboard.general.image, let imageStorage = self.imageStorage {
       Logger.shared.info("Pasting an image")
       let imageKey: String?
@@ -72,7 +87,7 @@ public final class MarkdownEditingTextView: UITextView {
     }
   }
 
-  public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
     if action == #selector(paste(_:)), UIPasteboard.general.image != nil {
       Logger.shared.info("There's an image on the pasteboard, so allow pasting")
       return true
@@ -80,7 +95,7 @@ public final class MarkdownEditingTextView: UITextView {
     return super.canPerformAction(action, withSender: sender)
   }
 
-  public override func insertText(_ text: String) {
+  override public func insertText(_ text: String) {
     os_signpost(.begin, log: log, name: "keystroke")
     super.insertText(text)
     os_signpost(.end, log: log, name: "keystroke")

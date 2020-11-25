@@ -1,4 +1,19 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Logging
 import MobileCoreServices
@@ -56,6 +71,7 @@ public final class TextEditViewController: UIViewController {
     )
   }
 
+  @available(*, unavailable)
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -95,7 +111,7 @@ public final class TextEditViewController: UIViewController {
       $1.listLevel = 1
     }
     formatters[.list] = { $1.listLevel += 1 }
-    formatters[.delimiter] = { delimiter, attributes in
+    formatters[.delimiter] = { _, attributes in
       attributes.color = .quaternaryLabel
       // TODO: Support Q&A cards
 //      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
@@ -110,7 +126,7 @@ public final class TextEditViewController: UIViewController {
     formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
 
-    // TODO
+    // TODO:
     formatters[.code] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
@@ -178,11 +194,11 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Lifecycle
 
-  public override func loadView() {
+  override public func loadView() {
     view = textView
   }
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
@@ -191,7 +207,7 @@ public final class TextEditViewController: UIViewController {
   /// If true, the text view will become first responder upon becoming visible.
   public var autoFirstResponder = false
 
-  public override func viewWillAppear(_ animated: Bool) {
+  override public func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     textView.contentOffset = CGPoint(x: 0, y: -1 * textView.adjustedContentInset.top)
     if autoFirstResponder {
@@ -204,12 +220,12 @@ public final class TextEditViewController: UIViewController {
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
 
-  public override func viewDidDisappear(_ animated: Bool) {
+  override public func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
     delegate?.textEditViewControllerDidClose(self)
   }
 
-  public override func viewWillLayoutSubviews() {
+  override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     adjustMargins(size: view.frame.size)
   }
@@ -236,7 +252,7 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Paste
 
-  public override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
     Logger.shared.debug("Checking if we can perform action \(action)")
     if action == #selector(paste(itemProviders:)), UIPasteboard.general.image != nil {
       Logger.shared.debug("Looks like you want to paste an image! Okay!")
@@ -245,7 +261,7 @@ public final class TextEditViewController: UIViewController {
     return super.canPerformAction(action, withSender: sender)
   }
 
-  public override func paste(itemProviders: [NSItemProvider]) {
+  override public func paste(itemProviders: [NSItemProvider]) {
     Logger.shared.info("Pasting \(itemProviders)")
   }
 }

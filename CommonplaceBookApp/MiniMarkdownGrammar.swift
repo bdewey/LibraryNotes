@@ -59,7 +59,7 @@ public enum ListTypeKey: SyntaxTreeNodePropertyKey {
 public final class MiniMarkdownGrammar: PackratGrammar {
   public init(trace: Bool = false) {
     if trace {
-      self.start = self.start.trace()
+      self.start = start.trace()
     }
   }
 

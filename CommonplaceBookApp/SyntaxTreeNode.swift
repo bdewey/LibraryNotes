@@ -154,7 +154,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
 
   public func findNodes(where predicate: (SyntaxTreeNode) -> Bool) -> [SyntaxTreeNode] {
     var results = [SyntaxTreeNode]()
-    forEach { (node, _, _) in
+    forEach { node, _, _ in
       if predicate(node) { results.append(node) }
     }
     return results
@@ -301,7 +301,7 @@ public final class AnchoredNode {
   /// Returns the first AnchoredNode that matches a predicate.
   public func first(where predicate: (SyntaxTreeNode) -> Bool) -> AnchoredNode? {
     var result: AnchoredNode?
-    node.forEach(startIndex: startIndex) { (candidate, index, stop) in
+    node.forEach(startIndex: startIndex) { candidate, index, stop in
       if predicate(candidate) {
         result = AnchoredNode(node: candidate, startIndex: index)
         stop = true

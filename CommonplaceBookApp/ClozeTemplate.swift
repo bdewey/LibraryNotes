@@ -1,16 +1,31 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Foundation
 import Logging
 import UIKit
 
-extension ChallengeTemplateType {
-  public static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
+public extension ChallengeTemplateType {
+  static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
 public final class ClozeTemplate: ChallengeTemplate {
-  public override var type: ChallengeTemplateType { return .cloze }
+  override public var type: ChallengeTemplateType { return .cloze }
 
   public required init?(rawValue: String) {
     self.markdown = rawValue
@@ -22,13 +37,13 @@ public final class ClozeTemplate: ChallengeTemplate {
     super.init()
   }
 
-  public override var rawValue: String { markdown }
+  override public var rawValue: String { markdown }
   private let markdown: String
   private let node: SyntaxTreeNode
 
   // MARK: - CardTemplate conformance
 
-  public override var challenges: [Challenge] {
+  override public var challenges: [Challenge] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
     return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
   }

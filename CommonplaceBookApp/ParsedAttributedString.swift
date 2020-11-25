@@ -66,7 +66,7 @@ private extension Logger {
     )
   }
 
-  public override convenience init() {
+  override public convenience init() {
     assertionFailure("Are you sure you want a plain-text attributed string?")
     self.init(
       grammar: PlainTextGrammar(),
@@ -101,10 +101,11 @@ private extension Logger {
     }
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
   @objc public weak var delegate: ParsedAttributedStringDelegate?
 
   // MARK: - Stored properties
@@ -116,14 +117,14 @@ private extension Logger {
   @objc public let _string: PieceTableString // swiftlint:disable:this identifier_name
 
   /// The contents of the string. This is derived from `rawString` after applying replacements.
-  public override var string: String { _string as String }
+  override public var string: String { _string as String }
 
   /// Default attributes
   private let defaultAttributes: AttributedStringAttributes
-  
+
   /// A set of functions that customize attributes based upon the nodes in the AST.
   private let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction]
-  
+
   /// A set of functions that replace the contents of `rawString` -- e.g., these can be used to remove delimiters or change spaces to tabs.
   private let replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
 
@@ -153,7 +154,7 @@ private extension Logger {
   public func path(to index: Int) -> [AnchoredNode] { rawString.path(to: index) }
 
   /// Replaces the characters in the given range with the characters of the given string.
-  public override func replaceCharacters(in range: NSRange, with str: String) {
+  override public func replaceCharacters(in range: NSRange, with str: String) {
     var changedAttributesRange: Range<Int>?
     let lengthBeforeChanges = _string.length
     let bufferRange = rawStringRange(forRange: range)
@@ -181,7 +182,7 @@ private extension Logger {
     delegate?.attributedStringDidChange(
       oldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
-      changedAttributesRange: changedAttributesRange.flatMap({ self.range(forRawStringRange: NSRange($0)) })
+      changedAttributesRange: changedAttributesRange.flatMap { self.range(forRawStringRange: NSRange($0)) }
         ?? NSRange(location: NSNotFound, length: 0)
     )
   }
@@ -191,7 +192,7 @@ private extension Logger {
   ///   - location: The index for which to return attributes. This value must lie within the bounds of the receiver.
   ///   - range: Upon return, the range over which the attributes and values are the same as those at index. This range isn’t necessarily the maximum range covered, and its extent is implementation-dependent.
   /// - Returns: The attributes for the character at index.
-  public override func attributes(
+  override public func attributes(
     at location: Int,
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
@@ -201,7 +202,7 @@ private extension Logger {
     }
     var bufferLocation = rawStringRange(forRange: NSRange(location: location, length: 0)).location
     repeat {
-    // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
+      // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
       let leafNode = try! tree.leafNode(containing: bufferLocation) // swiftlint:disable:this force_try
       let visibleRange = self.range(forRawStringRange: leafNode.range)
       if visibleRange.length > 0 {
@@ -220,7 +221,7 @@ private extension Logger {
   /// - Parameters:
   ///   - attrs: A dictionary containing the attributes to set.
   ///   - range: The range of characters whose attributes are set.
-  public override func setAttributes(
+  override public func setAttributes(
     _ attrs: [NSAttributedString.Key: Any]?,
     range: NSRange
   ) {
@@ -249,7 +250,7 @@ private extension ParsedAttributedString {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
-     } else {
+    } else {
       node.hasTextReplacement = false
     }
     node.attributedStringAttributes = attributes
@@ -288,6 +289,7 @@ private extension ParsedAttributedString {
 }
 
 // MARK: - Stylesheets
+
 // TODO: Move this to a separate file?
 
 public extension ParsedAttributedString.Settings {

@@ -15,8 +15,8 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-import Foundation
 import CommonplaceBookApp
+import Foundation
 import XCTest
 
 final class MiniMarkdownParsingTests: XCTestCase {
@@ -53,14 +53,14 @@ final class MiniMarkdownParsingTests: XCTestCase {
       expectedStructure: "(document (paragraph text (emphasis delimiter text delimiter)))"
     )
   }
-  
+
   func testTextWithSingleCharacterEmphasis() {
     parseText(
       "Emphasize just the letter *e* in this sentence",
       expectedStructure: "(document (paragraph text (emphasis delimiter text delimiter) text))"
     )
   }
-  
+
   func testEmphasisCannotBeEmpty() {
     parseText("Just ** two stars", expectedStructure: "(document (paragraph text))")
   }

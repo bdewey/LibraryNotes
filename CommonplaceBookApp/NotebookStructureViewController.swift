@@ -1,4 +1,19 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Combine
 import SnapKit
@@ -10,7 +25,6 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
 final class NotebookStructureViewController: UIViewController {
-
   enum StructureIdentifier: Hashable, CustomStringConvertible {
     case allNotes
     case hashtag(String)
@@ -34,6 +48,7 @@ final class NotebookStructureViewController: UIViewController {
     title = AppDelegate.appName
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -43,7 +58,7 @@ final class NotebookStructureViewController: UIViewController {
   private var notebookSubscription: AnyCancellable?
 
   private lazy var collectionView: UICollectionView = {
-    let layout = UICollectionViewCompositionalLayout { (sectionIndex, layoutEnvironment) in
+    let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
       var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
       config.backgroundColor = .grailBackground
       // the first section has no header; everything else gets a header.
@@ -57,7 +72,7 @@ final class NotebookStructureViewController: UIViewController {
   }()
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, StructureIdentifier> = {
-    let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, StructureIdentifier> { (cell, _, structureIdentifier) in
+    let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, StructureIdentifier> { cell, _, structureIdentifier in
       var contentConfiguration = cell.defaultContentConfiguration()
       contentConfiguration.text = structureIdentifier.description
       contentConfiguration.textProperties.color = .label
@@ -67,11 +82,11 @@ final class NotebookStructureViewController: UIViewController {
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 
-    dataSource.supplementaryViewProvider = { [weak dataSource] (collectionView, kind, indexPath) in
+    dataSource.supplementaryViewProvider = { [weak dataSource] collectionView, kind, indexPath in
       guard kind == UICollectionView.elementKindSectionHeader, dataSource?.snapshot().indexOfSection(.hashtags) == indexPath.section else {
         return nil
       }
-      let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { (headerView, _, _) in
+      let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { headerView, _, _ in
         var headerConfiguration = UIListContentConfiguration.sidebarHeader()
         headerConfiguration.text = "Tags"
         headerView.contentConfiguration = headerConfiguration

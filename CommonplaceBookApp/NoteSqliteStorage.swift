@@ -1,4 +1,19 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Combine
 import Foundation
@@ -105,7 +120,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
 
   public typealias IOCompletionHandler = (Bool) -> Void
 
-  public override func open(completionHandler: IOCompletionHandler? = nil) {
+  override public func open(completionHandler: IOCompletionHandler? = nil) {
     super.open { success in
       Logger.shared.info("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
@@ -114,7 +129,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     }
   }
 
-  public override func close(completionHandler: IOCompletionHandler? = nil) {
+  override public func close(completionHandler: IOCompletionHandler? = nil) {
     NotificationCenter.default.removeObserver(self)
     super.close { success in
       self.cleanupAfterClose()
@@ -190,7 +205,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     }
   }
 
-  public override func read(from url: URL) throws {
+  override public func read(from url: URL) throws {
     // TODO: Optionally merge the changes from disk into memory?
     Logger.shared.info("UIDocument: Reading content from '\(url.path)'")
     let dbQueue = try memoryDatabaseQueue(fileURL: url)
@@ -220,7 +235,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     }
   }
 
-  public override func writeContents(
+  override public func writeContents(
     _ contents: Any,
     to url: URL,
     for saveOperation: UIDocument.SaveOperation,
@@ -968,12 +983,12 @@ private extension VersionVector {
 extension UIDocument.State: CustomStringConvertible {
   public var description: String {
     var strings: [String] = []
-    if self.contains(.closed) { strings.append("Closed") }
-    if self.contains(.editingDisabled) { strings.append("Editing Disabled") }
-    if self.contains(.inConflict) { strings.append("Conflict") }
-    if self.contains(.normal) { strings.append("Normal") }
-    if self.contains(.progressAvailable) { strings.append("Progress available") }
-    if self.contains(.savingError) { strings.append("Saving error") }
+    if contains(.closed) { strings.append("Closed") }
+    if contains(.editingDisabled) { strings.append("Editing Disabled") }
+    if contains(.inConflict) { strings.append("Conflict") }
+    if contains(.normal) { strings.append("Normal") }
+    if contains(.progressAvailable) { strings.append("Progress available") }
+    if contains(.savingError) { strings.append("Saving error") }
     return strings.joined(separator: ", ")
   }
 }

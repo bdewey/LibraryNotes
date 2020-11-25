@@ -1,18 +1,33 @@
-// Copyright © 2020 Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Foundation
 
-extension Range where Range.Bound == PieceTable.Index {
+public extension Range where Range.Bound == PieceTable.Index {
   /// A constructor equivalent to Range(_: NSRange, in: String) for PieceTable use.
-  public init?(_ range: NSRange, in pieceTable: PieceTable) {
+  init?(_ range: NSRange, in pieceTable: PieceTable) {
     let startIndex = pieceTable.index(pieceTable.startIndex, offsetBy: range.location)
     let endIndex = pieceTable.index(startIndex, offsetBy: range.length)
     self = startIndex ..< endIndex
   }
 }
 
-extension NSRange {
-  public init<R: RangeExpression>(_ rangeExpression: R, in pieceTable: PieceTable) where R.Bound == PieceTable.Index {
+public extension NSRange {
+  init<R: RangeExpression>(_ rangeExpression: R, in pieceTable: PieceTable) where R.Bound == PieceTable.Index {
     let range = rangeExpression.relative(to: pieceTable)
     let lowerBound = pieceTable.offset(for: range.lowerBound)
     let upperBound = pieceTable.offset(for: range.upperBound)
@@ -120,7 +135,7 @@ public struct PieceTable {
     case .added:
       let priorOriginalPiece = pieces.prefix(index.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty })
       let nextOriginalPiece = pieces.dropFirst(index.pieceIndex).first(where: { $0.source == .original && !$0.isEmpty })
-      return .notFound(lowerBound: priorOriginalPiece.flatMap({ $0.endIndex - 1 }), upperBound: nextOriginalPiece.flatMap({ $0.startIndex }))
+      return .notFound(lowerBound: priorOriginalPiece.flatMap { $0.endIndex - 1 }, upperBound: nextOriginalPiece.flatMap { $0.startIndex })
     }
   }
 
@@ -135,7 +150,7 @@ public struct PieceTable {
       if piece.contains(originalOffset) {
         return Index(pieceIndex: index, contentIndex: originalOffset)
       }
-      if bound == .upperBound && piece.endIndex == originalOffset {
+      if bound == .upperBound, piece.endIndex == originalOffset {
         // We're looking for an upper bound at `originalOffset`, and whatever comes after
         // this current piece is the first thing past `originalOffset`
         return self.index(after: Index(pieceIndex: index, contentIndex: piece.endIndex - 1))
@@ -218,8 +233,8 @@ public struct PieceTable {
 
   public mutating func revertToOriginal() {
     addedContents.removeAll()
-    self.count = originalContents.length
-    self.pieces = [Piece(source: .original, startIndex: 0, endIndex: originalContents.length)]
+    count = originalContents.length
+    pieces = [Piece(source: .original, startIndex: 0, endIndex: originalContents.length)]
   }
 }
 
@@ -244,6 +259,7 @@ extension PieceTable: Collection {
       return endIndex
     }
   }
+
   public var endIndex: Index { Index(pieceIndex: pieces.endIndex, contentIndex: 0) }
 
   public func index(after i: Index) -> Index {
@@ -372,7 +388,6 @@ extension PieceTable: RangeReplaceableCollection {
   /// 2. No consecutive adjoining pieces (where replacement[n].endIndex == replacement[n+1].startIndex). If we're about to store
   ///   something like this, we just "extend" replacement[n] to encompass the new range.
   private struct ChangeDescription {
-
     private(set) var values: [Piece] = []
 
     /// The smallest index of an existing piece added to `values`
@@ -411,7 +426,7 @@ extension PieceTable: RangeReplaceableCollection {
   }
 
   /// Update the piece table with the changes contained in `changeDescription`
-  mutating private func applyChangeDescription(_ changeDescription: ChangeDescription) {
+  private mutating func applyChangeDescription(_ changeDescription: ChangeDescription) {
     let range: Range<Int>
     if let minIndex = changeDescription.lowerBound, let maxIndex = changeDescription.upperBound {
       range = minIndex ..< maxIndex + 1

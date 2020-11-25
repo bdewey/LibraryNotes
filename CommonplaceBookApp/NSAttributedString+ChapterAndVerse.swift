@@ -1,12 +1,27 @@
-// Copyright © 2017-present Brian's Brain. All rights reserved.
+//  Licensed to the Apache Software Foundation (ASF) under one
+//  or more contributor license agreements.  See the NOTICE file
+//  distributed with this work for additional information
+//  regarding copyright ownership.  The ASF licenses this file
+//  to you under the Apache License, Version 2.0 (the
+//  "License"); you may not use this file except in compliance
+//  with the License.  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing,
+//  software distributed under the License is distributed on an
+//  "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+//  KIND, either express or implied.  See the License for the
+//  specific language governing permissions and limitations
+//  under the License.
 
 import Foundation
 
 /// "Chapter and verse" text is a parenthetical note at the end of a quote that identifies where,
 /// in the source, the quote comes from.
-extension NSAttributedString {
+public extension NSAttributedString {
   /// The range of a "chapter and verse" annotation inside the receiver.
-  var rangeOfChapterAndVerseAnnotation: NSRange? {
+  internal var rangeOfChapterAndVerseAnnotation: NSRange? {
     guard let chapterAndVerseRegularExpression = try? NSRegularExpression(
       pattern: "\\s+\\(\\S*\\)\\s*$",
       options: []
@@ -22,9 +37,10 @@ extension NSAttributedString {
   }
 
   /// The chapter and verse annotation in the receiver, if present.
-  public var chapterAndVerseAnnotation: Substring? {
-    if let range = self.rangeOfChapterAndVerseAnnotation,
-      let stringRange = Range(range, in: self.string) {
+  var chapterAndVerseAnnotation: Substring? {
+    if let range = rangeOfChapterAndVerseAnnotation,
+       let stringRange = Range(range, in: string)
+    {
       return string[stringRange]
     } else {
       return nil
@@ -32,8 +48,8 @@ extension NSAttributedString {
   }
 
   /// Returns a copy of the receiver with the chapter and verse annotation removed.
-  public func removingChapterAndVerseAnnotation() -> NSAttributedString {
-    guard let range = self.rangeOfChapterAndVerseAnnotation else { return self }
+  func removingChapterAndVerseAnnotation() -> NSAttributedString {
+    guard let range = rangeOfChapterAndVerseAnnotation else { return self }
     // swiftlint:disable:next force_cast
     let result = mutableCopy() as! NSMutableAttributedString
     result.deleteCharacters(in: range)
@@ -42,9 +58,9 @@ extension NSAttributedString {
 
   /// Returns the receiver with any chapter and verse annotation, if present, removed and
   /// returned as a separate string.
-  public var decomposedChapterAndVerseAnnotation: (NSAttributedString, String) {
+  var decomposedChapterAndVerseAnnotation: (NSAttributedString, String) {
     guard let range = self.rangeOfChapterAndVerseAnnotation,
-      let stringRange = Range(range, in: self.string)
+          let stringRange = Range(range, in: self.string)
     else { return (self, "") }
     let chapterAndVerse = String(string[stringRange])
     // swiftlint:disable:next force_cast
@@ -53,7 +69,7 @@ extension NSAttributedString {
     return (result, chapterAndVerse)
   }
 
-  public func trimmingTrailingWhitespace() -> NSAttributedString {
+  func trimmingTrailingWhitespace() -> NSAttributedString {
     let rangeToTrim = string.reversed().prefix(while: { $0.isWhitespaceOrNewline })
     if rangeToTrim.isEmpty {
       return self

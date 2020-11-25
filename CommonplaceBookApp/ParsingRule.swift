@@ -98,7 +98,7 @@ open class ParsingRuleWrapper: ParsingRule {
     self.rule = rule
   }
 
-  public override func wrapInnerRules(_ wrapFunction: (ParsingRule) -> ParsingRule) {
+  override public func wrapInnerRules(_ wrapFunction: (ParsingRule) -> ParsingRule) {
     rule = wrapFunction(rule)
   }
 
@@ -107,12 +107,12 @@ open class ParsingRuleWrapper: ParsingRule {
     rule.gatherPerformanceCounters(into: &array)
   }
 
-  public override var possibleOpeningCharacters: CharacterSet? {
+  override public var possibleOpeningCharacters: CharacterSet? {
     return rule.possibleOpeningCharacters
   }
 
-  open override var optional: Bool { rule.optional }
-  open override var consumesInput: Bool { rule.consumesInput }
+  override open var optional: Bool { rule.optional }
+  override open var consumesInput: Bool { rule.consumesInput }
 }
 
 open class ParsingRuleSequenceWrapper: ParsingRule {
@@ -126,7 +126,7 @@ open class ParsingRuleSequenceWrapper: ParsingRule {
     self.init(rules)
   }
 
-  public override func wrapInnerRules(_ wrapFunction: (ParsingRule) -> ParsingRule) {
+  override public func wrapInnerRules(_ wrapFunction: (ParsingRule) -> ParsingRule) {
     rules = rules.map(wrapFunction)
   }
 
@@ -137,7 +137,7 @@ open class ParsingRuleSequenceWrapper: ParsingRule {
     }
   }
 
-  public override var possibleOpeningCharacters: CharacterSet? {
+  override public var possibleOpeningCharacters: CharacterSet? {
     assertionFailure("Subclasses should override")
     return nil
   }
@@ -336,12 +336,12 @@ public final class Literal: ParsingRule {
 
   let chars: [unichar]
 
-  public override var description: String {
+  override public var description: String {
     let str = String(utf16CodeUnits: chars, count: chars.count)
     return "\(super.description) \(str)"
   }
 
-  public override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+  override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     var length = 0
     while length < chars.count, let char = buffer.utf16(at: index + length), char == chars[length] {
       length += 1
@@ -353,7 +353,7 @@ public final class Literal: ParsingRule {
     }
   }
 
-  public override var possibleOpeningCharacters: CharacterSet {
+  override public var possibleOpeningCharacters: CharacterSet {
     return [Unicode.Scalar(chars[0])!]
   }
 }
@@ -488,16 +488,16 @@ final class WrappingRule: ParsingRuleWrapper {
 
 /// A rule that succeeds only if each child rule succeeds in sequence.
 public final class InOrder: ParsingRuleSequenceWrapper {
-  public override init(_ rules: [ParsingRule]) {
+  override public init(_ rules: [ParsingRule]) {
     self.memoizedPossibleCharacters = Self.possibleOpeningCharacters(for: rules)
     super.init(rules)
   }
 
   private let memoizedPossibleCharacters: CharacterSet?
 
-  public override var possibleOpeningCharacters: CharacterSet? { memoizedPossibleCharacters }
+  override public var possibleOpeningCharacters: CharacterSet? { memoizedPossibleCharacters }
 
-  public override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+  override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     var result = ParsingResult(succeeded: true)
     var currentIndex = index
     var maxExaminedIndex = index
@@ -515,7 +515,7 @@ public final class InOrder: ParsingRuleSequenceWrapper {
     return performanceCounters.recordResult(result)
   }
 
-  public override var description: String {
+  override public var description: String {
     "IN ORDER: \(rules.map(String.init(describing:)).joined(separator: ", "))"
   }
 
@@ -644,9 +644,9 @@ public final class Choice: ParsingRuleSequenceWrapper {
 
   private var _possibleCharacters: CharacterSet?
 
-  public override var possibleOpeningCharacters: CharacterSet? { _possibleCharacters }
+  override public var possibleOpeningCharacters: CharacterSet? { _possibleCharacters }
 
-  public override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+  override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     var examinedLength = 1
     let ch = buffer.utf16(at: index)
     guard _possibleCharacters.contains(ch) else {
@@ -664,15 +664,15 @@ public final class Choice: ParsingRuleSequenceWrapper {
     return performanceCounters.recordResult(ParsingResult(succeeded: false, examinedLength: examinedLength))
   }
 
-  public override var description: String {
+  override public var description: String {
     "CHOICE: \(rules.map(String.init(describing:)).joined(separator: ", "))"
   }
 
   // This is saying "the choice is optional if all of its subrules are optional"
-  public override var optional: Bool { rules.allSatisfy({ $0.optional }) }
+  override public var optional: Bool { rules.allSatisfy { $0.optional } }
 
   // If none of the choices consume input, this won't either.
-  public override var consumesInput: Bool { !rules.allSatisfy({ !$0.consumesInput }) }
+  override public var consumesInput: Bool { !rules.allSatisfy { !$0.consumesInput } }
 }
 
 final class TraceRule: ParsingRuleWrapper {
