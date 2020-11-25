@@ -56,8 +56,8 @@ extension Sqlite {
         .select(NoteHashtag.Columns.hashtag, as: String.self)
     }
 
-    static let challengeTemplates = hasMany(ChallengeTemplate.self)
-    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplate> { request(for: Note.challengeTemplates) }
+    static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
+    var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: Note.challengeTemplates) }
 
     /// The association between this note and its text.
     static let noteText = hasOne(NoteText.self)
@@ -65,7 +65,7 @@ extension Sqlite {
     /// A query that returns the text associated with this note.
     var noteText: QueryInterfaceRequest<NoteText> { request(for: Note.noteText) }
 
-    static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplate.challenges)
+    static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
     var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: Note.challenges) }
 
     /// The association between this note and the device it was last changed on.

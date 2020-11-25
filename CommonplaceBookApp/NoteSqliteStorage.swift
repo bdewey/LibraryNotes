@@ -440,7 +440,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
     try dbQueue.write { db in
       guard
         let templateKey = entry.identifier.challengeTemplateID,
-        let owningTemplate = try Sqlite.ChallengeTemplate.fetchOne(db, key: templateKey.rawValue),
+        let owningTemplate = try ChallengeTemplateRecord.fetchOne(db, key: templateKey.rawValue),
         let challenge = try owningTemplate.challenges.filter(ChallengeRecord.Columns.index == entry.identifier.index).fetchOne(db)
       else {
         throw Error.unknownChallengeTemplate
@@ -736,7 +736,7 @@ private extension NoteSqliteStorage {
     for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
       let templateString = template.rawValue
-      let record = Sqlite.ChallengeTemplate(
+      let record = ChallengeTemplateRecord(
         id: newTemplateIdentifier,
         type: template.type.rawValue,
         rawValue: templateString,
@@ -761,15 +761,15 @@ private extension NoteSqliteStorage {
     }
     for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
-      guard var record = try Sqlite.ChallengeTemplate.fetchOne(db, key: modifiedTemplateIdentifier.rawValue) else {
+      guard var record = try ChallengeTemplateRecord.fetchOne(db, key: modifiedTemplateIdentifier.rawValue) else {
         assertionFailure("Should be a record")
         continue
       }
       record.rawValue = template.rawValue
-      try record.update(db, columns: [Sqlite.ChallengeTemplate.Columns.rawValue])
+      try record.update(db, columns: [ChallengeTemplateRecord.Columns.rawValue])
     }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
-      let deleted = try Sqlite.ChallengeTemplate.deleteOne(db, key: obsoleteTemplateIdentifier.rawValue)
+      let deleted = try ChallengeTemplateRecord.deleteOne(db, key: obsoleteTemplateIdentifier.rawValue)
       assert(deleted)
     }
   }
@@ -802,8 +802,8 @@ private extension NoteSqliteStorage {
     }
     let hashtagRecords = try Sqlite.NoteHashtag.filter(Sqlite.NoteHashtag.Columns.noteId == identifier.rawValue).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtag }
-    let challengeTemplateRecords = try Sqlite.ChallengeTemplate
-      .filter(Sqlite.ChallengeTemplate.Columns.noteId == identifier.rawValue)
+    let challengeTemplateRecords = try ChallengeTemplateRecord
+      .filter(ChallengeTemplateRecord.Columns.noteId == identifier.rawValue)
       .fetchAll(db)
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
       try Self.challengeTemplate(from: challengeTemplateRecord)
@@ -822,14 +822,14 @@ private extension NoteSqliteStorage {
   }
 
   static func challengeTemplate(identifier: FlakeID, database: Database) throws -> ChallengeTemplate {
-    guard let record = try Sqlite.ChallengeTemplate.fetchOne(database, key: identifier.rawValue) else {
+    guard let record = try ChallengeTemplateRecord.fetchOne(database, key: identifier.rawValue) else {
       throw Error.unknownChallengeTemplate
     }
     return try challengeTemplate(from: record)
   }
 
   static func challengeTemplate(
-    from challengeTemplateRecord: Sqlite.ChallengeTemplate
+    from challengeTemplateRecord: ChallengeTemplateRecord
   ) throws -> ChallengeTemplate {
     guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
       throw Error.unknownChallengeType
@@ -851,7 +851,7 @@ private extension NoteSqliteStorage {
       try Sqlite.Note.createV1Table(in: database)
       try Sqlite.NoteText.createV1Table(in: database)
       try Sqlite.NoteHashtag.createV1Table(in: database)
-      try Sqlite.ChallengeTemplate.createV1Table(in: database)
+      try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)
       try Sqlite.StudyLogEntry.createV1Table(in: database)
       try Sqlite.Asset.createV1Table(in: database)

@@ -47,11 +47,11 @@ struct ChallengeRecord: Codable, FetchableRecord, MutablePersistableRecord {
     static let updateSequenceNumber = Column(ChallengeRecord.CodingKeys.updateSequenceNumber)
   }
 
-  static let challengeTemplate = belongsTo(Sqlite.ChallengeTemplate.self)
+  static let challengeTemplate = belongsTo(ChallengeTemplateRecord.self)
 
   static let device = belongsTo(Sqlite.Device.self)
 
-  var challengeTemplate: QueryInterfaceRequest<Sqlite.ChallengeTemplate> {
+  var challengeTemplate: QueryInterfaceRequest<ChallengeTemplateRecord> {
     request(for: Self.challengeTemplate)
   }
 
