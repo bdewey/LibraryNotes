@@ -446,7 +446,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         throw Error.unknownChallengeTemplate
       }
 
-      var record = Sqlite.StudyLogEntry(
+      var record = StudyLogEntryRecord(
         id: nil,
         timestamp: entry.timestamp,
         correct: entry.statistics.correct,
@@ -461,7 +461,7 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
   }
 
   private static func updateChallenge(
-    for entry: Sqlite.StudyLogEntry,
+    for entry: StudyLogEntryRecord,
     in db: Database,
     buryRelatedChallenges: Bool,
     updateKey: UpdateKey
@@ -500,9 +500,9 @@ public final class NoteSqliteStorage: UIDocument, NoteStorage {
         throw Error.databaseIsNotOpen
       }
       let entries = try dbQueue.read { db -> [Sqlite.StudyLogEntryInfo] in
-        let request = Sqlite.StudyLogEntry
-          .order(Sqlite.StudyLogEntry.Columns.timestamp)
-          .including(required: Sqlite.StudyLogEntry.challenge)
+        let request = StudyLogEntryRecord
+          .order(StudyLogEntryRecord.Columns.timestamp)
+          .including(required: StudyLogEntryRecord.challenge)
         return try Sqlite.StudyLogEntryInfo
           .fetchAll(db, request)
       }
@@ -564,7 +564,7 @@ private extension NoteSqliteStorage {
       NoteTextRecord.all(),
       NoteHashtagRecord.all(),
       ChallengeRecord.all(),
-      Sqlite.StudyLogEntry.all(),
+      StudyLogEntryRecord.all(),
       AssetRecord.all(),
     ]).publisher(in: dbQueue)
       .sink(
@@ -853,7 +853,7 @@ private extension NoteSqliteStorage {
       try NoteHashtagRecord.createV1Table(in: database)
       try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)
-      try Sqlite.StudyLogEntry.createV1Table(in: database)
+      try StudyLogEntryRecord.createV1Table(in: database)
       try AssetRecord.createV1Table(in: database)
       try ChangeLogRecord.createV1Table(in: database)
 
@@ -909,7 +909,7 @@ private extension ChallengeRecord {
   }
 }
 
-private extension Sqlite.StudyLogEntry {
+private extension StudyLogEntryRecord {
   var cardAnswer: CardAnswer {
     if correct > 0, incorrect == 0 {
       return .good
