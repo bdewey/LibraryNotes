@@ -29,7 +29,7 @@ public extension CGVector {
     public static let right = Direction(rawValue: 0)
     public static let down = Direction(rawValue: .pi / 2)
     public static let left = Direction(rawValue: .pi)
-    public static let up = Direction(rawValue: -1 * .pi / 2)
+    public static let up = Direction(rawValue: -1 * .pi / 2) // swiftlint:disable:this identifier_name
   }
 
   /// Convenience initializer of a CGVector as the difference between an origin and destination point.

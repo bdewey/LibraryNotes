@@ -56,7 +56,6 @@ public final class MetadataQuery {
   }
 
   @objc func didUpdateNotification(_ notification: NSNotification) {
-    print("Received notification: \(notification.userInfo)")
     let items = query.results as! [NSMetadataItem] // swiftlint:disable:this force_cast
     delegate?.metadataQuery(self, didFindItems: items)
   }

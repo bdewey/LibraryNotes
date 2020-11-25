@@ -648,12 +648,12 @@ public final class Choice: ParsingRuleSequenceWrapper {
 
   override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     var examinedLength = 1
-    let ch = buffer.utf16(at: index)
-    guard _possibleCharacters.contains(ch) else {
+    let character = buffer.utf16(at: index)
+    guard _possibleCharacters.contains(character) else {
       return .fail
     }
     for rule in rules {
-      if !rule.possibleOpeningCharacters.contains(ch) { continue }
+      if !rule.possibleOpeningCharacters.contains(character) { continue }
       var result = rule.parsingResult(from: buffer, at: index, memoizationTable: memoizationTable)
       examinedLength = max(examinedLength, result.examinedLength)
       if result.succeeded {

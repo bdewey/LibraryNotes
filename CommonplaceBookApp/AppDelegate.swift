@@ -19,6 +19,10 @@ import CoreSpotlight
 import Logging
 import UIKit
 
+extension UTType {
+  static let grailDiary = UTType("org.brians-brain.graildiary")!
+}
+
 extension Logger {
   fileprivate static let sharedLoggerLabel = "org.brians-brain.grail-diary"
   public static let shared = Logger(label: sharedLoggerLabel)
@@ -105,7 +109,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let browser = UIDocumentBrowserViewController(forOpeningFilesWithContentTypes: ["org.brians-brain.graildiary"])
+    let browser = UIDocumentBrowserViewController(forOpening: [.grailDiary])
     browser.delegate = self
 
     window.rootViewController = browser
@@ -224,16 +228,8 @@ extension AppDelegate: AppCommands {
     guard let documentListViewController = window?.rootViewController else {
       return
     }
-    if UIApplication.isSimulator, false {
-      let messageText = "Document browser doesn't work in the simulator"
-      let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-      alertController.addAction(okAction)
-      documentListViewController.present(alertController, animated: true, completion: nil)
-    } else {
-      AppDelegate.openedDocumentBookmark = nil
-      documentListViewController.dismiss(animated: true, completion: nil)
-    }
+    AppDelegate.openedDocumentBookmark = nil
+    documentListViewController.dismiss(animated: true, completion: nil)
   }
 
   @objc func makeNewNote() {

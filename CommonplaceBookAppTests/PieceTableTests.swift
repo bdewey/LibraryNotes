@@ -95,8 +95,8 @@ final class PieceTableTests: XCTestCase {
   func testRepeatedAppend() {
     var pieceTable = PieceTable()
     let expected = "Hello, world!!"
-    for ch in expected.utf16 {
-      pieceTable.append(ch)
+    for character in expected.utf16 {
+      pieceTable.append(character)
     }
     XCTAssertEqual(pieceTable.string, expected)
   }
@@ -180,8 +180,8 @@ extension SafeUnicodeBuffer {
   var utf16String: String {
     var chars = [unichar]()
     var i = 0
-    while let ch = utf16(at: i) {
-      chars.append(ch)
+    while let character = utf16(at: i) {
+      chars.append(character)
       i += 1
     }
     return String(utf16CodeUnits: chars, count: chars.count)

@@ -88,9 +88,8 @@ final class ParsedStringTests: XCTestCase {
     let parser = ParsedString(largeText, grammar: MiniMarkdownGrammar())
     let toInsert = "\n\nI'm adding some new text with *emphasis* to test incremental parsing.\n\n"
     measure {
-      for (i, ch) in toInsert.utf16.enumerated() {
-        let buf = [ch]
-        let str = String(utf16CodeUnits: buf, count: 1)
+      for (i, character) in toInsert.utf16.enumerated() {
+        let str = String(utf16CodeUnits: [character], count: 1)
         parser.replaceCharacters(in: NSRange(location: 34 + i, length: 0), with: str)
       }
     }

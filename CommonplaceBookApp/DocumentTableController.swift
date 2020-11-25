@@ -173,8 +173,6 @@ public final class DocumentTableController: NSObject {
         if lhsPage.pageKey != rhsPage.pageKey {
           return true
         }
-      default:
-        return true
       }
     }
     return false

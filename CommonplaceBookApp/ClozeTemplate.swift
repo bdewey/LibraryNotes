@@ -77,8 +77,8 @@ struct ObjectIdentityHashable<T: AnyObject>: Hashable {
   let value: T
   init(_ value: T) { self.value = value }
 
-  var hashValue: Int {
-    return ObjectIdentifier(value).hashValue
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(ObjectIdentifier(value))
   }
 
   static func == (lhs: ObjectIdentityHashable<T>, rhs: ObjectIdentityHashable<T>) -> Bool {

@@ -27,7 +27,7 @@ struct JsonWrapper: Codable {
 // TODO: Move this to CommonplaceBook.
 final class DayComponentsTests: XCTestCase {
   func testSimpleConversion() {
-    guard let day = DayComponents("2006-03-19") else { XCTFail(); return }
+    let day = DayComponents("2006-03-19")!
     XCTAssertEqual(day.year, 2006)
     XCTAssertEqual(day.month, 3)
     XCTAssertEqual(day.day, 19)
@@ -38,7 +38,7 @@ final class DayComponentsTests: XCTestCase {
     components.year = 2008
     components.month = 6
     components.day = 9
-    guard let date = Calendar.current.date(from: components) else { XCTFail(); return }
+    let date = Calendar.current.date(from: components)!
     let day = DayComponents(date)
     XCTAssertEqual("2008-06-09", day.description)
   }

@@ -17,10 +17,6 @@
 
 import Foundation
 
-// Copyright © 2018 Brian's Brain. All rights reserved.
-
-import Foundation
-
 /// Contains just the year/month/day for a date.
 public struct DayComponents: Equatable, Comparable, Hashable {
   public let year: Int

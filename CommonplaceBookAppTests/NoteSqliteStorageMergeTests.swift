@@ -283,7 +283,7 @@ private extension NoteSqliteStorageMergeTests {
       .tryMap { localStorage, remoteStorage -> Bool in
         try testCase.localModificationBlock?(localStorage)
         try testCase.remoteModificationBlock?(remoteStorage)
-        try localStorage.merge(other: remoteStorage)
+        _ = try localStorage.merge(other: remoteStorage)
         try testCase.validationBlock?(localStorage)
         return true
       }
@@ -297,6 +297,8 @@ private extension NoteSqliteStorageMergeTests {
         pipelineRan.fulfill()
       }, receiveValue: { _ in })
     waitForExpectations(timeout: 3, handler: nil)
+    // cancel() should be a no-op
+    cancelable.cancel()
   }
 
   func makeFile(

@@ -47,17 +47,11 @@ final class NotebookViewController: UIViewController {
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(notebook: notebook)
+    AppDelegate.openedDocumentBookmark = nil
+    documentListViewController.dismiss(animated: true, completion: nil)
     documentListViewController.didTapFilesAction = { [weak self] in
-      if UIApplication.isSimulator, false {
-        let messageText = "Document browser doesn't work in the simulator"
-        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alertController.addAction(okAction)
-        documentListViewController.present(alertController, animated: true, completion: nil)
-      } else {
-        AppDelegate.openedDocumentBookmark = nil
-        documentListViewController.dismiss(animated: true, completion: nil)
-      }
+      AppDelegate.openedDocumentBookmark = nil
+      documentListViewController.dismiss(animated: true, completion: nil)
     }
     return documentListViewController
   }()

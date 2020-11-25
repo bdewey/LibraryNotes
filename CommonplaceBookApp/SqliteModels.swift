@@ -18,8 +18,6 @@
 import Foundation
 import GRDB
 
-// swiftlint:disable nesting
-
 enum Sqlite {
   enum MigrationError: Error {
     case cannotFindNoteID(String)
