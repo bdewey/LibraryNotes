@@ -7,6 +7,7 @@
 - Apache license for this project
 - New material gets scheduled for about 4 days in the future for review
 - Tests pass again
+- Cleaned up a bunch of warnings, reorganized & refactored a bunch of code.
 
 ## [0.30.0] - 2020-11-23
 
