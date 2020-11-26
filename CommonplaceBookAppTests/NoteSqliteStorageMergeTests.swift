@@ -215,7 +215,7 @@ private struct TestDevice: DeviceIdentifying {
 }
 
 private struct MergeTestCase {
-  typealias StorageModificationBlock = (NoteSqliteStorage) throws -> Void
+  typealias StorageModificationBlock = (NoteDatabase) throws -> Void
   var initialLocalStorageBlock: StorageModificationBlock?
   var localModificationBlock: StorageModificationBlock?
   var remoteModificationBlock: StorageModificationBlock?
@@ -254,9 +254,9 @@ private extension NoteSqliteStorageMergeTests {
   static func openDatabase(
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-  ) -> Future<NoteSqliteStorage, Error> {
-    return Future<NoteSqliteStorage, Error> { promise in
-      let database = NoteSqliteStorage(
+  ) -> Future<NoteDatabase, Error> {
+    return Future<NoteDatabase, Error> { promise in
+      let database = NoteDatabase(
         fileURL: fileURL,
         device: device
       )
@@ -306,7 +306,7 @@ private extension NoteSqliteStorageMergeTests {
     modificationBlock: MergeTestCase.StorageModificationBlock?
   ) -> AnyPublisher<URL, Error> {
     Self.openDatabase(device: device)
-      .tryMap { database -> NoteSqliteStorage in
+      .tryMap { database -> NoteDatabase in
         try modificationBlock?(database)
         return database
       }

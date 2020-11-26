@@ -59,7 +59,7 @@ extension QuestionAndAnswerTemplate: Challenge {
     return ChallengeIdentifier(templateDigest: templateIdentifier, index: 0)
   }
 
-  public func challengeView(document: NoteSqliteStorage, properties: CardDocumentProperties) -> ChallengeView {
+  public func challengeView(database: NoteDatabase, properties: CardDocumentProperties) -> ChallengeView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
     // TODO: Need to re-invent images :-(

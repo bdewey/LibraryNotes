@@ -46,7 +46,7 @@ public protocol Challenge {
   ///                       loading images.
   /// - parameter properties: Relevant properties of `document`
   func challengeView(
-    document: NoteSqliteStorage,
+    database: NoteDatabase,
     properties: CardDocumentProperties
   ) -> ChallengeView
 }

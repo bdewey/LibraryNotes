@@ -50,13 +50,13 @@ final class DocumentListViewController: UIViewController {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteSqliteStorage
+    database: NoteDatabase
   ) {
-    self.notebook = notebook
+    self.database = database
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.allNotes.description
-    self.notebookSubscription = notebook.notesDidChange
+    self.databaseSubscription = database.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateStudySession()
@@ -68,7 +68,7 @@ final class DocumentListViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public let notebook: NoteSqliteStorage
+  public let database: NoteDatabase
 
   public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
     let hashtag: String?
@@ -86,7 +86,7 @@ final class DocumentListViewController: UIViewController {
 
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
-  private var notebookSubscription: AnyCancellable?
+  private var databaseSubscription: AnyCancellable?
   private var challengeDueDate: Date {
     get {
       return dataSource?.challengeDueDate ?? Date()
@@ -114,17 +114,15 @@ final class DocumentListViewController: UIViewController {
   internal func showPage(with noteIdentifier: Note.Identifier) {
     let note: Note
     do {
-      note = try notebook.note(noteIdentifier: noteIdentifier)
+      note = try database.note(noteIdentifier: noteIdentifier)
     } catch {
       Logger.shared.error("Unexpected error loading page: \(error)")
       return
     }
-    let textEditViewController = TextEditViewController(
-      notebook: notebook
-    )
+    let textEditViewController = TextEditViewController()
     textEditViewController.noteIdentifier = noteIdentifier
     textEditViewController.markdown = note.text ?? ""
-    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, noteStorage: notebook)
+    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, noteStorage: database)
     savingWrapper.setTitleMarkdown(note.metadata.title)
     showDetailViewController(savingWrapper)
   }
@@ -135,7 +133,7 @@ final class DocumentListViewController: UIViewController {
     super.viewDidLoad()
     let dataSource = DocumentTableController(
       tableView: tableView,
-      notebook: notebook,
+      database: database,
       delegate: self
     )
     self.dataSource = dataSource
@@ -143,7 +141,7 @@ final class DocumentListViewController: UIViewController {
     tableView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    notebook.studySession(filter: nil, date: Date()) { [weak self] in
+    database.studySession(filter: nil, date: Date()) { [weak self] in
       self?.studySession = $0
     }
     dataSource.performUpdates(animated: false)
@@ -178,12 +176,12 @@ final class DocumentListViewController: UIViewController {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    dataSource?.startObservingNotebook()
+    dataSource?.startObservingDatabase()
   }
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    dataSource?.stopObservingNotebook()
+    dataSource?.stopObservingDatabase()
   }
 
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -212,7 +210,7 @@ final class DocumentListViewController: UIViewController {
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
-    notebook.studySession(filter: filter, date: challengeDueDate) {
+    database.studySession(filter: filter, date: challengeDueDate) {
       guard currentHashtag == hashtag else { return }
       self.studySession = $0
     }
@@ -268,7 +266,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession.shuffling().ensuringUniqueChallengeTemplates().limiting(to: 20),
-      notebook: notebook,
+      database: database,
       delegate: self
     )
     studyVC.title = navigationItem.title
@@ -294,7 +292,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       // We just deleted the current page. Show a blank document.
       showDetailViewController(
         TextEditViewController.makeBlankDocument(
-          notebook: notebook,
+          database: database,
           currentHashtag: dataSource?.filteredHashtag,
           autoFirstResponder: false
         )
@@ -327,7 +325,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     let pattern = searchController.searchBar.text ?? ""
     Logger.shared.info("Issuing query: \(pattern)")
     do {
-      let allIdentifiers = try notebook.search(for: pattern)
+      let allIdentifiers = try database.search(for: pattern)
       dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
     } catch {
       Logger.shared.error("Error issuing full text query: \(error)")
@@ -349,7 +347,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     do {
-      try notebook.updateStudySessionResults(session, on: challengeDueDate, buryRelatedChallenges: true)
+      try database.updateStudySessionResults(session, on: challengeDueDate, buryRelatedChallenges: true)
       updateStudySession()
     } catch {
       Logger.shared.error("Unexpected error recording study session results: \(error)")

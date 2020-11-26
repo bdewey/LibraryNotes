@@ -230,9 +230,9 @@ final class NoteSqliteStorageTests: XCTestCase {
 }
 
 private extension NoteSqliteStorageTests {
-  func makeAndOpenEmptyDatabase(completion: @escaping (NoteSqliteStorage) throws -> Void) {
+  func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteSqliteStorage(fileURL: fileURL)
+    let database = NoteDatabase(fileURL: fileURL)
     let completionExpectation = expectation(description: "Expected to call completion routine")
     database.open { success in
       if success {

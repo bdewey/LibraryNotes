@@ -60,7 +60,7 @@ extension ClozeCard: Challenge {
   }
 
   public func challengeView(
-    document: NoteSqliteStorage,
+    database: NoteDatabase,
     properties: CardDocumentProperties
   ) -> ChallengeView {
     let cardView = TwoSidedCardView(frame: .zero)

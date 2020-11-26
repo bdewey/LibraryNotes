@@ -75,8 +75,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return loadingViewController
   }()
 
-  /// The currently open NoteSqliteStorage. TODO: Pick a consistent name for this thing!
-  var noteArchiveDocument: NoteSqliteStorage?
+  /// The currently open database
+  var database: NoteDatabase?
   /// The top-level UISplitViewController that is showing the note contents.
   var topLevelViewController: NotebookViewController?
 
@@ -144,7 +144,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
       }
       if case .failure(let error) = openResult {
-        let messageText = "Error opening Notebook: \(error.localizedDescription)"
+        let messageText = "Error opening database: \(error.localizedDescription)"
         let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
         alertController.addAction(okAction)
@@ -245,19 +245,19 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
-    let noteArchiveDocument: NoteSqliteStorage
+    let database: NoteDatabase
     if url.pathExtension == "grail" {
-      noteArchiveDocument = NoteSqliteStorage(fileURL: url)
+      database = NoteDatabase(fileURL: url)
     } else {
       throw Error.unknownFormat
     }
-    Logger.shared.info("Using document at \(noteArchiveDocument.fileURL)")
-    let viewController = NotebookViewController(notebook: noteArchiveDocument)
+    Logger.shared.info("Using document at \(database.fileURL)")
+    let viewController = NotebookViewController(database: database)
     viewController.modalPresentationStyle = .fullScreen
     viewController.modalTransitionStyle = .crossDissolve
     viewController.view.tintColor = .systemOrange
     controller.present(viewController, animated: animated, completion: nil)
-    noteArchiveDocument.open(completionHandler: { success in
+    database.open(completionHandler: { success in
       let properties: [String: String] = [
         "Success": success.description,
 //        "documentState": String(describing: noteArchiveDocument.documentState),
@@ -269,7 +269,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       }
     })
     topLevelViewController = viewController
-    self.noteArchiveDocument = noteArchiveDocument
+    self.database = database
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
@@ -290,7 +290,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = NoteSqliteStorage(fileURL: url)
+    let document = NoteDatabase(fileURL: url)
     Logger.shared.info("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {

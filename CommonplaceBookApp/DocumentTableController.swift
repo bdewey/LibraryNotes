@@ -36,10 +36,10 @@ public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteSqliteStorage,
+    database: NoteDatabase,
     delegate: DocumentTableControllerDelegate
   ) {
-    self.notebook = notebook
+    self.database = database
     self.delegate = delegate
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
     self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
@@ -116,7 +116,7 @@ public final class DocumentTableController: NSObject {
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
-  private let notebook: NoteSqliteStorage
+  private let database: NoteDatabase
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       needsPerformUpdates = true
@@ -125,10 +125,10 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: DataSource
 
-  private var notebookSubscription: AnyCancellable?
+  private var databaseSubscription: AnyCancellable?
 
-  public func startObservingNotebook() {
-    notebookSubscription = notebook.notesDidChange
+  public func startObservingDatabase() {
+    databaseSubscription = database.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateCardsPerDocument()
@@ -136,14 +136,14 @@ public final class DocumentTableController: NSObject {
     updateCardsPerDocument()
   }
 
-  public func stopObservingNotebook() {
-    notebookSubscription?.cancel()
-    notebookSubscription = nil
+  public func stopObservingDatabase() {
+    databaseSubscription?.cancel()
+    databaseSubscription = nil
   }
 
   public func performUpdates(animated: Bool) {
     let snapshot = DocumentTableController.snapshot(
-      for: notebook,
+      for: database,
       cardsPerDocument: cardsPerDocument,
       filteredHashtag: filteredHashtag,
       filteredPageIdentifiers: filteredPageIdentifiers
@@ -199,8 +199,8 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let properties):
       let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.notebook.deleteNote(noteIdentifier: properties.pageKey)
-        try? self.notebook.flush()
+        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
+        try? self.database.flush()
         self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
         completion(true)
       }
@@ -208,7 +208,7 @@ extension DocumentTableController: UITableViewDelegate {
       actions.append(deleteAction)
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.notebook.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
+          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
             self.delegate?.presentStudySessionViewController(for: $0)
             completion(true)
           })
@@ -298,13 +298,13 @@ private extension DocumentTableController {
   }
 
   @objc func handleRefreshControl() {
-    notebook.refresh { _ in
+    database.refresh { _ in
       self.refreshControl.endRefreshing()
     }
   }
 
   func updateCardsPerDocument() {
-    notebook.studySession(filter: nil, date: challengeDueDate) { studySession in
+    database.studySession(filter: nil, date: challengeDueDate) { studySession in
       self.cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
@@ -316,7 +316,7 @@ private extension DocumentTableController {
   }
 
   static func snapshot(
-    for notebook: NoteSqliteStorage,
+    for database: NoteDatabase,
     cardsPerDocument: [Note.Identifier: Int],
     filteredHashtag: String?,
     filteredPageIdentifiers: Set<Note.Identifier>?
@@ -324,7 +324,7 @@ private extension DocumentTableController {
     var snapshot = Snapshot()
     snapshot.appendSections([.documents])
 
-    let propertiesFilteredByHashtag = notebook.allMetadata
+    let propertiesFilteredByHashtag = database.allMetadata
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)

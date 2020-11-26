@@ -42,8 +42,8 @@ final class NotebookStructureViewController: UIViewController {
     case hashtags
   }
 
-  public init(notebook: NoteSqliteStorage) {
-    self.notebook = notebook
+  public init(database: NoteDatabase) {
+    self.database = database
     super.init(nibName: nil, bundle: nil)
     title = AppDelegate.appName
   }
@@ -54,7 +54,7 @@ final class NotebookStructureViewController: UIViewController {
   }
 
   public weak var delegate: NotebookStructureViewControllerDelegate?
-  public let notebook: NoteSqliteStorage
+  private let database: NoteDatabase
   private var notebookSubscription: AnyCancellable?
 
   private lazy var collectionView: UICollectionView = {
@@ -105,7 +105,7 @@ final class NotebookStructureViewController: UIViewController {
     updateSnapshot()
     // start with "all notes" selected.
     collectionView.selectItem(at: dataSource.indexPath(for: .allNotes), animated: false, scrollPosition: [])
-    notebookSubscription = notebook.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
+    notebookSubscription = database.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
     navigationController?.setToolbarHidden(false, animated: false)
@@ -148,9 +148,9 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSnapshot<Section, StructureIdentifier>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
-    if !notebook.hashtags.isEmpty {
+    if !database.hashtags.isEmpty {
       snapshot.appendSections([.hashtags])
-      snapshot.appendItems(notebook.hashtags.map { .hashtag($0) })
+      snapshot.appendItems(database.hashtags.map { .hashtag($0) })
     }
     dataSource.apply(snapshot)
   }

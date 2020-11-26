@@ -27,7 +27,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// - parameter viewController: The view controller to monitor.
   /// - parameter noteIdentifier: The identifier for the contents of `viewController`. If nil, the VC holds unsaved content.
   /// - parameter NoteSqliteStorage: Where to save the contents.
-  init(_ viewController: TextEditViewController, noteIdentifier: Note.Identifier?, noteStorage: NoteSqliteStorage) {
+  init(_ viewController: TextEditViewController, noteIdentifier: Note.Identifier?, noteStorage: NoteDatabase) {
     self.textEditViewController = viewController
     self.noteIdentifier = noteIdentifier
     self.noteStorage = noteStorage
@@ -40,7 +40,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   internal var noteIdentifier: Note.Identifier?
-  private let noteStorage: NoteSqliteStorage
+  private let noteStorage: NoteDatabase
   private let textEditViewController: TextEditViewController
 
   private var hasUnsavedChanges = false

@@ -73,7 +73,7 @@
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
-		D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */; };
+		D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */; };
 		D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */; };
 		D393F2BE24143CC100A6DABB /* DeviceRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* DeviceRecord.swift */; };
 		D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D2458256AD22900948A72 /* ParsedAttributedString.swift */; };
@@ -226,7 +226,7 @@
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
-		D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorage.swift; sourceTree = "<group>"; };
+		D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
 		D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeLogRecord.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* DeviceRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRecord.swift; sourceTree = "<group>"; };
 		D39D2458256AD22900948A72 /* ParsedAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedString.swift; sourceTree = "<group>"; };
@@ -337,7 +337,7 @@
 				D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */,
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
-				D38862BA23BE4C2B00A44F1C /* NoteSqliteStorage.swift */,
+				D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */,
 				D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */,
 				D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */,
 				D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */,
@@ -711,7 +711,7 @@
 				D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
-				D38862BB23BE4C2B00A44F1C /* NoteSqliteStorage.swift in Sources */,
+				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,

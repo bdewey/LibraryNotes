@@ -17,9 +17,9 @@
 
 import Foundation
 
-public extension NoteSqliteStorage {
+public extension NoteDatabase {
   /// Copies the contents of the receiver to another storage.
-  func migrate(to destination: NoteSqliteStorage) throws {
+  func migrate(to destination: NoteDatabase) throws {
     let metadata = allMetadata
     for identifier in metadata.keys {
       let note = try self.note(noteIdentifier: identifier)

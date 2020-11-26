@@ -24,8 +24,8 @@ import UIKit
 /// - supplementary: A list of notes
 /// - secondary: An individual note
 final class NotebookViewController: UIViewController {
-  init(notebook: NoteSqliteStorage) {
-    self.notebook = notebook
+  init(database: NoteDatabase) {
+    self.database = database
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -35,7 +35,7 @@ final class NotebookViewController: UIViewController {
   }
 
   /// The notebook we are viewing
-  public let notebook: NoteSqliteStorage
+  private let database: NoteDatabase
 
   /// What are we viewing in the current structure?
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
@@ -46,7 +46,7 @@ final class NotebookViewController: UIViewController {
 
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
-    let documentListViewController = DocumentListViewController(notebook: notebook)
+    let documentListViewController = DocumentListViewController(database: database)
     documentListViewController.didTapFilesAction = { [weak documentListViewController] in
       AppDelegate.openedDocumentBookmark = nil
       documentListViewController?.dismiss(animated: true, completion: nil)
@@ -63,7 +63,7 @@ final class NotebookViewController: UIViewController {
     supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
 
     let hashtagViewController = NotebookStructureViewController(
-      notebook: documentListViewController.notebook
+      database: documentListViewController.database
     )
     hashtagViewController.delegate = self
     let primaryNavigationController = UINavigationController(rootViewController: hashtagViewController)
@@ -74,7 +74,7 @@ final class NotebookViewController: UIViewController {
     let detailViewController = UINavigationController(
       rootViewController:
       TextEditViewController.makeBlankDocument(
-        notebook: documentListViewController.notebook,
+        database: documentListViewController.database,
         currentHashtag: nil,
         autoFirstResponder: false
       )
@@ -111,7 +111,7 @@ final class NotebookViewController: UIViewController {
       hashtag = focusedHashtag
     }
     let viewController = TextEditViewController.makeBlankDocument(
-      notebook: notebook,
+      database: database,
       currentHashtag: hashtag,
       autoFirstResponder: true
     )

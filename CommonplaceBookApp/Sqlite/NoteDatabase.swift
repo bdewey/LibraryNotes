@@ -49,7 +49,7 @@ private struct UpdateKey {
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 // TODO: Figure out how to break this apart
 // swiftlint:disable:next type_body_length
-public final class NoteSqliteStorage: UIDocument {
+public final class NoteDatabase: UIDocument {
   /// Designated initializer.
   public init(
     fileURL: URL,
@@ -161,7 +161,7 @@ public final class NoteSqliteStorage: UIDocument {
   }
 
   /// Merges new content from another storage container into this storage container.
-  public func merge(other: NoteSqliteStorage) throws -> MergeResult {
+  public func merge(other: NoteDatabase) throws -> MergeResult {
     guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -593,7 +593,7 @@ public final class NoteSqliteStorage: UIDocument {
 
 // MARK: - Private
 
-private extension NoteSqliteStorage {
+private extension NoteDatabase {
   /// Watch this db queue for changes.
   func monitorDatabaseQueue(_ dbQueue: DatabaseQueue) throws {
     if try runMigrations(on: dbQueue) {
@@ -949,7 +949,7 @@ private extension ChallengeRecord {
       // Create an item that's *just about to graduate* if we've never seen it before.
       // That's because we make new items due "last learning interval" after creation
       return SpacedRepetitionScheduler.Item(
-        learningState: .learning(step: NoteSqliteStorage.scheduler.learningIntervals.count),
+        learningState: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,

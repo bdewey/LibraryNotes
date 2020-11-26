@@ -35,11 +35,11 @@ public final class StudyViewController: UIViewController {
   /// - parameter delegate: TSIA.
   public init(
     studySession: StudySession,
-    notebook: NoteSqliteStorage,
+    database: NoteDatabase,
     delegate: StudyViewControllerDelegate
   ) {
     self.studySession = studySession
-    self.notebook = notebook
+    self.database = database
     self.delegate = delegate
     super.init(nibName: nil, bundle: nil)
   }
@@ -59,7 +59,7 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   /// The document we are studying from
-  private let notebook: NoteSqliteStorage
+  private let database: NoteDatabase
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -358,12 +358,12 @@ public final class StudyViewController: UIViewController {
       return
     }
     do {
-      let challenge = try notebook.challenge(
+      let challenge = try database.challenge(
         noteIdentifier: sessionChallengeIdentifier.noteIdentifier,
         challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
       )
       let challengeView = challenge.challengeView(
-        document: notebook,
+        database: database,
         properties: CardDocumentProperties(
           documentName: sessionChallengeIdentifier.noteIdentifier,
           attributionMarkdown: sessionChallengeIdentifier.noteTitle
