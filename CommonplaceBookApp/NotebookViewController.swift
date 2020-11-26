@@ -24,7 +24,7 @@ import UIKit
 /// - supplementary: A list of notes
 /// - secondary: An individual note
 final class NotebookViewController: UIViewController {
-  init(notebook: NoteStorage) {
+  init(notebook: NoteSqliteStorage) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
   }
@@ -35,7 +35,7 @@ final class NotebookViewController: UIViewController {
   }
 
   /// The notebook we are viewing
-  public let notebook: NoteStorage
+  public let notebook: NoteSqliteStorage
 
   /// What are we viewing in the current structure?
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {

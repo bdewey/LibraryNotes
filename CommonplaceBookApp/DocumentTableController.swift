@@ -36,7 +36,7 @@ public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
     tableView: UITableView,
-    notebook: NoteStorage,
+    notebook: NoteSqliteStorage,
     delegate: DocumentTableControllerDelegate
   ) {
     self.notebook = notebook
@@ -116,7 +116,7 @@ public final class DocumentTableController: NSObject {
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
-  private let notebook: NoteStorage
+  private let notebook: NoteSqliteStorage
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       needsPerformUpdates = true
@@ -316,7 +316,7 @@ private extension DocumentTableController {
   }
 
   static func snapshot(
-    for notebook: NoteStorage,
+    for notebook: NoteSqliteStorage,
     cardsPerDocument: [Note.Identifier: Int],
     filteredHashtag: String?,
     filteredPageIdentifiers: Set<Note.Identifier>?

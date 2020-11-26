@@ -27,7 +27,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  public init(notebook: NoteStorage) {
+  public init(notebook: NoteSqliteStorage) {
     self.textStorage = TextEditViewController.makeTextStorage(
       formatters: TextEditViewController.formatters()
     )
@@ -49,7 +49,7 @@ public final class TextEditViewController: UIViewController {
 
   /// Constructs a new blank document that will save back to `notebook` on changes.
   static func makeBlankDocument(
-    notebook: NoteStorage,
+    notebook: NoteSqliteStorage,
     currentHashtag: String?,
     autoFirstResponder: Bool
   ) -> SavingTextEditViewController {

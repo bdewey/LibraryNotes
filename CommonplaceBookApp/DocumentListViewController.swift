@@ -50,7 +50,7 @@ final class DocumentListViewController: UIViewController {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    notebook: NoteStorage
+    notebook: NoteSqliteStorage
   ) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
@@ -68,7 +68,7 @@ final class DocumentListViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public let notebook: NoteStorage
+  public let notebook: NoteSqliteStorage
 
   public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
     let hashtag: String?

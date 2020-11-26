@@ -99,7 +99,6 @@
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
-		D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CC03C923BA734C003393DC /* NoteStorage.swift */; };
 		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
 		D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* ParsedString.swift */; };
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
@@ -253,7 +252,6 @@
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
-		D3CC03C923BA734C003393DC /* NoteStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteStorage.swift; sourceTree = "<group>"; };
 		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
 		D3D05D2925507C89007C443A /* ParsedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedString.swift; sourceTree = "<group>"; };
 		D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PieceTable+SafeUnicodeBuffer.swift"; sourceTree = "<group>"; };
@@ -420,7 +418,6 @@
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
 				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
-				D3CC03C923BA734C003393DC /* NoteStorage.swift */,
 				D3AD01D623C55291004BB7DF /* NoteStorage+Migration.swift */,
 				D3E9B57F2564F97400E47375 /* NSAttributedString+Attributes.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
@@ -700,7 +697,6 @@
 				D30D6B542549C44800F5902D /* MemoizationTable.swift in Sources */,
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
 				D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */,
-				D3CC03CA23BA734C003393DC /* NoteStorage.swift in Sources */,
 				D31AFACA229D61EE00ED2B76 /* ClozeCard.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D393F2BE24143CC100A6DABB /* DeviceRecord.swift in Sources */,

@@ -75,8 +75,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return loadingViewController
   }()
 
-  /// The currently open NoteStorage. TODO: Pick a consistent name for this thing!
-  var noteArchiveDocument: NoteStorage?
+  /// The currently open NoteSqliteStorage. TODO: Pick a consistent name for this thing!
+  var noteArchiveDocument: NoteSqliteStorage?
   /// The top-level UISplitViewController that is showing the note contents.
   var topLevelViewController: NotebookViewController?
 
@@ -245,7 +245,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// - parameter controller: The view controller from which to present the DocumentListViewController
   private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
-    let noteArchiveDocument: NoteStorage
+    let noteArchiveDocument: NoteSqliteStorage
     if url.pathExtension == "grail" {
       noteArchiveDocument = NoteSqliteStorage(fileURL: url)
     } else {

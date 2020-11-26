@@ -42,7 +42,7 @@ final class NotebookStructureViewController: UIViewController {
     case hashtags
   }
 
-  public init(notebook: NoteStorage) {
+  public init(notebook: NoteSqliteStorage) {
     self.notebook = notebook
     super.init(nibName: nil, bundle: nil)
     title = AppDelegate.appName
@@ -54,7 +54,7 @@ final class NotebookStructureViewController: UIViewController {
   }
 
   public weak var delegate: NotebookStructureViewControllerDelegate?
-  public let notebook: NoteStorage
+  public let notebook: NoteSqliteStorage
   private var notebookSubscription: AnyCancellable?
 
   private lazy var collectionView: UICollectionView = {
