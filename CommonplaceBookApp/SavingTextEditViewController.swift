@@ -114,6 +114,26 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     configureToolbar()
   }
+  
+  @objc private func didTapTestText() {
+    var lines = [String]()
+    lines.append("The Shining\n* ")
+    for i in 0 ..< 25 {
+      lines.append("All work and no play makes ?[who?](Jack) a dull boy. \(i)\n")
+    }
+    for character in lines.joined() {
+      textEditViewController.insertText(String(character))
+    }
+  }
+  
+  private func makeTestTextButton() -> UIBarButtonItem {
+    UIBarButtonItem(
+      image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis"),
+      style: .plain,
+      target: self,
+      action: #selector(didTapTestText)
+    )
+  }
 
   @objc private func closeModal() {
     dismiss(animated: true, completion: nil)
@@ -128,7 +148,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       if splitViewController?.isCollapsed ?? false {
         navigationItem.rightBarButtonItem = nil
         navigationController?.isToolbarHidden = false
-        toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
+        toolbarItems = [makeTestTextButton(), UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
       } else {
         navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
         navigationController?.isToolbarHidden = true

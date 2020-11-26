@@ -213,6 +213,11 @@ public final class TextEditViewController: UIViewController {
       right: textView.bounds.maxX - readableContentGuide.layoutFrame.maxX
     )
   }
+  
+  public func insertText(_ text: String) {
+    let range = Range(textView.selectedRange, in: textView.text)!
+    textView.text.replaceSubrange(range, with: text)
+  }
 
   // MARK: - Keyboard
 
