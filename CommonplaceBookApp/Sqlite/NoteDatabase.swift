@@ -530,7 +530,7 @@ public final class NoteDatabase: UIDocument {
     }
     return log
   }
-  
+
   /// Computes a studySession for the relevant pages in the notebook.
   /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
   /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
@@ -760,6 +760,8 @@ private extension NoteDatabase {
     return UpdateKey(deviceID: device.id!, updateSequenceNumber: device.updateSequenceNumber)
   }
 
+  // TODO: Make this smaller
+  // swiftlint:disable:next function_body_length
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
     let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
     let sqliteNote = NoteRecord(

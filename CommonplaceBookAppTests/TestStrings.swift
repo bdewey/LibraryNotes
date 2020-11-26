@@ -18,6 +18,7 @@
 import Foundation
 
 // swiftlint:disable type_body_length
+// swiftlint:disable file_length
 
 enum TestStrings {
   static let markdownCanonical = #"""

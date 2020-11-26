@@ -20,12 +20,16 @@ import Logging
 import SnapKit
 import UIKit
 
+// swiftlint:disable file_length
+
 public protocol StudyViewControllerDelegate: class {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController)
 }
 
 /// Presents a stack of cards for studying.
+// TODO: Refactor
+// swiftlint:disable:next type_body_length
 public final class StudyViewController: UIViewController {
   /// Designated initializer.
   ///
@@ -181,18 +185,22 @@ public final class StudyViewController: UIViewController {
       cardSnapBehavior.map { animator.removeBehavior($0) }
       currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, origin: view.center, viewController: self) }
       attachPanGestureRecognizer()
-      UIView.animate(withDuration: 0.2, animations: {
-        self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
-        self.hideAllSwipeMessages()
-        self.currentCardView?.alpha = 1
-      }) { finished in
-        Logger.shared.info("Animation finished = \(finished)")
-        if let current = self.currentCardView {
-          current.becomeFirstResponder()
-          current.accessibilityIdentifier = "current-card"
-          self.attachSnapBehavior()
+      UIView.animate(
+        withDuration: 0.2,
+        animations: {
+          self.colorWashView.backgroundColor = self.colorWashView.backgroundColor?.withAlphaComponent(0)
+          self.hideAllSwipeMessages()
+          self.currentCardView?.alpha = 1
+        },
+        completion: { finished in
+          Logger.shared.info("Animation finished = \(finished)")
+          if let current = self.currentCardView {
+            current.becomeFirstResponder()
+            current.accessibilityIdentifier = "current-card"
+            self.attachSnapBehavior()
+          }
         }
-      }
+      )
     }
   }
 

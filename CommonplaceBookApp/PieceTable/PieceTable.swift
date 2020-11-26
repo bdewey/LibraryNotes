@@ -15,6 +15,8 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+// swiftlint:disable file_length
+
 import Foundation
 
 public extension Range where Range.Bound == PieceTable.Index {
@@ -206,29 +208,6 @@ public struct PieceTable {
           return originalContents.length
         }
       }
-    }
-  }
-
-  public var rangeOfChanges: Range<Index> {
-    var lowerBound: Index?
-    var upperBound = startIndex
-
-    for (pieceIndex, piece) in pieces.enumerated() where piece.source == .added && !piece.isEmpty {
-      if lowerBound == nil {
-        lowerBound = Index(pieceIndex: pieceIndex, contentIndex: piece.startIndex)
-      }
-      if pieceIndex + 1 < pieces.count {
-        let nextPiece = pieces[pieceIndex + 1]
-        upperBound = Index(pieceIndex: pieceIndex + 1, contentIndex: nextPiece.startIndex)
-      } else {
-        upperBound = endIndex
-      }
-    }
-
-    if let lowerBound = lowerBound {
-      return lowerBound ..< upperBound
-    } else {
-      return startIndex ..< startIndex
     }
   }
 

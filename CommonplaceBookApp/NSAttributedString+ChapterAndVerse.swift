@@ -38,8 +38,9 @@ public extension NSAttributedString {
 
   /// The chapter and verse annotation in the receiver, if present.
   var chapterAndVerseAnnotation: Substring? {
-    if let range = rangeOfChapterAndVerseAnnotation,
-       let stringRange = Range(range, in: string)
+    if
+      let range = rangeOfChapterAndVerseAnnotation,
+      let stringRange = Range(range, in: string)
     {
       return string[stringRange]
     } else {

@@ -380,42 +380,6 @@ private extension SyntaxTreeNode {
     }
   }
 
-  func changeInLengthBeforeOffset(
-    _ offset: Int,
-    favorLowerBound: Bool
-  ) -> Int {
-    assert(offset >= 0)
-    guard hasTextReplacement else { return 0 }
-    if offset >= length { return textReplacementChangeInLength }
-    if children.isEmpty {
-      if favorLowerBound {
-        return 0
-      } else {
-        return textReplacementChangeInLength
-      }
-    }
-    var childOffset = 0
-    var changeInLength = 0
-    for child in children {
-      if childOffset >= offset { break }
-      changeInLength += child.changeInLengthBeforeOffset(offset - childOffset, favorLowerBound: favorLowerBound)
-      childOffset += child.length
-    }
-    return changeInLength
-  }
-
-  func rangeBeforeReplacements(_ range: Range<Int>) -> Range<Int> {
-    let lowerBound = range.lowerBound - changeInLengthBeforeOffset(range.lowerBound, favorLowerBound: true)
-    let upperBound = range.upperBound - changeInLengthBeforeOffset(range.upperBound, favorLowerBound: false)
-    return lowerBound ..< upperBound
-  }
-
-  func rangeAfterReplacements(_ range: Range<Int>) -> Range<Int> {
-    let lowerBound = range.lowerBound + changeInLengthBeforeOffset(range.lowerBound, favorLowerBound: true)
-    let upperBound = range.upperBound + changeInLengthBeforeOffset(range.upperBound, favorLowerBound: false)
-    return lowerBound ..< upperBound
-  }
-
   func childrenAndOffsets(startingAt offset: Int) -> [(child: SyntaxTreeNode, offset: Int)] {
     var offset = offset
     var results = [(child: SyntaxTreeNode, offset: Int)]()

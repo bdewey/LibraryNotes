@@ -34,9 +34,9 @@ extension ChallengeTemplate {
 
     // Look for exact matches
     for template in newTemplates where template.templateIdentifier == nil {
-      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []]
-        .findFirst(where: { $0.rawValue == template.rawValue })
-      {
+      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
+        where: { $0.rawValue == template.rawValue }
+      ) {
         template.templateIdentifier = candidate.templateIdentifier
         existingUnusedIdentifiers[template.fingerprint] = remainder
       }
@@ -45,9 +45,9 @@ extension ChallengeTemplate {
     // Look for close-enough matches
     // TODO: This doesn't try to optimize things at all.
     for template in newTemplates where template.templateIdentifier == nil {
-      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []]
-        .findFirst(where: { template.closeEnough(to: $0) })
-      {
+      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
+        where: { template.closeEnough(to: $0) }
+      ) {
         template.templateIdentifier = candidate.templateIdentifier
         existingUnusedIdentifiers[template.fingerprint] = remainder
       }

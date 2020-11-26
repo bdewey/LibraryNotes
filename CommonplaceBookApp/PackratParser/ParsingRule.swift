@@ -17,6 +17,9 @@
 
 import Foundation
 
+// TODO: Figure out if we should break this up into individual rules?
+// swiftlint:disable file_length
+
 /// A rule recognizes a specific bit of structure inside of text content.
 open class ParsingRule: CustomStringConvertible {
   public init() {}
