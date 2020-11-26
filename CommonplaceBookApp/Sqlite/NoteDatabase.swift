@@ -132,7 +132,8 @@ public final class NoteDatabase: UIDocument {
   }
 
   override public func close(completionHandler: IOCompletionHandler? = nil) {
-    NotificationCenter.default.removeObserver(self)
+    // Remove-on-deinit doesn't apply to UIDocument, it seems to me. These have an explicit open/close lifecycle.
+    NotificationCenter.default.removeObserver(self) // swiftlint:disable:this notification_center_detachment
     super.close { success in
       self.cleanupAfterClose()
       completionHandler?(success)

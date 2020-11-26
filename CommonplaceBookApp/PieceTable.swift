@@ -144,6 +144,7 @@ public struct PieceTable {
     case upperBound
   }
 
+  // swiftlint:disable:next cyclomatic_complexity
   public func findBound(_ bound: Bound, forOriginalBound originalOffset: Int) -> Index {
     var previousOriginalPieceIndex: Int?
     for (index, piece) in pieces.enumerated() where piece.source == .original {
