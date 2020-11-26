@@ -1,6 +1,6 @@
 # Changelog
 
-## unreleased
+## [0.31.0] - 2020-11-26 Happy Thanksgiving!
 
 ### Changed
 
