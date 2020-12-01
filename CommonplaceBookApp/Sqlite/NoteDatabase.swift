@@ -600,6 +600,7 @@ private extension NoteDatabase {
     if try runMigrations(on: dbQueue) {
       updateChangeCount(.done)
     }
+    try dbQueue.recoverFullTextIndexIfNeeded()
     allMetadata = try dbQueue.read { db in
       try Self.fetchAllMetadata(from: db)
     }
@@ -1005,6 +1006,19 @@ private extension DatabaseQueue {
     read { db in
       let devices = (try? DeviceRecord.fetchAll(db)) ?? []
       return VersionVector(devices)
+    }
+  }
+
+  func recoverFullTextIndexIfNeeded() throws {
+    try write { db in
+      do {
+        try db.execute(sql: "INSERT INTO noteFullText(noteFullText) VALUES('integrity-check')")
+        Logger.shared.info("Full text index looks legit")
+      } catch {
+        Logger.shared.error("Full text index corrupt! Trying to recover.")
+        try db.execute(sql: "INSERT INTO noteFullText(noteFullText) VALUES('rebuild')")
+        Logger.shared.info("Recovered full text index")
+      }
     }
   }
 
