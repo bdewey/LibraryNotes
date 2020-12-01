@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Detect & fix corrupt full text indexes. (How'd it get corrupt in the first place? Not sure.)
+
 ## [0.31.0] - 2020-11-26 Happy Thanksgiving!
 
 ### Changed
