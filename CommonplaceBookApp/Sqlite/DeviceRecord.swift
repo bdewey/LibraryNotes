@@ -32,7 +32,7 @@ struct DeviceRecord: Codable, FetchableRecord, MutablePersistableRecord {
       table.column("updateSequenceNumber", .integer).notNull()
     })
   }
-  
+
   enum Columns {
     static let uuid = Column(DeviceRecord.CodingKeys.uuid)
   }

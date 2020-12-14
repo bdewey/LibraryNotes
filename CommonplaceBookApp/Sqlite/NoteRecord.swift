@@ -106,7 +106,7 @@ extension NoteRecord {
       else {
         return
       }
-      if nil == (try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase)) {
+      if (try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase)) == nil {
         // Make a device record in the destination database.
         var device = self.device
         device.updateSequenceNumber = updateSequenceNumber

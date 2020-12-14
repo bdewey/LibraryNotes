@@ -35,7 +35,7 @@ struct ChangeLogRecord: Codable, FetchableRecord, PersistableRecord {
       table.primaryKey(["deviceID", "updateSequenceNumber"])
     })
   }
-  
+
   static func migrateDeviceRelationship(in database: Database) throws {
     try database.create(table: "new-changeLog", body: { table in
       table.column("deviceID", .text).notNull().indexed().references("device", onDelete: .cascade)

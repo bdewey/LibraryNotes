@@ -124,7 +124,7 @@ extension ChallengeRecord {
       else {
         throw MergeError.cannotLoadChallenge
       }
-      if nil == (try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase)) {
+      if (try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase)) == nil {
         // We don't have a device record for this device in the destination database. Insert one.
         var deviceRecord = device
         deviceRecord.updateSequenceNumber = updateSequenceNumber
