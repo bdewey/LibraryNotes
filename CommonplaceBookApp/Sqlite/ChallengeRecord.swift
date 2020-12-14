@@ -31,7 +31,7 @@ struct ChallengeRecord: Codable, FetchableRecord, MutablePersistableRecord {
   var due: Date?
   var challengeTemplateId: Int64
   var spacedRepetitionFactor: Double = 2.5
-  var modifiedDevice: Int64
+  var modifiedDevice: String
   var timestamp: Date
   var updateSequenceNumber: Int64
 
@@ -124,14 +124,11 @@ extension ChallengeRecord {
       else {
         throw MergeError.cannotLoadChallenge
       }
-      if let destinationDevice = try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase) {
-        originRecord.modifiedDevice = destinationDevice.id!
-      } else {
+      if nil == (try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase)) {
+        // We don't have a device record for this device in the destination database. Insert one.
         var deviceRecord = device
-        deviceRecord.id = nil
         deviceRecord.updateSequenceNumber = updateSequenceNumber
         try deviceRecord.insert(destinationDatabase)
-        originRecord.modifiedDevice = deviceRecord.id!
       }
       if let destinationRecord = try ChallengeRecord.filter(key: ["index": index, "challengeTemplateId": challengeTemplateId]).fetchOne(destinationDatabase) {
         originRecord.id = destinationRecord.id

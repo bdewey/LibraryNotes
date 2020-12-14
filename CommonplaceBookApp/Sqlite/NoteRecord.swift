@@ -24,7 +24,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var id: FlakeID
   var title: String
   var modifiedTimestamp: Date
-  var modifiedDevice: Int64
+  var modifiedDevice: String
   var hasText: Bool
   var deleted: Bool
   var updateSequenceNumber: Int64
@@ -34,7 +34,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
       table.column("id", .integer).primaryKey()
       table.column("title", .text).notNull().defaults(to: "")
       table.column("modifiedTimestamp", .datetime).notNull()
-      table.column("modifiedDevice", .integer).indexed().references("device", onDelete: .setNull)
+      table.column("modifiedDevice", .text).indexed().references("device", onDelete: .setNull)
       table.column("hasText", .boolean).notNull()
       table.column("deleted", .boolean).notNull().defaults(to: false)
       table.column("updateSequenceNumber", .integer).notNull()
@@ -102,18 +102,15 @@ extension NoteRecord {
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
       guard
-        var note = try NoteRecord.filter(key: id.rawValue).fetchOne(sourceDatabase)
+        let note = try NoteRecord.filter(key: id.rawValue).fetchOne(sourceDatabase)
       else {
         return
       }
-      if let device = try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase) {
-        note.modifiedDevice = device.id!
-      } else {
+      if nil == (try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase)) {
+        // Make a device record in the destination database.
         var device = self.device
-        device.id = nil
         device.updateSequenceNumber = updateSequenceNumber
         try device.insert(destinationDatabase)
-        note.modifiedDevice = device.id!
       }
 
       try NoteRecord.deleteOne(destinationDatabase, key: id.rawValue)

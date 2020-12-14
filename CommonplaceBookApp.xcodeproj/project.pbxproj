@@ -118,6 +118,8 @@
 		D3E9B5802564F97400E47375 /* NSAttributedString+Attributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B57F2564F97400E47375 /* NSAttributedString+Attributes.swift */; };
 		D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */; };
 		D3E9B5952564FD4900E47375 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3E9B5942564FD4900E47375 /* Logging */; };
+		D3F90E5B25872FF700162CFC /* DeviceTableKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5A25872FF700162CFC /* DeviceTableKey.swift */; };
+		D3F90E602587301F00162CFC /* Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5F2587301F00162CFC /* Migrations.swift */; };
 		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 		D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */; };
@@ -275,6 +277,8 @@
 		D3E9B57B2564F92800E47375 /* StringProtocol+MiniMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StringProtocol+MiniMarkdown.swift"; sourceTree = "<group>"; };
 		D3E9B57F2564F97400E47375 /* NSAttributedString+Attributes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSAttributedString+Attributes.swift"; sourceTree = "<group>"; };
 		D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Character+MiniMarkdown.swift"; sourceTree = "<group>"; };
+		D3F90E5A25872FF700162CFC /* DeviceTableKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceTableKey.swift; sourceTree = "<group>"; };
+		D3F90E5F2587301F00162CFC /* Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migrations.swift; sourceTree = "<group>"; };
 		D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticColor.swift; sourceTree = "<group>"; };
 		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
 		D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditingTextView.swift; sourceTree = "<group>"; };
@@ -328,6 +332,7 @@
 		D3456DC7256F07DF00D32D14 /* Sqlite */ = {
 			isa = PBXGroup;
 			children = (
+				D3F90E5E2587301300162CFC /* Migrations */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
 				D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */,
 				D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */,
@@ -506,6 +511,15 @@
 				D3E98F0721D470B2008445DA /* Info.plist */,
 			);
 			path = CommonplaceBookAppUITests;
+			sourceTree = "<group>";
+		};
+		D3F90E5E2587301300162CFC /* Migrations */ = {
+			isa = PBXGroup;
+			children = (
+				D3F90E5F2587301F00162CFC /* Migrations.swift */,
+				D3F90E5A25872FF700162CFC /* DeviceTableKey.swift */,
+			);
+			path = Migrations;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -689,6 +703,7 @@
 				D31AFACB229D61EE00ED2B76 /* ChallengeTemplate.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
 				D3E9B5802564F97400E47375 /* NSAttributedString+Attributes.swift in Sources */,
+				D3F90E602587301F00162CFC /* Migrations.swift in Sources */,
 				D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */,
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
@@ -752,6 +767,7 @@
 				D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */,
 				D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */,
 				D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */,
+				D3F90E5B25872FF700162CFC /* DeviceTableKey.swift in Sources */,
 				D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,

@@ -20,7 +20,6 @@ import GRDB
 
 struct DeviceRecord: Codable, FetchableRecord, MutablePersistableRecord {
   static let databaseTableName = "device"
-  var id: Int64?
   var uuid: String
   var name: String
   var updateSequenceNumber: Int64
@@ -33,12 +32,8 @@ struct DeviceRecord: Codable, FetchableRecord, MutablePersistableRecord {
       table.column("updateSequenceNumber", .integer).notNull()
     })
   }
-
+  
   enum Columns {
     static let uuid = Column(DeviceRecord.CodingKeys.uuid)
-  }
-
-  mutating func didInsert(with rowID: Int64, for column: String?) {
-    id = rowID
   }
 }

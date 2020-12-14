@@ -40,7 +40,7 @@ extension UIDevice: DeviceIdentifying {}
 /// Identifier for a specific change to the database.
 private struct UpdateKey {
   /// The device ID that the change came from.
-  let deviceID: Int64
+  let deviceID: String
   /// The specific sequence number for this change on this device.
   let updateSequenceNumber: Int64
 }
@@ -605,7 +605,7 @@ private extension NoteDatabase {
       try Self.fetchAllMetadata(from: db)
     }
     deviceRecord = try currentDeviceRecord()
-    flakeMaker = FlakeMaker(instanceNumber: Int(deviceRecord.id!))
+    flakeMaker = FlakeMaker(instanceNumber: 666)
     metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
     ]).publisher(in: dbQueue)
@@ -752,13 +752,13 @@ private extension NoteDatabase {
     device.updateSequenceNumber += 1
     try device.update(database)
     let changeLog = ChangeLogRecord(
-      deviceID: device.id!,
+      deviceID: device.uuid,
       updateSequenceNumber: device.updateSequenceNumber,
       timestamp: Date(),
       changeDescription: changeDescription
     )
     try changeLog.insert(database)
-    return UpdateKey(deviceID: device.id!, updateSequenceNumber: device.updateSequenceNumber)
+    return UpdateKey(deviceID: device.uuid, updateSequenceNumber: device.updateSequenceNumber)
   }
 
   // TODO: Make this smaller
@@ -930,6 +930,10 @@ private extension NoteDatabase {
       }
     }
 
+    migrator.registerMigrationWithDeferredForeignKeyCheck("deviceUUIDKey") { database in
+      try database.execute(sql: Migrations.changeDeviceTableKey)
+    }
+
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
     let postMigrations = try migrator.appliedMigrations(in: databaseQueue)
@@ -994,7 +998,7 @@ private extension Database {
         device.updateSequenceNumber = max(device.updateSequenceNumber, updateSequenceNumber)
         try device.save(self)
       } else {
-        var device = DeviceRecord(id: nil, uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
+        var device = DeviceRecord(uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
         try device.insert(self)
       }
     }

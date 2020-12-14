@@ -129,6 +129,8 @@ extension FlakeID: CustomStringConvertible {
  - 12 bits sequence number
  - 10 bits instance ID
  */
+// Stop using this for identifiers.
+@available(*, deprecated)
 public class FlakeMaker {
   static let limitInstanceNumber = UInt16(0x400)
 
