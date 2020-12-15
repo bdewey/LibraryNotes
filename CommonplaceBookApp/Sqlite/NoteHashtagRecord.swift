@@ -21,7 +21,7 @@ import GRDB
 /// Core record for the `noteHashtag` association
 struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
   static let databaseTableName = "noteHashtag"
-  var noteId: FlakeID
+  var noteId: String
   var hashtag: String
 
   enum Columns {

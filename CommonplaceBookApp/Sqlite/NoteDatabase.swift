@@ -118,6 +118,7 @@ public final class NoteDatabase: UIDocument {
     case notWriteable = "The database is not currently writeable."
     case unknownChallengeTemplate = "The challenge template does not exist."
     case unknownChallengeType = "The challenge template uses an unknown type."
+    case missingMigrationScript = "Could not find a required migration script."
   }
 
   public typealias IOCompletionHandler = (Bool) -> Void
@@ -274,7 +275,7 @@ public final class NoteDatabase: UIDocument {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    let identifier = flakeMaker.nextValue()
+    let identifier = UUID().uuidString
     try dbQueue.write { db in
       try writeNote(note, with: identifier, to: db)
     }
@@ -333,7 +334,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     _ = try dbQueue.write { db in
-      guard var note = try NoteRecord.filter(key: noteIdentifier.rawValue).fetchOne(db) else {
+      guard var note = try NoteRecord.filter(key: noteIdentifier).fetchOne(db) else {
         return
       }
       let updateKey = try self.updateKey(changeDescription: "DELETE NOTE \(noteIdentifier)", in: db)
@@ -357,7 +358,7 @@ public final class NoteDatabase: UIDocument {
     return try dbQueue.read { db in
       let challengeRequest: QueryInterfaceRequest<ChallengeRecord>
       if let noteIdentifier = noteIdentifier {
-        guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier.rawValue) else {
+        guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier) else {
           throw Error.noSuchNote
         }
         challengeRequest = note.challenges
@@ -727,7 +728,7 @@ private extension NoteDatabase {
     guard let noteText = noteText else {
       return nil
     }
-    if var existingRecord = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier.rawValue]) {
+    if var existingRecord = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier]) {
       existingRecord.text = noteText
       try existingRecord.update(db)
       return existingRecord.id
@@ -785,7 +786,7 @@ private extension NoteDatabase {
       try associationRecord.save(db)
     }
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
-      let deleted = try NoteHashtagRecord.deleteOne(db, key: ["noteId": identifier.rawValue, "hashtag": obsoleteHashtag])
+      let deleted = try NoteHashtagRecord.deleteOne(db, key: ["noteId": identifier, "hashtag": obsoleteHashtag])
       assert(deleted)
     }
 
@@ -853,28 +854,27 @@ private extension NoteDatabase {
         title: metadataItem.title,
         containsText: metadataItem.hasText
       )
-      let noteIdentifier = Note.Identifier(rawValue: metadataItem.id)
-      return (key: noteIdentifier, value: metadata)
+      return (key: metadataItem.id, value: metadata)
     }
     return Dictionary(uniqueKeysWithValues: tuples)
   }
 
   func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
     guard
-      let sqliteNote = try NoteRecord.fetchOne(db, key: identifier.rawValue),
+      let sqliteNote = try NoteRecord.fetchOne(db, key: identifier),
       !sqliteNote.deleted
     else {
       throw Error.noSuchNote
     }
-    let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier.rawValue).fetchAll(db)
+    let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtag }
     let challengeTemplateRecords = try ChallengeTemplateRecord
-      .filter(ChallengeTemplateRecord.Columns.noteId == identifier.rawValue)
+      .filter(ChallengeTemplateRecord.Columns.noteId == identifier)
       .fetchAll(db)
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
       try Self.challengeTemplate(from: challengeTemplateRecord)
     }
-    let noteText = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier.rawValue])?.text
+    let noteText = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier])?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
@@ -930,9 +930,8 @@ private extension NoteDatabase {
       }
     }
 
-    migrator.registerMigrationWithDeferredForeignKeyCheck("deviceUUIDKey") { database in
-      try database.execute(sql: Migrations.changeDeviceTableKey)
-    }
+    try migrator.registerMigrationScript(.deviceUUIDKey)
+    try migrator.registerMigrationScript(.noFlakeNote)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
@@ -1073,5 +1072,20 @@ extension UIDocument.State: CustomStringConvertible {
     if contains(.progressAvailable) { strings.append("Progress available") }
     if contains(.savingError) { strings.append("Saving error") }
     return strings.joined(separator: ", ")
+  }
+}
+
+private extension DatabaseMigrator {
+  mutating func registerMigrationScript(_ migration: MigrationIdentifier) throws {
+    let bundle = Bundle(for: NoteDatabase.self)
+    guard
+      let scriptURL = bundle.url(forResource: migration.rawValue, withExtension: "sql"),
+      let script = try? String(contentsOf: scriptURL)
+    else {
+      throw NoteDatabase.Error.missingMigrationScript
+    }
+    registerMigrationWithDeferredForeignKeyCheck(migration.rawValue) { database in
+      try database.execute(sql: script)
+    }
   }
 }

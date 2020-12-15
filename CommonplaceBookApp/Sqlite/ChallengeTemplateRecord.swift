@@ -23,7 +23,7 @@ struct ChallengeTemplateRecord: Codable, FetchableRecord, PersistableRecord {
   var id: FlakeID
   var type: String
   var rawValue: String
-  var noteId: FlakeID
+  var noteId: Note.Identifier
 
   enum Columns {
     static let id = Column(CodingKeys.id)

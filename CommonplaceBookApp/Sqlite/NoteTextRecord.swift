@@ -23,7 +23,7 @@ struct NoteTextRecord: Codable, FetchableRecord, MutablePersistableRecord {
   static let databaseTableName = "noteText"
   var id: Int64?
   var text: String
-  var noteId: FlakeID
+  var noteId: String
 
   mutating func didInsert(with rowID: Int64, for column: String?) {
     id = rowID

@@ -19,7 +19,7 @@ import Foundation
 import GRDB
 
 struct NoteMetadataRecord: Decodable, FetchableRecord {
-  var id: Int64
+  var id: Note.Identifier
   var title: String
   var modifiedTimestamp: Date
   var hasText: Bool

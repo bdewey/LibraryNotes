@@ -19,7 +19,7 @@ import Foundation
 
 public struct Note: Equatable {
   /// Identifies a note.
-  public typealias Identifier = FlakeID
+  public typealias Identifier = String
 
   public struct Metadata: Hashable {
     /// Last modified time of the page.

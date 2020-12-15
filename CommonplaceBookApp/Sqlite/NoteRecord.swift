@@ -21,7 +21,7 @@ import GRDB
 /// Core record for the `note` table
 struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   static let databaseTableName = "Note"
-  var id: FlakeID
+  var id: Note.Identifier
   var title: String
   var modifiedTimestamp: Date
   var modifiedDevice: String
@@ -52,7 +52,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
 
   var hashtags: QueryInterfaceRequest<String> {
     NoteHashtagRecord
-      .filter(NoteHashtagRecord.Columns.noteId == id.rawValue)
+      .filter(NoteHashtagRecord.Columns.noteId == id)
       .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
   }
 
@@ -77,7 +77,7 @@ extension NoteRecord {
   struct MergeInfo: MergeInfoRecord, Decodable {
     // MARK: - Stored properties
 
-    var id: FlakeID
+    var id: String
     var modifiedTimestamp: Date
     var device: DeviceRecord
     var updateSequenceNumber: Int64
@@ -93,7 +93,7 @@ extension NoteRecord {
     var instanceRequest: QueryInterfaceRequest<Self> {
       NoteRecord
         .including(required: NoteRecord.device)
-        .filter(key: id.rawValue)
+        .filter(key: id)
         .asRequest(of: NoteRecord.MergeInfo.self)
     }
 
@@ -102,7 +102,7 @@ extension NoteRecord {
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
       guard
-        let note = try NoteRecord.filter(key: id.rawValue).fetchOne(sourceDatabase)
+        let note = try NoteRecord.filter(key: id).fetchOne(sourceDatabase)
       else {
         return
       }
@@ -113,7 +113,7 @@ extension NoteRecord {
         try device.insert(destinationDatabase)
       }
 
-      try NoteRecord.deleteOne(destinationDatabase, key: id.rawValue)
+      try NoteRecord.deleteOne(destinationDatabase, key: id)
       try note.insert(destinationDatabase)
       try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
         let record = NoteHashtagRecord(noteId: id, hashtag: hashtag)
