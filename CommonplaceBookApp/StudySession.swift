@@ -109,7 +109,7 @@ public struct StudySession {
   }
 
   public mutating func ensureUniqueChallengeTemplates() {
-    var seenChallengeTemplateIdentifiers = Set<FlakeID>()
+    var seenChallengeTemplateIdentifiers = Set<String>()
     sessionChallengeIdentifiers = sessionChallengeIdentifiers
       .filter { challengeIdentifier -> Bool in
         guard let templateIdentifier = challengeIdentifier.challengeIdentifier.challengeTemplateID else {

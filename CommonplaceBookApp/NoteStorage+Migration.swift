@@ -23,9 +23,9 @@ public extension NoteDatabase {
     let metadata = allMetadata
     for identifier in metadata.keys {
       let note = try self.note(noteIdentifier: identifier)
-      var oldToNewTemplateIdentifier = [FlakeID: FlakeID]()
+      var oldToNewTemplateIdentifier = [String: String]()
       for template in note.challengeTemplates {
-        let newIdentifier = destination.makeIdentifier()
+        let newIdentifier = UUID().uuidString
         oldToNewTemplateIdentifier[template.templateIdentifier!] = newIdentifier
         template.templateIdentifier = newIdentifier
       }

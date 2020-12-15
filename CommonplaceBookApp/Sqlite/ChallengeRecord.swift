@@ -29,7 +29,7 @@ struct ChallengeRecord: Codable, FetchableRecord, MutablePersistableRecord {
   var lastReview: Date?
   var idealInterval: Double?
   var due: Date?
-  var challengeTemplateId: Int64
+  var challengeTemplateId: String
   var spacedRepetitionFactor: Double = 2.5
   var modifiedDevice: String
   var timestamp: Date
@@ -95,7 +95,7 @@ extension ChallengeRecord {
 
     var id: Int64
     var index: Int64
-    var challengeTemplateId: Int64
+    var challengeTemplateId: String
     var timestamp: Date
     var device: DeviceRecord
     var updateSequenceNumber: Int64

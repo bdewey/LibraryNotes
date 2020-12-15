@@ -74,13 +74,6 @@ public final class NoteDatabase: UIDocument {
     )
   }()
 
-  /// Used for generating IDs. Will get created when the database is opened. Only access on the database queue.
-  private var flakeMaker: FlakeMaker!
-
-  public func makeIdentifier() -> FlakeID {
-    flakeMaker.nextValue()
-  }
-
   /// Connection to the in-memory database.
   private var dbQueue: DatabaseQueue? {
     didSet {
@@ -143,7 +136,6 @@ public final class NoteDatabase: UIDocument {
 
   private func cleanupAfterClose() {
     deviceRecord = nil
-    flakeMaker = nil
     metadataUpdatePipeline?.cancel()
     metadataUpdatePipeline = nil
     hasUnsavedChangesPipeline?.cancel()
@@ -369,7 +361,7 @@ public final class NoteDatabase: UIDocument {
         .filter(ChallengeRecord.Columns.due == nil || ChallengeRecord.Columns.due <= date)
         .fetchAll(db)
       return records.map {
-        ChallengeIdentifier(templateDigest: FlakeID(rawValue: $0.challengeTemplateId), index: $0.index)
+        ChallengeIdentifier(templateDigest: $0.challengeTemplateId, index: $0.index)
       }
     }
   }
@@ -444,7 +436,7 @@ public final class NoteDatabase: UIDocument {
     try dbQueue.write { db in
       guard
         let templateKey = entry.identifier.challengeTemplateID,
-        let owningTemplate = try ChallengeTemplateRecord.fetchOne(db, key: templateKey.rawValue),
+        let owningTemplate = try ChallengeTemplateRecord.fetchOne(db, key: templateKey),
         let challenge = try owningTemplate.challenges.filter(ChallengeRecord.Columns.index == entry.identifier.index).fetchOne(db)
       else {
         throw Error.unknownChallengeTemplate
@@ -515,7 +507,7 @@ public final class NoteDatabase: UIDocument {
           StudyLog.Entry(
             timestamp: $0.studyLogEntry.timestamp,
             identifier: ChallengeIdentifier(
-              templateDigest: FlakeID(rawValue: $0.challenge.challengeTemplateId),
+              templateDigest: $0.challenge.challengeTemplateId,
               index: $0.challenge.index
             ),
             statistics: AnswerStatistics(
@@ -606,7 +598,6 @@ private extension NoteDatabase {
       try Self.fetchAllMetadata(from: db)
     }
     deviceRecord = try currentDeviceRecord()
-    flakeMaker = FlakeMaker(instanceNumber: 666)
     metadataUpdatePipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
     ]).publisher(in: dbQueue)
@@ -791,7 +782,7 @@ private extension NoteDatabase {
     }
 
     for template in note.challengeTemplates where template.templateIdentifier == nil {
-      template.templateIdentifier = flakeMaker.nextValue()
+      template.templateIdentifier = UUID().uuidString
     }
     let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
     let onDiskChallengeTemplates = ((try? sqliteNote.challengeTemplates.fetchAll(db)) ?? [])
@@ -818,7 +809,7 @@ private extension NoteDatabase {
         var challengeRecord = ChallengeRecord(
           index: index,
           due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
-          challengeTemplateId: newTemplateIdentifier.rawValue,
+          challengeTemplateId: newTemplateIdentifier,
           modifiedDevice: updateKey.deviceID,
           timestamp: note.metadata.timestamp,
           updateSequenceNumber: updateKey.updateSequenceNumber
@@ -828,7 +819,7 @@ private extension NoteDatabase {
     }
     for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
-      guard var record = try ChallengeTemplateRecord.fetchOne(db, key: modifiedTemplateIdentifier.rawValue) else {
+      guard var record = try ChallengeTemplateRecord.fetchOne(db, key: modifiedTemplateIdentifier) else {
         assertionFailure("Should be a record")
         continue
       }
@@ -836,7 +827,7 @@ private extension NoteDatabase {
       try record.update(db, columns: [ChallengeTemplateRecord.Columns.rawValue])
     }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
-      let deleted = try ChallengeTemplateRecord.deleteOne(db, key: obsoleteTemplateIdentifier.rawValue)
+      let deleted = try ChallengeTemplateRecord.deleteOne(db, key: obsoleteTemplateIdentifier)
       assert(deleted)
     }
   }
@@ -887,8 +878,8 @@ private extension NoteDatabase {
     )
   }
 
-  static func challengeTemplate(identifier: FlakeID, database: Database) throws -> ChallengeTemplate {
-    guard let record = try ChallengeTemplateRecord.fetchOne(database, key: identifier.rawValue) else {
+  static func challengeTemplate(identifier: String, database: Database) throws -> ChallengeTemplate {
+    guard let record = try ChallengeTemplateRecord.fetchOne(database, key: identifier) else {
       throw Error.unknownChallengeTemplate
     }
     return try challengeTemplate(from: record)
@@ -932,6 +923,7 @@ private extension NoteDatabase {
 
     try migrator.registerMigrationScript(.deviceUUIDKey)
     try migrator.registerMigrationScript(.noFlakeNote)
+    try migrator.registerMigrationScript(.noFlakeChallengeTemplate)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)

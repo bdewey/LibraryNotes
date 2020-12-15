@@ -109,7 +109,6 @@
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
-		D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */; };
 		D3E5E024256F13CD0062BDD4 /* NoteMetadataRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */; };
 		D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */; };
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
@@ -121,6 +120,7 @@
 		D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */; };
 		D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */; };
 		D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */; };
+		D3F90E7825889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */; };
 		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 		D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */; };
@@ -268,7 +268,6 @@
 		D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
-		D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlakeMaker.swift; sourceTree = "<group>"; };
 		D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadataRecord.swift; sourceTree = "<group>"; };
 		D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudFileMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryMetadataProvider.swift; sourceTree = "<group>"; };
@@ -281,6 +280,7 @@
 		D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationIdentifier.swift; sourceTree = "<group>"; };
 		D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201213-deviceUUIDKey.sql"; sourceTree = "<group>"; };
 		D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeNote.sql"; sourceTree = "<group>"; };
+		D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeChallengeTemplate.sql"; sourceTree = "<group>"; };
 		D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticColor.swift; sourceTree = "<group>"; };
 		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
 		D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditingTextView.swift; sourceTree = "<group>"; };
@@ -341,7 +341,6 @@
 				D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */,
 				D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
-				D3E2BD2D23D4D6E600AA0277 /* FlakeMaker.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */,
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
@@ -518,6 +517,7 @@
 		D3F90E5E2587301300162CFC /* Migrations */ = {
 			isa = PBXGroup;
 			children = (
+				D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */,
 				D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */,
 				D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */,
 				D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */,
@@ -660,6 +660,7 @@
 				D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */,
 				D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */,
 				D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */,
+				D3F90E7825889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -744,7 +745,6 @@
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D30D6B532549C44800F5902D /* BufferProtocols.swift in Sources */,
-				D3E2BD2E23D4D6E600AA0277 /* FlakeMaker.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
