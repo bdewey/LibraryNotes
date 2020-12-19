@@ -19,11 +19,12 @@ import Foundation
 import GRDB
 
 /// For rows that contain text, this is the text.
-struct NoteTextRecord: Codable, FetchableRecord, MutablePersistableRecord {
-  static let databaseTableName = "noteText"
+struct ContentRecord: Codable, FetchableRecord, MutablePersistableRecord {
+  static let databaseTableName = "content"
   var id: Int64?
   var text: String
   var noteId: String
+  var mimeType: String
 
   mutating func didInsert(with rowID: Int64, for column: String?) {
     id = rowID

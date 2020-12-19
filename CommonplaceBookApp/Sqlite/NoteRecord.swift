@@ -60,10 +60,10 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
 
   /// The association between this note and its text.
-  static let noteText = hasOne(NoteTextRecord.self)
+  static let noteText = hasOne(ContentRecord.self)
 
   /// A query that returns the text associated with this note.
-  var noteText: QueryInterfaceRequest<NoteTextRecord> { request(for: NoteRecord.noteText) }
+  var noteText: QueryInterfaceRequest<ContentRecord> { request(for: NoteRecord.noteText) }
 
   static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
   var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }

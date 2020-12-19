@@ -24,7 +24,7 @@
 		D30F402E255D9EDE00AB05EE /* ParsedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */; };
 		D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* NoteRecord.swift */; };
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
-		D3198DAB23D9DDB50098A9D9 /* NoteTextRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */; };
+		D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */; };
 		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
 		D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */; };
 		D3198DB123DBCA0F0098A9D9 /* ChallengeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */; };
@@ -121,6 +121,7 @@
 		D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */; };
 		D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */; };
 		D3F90E7825889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */; };
+		D3F90E7E258EB49300162CFC /* 20201219-content.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E7D258EB49300162CFC /* 20201219-content.sql */; };
 		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 		D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */; };
@@ -178,7 +179,7 @@
 		D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedStringTests.swift; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
-		D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteTextRecord.swift; sourceTree = "<group>"; };
+		D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRecord.swift; sourceTree = "<group>"; };
 		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
 		D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateRecord.swift; sourceTree = "<group>"; };
 		D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeRecord.swift; sourceTree = "<group>"; };
@@ -281,6 +282,7 @@
 		D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201213-deviceUUIDKey.sql"; sourceTree = "<group>"; };
 		D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeNote.sql"; sourceTree = "<group>"; };
 		D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeChallengeTemplate.sql"; sourceTree = "<group>"; };
+		D3F90E7D258EB49300162CFC /* 20201219-content.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201219-content.sql"; sourceTree = "<group>"; };
 		D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticColor.swift; sourceTree = "<group>"; };
 		D541A99F21B0C07C0048182A /* FileMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadataTests.swift; sourceTree = "<group>"; };
 		D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownEditingTextView.swift; sourceTree = "<group>"; };
@@ -346,7 +348,7 @@
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
 				D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */,
-				D3198DAA23D9DDB50098A9D9 /* NoteTextRecord.swift */,
+				D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */,
 				D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */,
 				D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */,
 				D3A58F14240D469700CE3251 /* VersionVector.swift */,
@@ -517,9 +519,10 @@
 		D3F90E5E2587301300162CFC /* Migrations */ = {
 			isa = PBXGroup;
 			children = (
-				D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */,
 				D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */,
+				D3F90E7725889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql */,
 				D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */,
+				D3F90E7D258EB49300162CFC /* 20201219-content.sql */,
 				D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */,
 			);
 			path = Migrations;
@@ -657,6 +660,7 @@
 			files = (
 				D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */,
 				D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */,
+				D3F90E7E258EB49300162CFC /* 20201219-content.sql in Resources */,
 				D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */,
 				D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */,
 				D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */,
@@ -781,7 +785,7 @@
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */,
-				D3198DAB23D9DDB50098A9D9 /* NoteTextRecord.swift in Sources */,
+				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,
 				D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozeTemplate.swift in Sources */,

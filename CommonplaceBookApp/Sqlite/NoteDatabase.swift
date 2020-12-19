@@ -296,16 +296,16 @@ public final class NoteDatabase: UIDocument {
       if !searchPattern.trimmingCharacters(in: .whitespaces).isEmpty {
         let pattern = try db.makeFTS5Pattern(rawPattern: searchPattern.trimmingCharacters(in: .whitespaces).appending("*"), forTable: "noteFullText")
         let sql = """
-        SELECT noteText.*
-        FROM noteText
+        SELECT content.*
+        FROM content
         JOIN noteFullText
-          ON noteFullText.rowid = noteText.rowid
+          ON noteFullText.rowid = content.rowid
           AND noteFullText MATCH ?
         """
-        let noteTexts = try NoteTextRecord.fetchAll(db, sql: sql, arguments: [pattern])
+        let noteTexts = try ContentRecord.fetchAll(db, sql: sql, arguments: [pattern])
         return noteTexts.map { $0.noteId }
       } else {
-        let noteTexts = try NoteTextRecord.fetchAll(db)
+        let noteTexts = try ContentRecord.fetchAll(db)
         return noteTexts.map { $0.noteId }
       }
     }
@@ -387,7 +387,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      try NoteTextRecord.fetchCount(db)
+      try ContentRecord.fetchCount(db)
     }
   }
 
@@ -617,7 +617,7 @@ private extension NoteDatabase {
       )
     hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
-      NoteTextRecord.all(),
+      ContentRecord.all(),
       NoteHashtagRecord.all(),
       ChallengeRecord.all(),
       StudyLogEntryRecord.all(),
@@ -719,12 +719,12 @@ private extension NoteDatabase {
     guard let noteText = noteText else {
       return nil
     }
-    if var existingRecord = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier]) {
+    if var existingRecord = try ContentRecord.fetchOne(db, key: ["noteId": identifier]) {
       existingRecord.text = noteText
       try existingRecord.update(db)
       return existingRecord.id
     } else {
-      var newRecord = NoteTextRecord(id: nil, text: noteText, noteId: identifier)
+      var newRecord = ContentRecord(id: nil, text: noteText, noteId: identifier, mimeType: "text/markdown")
       try newRecord.insert(db)
       return newRecord.id
     }
@@ -865,7 +865,7 @@ private extension NoteDatabase {
     let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
       try Self.challengeTemplate(from: challengeTemplateRecord)
     }
-    let noteText = try NoteTextRecord.fetchOne(db, key: ["noteId": identifier])?.text
+    let noteText = try ContentRecord.fetchOne(db, key: ["noteId": identifier])?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
@@ -906,7 +906,7 @@ private extension NoteDatabase {
     migrator.registerMigration("initialSchema") { database in
       try DeviceRecord.createV1Table(in: database)
       try NoteRecord.createV1Table(in: database)
-      try NoteTextRecord.createV1Table(in: database)
+      try ContentRecord.createV1Table(in: database)
       try NoteHashtagRecord.createV1Table(in: database)
       try ChallengeTemplateRecord.createV1Table(in: database)
       try ChallengeRecord.createV1Table(in: database)
@@ -924,6 +924,15 @@ private extension NoteDatabase {
     try migrator.registerMigrationScript(.deviceUUIDKey)
     try migrator.registerMigrationScript(.noFlakeNote)
     try migrator.registerMigrationScript(.noFlakeChallengeTemplate)
+    try migrator.registerMigrationScript(.addContentTable, additionalSteps: { database in
+      // Recreate the index
+      try database.drop(table: "noteFullText")
+      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
+        table.synchronize(withTable: "content")
+        table.column("text")
+        table.tokenizer = .porter(wrapping: .unicode61())
+      }
+    })
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
@@ -1068,7 +1077,10 @@ extension UIDocument.State: CustomStringConvertible {
 }
 
 private extension DatabaseMigrator {
-  mutating func registerMigrationScript(_ migration: MigrationIdentifier) throws {
+  mutating func registerMigrationScript(
+    _ migration: MigrationIdentifier,
+    additionalSteps: ((Database) throws -> Void)? = nil
+  ) throws {
     let bundle = Bundle(for: NoteDatabase.self)
     guard
       let scriptURL = bundle.url(forResource: migration.rawValue, withExtension: "sql"),
@@ -1078,6 +1090,7 @@ private extension DatabaseMigrator {
     }
     registerMigrationWithDeferredForeignKeyCheck(migration.rawValue) { database in
       try database.execute(sql: script)
+      try additionalSteps?(database)
     }
   }
 }
