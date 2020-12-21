@@ -23,4 +23,5 @@ internal enum MigrationIdentifier: String {
   case noFlakeNote = "20201214-noFlakeNote"
   case noFlakeChallengeTemplate = "20201214-noFlakeChallengeTemplate"
   case addContentTable = "20201219-content"
+  case changeContentKey = "20201220-contentKey"
 }

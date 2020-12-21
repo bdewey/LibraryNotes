@@ -18,17 +18,18 @@
 import Foundation
 import GRDB
 
+enum ContentRole: String, Codable {
+  case primary
+}
+
 /// For rows that contain text, this is the text.
-struct ContentRecord: Codable, FetchableRecord, MutablePersistableRecord {
+struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
   static let databaseTableName = "content"
-  var id: Int64?
   var text: String
   var noteId: String
+  var key: String
+  var role: String
   var mimeType: String
-
-  mutating func didInsert(with rowID: Int64, for column: String?) {
-    id = rowID
-  }
 
   static func createV1Table(in database: Database) throws {
     try database.create(table: "noteText", body: { table in

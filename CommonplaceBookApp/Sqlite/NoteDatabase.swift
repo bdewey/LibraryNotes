@@ -714,19 +714,22 @@ private extension NoteDatabase {
     return db.lastInsertedRowID
   }
 
-  @discardableResult
-  func writeNoteText(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws -> Int64? {
+  func writePrimaryTextContent(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws {
     guard let noteText = noteText else {
-      return nil
+      return
     }
-    if var existingRecord = try ContentRecord.fetchOne(db, key: ["noteId": identifier]) {
+    if var existingRecord = try ContentRecord.fetchOne(db, key: ["noteId": identifier, "key": "primary"]) {
       existingRecord.text = noteText
       try existingRecord.update(db)
-      return existingRecord.id
     } else {
-      var newRecord = ContentRecord(id: nil, text: noteText, noteId: identifier, mimeType: "text/markdown")
+      let newRecord = ContentRecord(
+        text: noteText,
+        noteId: identifier,
+        key: "primary",
+        role: "primary",
+        mimeType: "text/markdown"
+      )
       try newRecord.insert(db)
-      return newRecord.id
     }
   }
 
@@ -768,7 +771,7 @@ private extension NoteDatabase {
     )
     try sqliteNote.save(db)
 
-    try writeNoteText(note.text, with: identifier, to: db)
+    try writePrimaryTextContent(note.text, with: identifier, to: db)
     let inMemoryHashtags = Set(note.metadata.hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
@@ -925,6 +928,15 @@ private extension NoteDatabase {
     try migrator.registerMigrationScript(.noFlakeNote)
     try migrator.registerMigrationScript(.noFlakeChallengeTemplate)
     try migrator.registerMigrationScript(.addContentTable, additionalSteps: { database in
+      // Recreate the index
+      try database.drop(table: "noteFullText")
+      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
+        table.synchronize(withTable: "content")
+        table.column("text")
+        table.tokenizer = .porter(wrapping: .unicode61())
+      }
+    })
+    try migrator.registerMigrationScript(.changeContentKey, additionalSteps: { database in
       // Recreate the index
       try database.drop(table: "noteFullText")
       try database.create(virtualTable: "noteFullText", using: FTS5()) { table in

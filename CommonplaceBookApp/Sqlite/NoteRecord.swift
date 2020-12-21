@@ -120,8 +120,6 @@ extension NoteRecord {
         try record.insert(destinationDatabase)
       }
       try note.noteText.fetchAll(sourceDatabase).forEach { noteText in
-        var noteText = noteText
-        noteText.id = nil
         try noteText.insert(destinationDatabase)
       }
       try note.challengeTemplates.fetchAll(sourceDatabase).forEach { challengeTemplate in
