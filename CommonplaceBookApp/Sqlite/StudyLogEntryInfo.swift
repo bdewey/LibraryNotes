@@ -22,5 +22,5 @@ import GRDB
 /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
 struct StudyLogEntryInfo: Codable, FetchableRecord {
   var studyLogEntry: StudyLogEntryRecord
-  var challenge: ChallengeRecord
+  var challenge: PromptStatistics
 }

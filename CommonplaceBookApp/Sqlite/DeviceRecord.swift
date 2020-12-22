@@ -24,15 +24,6 @@ struct DeviceRecord: Codable, FetchableRecord, MutablePersistableRecord {
   var name: String
   var updateSequenceNumber: Int64
 
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "device", body: { table in
-      table.autoIncrementedPrimaryKey("id")
-      table.column("uuid", .text).notNull().unique().indexed()
-      table.column("name", .text).notNull()
-      table.column("updateSequenceNumber", .integer).notNull()
-    })
-  }
-
   enum Columns {
     static let uuid = Column(DeviceRecord.CodingKeys.uuid)
   }

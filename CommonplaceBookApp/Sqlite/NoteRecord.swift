@@ -29,18 +29,6 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var deleted: Bool
   var updateSequenceNumber: Int64
 
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "note", body: { table in
-      table.column("id", .integer).primaryKey()
-      table.column("title", .text).notNull().defaults(to: "")
-      table.column("modifiedTimestamp", .datetime).notNull()
-      table.column("modifiedDevice", .text).indexed().references("device", onDelete: .setNull)
-      table.column("hasText", .boolean).notNull()
-      table.column("deleted", .boolean).notNull().defaults(to: false)
-      table.column("updateSequenceNumber", .integer).notNull()
-    })
-  }
-
   enum Columns {
     static let id = Column(CodingKeys.id)
     static let title = Column(CodingKeys.title)
@@ -55,18 +43,25 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
       .filter(NoteHashtagRecord.Columns.noteId == id)
       .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
   }
+  
+  static var contentRecords = hasMany(ContentRecord.self)
+  
+  var contentRecords: QueryInterfaceRequest<ContentRecord> { request(for: Self.contentRecords) }
 
-  static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
-  var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
-
-  /// The association between this note and its text.
-  static let noteText = hasOne(ContentRecord.self)
+  var prompts: QueryInterfaceRequest<ContentRecord> {
+    request(for: Self.contentRecords).filter(ContentRecord.Columns.role.like("prompt=%"))
+  }
 
   /// A query that returns the text associated with this note.
-  var noteText: QueryInterfaceRequest<ContentRecord> { request(for: NoteRecord.noteText) }
+  var noteText: QueryInterfaceRequest<ContentRecord> {
+    request(for: Self.contentRecords).filter(ContentRecord.Columns.role == "primary")
+  }
+  
+  static let promptStatistics = hasMany(PromptStatistics.self, through: contentRecords, using: ContentRecord.promptStatistics)
 
-  static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
-  var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }
+  var challenges: QueryInterfaceRequest<PromptStatistics> {
+    request(for: Self.promptStatistics)
+  }
 
   /// The association between this note and the device it was last changed on.
   static let device = belongsTo(DeviceRecord.self)
@@ -119,15 +114,10 @@ extension NoteRecord {
         let record = NoteHashtagRecord(noteId: id, hashtag: hashtag)
         try record.insert(destinationDatabase)
       }
-      try note.noteText.fetchAll(sourceDatabase).forEach { noteText in
-        try noteText.insert(destinationDatabase)
-      }
-      try note.challengeTemplates.fetchAll(sourceDatabase).forEach { challengeTemplate in
-        try challengeTemplate.insert(destinationDatabase)
+      try note.contentRecords.fetchAll(sourceDatabase).forEach { contentRecord in
+        try contentRecord.insert(destinationDatabase)
       }
       try note.challenges.fetchAll(sourceDatabase).forEach { challenge in
-        var challenge = challenge
-        challenge.id = nil
         try challenge.insert(destinationDatabase)
       }
     }

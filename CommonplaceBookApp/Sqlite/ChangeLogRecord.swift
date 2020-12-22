@@ -25,17 +25,6 @@ struct ChangeLogRecord: Codable, FetchableRecord, PersistableRecord {
   var timestamp: Date
   var changeDescription: String
 
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "changeLog", body: { table in
-      table.column("deviceID", .integer).notNull().indexed().references("device", onDelete: .cascade)
-      table.column("updateSequenceNumber", .integer).notNull()
-      table.column("timestamp", .datetime).notNull()
-      table.column("changeDescription", .text).notNull()
-
-      table.primaryKey(["deviceID", "updateSequenceNumber"])
-    })
-  }
-
   static func migrateDeviceRelationship(in database: Database) throws {
     try database.create(table: "new-changeLog", body: { table in
       table.column("deviceID", .text).notNull().indexed().references("device", onDelete: .cascade)

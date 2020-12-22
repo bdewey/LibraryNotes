@@ -19,9 +19,11 @@ import Foundation
 
 /// This is just a "namespace" enum for extending with specific migrations.
 internal enum MigrationIdentifier: String {
+  case initialSchema = "initialSchema"
   case deviceUUIDKey = "20201213-deviceUUIDKey"
   case noFlakeNote = "20201214-noFlakeNote"
   case noFlakeChallengeTemplate = "20201214-noFlakeChallengeTemplate"
   case addContentTable = "20201219-content"
   case changeContentKey = "20201220-contentKey"
+  case prompts = "20201221-prompt"
 }

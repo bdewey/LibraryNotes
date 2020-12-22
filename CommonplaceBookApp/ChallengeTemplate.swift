@@ -54,19 +54,24 @@ open class ChallengeTemplate: RawRepresentable {
     assertionFailure("Subclasses should override")
     return ""
   }
+  
+  public struct Identifier: Hashable {
+    public var noteId: String
+    public var promptKey: String
+  }
 
   public init() {}
 
   public required init?(rawValue: String) {
     assertionFailure("Subclasses should call the designated initializer instead.")
   }
-
+  
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
   /// Can only be set from nil to non-nil once; immutable once set.
-  public var templateIdentifier: String?
-
+  public var templateIdentifier: Identifier?
+  
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.
   open var type: ChallengeTemplateType { return .unknown }

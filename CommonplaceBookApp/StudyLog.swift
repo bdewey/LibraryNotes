@@ -27,7 +27,6 @@ public struct StudyLog {
     public var statistics: AnswerStatistics
 
     public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
-      assert(identifier.challengeTemplateID != nil)
       self.timestamp = timestamp
       self.identifier = identifier
       self.statistics = statistics
@@ -35,11 +34,11 @@ public struct StudyLog {
 
     public static func < (lhs: StudyLog.Entry, rhs: StudyLog.Entry) -> Bool {
       if lhs.timestamp != rhs.timestamp { return lhs.timestamp < rhs.timestamp }
-      if lhs.identifier.challengeTemplateID != rhs.identifier.challengeTemplateID {
-        return lhs.identifier.challengeTemplateID! < rhs.identifier.challengeTemplateID!
+      if lhs.identifier.promptKey != rhs.identifier.promptKey {
+        return lhs.identifier.promptKey < rhs.identifier.promptKey
       }
-      if lhs.identifier.index != rhs.identifier.index {
-        return lhs.identifier.index < rhs.identifier.index
+      if lhs.identifier.promptIndex != rhs.identifier.promptIndex {
+        return lhs.identifier.promptIndex < rhs.identifier.promptIndex
       }
       if lhs.statistics.correct != rhs.statistics.correct {
         return lhs.statistics.correct < rhs.statistics.correct

@@ -56,7 +56,7 @@ extension QuoteTemplate: Challenge {
   }
 
   public var challengeIdentifier: ChallengeIdentifier {
-    return ChallengeIdentifier(templateDigest: templateIdentifier, index: 0)
+    ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
   }
 
   public func challengeView(

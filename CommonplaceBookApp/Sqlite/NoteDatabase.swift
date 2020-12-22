@@ -330,8 +330,7 @@ public final class NoteDatabase: UIDocument {
         return
       }
       let updateKey = try self.updateKey(changeDescription: "DELETE NOTE \(noteIdentifier)", in: db)
-      try note.noteText.deleteAll(db)
-      try note.challengeTemplates.deleteAll(db)
+      try note.contentRecords.deleteAll(db)
       note.deleted = true
       note.modifiedDevice = updateKey.deviceID
       note.modifiedTimestamp = Date()
@@ -348,37 +347,34 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let challengeRequest: QueryInterfaceRequest<ChallengeRecord>
+      let challengeRequest: QueryInterfaceRequest<PromptStatistics>
       if let noteIdentifier = noteIdentifier {
         guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier) else {
           throw Error.noSuchNote
         }
         challengeRequest = note.challenges
       } else {
-        challengeRequest = ChallengeRecord.all()
+        challengeRequest = PromptStatistics.all()
       }
       let records = try challengeRequest
-        .filter(ChallengeRecord.Columns.due == nil || ChallengeRecord.Columns.due <= date)
+        .filter(PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due <= date)
         .fetchAll(db)
       return records.map {
-        ChallengeIdentifier(templateDigest: $0.challengeTemplateId, index: $0.index)
+        ChallengeIdentifier(noteId: $0.noteId, promptKey: $0.promptKey, promptIndex: Int($0.promptIndex))
       }
     }
   }
 
   public func challenge(
-    noteIdentifier: Note.Identifier,
     challengeIdentifier: ChallengeIdentifier
   ) throws -> Challenge {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    guard let templateIdentifier = challengeIdentifier.challengeTemplateID else {
-      throw Error.unknownChallengeTemplate
-    }
     return try dbQueue.read { db in
+      let templateIdentifier = ChallengeTemplate.Identifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
       let template = try Self.challengeTemplate(identifier: templateIdentifier, database: db)
-      return template.challenges[challengeIdentifier.index]
+      return template.challenges[Int(challengeIdentifier.promptIndex)]
     }
   }
 
@@ -434,35 +430,30 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     try dbQueue.write { db in
-      guard
-        let templateKey = entry.identifier.challengeTemplateID,
-        let owningTemplate = try ChallengeTemplateRecord.fetchOne(db, key: templateKey),
-        let challenge = try owningTemplate.challenges.filter(ChallengeRecord.Columns.index == entry.identifier.index).fetchOne(db)
-      else {
-        throw Error.unknownChallengeTemplate
-      }
-
       var record = StudyLogEntryRecord(
         id: nil,
         timestamp: entry.timestamp,
         correct: entry.statistics.correct,
         incorrect: entry.statistics.incorrect,
-        challengeId: challenge.id!
+        noteId: entry.identifier.noteId,
+        promptKey: entry.identifier.promptKey,
+        promptIndex: entry.identifier.promptIndex
       )
       try record.insert(db)
-      let updateKey = try self.updateKey(changeDescription: "UPDATE CHALLENGE \(entry.identifier.index) WHERE CHALLENGE TEMPLATE = \(templateKey) BURY = \(buryRelatedChallenges)", in: db)
-      try Self.updateChallenge(for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, updateKey: updateKey)
+      let updateKey = try self.updateKey(changeDescription: "UPDATE CHALLENGE \(entry.identifier.promptIndex) WHERE CHALLENGE TEMPLATE = \(entry.identifier.promptKey) BURY = \(buryRelatedChallenges)", in: db)
+      try Self.updateChallenge(entry.identifier, for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, updateKey: updateKey)
     }
     notesDidChangeSubject.send()
   }
 
   private static func updateChallenge(
+    _ identifier: ChallengeIdentifier,
     for entry: StudyLogEntryRecord,
     in db: Database,
     buryRelatedChallenges: Bool,
     updateKey: UpdateKey
   ) throws {
-    var challenge = try ChallengeRecord.fetchOne(db, key: entry.challengeId)!
+    var challenge = try PromptStatistics.fetchOne(db, key: identifier)!
     let delay: TimeInterval
     if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
@@ -480,11 +471,11 @@ public final class NoteDatabase: UIDocument {
 
     if buryRelatedChallenges {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
-      let updates = try ChallengeRecord
-        .filter(ChallengeRecord.Columns.challengeTemplateId == challenge.challengeTemplateId &&
-          (ChallengeRecord.Columns.due == nil || ChallengeRecord.Columns.due < minimumDue)
+      let updates = try PromptStatistics
+        .filter(PromptStatistics.Columns.noteId == identifier.noteId && PromptStatistics.Columns.promptKey == identifier.promptKey &&
+          (PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due < minimumDue)
         )
-        .updateAll(db, ChallengeRecord.Columns.due <- minimumDue, ChallengeRecord.Columns.modifiedDevice <- updateKey.deviceID, ChallengeRecord.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
+        .updateAll(db, PromptStatistics.Columns.due <- minimumDue, PromptStatistics.Columns.modifiedDevice <- updateKey.deviceID, PromptStatistics.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
       Logger.shared.info("Buried \(updates) challenge(s)")
     }
   }
@@ -507,8 +498,9 @@ public final class NoteDatabase: UIDocument {
           StudyLog.Entry(
             timestamp: $0.studyLogEntry.timestamp,
             identifier: ChallengeIdentifier(
-              templateDigest: $0.challenge.challengeTemplateId,
-              index: $0.challenge.index
+              noteId: $0.studyLogEntry.noteId,
+              promptKey: $0.studyLogEntry.promptKey,
+              promptIndex: $0.studyLogEntry.promptIndex
             ),
             statistics: AnswerStatistics(
               correct: $0.studyLogEntry.correct,
@@ -619,7 +611,7 @@ private extension NoteDatabase {
       NoteRecord.all(),
       ContentRecord.all(),
       NoteHashtagRecord.all(),
-      ChallengeRecord.all(),
+      PromptStatistics.all(),
       StudyLogEntryRecord.all(),
       AssetRecord.all(),
     ]).publisher(in: dbQueue)
@@ -785,23 +777,23 @@ private extension NoteDatabase {
     }
 
     for template in note.challengeTemplates where template.templateIdentifier == nil {
-      template.templateIdentifier = UUID().uuidString
+      template.templateIdentifier = ChallengeTemplate.Identifier(noteId: identifier, promptKey: UUID().uuidString)
     }
     let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
-    let onDiskChallengeTemplates = ((try? sqliteNote.challengeTemplates.fetchAll(db)) ?? [])
-      .map { $0.id }
+    let onDiskChallengeTemplates = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
+      .map { ChallengeTemplate.Identifier(noteId: $0.noteId, promptKey: $0.key) }
       .asSet()
 
     let today = Date()
     let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
     for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
-      let templateString = template.rawValue
-      let record = ChallengeTemplateRecord(
-        id: newTemplateIdentifier,
-        type: template.type.rawValue,
-        rawValue: templateString,
-        noteId: identifier
+      let record = ContentRecord(
+        text: template.rawValue,
+        noteId: template.templateIdentifier!.noteId,
+        key: template.templateIdentifier!.promptKey,
+        role: template.type.rawValue,
+        mimeType: "text/markdown"
       )
       try record.insert(db)
       for index in template.challenges.indices {
@@ -809,28 +801,29 @@ private extension NoteDatabase {
           changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newTemplateIdentifier)",
           in: db
         )
-        var challengeRecord = ChallengeRecord(
-          index: index,
+        let promptStatistics = PromptStatistics(
+          noteId: newTemplateIdentifier.noteId,
+          promptKey: newTemplateIdentifier.promptKey,
+          promptIndex: Int64(index),
           due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
-          challengeTemplateId: newTemplateIdentifier,
           modifiedDevice: updateKey.deviceID,
           timestamp: note.metadata.timestamp,
           updateSequenceNumber: updateKey.updateSequenceNumber
         )
-        try challengeRecord.insert(db)
+        try promptStatistics.insert(db)
       }
     }
     for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
       let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
-      guard var record = try ChallengeTemplateRecord.fetchOne(db, key: modifiedTemplateIdentifier) else {
+      guard var record = try ContentRecord.fetchOne(db, key: modifiedTemplateIdentifier) else {
         assertionFailure("Should be a record")
         continue
       }
-      record.rawValue = template.rawValue
-      try record.update(db, columns: [ChallengeTemplateRecord.Columns.rawValue])
+      record.text = template.rawValue
+      try record.update(db, columns: [ContentRecord.Columns.text])
     }
     for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
-      let deleted = try ChallengeTemplateRecord.deleteOne(db, key: obsoleteTemplateIdentifier)
+      let deleted = try ContentRecord.deleteOne(db, key: obsoleteTemplateIdentifier)
       assert(deleted)
     }
   }
@@ -862,13 +855,11 @@ private extension NoteDatabase {
     }
     let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtag }
-    let challengeTemplateRecords = try ChallengeTemplateRecord
-      .filter(ChallengeTemplateRecord.Columns.noteId == identifier)
-      .fetchAll(db)
-    let challengeTemplates = try challengeTemplateRecords.map { challengeTemplateRecord -> ChallengeTemplate in
-      try Self.challengeTemplate(from: challengeTemplateRecord)
-    }
-    let noteText = try ContentRecord.fetchOne(db, key: ["noteId": identifier])?.text
+    let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
+    let challengeTemplates = try contentRecords
+      .filter({ $0.role.hasPrefix("prompt=") })
+      .map { try Self.challengeTemplate(from: $0) }
+    let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
@@ -881,23 +872,26 @@ private extension NoteDatabase {
     )
   }
 
-  static func challengeTemplate(identifier: String, database: Database) throws -> ChallengeTemplate {
-    guard let record = try ChallengeTemplateRecord.fetchOne(database, key: identifier) else {
+  static func challengeTemplate(identifier: ChallengeTemplate.Identifier, database: Database) throws -> ChallengeTemplate {
+    guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
       throw Error.unknownChallengeTemplate
     }
     return try challengeTemplate(from: record)
   }
 
   static func challengeTemplate(
-    from challengeTemplateRecord: ChallengeTemplateRecord
+    from contentRecord: ContentRecord
   ) throws -> ChallengeTemplate {
-    guard let klass = ChallengeTemplateType.classMap[challengeTemplateRecord.type] else {
+    guard let klass = ChallengeTemplateType.classMap[contentRecord.role] else {
       throw Error.unknownChallengeType
     }
-    guard let template = klass.init(rawValue: challengeTemplateRecord.rawValue) else {
+    guard let template = klass.init(rawValue: contentRecord.text) else {
       throw Error.cannotDecodeTemplate
     }
-    template.templateIdentifier = challengeTemplateRecord.id
+    template.templateIdentifier = ChallengeTemplate.Identifier(
+      noteId: contentRecord.noteId,
+      promptKey: contentRecord.key
+    )
     return template
   }
 
@@ -906,24 +900,7 @@ private extension NoteDatabase {
   func runMigrations(on databaseQueue: DatabaseQueue) throws -> Bool {
     var migrator = DatabaseMigrator()
 
-    migrator.registerMigration("initialSchema") { database in
-      try DeviceRecord.createV1Table(in: database)
-      try NoteRecord.createV1Table(in: database)
-      try ContentRecord.createV1Table(in: database)
-      try NoteHashtagRecord.createV1Table(in: database)
-      try ChallengeTemplateRecord.createV1Table(in: database)
-      try ChallengeRecord.createV1Table(in: database)
-      try StudyLogEntryRecord.createV1Table(in: database)
-      try AssetRecord.createV1Table(in: database)
-      try ChangeLogRecord.createV1Table(in: database)
-
-      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
-        table.synchronize(withTable: "noteText")
-        table.column("text")
-        table.tokenizer = .porter(wrapping: .unicode61())
-      }
-    }
-
+    try migrator.registerMigrationScript(.initialSchema)
     try migrator.registerMigrationScript(.deviceUUIDKey)
     try migrator.registerMigrationScript(.noFlakeNote)
     try migrator.registerMigrationScript(.noFlakeChallengeTemplate)
@@ -945,6 +922,7 @@ private extension NoteDatabase {
         table.tokenizer = .porter(wrapping: .unicode61())
       }
     })
+    try migrator.registerMigrationScript(.prompts)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
@@ -953,7 +931,7 @@ private extension NoteDatabase {
   }
 }
 
-private extension ChallengeRecord {
+private extension PromptStatistics {
   var item: SpacedRepetitionScheduler.Item {
     if let due = due, let lastReview = lastReview {
       let interval = due.timeIntervalSince(lastReview)
@@ -1053,7 +1031,7 @@ private extension DatabaseQueue {
           destinationKnowledge: localKnowledge
         )
         result += try VersionVector.merge(
-          recordType: ChallengeRecord.MergeInfo.self,
+          recordType: PromptStatistics.MergeInfo.self,
           from: remoteDatabase,
           sourceKnowledge: remoteKnowlege,
           to: localDatabase,

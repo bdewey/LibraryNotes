@@ -367,7 +367,6 @@ public final class StudyViewController: UIViewController {
     }
     do {
       let challenge = try database.challenge(
-        noteIdentifier: sessionChallengeIdentifier.noteIdentifier,
         challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
       )
       let challengeView = challenge.challengeView(

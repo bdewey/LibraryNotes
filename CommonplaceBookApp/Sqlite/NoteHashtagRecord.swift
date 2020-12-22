@@ -30,17 +30,4 @@ struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
   }
 
   static let note = belongsTo(NoteRecord.self)
-
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "noteHashtag", body: { table in
-      table.column("noteId", .integer)
-        .notNull()
-        .indexed()
-        .references("note", onDelete: .cascade)
-      table.column("hashtag", .text)
-        .notNull()
-        .indexed()
-      table.primaryKey(["noteId", "hashtag"])
-    })
-  }
 }

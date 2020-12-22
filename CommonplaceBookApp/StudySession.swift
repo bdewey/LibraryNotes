@@ -108,14 +108,13 @@ public struct StudySession {
     return copy
   }
 
+  /// Make sure that we don't use multiple prompts from the same prompt template.
   public mutating func ensureUniqueChallengeTemplates() {
-    var seenChallengeTemplateIdentifiers = Set<String>()
+    var seenChallengeTemplateIdentifiers = Set<ChallengeIdentifier>()
     sessionChallengeIdentifiers = sessionChallengeIdentifiers
-      .filter { challengeIdentifier -> Bool in
-        guard let templateIdentifier = challengeIdentifier.challengeIdentifier.challengeTemplateID else {
-          assertionFailure()
-          return false
-        }
+      .filter { sessionChallengeIdentifier -> Bool in
+        var templateIdentifier = sessionChallengeIdentifier.challengeIdentifier
+        templateIdentifier.promptIndex = 0
         if seenChallengeTemplateIdentifiers.contains(templateIdentifier) {
           return false
         } else {

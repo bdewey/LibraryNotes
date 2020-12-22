@@ -26,8 +26,7 @@
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
 		D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */; };
 		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
-		D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */; };
-		D3198DB123DBCA0F0098A9D9 /* ChallengeRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */; };
+		D3198DB123DBCA0F0098A9D9 /* PromptStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
 		D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */; };
 		D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */; };
@@ -58,6 +57,8 @@
 		D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3446D3F23FAF20400BC269A /* Note+TestContent.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D34ACAEE2590E545007C9521 /* 20201220-contentKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */; };
+		D34ACAF825915662007C9521 /* 20201221-prompt.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACAF725915662007C9521 /* 20201221-prompt.sql */; };
+		D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACB0125925EA5007C9521 /* initialSchema.sql */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -182,8 +183,7 @@
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRecord.swift; sourceTree = "<group>"; };
 		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
-		D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateRecord.swift; sourceTree = "<group>"; };
-		D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeRecord.swift; sourceTree = "<group>"; };
+		D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStatistics.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
 		D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeView.swift; sourceTree = "<group>"; };
 		D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TimeInterval+CommonIntervals.swift"; sourceTree = "<group>"; };
@@ -215,6 +215,8 @@
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201220-contentKey.sql"; sourceTree = "<group>"; };
+		D34ACAF725915662007C9521 /* 20201221-prompt.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201221-prompt.sql"; sourceTree = "<group>"; };
+		D34ACB0125925EA5007C9521 /* initialSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = initialSchema.sql; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageMergeTests.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -340,8 +342,7 @@
 			children = (
 				D3F90E5E2587301300162CFC /* Migrations */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
-				D3198DB023DBCA0F0098A9D9 /* ChallengeRecord.swift */,
-				D3198DAE23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift */,
+				D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */,
 				D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */,
 				D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
@@ -526,6 +527,8 @@
 				D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */,
 				D3F90E7D258EB49300162CFC /* 20201219-content.sql */,
 				D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */,
+				D34ACAF725915662007C9521 /* 20201221-prompt.sql */,
+				D34ACB0125925EA5007C9521 /* initialSchema.sql */,
 				D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */,
 			);
 			path = Migrations;
@@ -662,12 +665,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */,
+				D34ACAF825915662007C9521 /* 20201221-prompt.sql in Resources */,
 				D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */,
 				D3F90E7E258EB49300162CFC /* 20201219-content.sql in Resources */,
 				D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */,
 				D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */,
 				D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */,
 				D3F90E7825889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql in Resources */,
+				D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */,
 				D34ACAEE2590E545007C9521 /* 20201220-contentKey.sql in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -766,7 +771,7 @@
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
-				D3198DB123DBCA0F0098A9D9 /* ChallengeRecord.swift in Sources */,
+				D3198DB123DBCA0F0098A9D9 /* PromptStatistics.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
@@ -788,7 +793,6 @@
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
-				D3198DAF23DB5F6B0098A9D9 /* ChallengeTemplateRecord.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,
 				D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
