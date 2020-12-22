@@ -39,50 +39,36 @@ public struct ChallengeTemplateType: RawRepresentable, Hashable {
     ChallengeTemplateType.classMap[rawValue] = templateClass
   }
 
-  /// Type used for the "abstract" base class.
-  internal static let unknown = ChallengeTemplateType(rawValue: "unknown", class: ChallengeTemplate.self)
-
   /// Mapping between rawValue and CardTemplate classes.
   public private(set) static var classMap = [String: ChallengeTemplate.Type]()
+}
+
+public struct ChallengeTemplateIdentifier: Hashable {
+  public var noteId: String
+  public var promptKey: String
 }
 
 /// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-open class ChallengeTemplate: RawRepresentable {
-  public var rawValue: String {
-    assertionFailure("Subclasses should override")
-    return ""
-  }
+public protocol ChallengeTemplate {
+  init?(rawValue: String)
+  
+  var rawValue: String { get }
 
-  public struct Identifier: Hashable {
-    public var noteId: String
-    public var promptKey: String
-  }
-
-  public init() {}
-
-  public required init?(rawValue: String) {
-    assertionFailure("Subclasses should call the designated initializer instead.")
-  }
 
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
   /// Can only be set from nil to non-nil once; immutable once set.
-  public var templateIdentifier: Identifier?
+  var templateIdentifier: ChallengeTemplateIdentifier? { get set }
 
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.
-  open var type: ChallengeTemplateType { return .unknown }
+  var type: ChallengeTemplateType { get }
 
   /// The specific cards from this template.
-  open var challenges: [Challenge] { return [] }
-
-  public enum CommonErrors: Error {
-    /// Thrown when encoded template markdown does not decode to exactly one Node.
-    case markdownParseError
-  }
+  var challenges: [Challenge] { get }
 }
 
 public extension Array where Element: ChallengeTemplate {

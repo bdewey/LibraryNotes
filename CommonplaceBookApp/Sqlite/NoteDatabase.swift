@@ -372,7 +372,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let templateIdentifier = ChallengeTemplate.Identifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
+      let templateIdentifier = ChallengeTemplateIdentifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
       let template = try Self.challengeTemplate(identifier: templateIdentifier, database: db)
       return template.challenges[Int(challengeIdentifier.promptIndex)]
     }
@@ -751,6 +751,7 @@ private extension NoteDatabase {
   // TODO: Make this smaller
   // swiftlint:disable:next function_body_length
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
+    var note = note
     let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
     let sqliteNote = NoteRecord(
       id: identifier,
@@ -776,12 +777,16 @@ private extension NoteDatabase {
       assert(deleted)
     }
 
-    for template in note.challengeTemplates where template.templateIdentifier == nil {
-      template.templateIdentifier = ChallengeTemplate.Identifier(noteId: identifier, promptKey: UUID().uuidString)
+    for index in note.challengeTemplates.indices {
+      if note.challengeTemplates[index].templateIdentifier == nil {
+        note.challengeTemplates[index].templateIdentifier = ChallengeTemplateIdentifier(noteId: identifier, promptKey: UUID().uuidString)
+      } else {
+        note.challengeTemplates[index].templateIdentifier!.noteId = identifier
+      }
     }
     let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
     let onDiskChallengeTemplates = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
-      .map { ChallengeTemplate.Identifier(noteId: $0.noteId, promptKey: $0.key) }
+      .map { ChallengeTemplateIdentifier(noteId: $0.noteId, promptKey: $0.key) }
       .asSet()
 
     let today = Date()
@@ -877,7 +882,7 @@ private extension NoteDatabase {
     )
   }
 
-  static func challengeTemplate(identifier: ChallengeTemplate.Identifier, database: Database) throws -> ChallengeTemplate {
+  static func challengeTemplate(identifier: ChallengeTemplateIdentifier, database: Database) throws -> ChallengeTemplate {
     guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
       throw Error.unknownChallengeTemplate
     }
@@ -890,10 +895,10 @@ private extension NoteDatabase {
     guard let klass = ChallengeTemplateType.classMap[contentRecord.role] else {
       throw Error.unknownChallengeType
     }
-    guard let template = klass.init(rawValue: contentRecord.text) else {
+    guard var template = klass.init(rawValue: contentRecord.text) else {
       throw Error.cannotDecodeTemplate
     }
-    template.templateIdentifier = ChallengeTemplate.Identifier(
+    template.templateIdentifier = ChallengeTemplateIdentifier(
       noteId: contentRecord.noteId,
       promptKey: contentRecord.key
     )

@@ -62,7 +62,7 @@ final class QuoteTemplateTests: XCTestCase {
 
   func testYamlEncodingIsJustMarkdown() {
     let decoded = QuoteTemplate(rawValue: contentWithCloze)
-    XCTAssertEqual(decoded?.challenges.count, 1)
+    XCTAssertEqual(decoded.challenges.count, 1)
   }
 
   func testRenderCloze() {

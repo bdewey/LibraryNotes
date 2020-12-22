@@ -41,17 +41,17 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
 
   static let promptStatistics = hasMany(PromptStatistics.self)
 
-  static func fetchOne(_ database: Database, key: ChallengeTemplate.Identifier) throws -> ContentRecord? {
+  static func fetchOne(_ database: Database, key: ChallengeTemplateIdentifier) throws -> ContentRecord? {
     try fetchOne(database, key: key.keyArray)
   }
 
   @discardableResult
-  static func deleteOne(_ database: Database, key: ChallengeTemplate.Identifier) throws -> Bool {
+  static func deleteOne(_ database: Database, key: ChallengeTemplateIdentifier) throws -> Bool {
     try deleteOne(database, key: key.keyArray)
   }
 }
 
-private extension ChallengeTemplate.Identifier {
+private extension ChallengeTemplateIdentifier {
   var keyArray: [String: DatabaseValueConvertible] {
     [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: promptKey]
   }

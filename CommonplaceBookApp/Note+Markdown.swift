@@ -42,8 +42,8 @@ public extension Note {
   }
 
   mutating func updateMarkdown(_ markdown: String) {
-    let newNote = Note(markdown: markdown)
-    ChallengeTemplate.assignMatchingTemplateIdentifiers(from: challengeTemplates, to: newNote.challengeTemplates)
+    var newNote = Note(markdown: markdown)
+    newNote.assignMatchingTemplateIdentifiers(from: self)
     self = newNote
   }
 }

@@ -24,26 +24,26 @@ public extension ChallengeTemplateType {
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
-public final class ClozeTemplate: ChallengeTemplate {
-  override public var type: ChallengeTemplateType { return .cloze }
+public struct ClozeTemplate: ChallengeTemplate {
+  public var type: ChallengeTemplateType { return .cloze }
 
-  public required init?(rawValue: String) {
+  public init?(rawValue: String) {
     self.markdown = rawValue
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
     guard let node = try? memoizationTable.parseBuffer(rawValue) else {
       return nil
     }
     self.node = node
-    super.init()
   }
 
-  override public var rawValue: String { markdown }
+  public var rawValue: String { markdown }
   private let markdown: String
   private let node: SyntaxTreeNode
+  public var templateIdentifier: ChallengeTemplateIdentifier?
 
   // MARK: - CardTemplate conformance
 
-  override public var challenges: [Challenge] {
+  public var challenges: [Challenge] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
     return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
   }

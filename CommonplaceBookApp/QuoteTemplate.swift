@@ -22,19 +22,20 @@ public extension ChallengeTemplateType {
   static let quote = ChallengeTemplateType(rawValue: "prompt=quote", class: QuoteTemplate.self)
 }
 
-public final class QuoteTemplate: ChallengeTemplate {
-  public required init?(rawValue: String) {
+public struct QuoteTemplate: ChallengeTemplate {
+  public init(rawValue: String) {
     self.markdown = rawValue
-    super.init()
   }
 
-  override public var type: ChallengeTemplateType { return .quote }
+  public var templateIdentifier: ChallengeTemplateIdentifier?
+
+  public var type: ChallengeTemplateType { return .quote }
 
   /// The quote template is itself a card.
-  override public var challenges: [Challenge] { return [self] }
+  public var challenges: [Challenge] { return [self] }
 
   private let markdown: String
-  override public var rawValue: String {
+  public var rawValue: String {
     return markdown
   }
 

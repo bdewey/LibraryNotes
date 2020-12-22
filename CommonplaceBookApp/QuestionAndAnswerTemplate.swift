@@ -23,19 +23,20 @@ public extension ChallengeTemplateType {
 }
 
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.
-public final class QuestionAndAnswerTemplate: ChallengeTemplate {
-  public required init?(rawValue: String) {
+public struct QuestionAndAnswerTemplate: ChallengeTemplate {
+  public init(rawValue: String) {
     self.markdown = rawValue
-    super.init()
   }
+
+  public var templateIdentifier: ChallengeTemplateIdentifier?
 
   /// The Q&A node.
   private let markdown: String
-  override public var rawValue: String { markdown }
+  public var rawValue: String { markdown }
 
   // MARK: - Public
 
-  override public var type: ChallengeTemplateType { return .questionAndAnswer }
+  public var type: ChallengeTemplateType { return .questionAndAnswer }
 
   public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerTemplate] {
     guard let root = try? parsedString.result.get() else { return [] }
@@ -51,7 +52,7 @@ public final class QuestionAndAnswerTemplate: ChallengeTemplate {
   }
 
   /// The single challenge from this template: Ourselves!
-  override public var challenges: [Challenge] { return [self] }
+  public var challenges: [Challenge] { return [self] }
 }
 
 extension QuestionAndAnswerTemplate: Challenge {
