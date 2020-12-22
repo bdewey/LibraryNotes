@@ -30,7 +30,7 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
   var key: String
   var role: String
   var mimeType: String
-  
+
   enum Columns: String, ColumnExpression {
     case text
     case noteId
@@ -38,13 +38,13 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
     case role
     case mimeType
   }
-  
+
   static let promptStatistics = hasMany(PromptStatistics.self)
-  
+
   static func fetchOne(_ database: Database, key: ChallengeTemplate.Identifier) throws -> ContentRecord? {
     try fetchOne(database, key: key.keyArray)
   }
-  
+
   @discardableResult
   static func deleteOne(_ database: Database, key: ChallengeTemplate.Identifier) throws -> Bool {
     try deleteOne(database, key: key.keyArray)

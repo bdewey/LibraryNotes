@@ -46,13 +46,13 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
   var challengeTemplate: QueryInterfaceRequest<ContentRecord> {
     request(for: Self.prompt)
   }
-  
+
   /// Convenience method that knows how to unpack a `ChallengeIdentifier` into the primary keys for a PromptStatistics.
   static func fetchOne(_ database: Database, key: ChallengeIdentifier) throws -> PromptStatistics? {
     return try fetchOne(database, key: [
-                      Columns.noteId.rawValue: key.noteId,
-                      Columns.promptKey.rawValue: key.promptKey,
-                      Columns.promptIndex.rawValue: key.promptIndex,
+      Columns.noteId.rawValue: key.noteId,
+      Columns.promptKey.rawValue: key.promptKey,
+      Columns.promptIndex.rawValue: key.promptIndex,
     ])
   }
 }
@@ -69,7 +69,6 @@ extension PromptStatistics {
     var noteId: String
     var promptKey: String
     var promptIndex: Int64
-    var challengeTemplateId: String
     var timestamp: Date
     var device: DeviceRecord
     var updateSequenceNumber: Int64
@@ -93,8 +92,8 @@ extension PromptStatistics {
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
       guard let originRecord = try PromptStatistics
-              .filter(key: ["noteId": noteId, "promptKey": promptKey, "promptIndex": promptIndex])
-              .fetchOne(sourceDatabase)
+        .filter(key: ["noteId": noteId, "promptKey": promptKey, "promptIndex": promptIndex])
+        .fetchOne(sourceDatabase)
       else {
         throw MergeError.cannotLoadChallenge
       }

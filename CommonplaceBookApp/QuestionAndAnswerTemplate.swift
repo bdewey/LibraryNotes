@@ -19,7 +19,7 @@ import Foundation
 import UIKit
 
 public extension ChallengeTemplateType {
-  static let questionAndAnswer = ChallengeTemplateType(rawValue: "qanda", class: QuestionAndAnswerTemplate.self)
+  static let questionAndAnswer = ChallengeTemplateType(rawValue: "prompt=qanda", class: QuestionAndAnswerTemplate.self)
 }
 
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.

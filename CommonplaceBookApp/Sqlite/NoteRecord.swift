@@ -43,9 +43,9 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
       .filter(NoteHashtagRecord.Columns.noteId == id)
       .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
   }
-  
+
   static var contentRecords = hasMany(ContentRecord.self)
-  
+
   var contentRecords: QueryInterfaceRequest<ContentRecord> { request(for: Self.contentRecords) }
 
   var prompts: QueryInterfaceRequest<ContentRecord> {
@@ -56,7 +56,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var noteText: QueryInterfaceRequest<ContentRecord> {
     request(for: Self.contentRecords).filter(ContentRecord.Columns.role == "primary")
   }
-  
+
   static let promptStatistics = hasMany(PromptStatistics.self, through: contentRecords, using: ContentRecord.promptStatistics)
 
   var challenges: QueryInterfaceRequest<PromptStatistics> {

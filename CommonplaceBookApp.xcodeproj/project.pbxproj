@@ -94,7 +94,6 @@
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */; };
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
-		D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01D623C55291004BB7DF /* NoteStorage+Migration.swift */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */; };
 		D3B5B50821BA55E9009B3EB5 /* Condition.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B5B50721BA55E9009B3EB5 /* Condition.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
@@ -253,7 +252,6 @@
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
-		D3AD01D623C55291004BB7DF /* NoteStorage+Migration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteStorage+Migration.swift"; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTemplate.swift; sourceTree = "<group>"; };
 		D3B5B50721BA55E9009B3EB5 /* Condition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Condition.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
@@ -428,7 +426,6 @@
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
 				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
-				D3AD01D623C55291004BB7DF /* NoteStorage+Migration.swift */,
 				D3E9B57F2564F97400E47375 /* NSAttributedString+Attributes.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
@@ -767,7 +764,6 @@
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
-				D3AD01D723C55291004BB7DF /* NoteStorage+Migration.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,

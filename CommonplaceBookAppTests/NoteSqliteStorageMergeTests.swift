@@ -296,7 +296,7 @@ private extension NoteSqliteStorageMergeTests {
         }
         pipelineRan.fulfill()
       }, receiveValue: { _ in })
-    waitForExpectations(timeout: 3, handler: nil)
+    waitForExpectations(timeout: 300, handler: nil)
     // cancel() should be a no-op
     cancelable.cancel()
   }

@@ -795,7 +795,12 @@ private extension NoteDatabase {
         role: template.type.rawValue,
         mimeType: "text/markdown"
       )
-      try record.insert(db)
+      do {
+        try record.insert(db)
+      } catch {
+        Logger.shared.critical("Could not insert content")
+        throw error
+      }
       for index in template.challenges.indices {
         let updateKey = try self.updateKey(
           changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newTemplateIdentifier)",
@@ -857,7 +862,7 @@ private extension NoteDatabase {
     let hashtags = hashtagRecords.map { $0.hashtag }
     let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
     let challengeTemplates = try contentRecords
-      .filter({ $0.role.hasPrefix("prompt=") })
+      .filter { $0.role.hasPrefix("prompt=") }
       .map { try Self.challengeTemplate(from: $0) }
     let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
     return Note(

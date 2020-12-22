@@ -33,8 +33,8 @@ public struct ClozeCard {
     self.markdown = markdown
     self.clozeIndex = clozeIndex
     self.challengeIdentifier = ChallengeIdentifier(
-      noteId: template.templateIdentifier!.noteId,
-      promptKey: template.templateIdentifier!.promptKey,
+      noteId: template.templateIdentifier?.noteId ?? "",
+      promptKey: template.templateIdentifier?.promptKey ?? "",
       promptIndex: clozeIndex
     )
   }

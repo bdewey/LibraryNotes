@@ -20,7 +20,7 @@ import Logging
 import UIKit
 
 public extension ChallengeTemplateType {
-  static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
+  static let cloze = ChallengeTemplateType(rawValue: "prompt=cloze", class: ClozeTemplate.self)
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.

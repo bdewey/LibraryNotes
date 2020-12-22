@@ -19,7 +19,7 @@ import Foundation
 import UIKit
 
 public extension ChallengeTemplateType {
-  static let quote = ChallengeTemplateType(rawValue: "quote", class: QuoteTemplate.self)
+  static let quote = ChallengeTemplateType(rawValue: "prompt=quote", class: QuoteTemplate.self)
 }
 
 public final class QuoteTemplate: ChallengeTemplate {
