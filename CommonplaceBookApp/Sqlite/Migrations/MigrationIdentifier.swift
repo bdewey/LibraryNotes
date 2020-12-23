@@ -27,4 +27,5 @@ internal enum MigrationIdentifier: String {
   case changeContentKey = "20201220-contentKey"
   case prompts = "20201221-prompt"
   case promptTable = "20201223-promptTable"
+  case links = "20201223-links"
 }

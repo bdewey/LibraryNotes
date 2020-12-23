@@ -604,7 +604,7 @@ private extension NoteDatabase {
     hasUnsavedChangesPipeline = DatabaseRegionObservation(tracking: [
       NoteRecord.all(),
       ContentRecord.all(),
-      NoteHashtagRecord.all(),
+      NoteLinkRecord.all(),
       PromptRecord.all(),
       StudyLogEntryRecord.all(),
       AssetRecord.all(),
@@ -748,11 +748,11 @@ private extension NoteDatabase {
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
-      let associationRecord = NoteHashtagRecord(noteId: identifier, hashtag: newHashtag)
+      let associationRecord = NoteLinkRecord(noteId: identifier, targetTitle: newHashtag)
       try associationRecord.save(db)
     }
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
-      let deleted = try NoteHashtagRecord.deleteOne(db, key: ["noteId": identifier, "hashtag": obsoleteHashtag])
+      let deleted = try NoteLinkRecord.deleteOne(db, key: ["noteId": identifier, "targetTitle": obsoleteHashtag])
       assert(deleted)
     }
 
@@ -816,7 +816,7 @@ private extension NoteDatabase {
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
       let metadata = Note.Metadata(
         timestamp: metadataItem.modifiedTimestamp,
-        hashtags: metadataItem.noteHashtags.map { $0.hashtag },
+        hashtags: metadataItem.noteLinks.map { $0.targetTitle },
         title: metadataItem.title
       )
       return (key: metadataItem.id, value: metadata)
@@ -831,8 +831,8 @@ private extension NoteDatabase {
     else {
       throw Error.noSuchNote
     }
-    let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier).fetchAll(db)
-    let hashtags = hashtagRecords.map { $0.hashtag }
+    let hashtagRecords = try NoteLinkRecord.filter(NoteLinkRecord.Columns.noteId == identifier).fetchAll(db)
+    let hashtags = hashtagRecords.map { $0.targetTitle }
     let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
     let tuples = try contentRecords
       .filter { $0.role.hasPrefix("prompt=") }
@@ -886,6 +886,7 @@ private extension NoteDatabase {
     })
     try migrator.registerMigrationScript(.prompts)
     try migrator.registerMigrationScript(.promptTable)
+    try migrator.registerMigrationScript(.links)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)

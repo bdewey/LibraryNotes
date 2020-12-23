@@ -24,7 +24,7 @@ struct NoteMetadataRecord: Decodable, FetchableRecord {
   var modifiedTimestamp: Date
   var hasText: Bool
   var deleted: Bool
-  var noteHashtags: [NoteHashtagRecord]
+  var noteLinks: [NoteLinkRecord]
 
   static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
 }

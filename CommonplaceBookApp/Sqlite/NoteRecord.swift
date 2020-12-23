@@ -36,12 +36,12 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
     static let deleted = Column(CodingKeys.deleted)
   }
 
-  static let noteHashtags = hasMany(NoteHashtagRecord.self)
+  static let noteHashtags = hasMany(NoteLinkRecord.self)
 
   var hashtags: QueryInterfaceRequest<String> {
-    NoteHashtagRecord
-      .filter(NoteHashtagRecord.Columns.noteId == id)
-      .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
+    NoteLinkRecord
+      .filter(NoteLinkRecord.Columns.noteId == id)
+      .select(NoteLinkRecord.Columns.targetTitle, as: String.self)
   }
 
   static var contentRecords = hasMany(ContentRecord.self)
@@ -111,7 +111,7 @@ extension NoteRecord {
       try NoteRecord.deleteOne(destinationDatabase, key: id)
       try note.insert(destinationDatabase)
       try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
-        let record = NoteHashtagRecord(noteId: id, hashtag: hashtag)
+        let record = NoteLinkRecord(noteId: id, targetTitle: hashtag)
         try record.insert(destinationDatabase)
       }
       try note.contentRecords.fetchAll(sourceDatabase).forEach { contentRecord in

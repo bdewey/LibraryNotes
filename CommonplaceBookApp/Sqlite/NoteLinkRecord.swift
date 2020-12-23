@@ -19,14 +19,14 @@ import Foundation
 import GRDB
 
 /// Core record for the `noteHashtag` association
-struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "noteHashtag"
+struct NoteLinkRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "noteLink"
   var noteId: String
-  var hashtag: String
+  var targetTitle: String
 
-  enum Columns {
-    static let noteId = Column(NoteHashtagRecord.CodingKeys.noteId)
-    static let hashtag = Column(NoteHashtagRecord.CodingKeys.hashtag)
+  enum Columns: String, ColumnExpression {
+    case noteId
+    case targetTitle
   }
 
   static let note = belongsTo(NoteRecord.self)
