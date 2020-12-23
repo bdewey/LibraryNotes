@@ -19,14 +19,14 @@ import Foundation
 
 /// A sequence of challenges for the learner to respond to.
 public struct StudySession {
-  public struct SessionChallengeIdentifier {
+  public struct SessionPromptIdentifier {
     public let noteIdentifier: Note.Identifier
     public let noteTitle: String
-    public let challengeIdentifier: PromptIdentifier
+    public let promptIdentifier: PromptIdentifier
   }
 
   /// The current set of cards to study.
-  private var sessionChallengeIdentifiers: [SessionChallengeIdentifier]
+  private var sessionPromptIdentifiers: [SessionPromptIdentifier]
 
   /// The current position in `cards`
   private var currentIndex: Int
@@ -54,84 +54,84 @@ public struct StudySession {
   }
 
   var allIdentifiers: Set<PromptIdentifier> {
-    return sessionChallengeIdentifiers.allIdentifiers
+    return sessionPromptIdentifiers.allIdentifiers
   }
 
   /// Creates a study session where all cards come from a single document.
-  public init<ChallengeIdentifiers: Sequence>(
-    _ challengeIdentifiers: ChallengeIdentifiers,
+  public init<PromptIdentifiers: Sequence>(
+    _ promptIdentifiers: PromptIdentifiers,
     properties: CardDocumentProperties
-  ) where ChallengeIdentifiers.Element == PromptIdentifier {
-    let sessionChallengeIdentifiers = challengeIdentifiers.shuffled().map {
-      SessionChallengeIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, challengeIdentifier: $0)
+  ) where PromptIdentifiers.Element == PromptIdentifier {
+    let sessionChallengeIdentifiers = promptIdentifiers.shuffled().map {
+      SessionPromptIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, promptIdentifier: $0)
     }
-    self.sessionChallengeIdentifiers = sessionChallengeIdentifiers
-    self.currentIndex = self.sessionChallengeIdentifiers.startIndex
+    self.sessionPromptIdentifiers = sessionChallengeIdentifiers
+    self.currentIndex = sessionPromptIdentifiers.startIndex
   }
 
   /// Creates an empty study session.
   public init() {
-    self.sessionChallengeIdentifiers = []
+    self.sessionPromptIdentifiers = []
     self.currentIndex = 0
   }
 
   /// The current card to study. Nil if we're done.
-  public var currentCard: SessionChallengeIdentifier? {
-    guard currentIndex < sessionChallengeIdentifiers.endIndex else { return nil }
-    return sessionChallengeIdentifiers[currentIndex]
+  public var currentPrompt: SessionPromptIdentifier? {
+    guard currentIndex < sessionPromptIdentifiers.endIndex else { return nil }
+    return sessionPromptIdentifiers[currentIndex]
   }
 
   /// Record a correct or incorrect answer for the current card, and advance `currentCard`
   public mutating func recordAnswer(correct: Bool) {
-    guard let currentCard = currentCard else { return }
-    let identifier = currentCard.challengeIdentifier
-    var statistics = results[currentCard.challengeIdentifier, default: AnswerStatistics.empty]
+    guard let currentCard = currentPrompt else { return }
+    let identifier = currentCard.promptIdentifier
+    var statistics = results[currentCard.promptIdentifier, default: AnswerStatistics.empty]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1
     } else {
       answeredIncorrectly.insert(identifier)
-      sessionChallengeIdentifiers.append(currentCard)
+      sessionPromptIdentifiers.append(currentCard)
       statistics.incorrect += 1
     }
-    results[currentCard.challengeIdentifier] = statistics
+    results[currentCard.promptIdentifier] = statistics
     currentIndex += 1
   }
 
-  public mutating func limit(to cardCount: Int) {
-    sessionChallengeIdentifiers = Array(sessionChallengeIdentifiers.prefix(cardCount))
+  public mutating func limit(to promptCount: Int) {
+    sessionPromptIdentifiers = Array(sessionPromptIdentifiers.prefix(promptCount))
   }
 
-  public func limiting(to cardCount: Int) -> StudySession {
+  public func limiting(to promptCount: Int) -> StudySession {
     var copy = self
-    copy.limit(to: cardCount)
+    copy.limit(to: promptCount)
     return copy
   }
 
   /// Make sure that we don't use multiple prompts from the same prompt template.
-  public mutating func ensureUniqueChallengeTemplates() {
-    var seenChallengeTemplateIdentifiers = Set<PromptIdentifier>()
-    sessionChallengeIdentifiers = sessionChallengeIdentifiers
+  public mutating func ensureUniquePromptCollections() {
+    var seenPromptCollections = Set<PromptIdentifier>()
+    sessionPromptIdentifiers = sessionPromptIdentifiers
       .filter { sessionChallengeIdentifier -> Bool in
-        var templateIdentifier = sessionChallengeIdentifier.challengeIdentifier
-        templateIdentifier.promptIndex = 0
-        if seenChallengeTemplateIdentifiers.contains(templateIdentifier) {
+        var identifier = sessionChallengeIdentifier.promptIdentifier
+        identifier.promptIndex = 0
+        if seenPromptCollections.contains(identifier) {
           return false
         } else {
-          seenChallengeTemplateIdentifiers.insert(templateIdentifier)
+          seenPromptCollections.insert(identifier)
           return true
         }
       }
   }
 
-  public func ensuringUniqueChallengeTemplates() -> StudySession {
+  public func ensuringUniquePromptCollections() -> StudySession {
     var copy = self
-    copy.ensureUniqueChallengeTemplates()
+    copy.ensureUniquePromptCollections()
     return copy
   }
 
   public mutating func shuffle() {
-    sessionChallengeIdentifiers.shuffle()
+    sessionPromptIdentifiers.shuffle()
   }
 
   public func shuffling() -> StudySession {
@@ -141,26 +141,26 @@ public struct StudySession {
   }
 
   /// Number of cards remaining in the study session.
-  public var remainingCards: Int {
-    return sessionChallengeIdentifiers.endIndex - currentIndex
+  public var remainingPrompts: Int {
+    return sessionPromptIdentifiers.endIndex - currentIndex
   }
 
   public static func += (lhs: inout StudySession, rhs: StudySession) {
-    lhs.sessionChallengeIdentifiers.append(contentsOf: rhs.sessionChallengeIdentifiers)
-    lhs.sessionChallengeIdentifiers.shuffle()
+    lhs.sessionPromptIdentifiers.append(contentsOf: rhs.sessionPromptIdentifiers)
+    lhs.sessionPromptIdentifiers.shuffle()
     lhs.currentIndex = 0
   }
 }
 
 extension StudySession: Collection {
-  public var startIndex: Int { return sessionChallengeIdentifiers.startIndex }
-  public var endIndex: Int { return sessionChallengeIdentifiers.endIndex }
+  public var startIndex: Int { return sessionPromptIdentifiers.startIndex }
+  public var endIndex: Int { return sessionPromptIdentifiers.endIndex }
   public func index(after i: Int) -> Int {
-    return sessionChallengeIdentifiers.index(after: i)
+    return sessionPromptIdentifiers.index(after: i)
   }
 
-  public subscript(position: Int) -> SessionChallengeIdentifier {
-    return sessionChallengeIdentifiers[position]
+  public subscript(position: Int) -> SessionPromptIdentifier {
+    return sessionPromptIdentifiers[position]
   }
 }
 
@@ -185,9 +185,9 @@ extension StudySession {
   }
 }
 
-extension Sequence where Element == StudySession.SessionChallengeIdentifier {
+extension Sequence where Element == StudySession.SessionPromptIdentifier {
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<PromptIdentifier> {
-    return reduce(into: Set<PromptIdentifier>()) { $0.insert($1.challengeIdentifier) }
+    return reduce(into: Set<PromptIdentifier>()) { $0.insert($1.promptIdentifier) }
   }
 }

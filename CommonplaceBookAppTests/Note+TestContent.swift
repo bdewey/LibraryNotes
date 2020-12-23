@@ -23,22 +23,20 @@ extension Note {
     metadata: Note.Metadata(
       timestamp: Date(),
       hashtags: [],
-      title: "Testing",
-      containsText: true
+      title: "Testing"
     ),
     text: "This is a test",
-    challengeTemplates: [:]
+    promptCollections: [:]
   )
 
   static let withHashtags = Note(
     metadata: Note.Metadata(
       timestamp: Date(),
       hashtags: ["#ashtag"],
-      title: "Testing",
-      containsText: true
+      title: "Testing"
     ),
     text: "This is a test",
-    challengeTemplates: [:]
+    promptCollections: [:]
   )
 
   static let withChallenges = Note(markdown: """

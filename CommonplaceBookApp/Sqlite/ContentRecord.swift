@@ -45,17 +45,17 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
     [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: key]
   }
 
-  static func fetchOne(_ database: Database, key: ChallengeTemplateIdentifier) throws -> ContentRecord? {
+  static func fetchOne(_ database: Database, key: PromptCollectionIdentifier) throws -> ContentRecord? {
     try fetchOne(database, key: key.keyArray)
   }
 
   @discardableResult
-  static func deleteOne(_ database: Database, key: ChallengeTemplateIdentifier) throws -> Bool {
+  static func deleteOne(_ database: Database, key: PromptCollectionIdentifier) throws -> Bool {
     try deleteOne(database, key: key.keyArray)
   }
 }
 
-private extension ChallengeTemplateIdentifier {
+private extension PromptCollectionIdentifier {
   var keyArray: [String: DatabaseValueConvertible] {
     [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: promptKey]
   }

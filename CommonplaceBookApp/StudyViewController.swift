@@ -323,7 +323,7 @@ public final class StudyViewController: UIViewController {
   private func userDidRespond(correct: Bool) {
     studySession.recordAnswer(correct: correct)
     configureUI(animated: true) {
-      if self.studySession.remainingCards == 0 {
+      if self.studySession.remainingPrompts == 0 {
         self.studySession.studySessionEndDate = Date()
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
           self.delegate?.studyViewController(self, didFinishSession: self.studySession)
@@ -335,12 +335,12 @@ public final class StudyViewController: UIViewController {
 
   private func configureUI(animated: Bool, completion: (() -> Void)?) {
     guard isViewLoaded else { return }
-    makeCardView(for: studySession.currentCard) { cardView in
+    makeCardView(for: studySession.currentPrompt) { cardView in
       self.currentCardView = cardView
     }
     let progressUpdates = { [progressView, studySession, doneImageView] in
-      progressView.setProgress(Float(studySession.count - studySession.remainingCards) / Float(studySession.count), animated: animated)
-      if studySession.remainingCards == 0 {
+      progressView.setProgress(Float(studySession.count - studySession.remainingPrompts) / Float(studySession.count), animated: animated)
+      if studySession.remainingPrompts == 0 {
         progressView.tintColor = .systemGreen
         doneImageView.image = UIImage(systemName: "checkmark.seal.fill")
         doneImageView.tintColor = .systemGreen
@@ -358,7 +358,7 @@ public final class StudyViewController: UIViewController {
 
   /// Creates a card view for a card.
   private func makeCardView(
-    for sessionChallengeIdentifier: StudySession.SessionChallengeIdentifier?,
+    for sessionChallengeIdentifier: StudySession.SessionPromptIdentifier?,
     completion: @escaping (PromptView?) -> Void
   ) {
     guard let sessionChallengeIdentifier = sessionChallengeIdentifier else {
@@ -367,7 +367,7 @@ public final class StudyViewController: UIViewController {
     }
     do {
       let challenge = try database.challenge(
-        challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
+        challengeIdentifier: sessionChallengeIdentifier.promptIdentifier
       )
       let challengeView = challenge.promptView(
         database: database,

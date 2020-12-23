@@ -41,7 +41,7 @@ final class ClozeTests: XCTestCase {
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
     let buffer = ParsedString(example, grammar: MiniMarkdownGrammar.shared)
-    let clozeCards = ClozePromptCollection.extract(from: buffer).cards as! [ClozePrompt] // swiftlint:disable:this force_cast
+    let clozeCards = ClozePromptCollection.extract(from: buffer).prompts as! [ClozePrompt] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
       clozeCards[1].markdown,
@@ -72,7 +72,7 @@ final class ClozeTests: XCTestCase {
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
     let decoded = ClozePromptCollection(rawValue: example)
-    XCTAssertEqual(decoded?.challenges.count, 2)
+    XCTAssertEqual(decoded?.prompts.count, 2)
   }
 
   func testClozeFormatting() {

@@ -43,7 +43,7 @@ public struct PromptType: RawRepresentable, Hashable {
   public private(set) static var classMap = [String: PromptCollection.Type]()
 }
 
-public struct ChallengeTemplateIdentifier: Hashable {
+public struct PromptCollectionIdentifier: Hashable {
   public var noteId: String
   public var promptKey: String
 }
@@ -61,12 +61,12 @@ public protocol PromptCollection {
   var type: PromptType { get }
 
   /// The specific cards from this template.
-  var challenges: [Prompt] { get }
+  var prompts: [Prompt] { get }
 }
 
 public extension Array where Element: PromptCollection {
   /// Returns the challenges from all of the associations in the array.
-  var cards: [Prompt] {
-    return [Prompt](map { $0.challenges }.joined())
+  var prompts: [Prompt] {
+    return [Prompt](map { $0.prompts }.joined())
   }
 }

@@ -28,8 +28,6 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
     self.markdown = rawValue
   }
 
-  public var templateIdentifier: ChallengeTemplateIdentifier?
-
   /// The Q&A node.
   private let markdown: String
   public var rawValue: String { markdown }
@@ -52,7 +50,7 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
   }
 
   /// The single challenge from this template: Ourselves!
-  public var challenges: [Prompt] { return [self] }
+  public var prompts: [Prompt] { return [self] }
 }
 
 extension QuestionAndAnswerPrompt: Prompt {

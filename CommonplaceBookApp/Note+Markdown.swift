@@ -57,11 +57,10 @@ public extension Note {
       metadata: Note.Metadata(
         timestamp: Date(),
         hashtags: parsedString.hashtags,
-        title: String(parsedString.title.split(separator: "\n").first ?? ""),
-        containsText: true
+        title: String(parsedString.title.split(separator: "\n").first ?? "")
       ),
       text: parsedString.string,
-      challengeTemplates: keyedCollection
+      promptCollections: keyedCollection
     )
   }
 

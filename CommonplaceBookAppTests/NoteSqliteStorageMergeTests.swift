@@ -100,7 +100,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         var studySession = storage.synchronousStudySession(date: future)
         XCTAssertEqual(3, studySession.count)
-        while studySession.currentCard != nil {
+        while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
         try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
@@ -124,7 +124,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         var studySession = storage.synchronousStudySession(date: future)
         XCTAssertEqual(3, studySession.count)
-        while studySession.currentCard != nil {
+        while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
         try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)

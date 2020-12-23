@@ -265,7 +265,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 
   func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
-      studySession: studySession.shuffling().ensuringUniqueChallengeTemplates().limiting(to: 20),
+      studySession: studySession.shuffling().ensuringUniquePromptCollections().limiting(to: 20),
       database: database,
       delegate: self
     )

@@ -39,11 +39,10 @@ public struct ClozePromptCollection: PromptCollection {
   public var rawValue: String { markdown }
   private let markdown: String
   private let node: SyntaxTreeNode
-  public var templateIdentifier: ChallengeTemplateIdentifier?
 
   // MARK: - CardTemplate conformance
 
-  public var challenges: [Prompt] {
+  public var prompts: [Prompt] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
     return (0 ..< clozeCount).map { ClozePrompt(template: self, markdown: markdown, clozeIndex: $0) }
   }

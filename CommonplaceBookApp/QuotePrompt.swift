@@ -27,12 +27,10 @@ public struct QuotePrompt: PromptCollection {
     self.markdown = rawValue
   }
 
-  public var templateIdentifier: ChallengeTemplateIdentifier?
-
   public var type: PromptType { return .quote }
 
   /// The quote template is itself a card.
-  public var challenges: [Prompt] { return [self] }
+  public var prompts: [Prompt] { return [self] }
 
   private let markdown: String
   public var rawValue: String {

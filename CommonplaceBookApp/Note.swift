@@ -35,50 +35,44 @@ public struct Note: Equatable {
     /// Title of the page. May include Markdown formatting.
     public var title: String
 
-    /// Does this note contain text or not?
-    public var containsText: Bool
-
     public init(
       timestamp: Date = Date(),
       hashtags: [String] = [],
-      title: String = "",
-      containsText: Bool = false
+      title: String = ""
     ) {
       self.timestamp = timestamp
       self.hashtags = hashtags
       self.title = title
-      self.containsText = containsText
     }
 
     public static func == (lhs: Metadata, rhs: Metadata) -> Bool {
       return
         abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) < 0.001 &&
         lhs.hashtags == rhs.hashtags &&
-        lhs.title == rhs.title &&
-        lhs.containsText == rhs.containsText
+        lhs.title == rhs.title
     }
   }
 
   public var metadata: Metadata
   public var text: String?
-  public var challengeTemplates: [ContentKey: PromptCollection]
+  public var promptCollections: [ContentKey: PromptCollection]
 
   public init(
     metadata: Metadata = Metadata(),
     text: String? = nil,
-    challengeTemplates: [ContentKey: PromptCollection] = [:]
+    promptCollections: [ContentKey: PromptCollection] = [:]
   ) {
     self.metadata = metadata
     self.text = text
-    self.challengeTemplates = challengeTemplates
+    self.promptCollections = promptCollections
   }
 
   public static func == (lhs: Note, rhs: Note) -> Bool {
     if lhs.metadata != rhs.metadata || lhs.text != rhs.text {
       return false
     }
-    let lhsIdentifiers = Set(lhs.challengeTemplates.keys)
-    let rhsIdentifiers = Set(rhs.challengeTemplates.keys)
+    let lhsIdentifiers = Set(lhs.promptCollections.keys)
+    let rhsIdentifiers = Set(rhs.promptCollections.keys)
     return lhsIdentifiers == rhsIdentifiers
   }
 }

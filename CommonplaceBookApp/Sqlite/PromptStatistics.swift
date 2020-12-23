@@ -39,13 +39,7 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
     case due, noteId, promptKey, promptIndex, modifiedDevice, updateSequenceNumber
   }
 
-  static let prompt = belongsTo(ContentRecord.self)
-
   static let device = belongsTo(DeviceRecord.self)
-
-  var challengeTemplate: QueryInterfaceRequest<ContentRecord> {
-    request(for: Self.prompt)
-  }
 
   /// Convenience method that knows how to unpack a `ChallengeIdentifier` into the primary keys for a PromptStatistics.
   static func fetchOne(_ database: Database, key: PromptIdentifier) throws -> PromptStatistics? {

@@ -48,7 +48,7 @@ final class QuoteTemplateTests: XCTestCase {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
-    let cards = quoteTemplates.map { $0.challenges }.joined()
+    let cards = quoteTemplates.map { $0.prompts }.joined()
     XCTAssertEqual(cards.count, 5)
   }
 
@@ -62,7 +62,7 @@ final class QuoteTemplateTests: XCTestCase {
 
   func testYamlEncodingIsJustMarkdown() {
     let decoded = QuotePrompt(rawValue: contentWithCloze)
-    XCTAssertEqual(decoded.challenges.count, 1)
+    XCTAssertEqual(decoded.prompts.count, 1)
   }
 
   func testRenderCloze() {

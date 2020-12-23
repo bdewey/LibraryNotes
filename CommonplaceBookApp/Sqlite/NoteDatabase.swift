@@ -109,8 +109,8 @@ public final class NoteDatabase: UIDocument {
     case noSuchChallenge = "The specified challenge does not exist."
     case noSuchNote = "The specified note does not exist."
     case notWriteable = "The database is not currently writeable."
-    case unknownChallengeTemplate = "The challenge template does not exist."
-    case unknownChallengeType = "The challenge template uses an unknown type."
+    case unknownPromptCollection = "The prompt collection does not exist."
+    case unknownPromptType = "The prompt uses an unknown type."
     case missingMigrationScript = "Could not find a required migration script."
   }
 
@@ -372,9 +372,9 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let templateIdentifier = ChallengeTemplateIdentifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
-      let template = try Self.challengeTemplate(identifier: templateIdentifier, database: db)
-      return template.challenges[Int(challengeIdentifier.promptIndex)]
+      let identifier = PromptCollectionIdentifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
+      let template = try Self.promptCollection(identifier: identifier, database: db)
+      return template.prompts[Int(challengeIdentifier.promptIndex)]
     }
   }
 
@@ -776,7 +776,7 @@ private extension NoteDatabase {
       assert(deleted)
     }
 
-    let inMemoryChallengeTemplates = Set(note.challengeTemplates.keys)
+    let inMemoryChallengeTemplates = Set(note.promptCollections.keys)
     let onDiskChallengeTemplates = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
       .map { $0.key }
       .asSet()
@@ -784,7 +784,7 @@ private extension NoteDatabase {
     let today = Date()
     let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
     for newKey in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
-      let template = note.challengeTemplates[newKey]!
+      let template = note.promptCollections[newKey]!
       let record = ContentRecord(
         text: template.rawValue,
         noteId: identifier,
@@ -798,7 +798,7 @@ private extension NoteDatabase {
         Logger.shared.critical("Could not insert content")
         throw error
       }
-      for index in template.challenges.indices {
+      for index in template.prompts.indices {
         let updateKey = try self.updateKey(
           changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newKey)",
           in: db
@@ -816,7 +816,7 @@ private extension NoteDatabase {
       }
     }
     for modifiedKey in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
-      let template = note.challengeTemplates[modifiedKey]!
+      let template = note.promptCollections[modifiedKey]!
       guard var record = try ContentRecord.fetchOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: modifiedKey)) else {
         assertionFailure("Should be a record")
         continue
@@ -840,8 +840,7 @@ private extension NoteDatabase {
       let metadata = Note.Metadata(
         timestamp: metadataItem.modifiedTimestamp,
         hashtags: metadataItem.noteHashtags.map { $0.hashtag },
-        title: metadataItem.title,
-        containsText: metadataItem.hasText
+        title: metadataItem.title
       )
       return (key: metadataItem.id, value: metadata)
     }
@@ -860,33 +859,32 @@ private extension NoteDatabase {
     let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
     let tuples = try contentRecords
       .filter { $0.role.hasPrefix("prompt=") }
-      .map { (key: $0.key, value: try Self.challengeTemplate(from: $0)) }
+      .map { (key: $0.key, value: try Self.promptCollection(from: $0)) }
     let promptCollections = Dictionary(uniqueKeysWithValues: tuples)
     let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
     return Note(
       metadata: Note.Metadata(
         timestamp: sqliteNote.modifiedTimestamp,
         hashtags: hashtags,
-        title: sqliteNote.title,
-        containsText: sqliteNote.hasText
+        title: sqliteNote.title
       ),
       text: noteText,
-      challengeTemplates: promptCollections
+      promptCollections: promptCollections
     )
   }
 
-  static func challengeTemplate(identifier: ChallengeTemplateIdentifier, database: Database) throws -> PromptCollection {
+  static func promptCollection(identifier: PromptCollectionIdentifier, database: Database) throws -> PromptCollection {
     guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
-      throw Error.unknownChallengeTemplate
+      throw Error.unknownPromptCollection
     }
-    return try challengeTemplate(from: record)
+    return try promptCollection(from: record)
   }
 
-  static func challengeTemplate(
+  static func promptCollection(
     from contentRecord: ContentRecord
   ) throws -> PromptCollection {
     guard let klass = PromptType.classMap[contentRecord.role] else {
-      throw Error.unknownChallengeType
+      throw Error.unknownPromptType
     }
     guard let template = klass.init(rawValue: contentRecord.text) else {
       throw Error.cannotDecodeTemplate
