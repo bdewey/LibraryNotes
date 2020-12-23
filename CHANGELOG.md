@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- **Significant** refactor / cleanup of the data layer. Bug chance is **EXTREMELY** high. However, the app is now in a good place for "multi-content notes" (inspired by Wikipedia) which will help move into new scenarios, like explicitly capturing notes "about" things.
+
 ## [0.32.0] - 2020-12-02
 
 ### Fixed
