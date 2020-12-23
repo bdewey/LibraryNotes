@@ -17,22 +17,50 @@
 
 import Foundation
 
+/// This struct provides a standard string encoding for all keys used for prompts: "prompt-{number}"
+public struct PromptCollectionKey: RawRepresentable {
+  public let rawValue: Note.ContentKey
+  public let numericIndex: Int
+
+  private static let prefix = "prompt-"
+
+  public init?(rawValue: String) {
+    guard rawValue.hasPrefix(Self.prefix) else {
+      return nil
+    }
+    let numberPart = rawValue.suffix(rawValue.count - Self.prefix.count)
+    guard let numericIndex = Int(numberPart) else {
+      return nil
+    }
+    self.rawValue = rawValue
+    self.numericIndex = numericIndex
+  }
+
+  public init(numericIndex: Int) {
+    self.numericIndex = numericIndex
+    self.rawValue = "\(Self.prefix)\(numericIndex)"
+  }
+}
+
 public extension Note {
   /// Creates a new Note from the contents of a parsed text buffer.
   init(parsedString: ParsedString) {
-    var challengeTemplates = [ChallengeTemplate]()
-    challengeTemplates.append(contentsOf: ClozeTemplate.extract(from: parsedString))
-    challengeTemplates.append(contentsOf: QuoteTemplate.extract(from: parsedString))
-    challengeTemplates.append(contentsOf: QuestionAndAnswerTemplate.extract(from: parsedString))
+    var prompts = [PromptCollection]()
+    prompts.append(contentsOf: ClozePromptCollection.extract(from: parsedString))
+    prompts.append(contentsOf: QuotePrompt.extract(from: parsedString))
+    prompts.append(contentsOf: QuestionAndAnswerPrompt.extract(from: parsedString))
+    var keyedCollection = [Note.ContentKey: PromptCollection]()
+    for (index, promptCollection) in prompts.enumerated() {
+      keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
+    }
     self.init(
       metadata: Note.Metadata(
         timestamp: Date(),
         hashtags: parsedString.hashtags,
-        title: String(parsedString.title.split(separator: "\n").first ?? ""),
-        containsText: true
+        title: String(parsedString.title.split(separator: "\n").first ?? "")
       ),
       text: parsedString.string,
-      challengeTemplates: challengeTemplates
+      promptCollections: keyedCollection
     )
   }
 
@@ -42,8 +70,8 @@ public extension Note {
   }
 
   mutating func updateMarkdown(_ markdown: String) {
-    let newNote = Note(markdown: markdown)
-    ChallengeTemplate.assignMatchingTemplateIdentifiers(from: challengeTemplates, to: newNote.challengeTemplates)
+    var newNote = Note(markdown: markdown)
+    newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }
 }

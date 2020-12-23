@@ -21,25 +21,13 @@ import GRDB
 /// Core record for the `note` table
 struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   static let databaseTableName = "Note"
-  var id: FlakeID
+  var id: Note.Identifier
   var title: String
   var modifiedTimestamp: Date
-  var modifiedDevice: Int64
+  var modifiedDevice: String
   var hasText: Bool
   var deleted: Bool
   var updateSequenceNumber: Int64
-
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "note", body: { table in
-      table.column("id", .integer).primaryKey()
-      table.column("title", .text).notNull().defaults(to: "")
-      table.column("modifiedTimestamp", .datetime).notNull()
-      table.column("modifiedDevice", .integer).indexed().references("device", onDelete: .setNull)
-      table.column("hasText", .boolean).notNull()
-      table.column("deleted", .boolean).notNull().defaults(to: false)
-      table.column("updateSequenceNumber", .integer).notNull()
-    })
-  }
 
   enum Columns {
     static let id = Column(CodingKeys.id)
@@ -48,25 +36,32 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
     static let deleted = Column(CodingKeys.deleted)
   }
 
-  static let noteHashtags = hasMany(NoteHashtagRecord.self)
+  static let noteHashtags = hasMany(NoteLinkRecord.self)
 
   var hashtags: QueryInterfaceRequest<String> {
-    NoteHashtagRecord
-      .filter(NoteHashtagRecord.Columns.noteId == id.rawValue)
-      .select(NoteHashtagRecord.Columns.hashtag, as: String.self)
+    NoteLinkRecord
+      .filter(NoteLinkRecord.Columns.noteId == id)
+      .select(NoteLinkRecord.Columns.targetTitle, as: String.self)
   }
 
-  static let challengeTemplates = hasMany(ChallengeTemplateRecord.self)
-  var challengeTemplates: QueryInterfaceRequest<ChallengeTemplateRecord> { request(for: NoteRecord.challengeTemplates) }
+  static var contentRecords = hasMany(ContentRecord.self)
 
-  /// The association between this note and its text.
-  static let noteText = hasOne(NoteTextRecord.self)
+  var contentRecords: QueryInterfaceRequest<ContentRecord> { request(for: Self.contentRecords) }
+
+  var prompts: QueryInterfaceRequest<ContentRecord> {
+    request(for: Self.contentRecords).filter(ContentRecord.Columns.role.like("prompt=%"))
+  }
 
   /// A query that returns the text associated with this note.
-  var noteText: QueryInterfaceRequest<NoteTextRecord> { request(for: NoteRecord.noteText) }
+  var noteText: QueryInterfaceRequest<ContentRecord> {
+    request(for: Self.contentRecords).filter(ContentRecord.Columns.role == "primary")
+  }
 
-  static let challenges = hasMany(ChallengeRecord.self, through: challengeTemplates, using: ChallengeTemplateRecord.challenges)
-  var challenges: QueryInterfaceRequest<ChallengeRecord> { request(for: NoteRecord.challenges) }
+  static let promptStatistics = hasMany(PromptRecord.self, through: contentRecords, using: ContentRecord.promptStatistics)
+
+  var promptStatistics: QueryInterfaceRequest<PromptRecord> {
+    request(for: Self.promptStatistics)
+  }
 
   /// The association between this note and the device it was last changed on.
   static let device = belongsTo(DeviceRecord.self)
@@ -77,7 +72,7 @@ extension NoteRecord {
   struct MergeInfo: MergeInfoRecord, Decodable {
     // MARK: - Stored properties
 
-    var id: FlakeID
+    var id: String
     var modifiedTimestamp: Date
     var device: DeviceRecord
     var updateSequenceNumber: Int64
@@ -93,7 +88,7 @@ extension NoteRecord {
     var instanceRequest: QueryInterfaceRequest<Self> {
       NoteRecord
         .including(required: NoteRecord.device)
-        .filter(key: id.rawValue)
+        .filter(key: id)
         .asRequest(of: NoteRecord.MergeInfo.self)
     }
 
@@ -102,38 +97,28 @@ extension NoteRecord {
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
       guard
-        var note = try NoteRecord.filter(key: id.rawValue).fetchOne(sourceDatabase)
+        let note = try NoteRecord.filter(key: id).fetchOne(sourceDatabase)
       else {
         return
       }
-      if let device = try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase) {
-        note.modifiedDevice = device.id!
-      } else {
+      if (try DeviceRecord.filter(key: ["uuid": device.uuid]).fetchOne(destinationDatabase)) == nil {
+        // Make a device record in the destination database.
         var device = self.device
-        device.id = nil
         device.updateSequenceNumber = updateSequenceNumber
         try device.insert(destinationDatabase)
-        note.modifiedDevice = device.id!
       }
 
-      try NoteRecord.deleteOne(destinationDatabase, key: id.rawValue)
+      try NoteRecord.deleteOne(destinationDatabase, key: id)
       try note.insert(destinationDatabase)
       try note.hashtags.fetchAll(sourceDatabase).forEach { hashtag in
-        let record = NoteHashtagRecord(noteId: id, hashtag: hashtag)
+        let record = NoteLinkRecord(noteId: id, targetTitle: hashtag)
         try record.insert(destinationDatabase)
       }
-      try note.noteText.fetchAll(sourceDatabase).forEach { noteText in
-        var noteText = noteText
-        noteText.id = nil
-        try noteText.insert(destinationDatabase)
+      try note.contentRecords.fetchAll(sourceDatabase).forEach { contentRecord in
+        try contentRecord.insert(destinationDatabase)
       }
-      try note.challengeTemplates.fetchAll(sourceDatabase).forEach { challengeTemplate in
-        try challengeTemplate.insert(destinationDatabase)
-      }
-      try note.challenges.fetchAll(sourceDatabase).forEach { challenge in
-        var challenge = challenge
-        challenge.id = nil
-        try challenge.insert(destinationDatabase)
+      try note.promptStatistics.fetchAll(sourceDatabase).forEach { promptStatisticsRecord in
+        try promptStatisticsRecord.insert(destinationDatabase)
       }
     }
   }

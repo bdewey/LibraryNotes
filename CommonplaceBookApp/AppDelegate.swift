@@ -61,9 +61,9 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     case unknownFormat = "Unknown file format"
   }
 
-  // This is here to force initialization of the CardTemplateType, which registers the class
-  // with the type name. This has to be done before deserializing any card templates.
-  private let knownCardTemplateTypes: [ChallengeTemplateType] = [
+  // This is here to force initialization of the PromptType, which registers the class
+  // with the type name. This has to be done before deserializing any prompt collections.
+  private let knownPromptTypes: [PromptType] = [
     .cloze,
     .quote,
     .questionAndAnswer,

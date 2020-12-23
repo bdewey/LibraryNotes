@@ -138,7 +138,7 @@ final class PieceTableTests: XCTestCase {
     }
   }
 
-  func testMegabyteStringPerformance() {
+  func TOO_SLOW_testMegabyteStringPerformance() {
     measure {
       var str = megabyteText
       var index = str.index(str.startIndex, offsetBy: 50 * 1024)

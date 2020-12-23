@@ -23,11 +23,10 @@ public struct StudyLog {
 
   public struct Entry: Hashable, Comparable {
     public var timestamp: Date
-    public var identifier: ChallengeIdentifier
+    public var identifier: PromptIdentifier
     public var statistics: AnswerStatistics
 
-    public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
-      assert(identifier.challengeTemplateID != nil)
+    public init(timestamp: Date, identifier: PromptIdentifier, statistics: AnswerStatistics) {
       self.timestamp = timestamp
       self.identifier = identifier
       self.statistics = statistics
@@ -35,11 +34,11 @@ public struct StudyLog {
 
     public static func < (lhs: StudyLog.Entry, rhs: StudyLog.Entry) -> Bool {
       if lhs.timestamp != rhs.timestamp { return lhs.timestamp < rhs.timestamp }
-      if lhs.identifier.challengeTemplateID != rhs.identifier.challengeTemplateID {
-        return lhs.identifier.challengeTemplateID! < rhs.identifier.challengeTemplateID!
+      if lhs.identifier.promptKey != rhs.identifier.promptKey {
+        return lhs.identifier.promptKey < rhs.identifier.promptKey
       }
-      if lhs.identifier.index != rhs.identifier.index {
-        return lhs.identifier.index < rhs.identifier.index
+      if lhs.identifier.promptIndex != rhs.identifier.promptIndex {
+        return lhs.identifier.promptIndex < rhs.identifier.promptIndex
       }
       if lhs.statistics.correct != rhs.statistics.correct {
         return lhs.statistics.correct < rhs.statistics.correct
@@ -58,20 +57,20 @@ public struct StudyLog {
   /// Constructs an entry from parameters and inserts it into the log.
   /// (Slightly easier to use in tests.)
   public mutating func appendEntry(
-    challengeIdentifier: ChallengeIdentifier,
+    promptIdentifier: PromptIdentifier,
     correct: Int = 1,
     incorrect: Int = 0,
     timestamp: Date = Date()
   ) {
     let entry = Entry(
       timestamp: timestamp,
-      identifier: challengeIdentifier,
+      identifier: promptIdentifier,
       statistics: AnswerStatistics(correct: correct, incorrect: incorrect)
     )
     entries.append(entry)
   }
 
-  /// Constructs log entries from all of the challenges in `studySession` and adds them to the log.
+  /// Constructs log entries from all of the prompts in `studySession` and adds them to the log.
   public mutating func updateStudySessionResults(
     _ studySession: StudySession,
     on date: Date = Date()
@@ -93,10 +92,10 @@ public struct StudyLog {
     ).sorted()
   }
 
-  /// Computes dates until which we should suppress the given challenge identifier from further
+  /// Computes dates until which we should suppress the given identifier from further
   /// study.
-  public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
-    return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
+  public func identifierSuppressionDates() -> [PromptIdentifier: Date] {
+    return entries.reduce(into: [PromptIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
       guard entry.statistics.correct > 0 else {
         suppressionDates[entry.identifier] = nil
         return

@@ -18,51 +18,42 @@
 import Foundation
 import UIKit
 
-public extension ChallengeTemplateType {
-  static let quote = ChallengeTemplateType(rawValue: "quote", class: QuoteTemplate.self)
+public extension PromptType {
+  static let quote = PromptType(rawValue: "prompt=quote", class: QuotePrompt.self)
 }
 
-public final class QuoteTemplate: ChallengeTemplate {
-  public required init?(rawValue: String) {
+public struct QuotePrompt: PromptCollection {
+  public init(rawValue: String) {
     self.markdown = rawValue
-    super.init()
   }
 
-  override public var type: ChallengeTemplateType { return .quote }
+  public var type: PromptType { return .quote }
 
   /// The quote template is itself a card.
-  override public var challenges: [Challenge] { return [self] }
+  public var prompts: [Prompt] { return [self] }
 
   private let markdown: String
-  override public var rawValue: String {
+  public var rawValue: String {
     return markdown
   }
 
-  public static func extract(from parsedString: ParsedString) -> [QuoteTemplate] {
+  public static func extract(from parsedString: ParsedString) -> [QuotePrompt] {
     guard let root = try? parsedString.result.get() else { return [] }
     let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
     return anchoredRoot
       .findNodes(where: { $0.type == .blockquote })
-      .compactMap { node -> QuoteTemplate? in
+      .compactMap { node -> QuotePrompt? in
         let chars = parsedString[node.range]
-        return QuoteTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
+        return QuotePrompt(rawValue: String(utf16CodeUnits: chars, count: chars.count))
       }
   }
 }
 
-extension QuoteTemplate: Challenge {
-  public var identifier: String {
-    return markdown
-  }
-
-  public var challengeIdentifier: ChallengeIdentifier {
-    return ChallengeIdentifier(templateDigest: templateIdentifier, index: 0)
-  }
-
-  public func challengeView(
+extension QuotePrompt: Prompt {
+  public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties
-  ) -> ChallengeView {
+  ) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = NSAttributedString(
       string: "Identify the source".uppercased(),
@@ -92,8 +83,8 @@ extension QuoteTemplate: Challenge {
   }
 }
 
-extension QuoteTemplate: Equatable {
-  public static func == (lhs: QuoteTemplate, rhs: QuoteTemplate) -> Bool {
+extension QuotePrompt: Equatable {
+  public static func == (lhs: QuotePrompt, rhs: QuotePrompt) -> Bool {
     return lhs.markdown == rhs.markdown
   }
 }

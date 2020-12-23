@@ -100,10 +100,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         var studySession = storage.synchronousStudySession(date: future)
         XCTAssertEqual(3, studySession.count)
-        while studySession.currentCard != nil {
+        while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
-        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
+        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }
@@ -124,10 +124,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         var studySession = storage.synchronousStudySession(date: future)
         XCTAssertEqual(3, studySession.count)
-        while studySession.currentCard != nil {
+        while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
-        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
+        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }
@@ -296,7 +296,7 @@ private extension NoteSqliteStorageMergeTests {
         }
         pipelineRan.fulfill()
       }, receiveValue: { _ in })
-    waitForExpectations(timeout: 3, handler: nil)
+    waitForExpectations(timeout: 300, handler: nil)
     // cancel() should be a no-op
     cancelable.cancel()
   }

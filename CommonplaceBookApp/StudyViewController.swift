@@ -176,7 +176,7 @@ public final class StudyViewController: UIViewController {
 
   /// The view displaying the current card.
   /// - note: Changing this value will animate away the old card view and animate in the new.
-  private var currentCardView: ChallengeView? {
+  private var currentCardView: PromptView? {
     didSet {
       currentCardView?.alpha = 0
       oldValue?.accessibilityIdentifier = nil
@@ -323,7 +323,7 @@ public final class StudyViewController: UIViewController {
   private func userDidRespond(correct: Bool) {
     studySession.recordAnswer(correct: correct)
     configureUI(animated: true) {
-      if self.studySession.remainingCards == 0 {
+      if self.studySession.remainingPrompts == 0 {
         self.studySession.studySessionEndDate = Date()
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
           self.delegate?.studyViewController(self, didFinishSession: self.studySession)
@@ -335,12 +335,12 @@ public final class StudyViewController: UIViewController {
 
   private func configureUI(animated: Bool, completion: (() -> Void)?) {
     guard isViewLoaded else { return }
-    makeCardView(for: studySession.currentCard) { cardView in
+    makePromptView(for: studySession.currentPrompt) { cardView in
       self.currentCardView = cardView
     }
     let progressUpdates = { [progressView, studySession, doneImageView] in
-      progressView.setProgress(Float(studySession.count - studySession.remainingCards) / Float(studySession.count), animated: animated)
-      if studySession.remainingCards == 0 {
+      progressView.setProgress(Float(studySession.count - studySession.remainingPrompts) / Float(studySession.count), animated: animated)
+      if studySession.remainingPrompts == 0 {
         progressView.tintColor = .systemGreen
         doneImageView.image = UIImage(systemName: "checkmark.seal.fill")
         doneImageView.tintColor = .systemGreen
@@ -357,35 +357,34 @@ public final class StudyViewController: UIViewController {
   }
 
   /// Creates a card view for a card.
-  private func makeCardView(
-    for sessionChallengeIdentifier: StudySession.SessionChallengeIdentifier?,
-    completion: @escaping (ChallengeView?) -> Void
+  private func makePromptView(
+    for sessionPromptIdentifier: StudySession.SessionPromptIdentifier?,
+    completion: @escaping (PromptView?) -> Void
   ) {
-    guard let sessionChallengeIdentifier = sessionChallengeIdentifier else {
+    guard let sessionPromptIdentifier = sessionPromptIdentifier else {
       completion(nil)
       return
     }
     do {
-      let challenge = try database.challenge(
-        noteIdentifier: sessionChallengeIdentifier.noteIdentifier,
-        challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
+      let prompt = try database.prompt(
+        promptIdentifier: sessionPromptIdentifier.promptIdentifier
       )
-      let challengeView = challenge.challengeView(
+      let promptView = prompt.promptView(
         database: database,
         properties: CardDocumentProperties(
-          documentName: sessionChallengeIdentifier.noteIdentifier,
-          attributionMarkdown: sessionChallengeIdentifier.noteTitle
+          documentName: sessionPromptIdentifier.noteIdentifier,
+          attributionMarkdown: sessionPromptIdentifier.noteTitle
         )
       )
-      challengeView.delegate = self
-      view.addSubview(challengeView)
-      challengeView.snp.makeConstraints { make in
+      promptView.delegate = self
+      view.addSubview(promptView)
+      promptView.snp.makeConstraints { make in
         make.left.right.equalTo(self.view.readableContentGuide)
         make.centerY.equalToSuperview()
       }
-      completion(challengeView)
+      completion(promptView)
     } catch {
-      Logger.shared.error("Unexpected error generating challenge view: \(error)")
+      Logger.shared.error("Unexpected error generating prompt view: \(error)")
       completion(nil)
     }
   }
@@ -452,8 +451,8 @@ private extension StudyViewController {
   }
 }
 
-extension StudyViewController: ChallengeViewDelegate {
-  public func challengeViewDidRevealAnswer(_ challengeView: ChallengeView) {
+extension StudyViewController: PromptViewDelegate {
+  public func promptViewDidRevealAnswer(_ promptView: PromptView) {
     currentDynamicItem?.shouldChangeColor = true
   }
 }

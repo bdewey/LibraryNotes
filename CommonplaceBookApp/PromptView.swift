@@ -15,32 +15,29 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+import AVFoundation
 import Foundation
-import GRDB
+import UIKit
 
-/// Core record for the `noteHashtag` association
-struct NoteHashtagRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "noteHashtag"
-  var noteId: FlakeID
-  var hashtag: String
+public protocol PromptViewDelegate: class {
+  func promptViewDidRevealAnswer(_ promptView: PromptView)
+}
 
-  enum Columns {
-    static let noteId = Column(NoteHashtagRecord.CodingKeys.noteId)
-    static let hashtag = Column(NoteHashtagRecord.CodingKeys.hashtag)
+open class PromptView: UIControl {
+  public var isAnswerVisible = false
+  public weak var delegate: PromptViewDelegate?
+
+  override public init(frame: CGRect) {
+    super.init(frame: frame)
+    commonInit()
   }
 
-  static let note = belongsTo(NoteRecord.self)
+  public required init?(coder: NSCoder) {
+    super.init(coder: coder)
+    commonInit()
+  }
 
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "noteHashtag", body: { table in
-      table.column("noteId", .integer)
-        .notNull()
-        .indexed()
-        .references("note", onDelete: .cascade)
-      table.column("hashtag", .text)
-        .notNull()
-        .indexed()
-      table.primaryKey(["noteId", "hashtag"])
-    })
+  private func commonInit() {
+    backgroundColor = UIColor.secondarySystemGroupedBackground
   }
 }

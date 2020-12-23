@@ -24,18 +24,14 @@ import UIKit
 /// a hint. The removed word/phrase is a "cloze".
 ///
 /// See https://en.wikipedia.org/wiki/Cloze_test
-public struct ClozeCard {
+public struct ClozePrompt {
   /// Designated initializer.
   ///
   /// - parameter markdown: The markdown content that contains at least one cloze.
   /// - parameter closeIndex: The index of the cloze in `markdown` to remove when testing.
-  public init(template: ClozeTemplate, markdown: String, clozeIndex: Int) {
+  public init(template: ClozePromptCollection, markdown: String, clozeIndex: Int) {
     self.markdown = markdown
     self.clozeIndex = clozeIndex
-    self.challengeIdentifier = ChallengeIdentifier(
-      templateDigest: template.templateIdentifier,
-      index: clozeIndex
-    )
   }
 
   /// The markdown content that contains at least one cloze.
@@ -44,8 +40,6 @@ public struct ClozeCard {
   /// The index of the cloze in `markdown` to remove when testing.
   public let clozeIndex: Int
 
-  public var challengeIdentifier: ChallengeIdentifier
-
   /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
   /// replaced with a hint if present, and highlighted.
   public var cardFrontSettings: ParsedAttributedString.Settings {
@@ -53,16 +47,11 @@ public struct ClozeCard {
   }
 }
 
-extension ClozeCard: Challenge {
-  public var identifier: String {
-    let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
-    return markdown + suffix
-  }
-
-  public func challengeView(
+extension ClozePrompt: Prompt {
+  public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties
-  ) -> ChallengeView {
+  ) -> PromptView {
     let cardView = TwoSidedCardView(frame: .zero)
     cardView.context = context()
     let (front, chapterAndVerse) = ParsedAttributedString(string: markdown, settings: cardFrontSettings).decomposedChapterAndVerseAnnotation

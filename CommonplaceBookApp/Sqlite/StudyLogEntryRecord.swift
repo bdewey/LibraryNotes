@@ -19,32 +19,18 @@ import Foundation
 import GRDB
 
 struct StudyLogEntryRecord: Codable, FetchableRecord, MutablePersistableRecord {
-  static let databaseTableName = "studyLogEntry"
+  static let databaseTableName = "promptHistory"
   var id: Int64?
   var timestamp: Date
   var correct: Int
   var incorrect: Int
-  var challengeId: Int64
-
-  mutating func didInsert(with rowID: Int64, for column: String?) {
-    id = rowID
-  }
-
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "studyLogEntry", body: { table in
-      table.autoIncrementedPrimaryKey("id")
-      table.column("timestamp", .datetime).notNull()
-      table.column("correct", .integer).notNull().defaults(to: 0)
-      table.column("incorrect", .integer).notNull().defaults(to: 0)
-      table.column("challengeId", .integer)
-        .notNull()
-        .references("challenge", onDelete: .cascade)
-    })
-  }
+  var noteId: String
+  var promptKey: String
+  var promptIndex: Int
 
   enum Columns {
     static let timestamp = Column(StudyLogEntryRecord.CodingKeys.timestamp)
   }
 
-  static let challenge = belongsTo(ChallengeRecord.self)
+  static let prompt = belongsTo(PromptRecord.self)
 }

@@ -19,36 +19,35 @@ import Foundation
 import Logging
 import UIKit
 
-public extension ChallengeTemplateType {
-  static let cloze = ChallengeTemplateType(rawValue: "cloze", class: ClozeTemplate.self)
+public extension PromptType {
+  static let cloze = PromptType(rawValue: "prompt=cloze", class: ClozePromptCollection.self)
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
-public final class ClozeTemplate: ChallengeTemplate {
-  override public var type: ChallengeTemplateType { return .cloze }
+public struct ClozePromptCollection: PromptCollection {
+  public var type: PromptType { return .cloze }
 
-  public required init?(rawValue: String) {
+  public init?(rawValue: String) {
     self.markdown = rawValue
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
     guard let node = try? memoizationTable.parseBuffer(rawValue) else {
       return nil
     }
     self.node = node
-    super.init()
   }
 
-  override public var rawValue: String { markdown }
+  public var rawValue: String { markdown }
   private let markdown: String
   private let node: SyntaxTreeNode
 
   // MARK: - CardTemplate conformance
 
-  override public var challenges: [Challenge] {
+  public var prompts: [Prompt] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
-    return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
+    return (0 ..< clozeCount).map { ClozePrompt(template: self, markdown: markdown, clozeIndex: $0) }
   }
 
-  public static func extract(from parsedString: ParsedString) -> [ClozeTemplate] {
+  public static func extract(from parsedString: ParsedString) -> [ClozePromptCollection] {
     guard let root = try? parsedString.result.get() else {
       return []
     }
@@ -64,10 +63,10 @@ public final class ClozeTemplate: ChallengeTemplate {
     // one time in `clozes`. Deduplicate using pointer identity.
     let clozeSet = Set<ObjectIdentityHashable>(clozeParents.map { ObjectIdentityHashable($0) })
     Logger.shared.debug("Found \(clozeSet.count) clozes")
-    return clozeSet.compactMap { wrappedNode -> ClozeTemplate? in
+    return clozeSet.compactMap { wrappedNode -> ClozePromptCollection? in
       let node = wrappedNode.value
       let chars = parsedString[node.range]
-      return ClozeTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
+      return ClozePromptCollection(rawValue: String(utf16CodeUnits: chars, count: chars.count))
     }
   }
 }

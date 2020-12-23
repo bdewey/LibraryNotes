@@ -18,21 +18,16 @@
 import Foundation
 import GRDB
 
-struct ChangeLogRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName: String = "changeLog"
-  var deviceID: Int64
-  var updateSequenceNumber: Int64
-  var timestamp: Date
-  var changeDescription: String
+/// Core record for the `noteHashtag` association
+struct NoteLinkRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "noteLink"
+  var noteId: String
+  var targetTitle: String
 
-  static func createV1Table(in database: Database) throws {
-    try database.create(table: "changeLog", body: { table in
-      table.column("deviceID", .integer).notNull().indexed().references("device", onDelete: .cascade)
-      table.column("updateSequenceNumber", .integer).notNull()
-      table.column("timestamp", .datetime).notNull()
-      table.column("changeDescription", .text).notNull()
-
-      table.primaryKey(["deviceID", "updateSequenceNumber"])
-    })
+  enum Columns: String, ColumnExpression {
+    case noteId
+    case targetTitle
   }
+
+  static let note = belongsTo(NoteRecord.self)
 }
