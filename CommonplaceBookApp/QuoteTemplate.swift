@@ -32,7 +32,7 @@ public struct QuoteTemplate: ChallengeTemplate {
   public var type: ChallengeTemplateType { return .quote }
 
   /// The quote template is itself a card.
-  public var challenges: [Challenge] { return [self] }
+  public var challenges: [Prompt] { return [self] }
 
   private let markdown: String
   public var rawValue: String {
@@ -51,7 +51,7 @@ public struct QuoteTemplate: ChallengeTemplate {
   }
 }
 
-extension QuoteTemplate: Challenge {
+extension QuoteTemplate: Prompt {
   public var identifier: String {
     return markdown
   }
@@ -60,10 +60,10 @@ extension QuoteTemplate: Challenge {
     ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
   }
 
-  public func challengeView(
+  public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties
-  ) -> ChallengeView {
+  ) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = NSAttributedString(
       string: "Identify the source".uppercased(),

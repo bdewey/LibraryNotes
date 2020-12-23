@@ -52,15 +52,15 @@ public struct QuestionAndAnswerTemplate: ChallengeTemplate {
   }
 
   /// The single challenge from this template: Ourselves!
-  public var challenges: [Challenge] { return [self] }
+  public var challenges: [Prompt] { return [self] }
 }
 
-extension QuestionAndAnswerTemplate: Challenge {
+extension QuestionAndAnswerTemplate: Prompt {
   public var challengeIdentifier: ChallengeIdentifier {
     ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
   }
 
-  public func challengeView(database: NoteDatabase, properties: CardDocumentProperties) -> ChallengeView {
+  public func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
     // TODO: Need to re-invent images :-(

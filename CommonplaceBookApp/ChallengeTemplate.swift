@@ -56,7 +56,6 @@ public protocol ChallengeTemplate {
   
   var rawValue: String { get }
 
-
   /// Unique identifier for this template. Must by set by whatever data structure "owns"
   /// the template before creating any challenges from it.
   ///
@@ -68,12 +67,12 @@ public protocol ChallengeTemplate {
   var type: ChallengeTemplateType { get }
 
   /// The specific cards from this template.
-  var challenges: [Challenge] { get }
+  var challenges: [Prompt] { get }
 }
 
 public extension Array where Element: ChallengeTemplate {
   /// Returns the challenges from all of the associations in the array.
-  var cards: [Challenge] {
-    return [Challenge](map { $0.challenges }.joined())
+  var cards: [Prompt] {
+    return [Prompt](map { $0.challenges }.joined())
   }
 }

@@ -28,10 +28,10 @@
 		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
 		D3198DB123DBCA0F0098A9D9 /* PromptStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
-		D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */; };
+		D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* PromptView.swift */; };
 		D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */; };
 		D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */; };
-		D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA83229D61E800ED2B76 /* Challenge.swift */; };
+		D31AFAB7229D61EE00ED2B76 /* Prompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA83229D61E800ED2B76 /* Prompt.swift */; };
 		D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */; };
 		D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA87229D61E900ED2B76 /* StudyViewController.swift */; };
 		D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */; };
@@ -184,10 +184,10 @@
 		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
 		D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStatistics.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
-		D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChallengeView.swift; sourceTree = "<group>"; };
+		D31AFA7A229D61E800ED2B76 /* PromptView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; };
 		D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TimeInterval+CommonIntervals.swift"; sourceTree = "<group>"; };
 		D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CardDocumentProperties.swift; sourceTree = "<group>"; };
-		D31AFA83229D61E800ED2B76 /* Challenge.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Challenge.swift; sourceTree = "<group>"; };
+		D31AFA83229D61E800ED2B76 /* Prompt.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Prompt.swift; sourceTree = "<group>"; };
 		D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ClosedRange+SwiftFlash.swift"; sourceTree = "<group>"; };
 		D31AFA87229D61E900ED2B76 /* StudyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StudyViewController.swift; sourceTree = "<group>"; };
 		D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
@@ -392,10 +392,10 @@
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */,
-				D31AFA83229D61E800ED2B76 /* Challenge.swift */,
+				D31AFA83229D61E800ED2B76 /* Prompt.swift */,
 				D31AFA97229D61EB00ED2B76 /* ChallengeTemplate.swift */,
 				D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */,
-				D31AFA7A229D61E800ED2B76 /* ChallengeView.swift */,
+				D31AFA7A229D61E800ED2B76 /* PromptView.swift */,
 				D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */,
 				D30D6B462549C44700F5902D /* CharacterSet+Extensions.swift */,
 				D31AFA85229D61E800ED2B76 /* ClosedRange+SwiftFlash.swift */,
@@ -750,7 +750,7 @@
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
 				D3A58F15240D469700CE3251 /* VersionVector.swift in Sources */,
 				D30D6B502549C44800F5902D /* MiniMarkdownGrammar.swift in Sources */,
-				D31AFAB7229D61EE00ED2B76 /* Challenge.swift in Sources */,
+				D31AFAB7229D61EE00ED2B76 /* Prompt.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
@@ -760,7 +760,7 @@
 				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
-				D31AFAAE229D61EE00ED2B76 /* ChallengeView.swift in Sources */,
+				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,

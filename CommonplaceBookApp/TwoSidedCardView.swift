@@ -28,7 +28,7 @@ private extension CGFloat {
 /// The view initially shows the card front with no buttons. When you tap the card, it will
 /// show the card back and two buttons: "Got it" and "study more."
 ///
-public final class TwoSidedCardView: ChallengeView {
+public final class TwoSidedCardView: PromptView {
   override public init(frame: CGRect) {
     super.init(frame: frame)
     commonInit()
@@ -145,6 +145,6 @@ public final class TwoSidedCardView: ChallengeView {
 
   @objc private func revealAnswer() {
     setAnswerVisible(true, animated: true)
-    delegate?.challengeViewDidRevealAnswer(self)
+    delegate?.promptViewDidRevealAnswer(self)
   }
 }

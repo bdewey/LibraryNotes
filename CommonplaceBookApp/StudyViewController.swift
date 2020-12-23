@@ -176,7 +176,7 @@ public final class StudyViewController: UIViewController {
 
   /// The view displaying the current card.
   /// - note: Changing this value will animate away the old card view and animate in the new.
-  private var currentCardView: ChallengeView? {
+  private var currentCardView: PromptView? {
     didSet {
       currentCardView?.alpha = 0
       oldValue?.accessibilityIdentifier = nil
@@ -359,7 +359,7 @@ public final class StudyViewController: UIViewController {
   /// Creates a card view for a card.
   private func makeCardView(
     for sessionChallengeIdentifier: StudySession.SessionChallengeIdentifier?,
-    completion: @escaping (ChallengeView?) -> Void
+    completion: @escaping (PromptView?) -> Void
   ) {
     guard let sessionChallengeIdentifier = sessionChallengeIdentifier else {
       completion(nil)
@@ -369,7 +369,7 @@ public final class StudyViewController: UIViewController {
       let challenge = try database.challenge(
         challengeIdentifier: sessionChallengeIdentifier.challengeIdentifier
       )
-      let challengeView = challenge.challengeView(
+      let challengeView = challenge.promptView(
         database: database,
         properties: CardDocumentProperties(
           documentName: sessionChallengeIdentifier.noteIdentifier,
@@ -451,8 +451,8 @@ private extension StudyViewController {
   }
 }
 
-extension StudyViewController: ChallengeViewDelegate {
-  public func challengeViewDidRevealAnswer(_ challengeView: ChallengeView) {
+extension StudyViewController: PromptViewDelegate {
+  public func promptViewDidRevealAnswer(_ promptView: PromptView) {
     currentDynamicItem?.shouldChangeColor = true
   }
 }

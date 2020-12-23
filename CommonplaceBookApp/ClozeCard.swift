@@ -54,16 +54,16 @@ public struct ClozeCard {
   }
 }
 
-extension ClozeCard: Challenge {
+extension ClozeCard: Prompt {
   public var identifier: String {
     let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
     return markdown + suffix
   }
 
-  public func challengeView(
+  public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties
-  ) -> ChallengeView {
+  ) -> PromptView {
     let cardView = TwoSidedCardView(frame: .zero)
     cardView.context = context()
     let (front, chapterAndVerse) = ParsedAttributedString(string: markdown, settings: cardFrontSettings).decomposedChapterAndVerseAnnotation

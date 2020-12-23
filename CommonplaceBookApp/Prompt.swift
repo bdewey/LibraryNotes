@@ -19,25 +19,26 @@ import AVFoundation
 import Foundation
 import UIKit
 
-public protocol ChallengeViewDelegate: class {
-  func challengeViewDidRevealAnswer(_ challengeView: ChallengeView)
+/// Uniquely identifies a challenge.
+public struct ChallengeIdentifier: Hashable {
+  public var noteId: String
+  public var promptKey: String
+  public var promptIndex: Int
 }
 
-open class ChallengeView: UIControl {
-  public var isAnswerVisible = false
-  public weak var delegate: ChallengeViewDelegate?
+/// A specific thing to recall.
+public protocol Prompt {
+  /// Every challenge needs a unique identifier. This serves as an key to associate this card
+  /// with statistics describing how well the person handles the challenge over time.
+  var challengeIdentifier: ChallengeIdentifier { get }
 
-  override public init(frame: CGRect) {
-    super.init(frame: frame)
-    commonInit()
-  }
-
-  public required init?(coder: NSCoder) {
-    super.init(coder: coder)
-    commonInit()
-  }
-
-  private func commonInit() {
-    backgroundColor = UIColor.secondarySystemGroupedBackground
-  }
+  /// Returns a view that can quiz a person about the thing to remember.
+  ///
+  /// - parameter document: The document the card came from. Can be used for things like
+  ///                       loading images.
+  /// - parameter properties: Relevant properties of `document`
+  func promptView(
+    database: NoteDatabase,
+    properties: CardDocumentProperties
+  ) -> PromptView
 }

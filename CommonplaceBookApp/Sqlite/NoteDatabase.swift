@@ -367,7 +367,7 @@ public final class NoteDatabase: UIDocument {
 
   public func challenge(
     challengeIdentifier: ChallengeIdentifier
-  ) throws -> Challenge {
+  ) throws -> Prompt {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }

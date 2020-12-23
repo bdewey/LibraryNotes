@@ -43,7 +43,7 @@ public struct ClozeTemplate: ChallengeTemplate {
 
   // MARK: - CardTemplate conformance
 
-  public var challenges: [Challenge] {
+  public var challenges: [Prompt] {
     let clozeCount = node.findNodes(where: { $0.type == .cloze }).count
     return (0 ..< clozeCount).map { ClozeCard(template: self, markdown: markdown, clozeIndex: $0) }
   }
