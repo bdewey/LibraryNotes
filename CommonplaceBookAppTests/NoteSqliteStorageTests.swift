@@ -129,7 +129,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       try database.deleteNote(noteIdentifier: identifier)
       XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
-      XCTAssertEqual(0, try database.countOfTextRows())
+      XCTAssertEqual(0, try database.countOfContentRecords())
       XCTAssertEqual(0, database.allMetadata.count)
     }
   }

@@ -93,20 +93,14 @@ public final class NoteDatabase: UIDocument {
   /// Pipeline for monitoring for unsaved changes to the in-memory database.
   private var hasUnsavedChangesPipeline: AnyCancellable?
 
-  /// Used for decoding challenge templates.
-  private lazy var decoder: JSONDecoder = {
-    let decoder = JSONDecoder()
-    return decoder
-  }()
-
   /// Errors specific to this class.
   public enum Error: String, Swift.Error {
-    case cannotDecodeTemplate = "Cannot decode challenge template."
+    case cannotDecodePromptCollection = "Cannot decode the prompt collection."
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
     case noDeviceUUID = "Could note get the device UUID."
     case noSuchAsset = "The specified asset does not exist."
-    case noSuchChallenge = "The specified challenge does not exist."
+    case noSuchPrompt = "The specified prompt does not exist."
     case noSuchNote = "The specified note does not exist."
     case notWriteable = "The database is not currently writeable."
     case unknownPromptCollection = "The prompt collection does not exist."
@@ -339,7 +333,7 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public func eligibleChallengeIdentifiers(
+  public func eligiblePromptIdentifiers(
     before date: Date,
     limitedTo noteIdentifier: Note.Identifier?
   ) throws -> [PromptIdentifier] {
@@ -347,16 +341,16 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let challengeRequest: QueryInterfaceRequest<PromptStatistics>
+      let promptStatisticsRequest: QueryInterfaceRequest<PromptStatistics>
       if let noteIdentifier = noteIdentifier {
         guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier) else {
           throw Error.noSuchNote
         }
-        challengeRequest = note.challenges
+        promptStatisticsRequest = note.promptStatistics
       } else {
-        challengeRequest = PromptStatistics.all()
+        promptStatisticsRequest = PromptStatistics.all()
       }
-      let records = try challengeRequest
+      let records = try promptStatisticsRequest
         .filter(PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due <= date)
         .fetchAll(db)
       return records.map {
@@ -365,20 +359,20 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public func challenge(
-    challengeIdentifier: PromptIdentifier
+  public func prompt(
+    promptIdentifier: PromptIdentifier
   ) throws -> Prompt {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let identifier = PromptCollectionIdentifier(noteId: challengeIdentifier.noteId, promptKey: challengeIdentifier.promptKey)
+      let identifier = PromptCollectionIdentifier(noteId: promptIdentifier.noteId, promptKey: promptIdentifier.promptKey)
       let template = try Self.promptCollection(identifier: identifier, database: db)
-      return template.prompts[Int(challengeIdentifier.promptIndex)]
+      return template.prompts[Int(promptIdentifier.promptIndex)]
     }
   }
 
-  internal func countOfTextRows() throws -> Int {
+  internal func countOfContentRecords() throws -> Int {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -425,7 +419,7 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedChallenges: Bool) throws {
+  public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedPrompts: Bool) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -440,36 +434,36 @@ public final class NoteDatabase: UIDocument {
         promptIndex: entry.identifier.promptIndex
       )
       try record.insert(db)
-      let updateKey = try self.updateKey(changeDescription: "UPDATE CHALLENGE \(entry.identifier.promptIndex) WHERE CHALLENGE TEMPLATE = \(entry.identifier.promptKey) BURY = \(buryRelatedChallenges)", in: db)
-      try Self.updateChallenge(entry.identifier, for: record, in: db, buryRelatedChallenges: buryRelatedChallenges, updateKey: updateKey)
+      let updateKey = try self.updateKey(changeDescription: "UPDATE PROMPT \(entry.identifier.promptIndex) WHERE PROMPT COLLECTION = \(entry.identifier.promptKey) BURY = \(buryRelatedPrompts)", in: db)
+      try Self.updatePrompt(entry.identifier, for: record, in: db, buryRelatedPrompts: buryRelatedPrompts, updateKey: updateKey)
     }
     notesDidChangeSubject.send()
   }
 
-  private static func updateChallenge(
+  private static func updatePrompt(
     _ identifier: PromptIdentifier,
     for entry: StudyLogEntryRecord,
     in db: Database,
-    buryRelatedChallenges: Bool,
+    buryRelatedPrompts: Bool,
     updateKey: UpdateKey
   ) throws {
-    var challenge = try PromptStatistics.fetchOne(db, key: identifier)!
+    var prompt = try PromptStatistics.fetchOne(db, key: identifier)!
     let delay: TimeInterval
-    if let lastReview = challenge.lastReview, let idealInterval = challenge.idealInterval {
+    if let lastReview = prompt.lastReview, let idealInterval = prompt.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
       delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
     } else {
       delay = 0
     }
-    let schedulingOptions = Self.scheduler.scheduleItem(challenge.item, afterDelay: delay)
+    let schedulingOptions = Self.scheduler.scheduleItem(prompt.item, afterDelay: delay)
     let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
 
-    challenge.applyItem(outcome, on: entry.timestamp, updateKey: updateKey)
-    challenge.totalCorrect += entry.correct
-    challenge.totalIncorrect += entry.incorrect
-    try challenge.update(db)
+    prompt.applyItem(outcome, on: entry.timestamp, updateKey: updateKey)
+    prompt.totalCorrect += entry.correct
+    prompt.totalIncorrect += entry.incorrect
+    try prompt.update(db)
 
-    if buryRelatedChallenges {
+    if buryRelatedPrompts {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
       let updates = try PromptStatistics
         .filter(PromptStatistics.Columns.noteId == identifier.noteId && PromptStatistics.Columns.promptKey == identifier.promptKey &&
@@ -543,7 +537,7 @@ public final class NoteDatabase: UIDocument {
     return allMetadata
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
-        let challengeIdentifiers = try? eligibleChallengeIdentifiers(before: date, limitedTo: name)
+        let challengeIdentifiers = try? eligiblePromptIdentifiers(before: date, limitedTo: name)
         return StudySession(
           challengeIdentifiers ?? [],
           properties: CardDocumentProperties(
@@ -564,7 +558,7 @@ public final class NoteDatabase: UIDocument {
       StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
     }
     for entry in entries {
-      try recordStudyEntry(entry, buryRelatedChallenges: buryRelatedChallenges)
+      try recordStudyEntry(entry, buryRelatedPrompts: buryRelatedChallenges)
     }
   }
 
@@ -887,7 +881,7 @@ private extension NoteDatabase {
       throw Error.unknownPromptType
     }
     guard let template = klass.init(rawValue: contentRecord.text) else {
-      throw Error.cannotDecodeTemplate
+      throw Error.cannotDecodePromptCollection
     }
     return template
   }

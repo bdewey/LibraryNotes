@@ -59,7 +59,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
 
   static let promptStatistics = hasMany(PromptStatistics.self, through: contentRecords, using: ContentRecord.promptStatistics)
 
-  var challenges: QueryInterfaceRequest<PromptStatistics> {
+  var promptStatistics: QueryInterfaceRequest<PromptStatistics> {
     request(for: Self.promptStatistics)
   }
 
@@ -117,8 +117,8 @@ extension NoteRecord {
       try note.contentRecords.fetchAll(sourceDatabase).forEach { contentRecord in
         try contentRecord.insert(destinationDatabase)
       }
-      try note.challenges.fetchAll(sourceDatabase).forEach { challenge in
-        try challenge.insert(destinationDatabase)
+      try note.promptStatistics.fetchAll(sourceDatabase).forEach { promptStatisticsRecord in
+        try promptStatisticsRecord.insert(destinationDatabase)
       }
     }
   }

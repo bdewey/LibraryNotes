@@ -41,7 +41,7 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
 
   static let device = belongsTo(DeviceRecord.self)
 
-  /// Convenience method that knows how to unpack a `ChallengeIdentifier` into the primary keys for a PromptStatistics.
+  /// Convenience method that knows how to unpack a `PromptIdentifier` into the primary keys for a PromptStatistics.
   static func fetchOne(_ database: Database, key: PromptIdentifier) throws -> PromptStatistics? {
     return try fetchOne(database, key: [
       Columns.noteId.rawValue: key.noteId,
@@ -53,10 +53,10 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
 
 extension PromptStatistics {
   enum MergeError: Swift.Error {
-    case cannotLoadChallenge
+    case cannotLoadPrompt
   }
 
-  /// Knows how to merge challenges between databases.
+  /// Knows how to merge prompt statistics between databases.
   struct MergeInfo: MergeInfoRecord, Decodable {
     // MARK: - Stored properties
 
@@ -89,7 +89,7 @@ extension PromptStatistics {
         .filter(key: ["noteId": noteId, "promptKey": promptKey, "promptIndex": promptIndex])
         .fetchOne(sourceDatabase)
       else {
-        throw MergeError.cannotLoadChallenge
+        throw MergeError.cannotLoadPrompt
       }
       if (try DeviceRecord.filter(DeviceRecord.Columns.uuid == device.uuid).fetchOne(destinationDatabase)) == nil {
         // We don't have a device record for this device in the destination database. Insert one.

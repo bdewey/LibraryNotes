@@ -366,8 +366,8 @@ public final class StudyViewController: UIViewController {
       return
     }
     do {
-      let challenge = try database.challenge(
-        challengeIdentifier: sessionChallengeIdentifier.promptIdentifier
+      let challenge = try database.prompt(
+        promptIdentifier: sessionChallengeIdentifier.promptIdentifier
       )
       let challengeView = challenge.promptView(
         database: database,
