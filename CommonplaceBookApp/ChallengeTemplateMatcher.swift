@@ -20,37 +20,35 @@ import Foundation
 /// When you edit markdown notes, the challenge templates extracted from the text don't have "identity"
 /// This extension compares templates from one version of a note to another version of a note to find matching identities.
 extension Note {
+  // TODO: FIX FIX FIX
+  @available(*, deprecated)
   public mutating func assignMatchingTemplateIdentifiers(
     from otherNote: Note
   ) {
-    assert(otherNote.challengeTemplates.allSatisfy { $0.templateIdentifier != nil })
-    let existingIdentifiers = challengeTemplates
-      .compactMap { $0.templateIdentifier }
-      .asSet()
-    let tuples = otherNote.challengeTemplates
-      .filter { !existingIdentifiers.contains($0.templateIdentifier!) }
-    var existingUnusedIdentifiers = Dictionary(grouping: tuples, by: { $0.fingerprint })
-
-    // Look for exact matches
-    for (index, template) in challengeTemplates.enumerated() where template.templateIdentifier == nil {
-      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
-        where: { $0.rawValue == template.rawValue }
-      ) {
-        challengeTemplates[index].templateIdentifier = candidate.templateIdentifier
-        existingUnusedIdentifiers[template.fingerprint] = remainder
-      }
-    }
-
-    // Look for close-enough matches
-    // TODO: This doesn't try to optimize things at all.
-    for (index, template) in challengeTemplates.enumerated() where template.templateIdentifier == nil {
-      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
-        where: { template.closeEnough(to: $0) }
-      ) {
-        challengeTemplates[index].templateIdentifier = candidate.templateIdentifier
-        existingUnusedIdentifiers[template.fingerprint] = remainder
-      }
-    }
+    // NEED TO RETHINK THIS
+    
+//    var existingUnusedIdentifiers = Dictionary(grouping: otherNote.challengeTemplates.values, by: { $0.fingerprint })
+//
+//    // Look for exact matches
+//    for (index, template) in challengeTemplates.enumerated() {
+//      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
+//        where: { $0.rawValue == template.rawValue }
+//      ) {
+//        challengeTemplates[index].templateIdentifier = candidate.templateIdentifier
+//        existingUnusedIdentifiers[template.fingerprint] = remainder
+//      }
+//    }
+//
+//    // Look for close-enough matches
+//    // TODO: This doesn't try to optimize things at all.
+//    for (index, template) in challengeTemplates.enumerated() where template.templateIdentifier == nil {
+//      if let (candidate, remainder) = existingUnusedIdentifiers[template.fingerprint, default: []].findFirst(
+//        where: { template.closeEnough(to: $0) }
+//      ) {
+//        challengeTemplates[index].templateIdentifier = candidate.templateIdentifier
+//        existingUnusedIdentifiers[template.fingerprint] = remainder
+//      }
+//    }
   }
 }
 

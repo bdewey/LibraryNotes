@@ -21,6 +21,9 @@ public struct Note: Equatable {
   /// Identifies a note.
   public typealias Identifier = String
 
+  /// Identifies content within a note (currently, just prompts, but can be extended to other things)
+  public typealias ContentKey = String
+
   public struct Metadata: Hashable {
     /// Last modified time of the page.
     public var timestamp: Date
@@ -58,12 +61,12 @@ public struct Note: Equatable {
 
   public var metadata: Metadata
   public var text: String?
-  public var challengeTemplates: [PromptCollection]
+  public var challengeTemplates: [ContentKey: PromptCollection]
 
   public init(
     metadata: Metadata = Metadata(),
     text: String? = nil,
-    challengeTemplates: [PromptCollection] = []
+    challengeTemplates: [ContentKey: PromptCollection] = [:]
   ) {
     self.metadata = metadata
     self.text = text
@@ -74,8 +77,8 @@ public struct Note: Equatable {
     if lhs.metadata != rhs.metadata || lhs.text != rhs.text {
       return false
     }
-    let lhsIdentifiers = Set(lhs.challengeTemplates.map { $0.templateIdentifier })
-    let rhsIdentifiers = Set(rhs.challengeTemplates.map { $0.templateIdentifier })
+    let lhsIdentifiers = Set(lhs.challengeTemplates.keys)
+    let rhsIdentifiers = Set(rhs.challengeTemplates.keys)
     return lhsIdentifiers == rhsIdentifiers
   }
 }

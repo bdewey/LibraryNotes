@@ -41,6 +41,10 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
 
   static let promptStatistics = hasMany(PromptStatistics.self)
 
+  static func primaryKey(noteId: Note.Identifier, key: String) -> [String: DatabaseValueConvertible] {
+    [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: key]
+  }
+
   static func fetchOne(_ database: Database, key: ChallengeTemplateIdentifier) throws -> ContentRecord? {
     try fetchOne(database, key: key.keyArray)
   }

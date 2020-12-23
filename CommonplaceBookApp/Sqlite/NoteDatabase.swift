@@ -751,7 +751,6 @@ private extension NoteDatabase {
   // TODO: Make this smaller
   // swiftlint:disable:next function_body_length
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
-    var note = note
     let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
     let sqliteNote = NoteRecord(
       id: identifier,
@@ -777,26 +776,19 @@ private extension NoteDatabase {
       assert(deleted)
     }
 
-    for index in note.challengeTemplates.indices {
-      if note.challengeTemplates[index].templateIdentifier == nil {
-        note.challengeTemplates[index].templateIdentifier = ChallengeTemplateIdentifier(noteId: identifier, promptKey: UUID().uuidString)
-      } else {
-        note.challengeTemplates[index].templateIdentifier!.noteId = identifier
-      }
-    }
-    let inMemoryChallengeTemplates = Set(note.challengeTemplates.map { $0.templateIdentifier! })
+    let inMemoryChallengeTemplates = Set(note.challengeTemplates.keys)
     let onDiskChallengeTemplates = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
-      .map { ChallengeTemplateIdentifier(noteId: $0.noteId, promptKey: $0.key) }
+      .map { $0.key }
       .asSet()
 
     let today = Date()
     let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
-    for newTemplateIdentifier in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
-      let template = note.challengeTemplates.first(where: { $0.templateIdentifier == newTemplateIdentifier })!
+    for newKey in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
+      let template = note.challengeTemplates[newKey]!
       let record = ContentRecord(
         text: template.rawValue,
-        noteId: template.templateIdentifier!.noteId,
-        key: template.templateIdentifier!.promptKey,
+        noteId: identifier,
+        key: newKey,
         role: template.type.rawValue,
         mimeType: "text/markdown"
       )
@@ -808,12 +800,12 @@ private extension NoteDatabase {
       }
       for index in template.challenges.indices {
         let updateKey = try self.updateKey(
-          changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newTemplateIdentifier)",
+          changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newKey)",
           in: db
         )
         let promptStatistics = PromptStatistics(
-          noteId: newTemplateIdentifier.noteId,
-          promptKey: newTemplateIdentifier.promptKey,
+          noteId: identifier,
+          promptKey: newKey,
           promptIndex: Int64(index),
           due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
           modifiedDevice: updateKey.deviceID,
@@ -823,17 +815,17 @@ private extension NoteDatabase {
         try promptStatistics.insert(db)
       }
     }
-    for modifiedTemplateIdentifier in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
-      let template = note.challengeTemplates.first(where: { $0.templateIdentifier == modifiedTemplateIdentifier })!
-      guard var record = try ContentRecord.fetchOne(db, key: modifiedTemplateIdentifier) else {
+    for modifiedKey in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
+      let template = note.challengeTemplates[modifiedKey]!
+      guard var record = try ContentRecord.fetchOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: modifiedKey)) else {
         assertionFailure("Should be a record")
         continue
       }
       record.text = template.rawValue
       try record.update(db, columns: [ContentRecord.Columns.text])
     }
-    for obsoleteTemplateIdentifier in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
-      let deleted = try ContentRecord.deleteOne(db, key: obsoleteTemplateIdentifier)
+    for obsoleteKey in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
+      let deleted = try ContentRecord.deleteOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: obsoleteKey))
       assert(deleted)
     }
   }
@@ -866,9 +858,10 @@ private extension NoteDatabase {
     let hashtagRecords = try NoteHashtagRecord.filter(NoteHashtagRecord.Columns.noteId == identifier).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.hashtag }
     let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
-    let challengeTemplates = try contentRecords
+    let tuples = try contentRecords
       .filter { $0.role.hasPrefix("prompt=") }
-      .map { try Self.challengeTemplate(from: $0) }
+      .map { (key: $0.key, value: try Self.challengeTemplate(from: $0)) }
+    let promptCollections = Dictionary(uniqueKeysWithValues: tuples)
     let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
     return Note(
       metadata: Note.Metadata(
@@ -878,7 +871,7 @@ private extension NoteDatabase {
         containsText: sqliteNote.hasText
       ),
       text: noteText,
-      challengeTemplates: challengeTemplates
+      challengeTemplates: promptCollections
     )
   }
 
@@ -895,13 +888,9 @@ private extension NoteDatabase {
     guard let klass = PromptType.classMap[contentRecord.role] else {
       throw Error.unknownChallengeType
     }
-    guard var template = klass.init(rawValue: contentRecord.text) else {
+    guard let template = klass.init(rawValue: contentRecord.text) else {
       throw Error.cannotDecodeTemplate
     }
-    template.templateIdentifier = ChallengeTemplateIdentifier(
-      noteId: contentRecord.noteId,
-      promptKey: contentRecord.key
-    )
     return template
   }
 

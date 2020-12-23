@@ -171,6 +171,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       let modifiedText = originalText.appending("> Out, out, damn spot! (Macbeth)\n")
       let noteIdentifier = try database.createNote(Note(markdown: originalText))
       let originalNote = try database.note(noteIdentifier: noteIdentifier)
+      let originalPromptKey = originalNote.challengeTemplates.first!.key
       try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         XCTAssertEqual(note.challengeTemplates.count, 1)
@@ -179,7 +180,7 @@ final class NoteSqliteStorageTests: XCTestCase {
         return note
       })
       let modifiedNote = try database.note(noteIdentifier: noteIdentifier)
-      XCTAssertEqual(originalNote.challengeTemplates[0].templateIdentifier, modifiedNote.challengeTemplates[0].templateIdentifier)
+      XCTAssertEqual(originalNote.challengeTemplates[originalPromptKey]!.rawValue, modifiedNote.challengeTemplates[originalPromptKey]!.rawValue)
       XCTAssertEqual(2, modifiedNote.challengeTemplates.count)
     }
   }
@@ -202,9 +203,9 @@ final class NoteSqliteStorageTests: XCTestCase {
         return note
       })
       let modifiedNote = try database.note(noteIdentifier: noteIdentifier)
-      XCTAssertEqual(originalNote.challengeTemplates[0].templateIdentifier, modifiedNote.challengeTemplates[0].templateIdentifier)
+      XCTAssertEqual(originalNote.challengeTemplates.keys, modifiedNote.challengeTemplates.keys)
       XCTAssertEqual(1, modifiedNote.challengeTemplates.count)
-      XCTAssertEqual(modifiedNote.challengeTemplates[0].rawValue, "> To be, or not to be, that is the question. (Hamlet)\n")
+      XCTAssertEqual(modifiedNote.challengeTemplates.first!.value.rawValue, "> To be, or not to be, that is the question. (Hamlet)\n")
     }
   }
 

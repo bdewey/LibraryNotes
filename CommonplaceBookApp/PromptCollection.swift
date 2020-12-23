@@ -56,12 +56,6 @@ public protocol PromptCollection {
   
   var rawValue: String { get }
 
-  /// Unique identifier for this template. Must by set by whatever data structure "owns"
-  /// the template before creating any challenges from it.
-  ///
-  /// Can only be set from nil to non-nil once; immutable once set.
-  var templateIdentifier: ChallengeTemplateIdentifier? { get set }
-
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.
   var type: PromptType { get }

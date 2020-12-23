@@ -27,7 +27,7 @@ extension Note {
       containsText: true
     ),
     text: "This is a test",
-    challengeTemplates: []
+    challengeTemplates: [:]
   )
 
   static let withHashtags = Note(
@@ -38,7 +38,7 @@ extension Note {
       containsText: true
     ),
     text: "This is a test",
-    challengeTemplates: []
+    challengeTemplates: [:]
   )
 
   static let withChallenges = Note(markdown: """
