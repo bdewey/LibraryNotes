@@ -38,7 +38,7 @@ public protocol DeviceIdentifying {
 extension UIDevice: DeviceIdentifying {}
 
 /// Identifier for a specific change to the database.
-private struct UpdateKey {
+private struct UpdateIdentifier {
   /// The device ID that the change came from.
   let deviceID: String
   /// The specific sequence number for this change on this device.
@@ -323,7 +323,7 @@ public final class NoteDatabase: UIDocument {
       guard var note = try NoteRecord.filter(key: noteIdentifier).fetchOne(db) else {
         return
       }
-      let updateKey = try self.updateKey(changeDescription: "DELETE NOTE \(noteIdentifier)", in: db)
+      let updateKey = try self.updateIdentifier(in: db)
       try note.contentRecords.deleteAll(db)
       note.deleted = true
       note.modifiedDevice = updateKey.deviceID
@@ -341,17 +341,17 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let promptStatisticsRequest: QueryInterfaceRequest<PromptStatistics>
+      let promptStatisticsRequest: QueryInterfaceRequest<PromptRecord>
       if let noteIdentifier = noteIdentifier {
         guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier) else {
           throw Error.noSuchNote
         }
         promptStatisticsRequest = note.promptStatistics
       } else {
-        promptStatisticsRequest = PromptStatistics.all()
+        promptStatisticsRequest = PromptRecord.all()
       }
       let records = try promptStatisticsRequest
-        .filter(PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due <= date)
+        .filter(PromptRecord.Columns.due == nil || PromptRecord.Columns.due <= date)
         .fetchAll(db)
       return records.map {
         PromptIdentifier(noteId: $0.noteId, promptKey: $0.promptKey, promptIndex: Int($0.promptIndex))
@@ -434,7 +434,7 @@ public final class NoteDatabase: UIDocument {
         promptIndex: entry.identifier.promptIndex
       )
       try record.insert(db)
-      let updateKey = try self.updateKey(changeDescription: "UPDATE PROMPT \(entry.identifier.promptIndex) WHERE PROMPT COLLECTION = \(entry.identifier.promptKey) BURY = \(buryRelatedPrompts)", in: db)
+      let updateKey = try self.updateIdentifier(in: db)
       try Self.updatePrompt(entry.identifier, for: record, in: db, buryRelatedPrompts: buryRelatedPrompts, updateKey: updateKey)
     }
     notesDidChangeSubject.send()
@@ -445,9 +445,9 @@ public final class NoteDatabase: UIDocument {
     for entry: StudyLogEntryRecord,
     in db: Database,
     buryRelatedPrompts: Bool,
-    updateKey: UpdateKey
+    updateKey: UpdateIdentifier
   ) throws {
-    var prompt = try PromptStatistics.fetchOne(db, key: identifier)!
+    var prompt = try PromptRecord.fetchOne(db, key: identifier)!
     let delay: TimeInterval
     if let lastReview = prompt.lastReview, let idealInterval = prompt.idealInterval {
       let idealDate = lastReview.addingTimeInterval(idealInterval)
@@ -465,11 +465,11 @@ public final class NoteDatabase: UIDocument {
 
     if buryRelatedPrompts {
       let minimumDue = entry.timestamp.addingTimeInterval(.day)
-      let updates = try PromptStatistics
-        .filter(PromptStatistics.Columns.noteId == identifier.noteId && PromptStatistics.Columns.promptKey == identifier.promptKey &&
-          (PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due < minimumDue)
+      let updates = try PromptRecord
+        .filter(PromptRecord.Columns.noteId == identifier.noteId && PromptRecord.Columns.promptKey == identifier.promptKey &&
+          (PromptRecord.Columns.due == nil || PromptRecord.Columns.due < minimumDue)
         )
-        .updateAll(db, PromptStatistics.Columns.due <- minimumDue, PromptStatistics.Columns.modifiedDevice <- updateKey.deviceID, PromptStatistics.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
+        .updateAll(db, PromptRecord.Columns.due <- minimumDue, PromptRecord.Columns.modifiedDevice <- updateKey.deviceID, PromptRecord.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
       Logger.shared.info("Buried \(updates) challenge(s)")
     }
   }
@@ -490,15 +490,15 @@ public final class NoteDatabase: UIDocument {
       entries
         .map {
           StudyLog.Entry(
-            timestamp: $0.studyLogEntry.timestamp,
+            timestamp: $0.promptHistory.timestamp,
             identifier: PromptIdentifier(
-              noteId: $0.studyLogEntry.noteId,
-              promptKey: $0.studyLogEntry.promptKey,
-              promptIndex: $0.studyLogEntry.promptIndex
+              noteId: $0.promptHistory.noteId,
+              promptKey: $0.promptHistory.promptKey,
+              promptIndex: $0.promptHistory.promptIndex
             ),
             statistics: AnswerStatistics(
-              correct: $0.studyLogEntry.correct,
-              incorrect: $0.studyLogEntry.incorrect
+              correct: $0.promptHistory.correct,
+              incorrect: $0.promptHistory.incorrect
             )
           )
         }
@@ -605,7 +605,7 @@ private extension NoteDatabase {
       NoteRecord.all(),
       ContentRecord.all(),
       NoteHashtagRecord.all(),
-      PromptStatistics.all(),
+      PromptRecord.all(),
       StudyLogEntryRecord.all(),
       AssetRecord.all(),
     ]).publisher(in: dbQueue)
@@ -719,33 +719,19 @@ private extension NoteDatabase {
     }
   }
 
-  /// Creates a change log entry for a change, and returns the key identifying the change.
-  /// - Parameters:
-  ///   - changeDescription: The change being made
-  ///   - database: The writeable database in which the change will be made.
-  /// - Throws: Database errors
-  /// - Returns: The key identifying this change.
-  func updateKey(
-    changeDescription: String,
+  func updateIdentifier(
     in database: Database
-  ) throws -> UpdateKey {
+  ) throws -> UpdateIdentifier {
     var device = try currentDeviceRecord(in: database)
     device.updateSequenceNumber += 1
     try device.update(database)
-    let changeLog = ChangeLogRecord(
-      deviceID: device.uuid,
-      updateSequenceNumber: device.updateSequenceNumber,
-      timestamp: Date(),
-      changeDescription: changeDescription
-    )
-    try changeLog.insert(database)
-    return UpdateKey(deviceID: device.uuid, updateSequenceNumber: device.updateSequenceNumber)
+    return UpdateIdentifier(deviceID: device.uuid, updateSequenceNumber: device.updateSequenceNumber)
   }
 
   // TODO: Make this smaller
   // swiftlint:disable:next function_body_length
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
-    let updateKey = try self.updateKey(changeDescription: "SAVE NOTE \(identifier)", in: db)
+    let updateKey = try self.updateIdentifier(in: db)
     let sqliteNote = NoteRecord(
       id: identifier,
       title: note.metadata.title,
@@ -793,11 +779,8 @@ private extension NoteDatabase {
         throw error
       }
       for index in template.prompts.indices {
-        let updateKey = try self.updateKey(
-          changeDescription: "INSERT CHALLENGE \(index) WHERE TEMPLATE = \(newKey)",
-          in: db
-        )
-        let promptStatistics = PromptStatistics(
+        let updateKey = try self.updateIdentifier(in: db)
+        let promptStatistics = PromptRecord(
           noteId: identifier,
           promptKey: newKey,
           promptIndex: Int64(index),
@@ -896,24 +879,13 @@ private extension NoteDatabase {
     try migrator.registerMigrationScript(.noFlakeNote)
     try migrator.registerMigrationScript(.noFlakeChallengeTemplate)
     try migrator.registerMigrationScript(.addContentTable, additionalSteps: { database in
-      // Recreate the index
-      try database.drop(table: "noteFullText")
-      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
-        table.synchronize(withTable: "content")
-        table.column("text")
-        table.tokenizer = .porter(wrapping: .unicode61())
-      }
+      try database.rebuildFullTextIndex()
     })
     try migrator.registerMigrationScript(.changeContentKey, additionalSteps: { database in
-      // Recreate the index
-      try database.drop(table: "noteFullText")
-      try database.create(virtualTable: "noteFullText", using: FTS5()) { table in
-        table.synchronize(withTable: "content")
-        table.column("text")
-        table.tokenizer = .porter(wrapping: .unicode61())
-      }
+      try database.rebuildFullTextIndex()
     })
     try migrator.registerMigrationScript(.prompts)
+    try migrator.registerMigrationScript(.promptTable)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
@@ -922,7 +894,7 @@ private extension NoteDatabase {
   }
 }
 
-private extension PromptStatistics {
+private extension PromptRecord {
   var item: SpacedRepetitionScheduler.Item {
     if let due = due, let lastReview = lastReview {
       let interval = due.timeIntervalSince(lastReview)
@@ -947,7 +919,7 @@ private extension PromptStatistics {
     }
   }
 
-  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, updateKey: UpdateKey) {
+  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, updateKey: UpdateIdentifier) {
     reviewCount = item.reviewCount
     lapseCount = item.lapseCount
     spacedRepetitionFactor = item.factor
@@ -982,6 +954,15 @@ private extension Database {
         var device = DeviceRecord(uuid: uuid, name: "Unknown", updateSequenceNumber: updateSequenceNumber)
         try device.insert(self)
       }
+    }
+  }
+
+  func rebuildFullTextIndex() throws {
+    try drop(table: "noteFullText")
+    try create(virtualTable: "noteFullText", using: FTS5()) { table in
+      table.synchronize(withTable: "content")
+      table.column("text")
+      table.tokenizer = .porter(wrapping: .unicode61())
     }
   }
 }
@@ -1022,7 +1003,7 @@ private extension DatabaseQueue {
           destinationKnowledge: localKnowledge
         )
         result += try VersionVector.merge(
-          recordType: PromptStatistics.MergeInfo.self,
+          recordType: PromptRecord.MergeInfo.self,
           from: remoteDatabase,
           sourceKnowledge: remoteKnowlege,
           to: localDatabase,

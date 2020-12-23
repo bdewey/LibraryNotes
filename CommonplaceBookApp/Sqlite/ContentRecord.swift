@@ -39,7 +39,7 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
     case mimeType
   }
 
-  static let promptStatistics = hasMany(PromptStatistics.self)
+  static let promptStatistics = hasMany(PromptRecord.self)
 
   static func primaryKey(noteId: Note.Identifier, key: String) -> [String: DatabaseValueConvertible] {
     [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: key]

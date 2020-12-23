@@ -32,5 +32,5 @@ struct StudyLogEntryRecord: Codable, FetchableRecord, MutablePersistableRecord {
     static let timestamp = Column(StudyLogEntryRecord.CodingKeys.timestamp)
   }
 
-  static let challenge = belongsTo(PromptStatistics.self)
+  static let challenge = belongsTo(PromptRecord.self)
 }

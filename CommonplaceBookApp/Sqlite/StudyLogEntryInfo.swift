@@ -21,6 +21,6 @@ import GRDB
 /// Result structure from fetching a Note plus all of its hashtags
 /// Includes all of the information needed to convert a Sqlite.StudyLogEntry to an in-memory StudyLog.entry.
 struct StudyLogEntryInfo: Codable, FetchableRecord {
-  var studyLogEntry: StudyLogEntryRecord
-  var promptCounter: PromptStatistics
+  var promptHistory: StudyLogEntryRecord
+  var prompt: PromptRecord
 }

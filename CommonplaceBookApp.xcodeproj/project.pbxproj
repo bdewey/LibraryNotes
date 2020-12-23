@@ -26,7 +26,7 @@
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
 		D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */; };
 		D3198DAD23DB3E1B0098A9D9 /* NoteHashtagRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */; };
-		D3198DB123DBCA0F0098A9D9 /* PromptStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */; };
+		D3198DB123DBCA0F0098A9D9 /* PromptRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DB023DBCA0F0098A9D9 /* PromptRecord.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
 		D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* PromptView.swift */; };
 		D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */; };
@@ -54,6 +54,7 @@
 		D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuotePrompt.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
+		D34151C42593E8C9000E5A00 /* 20201223-promptTable.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34151C32593E8C9000E5A00 /* 20201223-promptTable.sql */; };
 		D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3446D3F23FAF20400BC269A /* Note+TestContent.swift */; };
 		D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D348A97921C6C586005CA937 /* FileNameGenerator.swift */; };
 		D34ACAEE2590E545007C9521 /* 20201220-contentKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */; };
@@ -76,7 +77,6 @@
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
 		D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */; };
-		D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */; };
 		D393F2BE24143CC100A6DABB /* DeviceRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* DeviceRecord.swift */; };
 		D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D2458256AD22900948A72 /* ParsedAttributedString.swift */; };
 		D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = D39D2467256C013100948A72 /* ParsedTextStorage.m */; };
@@ -182,7 +182,7 @@
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRecord.swift; sourceTree = "<group>"; };
 		D3198DAC23DB3E1B0098A9D9 /* NoteHashtagRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHashtagRecord.swift; sourceTree = "<group>"; };
-		D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStatistics.swift; sourceTree = "<group>"; };
+		D3198DB023DBCA0F0098A9D9 /* PromptRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptRecord.swift; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
 		D31AFA7A229D61E800ED2B76 /* PromptView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; };
 		D31AFA81229D61E800ED2B76 /* TimeInterval+CommonIntervals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "TimeInterval+CommonIntervals.swift"; sourceTree = "<group>"; };
@@ -211,6 +211,7 @@
 		D339C6FD21EB928700924178 /* QuotePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotePrompt.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
+		D34151C32593E8C9000E5A00 /* 20201223-promptTable.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201223-promptTable.sql"; sourceTree = "<group>"; };
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
 		D348A97921C6C586005CA937 /* FileNameGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileNameGenerator.swift; sourceTree = "<group>"; };
 		D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201220-contentKey.sql"; sourceTree = "<group>"; };
@@ -234,7 +235,6 @@
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
 		D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
-		D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeLogRecord.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* DeviceRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRecord.swift; sourceTree = "<group>"; };
 		D39D2458256AD22900948A72 /* ParsedAttributedString.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedString.swift; sourceTree = "<group>"; };
 		D39D2466256C013100948A72 /* ParsedTextStorage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParsedTextStorage.h; sourceTree = "<group>"; };
@@ -340,8 +340,7 @@
 			children = (
 				D3F90E5E2587301300162CFC /* Migrations */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
-				D3198DB023DBCA0F0098A9D9 /* PromptStatistics.swift */,
-				D393F2BB241439EE00A6DABB /* ChangeLogRecord.swift */,
+				D3198DB023DBCA0F0098A9D9 /* PromptRecord.swift */,
 				D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
@@ -525,6 +524,7 @@
 				D3F90E7D258EB49300162CFC /* 20201219-content.sql */,
 				D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */,
 				D34ACAF725915662007C9521 /* 20201221-prompt.sql */,
+				D34151C32593E8C9000E5A00 /* 20201223-promptTable.sql */,
 				D34ACB0125925EA5007C9521 /* initialSchema.sql */,
 				D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */,
 			);
@@ -661,6 +661,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D34151C42593E8C9000E5A00 /* 20201223-promptTable.sql in Resources */,
 				D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */,
 				D34ACAF825915662007C9521 /* 20201221-prompt.sql in Resources */,
 				D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */,
@@ -767,7 +768,7 @@
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
-				D3198DB123DBCA0F0098A9D9 /* PromptStatistics.swift in Sources */,
+				D3198DB123DBCA0F0098A9D9 /* PromptRecord.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
@@ -790,7 +791,6 @@
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,
-				D393F2BC241439EE00A6DABB /* ChangeLogRecord.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozePromptCollection.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,

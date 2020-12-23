@@ -18,8 +18,8 @@
 import Foundation
 import GRDB
 
-struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "promptCounters"
+struct PromptRecord: Codable, FetchableRecord, PersistableRecord {
+  static let databaseTableName = "prompt"
   var noteId: String
   var promptKey: String
   var promptIndex: Int64
@@ -42,7 +42,7 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
   static let device = belongsTo(DeviceRecord.self)
 
   /// Convenience method that knows how to unpack a `PromptIdentifier` into the primary keys for a PromptStatistics.
-  static func fetchOne(_ database: Database, key: PromptIdentifier) throws -> PromptStatistics? {
+  static func fetchOne(_ database: Database, key: PromptIdentifier) throws -> PromptRecord? {
     return try fetchOne(database, key: [
       Columns.noteId.rawValue: key.noteId,
       Columns.promptKey.rawValue: key.promptKey,
@@ -51,7 +51,7 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
   }
 }
 
-extension PromptStatistics {
+extension PromptRecord {
   enum MergeError: Swift.Error {
     case cannotLoadPrompt
   }
@@ -70,22 +70,22 @@ extension PromptStatistics {
     // MARK: - Computed properties
 
     static var cursorRequest: QueryInterfaceRequest<Self> {
-      PromptStatistics
-        .including(required: PromptStatistics.device)
-        .asRequest(of: PromptStatistics.MergeInfo.self)
+      PromptRecord
+        .including(required: PromptRecord.device)
+        .asRequest(of: PromptRecord.MergeInfo.self)
     }
 
     var instanceRequest: QueryInterfaceRequest<Self> {
-      PromptStatistics
-        .including(required: PromptStatistics.device)
+      PromptRecord
+        .including(required: PromptRecord.device)
         .filter(key: ["noteId": noteId, "promptKey": promptKey, "promptIndex": promptIndex])
-        .asRequest(of: PromptStatistics.MergeInfo.self)
+        .asRequest(of: PromptRecord.MergeInfo.self)
     }
 
     var deviceUUID: String { device.uuid }
 
     func copy(from sourceDatabase: Database, to destinationDatabase: Database) throws {
-      guard let originRecord = try PromptStatistics
+      guard let originRecord = try PromptRecord
         .filter(key: ["noteId": noteId, "promptKey": promptKey, "promptIndex": promptIndex])
         .fetchOne(sourceDatabase)
       else {
