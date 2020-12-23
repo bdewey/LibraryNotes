@@ -21,7 +21,7 @@ import Foundation
 /// Extensible enum for the different types of card templates.
 /// Also maintains a mapping between each type and the specific CardTemplate class
 /// associated with that type.
-public struct ChallengeTemplateType: RawRepresentable, Hashable {
+public struct PromptType: RawRepresentable, Hashable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way
@@ -34,13 +34,13 @@ public struct ChallengeTemplateType: RawRepresentable, Hashable {
   ///
   /// - parameter rawValue: The string name for the type.
   /// - parameter templateClass: The CardTemplate associated with this type.
-  public init(rawValue: String, class templateClass: ChallengeTemplate.Type) {
+  public init(rawValue: String, class templateClass: PromptCollection.Type) {
     self.rawValue = rawValue
-    ChallengeTemplateType.classMap[rawValue] = templateClass
+    PromptType.classMap[rawValue] = templateClass
   }
 
   /// Mapping between rawValue and CardTemplate classes.
-  public private(set) static var classMap = [String: ChallengeTemplate.Type]()
+  public private(set) static var classMap = [String: PromptCollection.Type]()
 }
 
 public struct ChallengeTemplateIdentifier: Hashable {
@@ -51,7 +51,7 @@ public struct ChallengeTemplateIdentifier: Hashable {
 /// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
-public protocol ChallengeTemplate {
+public protocol PromptCollection {
   init?(rawValue: String)
   
   var rawValue: String { get }
@@ -64,13 +64,13 @@ public protocol ChallengeTemplate {
 
   /// Subclasses should override and return their particular type.
   /// This is a computed, rather than a stored, property so it does not get serialized.
-  var type: ChallengeTemplateType { get }
+  var type: PromptType { get }
 
   /// The specific cards from this template.
   var challenges: [Prompt] { get }
 }
 
-public extension Array where Element: ChallengeTemplate {
+public extension Array where Element: PromptCollection {
   /// Returns the challenges from all of the associations in the array.
   var cards: [Prompt] {
     return [Prompt](map { $0.challenges }.joined())

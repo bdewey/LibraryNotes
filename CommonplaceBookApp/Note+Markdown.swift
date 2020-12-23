@@ -20,10 +20,10 @@ import Foundation
 public extension Note {
   /// Creates a new Note from the contents of a parsed text buffer.
   init(parsedString: ParsedString) {
-    var challengeTemplates = [ChallengeTemplate]()
-    challengeTemplates.append(contentsOf: ClozeTemplate.extract(from: parsedString))
-    challengeTemplates.append(contentsOf: QuoteTemplate.extract(from: parsedString))
-    challengeTemplates.append(contentsOf: QuestionAndAnswerTemplate.extract(from: parsedString))
+    var challengeTemplates = [PromptCollection]()
+    challengeTemplates.append(contentsOf: ClozePromptCollection.extract(from: parsedString))
+    challengeTemplates.append(contentsOf: QuotePrompt.extract(from: parsedString))
+    challengeTemplates.append(contentsOf: QuestionAndAnswerPrompt.extract(from: parsedString))
     self.init(
       metadata: Note.Metadata(
         timestamp: Date(),

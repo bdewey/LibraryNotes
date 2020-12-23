@@ -882,7 +882,7 @@ private extension NoteDatabase {
     )
   }
 
-  static func challengeTemplate(identifier: ChallengeTemplateIdentifier, database: Database) throws -> ChallengeTemplate {
+  static func challengeTemplate(identifier: ChallengeTemplateIdentifier, database: Database) throws -> PromptCollection {
     guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
       throw Error.unknownChallengeTemplate
     }
@@ -891,8 +891,8 @@ private extension NoteDatabase {
 
   static func challengeTemplate(
     from contentRecord: ContentRecord
-  ) throws -> ChallengeTemplate {
-    guard let klass = ChallengeTemplateType.classMap[contentRecord.role] else {
+  ) throws -> PromptCollection {
+    guard let klass = PromptType.classMap[contentRecord.role] else {
       throw Error.unknownChallengeType
     }
     guard var template = klass.init(rawValue: contentRecord.text) else {

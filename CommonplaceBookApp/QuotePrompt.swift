@@ -18,18 +18,18 @@
 import Foundation
 import UIKit
 
-public extension ChallengeTemplateType {
-  static let quote = ChallengeTemplateType(rawValue: "prompt=quote", class: QuoteTemplate.self)
+public extension PromptType {
+  static let quote = PromptType(rawValue: "prompt=quote", class: QuotePrompt.self)
 }
 
-public struct QuoteTemplate: ChallengeTemplate {
+public struct QuotePrompt: PromptCollection {
   public init(rawValue: String) {
     self.markdown = rawValue
   }
 
   public var templateIdentifier: ChallengeTemplateIdentifier?
 
-  public var type: ChallengeTemplateType { return .quote }
+  public var type: PromptType { return .quote }
 
   /// The quote template is itself a card.
   public var challenges: [Prompt] { return [self] }
@@ -39,19 +39,19 @@ public struct QuoteTemplate: ChallengeTemplate {
     return markdown
   }
 
-  public static func extract(from parsedString: ParsedString) -> [QuoteTemplate] {
+  public static func extract(from parsedString: ParsedString) -> [QuotePrompt] {
     guard let root = try? parsedString.result.get() else { return [] }
     let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
     return anchoredRoot
       .findNodes(where: { $0.type == .blockquote })
-      .compactMap { node -> QuoteTemplate? in
+      .compactMap { node -> QuotePrompt? in
         let chars = parsedString[node.range]
-        return QuoteTemplate(rawValue: String(utf16CodeUnits: chars, count: chars.count))
+        return QuotePrompt(rawValue: String(utf16CodeUnits: chars, count: chars.count))
       }
   }
 }
 
-extension QuoteTemplate: Prompt {
+extension QuotePrompt: Prompt {
   public var identifier: String {
     return markdown
   }
@@ -93,8 +93,8 @@ extension QuoteTemplate: Prompt {
   }
 }
 
-extension QuoteTemplate: Equatable {
-  public static func == (lhs: QuoteTemplate, rhs: QuoteTemplate) -> Bool {
+extension QuotePrompt: Equatable {
+  public static func == (lhs: QuotePrompt, rhs: QuotePrompt) -> Bool {
     return lhs.markdown == rhs.markdown
   }
 }

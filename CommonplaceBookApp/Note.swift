@@ -58,12 +58,12 @@ public struct Note: Equatable {
 
   public var metadata: Metadata
   public var text: String?
-  public var challengeTemplates: [ChallengeTemplate]
+  public var challengeTemplates: [PromptCollection]
 
   public init(
     metadata: Metadata = Metadata(),
     text: String? = nil,
-    challengeTemplates: [ChallengeTemplate] = []
+    challengeTemplates: [PromptCollection] = []
   ) {
     self.metadata = metadata
     self.text = text

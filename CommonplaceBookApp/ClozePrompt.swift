@@ -24,12 +24,12 @@ import UIKit
 /// a hint. The removed word/phrase is a "cloze".
 ///
 /// See https://en.wikipedia.org/wiki/Cloze_test
-public struct ClozeCard {
+public struct ClozePrompt {
   /// Designated initializer.
   ///
   /// - parameter markdown: The markdown content that contains at least one cloze.
   /// - parameter closeIndex: The index of the cloze in `markdown` to remove when testing.
-  public init(template: ClozeTemplate, markdown: String, clozeIndex: Int) {
+  public init(template: ClozePromptCollection, markdown: String, clozeIndex: Int) {
     self.markdown = markdown
     self.clozeIndex = clozeIndex
     self.challengeIdentifier = ChallengeIdentifier(
@@ -54,7 +54,7 @@ public struct ClozeCard {
   }
 }
 
-extension ClozeCard: Prompt {
+extension ClozePrompt: Prompt {
   public var identifier: String {
     let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
     return markdown + suffix

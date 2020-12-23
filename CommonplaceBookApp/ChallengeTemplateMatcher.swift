@@ -55,16 +55,16 @@ extension Note {
 }
 
 private struct TemplateFingerprint: Hashable {
-  let templateType: ChallengeTemplateType
+  let templateType: PromptType
   let challengeCount: Int
 }
 
-private extension ChallengeTemplate {
+private extension PromptCollection {
   var fingerprint: TemplateFingerprint {
     TemplateFingerprint(templateType: type, challengeCount: challenges.count)
   }
 
-  func closeEnough(to other: ChallengeTemplate) -> Bool {
+  func closeEnough(to other: PromptCollection) -> Bool {
     assert(other.type == type)
     assert(other.challenges.count == challenges.count)
     let diff = rawValue.difference(from: other.rawValue)

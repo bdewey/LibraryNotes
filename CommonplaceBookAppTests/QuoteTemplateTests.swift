@@ -46,7 +46,7 @@ private let contentWithCloze = """
 final class QuoteTemplateTests: XCTestCase {
   func testLoadQuotes() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
-    let quoteTemplates = QuoteTemplate.extract(from: buffer)
+    let quoteTemplates = QuotePrompt.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
     let cards = quoteTemplates.map { $0.challenges }.joined()
     XCTAssertEqual(cards.count, 5)
@@ -54,20 +54,20 @@ final class QuoteTemplateTests: XCTestCase {
 
   func testSerialization() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
-    let quoteTemplates = QuoteTemplate.extract(from: buffer)
+    let quoteTemplates = QuotePrompt.extract(from: buffer)
     let strings = quoteTemplates.map { $0.rawValue }
-    let decodedTemplates = strings.map { QuoteTemplate(rawValue: $0) }
+    let decodedTemplates = strings.map { QuotePrompt(rawValue: $0) }
     XCTAssertEqual(decodedTemplates, quoteTemplates)
   }
 
   func testYamlEncodingIsJustMarkdown() {
-    let decoded = QuoteTemplate(rawValue: contentWithCloze)
+    let decoded = QuotePrompt(rawValue: contentWithCloze)
     XCTAssertEqual(decoded.challenges.count, 1)
   }
 
   func testRenderCloze() {
     let buffer = ParsedString(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
-    let quoteTemplates = QuoteTemplate.extract(from: buffer)
+    let quoteTemplates = QuotePrompt.extract(from: buffer)
 
     let (front, _) = quoteTemplates[0].renderCardFront()
     XCTAssertEqual(

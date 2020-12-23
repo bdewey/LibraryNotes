@@ -18,12 +18,12 @@
 import Foundation
 import UIKit
 
-public extension ChallengeTemplateType {
-  static let questionAndAnswer = ChallengeTemplateType(rawValue: "prompt=qanda", class: QuestionAndAnswerTemplate.self)
+public extension PromptType {
+  static let questionAndAnswer = PromptType(rawValue: "prompt=qanda", class: QuestionAndAnswerPrompt.self)
 }
 
 /// Generates challenges from QuestionAndAnswer minimarkdown nodes.
-public struct QuestionAndAnswerTemplate: ChallengeTemplate {
+public struct QuestionAndAnswerPrompt: PromptCollection {
   public init(rawValue: String) {
     self.markdown = rawValue
   }
@@ -36,9 +36,9 @@ public struct QuestionAndAnswerTemplate: ChallengeTemplate {
 
   // MARK: - Public
 
-  public var type: ChallengeTemplateType { return .questionAndAnswer }
+  public var type: PromptType { return .questionAndAnswer }
 
-  public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerTemplate] {
+  public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerPrompt] {
     guard let root = try? parsedString.result.get() else { return [] }
     return AnchoredNode(node: root, startIndex: 0)
       .findNodes(where: { $0.type == .questionAndAnswer })
@@ -47,7 +47,7 @@ public struct QuestionAndAnswerTemplate: ChallengeTemplate {
         return String(utf16CodeUnits: chars, count: chars.count)
       }
       .compactMap {
-        QuestionAndAnswerTemplate(rawValue: $0)
+        QuestionAndAnswerPrompt(rawValue: $0)
       }
   }
 
@@ -55,7 +55,7 @@ public struct QuestionAndAnswerTemplate: ChallengeTemplate {
   public var challenges: [Prompt] { return [self] }
 }
 
-extension QuestionAndAnswerTemplate: Prompt {
+extension QuestionAndAnswerPrompt: Prompt {
   public var challengeIdentifier: ChallengeIdentifier {
     ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
   }
