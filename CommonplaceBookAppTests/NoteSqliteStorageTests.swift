@@ -209,6 +209,35 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
   }
 
+  func testSubstantialEditGetsNewKey() {
+    makeAndOpenEmptyDatabase { database in
+      let originalText = """
+      # Shakespeare quotes
+
+      > To be, or not to be, that is the question.
+      """
+      let modifiedText = """
+      # Shakespeare quotes
+
+      > Out, out, damn spot!
+      """
+      let noteIdentifier = try database.createNote(Note(markdown: originalText))
+      let originalNote = try database.note(noteIdentifier: noteIdentifier)
+      try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
+        var note = note
+        XCTAssertEqual(note.challengeTemplates.count, 1)
+        note.updateMarkdown(modifiedText)
+        XCTAssertEqual(note.challengeTemplates.count, 1)
+        return note
+      })
+      let modifiedNote = try database.note(noteIdentifier: noteIdentifier)
+      // We should have *different* keys because we changed the quote substantially, not just a little edit.
+      XCTAssertNotEqual(originalNote.challengeTemplates.keys, modifiedNote.challengeTemplates.keys)
+      XCTAssertEqual(1, modifiedNote.challengeTemplates.count)
+      XCTAssertEqual(modifiedNote.challengeTemplates.first!.value.rawValue, "> Out, out, damn spot!")
+    }
+  }
+
   func testBuryRelatedChallenges() {
     makeAndOpenEmptyDatabase { database in
       _ = try database.createNote(Note.multipleClozes)
