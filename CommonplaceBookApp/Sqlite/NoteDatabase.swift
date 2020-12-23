@@ -731,7 +731,7 @@ private extension NoteDatabase {
   // TODO: Make this smaller
   // swiftlint:disable:next function_body_length
   func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
-    let updateKey = try self.updateIdentifier(in: db)
+    let updateKey = try updateIdentifier(in: db)
     let sqliteNote = NoteRecord(
       id: identifier,
       title: note.metadata.title,
@@ -779,7 +779,7 @@ private extension NoteDatabase {
         throw error
       }
       for index in template.prompts.indices {
-        let updateKey = try self.updateIdentifier(in: db)
+        let updateKey = try updateIdentifier(in: db)
         let promptStatistics = PromptRecord(
           noteId: identifier,
           promptKey: newKey,
