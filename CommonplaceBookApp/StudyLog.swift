@@ -57,20 +57,20 @@ public struct StudyLog {
   /// Constructs an entry from parameters and inserts it into the log.
   /// (Slightly easier to use in tests.)
   public mutating func appendEntry(
-    challengeIdentifier: PromptIdentifier,
+    promptIdentifier: PromptIdentifier,
     correct: Int = 1,
     incorrect: Int = 0,
     timestamp: Date = Date()
   ) {
     let entry = Entry(
       timestamp: timestamp,
-      identifier: challengeIdentifier,
+      identifier: promptIdentifier,
       statistics: AnswerStatistics(correct: correct, incorrect: incorrect)
     )
     entries.append(entry)
   }
 
-  /// Constructs log entries from all of the challenges in `studySession` and adds them to the log.
+  /// Constructs log entries from all of the prompts in `studySession` and adds them to the log.
   public mutating func updateStudySessionResults(
     _ studySession: StudySession,
     on date: Date = Date()

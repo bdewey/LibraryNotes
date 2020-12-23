@@ -96,7 +96,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
         try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
           var mergedNote = note
-          mergedNote.assignMatchingTemplateIdentifiers(from: oldNote)
+          mergedNote.copyContentKeysForMatchingContent(from: oldNote)
           return mergedNote
         })
       } else {

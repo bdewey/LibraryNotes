@@ -347,7 +347,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     do {
-      try database.updateStudySessionResults(session, on: challengeDueDate, buryRelatedChallenges: true)
+      try database.updateStudySessionResults(session, on: challengeDueDate, buryRelatedPrompts: true)
       updateStudySession()
     } catch {
       Logger.shared.error("Unexpected error recording study session results: \(error)")

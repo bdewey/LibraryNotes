@@ -24,7 +24,7 @@ public extension Note {
   ///
   /// This method tries to make sure that challenges between two versions of a note use the same key if and only if
   /// those challenges are identical or nearly-identical.
-  mutating func assignMatchingTemplateIdentifiers(
+  mutating func copyContentKeysForMatchingContent(
     from otherNote: Note
   ) {
     // This will hold the re-keyed prompts.

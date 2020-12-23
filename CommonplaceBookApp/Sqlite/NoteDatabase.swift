@@ -367,8 +367,8 @@ public final class NoteDatabase: UIDocument {
     }
     return try dbQueue.read { db in
       let identifier = PromptCollectionIdentifier(noteId: promptIdentifier.noteId, promptKey: promptIdentifier.promptKey)
-      let template = try Self.promptCollection(identifier: identifier, database: db)
-      return template.prompts[Int(promptIdentifier.promptIndex)]
+      let promptCollection = try Self.promptCollection(identifier: identifier, database: db)
+      return promptCollection.prompts[Int(promptIdentifier.promptIndex)]
     }
   }
 
@@ -470,7 +470,7 @@ public final class NoteDatabase: UIDocument {
           (PromptRecord.Columns.due == nil || PromptRecord.Columns.due < minimumDue)
         )
         .updateAll(db, PromptRecord.Columns.due <- minimumDue, PromptRecord.Columns.modifiedDevice <- updateKey.deviceID, PromptRecord.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
-      Logger.shared.info("Buried \(updates) challenge(s)")
+      Logger.shared.info("Buried \(updates) prompts(s)")
     }
   }
 
@@ -483,7 +483,7 @@ public final class NoteDatabase: UIDocument {
       let entries = try dbQueue.read { db -> [StudyLogEntryInfo] in
         let request = StudyLogEntryRecord
           .order(StudyLogEntryRecord.Columns.timestamp)
-          .including(required: StudyLogEntryRecord.challenge)
+          .including(required: StudyLogEntryRecord.prompt)
         return try StudyLogEntryInfo
           .fetchAll(db, request)
       }
@@ -511,8 +511,8 @@ public final class NoteDatabase: UIDocument {
   }
 
   /// Computes a studySession for the relevant pages in the notebook.
-  /// - parameter filter: An optional filter closure to determine if the page's challenges should be included in the session. If nil, all pages are included.
-  /// - parameter date: An optional date for determining challenge eligibility. If nil, will be today's date.
+  /// - parameter filter: An optional filter closure to determine if the page's prompts should be included in the session. If nil, all pages are included.
+  /// - parameter date: An optional date for determining prompt eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   public func studySession(
     filter: ((Note.Identifier, Note.Metadata) -> Bool)? = nil,
@@ -537,9 +537,9 @@ public final class NoteDatabase: UIDocument {
     return allMetadata
       .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
-        let challengeIdentifiers = try? eligiblePromptIdentifiers(before: date, limitedTo: name)
+        let promptIdentifiers = try? eligiblePromptIdentifiers(before: date, limitedTo: name)
         return StudySession(
-          challengeIdentifiers ?? [],
+          promptIdentifiers ?? [],
           properties: CardDocumentProperties(
             documentName: name,
             attributionMarkdown: reviewProperties.title
@@ -553,12 +553,12 @@ public final class NoteDatabase: UIDocument {
   ///
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedChallenges: Bool) throws {
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let entries = studySession.results.map { tuple -> StudyLog.Entry in
       StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
     }
     for entry in entries {
-      try recordStudyEntry(entry, buryRelatedPrompts: buryRelatedChallenges)
+      try recordStudyEntry(entry, buryRelatedPrompts: buryRelatedPrompts)
     }
   }
 
@@ -756,20 +756,20 @@ private extension NoteDatabase {
       assert(deleted)
     }
 
-    let inMemoryChallengeTemplates = Set(note.promptCollections.keys)
-    let onDiskChallengeTemplates = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
+    let inMemoryContentKeys = Set(note.promptCollections.keys)
+    let onDiskContentKeys = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
       .map { $0.key }
       .asSet()
 
     let today = Date()
     let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
-    for newKey in inMemoryChallengeTemplates.subtracting(onDiskChallengeTemplates) {
-      let template = note.promptCollections[newKey]!
+    for newKey in inMemoryContentKeys.subtracting(onDiskContentKeys) {
+      let promptCollection = note.promptCollections[newKey]!
       let record = ContentRecord(
-        text: template.rawValue,
+        text: promptCollection.rawValue,
         noteId: identifier,
         key: newKey,
-        role: template.type.rawValue,
+        role: promptCollection.type.rawValue,
         mimeType: "text/markdown"
       )
       do {
@@ -778,7 +778,7 @@ private extension NoteDatabase {
         Logger.shared.critical("Could not insert content")
         throw error
       }
-      for index in template.prompts.indices {
+      for index in promptCollection.prompts.indices {
         let updateKey = try updateIdentifier(in: db)
         let promptStatistics = PromptRecord(
           noteId: identifier,
@@ -792,16 +792,16 @@ private extension NoteDatabase {
         try promptStatistics.insert(db)
       }
     }
-    for modifiedKey in inMemoryChallengeTemplates.intersection(onDiskChallengeTemplates) {
-      let template = note.promptCollections[modifiedKey]!
+    for modifiedKey in inMemoryContentKeys.intersection(onDiskContentKeys) {
+      let promptCollection = note.promptCollections[modifiedKey]!
       guard var record = try ContentRecord.fetchOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: modifiedKey)) else {
         assertionFailure("Should be a record")
         continue
       }
-      record.text = template.rawValue
+      record.text = promptCollection.rawValue
       try record.update(db, columns: [ContentRecord.Columns.text])
     }
-    for obsoleteKey in onDiskChallengeTemplates.subtracting(inMemoryChallengeTemplates) {
+    for obsoleteKey in onDiskContentKeys.subtracting(inMemoryContentKeys) {
       let deleted = try ContentRecord.deleteOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: obsoleteKey))
       assert(deleted)
     }
@@ -863,10 +863,10 @@ private extension NoteDatabase {
     guard let klass = PromptType.classMap[contentRecord.role] else {
       throw Error.unknownPromptType
     }
-    guard let template = klass.init(rawValue: contentRecord.text) else {
+    guard let promptCollection = klass.init(rawValue: contentRecord.text) else {
       throw Error.cannotDecodePromptCollection
     }
-    return template
+    return promptCollection
   }
 
   /// Makes sure the database is up-to-date.

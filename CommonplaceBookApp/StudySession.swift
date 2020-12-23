@@ -17,7 +17,7 @@
 
 import Foundation
 
-/// A sequence of challenges for the learner to respond to.
+/// A sequence of prompts for the learner to respond to.
 public struct StudySession {
   public struct SessionPromptIdentifier {
     public let noteIdentifier: Note.Identifier
@@ -62,10 +62,10 @@ public struct StudySession {
     _ promptIdentifiers: PromptIdentifiers,
     properties: CardDocumentProperties
   ) where PromptIdentifiers.Element == PromptIdentifier {
-    let sessionChallengeIdentifiers = promptIdentifiers.shuffled().map {
+    let sessionPromptIdentifiers = promptIdentifiers.shuffled().map {
       SessionPromptIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, promptIdentifier: $0)
     }
-    self.sessionPromptIdentifiers = sessionChallengeIdentifiers
+    self.sessionPromptIdentifiers = sessionPromptIdentifiers
     self.currentIndex = sessionPromptIdentifiers.startIndex
   }
 
@@ -112,8 +112,8 @@ public struct StudySession {
   public mutating func ensureUniquePromptCollections() {
     var seenPromptCollections = Set<PromptIdentifier>()
     sessionPromptIdentifiers = sessionPromptIdentifiers
-      .filter { sessionChallengeIdentifier -> Bool in
-        var identifier = sessionChallengeIdentifier.promptIdentifier
+      .filter { sessionPromptIdentifier -> Bool in
+        var identifier = sessionPromptIdentifier.promptIdentifier
         identifier.promptIndex = 0
         if seenPromptCollections.contains(identifier) {
           return false

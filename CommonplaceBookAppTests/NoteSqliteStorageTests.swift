@@ -154,7 +154,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       while studySession.currentPrompt != nil {
         studySession.recordAnswer(correct: true)
       }
-      try database.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
+      try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
       XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertEqual(database.studyLog.count, studySession.count)
     }
@@ -250,7 +250,7 @@ final class NoteSqliteStorageTests: XCTestCase {
       while studySession.currentPrompt != nil {
         studySession.recordAnswer(correct: true)
       }
-      try database.updateStudySessionResults(studySession, on: future, buryRelatedChallenges: true)
+      try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
       studySession = database.synchronousStudySession(date: future)
       XCTAssertEqual(studySession.count, 0)
       studySession = database.synchronousStudySession(date: future.addingTimeInterval(24 * .hour))

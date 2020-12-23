@@ -71,7 +71,7 @@ public extension Note {
 
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
-    newNote.assignMatchingTemplateIdentifiers(from: self)
+    newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }
 }

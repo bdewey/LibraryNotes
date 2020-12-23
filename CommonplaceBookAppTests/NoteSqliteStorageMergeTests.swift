@@ -103,7 +103,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
-        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
+        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }
@@ -127,7 +127,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
         }
-        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedChallenges: true)
+        try storage.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }

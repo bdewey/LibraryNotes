@@ -18,28 +18,28 @@
 import CommonCrypto
 import Foundation
 
-/// Extensible enum for the different types of card templates.
-/// Also maintains a mapping between each type and the specific CardTemplate class
+/// Extensible enum for the different types of prompts.
+/// Also maintains a mapping between each type and the specific PromptCollection class
 /// associated with that type.
 public struct PromptType: RawRepresentable, Hashable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way
-  /// to create CardTemplateTypes because it will not create an association with the
-  /// corresponding CardTemplate classes.
+  /// to create PromptType because it will not create an association with the
+  /// corresponding PromptCollection classes.
   @available(*, deprecated)
   public init(rawValue: String) { self.rawValue = rawValue }
 
   /// Designated initializer.
   ///
   /// - parameter rawValue: The string name for the type.
-  /// - parameter templateClass: The CardTemplate associated with this type.
+  /// - parameter templateClass: The PromptCollection associated with this type.
   public init(rawValue: String, class templateClass: PromptCollection.Type) {
     self.rawValue = rawValue
     PromptType.classMap[rawValue] = templateClass
   }
 
-  /// Mapping between rawValue and CardTemplate classes.
+  /// Mapping between rawValue and PromptCollection classes.
   public private(set) static var classMap = [String: PromptCollection.Type]()
 }
 
@@ -48,7 +48,7 @@ public struct PromptCollectionIdentifier: Hashable {
   public var promptKey: String
 }
 
-/// A ChallengeTemplate is a serializable thing that knows how to generate one or more Challenges.
+/// A PromptCollection is a serializable thing that knows how to generate one or more Prompts.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
 public protocol PromptCollection {
@@ -60,12 +60,12 @@ public protocol PromptCollection {
   /// This is a computed, rather than a stored, property so it does not get serialized.
   var type: PromptType { get }
 
-  /// The specific cards from this template.
+  /// The specific prompts contained in this collection.
   var prompts: [Prompt] { get }
 }
 
 public extension Array where Element: PromptCollection {
-  /// Returns the challenges from all of the associations in the array.
+  /// Returns the prompts from all of the collections in the array.
   var prompts: [Prompt] {
     return [Prompt](map { $0.prompts }.joined())
   }

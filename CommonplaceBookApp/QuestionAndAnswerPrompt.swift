@@ -22,7 +22,7 @@ public extension PromptType {
   static let questionAndAnswer = PromptType(rawValue: "prompt=qanda", class: QuestionAndAnswerPrompt.self)
 }
 
-/// Generates challenges from QuestionAndAnswer minimarkdown nodes.
+/// Generates prompts from QuestionAndAnswer minimarkdown nodes.
 public struct QuestionAndAnswerPrompt: PromptCollection {
   public init(rawValue: String) {
     self.markdown = rawValue
