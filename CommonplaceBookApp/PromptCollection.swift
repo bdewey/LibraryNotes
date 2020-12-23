@@ -53,7 +53,7 @@ public struct ChallengeTemplateIdentifier: Hashable {
 /// the English word and one card that prompts with the Spanish word.
 public protocol PromptCollection {
   init?(rawValue: String)
-  
+
   var rawValue: String { get }
 
   /// Subclasses should override and return their particular type.
