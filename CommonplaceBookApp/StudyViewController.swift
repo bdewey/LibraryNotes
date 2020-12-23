@@ -335,7 +335,7 @@ public final class StudyViewController: UIViewController {
 
   private func configureUI(animated: Bool, completion: (() -> Void)?) {
     guard isViewLoaded else { return }
-    makeCardView(for: studySession.currentPrompt) { cardView in
+    makePromptView(for: studySession.currentPrompt) { cardView in
       self.currentCardView = cardView
     }
     let progressUpdates = { [progressView, studySession, doneImageView] in
@@ -357,34 +357,34 @@ public final class StudyViewController: UIViewController {
   }
 
   /// Creates a card view for a card.
-  private func makeCardView(
-    for sessionChallengeIdentifier: StudySession.SessionPromptIdentifier?,
+  private func makePromptView(
+    for sessionPromptIdentifier: StudySession.SessionPromptIdentifier?,
     completion: @escaping (PromptView?) -> Void
   ) {
-    guard let sessionChallengeIdentifier = sessionChallengeIdentifier else {
+    guard let sessionPromptIdentifier = sessionPromptIdentifier else {
       completion(nil)
       return
     }
     do {
-      let challenge = try database.prompt(
-        promptIdentifier: sessionChallengeIdentifier.promptIdentifier
+      let prompt = try database.prompt(
+        promptIdentifier: sessionPromptIdentifier.promptIdentifier
       )
-      let challengeView = challenge.promptView(
+      let promptView = prompt.promptView(
         database: database,
         properties: CardDocumentProperties(
-          documentName: sessionChallengeIdentifier.noteIdentifier,
-          attributionMarkdown: sessionChallengeIdentifier.noteTitle
+          documentName: sessionPromptIdentifier.noteIdentifier,
+          attributionMarkdown: sessionPromptIdentifier.noteTitle
         )
       )
-      challengeView.delegate = self
-      view.addSubview(challengeView)
-      challengeView.snp.makeConstraints { make in
+      promptView.delegate = self
+      view.addSubview(promptView)
+      promptView.snp.makeConstraints { make in
         make.left.right.equalTo(self.view.readableContentGuide)
         make.centerY.equalToSuperview()
       }
-      completion(challengeView)
+      completion(promptView)
     } catch {
-      Logger.shared.error("Unexpected error generating challenge view: \(error)")
+      Logger.shared.error("Unexpected error generating prompt view: \(error)")
       completion(nil)
     }
   }

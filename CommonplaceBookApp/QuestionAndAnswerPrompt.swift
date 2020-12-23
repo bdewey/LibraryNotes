@@ -49,7 +49,7 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
       }
   }
 
-  /// The single challenge from this template: Ourselves!
+  /// The single prompt from this template: Ourselves!
   public var prompts: [Prompt] { return [self] }
 }
 

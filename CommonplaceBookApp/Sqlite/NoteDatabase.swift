@@ -762,7 +762,7 @@ private extension NoteDatabase {
       .asSet()
 
     let today = Date()
-    let newChallengeDelay = Self.scheduler.learningIntervals.last ?? 0
+    let newPromptDelay = Self.scheduler.learningIntervals.last ?? 0
     for newKey in inMemoryContentKeys.subtracting(onDiskContentKeys) {
       let promptCollection = note.promptCollections[newKey]!
       let record = ContentRecord(
@@ -784,7 +784,7 @@ private extension NoteDatabase {
           noteId: identifier,
           promptKey: newKey,
           promptIndex: Int64(index),
-          due: today.addingTimeInterval(newChallengeDelay.fuzzed()),
+          due: today.addingTimeInterval(newPromptDelay.fuzzed()),
           modifiedDevice: updateKey.deviceID,
           timestamp: note.metadata.timestamp,
           updateSequenceNumber: updateKey.updateSequenceNumber

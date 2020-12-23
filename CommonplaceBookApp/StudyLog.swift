@@ -92,7 +92,7 @@ public struct StudyLog {
     ).sorted()
   }
 
-  /// Computes dates until which we should suppress the given challenge identifier from further
+  /// Computes dates until which we should suppress the given identifier from further
   /// study.
   public func identifierSuppressionDates() -> [PromptIdentifier: Date] {
     return entries.reduce(into: [PromptIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in

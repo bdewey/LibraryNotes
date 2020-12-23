@@ -87,12 +87,12 @@ final class DocumentListViewController: UIViewController {
   public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var databaseSubscription: AnyCancellable?
-  private var challengeDueDate: Date {
+  private var dueDate: Date {
     get {
-      return dataSource?.challengeDueDate ?? Date()
+      return dataSource?.dueDate ?? Date()
     }
     set {
-      dataSource?.challengeDueDate = newValue
+      dataSource?.dueDate = newValue
       updateStudySession()
     }
   }
@@ -154,18 +154,18 @@ final class DocumentListViewController: UIViewController {
     searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
-    /// Update the challenge due date as time passes, app foregrounds, etc.
-    updateChallengeDueDatePipeline = Just(Date())
+    /// Update the due date as time passes, app foregrounds, etc.
+    updateDueDatePipeline = Just(Date())
       .merge(with: makeForegroundDatePublisher(), Timer.publish(every: .hour, on: .main, in: .common).autoconnect())
       .map { Calendar.current.startOfDay(for: $0.addingTimeInterval(.day)) }
-      .assign(to: \.challengeDueDate, on: self)
+      .assign(to: \.dueDate, on: self)
     navigationController?.setToolbarHidden(false, animated: false)
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItem = advanceTimeButton
     }
   }
 
-  private var updateChallengeDueDatePipeline: AnyCancellable?
+  private var updateDueDatePipeline: AnyCancellable?
 
   private func makeForegroundDatePublisher() -> AnyPublisher<Date, Never> {
     NotificationCenter.default
@@ -201,7 +201,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func advanceTime() {
-    challengeDueDate = challengeDueDate.addingTimeInterval(7 * .day)
+    dueDate = dueDate.addingTimeInterval(7 * .day)
   }
 
   private func updateStudySession() {
@@ -210,7 +210,7 @@ final class DocumentListViewController: UIViewController {
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
     let hashtag = currentHashtag
-    database.studySession(filter: filter, date: challengeDueDate) {
+    database.studySession(filter: filter, date: dueDate) {
       guard currentHashtag == hashtag else { return }
       self.studySession = $0
     }
@@ -347,7 +347,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     didFinishSession session: StudySession
   ) {
     do {
-      try database.updateStudySessionResults(session, on: challengeDueDate, buryRelatedPrompts: true)
+      try database.updateStudySessionResults(session, on: dueDate, buryRelatedPrompts: true)
       updateStudySession()
     } catch {
       Logger.shared.error("Unexpected error recording study session results: \(error)")

@@ -62,7 +62,7 @@ public final class DocumentTableController: NSObject {
     updateCardsPerDocument()
   }
 
-  public var challengeDueDate = Date() {
+  public var dueDate = Date() {
     didSet {
       updateCardsPerDocument()
     }
@@ -304,7 +304,7 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    database.studySession(filter: nil, date: challengeDueDate) { studySession in
+    database.studySession(filter: nil, date: dueDate) { studySession in
       self.cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
