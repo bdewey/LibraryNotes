@@ -19,8 +19,8 @@ import AVFoundation
 import Foundation
 import UIKit
 
-/// Uniquely identifies a challenge.
-public struct ChallengeIdentifier: Hashable {
+/// Uniquely identifies a prompt.
+public struct PromptIdentifier: Hashable {
   public var noteId: String
   public var promptKey: String
   public var promptIndex: Int
@@ -28,10 +28,6 @@ public struct ChallengeIdentifier: Hashable {
 
 /// A specific thing to recall.
 public protocol Prompt {
-  /// Every challenge needs a unique identifier. This serves as an key to associate this card
-  /// with statistics describing how well the person handles the challenge over time.
-  var challengeIdentifier: ChallengeIdentifier { get }
-
   /// Returns a view that can quiz a person about the thing to remember.
   ///
   /// - parameter document: The document the card came from. Can be used for things like

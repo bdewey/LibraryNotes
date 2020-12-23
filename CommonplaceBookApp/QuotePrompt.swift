@@ -52,14 +52,6 @@ public struct QuotePrompt: PromptCollection {
 }
 
 extension QuotePrompt: Prompt {
-  public var identifier: String {
-    return markdown
-  }
-
-  public var challengeIdentifier: ChallengeIdentifier {
-    ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
-  }
-
   public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties

@@ -342,7 +342,7 @@ public final class NoteDatabase: UIDocument {
   public func eligibleChallengeIdentifiers(
     before date: Date,
     limitedTo noteIdentifier: Note.Identifier?
-  ) throws -> [ChallengeIdentifier] {
+  ) throws -> [PromptIdentifier] {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
@@ -360,13 +360,13 @@ public final class NoteDatabase: UIDocument {
         .filter(PromptStatistics.Columns.due == nil || PromptStatistics.Columns.due <= date)
         .fetchAll(db)
       return records.map {
-        ChallengeIdentifier(noteId: $0.noteId, promptKey: $0.promptKey, promptIndex: Int($0.promptIndex))
+        PromptIdentifier(noteId: $0.noteId, promptKey: $0.promptKey, promptIndex: Int($0.promptIndex))
       }
     }
   }
 
   public func challenge(
-    challengeIdentifier: ChallengeIdentifier
+    challengeIdentifier: PromptIdentifier
   ) throws -> Prompt {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
@@ -447,7 +447,7 @@ public final class NoteDatabase: UIDocument {
   }
 
   private static func updateChallenge(
-    _ identifier: ChallengeIdentifier,
+    _ identifier: PromptIdentifier,
     for entry: StudyLogEntryRecord,
     in db: Database,
     buryRelatedChallenges: Bool,
@@ -497,7 +497,7 @@ public final class NoteDatabase: UIDocument {
         .map {
           StudyLog.Entry(
             timestamp: $0.studyLogEntry.timestamp,
-            identifier: ChallengeIdentifier(
+            identifier: PromptIdentifier(
               noteId: $0.studyLogEntry.noteId,
               promptKey: $0.studyLogEntry.promptKey,
               promptIndex: $0.studyLogEntry.promptIndex

@@ -22,7 +22,7 @@ public struct StudySession {
   public struct SessionChallengeIdentifier {
     public let noteIdentifier: Note.Identifier
     public let noteTitle: String
-    public let challengeIdentifier: ChallengeIdentifier
+    public let challengeIdentifier: PromptIdentifier
   }
 
   /// The current set of cards to study.
@@ -32,10 +32,10 @@ public struct StudySession {
   private var currentIndex: Int
 
   /// Identifiers of the cards that were answered correctly the first time.
-  private(set) var answeredCorrectly: Set<ChallengeIdentifier> = []
+  private(set) var answeredCorrectly: Set<PromptIdentifier> = []
 
   /// Identifiers of cards that were answered incorrectly at least once.
-  private(set) var answeredIncorrectly: Set<ChallengeIdentifier> = []
+  private(set) var answeredIncorrectly: Set<PromptIdentifier> = []
 
   /// When the person started this particular study session.
   public var studySessionStartDate: Date?
@@ -43,17 +43,17 @@ public struct StudySession {
   /// When the person ended this particular study session.
   public var studySessionEndDate: Date?
 
-  public private(set) var results = [ChallengeIdentifier: AnswerStatistics]()
+  public private(set) var results = [PromptIdentifier: AnswerStatistics]()
 
   /// Identifiers of cards that weren't answered at all in the study session.
-  var didNotAnswerAtAll: Set<ChallengeIdentifier> {
+  var didNotAnswerAtAll: Set<PromptIdentifier> {
     var didNotAnswer = allIdentifiers
     didNotAnswer.subtract(answeredCorrectly)
     didNotAnswer.subtract(answeredIncorrectly)
     return didNotAnswer
   }
 
-  var allIdentifiers: Set<ChallengeIdentifier> {
+  var allIdentifiers: Set<PromptIdentifier> {
     return sessionChallengeIdentifiers.allIdentifiers
   }
 
@@ -61,7 +61,7 @@ public struct StudySession {
   public init<ChallengeIdentifiers: Sequence>(
     _ challengeIdentifiers: ChallengeIdentifiers,
     properties: CardDocumentProperties
-  ) where ChallengeIdentifiers.Element == ChallengeIdentifier {
+  ) where ChallengeIdentifiers.Element == PromptIdentifier {
     let sessionChallengeIdentifiers = challengeIdentifiers.shuffled().map {
       SessionChallengeIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, challengeIdentifier: $0)
     }
@@ -110,7 +110,7 @@ public struct StudySession {
 
   /// Make sure that we don't use multiple prompts from the same prompt template.
   public mutating func ensureUniqueChallengeTemplates() {
-    var seenChallengeTemplateIdentifiers = Set<ChallengeIdentifier>()
+    var seenChallengeTemplateIdentifiers = Set<PromptIdentifier>()
     sessionChallengeIdentifiers = sessionChallengeIdentifiers
       .filter { sessionChallengeIdentifier -> Bool in
         var templateIdentifier = sessionChallengeIdentifier.challengeIdentifier
@@ -187,7 +187,7 @@ extension StudySession {
 
 extension Sequence where Element == StudySession.SessionChallengeIdentifier {
   /// For a sequence of cards, return the set of all identifiers.
-  var allIdentifiers: Set<ChallengeIdentifier> {
-    return reduce(into: Set<ChallengeIdentifier>()) { $0.insert($1.challengeIdentifier) }
+  var allIdentifiers: Set<PromptIdentifier> {
+    return reduce(into: Set<PromptIdentifier>()) { $0.insert($1.challengeIdentifier) }
   }
 }

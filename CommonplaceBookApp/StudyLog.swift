@@ -23,10 +23,10 @@ public struct StudyLog {
 
   public struct Entry: Hashable, Comparable {
     public var timestamp: Date
-    public var identifier: ChallengeIdentifier
+    public var identifier: PromptIdentifier
     public var statistics: AnswerStatistics
 
-    public init(timestamp: Date, identifier: ChallengeIdentifier, statistics: AnswerStatistics) {
+    public init(timestamp: Date, identifier: PromptIdentifier, statistics: AnswerStatistics) {
       self.timestamp = timestamp
       self.identifier = identifier
       self.statistics = statistics
@@ -57,7 +57,7 @@ public struct StudyLog {
   /// Constructs an entry from parameters and inserts it into the log.
   /// (Slightly easier to use in tests.)
   public mutating func appendEntry(
-    challengeIdentifier: ChallengeIdentifier,
+    challengeIdentifier: PromptIdentifier,
     correct: Int = 1,
     incorrect: Int = 0,
     timestamp: Date = Date()
@@ -94,8 +94,8 @@ public struct StudyLog {
 
   /// Computes dates until which we should suppress the given challenge identifier from further
   /// study.
-  public func identifierSuppressionDates() -> [ChallengeIdentifier: Date] {
-    return entries.reduce(into: [ChallengeIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
+  public func identifierSuppressionDates() -> [PromptIdentifier: Date] {
+    return entries.reduce(into: [PromptIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
       guard entry.statistics.correct > 0 else {
         suppressionDates[entry.identifier] = nil
         return

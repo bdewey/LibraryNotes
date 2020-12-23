@@ -32,11 +32,6 @@ public struct ClozePrompt {
   public init(template: ClozePromptCollection, markdown: String, clozeIndex: Int) {
     self.markdown = markdown
     self.clozeIndex = clozeIndex
-    self.challengeIdentifier = ChallengeIdentifier(
-      noteId: template.templateIdentifier?.noteId ?? "",
-      promptKey: template.templateIdentifier?.promptKey ?? "",
-      promptIndex: clozeIndex
-    )
   }
 
   /// The markdown content that contains at least one cloze.
@@ -44,8 +39,6 @@ public struct ClozePrompt {
 
   /// The index of the cloze in `markdown` to remove when testing.
   public let clozeIndex: Int
-
-  public var challengeIdentifier: ChallengeIdentifier
 
   /// Creates a renderer that will render `markdown` with the cloze at `clozeIndex` removed,
   /// replaced with a hint if present, and highlighted.
@@ -55,11 +48,6 @@ public struct ClozePrompt {
 }
 
 extension ClozePrompt: Prompt {
-  public var identifier: String {
-    let suffix = clozeIndex > 0 ? "::\(clozeIndex)" : ""
-    return markdown + suffix
-  }
-
   public func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties

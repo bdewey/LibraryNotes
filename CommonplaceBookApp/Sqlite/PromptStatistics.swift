@@ -48,7 +48,7 @@ struct PromptStatistics: Codable, FetchableRecord, PersistableRecord {
   }
 
   /// Convenience method that knows how to unpack a `ChallengeIdentifier` into the primary keys for a PromptStatistics.
-  static func fetchOne(_ database: Database, key: ChallengeIdentifier) throws -> PromptStatistics? {
+  static func fetchOne(_ database: Database, key: PromptIdentifier) throws -> PromptStatistics? {
     return try fetchOne(database, key: [
       Columns.noteId.rawValue: key.noteId,
       Columns.promptKey.rawValue: key.promptKey,

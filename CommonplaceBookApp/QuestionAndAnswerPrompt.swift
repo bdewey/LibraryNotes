@@ -56,10 +56,6 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
 }
 
 extension QuestionAndAnswerPrompt: Prompt {
-  public var challengeIdentifier: ChallengeIdentifier {
-    ChallengeIdentifier(noteId: templateIdentifier!.noteId, promptKey: templateIdentifier!.promptKey, promptIndex: 0)
-  }
-
   public func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
