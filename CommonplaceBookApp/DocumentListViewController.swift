@@ -19,6 +19,7 @@ import Combine
 import CoreServices
 import CoreSpotlight
 import Logging
+import SafariServices
 import SnapKit
 import UIKit
 
@@ -252,6 +253,8 @@ final class DocumentListViewController: UIViewController {
 extension DocumentListViewController: DocumentTableControllerDelegate {
   func showWebPage(url: URL) {
     Logger.shared.info("Will navigate to web page at \(url)")
+    let safariVC = SFSafariViewController(url: url)
+    showDetailViewController(safariVC, sender: self)
   }
 
   func showDetailViewController(_ detailViewController: UIViewController) {
