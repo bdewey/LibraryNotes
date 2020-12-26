@@ -370,8 +370,17 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 private extension String {
   /// Non-nil if this string is a valid web URL.
   var asWebURL: URL? {
-    guard let url = URL(string: self.lowercased()) else { return nil }
-    if url.scheme == "http" || url.scheme == "https" { return url }
+    guard let urlDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+      assertionFailure()
+      return nil
+    }
+    let fullStringRange = NSRange(startIndex..., in: self)
+    let matches = urlDetector.matches(in: self, options: [], range: fullStringRange)
+    for match in matches {
+      if match.range(at: 0) == fullStringRange {
+        return match.url
+      }
+    }
     return nil
   }
 }
