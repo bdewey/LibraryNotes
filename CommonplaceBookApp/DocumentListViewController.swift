@@ -250,6 +250,10 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
+  func showWebPage(url: URL) {
+    Logger.shared.info("Will navigate to web page at \(url)")
+  }
+
   func showDetailViewController(_ detailViewController: UIViewController) {
     if let splitViewController = splitViewController {
       let navigationController = UINavigationController(rootViewController: detailViewController)
@@ -324,6 +328,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     }
     let pattern = searchController.searchBar.text ?? ""
     Logger.shared.info("Issuing query: \(pattern)")
+    dataSource?.webURL = pattern.asWebURL
     do {
       let allIdentifiers = try database.search(for: pattern)
       dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
@@ -356,5 +361,14 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+private extension String {
+  /// Non-nil if this string is a valid web URL.
+  var asWebURL: URL? {
+    guard let url = URL(string: self.lowercased()) else { return nil }
+    if url.scheme == "http" || url.scheme == "https" { return url }
+    return nil
   }
 }

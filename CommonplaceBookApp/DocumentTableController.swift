@@ -28,6 +28,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
+  func showWebPage(url: URL)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -41,6 +42,7 @@ public final class DocumentTableController: NSObject {
   ) {
     self.database = database
     self.delegate = delegate
+    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "web")
     tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
     self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
       switch item {
@@ -50,6 +52,10 @@ public final class DocumentTableController: NSObject {
           indexPath: indexPath,
           viewProperties: viewProperties
         )
+      case .webPage(let url):
+        let cell = tableView.dequeueReusableCell(withIdentifier: "web", for: indexPath)
+        cell.textLabel?.text = "Open \(url)"
+        return cell
       }
     }
     super.init()
@@ -113,6 +119,13 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  /// If non-nil, the table view should show a cell representing this web page at the top of the table.
+  public var webURL: URL? {
+    didSet {
+      needsPerformUpdates = true
+    }
+  }
+
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
@@ -146,7 +159,8 @@ public final class DocumentTableController: NSObject {
       for: database,
       cardsPerDocument: cardsPerDocument,
       filteredHashtag: filteredHashtag,
-      filteredPageIdentifiers: filteredPageIdentifiers
+      filteredPageIdentifiers: filteredPageIdentifiers,
+      webURL: webURL
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -173,6 +187,10 @@ public final class DocumentTableController: NSObject {
         if lhsPage.pageKey != rhsPage.pageKey {
           return true
         }
+      case (.webPage, .webPage):
+        continue
+      default:
+        return true
       }
     }
     return false
@@ -188,6 +206,8 @@ extension DocumentTableController: UITableViewDelegate {
     switch item {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey)
+    case .webPage(let url):
+      delegate?.showWebPage(url: url)
     }
   }
 
@@ -217,6 +237,8 @@ extension DocumentTableController: UITableViewDelegate {
         studyAction.backgroundColor = UIColor.systemBlue
         actions.append(studyAction)
       }
+    case .webPage:
+      return nil
     }
     return UISwipeActionsConfiguration(actions: actions)
   }
@@ -237,15 +259,20 @@ private extension DocumentTableController {
 
   /// Sections of the collection view
   enum DocumentSection {
+    /// A section with cells that represent navigation to other pages.
+    case webNavigation
     /// List of documents.
     case documents
   }
 
   enum Item: Hashable, CustomStringConvertible {
+    case webPage(URL)
     case page(ViewProperties)
 
     var description: String {
       switch self {
+      case .webPage(let url):
+        return "Web page: \(url)"
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
       }
@@ -319,9 +346,16 @@ private extension DocumentTableController {
     for database: NoteDatabase,
     cardsPerDocument: [Note.Identifier: Int],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<Note.Identifier>?
+    filteredPageIdentifiers: Set<Note.Identifier>?,
+    webURL: URL?
   ) -> Snapshot {
     var snapshot = Snapshot()
+
+    if let webURL = webURL {
+      snapshot.appendSections([.webNavigation])
+      snapshot.appendItems([.webPage(webURL)])
+    }
+
     snapshot.appendSections([.documents])
 
     let propertiesFilteredByHashtag = database.allMetadata
