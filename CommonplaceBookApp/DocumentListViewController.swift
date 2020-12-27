@@ -253,8 +253,10 @@ final class DocumentListViewController: UIViewController {
 extension DocumentListViewController: DocumentTableControllerDelegate {
   func showWebPage(url: URL) {
     Logger.shared.info("Will navigate to web page at \(url)")
-    let safariVC = SFSafariViewController(url: url)
-    showDetailViewController(safariVC, sender: self)
+    let webViewController = WebViewController(url: url)
+    let navigationController = UINavigationController(rootViewController: webViewController)
+    navigationController.navigationBar.barTintColor = .grailBackground
+    showDetailViewController(navigationController, sender: self)
   }
 
   func showDetailViewController(_ detailViewController: UIViewController) {

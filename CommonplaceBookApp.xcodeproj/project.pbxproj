@@ -48,6 +48,7 @@
 		D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */; };
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
+		D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D7CDF2598CCC70083AB05 /* WebViewController.swift */; };
 		D329BF6023CB8BD5008D59CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D329BF5F23CB8BD5008D59CF /* GRDB */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
@@ -205,6 +206,7 @@
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
+		D31D7CDF2598CCC70083AB05 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
@@ -453,6 +455,7 @@
 				D31AFAA4229D61ED00ED2B76 /* TwoSidedCardView.swift */,
 				D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */,
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
+				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 			);
 			path = CommonplaceBookApp;
 			sourceTree = "<group>";
@@ -737,6 +740,7 @@
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D30D6B2A2549BD0700F5902D /* PieceTableString.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
+				D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */,
 				D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */,
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
