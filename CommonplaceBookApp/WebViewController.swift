@@ -25,12 +25,12 @@ extension Logger {
 }
 
 public final class WebViewController: UIViewController {
-
   public init(url: URL) {
     self.initialURL = url
     super.init(nibName: nil, bundle: nil)
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -48,11 +48,11 @@ public final class WebViewController: UIViewController {
     return view
   }()
 
-  public override func loadView() {
-    self.view = webView
+  override public func loadView() {
+    view = webView
   }
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
 
     // Do any additional setup after loading the view.
@@ -61,5 +61,4 @@ public final class WebViewController: UIViewController {
 
 // MARK: - WKNavigationDelegate
 
-extension WebViewController: WKNavigationDelegate {
-}
+extension WebViewController: WKNavigationDelegate {}

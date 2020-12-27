@@ -57,6 +57,10 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
     request(for: Self.contentRecords).filter(ContentRecord.Columns.role == "primary")
   }
 
+  static var binaryContentRecords = hasMany(BinaryContentRecord.self)
+
+  var binaryContentRecords: QueryInterfaceRequest<BinaryContentRecord> { request(for: Self.binaryContentRecords) }
+
   static let promptStatistics = hasMany(PromptRecord.self, through: contentRecords, using: ContentRecord.promptStatistics)
 
   var promptStatistics: QueryInterfaceRequest<PromptRecord> {

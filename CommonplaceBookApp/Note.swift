@@ -53,8 +53,14 @@ public struct Note: Equatable {
     }
   }
 
+  /// What this note is "about."
+  public enum Reference: Equatable {
+    case webPage(URL)
+  }
+
   public var metadata: Metadata
   public var text: String?
+  public var reference: Reference?
   public var promptCollections: [ContentKey: PromptCollection]
 
   public init(
@@ -68,7 +74,7 @@ public struct Note: Equatable {
   }
 
   public static func == (lhs: Note, rhs: Note) -> Bool {
-    if lhs.metadata != rhs.metadata || lhs.text != rhs.text {
+    if lhs.metadata != rhs.metadata || lhs.text != rhs.text || lhs.reference != rhs.reference {
       return false
     }
     let lhsIdentifiers = Set(lhs.promptCollections.keys)
