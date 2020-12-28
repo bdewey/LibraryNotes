@@ -47,21 +47,21 @@ final class NotebookViewController: UIViewController {
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
-    documentListViewController.didTapFilesAction = { [weak documentListViewController] in
-      AppDelegate.openedDocumentBookmark = nil
-      documentListViewController?.dismiss(animated: true, completion: nil)
-    }
+    documentListViewController.delegate = self
     return documentListViewController
   }()
 
-  /// The split view we are managing.
-  private lazy var notebookSplitViewController: UISplitViewController = {
+  private lazy var supplementaryNavigationController: UINavigationController = {
     let supplementaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
     )
     supplementaryNavigationController.navigationBar.prefersLargeTitles = false
     supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+    return supplementaryNavigationController
+  }()
 
+  /// The split view we are managing.
+  private lazy var notebookSplitViewController: UISplitViewController = {
     let hashtagViewController = NotebookStructureViewController(
       database: documentListViewController.database
     )
@@ -122,9 +122,53 @@ final class NotebookViewController: UIViewController {
   }
 }
 
+// MARK: - NotebookStructureViewControllerDelegate
+
 extension NotebookViewController: NotebookStructureViewControllerDelegate {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
     focusedNotebookStructure = structure
+  }
+}
+
+// MARK: - DocumentListViewControllerDelegate
+
+extension NotebookViewController: DocumentListViewControllerDelegate {
+  func documentListViewController(
+    _ viewController: DocumentListViewController,
+    didRequestShowNote note: Note,
+    noteIdentifier: Note.Identifier?
+  ) {
+    let textEditViewController = TextEditViewController()
+    textEditViewController.noteIdentifier = noteIdentifier
+    textEditViewController.markdown = note.text ?? ""
+    let savingWrapper = SavingTextEditViewController(
+      textEditViewController,
+      noteIdentifier: noteIdentifier,
+      noteStorage: database
+    )
+    savingWrapper.setTitleMarkdown(note.metadata.title)
+
+    if let referenceViewController = self.referenceViewController(for: note) {
+      supplementaryNavigationController.pushViewController(savingWrapper, animated: true)
+      notebookSplitViewController.setViewController(referenceViewController.wrappingInNavigationController(), for: .secondary)
+    } else {
+      notebookSplitViewController.setViewController(savingWrapper.wrappingInNavigationController(), for: .secondary)
+    }
+    notebookSplitViewController.show(.secondary)
+  }
+
+  private func referenceViewController(for note: Note) -> UIViewController? {
+    switch note.reference {
+    case .none: return nil
+    case .some(.webPage(let url)):
+      return WebViewController(url: url)
+    }
+  }
+}
+
+private extension UIViewController {
+  func wrappingInNavigationController() -> UINavigationController {
+    UINavigationController(rootViewController: self)
   }
 }
 

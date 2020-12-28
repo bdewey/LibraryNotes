@@ -45,6 +45,14 @@ extension UIResponder {
   }
 }
 
+protocol DocumentListViewControllerDelegate: AnyObject {
+  func documentListViewController(
+    _ viewController: DocumentListViewController,
+    didRequestShowNote note: Note,
+    noteIdentifier: Note.Identifier?
+  )
+}
+
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
   /// Designated initializer.
@@ -70,6 +78,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
+  weak public var delegate: DocumentListViewControllerDelegate?
 
   public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
     let hashtag: String?
@@ -85,7 +94,6 @@ final class DocumentListViewController: UIViewController {
     updateStudySession()
   }
 
-  public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
@@ -120,12 +128,7 @@ final class DocumentListViewController: UIViewController {
       Logger.shared.error("Unexpected error loading page: \(error)")
       return
     }
-    let textEditViewController = TextEditViewController()
-    textEditViewController.noteIdentifier = noteIdentifier
-    textEditViewController.markdown = note.text ?? ""
-    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, noteStorage: database)
-    savingWrapper.setTitleMarkdown(note.metadata.title)
-    showDetailViewController(savingWrapper)
+    delegate?.documentListViewController(self, didRequestShowNote: note, noteIdentifier: noteIdentifier)
   }
 
   // MARK: - Lifecycle
@@ -253,10 +256,17 @@ final class DocumentListViewController: UIViewController {
 extension DocumentListViewController: DocumentTableControllerDelegate {
   func showWebPage(url: URL) {
     Logger.shared.info("Will navigate to web page at \(url)")
-    let webViewController = WebViewController(url: url)
-    let navigationController = UINavigationController(rootViewController: webViewController)
-    navigationController.navigationBar.barTintColor = .grailBackground
-    showDetailViewController(navigationController, sender: self)
+    let placeholderNote = Note(
+      metadata: Note.Metadata(
+        timestamp: Date(),
+        hashtags: [],
+        title: ""
+      ),
+      text: "This is a test note",
+      reference: .webPage(url),
+      promptCollections: [:]
+    )
+    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil)
   }
 
   func showDetailViewController(_ detailViewController: UIViewController) {
