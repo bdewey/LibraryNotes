@@ -269,19 +269,6 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil)
   }
 
-  func showDetailViewController(_ detailViewController: UIViewController) {
-    if let splitViewController = splitViewController {
-      let navigationController = UINavigationController(rootViewController: detailViewController)
-      navigationController.navigationBar.barTintColor = .grailBackground
-      splitViewController.showDetailViewController(
-        navigationController,
-        sender: self
-      )
-    } else if let navigationController = navigationController {
-      navigationController.pushViewController(detailViewController, animated: true)
-    }
-  }
-
   func presentStudySessionViewController(for studySession: StudySession) {
     let studyVC = StudyViewController(
       studySession: studySession.shuffling().ensuringUniquePromptCollections().limiting(to: 20),
@@ -309,13 +296,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
-      showDetailViewController(
-        SavingTextEditViewController(
-          database: database,
-          currentHashtag: dataSource?.filteredHashtag,
-          autoFirstResponder: false
-        )
-      )
+      let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource?.filteredHashtag)
+      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil)
     }
   }
 

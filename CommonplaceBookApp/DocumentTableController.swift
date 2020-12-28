@@ -21,8 +21,6 @@ import UIKit
 
 /// Knows how to perform key actions with the document
 public protocol DocumentTableControllerDelegate: AnyObject {
-  /// Shows a TextEditViewController in the detail view.
-  func showDetailViewController(_ detailViewController: UIViewController)
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)

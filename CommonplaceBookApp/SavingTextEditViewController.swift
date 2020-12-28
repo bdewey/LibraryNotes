@@ -50,16 +50,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   /// Initializes a view controller for a new, unsaved note.
   convenience init(database: NoteDatabase, currentHashtag: String? = nil, autoFirstResponder: Bool = false) {
-    var initialText = "# "
-    let initialOffset = initialText.count
-    initialText += "\n"
-    if let hashtag = currentHashtag {
-      initialText += hashtag
-      initialText += "\n"
-    }
+    let (note, initialOffset) = Note.makeBlankNote(hashtag: currentHashtag)
     let configuration = Configuration(
       noteIdentifier: nil,
-      note: Note(markdown: initialText),
+      note: note,
       initialSelectedRange: NSRange(location: initialOffset, length: 0),
       autoFirstResponder: autoFirstResponder
     )
