@@ -19,6 +19,12 @@ import Foundation
 import GRDB
 import Logging
 
+private enum ApplicationMimeType: String {
+
+  /// Private MIME type for URLs.
+  case url = "text/vnd.grail.url"
+}
+
 public extension Note {
   /// Loads a note from the database.
   init(identifier: Note.Identifier, database db: Database) throws {
@@ -44,6 +50,7 @@ public extension Note {
         title: sqliteNote.title
       ),
       text: noteText,
+      reference: try db.reference(for: identifier),
       promptCollections: promptCollections
     )
   }
@@ -63,6 +70,7 @@ public extension Note {
     try sqliteNote.save(db)
 
     try savePrimaryText(noteIdentifier: identifier, database: db)
+    try saveReference(noteIdentifier: identifier, database: db)
     let inMemoryHashtags = Set(metadata.hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
@@ -134,5 +142,45 @@ public extension Note {
       mimeType: "text/markdown"
     )
     try newRecord.save(db)
+  }
+
+  private func saveReference(noteIdentifier: Note.Identifier, database: Database) throws {
+    guard let reference = reference else { return }
+    switch reference {
+    case .webPage(let url):
+      let record = ContentRecord(
+        text: url.absoluteString,
+        noteId: noteIdentifier,
+        key: ContentRole.reference.rawValue,
+        role: ContentRole.reference.rawValue,
+        mimeType: ApplicationMimeType.url.rawValue
+      )
+      try record.save(database)
+    }
+  }
+}
+
+private extension Database {
+  func reference(for noteIdentifier: Note.Identifier) throws -> Note.Reference? {
+    guard
+      let record = try ContentRecord
+        .filter(ContentRecord.Columns.noteId == noteIdentifier)
+        .filter(ContentRecord.Columns.role == ContentRole.reference.rawValue).fetchOne(self)
+    else {
+      return nil
+    }
+    let mimeType = ApplicationMimeType(rawValue: record.mimeType)
+    switch mimeType {
+    case .none:
+      Logger.shared.error("Unrecognized reference MIME type \(record.mimeType), ignoring")
+      return nil
+    case .url:
+      if let url = URL(string: record.text) {
+        return .webPage(url)
+      } else {
+        Logger.shared.error("Could not turn string into URL: \(record.text)")
+        return nil
+      }
+    }
   }
 }

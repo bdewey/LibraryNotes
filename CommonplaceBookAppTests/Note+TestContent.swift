@@ -52,4 +52,15 @@ extension Note {
   """)
 
   static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
+
+  static let withReferenceWebPage = Note(
+    metadata: Metadata(
+      timestamp: Date(),
+      hashtags: ["#test"],
+      title: "The Onion"
+    ),
+    text: nil,
+    reference: .webPage(URL(string: "https://www.theonion.com")!),
+    promptCollections: [:]
+  )
 }

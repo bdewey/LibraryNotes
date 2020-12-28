@@ -54,6 +54,14 @@ final class NoteSqliteStorageTests: XCTestCase {
     }
   }
 
+  func testRoundTripReferenceWebPage() {
+    makeAndOpenEmptyDatabase { database in
+      let identifier = try database.createNote(.withReferenceWebPage)
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(Note.withReferenceWebPage, roundTripNote)
+    }
+  }
+
   func testUpdateHashtags() {
     makeAndOpenEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)

@@ -66,10 +66,12 @@ public struct Note: Equatable {
   public init(
     metadata: Metadata = Metadata(),
     text: String? = nil,
+    reference: Reference? = nil,
     promptCollections: [ContentKey: PromptCollection] = [:]
   ) {
     self.metadata = metadata
     self.text = text
+    self.reference = reference
     self.promptCollections = promptCollections
   }
 
