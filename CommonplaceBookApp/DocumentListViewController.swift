@@ -310,7 +310,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
       showDetailViewController(
-        TextEditViewController.makeBlankDocument(
+        SavingTextEditViewController(
           database: database,
           currentHashtag: dataSource?.filteredHashtag,
           autoFirstResponder: false

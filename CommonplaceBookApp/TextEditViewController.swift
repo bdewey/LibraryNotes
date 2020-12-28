@@ -49,30 +49,6 @@ public final class TextEditViewController: UIViewController {
     )
   }
 
-  /// Constructs a new blank document that will save back to `database` on changes.
-  static func makeBlankDocument(
-    database: NoteDatabase,
-    currentHashtag: String?,
-    autoFirstResponder: Bool
-  ) -> SavingTextEditViewController {
-    var initialText = "# "
-    let initialOffset = initialText.count
-    initialText += "\n"
-    if let hashtag = currentHashtag {
-      initialText += hashtag
-      initialText += "\n"
-    }
-    let viewController = TextEditViewController()
-    viewController.markdown = initialText
-    viewController.selectedRange = NSRange(location: initialOffset, length: 0)
-    viewController.autoFirstResponder = autoFirstResponder
-    return SavingTextEditViewController(
-      viewController,
-      noteIdentifier: nil,
-      noteStorage: database
-    )
-  }
-
   @available(*, unavailable)
   required init(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
@@ -93,9 +69,6 @@ public final class TextEditViewController: UIViewController {
       textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: newValue)
     }
   }
-
-  /// Identifier of the page we are editing.
-  public var noteIdentifier: Note.Identifier?
 
   private static func formatters(
   ) -> [SyntaxTreeNodeType: FormattingFunction] {

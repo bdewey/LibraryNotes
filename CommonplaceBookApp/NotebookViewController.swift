@@ -71,14 +71,8 @@ final class NotebookViewController: UIViewController {
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
     let splitViewController = UISplitViewController(style: .tripleColumn)
-    let detailViewController = UINavigationController(
-      rootViewController:
-      TextEditViewController.makeBlankDocument(
-        database: documentListViewController.database,
-        currentHashtag: nil,
-        autoFirstResponder: false
-      )
-    )
+    let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
+      .wrappingInNavigationController()
     splitViewController.viewControllers = [
       primaryNavigationController,
       supplementaryNavigationController,
@@ -110,14 +104,8 @@ final class NotebookViewController: UIViewController {
     case .hashtag(let focusedHashtag):
       hashtag = focusedHashtag
     }
-    let viewController = TextEditViewController.makeBlankDocument(
-      database: database,
-      currentHashtag: hashtag,
-      autoFirstResponder: true
-    )
-    // I don't know why but you need to wrap this in a nav controller before pushing
-    let navController = UINavigationController(rootViewController: viewController)
-    notebookSplitViewController.showDetailViewController(navController, sender: nil)
+    let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true).wrappingInNavigationController()
+    notebookSplitViewController.showDetailViewController(viewController, sender: nil)
     Logger.shared.info("Created a new view controller for a blank document")
   }
 }
@@ -138,21 +126,17 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     didRequestShowNote note: Note,
     noteIdentifier: Note.Identifier?
   ) {
-    let textEditViewController = TextEditViewController()
-    textEditViewController.noteIdentifier = noteIdentifier
-    textEditViewController.markdown = note.text ?? ""
-    let savingWrapper = SavingTextEditViewController(
-      textEditViewController,
-      noteIdentifier: noteIdentifier,
+    let noteViewController = SavingTextEditViewController(
+      configuration: SavingTextEditViewController.Configuration(noteIdentifier: noteIdentifier, note: note),
       noteStorage: database
     )
-    savingWrapper.setTitleMarkdown(note.metadata.title)
+    noteViewController.setTitleMarkdown(note.metadata.title)
 
     if let referenceViewController = self.referenceViewController(for: note) {
-      supplementaryNavigationController.pushViewController(savingWrapper, animated: true)
+      supplementaryNavigationController.pushViewController(noteViewController, animated: true)
       notebookSplitViewController.setViewController(referenceViewController.wrappingInNavigationController(), for: .secondary)
     } else {
-      notebookSplitViewController.setViewController(savingWrapper.wrappingInNavigationController(), for: .secondary)
+      notebookSplitViewController.setViewController(noteViewController.wrappingInNavigationController(), for: .secondary)
     }
     notebookSplitViewController.show(.secondary)
   }
