@@ -24,7 +24,7 @@ extension Logger {
   static let webView = Logger(label: webViewLoggerLabel)
 }
 
-public final class WebViewController: UIViewController {
+public final class WebViewController: UIViewController, ReferenceViewController {
   public init(url: URL) {
     self.initialURL = url
     super.init(nibName: nil, bundle: nil)
@@ -35,6 +35,7 @@ public final class WebViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  public var relatedNotesViewController: UIViewController?
   private var initialURL: URL
 
   private lazy var webView: WKWebView = {
@@ -56,6 +57,41 @@ public final class WebViewController: UIViewController {
     super.viewDidLoad()
 
     // Do any additional setup after loading the view.
+  }
+
+  override public func viewWillAppear(_ animated: Bool) {
+    super.viewWillAppear(animated)
+    configureToolbar()
+  }
+
+  override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+    super.traitCollectionDidChange(previousTraitCollection)
+    configureToolbar()
+  }
+
+  @objc private func showNotes() {
+    guard let relatedNotesViewController = relatedNotesViewController else { return }
+    Logger.shared.info("Should show notes now")
+    let navigationController = UINavigationController(rootViewController: relatedNotesViewController)
+    navigationController.navigationBar.prefersLargeTitles = false
+    navigationController.navigationBar.barTintColor = .grailBackground
+    navigationController.view.tintColor = .systemOrange
+    present(navigationController, animated: true, completion: nil)
+  }
+
+  private func configureToolbar() {
+    if splitViewController?.isCollapsed ?? false {
+      navigationController?.isToolbarHidden = false
+
+      let showNotesButton = UIBarButtonItem(image: UIImage(systemName: "note.text"), style: .plain, target: self, action: #selector(showNotes))
+      showNotesButton.accessibilityIdentifier = "show-notes"
+
+      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
+    } else {
+      navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
+      navigationController?.isToolbarHidden = true
+      toolbarItems = []
+    }
   }
 }
 

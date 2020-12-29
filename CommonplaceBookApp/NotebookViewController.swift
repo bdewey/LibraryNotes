@@ -19,6 +19,11 @@ import Logging
 import SnapKit
 import UIKit
 
+/// Protocol for any UIViewController that displays "reference" material for which we can also show related notes
+protocol ReferenceViewController: UIViewController {
+  var relatedNotesViewController: UIViewController? { get set }
+}
+
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
@@ -133,26 +138,28 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteViewController.setTitleMarkdown(note.metadata.title)
 
     if let referenceViewController = self.referenceViewController(for: note) {
-      supplementaryNavigationController.pushViewController(noteViewController, animated: true)
-      notebookSplitViewController.setViewController(referenceViewController.wrappingInNavigationController(), for: .secondary)
+      referenceViewController.relatedNotesViewController = noteViewController
+      // In a non-collapsed environment, we'll show the notes in the supplementary view.
+      // In a collapsed environment, we rely on a button in the web view to modally present notes.
+      if !notebookSplitViewController.isCollapsed {
+        supplementaryNavigationController.pushViewController(noteViewController, animated: true)
+      }
+      notebookSplitViewController.setViewController(
+        referenceViewController.wrappingInNavigationController(),
+        for: .secondary
+      )
     } else {
       notebookSplitViewController.setViewController(noteViewController.wrappingInNavigationController(), for: .secondary)
     }
     notebookSplitViewController.show(.secondary)
   }
 
-  private func referenceViewController(for note: Note) -> UIViewController? {
+  private func referenceViewController(for note: Note) -> ReferenceViewController? {
     switch note.reference {
     case .none: return nil
     case .some(.webPage(let url)):
       return WebViewController(url: url)
     }
-  }
-}
-
-private extension UIViewController {
-  func wrappingInNavigationController() -> UINavigationController {
-    UINavigationController(rootViewController: self)
   }
 }
 

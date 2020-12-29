@@ -78,7 +78,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
-  weak public var delegate: DocumentListViewControllerDelegate?
+  public weak var delegate: DocumentListViewControllerDelegate?
 
   public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
     let hashtag: String?

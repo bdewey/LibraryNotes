@@ -20,7 +20,6 @@ import GRDB
 import Logging
 
 private enum ApplicationMimeType: String {
-
   /// Private MIME type for URLs.
   case url = "text/vnd.grail.url"
 }
@@ -164,8 +163,8 @@ private extension Database {
   func reference(for noteIdentifier: Note.Identifier) throws -> Note.Reference? {
     guard
       let record = try ContentRecord
-        .filter(ContentRecord.Columns.noteId == noteIdentifier)
-        .filter(ContentRecord.Columns.role == ContentRole.reference.rawValue).fetchOne(self)
+      .filter(ContentRecord.Columns.noteId == noteIdentifier)
+      .filter(ContentRecord.Columns.role == ContentRole.reference.rawValue).fetchOne(self)
     else {
       return nil
     }

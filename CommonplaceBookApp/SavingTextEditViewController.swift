@@ -23,7 +23,6 @@ import UIKit
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
-
   /// Holds configuration settings for the view controller.
   struct Configuration {
     var noteIdentifier: Note.Identifier?
