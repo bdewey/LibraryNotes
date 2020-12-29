@@ -49,6 +49,26 @@ final class NotebookViewController: UIViewController {
     }
   }
 
+  /// The current editor.
+  private var currentNoteEditor: SavingTextEditViewController? {
+    didSet {
+      guard let currentNoteEditor = currentNoteEditor else { return }
+      let note = currentNoteEditor.note
+      if let referenceViewController = self.referenceViewController(for: note) {
+        referenceViewController.relatedNotesViewController = currentNoteEditor
+        // In a non-collapsed environment, we'll show the notes in the supplementary view.
+        // In a collapsed environment, we rely on a button in the web view to modally present notes.
+        if !notebookSplitViewController.isCollapsed {
+          supplementaryNavigationController.pushViewController(currentNoteEditor, animated: true)
+        }
+        secondaryNavigationController.viewControllers = [referenceViewController]
+      } else {
+        secondaryNavigationController.viewControllers = [currentNoteEditor]
+      }
+      notebookSplitViewController.show(.secondary)
+    }
+  }
+
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
@@ -59,6 +79,16 @@ final class NotebookViewController: UIViewController {
   private lazy var supplementaryNavigationController: UINavigationController = {
     let supplementaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
+    )
+    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
+    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+    return supplementaryNavigationController
+  }()
+
+  private lazy var secondaryNavigationController: UINavigationController = {
+    let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
+    let supplementaryNavigationController = UINavigationController(
+      rootViewController: detailViewController
     )
     supplementaryNavigationController.navigationBar.prefersLargeTitles = false
     supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
@@ -76,12 +106,10 @@ final class NotebookViewController: UIViewController {
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
     let splitViewController = UISplitViewController(style: .tripleColumn)
-    let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
-      .wrappingInNavigationController()
     splitViewController.viewControllers = [
       primaryNavigationController,
       supplementaryNavigationController,
-      detailViewController,
+      secondaryNavigationController,
     ]
     splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.showsSecondaryOnlyButton = true
@@ -109,8 +137,8 @@ final class NotebookViewController: UIViewController {
     case .hashtag(let focusedHashtag):
       hashtag = focusedHashtag
     }
-    let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true).wrappingInNavigationController()
-    notebookSplitViewController.showDetailViewController(viewController, sender: nil)
+    let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true)
+    currentNoteEditor = viewController
     Logger.shared.info("Created a new view controller for a blank document")
   }
 }
@@ -136,22 +164,7 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
       noteStorage: database
     )
     noteViewController.setTitleMarkdown(note.metadata.title)
-
-    if let referenceViewController = self.referenceViewController(for: note) {
-      referenceViewController.relatedNotesViewController = noteViewController
-      // In a non-collapsed environment, we'll show the notes in the supplementary view.
-      // In a collapsed environment, we rely on a button in the web view to modally present notes.
-      if !notebookSplitViewController.isCollapsed {
-        supplementaryNavigationController.pushViewController(noteViewController, animated: true)
-      }
-      notebookSplitViewController.setViewController(
-        referenceViewController.wrappingInNavigationController(),
-        for: .secondary
-      )
-    } else {
-      notebookSplitViewController.setViewController(noteViewController.wrappingInNavigationController(), for: .secondary)
-    }
-    notebookSplitViewController.show(.secondary)
+    currentNoteEditor = noteViewController
   }
 
   private func referenceViewController(for note: Note) -> ReferenceViewController? {
@@ -188,7 +201,23 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     return textEditViewController.noteIdentifier == nil
   }
 
-  func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
-    return .supplementary
+  func splitViewController(
+    _ svc: UISplitViewController,
+    topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
+  ) -> UISplitViewController.Column {
+    guard let currentNoteEditor = currentNoteEditor else { return proposedTopColumn }
+
+    // If the current note has reference material, keep it in view.
+    if currentNoteEditor.note.reference != nil {
+      return .secondary
+    }
+
+    // If the current note isn't saved, prefer the supplementary view.
+    if currentNoteEditor.noteIdentifier == nil {
+      return .supplementary
+    }
+
+    // No reason to second-guess UIKit.
+    return proposedTopColumn
   }
 }

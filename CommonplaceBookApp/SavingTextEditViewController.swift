@@ -74,6 +74,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
   var noteIdentifier: Note.Identifier? { configuration.noteIdentifier }
 
+  /// The current note.
+  var note: Note { configuration.note }
+
   internal func setTitleMarkdown(_ markdown: String) {
     navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
