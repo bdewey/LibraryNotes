@@ -109,6 +109,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private func configureToolbar() {
     if splitViewController?.isCollapsed ?? false {
+      navigationItem.rightBarButtonItem = nil
       navigationController?.isToolbarHidden = false
       toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
     } else {
