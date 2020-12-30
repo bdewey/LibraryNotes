@@ -55,14 +55,11 @@ final class NotebookViewController: UIViewController {
       guard let currentNoteEditor = currentNoteEditor else { return }
       let note = currentNoteEditor.note
       if let referenceViewController = self.referenceViewController(for: note) {
+        currentNoteEditor.chromeStyle = .modal
         referenceViewController.relatedNotesViewController = currentNoteEditor
-        // In a non-collapsed environment, we'll show the notes in the supplementary view.
-        // In a collapsed environment, we rely on a button in the web view to modally present notes.
-        if !notebookSplitViewController.isCollapsed {
-          supplementaryNavigationController.pushViewController(currentNoteEditor, animated: true)
-        }
         secondaryNavigationController.viewControllers = [referenceViewController]
       } else {
+        currentNoteEditor.chromeStyle = .splitViewController
         secondaryNavigationController.viewControllers = [currentNoteEditor]
       }
       notebookSplitViewController.show(.secondary)

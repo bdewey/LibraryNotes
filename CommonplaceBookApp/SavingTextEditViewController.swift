@@ -64,6 +64,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     fatalError("init(coder:) has not been implemented")
   }
 
+  public enum ChromeStyle {
+    case modal
+    case splitViewController
+  }
+
+  /// Controls configuration of toolbars & navigation items
+  public var chromeStyle = ChromeStyle.splitViewController
+
   private var configuration: Configuration
   private let noteStorage: NoteDatabase
   private let textEditViewController: TextEditViewController
@@ -107,15 +115,25 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     configureToolbar()
   }
 
+  @objc private func closeModal() {
+    dismiss(animated: true, completion: nil)
+  }
+
   private func configureToolbar() {
-    if splitViewController?.isCollapsed ?? false {
-      navigationItem.rightBarButtonItem = nil
-      navigationController?.isToolbarHidden = false
-      toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
-    } else {
-      navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
-      navigationController?.isToolbarHidden = true
-      toolbarItems = []
+    switch chromeStyle {
+    case .modal:
+      let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeModal))
+      navigationItem.rightBarButtonItem = closeButton
+    case .splitViewController:
+      if splitViewController?.isCollapsed ?? false {
+        navigationItem.rightBarButtonItem = nil
+        navigationController?.isToolbarHidden = false
+        toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
+      } else {
+        navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
+        navigationController?.isToolbarHidden = true
+        toolbarItems = []
+      }
     }
   }
 

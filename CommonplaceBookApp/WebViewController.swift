@@ -75,22 +75,23 @@ public final class WebViewController: UIViewController, ReferenceViewController 
     let navigationController = UINavigationController(rootViewController: relatedNotesViewController)
     navigationController.navigationBar.prefersLargeTitles = false
     navigationController.navigationBar.barTintColor = .grailBackground
+    navigationController.navigationBar.tintColor = .systemOrange
     navigationController.view.tintColor = .systemOrange
     present(navigationController, animated: true, completion: nil)
   }
 
   private func configureToolbar() {
+    let showNotesButton = UIBarButtonItem(image: UIImage(systemName: "note.text"), style: .plain, target: self, action: #selector(showNotes))
+    showNotesButton.accessibilityIdentifier = "show-notes"
+
     if splitViewController?.isCollapsed ?? false {
+      navigationItem.rightBarButtonItem = nil
       navigationController?.isToolbarHidden = false
-
-      let showNotesButton = UIBarButtonItem(image: UIImage(systemName: "note.text"), style: .plain, target: self, action: #selector(showNotes))
-      showNotesButton.accessibilityIdentifier = "show-notes"
-
       toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
     } else {
       navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
-      navigationController?.isToolbarHidden = true
-      toolbarItems = []
+      navigationController?.isToolbarHidden = false
+      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace()]
     }
   }
 }
