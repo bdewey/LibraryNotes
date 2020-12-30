@@ -85,13 +85,13 @@ public final class WebViewController: UIViewController, ReferenceViewController 
     showNotesButton.accessibilityIdentifier = "show-notes"
 
     if splitViewController?.isCollapsed ?? false {
-      navigationItem.rightBarButtonItem = nil
+      navigationItem.rightBarButtonItems = []
       navigationController?.isToolbarHidden = false
       toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
     } else {
-      navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
-      navigationController?.isToolbarHidden = false
-      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace()]
+      navigationItem.rightBarButtonItems = [AppCommandsButtonItems.newNote(), showNotesButton]
+      navigationController?.isToolbarHidden = true
+      toolbarItems = []
     }
   }
 }
