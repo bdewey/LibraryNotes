@@ -86,6 +86,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   var note: Note { configuration.note }
 
   internal func setTitleMarkdown(_ markdown: String) {
+    guard chromeStyle == .splitViewController else { return }
     navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
@@ -107,7 +108,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    navigationController?.hidesBarsOnSwipe = true
     configureToolbar()
   }
 

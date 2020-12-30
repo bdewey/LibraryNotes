@@ -53,12 +53,6 @@ public final class WebViewController: UIViewController, ReferenceViewController 
     view = webView
   }
 
-  override public func viewDidLoad() {
-    super.viewDidLoad()
-
-    // Do any additional setup after loading the view.
-  }
-
   override public func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     configureToolbar()
@@ -76,6 +70,7 @@ public final class WebViewController: UIViewController, ReferenceViewController 
     navigationController.navigationBar.prefersLargeTitles = false
     navigationController.navigationBar.barTintColor = .grailBackground
     navigationController.navigationBar.tintColor = .systemOrange
+    navigationController.hidesBarsOnSwipe = false
     navigationController.view.tintColor = .systemOrange
     present(navigationController, animated: true, completion: nil)
   }

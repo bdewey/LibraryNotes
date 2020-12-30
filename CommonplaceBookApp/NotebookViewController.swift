@@ -56,6 +56,7 @@ final class NotebookViewController: UIViewController {
       let note = currentNoteEditor.note
       if let referenceViewController = self.referenceViewController(for: note) {
         currentNoteEditor.chromeStyle = .modal
+        currentNoteEditor.navigationItem.title = "Related Notes"
         referenceViewController.relatedNotesViewController = currentNoteEditor
         secondaryNavigationController.viewControllers = [referenceViewController]
       } else {
@@ -84,12 +85,13 @@ final class NotebookViewController: UIViewController {
 
   private lazy var secondaryNavigationController: UINavigationController = {
     let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
-    let supplementaryNavigationController = UINavigationController(
+    let navigationController = UINavigationController(
       rootViewController: detailViewController
     )
-    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
-    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
-    return supplementaryNavigationController
+    navigationController.navigationBar.prefersLargeTitles = false
+    navigationController.navigationBar.barTintColor = .grailBackground
+    navigationController.hidesBarsOnSwipe = true
+    return navigationController
   }()
 
   /// The split view we are managing.
