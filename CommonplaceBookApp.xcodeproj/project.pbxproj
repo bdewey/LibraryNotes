@@ -1003,12 +1003,13 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				MARKETING_VERSION = 0.33.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1026,12 +1027,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
+				MARKETING_VERSION = 0.33.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";

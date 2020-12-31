@@ -19,8 +19,6 @@ import Logging
 import MobileCoreServices
 import UIKit
 
-// swiftlint:disable file_length
-
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
