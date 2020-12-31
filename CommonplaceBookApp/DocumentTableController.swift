@@ -30,35 +30,65 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
+/// A list cell that is clear by default, with tint background color when selected.
+private final class ClearBackgroundCell: UICollectionViewListCell {
+  override func updateConfiguration(using state: UICellConfigurationState) {
+    var backgroundConfiguration = UIBackgroundConfiguration.clear()
+    if state.isSelected {
+      backgroundConfiguration.backgroundColor = nil
+      backgroundConfiguration.backgroundColorTransformer = .init({ $0.withAlphaComponent(0.5) })
+    }
+    self.backgroundConfiguration = backgroundConfiguration
+  }
+}
+
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
-    tableView: UITableView,
+    collectionView: UICollectionView,
     database: NoteDatabase,
     delegate: DocumentTableControllerDelegate
   ) {
     self.database = database
     self.delegate = delegate
-    tableView.register(UITableViewCell.self, forCellReuseIdentifier: "web")
-    tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
-    self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
-      switch item {
-      case .page(let viewProperties):
-        return DocumentTableController.cell(
-          tableView: tableView,
-          indexPath: indexPath,
-          viewProperties: viewProperties
-        )
-      case .webPage(let url):
-        let cell = tableView.dequeueReusableCell(withIdentifier: "web", for: indexPath)
-        cell.textLabel?.text = "Open \(url)"
-        return cell
-      }
+
+    let openWebPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .webPage(let url) = item else { return }
+      var configuration = cell.defaultContentConfiguration()
+      configuration.text = "Open \(url)"
+      cell.contentConfiguration = configuration
     }
+
+    let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .page(let viewProperties) = item else { return }
+      var configuration = cell.defaultContentConfiguration()
+      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
+      configuration.attributedText = title
+      configuration.secondaryText = viewProperties.noteProperties.hashtags.joined(separator: ", ")
+      configuration.secondaryTextProperties.color = .secondaryLabel
+
+      let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
+      let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
+      configuration.directionalLayoutMargins = .init(top: verticalMargin, leading: 0, bottom: verticalMargin, trailing: 0)
+      cell.contentConfiguration = configuration
+    }
+
+    self.dataSource = UICollectionViewDiffableDataSource<DocumentSection, Item>(
+      collectionView: collectionView,
+      cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
+        switch item {
+        case .webPage:
+          return collectionView.dequeueConfiguredReusableCell(using: openWebPageRegistration, for: indexPath, item: item)
+        case .page:
+          return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+        }
+      }
+    )
+
     super.init()
-    tableView.delegate = self
-    tableView.refreshControl = refreshControl
+    collectionView.delegate = self
+    collectionView.refreshControl = refreshControl
     let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
       self?.updateDataSourceIfNeeded()
     }
@@ -92,17 +122,6 @@ public final class DocumentTableController: NSObject {
     return control
   }()
 
-  /// Convenience to construct an appropriately-configured UITableView to show our data.
-  public static func makeTableView() -> UITableView {
-    let tableView = UITableView(frame: .zero, style: .plain)
-    tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    tableView.backgroundColor = .grailBackground
-    tableView.accessibilityIdentifier = "document-list"
-    tableView.estimatedRowHeight = 72
-    tableView.separatorStyle = .none
-    return tableView
-  }
-
   /// If non-nil, only pages with these identifiers will be shown.
   public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
@@ -134,7 +153,7 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  private let dataSource: DataSource
+  private let dataSource: UICollectionViewDiffableDataSource<DocumentSection, Item>
 
   private var databaseSubscription: AnyCancellable?
 
@@ -197,9 +216,8 @@ public final class DocumentTableController: NSObject {
 
 // MARK: - UITableViewDelegate
 
-extension DocumentTableController: UITableViewDelegate {
-  public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    tableView.deselectRow(at: indexPath, animated: true)
+extension DocumentTableController: UICollectionViewDelegate {
+  public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
@@ -290,36 +308,6 @@ private extension DocumentTableController {
   enum ReuseIdentifiers {
     static let documentCell = "DocumentCollectionViewCell"
     static let hashtag = "HashtagCell"
-  }
-
-  static func cell(
-    tableView: UITableView,
-    indexPath: IndexPath,
-    viewProperties: ViewProperties
-  ) -> UITableViewCell? {
-    guard
-      let cell = tableView.dequeueReusableCell(
-        withIdentifier: ReuseIdentifiers.documentCell,
-        for: indexPath
-      ) as? DocumentTableViewCell
-    else {
-      preconditionFailure("Forgot to register the right kind of cell")
-    }
-    let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
-    cell.titleLabel.attributedText = title
-    cell.accessibilityLabel = viewProperties.noteProperties.title
-    let detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
-    cell.detailLabel.attributedText = NSAttributedString(
-      string: detailString,
-      attributes: [
-        .font: UIFont.preferredFont(forTextStyle: .subheadline),
-        .foregroundColor: UIColor.secondaryLabel,
-      ]
-    )
-    cell.documentModifiedTimestamp = viewProperties.noteProperties.timestamp
-    let font = UIFont.preferredFont(forTextStyle: .headline)
-    cell.verticalPadding = max(20, font.lineHeight.roundedToScreenScale() * 1.5)
-    return cell
   }
 
   @objc func handleRefreshControl() {

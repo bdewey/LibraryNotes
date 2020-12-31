@@ -118,7 +118,12 @@ final class DocumentListViewController: UIViewController {
     return button
   }()
 
-  private lazy var tableView: UITableView = DocumentTableController.makeTableView()
+  private lazy var collectionView: UICollectionView = {
+    var listConfiguration = UICollectionLayoutListConfiguration(appearance: .plain)
+    listConfiguration.backgroundColor = .grailBackground
+    let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
+    return UICollectionView(frame: .zero, collectionViewLayout: layout)
+  }()
 
   internal func showPage(with noteIdentifier: Note.Identifier) {
     let note: Note
@@ -136,13 +141,13 @@ final class DocumentListViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     let dataSource = DocumentTableController(
-      tableView: tableView,
+      collectionView: collectionView,
       database: database,
       delegate: self
     )
     self.dataSource = dataSource
-    view.addSubview(tableView)
-    tableView.snp.makeConstraints { make in
+    view.addSubview(collectionView)
+    collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
     database.studySession(filter: nil, date: Date()) { [weak self] in
