@@ -258,7 +258,6 @@ extension DocumentTableController: UICollectionViewDelegate {
       delegate?.showWebPage(url: url)
     }
   }
-
 }
 
 // MARK: - Private
@@ -304,11 +303,6 @@ private extension DocumentTableController {
     let noteProperties: Note.Metadata
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
-  }
-
-  enum ReuseIdentifiers {
-    static let documentCell = "DocumentCollectionViewCell"
-    static let hashtag = "HashtagCell"
   }
 
   @objc func handleRefreshControl() {
