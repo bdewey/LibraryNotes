@@ -121,6 +121,10 @@ final class DocumentListViewController: UIViewController {
   private lazy var collectionView: UICollectionView = {
     var listConfiguration = UICollectionLayoutListConfiguration(appearance: .plain)
     listConfiguration.backgroundColor = .grailBackground
+    listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
+      guard let self = self else { return nil }
+      return self.dataSource?.trailingSwipeActionsConfiguration(forRowAt: indexPath)
+    }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     return UICollectionView(frame: .zero, collectionViewLayout: layout)
   }()

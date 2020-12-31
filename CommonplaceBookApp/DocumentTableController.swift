@@ -143,6 +143,38 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  public func trailingSwipeActionsConfiguration(forRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else {
+      return nil
+    }
+    var actions = [UIContextualAction]()
+    switch item {
+    case .page(let properties):
+      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
+        try? self.database.flush()
+        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
+        completion(true)
+      }
+      deleteAction.image = UIImage(systemName: "trash")
+      actions.append(deleteAction)
+      if properties.cardCount > 0 {
+        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
+          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
+            self.delegate?.presentStudySessionViewController(for: $0)
+            completion(true)
+          })
+        }
+        studyAction.image = UIImage(systemName: "rectangle.stack")
+        studyAction.backgroundColor = UIColor.systemBlue
+        actions.append(studyAction)
+      }
+    case .webPage:
+      return nil
+    }
+    return UISwipeActionsConfiguration(actions: actions)
+  }
+
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
@@ -227,37 +259,6 @@ extension DocumentTableController: UICollectionViewDelegate {
     }
   }
 
-  public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else {
-      return nil
-    }
-    var actions = [UIContextualAction]()
-    switch item {
-    case .page(let properties):
-      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
-        try? self.database.flush()
-        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
-        completion(true)
-      }
-      deleteAction.image = UIImage(systemName: "trash")
-      actions.append(deleteAction)
-      if properties.cardCount > 0 {
-        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
-            self.delegate?.presentStudySessionViewController(for: $0)
-            completion(true)
-          })
-        }
-        studyAction.image = UIImage(systemName: "rectangle.stack")
-        studyAction.backgroundColor = UIColor.systemBlue
-        actions.append(studyAction)
-      }
-    case .webPage:
-      return nil
-    }
-    return UISwipeActionsConfiguration(actions: actions)
-  }
 }
 
 // MARK: - Private
