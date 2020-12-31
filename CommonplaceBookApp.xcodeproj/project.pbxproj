@@ -68,6 +68,11 @@
 		D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACB0125925EA5007C9521 /* initialSchema.sql */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */; };
+		D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */; };
+		D35C8BBC259E4BF200A92CEB /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */; };
+		D35C8BC0259E4BF200A92CEB /* SaveToGrailDiary.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D35C8BCA259E831600A92CEB /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */; };
+		D35C8BCF259E844700A92CEB /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */; };
 		D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36214652334F607008C8FF4 /* LayoutManager.swift */; };
@@ -136,6 +141,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		D35C8BBE259E4BF200A92CEB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D35C8BB5259E4BF200A92CEB;
+			remoteInfo = SaveToGrailDiary;
+		};
 		D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
@@ -161,6 +173,17 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D35C8BC2259E4BF200A92CEB /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				D35C8BC0259E4BF200A92CEB /* SaveToGrailDiary.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -231,6 +254,12 @@
 		D34ACB0125925EA5007C9521 /* initialSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = initialSchema.sql; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
+		D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaveToGrailDiary.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		D35C8BBB259E4BF200A92CEB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		D35C8BBD259E4BF200A92CEB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D35C8BC1259E4BF200A92CEB /* SaveToGrailDiary.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SaveToGrailDiary.entitlements; sourceTree = "<group>"; };
+		D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserDefaults.swift; sourceTree = "<group>"; };
 		D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageMergeTests.swift; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
@@ -304,6 +333,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D35C8BB3259E4BF200A92CEB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBC20EC9B0100F0B74B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -370,12 +406,33 @@
 			path = Sqlite;
 			sourceTree = "<group>";
 		};
+		D35C8BB7259E4BF200A92CEB /* SaveToGrailDiary */ = {
+			isa = PBXGroup;
+			children = (
+				D35C8BC1259E4BF200A92CEB /* SaveToGrailDiary.entitlements */,
+				D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */,
+				D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */,
+				D35C8BBD259E4BF200A92CEB /* Info.plist */,
+			);
+			path = SaveToGrailDiary;
+			sourceTree = "<group>";
+		};
+		D35C8BCE259E842E00A92CEB /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
+				D35C8BCE259E842E00A92CEB /* Shared */,
 				D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */,
 				D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0421D470B2008445DA /* CommonplaceBookAppUITests */,
+				D35C8BB7259E4BF200A92CEB /* SaveToGrailDiary */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
@@ -389,6 +446,7 @@
 				D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
+				D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -552,6 +610,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D35C8BC5259E4BF200A92CEB /* Build configuration list for PBXNativeTarget "SaveToGrailDiary" */;
+			buildPhases = (
+				D35C8BB2259E4BF200A92CEB /* Sources */,
+				D35C8BB3259E4BF200A92CEB /* Frameworks */,
+				D35C8BB4259E4BF200A92CEB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SaveToGrailDiary;
+			productName = SaveToGrailDiary;
+			productReference = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookApp" */;
@@ -561,10 +636,12 @@
 				D3DC5EBD20EC9B0100F0B74B /* Resources */,
 				D318C0FC2148707D00B035A1 /* ShellScript */,
 				D32A1BAA229D8A6200B78576 /* Embed Frameworks */,
+				D35C8BC2259E4BF200A92CEB /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D35C8BBF259E4BF200A92CEB /* PBXTargetDependency */,
 			);
 			name = CommonplaceBookApp;
 			packageProductDependencies = (
@@ -620,10 +697,13 @@
 		D3DC5EB720EC9B0100F0B74B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1230;
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Brian's Brain";
 				TargetAttributes = {
+					D35C8BB5259E4BF200A92CEB = {
+						CreatedOnToolsVersion = 12.3;
+					};
 					D3DC5EBE20EC9B0100F0B74B = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1210;
@@ -670,11 +750,20 @@
 				D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
+				D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D35C8BB4259E4BF200A92CEB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D35C8BBC259E4BF200A92CEB /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBD20EC9B0100F0B74B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -728,6 +817,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D35C8BB2259E4BF200A92CEB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */,
+				D35C8BCF259E844700A92CEB /* SharedUserDefaults.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBB20EC9B0100F0B74B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -751,6 +849,7 @@
 				D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */,
 				D3E5E024256F13CD0062BDD4 /* NoteMetadataRecord.swift in Sources */,
 				D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */,
+				D35C8BCA259E831600A92CEB /* SharedUserDefaults.swift in Sources */,
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D30D6B2A2549BD0700F5902D /* PieceTableString.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
@@ -859,6 +958,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D35C8BBF259E4BF200A92CEB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */;
+			targetProxy = D35C8BBE259E4BF200A92CEB /* PBXContainerItemProxy */;
+		};
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */;
@@ -872,6 +976,14 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D35C8BBB259E4BF200A92CEB /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
 		D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -883,6 +995,53 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		D35C8BC3259E4BF200A92CEB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D35C8BC4259E4BF200A92CEB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.3;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		D3DC5EDC20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1004,6 +1163,7 @@
 		D3DC5EDF20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
@@ -1032,6 +1192,7 @@
 		D3DC5EE020EC9B0200F0B74B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
@@ -1150,6 +1311,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D35C8BC5259E4BF200A92CEB /* Build configuration list for PBXNativeTarget "SaveToGrailDiary" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D35C8BC3259E4BF200A92CEB /* Debug */,
+				D35C8BC4259E4BF200A92CEB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "CommonplaceBookApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

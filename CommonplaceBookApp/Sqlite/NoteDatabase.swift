@@ -114,7 +114,9 @@ public final class NoteDatabase: UIDocument {
     super.open { success in
       Logger.shared.info("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
+      NotificationCenter.default.addObserver(self, selector: #selector(self.handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
       self.handleDocumentStateChanged()
+      try? self.lookForPendingSavedURLs()
       completionHandler?(success)
     }
   }
@@ -148,6 +150,22 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
+  public func lookForPendingSavedURLs() throws {
+    guard let sharedDefaults = UserDefaults(suiteName: appGroupName) else {
+      assertionFailure("Couldn't access shared defaults")
+      return
+    }
+    var count = 0
+    for savedURL in sharedDefaults.pendingSavedURLs {
+      var note = Note(markdown: savedURL.message)
+      note.reference = .webPage(savedURL.url)
+      _ = try createNote(note)
+      count += 1
+    }
+    sharedDefaults.pendingSavedURLs = []
+    Logger.shared.info("Found \(count) saved URLs")
+  }
+
   /// Merges new content from another storage container into this storage container.
   public func merge(other: NoteDatabase) throws -> MergeResult {
     guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {
@@ -158,6 +176,10 @@ public final class NoteDatabase: UIDocument {
       notesDidChangeSubject.send()
     }
     return result
+  }
+
+  @objc private func handleWillEnterForeground() {
+    try? lookForPendingSavedURLs()
   }
 
   @objc private func handleDocumentStateChanged() {

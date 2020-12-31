@@ -36,7 +36,7 @@ private final class ClearBackgroundCell: UICollectionViewListCell {
     var backgroundConfiguration = UIBackgroundConfiguration.clear()
     if state.isSelected {
       backgroundConfiguration.backgroundColor = nil
-      backgroundConfiguration.backgroundColorTransformer = .init({ $0.withAlphaComponent(0.5) })
+      backgroundConfiguration.backgroundColorTransformer = .init { $0.withAlphaComponent(0.5) }
     }
     self.backgroundConfiguration = backgroundConfiguration
   }
