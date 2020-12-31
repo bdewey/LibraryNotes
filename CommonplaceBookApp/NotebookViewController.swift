@@ -204,7 +204,10 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     _ svc: UISplitViewController,
     topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
   ) -> UISplitViewController.Column {
-    guard let currentNoteEditor = currentNoteEditor else { return proposedTopColumn }
+    guard let currentNoteEditor = currentNoteEditor else {
+      // If there's nothing meaningful in the secondary pane, we should show supplementary.
+      return .supplementary
+    }
 
     // If the current note has reference material, keep it in view.
     if currentNoteEditor.note.reference != nil {
