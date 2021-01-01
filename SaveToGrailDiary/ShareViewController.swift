@@ -21,20 +21,33 @@ import Social
 import UIKit
 import UniformTypeIdentifiers
 
+private struct ShareConfiguration {
+  var url: URL
+  var message: String
+}
+
 final class ShareViewController: SLComposeServiceViewController {
   private let sharedDefaults = UserDefaults(suiteName: appGroupName)
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    title = "Save to Grail Diary"
+    loadShareConfiguration { [weak self] result in
+      guard case .success(let shareConfiguration) = result else { return }
+      self?.shareConfiguration = shareConfiguration
+    }
   }
 
-  func loadURL(completion: @escaping (Result<NSURL, Error>) -> Void) {
+  private func loadShareConfiguration(completion: @escaping (Result<ShareConfiguration, Error>) -> Void) {
     let inputItems = (extensionContext?.inputItems ?? []).compactMap { $0 as? NSExtensionItem }
     for item in inputItems {
       for attachment in item.attachments ?? [] where attachment.canLoadObject(ofClass: NSURL.self) {
         attachment.loadObject(ofClass: NSURL.self) { url, error in
           if let url = url as? NSURL {
-            completion(.success(url))
+            let messageComponents: [String?] = [item.attributedTitle?.string, item.attributedContentText?.string, "#link"]
+            let message = messageComponents.compactMap({ $0 }).joined(separator: "\n\n")
+            let config = ShareConfiguration(url: url as URL, message: message)
+            completion(.success(config))
           } else if let error = error {
             completion(.failure(error))
           } else {
@@ -45,25 +58,21 @@ final class ShareViewController: SLComposeServiceViewController {
     }
   }
 
+  private var shareConfiguration: ShareConfiguration? {
+    didSet {
+      validateContent()
+      textView.text = shareConfiguration?.message
+    }
+  }
+
   override func isContentValid() -> Bool {
-    // Do validation of contentText and/or NSExtensionContext attachments here
-    return true
+    return shareConfiguration != nil
   }
 
   override func didSelectPost() {
-    // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
-    loadURL { [weak self] result in
-      guard let self = self else { return }
-      switch result {
-      case .success(let url):
-        self.sharedDefaults?.pendingSavedURLs.append(SavedURL(url: url as URL, message: self.contentText ?? ""))
-      case .failure:
-        let alert = UIAlertController(title: "Error", message: "Unexpected error", preferredStyle: .alert)
-        self.present(alert, animated: true, completion: nil)
-      }
-      // Inform the host that we're done, so it un-blocks its UI. Note: Alternatively you could call super's -didSelectPost, which will similarly complete the extension context.
-      self.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
-    }
+    guard let shareConfiguration = shareConfiguration else { return }
+    self.sharedDefaults?.pendingSavedURLs.append(SavedURL(url: shareConfiguration.url, message: self.contentText))
+    super.didSelectPost()
   }
 
   override func configurationItems() -> [Any]! {
