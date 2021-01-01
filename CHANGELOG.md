@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- A share extension, plus UI that lets you browse web pages from inside the app.
+
 ## [0.33.0] - 2020-12-23
 
 ### Changed
