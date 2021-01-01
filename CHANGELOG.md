@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## [0.35.0] - 2021-01-01 Happy New Year!
 
 ### Added
 
 - Version string at the bottom of the primary view controller
+- We save logs to a file to help with missing pages.
 
 ## [0.34.0] - 2020-12-31
 

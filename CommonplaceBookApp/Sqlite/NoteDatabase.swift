@@ -287,6 +287,7 @@ public final class NoteDatabase: UIDocument {
     try dbQueue.write { db in
       let updateKey = try updateIdentifier(in: db)
       try note.save(identifier: identifier, updateKey: updateKey, to: db)
+      Logger.shared.info("Created new note \(identifier)")
     }
     return identifier
   }

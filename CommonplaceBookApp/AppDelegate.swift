@@ -16,6 +16,7 @@
 //  under the License.
 
 import CoreSpotlight
+import FileLogging
 import Logging
 import UIKit
 
@@ -102,15 +103,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    var factory = LogHandlerFactory()
+    let factory = LogHandlerFactory()
     // Here's how you enable debug logging for different loggers...
     factory.logLevelsForLabel[Logger.sharedLoggerLabel] = .debug
     factory.logLevelsForLabel[Logger.webViewLoggerLabel] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
 
+    Logger.shared.info("----- Launch application version \(UIApplication.versionString)")
     let window = UIWindow(frame: UIScreen.main.bounds)
 
-    let browser = UIDocumentBrowserViewController(forOpening: [.grailDiary])
+    let browser = UIDocumentBrowserViewController(forOpening: [.grailDiary, .plainText])
     browser.delegate = self
 
     window.rootViewController = browser
@@ -274,7 +276,18 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-    guard let url = documentURLs.first else { return }
+    guard
+      let url = documentURLs.first,
+      let values = try? url.resourceValues(forKeys: [.contentTypeKey]),
+      values.contentType?.conforms(to: .grailDiary) ?? false
+    else {
+      let alert = UIAlertController(title: "Oops", message: "Cannot open this file type", preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+      alert.addAction(okAction)
+      window?.rootViewController?.present(alert, animated: true, completion: nil)
+      Logger.shared.info("Trying to open \(documentURLs.first?.lastPathComponent ?? "nil") but it isn't a Grail Diary file")
+      return
+    }
     try? openDocument(at: url, from: controller, animated: true)
   }
 
@@ -350,13 +363,55 @@ extension AppDelegate: UISplitViewControllerDelegate {
   }
 }
 
-struct LogHandlerFactory {
+/// Creates log handlers. Note that since this tends to run before logging is set up, and if it fails we can't get debug information for other bugs,
+/// the strategy here is to crash on unexpected errors rather than "log and try to recover."
+// swiftlint:disable force_try
+final class LogHandlerFactory {
   var defaultLogLevel = Logger.Level.info
   var logLevelsForLabel = [String: Logger.Level]()
 
   func logHandler(for label: String) -> LogHandler {
-    var handler = StreamLogHandler.standardError(label: label)
+    var streamHandler = StreamLogHandler.standardError(label: label)
+    streamHandler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
+
+    return MultiplexLogHandler([
+      streamHandler,
+      makeFileLogHandler(label: label)
+    ])
+  }
+
+  private func makeFileLogHandler(label: String) -> FileLogHandler {
+    let handler = try! FileLogHandler(label: label, localFile: logFileURL)
     handler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
     return handler
   }
+
+  /// the URL to use for **the current logging session**
+  private lazy var logFileURL: URL = {
+    let currentLogFileURL = logFileDirectoryURL.appendingPathComponent("grail-diary-current.log")
+    if
+      let existingAttributes = try? FileManager.default.attributesOfItem(atPath: currentLogFileURL.path),
+      let existingSize = (existingAttributes[.size] as? Int),
+      existingSize > 1024*1024
+    {
+      // Roll the log.
+      let creationDate = (existingAttributes[.creationDate] as? Date) ?? Date()
+      let unwantedCharacters = CharacterSet(charactersIn: "-:")
+      var dateString = ISO8601DateFormatter().string(from: creationDate)
+      dateString.removeAll(where: { unwantedCharacters.contains($0.unicodeScalars.first!) })
+      let archiveLogFileURL = logFileDirectoryURL.appendingPathComponent("grail-diary-\(dateString).log")
+      try! FileManager.default.moveItem(at: currentLogFileURL, to: archiveLogFileURL)
+    }
+    return currentLogFileURL
+  }()
+
+  /// The container directory for all of our log files.
+  private lazy var logFileDirectoryURL: URL = {
+    // Right now, put the logs into the Documents directory so they're easy to find.
+    let documentsDirectoryURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    let logDirectoryURL = documentsDirectoryURL.appendingPathComponent("logs")
+    // Try to create the "logs" subdirectory if it does not exist.
+    try? FileManager.default.createDirectory(at: logDirectoryURL, withIntermediateDirectories: false, attributes: nil)
+    return logDirectoryURL
+  }()
 }
