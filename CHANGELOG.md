@@ -4,6 +4,12 @@
 
 ### Added
 
+- Version string at the bottom of the primary view controller
+
+## [0.34.0] - 2020-12-31
+
+### Added
+
 - A share extension, plus UI that lets you browse web pages from inside the app.
 
 ## [0.33.0] - 2020-12-23

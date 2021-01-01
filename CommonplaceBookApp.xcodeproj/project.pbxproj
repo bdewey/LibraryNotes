@@ -116,6 +116,7 @@
 		D3D05D322551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
+		D3D867B3259EA262008254DF /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B2259EA262008254DF /* Logging */; };
 		D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DA1B862569E8AB009DC866 /* SnapKit */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
@@ -337,6 +338,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3D867B3259EA262008254DF /* Logging in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -623,6 +625,9 @@
 			dependencies = (
 			);
 			name = SaveToGrailDiary;
+			packageProductDependencies = (
+				D3D867B2259EA262008254DF /* Logging */,
+			);
 			productName = SaveToGrailDiary;
 			productReference = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */;
 			productType = "com.apple.product-type.app-extension";
@@ -1000,6 +1005,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
@@ -1009,7 +1015,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.33.0;
+				MARKETING_VERSION = 0.34.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1025,6 +1031,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 44;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -1033,7 +1040,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.33.0;
+				MARKETING_VERSION = 0.34.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1170,7 +1177,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEAD_CODE_STRIPPING = NO;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -1180,7 +1187,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.33.0;
+				MARKETING_VERSION = 0.34.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
@@ -1199,7 +1206,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 43;
+				CURRENT_PROJECT_VERSION = 44;
 				DEAD_CODE_STRIPPING = NO;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -1209,7 +1216,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.33.0;
+				MARKETING_VERSION = 0.34.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = YES;
@@ -1418,6 +1425,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D3AD01CF23BEB137004BB7DF /* XCRemoteSwiftPackageReference "GRDBCombine" */;
 			productName = GRDBCombine;
+		};
+		D3D867B2259EA262008254DF /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
 		};
 		D3DA1B862569E8AB009DC866 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -27,4 +27,11 @@ extension UIApplication {
       return false
     #endif
   }
+
+  static var versionString: String {
+    let shortVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
+    let shortVersionNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")
+
+    return "\(shortVersionString ?? "nil") (\(shortVersionNumber ?? -1))"
+  }
 }

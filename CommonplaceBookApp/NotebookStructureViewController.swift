@@ -16,6 +16,7 @@
 //  under the License.
 
 import Combine
+import Logging
 import SnapKit
 import UIKit
 
@@ -63,6 +64,8 @@ final class NotebookStructureViewController: UIViewController {
       config.backgroundColor = .grailBackground
       // the first section has no header; everything else gets a header.
       config.headerMode = (sectionIndex == 0) ? .none : .supplementary
+      // The last section gets a footer
+      config.footerMode = (sectionIndex == Section.allCases.count - 1) ? .supplementary : .none
       let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
       return section
     }
@@ -83,15 +86,32 @@ final class NotebookStructureViewController: UIViewController {
     }
 
     dataSource.supplementaryViewProvider = { [weak dataSource] collectionView, kind, indexPath in
-      guard kind == UICollectionView.elementKindSectionHeader, dataSource?.snapshot().indexOfSection(.hashtags) == indexPath.section else {
+      guard dataSource?.snapshot().indexOfSection(.hashtags) == indexPath.section
+      else {
+        Logger.shared.debug("Skipping supplementary view for \(indexPath) because it isn't the hashtag section")
         return nil
       }
-      let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { headerView, _, _ in
-        var headerConfiguration = UIListContentConfiguration.sidebarHeader()
-        headerConfiguration.text = "Tags"
-        headerView.contentConfiguration = headerConfiguration
+      Logger.shared.info("This is the hashtag section, getting its header and footer")
+      if kind == UICollectionView.elementKindSectionHeader {
+        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { headerView, _, _ in
+          var headerConfiguration = UIListContentConfiguration.sidebarHeader()
+          headerConfiguration.text = "Tags"
+          headerView.contentConfiguration = headerConfiguration
+        }
+        return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
       }
-      return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
+      if kind == UICollectionView.elementKindSectionFooter {
+        let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
+          var footerConfiguration = footerView.defaultContentConfiguration()
+          footerConfiguration.text = "Version \(UIApplication.versionString)"
+          footerConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
+          footerConfiguration.textProperties.color = UIColor.secondaryLabel
+          footerView.contentConfiguration = footerConfiguration
+        }
+        return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
+      }
+      Logger.shared.error("Unexpected supplementary kind \(kind), returning nil")
+      return nil
     }
     return dataSource
   }()
