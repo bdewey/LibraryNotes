@@ -19,6 +19,7 @@ import Combine
 import CoreServices
 import CoreSpotlight
 import Logging
+import SafariServices
 import SnapKit
 import UIKit
 
@@ -42,6 +43,14 @@ extension UIResponder {
       responder = currentResponder.next
     }
   }
+}
+
+protocol DocumentListViewControllerDelegate: AnyObject {
+  func documentListViewController(
+    _ viewController: DocumentListViewController,
+    didRequestShowNote note: Note,
+    noteIdentifier: Note.Identifier?
+  )
 }
 
 /// Implements a filterable list of documents in an interactive notebook.
@@ -69,6 +78,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
+  public weak var delegate: DocumentListViewControllerDelegate?
 
   public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
     let hashtag: String?
@@ -84,7 +94,6 @@ final class DocumentListViewController: UIViewController {
     updateStudySession()
   }
 
-  public var didTapFilesAction: (() -> Void)?
   private var dataSource: DocumentTableController?
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
@@ -109,7 +118,16 @@ final class DocumentListViewController: UIViewController {
     return button
   }()
 
-  private lazy var tableView: UITableView = DocumentTableController.makeTableView()
+  private lazy var collectionView: UICollectionView = {
+    var listConfiguration = UICollectionLayoutListConfiguration(appearance: .plain)
+    listConfiguration.backgroundColor = .grailBackground
+    listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
+      guard let self = self else { return nil }
+      return self.dataSource?.trailingSwipeActionsConfiguration(forRowAt: indexPath)
+    }
+    let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
+    return UICollectionView(frame: .zero, collectionViewLayout: layout)
+  }()
 
   internal func showPage(with noteIdentifier: Note.Identifier) {
     let note: Note
@@ -119,12 +137,7 @@ final class DocumentListViewController: UIViewController {
       Logger.shared.error("Unexpected error loading page: \(error)")
       return
     }
-    let textEditViewController = TextEditViewController()
-    textEditViewController.noteIdentifier = noteIdentifier
-    textEditViewController.markdown = note.text ?? ""
-    let savingWrapper = SavingTextEditViewController(textEditViewController, noteIdentifier: noteIdentifier, noteStorage: database)
-    savingWrapper.setTitleMarkdown(note.metadata.title)
-    showDetailViewController(savingWrapper)
+    delegate?.documentListViewController(self, didRequestShowNote: note, noteIdentifier: noteIdentifier)
   }
 
   // MARK: - Lifecycle
@@ -132,13 +145,13 @@ final class DocumentListViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
     let dataSource = DocumentTableController(
-      tableView: tableView,
+      collectionView: collectionView,
       database: database,
       delegate: self
     )
     self.dataSource = dataSource
-    view.addSubview(tableView)
-    tableView.snp.makeConstraints { make in
+    view.addSubview(collectionView)
+    collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
     database.studySession(filter: nil, date: Date()) { [weak self] in
@@ -250,17 +263,19 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showDetailViewController(_ detailViewController: UIViewController) {
-    if let splitViewController = splitViewController {
-      let navigationController = UINavigationController(rootViewController: detailViewController)
-      navigationController.navigationBar.barTintColor = .grailBackground
-      splitViewController.showDetailViewController(
-        navigationController,
-        sender: self
-      )
-    } else if let navigationController = navigationController {
-      navigationController.pushViewController(detailViewController, animated: true)
-    }
+  func showWebPage(url: URL) {
+    Logger.shared.info("Will navigate to web page at \(url)")
+    let placeholderNote = Note(
+      metadata: Note.Metadata(
+        timestamp: Date(),
+        hashtags: [],
+        title: ""
+      ),
+      text: "This is a test note",
+      reference: .webPage(url),
+      promptCollections: [:]
+    )
+    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
@@ -290,13 +305,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
-      showDetailViewController(
-        TextEditViewController.makeBlankDocument(
-          database: database,
-          currentHashtag: dataSource?.filteredHashtag,
-          autoFirstResponder: false
-        )
-      )
+      let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource?.filteredHashtag)
+      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil)
     }
   }
 
@@ -324,6 +334,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     }
     let pattern = searchController.searchBar.text ?? ""
     Logger.shared.info("Issuing query: \(pattern)")
+    dataSource?.webURL = pattern.asWebURL
     do {
       let allIdentifiers = try database.search(for: pattern)
       dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
@@ -356,5 +367,23 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+private extension String {
+  /// Non-nil if this string is a valid web URL.
+  var asWebURL: URL? {
+    guard let urlDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
+      assertionFailure()
+      return nil
+    }
+    let fullStringRange = NSRange(startIndex..., in: self)
+    let matches = urlDetector.matches(in: self, options: [], range: fullStringRange)
+    for match in matches {
+      if match.range(at: 0) == fullStringRange {
+        return match.url
+      }
+    }
+    return nil
   }
 }

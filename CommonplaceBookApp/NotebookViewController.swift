@@ -19,6 +19,11 @@ import Logging
 import SnapKit
 import UIKit
 
+/// Protocol for any UIViewController that displays "reference" material for which we can also show related notes
+protocol ReferenceViewController: UIViewController {
+  var relatedNotesViewController: UIViewController? { get set }
+}
+
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
@@ -44,24 +49,53 @@ final class NotebookViewController: UIViewController {
     }
   }
 
+  /// The current editor.
+  private var currentNoteEditor: SavingTextEditViewController? {
+    didSet {
+      guard let currentNoteEditor = currentNoteEditor else { return }
+      let note = currentNoteEditor.note
+      if let referenceViewController = self.referenceViewController(for: note) {
+        currentNoteEditor.chromeStyle = .modal
+        currentNoteEditor.navigationItem.title = "Related Notes"
+        referenceViewController.relatedNotesViewController = currentNoteEditor
+        secondaryNavigationController.viewControllers = [referenceViewController]
+      } else {
+        currentNoteEditor.chromeStyle = .splitViewController
+        secondaryNavigationController.viewControllers = [currentNoteEditor]
+      }
+      notebookSplitViewController.show(.secondary)
+    }
+  }
+
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
-    documentListViewController.didTapFilesAction = { [weak documentListViewController] in
-      AppDelegate.openedDocumentBookmark = nil
-      documentListViewController?.dismiss(animated: true, completion: nil)
-    }
+    documentListViewController.delegate = self
     return documentListViewController
   }()
 
-  /// The split view we are managing.
-  private lazy var notebookSplitViewController: UISplitViewController = {
+  private lazy var supplementaryNavigationController: UINavigationController = {
     let supplementaryNavigationController = UINavigationController(
       rootViewController: documentListViewController
     )
     supplementaryNavigationController.navigationBar.prefersLargeTitles = false
     supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
+    return supplementaryNavigationController
+  }()
 
+  private lazy var secondaryNavigationController: UINavigationController = {
+    let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
+    let navigationController = UINavigationController(
+      rootViewController: detailViewController
+    )
+    navigationController.navigationBar.prefersLargeTitles = false
+    navigationController.navigationBar.barTintColor = .grailBackground
+    navigationController.hidesBarsOnSwipe = true
+    return navigationController
+  }()
+
+  /// The split view we are managing.
+  private lazy var notebookSplitViewController: UISplitViewController = {
     let hashtagViewController = NotebookStructureViewController(
       database: documentListViewController.database
     )
@@ -71,18 +105,10 @@ final class NotebookViewController: UIViewController {
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
     let splitViewController = UISplitViewController(style: .tripleColumn)
-    let detailViewController = UINavigationController(
-      rootViewController:
-      TextEditViewController.makeBlankDocument(
-        database: documentListViewController.database,
-        currentHashtag: nil,
-        autoFirstResponder: false
-      )
-    )
     splitViewController.viewControllers = [
       primaryNavigationController,
       supplementaryNavigationController,
-      detailViewController,
+      secondaryNavigationController,
     ]
     splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.showsSecondaryOnlyButton = true
@@ -110,21 +136,42 @@ final class NotebookViewController: UIViewController {
     case .hashtag(let focusedHashtag):
       hashtag = focusedHashtag
     }
-    let viewController = TextEditViewController.makeBlankDocument(
-      database: database,
-      currentHashtag: hashtag,
-      autoFirstResponder: true
-    )
-    // I don't know why but you need to wrap this in a nav controller before pushing
-    let navController = UINavigationController(rootViewController: viewController)
-    notebookSplitViewController.showDetailViewController(navController, sender: nil)
+    let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true)
+    currentNoteEditor = viewController
     Logger.shared.info("Created a new view controller for a blank document")
   }
 }
 
+// MARK: - NotebookStructureViewControllerDelegate
+
 extension NotebookViewController: NotebookStructureViewControllerDelegate {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
     focusedNotebookStructure = structure
+  }
+}
+
+// MARK: - DocumentListViewControllerDelegate
+
+extension NotebookViewController: DocumentListViewControllerDelegate {
+  func documentListViewController(
+    _ viewController: DocumentListViewController,
+    didRequestShowNote note: Note,
+    noteIdentifier: Note.Identifier?
+  ) {
+    let noteViewController = SavingTextEditViewController(
+      configuration: SavingTextEditViewController.Configuration(noteIdentifier: noteIdentifier, note: note),
+      noteStorage: database
+    )
+    noteViewController.setTitleMarkdown(note.metadata.title)
+    currentNoteEditor = noteViewController
+  }
+
+  private func referenceViewController(for note: Note) -> ReferenceViewController? {
+    switch note.reference {
+    case .none: return nil
+    case .some(.webPage(let url)):
+      return WebViewController(url: url)
+    }
   }
 }
 
@@ -153,7 +200,26 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     return textEditViewController.noteIdentifier == nil
   }
 
-  func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
-    return .supplementary
+  func splitViewController(
+    _ svc: UISplitViewController,
+    topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
+  ) -> UISplitViewController.Column {
+    guard let currentNoteEditor = currentNoteEditor else {
+      // If there's nothing meaningful in the secondary pane, we should show supplementary.
+      return .supplementary
+    }
+
+    // If the current note has reference material, keep it in view.
+    if currentNoteEditor.note.reference != nil {
+      return .secondary
+    }
+
+    // If the current note isn't saved, prefer the supplementary view.
+    if currentNoteEditor.noteIdentifier == nil {
+      return .supplementary
+    }
+
+    // No reason to second-guess UIKit.
+    return proposedTopColumn
   }
 }

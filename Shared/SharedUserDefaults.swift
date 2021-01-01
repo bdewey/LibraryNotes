@@ -17,16 +17,33 @@
 
 import Foundation
 
-/// This is just a "namespace" enum for extending with specific migrations.
-internal enum MigrationIdentifier: String {
-  case initialSchema
-  case deviceUUIDKey = "20201213-deviceUUIDKey"
-  case noFlakeNote = "20201214-noFlakeNote"
-  case noFlakeChallengeTemplate = "20201214-noFlakeChallengeTemplate"
-  case addContentTable = "20201219-content"
-  case changeContentKey = "20201220-contentKey"
-  case prompts = "20201221-prompt"
-  case promptTable = "20201223-promptTable"
-  case links = "20201223-links"
-  case binaryContent = "20201227-binaryContent"
+/// The shared app group used for communication between share extensions and the main app.
+public let appGroupName = "group.org.brians-brain.grail-diary"
+
+
+/// Serialization structure for saved URLs.
+public struct SavedURL: Codable {
+  let url: URL
+  let message: String
+}
+
+public extension UserDefaults {
+  private static let savedURLKey = "savedURLs"
+
+  /// URLs that are pending to save into a note database.
+  var pendingSavedURLs: [SavedURL] {
+    get {
+      if let data = self.data(forKey: Self.savedURLKey) {
+        let items = try? JSONDecoder().decode([SavedURL].self, from: data)
+        return items ?? []
+      } else {
+        return []
+      }
+    }
+    set {
+      if let encodedData = try? JSONEncoder().encode(newValue) {
+        set(encodedData, forKey: Self.savedURLKey)
+      }
+    }
+  }
 }

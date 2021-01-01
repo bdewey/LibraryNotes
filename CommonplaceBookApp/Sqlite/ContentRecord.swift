@@ -19,7 +19,11 @@ import Foundation
 import GRDB
 
 enum ContentRole: String, Codable {
+  /// The main text that the person has entered as part of the note.
   case primary
+
+  /// An optional "reference" is the material that a note is about (a web page, PDF, book citation, etc)
+  case reference
 }
 
 /// For rows that contain text, this is the text.
@@ -45,18 +49,23 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
     [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: key]
   }
 
-  static func fetchOne(_ database: Database, key: PromptCollectionIdentifier) throws -> ContentRecord? {
+  static func fetchOne(_ database: Database, key: ContentIdentifier) throws -> ContentRecord? {
     try fetchOne(database, key: key.keyArray)
   }
 
   @discardableResult
-  static func deleteOne(_ database: Database, key: PromptCollectionIdentifier) throws -> Bool {
+  static func deleteOne(_ database: Database, key: ContentIdentifier) throws -> Bool {
     try deleteOne(database, key: key.keyArray)
   }
-}
 
-private extension PromptCollectionIdentifier {
-  var keyArray: [String: DatabaseValueConvertible] {
-    [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: promptKey]
+  /// Converts the receiver to an object conforming to PromptCollection, if possible.
+  func asPromptCollection() throws -> PromptCollection {
+    guard let klass = PromptType.classMap[role] else {
+      throw NoteDatabase.Error.unknownPromptType
+    }
+    guard let promptCollection = klass.init(rawValue: text) else {
+      throw NoteDatabase.Error.cannotDecodePromptCollection
+    }
+    return promptCollection
   }
 }

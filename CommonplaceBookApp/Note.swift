@@ -53,22 +53,30 @@ public struct Note: Equatable {
     }
   }
 
+  /// What this note is "about."
+  public enum Reference: Equatable {
+    case webPage(URL)
+  }
+
   public var metadata: Metadata
   public var text: String?
+  public var reference: Reference?
   public var promptCollections: [ContentKey: PromptCollection]
 
   public init(
     metadata: Metadata = Metadata(),
     text: String? = nil,
+    reference: Reference? = nil,
     promptCollections: [ContentKey: PromptCollection] = [:]
   ) {
     self.metadata = metadata
     self.text = text
+    self.reference = reference
     self.promptCollections = promptCollections
   }
 
   public static func == (lhs: Note, rhs: Note) -> Bool {
-    if lhs.metadata != rhs.metadata || lhs.text != rhs.text {
+    if lhs.metadata != rhs.metadata || lhs.text != rhs.text || lhs.reference != rhs.reference {
       return false
     }
     let lhsIdentifiers = Set(lhs.promptCollections.keys)

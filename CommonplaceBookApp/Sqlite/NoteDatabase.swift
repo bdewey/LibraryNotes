@@ -38,7 +38,7 @@ public protocol DeviceIdentifying {
 extension UIDevice: DeviceIdentifying {}
 
 /// Identifier for a specific change to the database.
-private struct UpdateIdentifier {
+public struct UpdateIdentifier {
   /// The device ID that the change came from.
   let deviceID: String
   /// The specific sequence number for this change on this device.
@@ -114,7 +114,9 @@ public final class NoteDatabase: UIDocument {
     super.open { success in
       Logger.shared.info("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
+      NotificationCenter.default.addObserver(self, selector: #selector(self.handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
       self.handleDocumentStateChanged()
+      try? self.lookForPendingSavedURLs()
       completionHandler?(success)
     }
   }
@@ -148,6 +150,22 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
+  public func lookForPendingSavedURLs() throws {
+    guard let sharedDefaults = UserDefaults(suiteName: appGroupName) else {
+      assertionFailure("Couldn't access shared defaults")
+      return
+    }
+    var count = 0
+    for savedURL in sharedDefaults.pendingSavedURLs {
+      var note = Note(markdown: savedURL.message)
+      note.reference = .webPage(savedURL.url)
+      _ = try createNote(note)
+      count += 1
+    }
+    sharedDefaults.pendingSavedURLs = []
+    Logger.shared.info("Found \(count) saved URLs")
+  }
+
   /// Merges new content from another storage container into this storage container.
   public func merge(other: NoteDatabase) throws -> MergeResult {
     guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {
@@ -158,6 +176,10 @@ public final class NoteDatabase: UIDocument {
       notesDidChangeSubject.send()
     }
     return result
+  }
+
+  @objc private func handleWillEnterForeground() {
+    try? lookForPendingSavedURLs()
   }
 
   @objc private func handleDocumentStateChanged() {
@@ -263,7 +285,8 @@ public final class NoteDatabase: UIDocument {
     }
     let identifier = UUID().uuidString
     try dbQueue.write { db in
-      try writeNote(note, with: identifier, to: db)
+      let updateKey = try updateIdentifier(in: db)
+      try note.save(identifier: identifier, updateKey: updateKey, to: db)
     }
     return identifier
   }
@@ -276,9 +299,10 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     try dbQueue.write { db in
-      let existingNote = try loadNote(with: noteIdentifier, from: db)
+      let existingNote = try Note(identifier: noteIdentifier, database: db)
       let updatedNote = updateBlock(existingNote)
-      try writeNote(updatedNote, with: noteIdentifier, to: db)
+      let updateKey = try updateIdentifier(in: db)
+      try updatedNote.save(identifier: noteIdentifier, updateKey: updateKey, to: db)
     }
   }
 
@@ -311,7 +335,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db -> Note in
-      try loadNote(with: noteIdentifier, from: db)
+      try Note(identifier: noteIdentifier, database: db)
     }
   }
 
@@ -366,7 +390,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let identifier = PromptCollectionIdentifier(noteId: promptIdentifier.noteId, promptKey: promptIdentifier.promptKey)
+      let identifier = ContentIdentifier(noteId: promptIdentifier.noteId, promptKey: promptIdentifier.promptKey)
       let promptCollection = try Self.promptCollection(identifier: identifier, database: db)
       return promptCollection.prompts[Int(promptIdentifier.promptIndex)]
     }
@@ -700,25 +724,6 @@ private extension NoteDatabase {
     return db.lastInsertedRowID
   }
 
-  func writePrimaryTextContent(_ noteText: String?, with identifier: Note.Identifier, to db: Database) throws {
-    guard let noteText = noteText else {
-      return
-    }
-    if var existingRecord = try ContentRecord.fetchOne(db, key: ["noteId": identifier, "key": "primary"]) {
-      existingRecord.text = noteText
-      try existingRecord.update(db)
-    } else {
-      let newRecord = ContentRecord(
-        text: noteText,
-        noteId: identifier,
-        key: "primary",
-        role: "primary",
-        mimeType: "text/markdown"
-      )
-      try newRecord.insert(db)
-    }
-  }
-
   func updateIdentifier(
     in database: Database
   ) throws -> UpdateIdentifier {
@@ -726,85 +731,6 @@ private extension NoteDatabase {
     device.updateSequenceNumber += 1
     try device.update(database)
     return UpdateIdentifier(deviceID: device.uuid, updateSequenceNumber: device.updateSequenceNumber)
-  }
-
-  // TODO: Make this smaller
-  // swiftlint:disable:next function_body_length
-  func writeNote(_ note: Note, with identifier: Note.Identifier, to db: Database) throws {
-    let updateKey = try updateIdentifier(in: db)
-    let sqliteNote = NoteRecord(
-      id: identifier,
-      title: note.metadata.title,
-      modifiedTimestamp: note.metadata.timestamp,
-      modifiedDevice: updateKey.deviceID,
-      hasText: note.text != nil,
-      deleted: false,
-      updateSequenceNumber: updateKey.updateSequenceNumber
-    )
-    try sqliteNote.save(db)
-
-    try writePrimaryTextContent(note.text, with: identifier, to: db)
-    let inMemoryHashtags = Set(note.metadata.hashtags)
-    let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
-      .asSet()
-    for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
-      let associationRecord = NoteLinkRecord(noteId: identifier, targetTitle: newHashtag)
-      try associationRecord.save(db)
-    }
-    for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
-      let deleted = try NoteLinkRecord.deleteOne(db, key: ["noteId": identifier, "targetTitle": obsoleteHashtag])
-      assert(deleted)
-    }
-
-    let inMemoryContentKeys = Set(note.promptCollections.keys)
-    let onDiskContentKeys = ((try? sqliteNote.prompts.fetchAll(db)) ?? [])
-      .map { $0.key }
-      .asSet()
-
-    let today = Date()
-    let newPromptDelay = Self.scheduler.learningIntervals.last ?? 0
-    for newKey in inMemoryContentKeys.subtracting(onDiskContentKeys) {
-      let promptCollection = note.promptCollections[newKey]!
-      let record = ContentRecord(
-        text: promptCollection.rawValue,
-        noteId: identifier,
-        key: newKey,
-        role: promptCollection.type.rawValue,
-        mimeType: "text/markdown"
-      )
-      do {
-        try record.insert(db)
-      } catch {
-        Logger.shared.critical("Could not insert content")
-        throw error
-      }
-      for index in promptCollection.prompts.indices {
-        let updateKey = try updateIdentifier(in: db)
-        let promptStatistics = PromptRecord(
-          noteId: identifier,
-          promptKey: newKey,
-          promptIndex: Int64(index),
-          due: today.addingTimeInterval(newPromptDelay.fuzzed()),
-          modifiedDevice: updateKey.deviceID,
-          timestamp: note.metadata.timestamp,
-          updateSequenceNumber: updateKey.updateSequenceNumber
-        )
-        try promptStatistics.insert(db)
-      }
-    }
-    for modifiedKey in inMemoryContentKeys.intersection(onDiskContentKeys) {
-      let promptCollection = note.promptCollections[modifiedKey]!
-      guard var record = try ContentRecord.fetchOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: modifiedKey)) else {
-        assertionFailure("Should be a record")
-        continue
-      }
-      record.text = promptCollection.rawValue
-      try record.update(db, columns: [ContentRecord.Columns.text])
-    }
-    for obsoleteKey in onDiskContentKeys.subtracting(inMemoryContentKeys) {
-      let deleted = try ContentRecord.deleteOne(db, key: ContentRecord.primaryKey(noteId: identifier, key: obsoleteKey))
-      assert(deleted)
-    }
   }
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: Note.Metadata] {
@@ -824,49 +750,11 @@ private extension NoteDatabase {
     return Dictionary(uniqueKeysWithValues: tuples)
   }
 
-  func loadNote(with identifier: Note.Identifier, from db: Database) throws -> Note {
-    guard
-      let sqliteNote = try NoteRecord.fetchOne(db, key: identifier),
-      !sqliteNote.deleted
-    else {
-      throw Error.noSuchNote
-    }
-    let hashtagRecords = try NoteLinkRecord.filter(NoteLinkRecord.Columns.noteId == identifier).fetchAll(db)
-    let hashtags = hashtagRecords.map { $0.targetTitle }
-    let contentRecords = try ContentRecord.filter(ContentRecord.Columns.noteId == identifier).fetchAll(db)
-    let tuples = try contentRecords
-      .filter { $0.role.hasPrefix("prompt=") }
-      .map { (key: $0.key, value: try Self.promptCollection(from: $0)) }
-    let promptCollections = Dictionary(uniqueKeysWithValues: tuples)
-    let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
-    return Note(
-      metadata: Note.Metadata(
-        timestamp: sqliteNote.modifiedTimestamp,
-        hashtags: hashtags,
-        title: sqliteNote.title
-      ),
-      text: noteText,
-      promptCollections: promptCollections
-    )
-  }
-
-  static func promptCollection(identifier: PromptCollectionIdentifier, database: Database) throws -> PromptCollection {
+  static func promptCollection(identifier: ContentIdentifier, database: Database) throws -> PromptCollection {
     guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
       throw Error.unknownPromptCollection
     }
-    return try promptCollection(from: record)
-  }
-
-  static func promptCollection(
-    from contentRecord: ContentRecord
-  ) throws -> PromptCollection {
-    guard let klass = PromptType.classMap[contentRecord.role] else {
-      throw Error.unknownPromptType
-    }
-    guard let promptCollection = klass.init(rawValue: contentRecord.text) else {
-      throw Error.cannotDecodePromptCollection
-    }
-    return promptCollection
+    return try record.asPromptCollection()
   }
 
   /// Makes sure the database is up-to-date.
@@ -887,6 +775,7 @@ private extension NoteDatabase {
     try migrator.registerMigrationScript(.prompts)
     try migrator.registerMigrationScript(.promptTable)
     try migrator.registerMigrationScript(.links)
+    try migrator.registerMigrationScript(.binaryContent)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)

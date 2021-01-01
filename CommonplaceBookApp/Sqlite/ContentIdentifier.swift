@@ -16,17 +16,14 @@
 //  under the License.
 
 import Foundation
+import GRDB
 
-/// This is just a "namespace" enum for extending with specific migrations.
-internal enum MigrationIdentifier: String {
-  case initialSchema
-  case deviceUUIDKey = "20201213-deviceUUIDKey"
-  case noFlakeNote = "20201214-noFlakeNote"
-  case noFlakeChallengeTemplate = "20201214-noFlakeChallengeTemplate"
-  case addContentTable = "20201219-content"
-  case changeContentKey = "20201220-contentKey"
-  case prompts = "20201221-prompt"
-  case promptTable = "20201223-promptTable"
-  case links = "20201223-links"
-  case binaryContent = "20201227-binaryContent"
+/// A tuple used as a primary key in one of the content tables in the database
+public struct ContentIdentifier: Hashable {
+  public var noteId: String
+  public var promptKey: String
+
+  public var keyArray: [String: DatabaseValueConvertible] {
+    [ContentRecord.Columns.noteId.rawValue: noteId, ContentRecord.Columns.key.rawValue: promptKey]
+  }
 }

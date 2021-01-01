@@ -69,6 +69,17 @@ public extension Note {
     self.init(parsedString: buffer)
   }
 
+  static func makeBlankNote(hashtag: String? = nil) -> (Note, Int) {
+    var initialText = "# "
+    let initialOffset = initialText.count
+    initialText += "\n"
+    if let hashtag = hashtag {
+      initialText += hashtag
+      initialText += "\n"
+    }
+    return (Note(markdown: initialText), initialOffset)
+  }
+
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
     newNote.copyContentKeysForMatchingContent(from: self)

@@ -15,18 +15,13 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-import Foundation
+import UIKit
 
-/// This is just a "namespace" enum for extending with specific migrations.
-internal enum MigrationIdentifier: String {
-  case initialSchema
-  case deviceUUIDKey = "20201213-deviceUUIDKey"
-  case noFlakeNote = "20201214-noFlakeNote"
-  case noFlakeChallengeTemplate = "20201214-noFlakeChallengeTemplate"
-  case addContentTable = "20201219-content"
-  case changeContentKey = "20201220-contentKey"
-  case prompts = "20201221-prompt"
-  case promptTable = "20201223-promptTable"
-  case links = "20201223-links"
-  case binaryContent = "20201227-binaryContent"
+extension UIViewController {
+  /// A conveniene method for wrapping a view controller in a UINavigationController with fluent syntax.
+  func wrappingInNavigationController() -> UINavigationController {
+    let navigationController = UINavigationController(rootViewController: self)
+    navigationController.navigationBar.barTintColor = .grailBackground
+    return navigationController
+  }
 }

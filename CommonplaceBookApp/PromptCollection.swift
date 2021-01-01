@@ -43,11 +43,6 @@ public struct PromptType: RawRepresentable, Hashable {
   public private(set) static var classMap = [String: PromptCollection.Type]()
 }
 
-public struct PromptCollectionIdentifier: Hashable {
-  public var noteId: String
-  public var promptKey: String
-}
-
 /// A PromptCollection is a serializable thing that knows how to generate one or more Prompts.
 /// For example, a VocabularyAssociation knows how to generate one card that prompts with
 /// the English word and one card that prompts with the Spanish word.
@@ -62,6 +57,13 @@ public protocol PromptCollection {
 
   /// The specific prompts contained in this collection.
   var prompts: [Prompt] { get }
+
+  /// When first creating the prompts in this collection, how far in the future should they be scheduled?
+  var newPromptDelay: TimeInterval { get }
+}
+
+public extension PromptCollection {
+  var newPromptDelay: TimeInterval { 4 * .day }
 }
 
 public extension Array where Element: PromptCollection {

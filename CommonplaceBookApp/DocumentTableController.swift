@@ -21,40 +21,74 @@ import UIKit
 
 /// Knows how to perform key actions with the document
 public protocol DocumentTableControllerDelegate: AnyObject {
-  /// Shows a TextEditViewController in the detail view.
-  func showDetailViewController(_ detailViewController: UIViewController)
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier)
+  func showWebPage(url: URL)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
+}
+
+/// A list cell that is clear by default, with tint background color when selected.
+private final class ClearBackgroundCell: UICollectionViewListCell {
+  override func updateConfiguration(using state: UICellConfigurationState) {
+    var backgroundConfiguration = UIBackgroundConfiguration.clear()
+    if state.isSelected {
+      backgroundConfiguration.backgroundColor = nil
+      backgroundConfiguration.backgroundColorTransformer = .init { $0.withAlphaComponent(0.5) }
+    }
+    self.backgroundConfiguration = backgroundConfiguration
+  }
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
-    tableView: UITableView,
+    collectionView: UICollectionView,
     database: NoteDatabase,
     delegate: DocumentTableControllerDelegate
   ) {
     self.database = database
     self.delegate = delegate
-    tableView.register(DocumentTableViewCell.self, forCellReuseIdentifier: ReuseIdentifiers.documentCell)
-    self.dataSource = DataSource(tableView: tableView) { (tableView, indexPath, item) -> UITableViewCell? in
-      switch item {
-      case .page(let viewProperties):
-        return DocumentTableController.cell(
-          tableView: tableView,
-          indexPath: indexPath,
-          viewProperties: viewProperties
-        )
-      }
+
+    let openWebPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .webPage(let url) = item else { return }
+      var configuration = cell.defaultContentConfiguration()
+      configuration.text = "Open \(url)"
+      cell.contentConfiguration = configuration
     }
+
+    let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .page(let viewProperties) = item else { return }
+      var configuration = cell.defaultContentConfiguration()
+      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
+      configuration.attributedText = title
+      configuration.secondaryText = viewProperties.noteProperties.hashtags.joined(separator: ", ")
+      configuration.secondaryTextProperties.color = .secondaryLabel
+
+      let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
+      let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
+      configuration.directionalLayoutMargins = .init(top: verticalMargin, leading: 0, bottom: verticalMargin, trailing: 0)
+      cell.contentConfiguration = configuration
+    }
+
+    self.dataSource = UICollectionViewDiffableDataSource<DocumentSection, Item>(
+      collectionView: collectionView,
+      cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
+        switch item {
+        case .webPage:
+          return collectionView.dequeueConfiguredReusableCell(using: openWebPageRegistration, for: indexPath, item: item)
+        case .page:
+          return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+        }
+      }
+    )
+
     super.init()
-    tableView.delegate = self
-    tableView.refreshControl = refreshControl
+    collectionView.delegate = self
+    collectionView.refreshControl = refreshControl
     let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
       self?.updateDataSourceIfNeeded()
     }
@@ -88,17 +122,6 @@ public final class DocumentTableController: NSObject {
     return control
   }()
 
-  /// Convenience to construct an appropriately-configured UITableView to show our data.
-  public static func makeTableView() -> UITableView {
-    let tableView = UITableView(frame: .zero, style: .plain)
-    tableView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
-    tableView.backgroundColor = .grailBackground
-    tableView.accessibilityIdentifier = "document-list"
-    tableView.estimatedRowHeight = 72
-    tableView.separatorStyle = .none
-    return tableView
-  }
-
   /// If non-nil, only pages with these identifiers will be shown.
   public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
@@ -113,6 +136,45 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  /// If non-nil, the table view should show a cell representing this web page at the top of the table.
+  public var webURL: URL? {
+    didSet {
+      needsPerformUpdates = true
+    }
+  }
+
+  public func trailingSwipeActionsConfiguration(forRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else {
+      return nil
+    }
+    var actions = [UIContextualAction]()
+    switch item {
+    case .page(let properties):
+      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
+        try? self.database.flush()
+        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
+        completion(true)
+      }
+      deleteAction.image = UIImage(systemName: "trash")
+      actions.append(deleteAction)
+      if properties.cardCount > 0 {
+        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
+          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
+            self.delegate?.presentStudySessionViewController(for: $0)
+            completion(true)
+          })
+        }
+        studyAction.image = UIImage(systemName: "rectangle.stack")
+        studyAction.backgroundColor = UIColor.systemBlue
+        actions.append(studyAction)
+      }
+    case .webPage:
+      return nil
+    }
+    return UISwipeActionsConfiguration(actions: actions)
+  }
+
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
@@ -123,7 +185,7 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  private let dataSource: DataSource
+  private let dataSource: UICollectionViewDiffableDataSource<DocumentSection, Item>
 
   private var databaseSubscription: AnyCancellable?
 
@@ -146,7 +208,8 @@ public final class DocumentTableController: NSObject {
       for: database,
       cardsPerDocument: cardsPerDocument,
       filteredHashtag: filteredHashtag,
-      filteredPageIdentifiers: filteredPageIdentifiers
+      filteredPageIdentifiers: filteredPageIdentifiers,
+      webURL: webURL
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -173,6 +236,10 @@ public final class DocumentTableController: NSObject {
         if lhsPage.pageKey != rhsPage.pageKey {
           return true
         }
+      case (.webPage, .webPage):
+        continue
+      default:
+        return true
       }
     }
     return false
@@ -181,44 +248,15 @@ public final class DocumentTableController: NSObject {
 
 // MARK: - UITableViewDelegate
 
-extension DocumentTableController: UITableViewDelegate {
-  public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    tableView.deselectRow(at: indexPath, animated: true)
+extension DocumentTableController: UICollectionViewDelegate {
+  public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey)
+    case .webPage(let url):
+      delegate?.showWebPage(url: url)
     }
-  }
-
-  public func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else {
-      return nil
-    }
-    var actions = [UIContextualAction]()
-    switch item {
-    case .page(let properties):
-      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
-        try? self.database.flush()
-        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
-        completion(true)
-      }
-      deleteAction.image = UIImage(systemName: "trash")
-      actions.append(deleteAction)
-      if properties.cardCount > 0 {
-        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
-            self.delegate?.presentStudySessionViewController(for: $0)
-            completion(true)
-          })
-        }
-        studyAction.image = UIImage(systemName: "rectangle.stack")
-        studyAction.backgroundColor = UIColor.systemBlue
-        actions.append(studyAction)
-      }
-    }
-    return UISwipeActionsConfiguration(actions: actions)
   }
 }
 
@@ -237,15 +275,20 @@ private extension DocumentTableController {
 
   /// Sections of the collection view
   enum DocumentSection {
+    /// A section with cells that represent navigation to other pages.
+    case webNavigation
     /// List of documents.
     case documents
   }
 
   enum Item: Hashable, CustomStringConvertible {
+    case webPage(URL)
     case page(ViewProperties)
 
     var description: String {
       switch self {
+      case .webPage(let url):
+        return "Web page: \(url)"
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
       }
@@ -260,41 +303,6 @@ private extension DocumentTableController {
     let noteProperties: Note.Metadata
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
-  }
-
-  enum ReuseIdentifiers {
-    static let documentCell = "DocumentCollectionViewCell"
-    static let hashtag = "HashtagCell"
-  }
-
-  static func cell(
-    tableView: UITableView,
-    indexPath: IndexPath,
-    viewProperties: ViewProperties
-  ) -> UITableViewCell? {
-    guard
-      let cell = tableView.dequeueReusableCell(
-        withIdentifier: ReuseIdentifiers.documentCell,
-        for: indexPath
-      ) as? DocumentTableViewCell
-    else {
-      preconditionFailure("Forgot to register the right kind of cell")
-    }
-    let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
-    cell.titleLabel.attributedText = title
-    cell.accessibilityLabel = viewProperties.noteProperties.title
-    let detailString = viewProperties.noteProperties.hashtags.joined(separator: ", ")
-    cell.detailLabel.attributedText = NSAttributedString(
-      string: detailString,
-      attributes: [
-        .font: UIFont.preferredFont(forTextStyle: .subheadline),
-        .foregroundColor: UIColor.secondaryLabel,
-      ]
-    )
-    cell.documentModifiedTimestamp = viewProperties.noteProperties.timestamp
-    let font = UIFont.preferredFont(forTextStyle: .headline)
-    cell.verticalPadding = max(20, font.lineHeight.roundedToScreenScale() * 1.5)
-    return cell
   }
 
   @objc func handleRefreshControl() {
@@ -319,9 +327,16 @@ private extension DocumentTableController {
     for database: NoteDatabase,
     cardsPerDocument: [Note.Identifier: Int],
     filteredHashtag: String?,
-    filteredPageIdentifiers: Set<Note.Identifier>?
+    filteredPageIdentifiers: Set<Note.Identifier>?,
+    webURL: URL?
   ) -> Snapshot {
     var snapshot = Snapshot()
+
+    if let webURL = webURL {
+      snapshot.appendSections([.webNavigation])
+      snapshot.appendItems([.webPage(webURL)])
+    }
+
     snapshot.appendSections([.documents])
 
     let propertiesFilteredByHashtag = database.allMetadata

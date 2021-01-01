@@ -20,18 +20,43 @@ import Logging
 import SnapKit
 import UIKit
 
-/// Watches for changes from a `TextEditViewController` and saves them to storage.
+/// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
+  /// Holds configuration settings for the view controller.
+  struct Configuration {
+    var noteIdentifier: Note.Identifier?
+    var note: Note
+    var initialSelectedRange = NSRange(location: 0, length: 0)
+    var autoFirstResponder = false
+  }
+
   /// Designated initializer.
-  /// - parameter viewController: The view controller to monitor.
-  /// - parameter noteIdentifier: The identifier for the contents of `viewController`. If nil, the VC holds unsaved content.
+  /// - parameter configuration: Configuration object
   /// - parameter NoteSqliteStorage: Where to save the contents.
-  init(_ viewController: TextEditViewController, noteIdentifier: Note.Identifier?, noteStorage: NoteDatabase) {
-    self.textEditViewController = viewController
-    self.noteIdentifier = noteIdentifier
+  init(configuration: Configuration, noteStorage: NoteDatabase) {
+    self.configuration = configuration
     self.noteStorage = noteStorage
+
+    let viewController = TextEditViewController()
+    viewController.markdown = configuration.note.text ?? ""
+    viewController.selectedRange = configuration.initialSelectedRange
+    viewController.autoFirstResponder = configuration.autoFirstResponder
+    self.textEditViewController = viewController
     super.init(nibName: nil, bundle: nil)
+    setTitleMarkdown(configuration.note.metadata.title)
+  }
+
+  /// Initializes a view controller for a new, unsaved note.
+  convenience init(database: NoteDatabase, currentHashtag: String? = nil, autoFirstResponder: Bool = false) {
+    let (note, initialOffset) = Note.makeBlankNote(hashtag: currentHashtag)
+    let configuration = Configuration(
+      noteIdentifier: nil,
+      note: note,
+      initialSelectedRange: NSRange(location: initialOffset, length: 0),
+      autoFirstResponder: autoFirstResponder
+    )
+    self.init(configuration: configuration, noteStorage: database)
   }
 
   @available(*, unavailable)
@@ -39,14 +64,29 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     fatalError("init(coder:) has not been implemented")
   }
 
-  internal var noteIdentifier: Note.Identifier?
+  public enum ChromeStyle {
+    case modal
+    case splitViewController
+  }
+
+  /// Controls configuration of toolbars & navigation items
+  public var chromeStyle = ChromeStyle.splitViewController
+
+  private var configuration: Configuration
   private let noteStorage: NoteDatabase
   private let textEditViewController: TextEditViewController
 
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?
 
+  /// The identifier for the displayed note; nil if the note is not yet saved to the database.
+  var noteIdentifier: Note.Identifier? { configuration.noteIdentifier }
+
+  /// The current note.
+  var note: Note { configuration.note }
+
   internal func setTitleMarkdown(_ markdown: String) {
+    guard chromeStyle == .splitViewController else { return }
     navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
@@ -68,7 +108,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    navigationController?.hidesBarsOnSwipe = true
     configureToolbar()
   }
 
@@ -76,23 +115,37 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     configureToolbar()
   }
 
+  @objc private func closeModal() {
+    dismiss(animated: true, completion: nil)
+  }
+
   private func configureToolbar() {
-    if splitViewController?.isCollapsed ?? false {
-      navigationController?.isToolbarHidden = false
-      toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
-    } else {
-      navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
-      navigationController?.isToolbarHidden = true
-      toolbarItems = []
+    switch chromeStyle {
+    case .modal:
+      let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeModal))
+      navigationItem.rightBarButtonItem = closeButton
+    case .splitViewController:
+      if splitViewController?.isCollapsed ?? false {
+        navigationItem.rightBarButtonItem = nil
+        navigationController?.isToolbarHidden = false
+        toolbarItems = [UIBarButtonItem.flexibleSpace(), AppCommandsButtonItems.newNote()]
+      } else {
+        navigationItem.rightBarButtonItem = AppCommandsButtonItems.newNote()
+        navigationController?.isToolbarHidden = true
+        toolbarItems = []
+      }
     }
   }
 
   /// Writes a note to storage.
   private func updateNote(_ note: Note) {
     assert(Thread.isMainThread)
+    var note = note
+    // Copy over the initial reference, if any
+    note.reference = configuration.note.reference
     setTitleMarkdown(note.metadata.title)
     do {
-      if let noteIdentifier = noteIdentifier {
+      if let noteIdentifier = configuration.noteIdentifier {
         Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
         try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
           var mergedNote = note
@@ -100,8 +153,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
           return mergedNote
         })
       } else {
-        noteIdentifier = try noteStorage.createNote(note)
-        Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier!)")
+        configuration.noteIdentifier = try noteStorage.createNote(note)
+        Logger.shared.info("SavingTextEditViewController: Created note \(configuration.noteIdentifier!)")
       }
     } catch {
       Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")

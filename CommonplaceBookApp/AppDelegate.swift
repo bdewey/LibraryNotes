@@ -105,6 +105,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     var factory = LogHandlerFactory()
     // Here's how you enable debug logging for different loggers...
     factory.logLevelsForLabel[Logger.sharedLoggerLabel] = .debug
+    factory.logLevelsForLabel[Logger.webViewLoggerLabel] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
 
     let window = UIWindow(frame: UIScreen.main.bounds)
