@@ -30,10 +30,10 @@ public extension NoteDatabase {
       let updateKey = try updateIdentifier(in: database)
       let allMetadata = try Self.fetchAllMetadata(from: database)
       for (identifier, metadata) in allMetadata where filter(metadata) {
-        let note = try Note(identifier: identifier, database: database)
+        var note = try Note(identifier: identifier, database: database)
         if let text = note.text {
-          let updatedNote = Note(markdown: text.replacingOccurrences(of: originalText, with: replacementText))
-          try updatedNote.save(identifier: identifier, updateKey: updateKey, to: database)
+          note.updateMarkdown(text.replacingOccurrences(of: originalText, with: replacementText))
+          try note.save(identifier: identifier, updateKey: updateKey, to: database)
         }
       }
     }
