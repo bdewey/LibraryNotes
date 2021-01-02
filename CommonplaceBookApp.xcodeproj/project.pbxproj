@@ -54,6 +54,7 @@
 		D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */; };
 		D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */; };
 		D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */; };
+		D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */; };
 		D32B16BB2599438000766D55 /* 20201227-binaryContent.sql in Resources */ = {isa = PBXBuildFile; fileRef = D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */; };
 		D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16BE259943B800766D55 /* BinaryContentRecord.swift */; };
 		D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C42599457A00766D55 /* ContentIdentifier.swift */; };
@@ -245,6 +246,7 @@
 		D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+Replace.swift"; sourceTree = "<group>"; };
 		D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+Hashtag.swift"; sourceTree = "<group>"; };
 		D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+HashtagTests.swift"; sourceTree = "<group>"; };
+		D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+AnySatisfy.swift"; sourceTree = "<group>"; };
 		D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201227-binaryContent.sql"; sourceTree = "<group>"; };
 		D32B16BE259943B800766D55 /* BinaryContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryContentRecord.swift; sourceTree = "<group>"; };
 		D32B16C42599457A00766D55 /* ContentIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
@@ -515,6 +517,7 @@
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
+				D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D3456DC7256F07DF00D32D14 /* Sqlite */,
@@ -850,6 +853,7 @@
 			files = (
 				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
 				D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */,
+				D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */,
 				D30D6B4E2549C44800F5902D /* CharacterSet+Extensions.swift in Sources */,

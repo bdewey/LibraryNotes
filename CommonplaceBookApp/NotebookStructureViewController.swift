@@ -191,7 +191,11 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
           }
           Logger.shared.info("Replacing \(hashtag) with \(newHashtag)")
           do {
-            try database.replaceText(hashtag, with: newHashtag)
+            try database.replaceText(
+              hashtag,
+              with: newHashtag,
+              filter: { $0.hashtags.anySatisfy { noteHashtag in hashtag.isPathPrefix(of: noteHashtag) } }
+            )
           } catch {
             Logger.shared.error("Error renaming hashtag: \(error)")
           }

@@ -371,13 +371,3 @@ private extension CGFloat {
     return scale * (self / scale).rounded(rule)
   }
 }
-
-private extension Sequence {
-  /// `allSatisfy` is in the standard library. Why not `anySatisfy`?
-  func anySatisfy(_ predicate: (Element) -> Bool) -> Bool {
-    for element in self {
-      if predicate(element) { return true }
-    }
-    return false
-  }
-}
