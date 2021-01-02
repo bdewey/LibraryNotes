@@ -80,6 +80,7 @@ final class NotebookStructureViewController: UIViewController {
       contentConfiguration.text = structureIdentifier.description
       contentConfiguration.textProperties.color = .label
       cell.contentConfiguration = contentConfiguration
+      cell.accessories = [.outlineDisclosure()]
     }
     let dataSource = UICollectionViewDiffableDataSource<Section, StructureIdentifier>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
@@ -91,7 +92,6 @@ final class NotebookStructureViewController: UIViewController {
         Logger.shared.debug("Skipping supplementary view for \(indexPath) because it isn't the hashtag section")
         return nil
       }
-      Logger.shared.info("This is the hashtag section, getting its header and footer")
       if kind == UICollectionView.elementKindSectionHeader {
         let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { headerView, _, _ in
           var headerConfiguration = UIListContentConfiguration.sidebarHeader()
@@ -168,10 +168,31 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSnapshot<Section, StructureIdentifier>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
-    if !database.hashtags.isEmpty {
+    var hashtagSectionSnapshot = NSDiffableDataSourceSectionSnapshot<StructureIdentifier>()
+    for hashtag in database.hashtags {
+      hashtagSectionSnapshot.insertHashtag(hashtag)
+    }
+    if !hashtagSectionSnapshot.items.isEmpty {
       snapshot.appendSections([.hashtags])
-      snapshot.appendItems(database.hashtags.map { .hashtag($0) })
     }
     dataSource.apply(snapshot)
+    if !hashtagSectionSnapshot.items.isEmpty {
+      dataSource.apply(hashtagSectionSnapshot, to: .hashtags)
+    }
+  }
+}
+
+private extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == NotebookStructureViewController.StructureIdentifier {
+  mutating func insertHashtag(_ hashtag: String) {
+    var parent: NotebookStructureViewController.StructureIdentifier?
+    for (index, character) in hashtag.enumerated() where character == "/" {
+      let parentHashtag = hashtag.prefix(index)
+      let currentParent = NotebookStructureViewController.StructureIdentifier.hashtag(String(parentHashtag))
+      if !contains(currentParent) {
+        append([currentParent], to: parent)
+      }
+      parent = currentParent
+    }
+    self.append([.hashtag(hashtag)], to: parent)
   }
 }
