@@ -55,6 +55,8 @@
 		D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */; };
 		D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */; };
 		D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */; };
+		D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */; };
+		D32A7A7525A0CF8200950684 /* NoteSqliteStorageTestBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */; };
 		D32B16BB2599438000766D55 /* 20201227-binaryContent.sql in Resources */ = {isa = PBXBuildFile; fileRef = D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */; };
 		D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16BE259943B800766D55 /* BinaryContentRecord.swift */; };
 		D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C42599457A00766D55 /* ContentIdentifier.swift */; };
@@ -247,6 +249,8 @@
 		D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+Hashtag.swift"; sourceTree = "<group>"; };
 		D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+HashtagTests.swift"; sourceTree = "<group>"; };
 		D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+AnySatisfy.swift"; sourceTree = "<group>"; };
+		D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+RenameTests.swift"; sourceTree = "<group>"; };
+		D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTestBase.swift; sourceTree = "<group>"; };
 		D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201227-binaryContent.sql"; sourceTree = "<group>"; };
 		D32B16BE259943B800766D55 /* BinaryContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryContentRecord.swift; sourceTree = "<group>"; };
 		D32B16C42599457A00766D55 /* ContentIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
@@ -553,8 +557,10 @@
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
 				D3A68EE12556040D0049B8E5 /* MiniMarkdownGrammarTests.swift */,
 				D3A68EE22556040D0049B8E5 /* MiniMarkdownParsingTests.swift */,
+				D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */,
 				D3446D3F23FAF20400BC269A /* Note+TestContent.swift */,
 				D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */,
+				D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */,
 				D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */,
 				D39D247B256C328900948A72 /* ParsedAttributedStringTests.swift */,
 				D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */,
@@ -965,9 +971,11 @@
 				D30F402E255D9EDE00AB05EE /* ParsedStringTests.swift in Sources */,
 				D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */,
 				D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */,
+				D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */,
 				D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */,
 				D3A68EE32556040D0049B8E5 /* MiniMarkdownGrammarTests.swift in Sources */,
 				D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */,
+				D32A7A7525A0CF8200950684 /* NoteSqliteStorageTestBase.swift in Sources */,
 				D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -49,6 +49,8 @@ extension Note {
   Q: What is the name of this format?
   A: Question and answer.
 
+  #test
+
   """)
 
   static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
