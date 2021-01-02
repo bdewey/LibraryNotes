@@ -26,6 +26,8 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
 final class NotebookStructureViewController: UIViewController {
+
+  /// What subset of notebook pages does the person want to see?
   enum StructureIdentifier: Hashable, CustomStringConvertible {
     case allNotes
     case hashtag(String)
@@ -33,14 +35,24 @@ final class NotebookStructureViewController: UIViewController {
     var description: String {
       switch self {
       case .allNotes: return "All Notes"
-      case .hashtag(let hashtag): return hashtag
+      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
       }
     }
   }
 
+  /// Sections of our list.
   private enum Section: CaseIterable {
     case allNotes
     case hashtags
+  }
+
+  /// Item identifier -- this is separate from StructureIdentifier because we need to know if we have children for the disclosure indicator
+  private struct Item: Hashable, CustomStringConvertible {
+    var structureIdentifier: StructureIdentifier
+    var hasChildren: Bool
+
+    var description: String { structureIdentifier.description }
+    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: false)
   }
 
   public init(database: NoteDatabase) {
@@ -74,15 +86,22 @@ final class NotebookStructureViewController: UIViewController {
     return view
   }()
 
-  private lazy var dataSource: UICollectionViewDiffableDataSource<Section, StructureIdentifier> = {
-    let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, StructureIdentifier> { cell, _, structureIdentifier in
+  private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
+    let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
       var contentConfiguration = cell.defaultContentConfiguration()
-      contentConfiguration.text = structureIdentifier.description
+      contentConfiguration.text = item.description
       contentConfiguration.textProperties.color = .label
       cell.contentConfiguration = contentConfiguration
-      cell.accessories = [.outlineDisclosure()]
+
+      // Only items with children get an outline disclosure identifier.
+      if item.hasChildren {
+        cell.accessories = [.outlineDisclosure()]
+      } else {
+        cell.accessories = []
+      }
     }
-    let dataSource = UICollectionViewDiffableDataSource<Section, StructureIdentifier>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
+
+    let dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 
@@ -146,8 +165,8 @@ final class NotebookStructureViewController: UIViewController {
 
 extension NotebookStructureViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    if let structureIdentifier = dataSource.itemIdentifier(for: indexPath) {
-      delegate?.notebookStructureViewController(self, didSelect: structureIdentifier)
+    if let item = dataSource.itemIdentifier(for: indexPath) {
+      delegate?.notebookStructureViewController(self, didSelect: item.structureIdentifier)
       splitViewController?.show(.supplementary)
     }
   }
@@ -165,13 +184,10 @@ private extension NotebookStructureViewController {
   }
 
   func updateSnapshot() {
-    var snapshot = NSDiffableDataSourceSnapshot<Section, StructureIdentifier>()
+    var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
-    var hashtagSectionSnapshot = NSDiffableDataSourceSectionSnapshot<StructureIdentifier>()
-    for hashtag in database.hashtags {
-      hashtagSectionSnapshot.insertHashtag(hashtag)
-    }
+    let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
     if !hashtagSectionSnapshot.items.isEmpty {
       snapshot.appendSections([.hashtags])
     }
@@ -180,19 +196,35 @@ private extension NotebookStructureViewController {
       dataSource.apply(hashtagSectionSnapshot, to: .hashtags)
     }
   }
-}
 
-private extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == NotebookStructureViewController.StructureIdentifier {
-  mutating func insertHashtag(_ hashtag: String) {
-    var parent: NotebookStructureViewController.StructureIdentifier?
-    for (index, character) in hashtag.enumerated() where character == "/" {
-      let parentHashtag = hashtag.prefix(index)
-      let currentParent = NotebookStructureViewController.StructureIdentifier.hashtag(String(parentHashtag))
-      if !contains(currentParent) {
-        append([currentParent], to: parent)
+  private func makeHashtagSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
+    var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
+
+    // Enumerate every hashtag and make sure there is an entry for the hashtag *and all prefixes*.
+    // Denote that each prefix has children.
+    //
+    // This algorithm depends on database.hashtags being sorted, so we will never process a prefix *after* a more specific
+    // string. E.g., things work if we process `#books` then `#books/2020`, but will break if we process `#books/2020` before
+    // `#books`.
+    var stringToItem = [String: Item]()
+    for hashtag in database.hashtags {
+      for (index, character) in hashtag.enumerated() where character == "/" {
+        let prefix = String(hashtag.prefix(index))
+        stringToItem[prefix] = Item(structureIdentifier: .hashtag(prefix), hasChildren: true)
       }
-      parent = currentParent
+      stringToItem[hashtag] = Item(structureIdentifier: .hashtag(hashtag), hasChildren: false)
     }
-    self.append([.hashtag(hashtag)], to: parent)
+
+    // Now make a snapshot item for everything in `stringToItem`. The only tricky part is for a multi-part
+    // hashtag like `#books/2020`, we have to look up its parent `#books`... and again, this depends on the array
+    // being sorted.
+    for hashtag in stringToItem.keys.sorted() {
+      let parent = hashtag
+        .lastIndex(of: "/")
+        .flatMap({ String(hashtag.prefix(upTo: $0)) })
+        .flatMap({ stringToItem[$0] })
+      snapshot.append([stringToItem[hashtag]!], to: parent)
+    }
+    return snapshot
   }
 }

@@ -346,7 +346,7 @@ private extension DocumentTableController {
       }
       .filter {
         guard let hashtag = filteredHashtag else { return true }
-        return $0.value.hashtags.contains(hashtag)
+        return $0.value.hashtags.anySatisfy({ $0.hasPrefix(hashtag) })
       }
 
     let objects = propertiesFilteredByHashtag
@@ -369,5 +369,15 @@ private extension CGFloat {
   func roundedToScreenScale(_ rule: FloatingPointRoundingRule = .toNearestOrAwayFromZero) -> CGFloat {
     let scale: CGFloat = 1.0 / UIScreen.main.scale
     return scale * (self / scale).rounded(rule)
+  }
+}
+
+private extension Sequence {
+  /// `allSatisfy` is in the standard library. Why not `anySatisfy`?
+  func anySatisfy(_ predicate: (Element) -> Bool) -> Bool {
+    for element in self {
+      if predicate(element) { return true }
+    }
+    return false
   }
 }
