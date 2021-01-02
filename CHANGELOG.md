@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Support for hierarchical hashtags! Hello, #books/2021
+
 ## [0.35.0] - 2021-01-01 Happy New Year!
 
 ### Added
