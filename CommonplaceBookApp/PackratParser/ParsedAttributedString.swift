@@ -197,6 +197,10 @@ private extension Logger {
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
     guard let tree = try? rawString.result.get() else {
+      if location >= count {
+        let exception = NSException(name: .rangeException, reason: "Location is beyond the end of the text", userInfo: nil)
+        exception.raise()
+      }
       range?.pointee = NSRange(location: 0, length: rawString.count)
       return defaultAttributes
     }

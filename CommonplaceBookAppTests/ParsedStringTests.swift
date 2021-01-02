@@ -83,7 +83,7 @@ final class ParsedStringTests: XCTestCase {
     XCTAssert(emphasis === editedEmphasis)
   }
 
-  func tooslow__testAddSentenceToLargeText() {
+  func testAddSentenceToLargeText() {
     let largeText = String(repeating: TestStrings.markdownCanonical, count: 10)
     let parser = ParsedString(largeText, grammar: MiniMarkdownGrammar())
     let toInsert = "\n\nI'm adding some new text with *emphasis* to test incremental parsing.\n\n"

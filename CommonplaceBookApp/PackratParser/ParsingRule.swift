@@ -147,7 +147,7 @@ open class ParsingRuleSequenceWrapper: ParsingRule {
 }
 
 /// The output of trying to match a rule at an offset into a PieceTable.
-public struct ParsingResult {
+public final class ParsingResult {
   public init(succeeded: Bool, length: Int = 0, examinedLength: Int = 0, node: SyntaxTreeNode? = nil) {
     assert(node == nil || (length == node!.length))
     self.succeeded = succeeded
@@ -163,7 +163,7 @@ public struct ParsingResult {
   public private(set) var length: Int
 
   /// Mutate this result to denote that it consumes no input.
-  public mutating func setZeroLength() {
+  public func setZeroLength() {
     length = 0
     node = nil
   }
@@ -179,7 +179,7 @@ public struct ParsingResult {
   public private(set) var node: SyntaxTreeNode?
 
   /// Turns the spanned by an "anonymous" result into a typed node.
-  fileprivate mutating func makeNode(type: SyntaxTreeNodeType) {
+  fileprivate func makeNode(type: SyntaxTreeNodeType) {
     assert(node == nil)
     node = SyntaxTreeNode(type: type, length: length)
   }
@@ -187,7 +187,7 @@ public struct ParsingResult {
   /// Marks this result as a failure; useful for truncating in-process results. Notes it leaves `examinedLength` unchanged
   /// so incremental parsing can work.
   @discardableResult
-  public mutating func failed() -> ParsingResult {
+  public func failed() -> ParsingResult {
     succeeded = false
     length = 0
     node = nil
@@ -195,7 +195,7 @@ public struct ParsingResult {
   }
 
   /// Used to accumulate child results into a parent result.
-  public mutating func appendChild(_ result: ParsingResult) {
+  public func appendChild(_ result: ParsingResult) {
     assert(result.node == nil || result.node!.length == result.length)
     succeeded = succeeded && result.succeeded
     examinedLength += result.examinedLength
@@ -223,17 +223,9 @@ public struct ParsingResult {
     assert(node == nil || node?.length == length)
   }
 
-  private mutating func makeFragmentIfNeeded() -> SyntaxTreeNode {
-    if let node = node {
-      if node.frozen {
-        // Return a shallow copy
-        let shallowCopy = SyntaxTreeNode(type: node.type, length: node.length)
-        shallowCopy.children = node.children
-        self.node = shallowCopy
-        return shallowCopy
-      } else {
-        return node
-      }
+  private func makeFragmentIfNeeded() -> SyntaxTreeNode {
+    if let existingNode = node {
+      return existingNode
     }
     let node = SyntaxTreeNode(type: .documentFragment, length: 0)
     self.node = node
