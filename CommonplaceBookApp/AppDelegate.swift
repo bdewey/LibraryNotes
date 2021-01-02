@@ -376,7 +376,7 @@ final class LogHandlerFactory {
 
     return MultiplexLogHandler([
       streamHandler,
-      makeFileLogHandler(label: label)
+      makeFileLogHandler(label: label),
     ])
   }
 
@@ -392,7 +392,7 @@ final class LogHandlerFactory {
     if
       let existingAttributes = try? FileManager.default.attributesOfItem(atPath: currentLogFileURL.path),
       let existingSize = (existingAttributes[.size] as? Int),
-      existingSize > 1024*1024
+      existingSize > 1024 * 1024
     {
       // Roll the log.
       let creationDate = (existingAttributes[.creationDate] as? Date) ?? Date()

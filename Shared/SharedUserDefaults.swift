@@ -20,7 +20,6 @@ import Foundation
 /// The shared app group used for communication between share extensions and the main app.
 public let appGroupName = "group.org.brians-brain.grail-diary"
 
-
 /// Serialization structure for saved URLs.
 public struct SavedURL: Codable {
   let url: URL
