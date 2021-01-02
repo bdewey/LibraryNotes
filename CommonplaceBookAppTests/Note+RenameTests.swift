@@ -15,6 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
+import CommonplaceBookApp
 import XCTest
 
 final class NoteRenameTests: NoteSqliteStorageTestBase {
@@ -30,6 +31,22 @@ final class NoteRenameTests: NoteSqliteStorageTestBase {
         XCTAssertFalse(try database.note(noteIdentifier: identifier).metadata.hashtags.contains("#test"))
         let newPromptIdentifiers = Set(try database.eligiblePromptIdentifiers(before: Date().addingTimeInterval(7 * .day), limitedTo: identifier))
         XCTAssertEqual(promptIdentifiers, newPromptIdentifiers)
+      } catch {
+        XCTFail("Unexpected error: \(error)")
+      }
+    }
+  }
+
+  func testRenameHashtagAsAtomicToken() {
+    makeAndOpenEmptyDatabase { database in
+      do {
+        let note1 = try database.createNote(Note(markdown: "First note #book"))
+        let note2 = try database.createNote(Note(markdown: "Second note #books"))
+        XCTAssertTrue(try database.note(noteIdentifier: note2).metadata.hashtags.contains("#books"))
+        try database.renameHashtag("#book", to: "#books")
+        XCTAssertFalse(try database.note(noteIdentifier: note1).metadata.hashtags.contains("#book"))
+        XCTAssertTrue(try database.note(noteIdentifier: note1).metadata.hashtags.contains("#books"))
+        XCTAssertTrue(try database.note(noteIdentifier: note2).metadata.hashtags.contains("#books"))
       } catch {
         XCTFail("Unexpected error: \(error)")
       }
