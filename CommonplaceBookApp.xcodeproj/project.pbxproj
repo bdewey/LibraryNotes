@@ -51,6 +51,7 @@
 		D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D7CDF2598CCC70083AB05 /* WebViewController.swift */; };
 		D329BF6023CB8BD5008D59CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D329BF5F23CB8BD5008D59CF /* GRDB */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
+		D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */; };
 		D32B16BB2599438000766D55 /* 20201227-binaryContent.sql in Resources */ = {isa = PBXBuildFile; fileRef = D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */; };
 		D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16BE259943B800766D55 /* BinaryContentRecord.swift */; };
 		D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C42599457A00766D55 /* ContentIdentifier.swift */; };
@@ -239,6 +240,7 @@
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
+		D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+Replace.swift"; sourceTree = "<group>"; };
 		D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201227-binaryContent.sql"; sourceTree = "<group>"; };
 		D32B16BE259943B800766D55 /* BinaryContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryContentRecord.swift; sourceTree = "<group>"; };
 		D32B16C42599457A00766D55 /* ContentIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
@@ -399,6 +401,7 @@
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */,
+				D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteLinkRecord.swift */,
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
@@ -894,6 +897,7 @@
 				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
+				D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,

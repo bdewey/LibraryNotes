@@ -170,6 +170,40 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
       splitViewController?.show(.supplementary)
     }
   }
+
+  func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemAt indexPath: IndexPath, point: CGPoint) -> UIContextMenuConfiguration? {
+    let item = dataSource.itemIdentifier(for: indexPath)
+    guard case .hashtag(let hashtag) = item?.structureIdentifier else { return nil }
+    return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self, database] _ in
+      guard let self = self else { return nil }
+      let rename = UIAction(title: "Rename \(hashtag)", image: UIImage(systemName: "square.and.pencil")) { _ in
+        Logger.shared.debug("Rename \(hashtag)")
+        let alert = UIAlertController(title: "Rename \(hashtag)", message: nil, preferredStyle: .alert)
+        alert.addTextField { textField in
+          textField.placeholder = "#new-hashtag"
+        }
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+          guard var newHashtag = alert.textFields?.first?.text else {
+            Logger.shared.info("No replacement text; skipping hashtag rename.")
+            return
+          }
+          if newHashtag.first != "#" {
+            newHashtag = "#\(newHashtag)"
+          }
+          Logger.shared.info("Replacing \(hashtag) with \(newHashtag)")
+          do {
+            try database.replaceText(hashtag, with: newHashtag)
+          } catch {
+            Logger.shared.error("Error renaming hashtag: \(error)")
+          }
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.view.tintColor = .grailTint
+        self.present(alert, animated: true, completion: nil)
+      }
+      return UIMenu(title: "", children: [rename])
+    }
+  }
 }
 
 // MARK: - Private
