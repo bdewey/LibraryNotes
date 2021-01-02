@@ -215,8 +215,8 @@ public final class TextEditViewController: UIViewController {
   }
   
   public func insertText(_ text: String) {
-    let range = Range(textView.selectedRange, in: textView.text)!
-    textView.text.replaceSubrange(range, with: text)
+    textView.textStorage.replaceCharacters(in: textView.selectedRange, with: text)
+    textView.selectedRange = NSRange(location: textView.selectedRange.upperBound + text.utf16.count, length: 0)
   }
 
   // MARK: - Keyboard

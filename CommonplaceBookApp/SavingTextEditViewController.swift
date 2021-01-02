@@ -117,9 +117,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   
   @objc private func didTapTestText() {
     var lines = [String]()
-    lines.append("The Shining\n* ")
+    lines.append("The Shining")
     for i in 0 ..< 25 {
-      lines.append("All work and no play makes ?[who?](Jack) a dull boy. \(i)\n")
+      lines.append("* All work and no play makes ?[who?](Jack) a dull boy. \(i)\n\n")
     }
     for character in lines.joined() {
       textEditViewController.insertText(String(character))
