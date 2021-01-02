@@ -83,7 +83,7 @@ final class ParsedStringTests: XCTestCase {
     XCTAssert(emphasis === editedEmphasis)
   }
 
-  func testAddSentenceToLargeText() {
+  func tooslow__testAddSentenceToLargeText() {
     let largeText = String(repeating: TestStrings.markdownCanonical, count: 10)
     let parser = ParsedString(largeText, grammar: MiniMarkdownGrammar())
     let toInsert = "\n\nI'm adding some new text with *emphasis* to test incremental parsing.\n\n"
@@ -94,6 +94,15 @@ final class ParsedStringTests: XCTestCase {
       }
     }
     print("Inserted \(toInsert.utf16.count) characters, so remember to divide for per-character costs")
+  }
+
+  func testReplacement() {
+    let initialText = "#books #notreally #ijustwanttoreviewitwithbooks #books2019"
+    let parsedString = ParsedString(initialText, grammar: MiniMarkdownGrammar.shared)
+    XCTAssertTrue((try? parsedString.result.get()) != nil)
+    let replacementRange = NSRange(parsedString.string.range(of: "#books2019")!, in: initialText)
+    parsedString.replaceCharacters(in: replacementRange, with: "#books/2019")
+    XCTAssertEqual(parsedString.string, "#books #notreally #ijustwanttoreviewitwithbooks #books/2019")
   }
 }
 
