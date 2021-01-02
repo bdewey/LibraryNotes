@@ -26,7 +26,6 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
 final class NotebookStructureViewController: UIViewController {
-
   /// What subset of notebook pages does the person want to see?
   enum StructureIdentifier: Hashable, CustomStringConvertible {
     case allNotes
@@ -255,8 +254,8 @@ private extension NotebookStructureViewController {
     for hashtag in stringToItem.keys.sorted() {
       let parent = hashtag
         .lastIndex(of: "/")
-        .flatMap({ String(hashtag.prefix(upTo: $0)) })
-        .flatMap({ stringToItem[$0] })
+        .flatMap { String(hashtag.prefix(upTo: $0)) }
+        .flatMap { stringToItem[$0] }
       snapshot.append([stringToItem[hashtag]!], to: parent)
     }
     return snapshot
