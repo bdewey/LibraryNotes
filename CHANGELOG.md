@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Support for hierarchical hashtags! Hello, #books/2021
+
 ### Fixed
 
 - Bug where things would get in an infinite loop if the buffer failed to parse.

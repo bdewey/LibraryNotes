@@ -45,7 +45,7 @@ final class ShareViewController: SLComposeServiceViewController {
         attachment.loadObject(ofClass: NSURL.self) { url, error in
           if let url = url as? NSURL {
             let messageComponents: [String?] = [item.attributedTitle?.string, item.attributedContentText?.string, "#link"]
-            let message = messageComponents.compactMap({ $0 }).joined(separator: "\n\n")
+            let message = messageComponents.compactMap { $0 }.joined(separator: "\n\n")
             let config = ShareConfiguration(url: url as URL, message: message)
             completion(.success(config))
           } else if let error = error {
@@ -71,7 +71,7 @@ final class ShareViewController: SLComposeServiceViewController {
 
   override func didSelectPost() {
     guard let shareConfiguration = shareConfiguration else { return }
-    self.sharedDefaults?.pendingSavedURLs.append(SavedURL(url: shareConfiguration.url, message: self.contentText))
+    sharedDefaults?.pendingSavedURLs.append(SavedURL(url: shareConfiguration.url, message: contentText))
     super.didSelectPost()
   }
 

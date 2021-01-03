@@ -19,7 +19,7 @@ import Combine
 @testable import CommonplaceBookApp
 import XCTest
 
-final class NoteSqliteStorageTests: XCTestCase {
+final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
   func testCanOpenNonexistantFile() {
     makeAndOpenEmptyDatabase { _ in
       // NOTHING
@@ -264,32 +264,5 @@ final class NoteSqliteStorageTests: XCTestCase {
       studySession = database.synchronousStudySession(date: future.addingTimeInterval(24 * .hour))
       XCTAssertEqual(studySession.count, 1)
     }
-  }
-}
-
-private extension NoteSqliteStorageTests {
-  func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
-    let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteDatabase(fileURL: fileURL)
-    let completionExpectation = expectation(description: "Expected to call completion routine")
-    database.open { success in
-      if success {
-        do {
-          try completion(database)
-        } catch {
-          XCTFail("Unexpected error: \(error)")
-        }
-      } else {
-        XCTFail("Could not open database")
-      }
-      completionExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 5, handler: nil)
-    let closedExpectation = expectation(description: "Can close")
-    database.close { _ in
-      try? FileManager.default.removeItem(at: database.fileURL)
-      closedExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 3, handler: nil)
   }
 }

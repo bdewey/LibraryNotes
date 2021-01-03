@@ -77,15 +77,41 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   /// The length of the original text covered by this node (and all children).
   /// We only store the length so nodes can be efficiently reused while editing text, but it does mean you need to
   /// build up context (start position) by walking the parse tree.
-  public var length: Int
+  public var length: Int {
+    willSet {
+      assert(!frozen)
+    }
+  }
 
   /// We do a couple of tree-construction optimizations that mutate existing nodes that don't "belong" to us
   private var disconnectedFromResult = false
 
   /// Children of this node.
-  public var children = [SyntaxTreeNode]()
+  public var children = [SyntaxTreeNode]() {
+    willSet {
+      assert(!frozen)
+    }
+  }
+
+  public var treeSize: Int {
+    1 + children.map({ $0.treeSize }).reduce(0, +)
+  }
+
+  /// Set to true when we expect no more changes to this node.
+  public private(set) var frozen = false
+
+  public func freeze() {
+    frozen = true
+  }
+
+  public func makeCopy() -> SyntaxTreeNode {
+    let copy = SyntaxTreeNode(type: type, length: length)
+    copy.children = children.map { $0.makeCopy() }
+    return copy
+  }
 
   public func appendChild(_ child: SyntaxTreeNode) {
+    assert(!frozen)
     length += child.length
     if child.isFragment {
       var fragmentNodes = child.children

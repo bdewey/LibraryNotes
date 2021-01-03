@@ -346,7 +346,7 @@ private extension DocumentTableController {
       }
       .filter {
         guard let hashtag = filteredHashtag else { return true }
-        return $0.value.hashtags.contains(hashtag)
+        return $0.value.hashtags.anySatisfy { hashtag.isPathPrefix(of: $0) }
       }
 
     let objects = propertiesFilteredByHashtag

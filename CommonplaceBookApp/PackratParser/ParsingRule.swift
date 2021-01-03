@@ -224,8 +224,16 @@ public struct ParsingResult {
   }
 
   private mutating func makeFragmentIfNeeded() -> SyntaxTreeNode {
-    if let existingNode = node {
-      return existingNode
+    if let node = node {
+      if node.frozen {
+        // Return a shallow copy
+        let shallowCopy = SyntaxTreeNode(type: node.type, length: node.length)
+        shallowCopy.children = node.children
+        self.node = shallowCopy
+        return shallowCopy
+      } else {
+        return node
+      }
     }
     let node = SyntaxTreeNode(type: .documentFragment, length: 0)
     self.node = node
@@ -369,6 +377,7 @@ final class MemoizingRule: ParsingRuleWrapper {
       return performanceCounters.recordResult(memoizedResult)
     }
     let result = rule.parsingResult(from: buffer, at: index, memoizationTable: memoizationTable)
+    result.node?.freeze()
     memoizationTable.memoizeResult(result, rule: ObjectIdentifier(self), index: index)
     return performanceCounters.recordResult(result)
   }

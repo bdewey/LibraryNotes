@@ -17,32 +17,12 @@
 
 import Foundation
 
-/// The shared app group used for communication between share extensions and the main app.
-public let appGroupName = "group.org.brians-brain.grail-diary"
-
-/// Serialization structure for saved URLs.
-public struct SavedURL: Codable {
-  let url: URL
-  let message: String
-}
-
-public extension UserDefaults {
-  private static let savedURLKey = "savedURLs"
-
-  /// URLs that are pending to save into a note database.
-  var pendingSavedURLs: [SavedURL] {
-    get {
-      if let data = self.data(forKey: Self.savedURLKey) {
-        let items = try? JSONDecoder().decode([SavedURL].self, from: data)
-        return items ?? []
-      } else {
-        return []
-      }
+public extension Sequence {
+  /// `allSatisfy` is in the standard library. Why not `anySatisfy`?
+  func anySatisfy(_ predicate: (Element) -> Bool) -> Bool {
+    for element in self {
+      if predicate(element) { return true }
     }
-    set {
-      if let encodedData = try? JSONEncoder().encode(newValue) {
-        set(encodedData, forKey: Self.savedURLKey)
-      }
-    }
+    return false
   }
 }

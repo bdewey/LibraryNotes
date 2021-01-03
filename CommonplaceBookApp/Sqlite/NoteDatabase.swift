@@ -75,7 +75,7 @@ public final class NoteDatabase: UIDocument {
   }()
 
   /// Connection to the in-memory database.
-  private var dbQueue: DatabaseQueue? {
+  internal var dbQueue: DatabaseQueue? {
     didSet {
       if let queue = dbQueue {
         do {
@@ -596,9 +596,9 @@ public final class NoteDatabase: UIDocument {
   }
 }
 
-// MARK: - Private
+// MARK: - Internal (to enable dividing into extensions)
 
-private extension NoteDatabase {
+internal extension NoteDatabase {
   /// Watch this db queue for changes.
   func monitorDatabaseQueue(_ dbQueue: DatabaseQueue) throws {
     if try runMigrations(on: dbQueue) {

@@ -222,6 +222,10 @@ final class MiniMarkdownParsingTests: XCTestCase {
     )
   }
 
+  func testHierarchicalHashtag() {
+    parseText("#books/2020", expectedStructure: "(document (paragraph hashtag))")
+  }
+
   func testFile() {
     let pieceTable = PieceTable(TestStrings.markdownCanonical)
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
