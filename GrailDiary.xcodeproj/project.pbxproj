@@ -319,7 +319,7 @@
 		D3D05D312551D2AD007C443A /* PieceTable+SafeUnicodeBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PieceTable+SafeUnicodeBuffer.swift"; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
-		D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CommonplaceBookApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrailDiary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D3DC5ECE20EC9B0200F0B74B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -448,9 +448,9 @@
 			isa = PBXGroup;
 			children = (
 				D35C8BCE259E842E00A92CEB /* Shared */,
-				D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */,
-				D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */,
-				D3E98F0421D470B2008445DA /* CommonplaceBookAppUITests */,
+				D3DC5EC120EC9B0100F0B74B /* GrailDiary */,
+				D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */,
+				D3E98F0421D470B2008445DA /* GrailDiaryUITests */,
 				D35C8BB7259E4BF200A92CEB /* SaveToGrailDiary */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
@@ -462,7 +462,7 @@
 		D3DC5EC020EC9B0100F0B74B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */,
+				D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
 				D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */,
@@ -470,7 +470,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D3DC5EC120EC9B0100F0B74B /* CommonplaceBookApp */ = {
+		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXGroup;
 			children = (
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
@@ -547,10 +547,10 @@
 				D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 			);
-			path = CommonplaceBookApp;
+			path = GrailDiary;
 			sourceTree = "<group>";
 		};
-		D3DC5ED820EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
+		D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */ = {
 			isa = PBXGroup;
 			children = (
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
@@ -575,7 +575,7 @@
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D3A68EE92556053C0049B8E5 /* TestStrings.swift */,
 			);
-			path = CommonplaceBookAppTests;
+			path = GrailDiaryTests;
 			sourceTree = "<group>";
 		};
 		D3DD9B66256FF9A50019167E /* PackratParser */ = {
@@ -604,13 +604,13 @@
 			path = PieceTable;
 			sourceTree = "<group>";
 		};
-		D3E98F0421D470B2008445DA /* CommonplaceBookAppUITests */ = {
+		D3E98F0421D470B2008445DA /* GrailDiaryUITests */ = {
 			isa = PBXGroup;
 			children = (
 				D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */,
 				D3E98F0721D470B2008445DA /* Info.plist */,
 			);
-			path = CommonplaceBookAppUITests;
+			path = GrailDiaryUITests;
 			sourceTree = "<group>";
 		};
 		D3F90E5E2587301300162CFC /* Migrations */ = {
@@ -655,9 +655,9 @@
 			productReference = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */ = {
+		D3DC5EBE20EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookApp" */;
+			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "GrailDiary" */;
 			buildPhases = (
 				D3DC5EBB20EC9B0100F0B74B /* Sources */,
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
@@ -671,7 +671,7 @@
 			dependencies = (
 				D35C8BBF259E4BF200A92CEB /* PBXTargetDependency */,
 			);
-			name = CommonplaceBookApp;
+			name = GrailDiary;
 			packageProductDependencies = (
 				D3AD01D023BEB137004BB7DF /* GRDBCombine */,
 				D329BF5F23CB8BD5008D59CF /* GRDB */,
@@ -681,7 +681,7 @@
 				D3D867B8259F9FB8008254DF /* FileLogging */,
 			);
 			productName = CommonplaceBookApp;
-			productReference = D3DC5EBF20EC9B0100F0B74B /* CommonplaceBookApp.app */;
+			productReference = D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
@@ -756,7 +756,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "CommonplaceBookApp" */;
+			buildConfigurationList = D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "GrailDiary" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -777,7 +777,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */,
+				D3DC5EBE20EC9B0100F0B74B /* GrailDiary */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
 				D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */,
@@ -1002,12 +1002,12 @@
 		};
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */;
+			target = D3DC5EBE20EC9B0100F0B74B /* GrailDiary */;
 			targetProxy = D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */;
 		};
 		D3E98F0921D470B2008445DA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* CommonplaceBookApp */;
+			target = D3DC5EBE20EC9B0100F0B74B /* GrailDiary */;
 			targetProxy = D3E98F0821D470B2008445DA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1037,7 +1037,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
@@ -1052,7 +1052,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1063,7 +1063,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -1077,7 +1077,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1207,13 +1207,12 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEAD_CODE_STRIPPING = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1222,8 +1221,8 @@
 				MARKETING_VERSION = 0.37.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "CommonplaceBookApp/CommonplaceBookApp-Bridging-Header.h";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "GrailDiary/CommonplaceBookApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1236,13 +1235,12 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = CommonplaceBookApp/CommonplaceBookApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 47;
+				CURRENT_PROJECT_VERSION = 48;
 				DEAD_CODE_STRIPPING = NO;
-				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1251,8 +1249,8 @@
 				MARKETING_VERSION = 0.37.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "CommonplaceBookApp/CommonplaceBookApp-Bridging-Header.h";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "GrailDiary/CommonplaceBookApp-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1361,7 +1359,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "CommonplaceBookApp" */ = {
+		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "GrailDiary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DC5EDC20EC9B0200F0B74B /* Debug */,
@@ -1370,7 +1368,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "CommonplaceBookApp" */ = {
+		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "GrailDiary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DC5EDF20EC9B0200F0B74B /* Debug */,

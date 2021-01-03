@@ -15,7 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-#import "CommonplaceBookApp-Swift.h"
+#import "GrailDiary-Swift.h"
 #import "ParsedTextStorage.h"
 
 @interface ParsedTextStorage () <ParsedAttributedStringDelegate>
