@@ -101,7 +101,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   public private(set) var frozen = false
 
   public func freeze() {
-//    frozen = true
+    frozen = true
   }
 
   public func makeCopy() -> SyntaxTreeNode {
