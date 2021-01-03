@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Added "creationDate" to the note schema
+
 ## [0.36.0] - 2021-01-02 Hello Hierarchy!
 
 ### Added

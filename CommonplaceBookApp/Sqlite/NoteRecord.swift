@@ -23,9 +23,9 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   static let databaseTableName = "Note"
   var id: Note.Identifier
   var title: String
+  var creationTimestamp: Date
   var modifiedTimestamp: Date
   var modifiedDevice: String
-  var hasText: Bool
   var deleted: Bool
   var updateSequenceNumber: Int64
 

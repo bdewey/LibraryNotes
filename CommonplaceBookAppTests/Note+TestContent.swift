@@ -21,6 +21,7 @@ import Foundation
 extension Note {
   static let simpleTest = Note(
     metadata: Note.Metadata(
+      creationTimestamp: Date(),
       timestamp: Date(),
       hashtags: [],
       title: "Testing"
@@ -31,6 +32,7 @@ extension Note {
 
   static let withHashtags = Note(
     metadata: Note.Metadata(
+      creationTimestamp: Date(),
       timestamp: Date(),
       hashtags: ["#ashtag"],
       title: "Testing"
@@ -57,6 +59,7 @@ extension Note {
 
   static let withReferenceWebPage = Note(
     metadata: Metadata(
+      creationTimestamp: Date(),
       timestamp: Date(),
       hashtags: ["#test"],
       title: "The Onion"

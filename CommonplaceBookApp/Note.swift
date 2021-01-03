@@ -25,6 +25,8 @@ public struct Note: Equatable {
   public typealias ContentKey = String
 
   public struct Metadata: Hashable {
+    public var creationTimestamp: Date
+
     /// Last modified time of the page.
     public var timestamp: Date
 
@@ -36,10 +38,12 @@ public struct Note: Equatable {
     public var title: String
 
     public init(
+      creationTimestamp: Date,
       timestamp: Date = Date(),
       hashtags: [String] = [],
       title: String = ""
     ) {
+      self.creationTimestamp = creationTimestamp
       self.timestamp = timestamp
       self.hashtags = hashtags
       self.title = title
@@ -64,7 +68,7 @@ public struct Note: Equatable {
   public var promptCollections: [ContentKey: PromptCollection]
 
   public init(
-    metadata: Metadata = Metadata(),
+    metadata: Metadata = Metadata(creationTimestamp: Date()),
     text: String? = nil,
     reference: Reference? = nil,
     promptCollections: [ContentKey: PromptCollection] = [:]

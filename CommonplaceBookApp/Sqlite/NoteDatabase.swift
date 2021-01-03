@@ -742,6 +742,7 @@ internal extension NoteDatabase {
       .fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
       let metadata = Note.Metadata(
+        creationTimestamp: metadataItem.creationTimestamp,
         timestamp: metadataItem.modifiedTimestamp,
         hashtags: metadataItem.noteLinks.map { $0.targetTitle },
         title: metadataItem.title
@@ -777,6 +778,7 @@ internal extension NoteDatabase {
     try migrator.registerMigrationScript(.promptTable)
     try migrator.registerMigrationScript(.links)
     try migrator.registerMigrationScript(.binaryContent)
+    try migrator.registerMigrationScript(.creationTimestamp)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)

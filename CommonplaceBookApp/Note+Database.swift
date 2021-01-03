@@ -44,6 +44,7 @@ public extension Note {
 
     self.init(
       metadata: Note.Metadata(
+        creationTimestamp: sqliteNote.creationTimestamp,
         timestamp: sqliteNote.modifiedTimestamp,
         hashtags: hashtags,
         title: sqliteNote.title
@@ -60,9 +61,9 @@ public extension Note {
     let sqliteNote = NoteRecord(
       id: identifier,
       title: metadata.title,
+      creationTimestamp: metadata.creationTimestamp,
       modifiedTimestamp: metadata.timestamp,
       modifiedDevice: updateKey.deviceID,
-      hasText: text != nil,
       deleted: false,
       updateSequenceNumber: updateKey.updateSequenceNumber
     )

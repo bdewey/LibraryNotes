@@ -21,8 +21,8 @@ import GRDB
 struct NoteMetadataRecord: Decodable, FetchableRecord {
   var id: Note.Identifier
   var title: String
+  var creationTimestamp: Date
   var modifiedTimestamp: Date
-  var hasText: Bool
   var deleted: Bool
   var noteLinks: [NoteLinkRecord]
 

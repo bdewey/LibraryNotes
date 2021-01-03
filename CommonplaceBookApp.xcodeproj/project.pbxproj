@@ -130,6 +130,7 @@
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
 		D3E5E024256F13CD0062BDD4 /* NoteMetadataRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */; };
+		D3E7076C25A20C7F00127B1F /* 20210103-creationTimestamp.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3E7076B25A20C7F00127B1F /* 20210103-creationTimestamp.sql */; };
 		D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */; };
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
 		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
@@ -327,6 +328,7 @@
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadataRecord.swift; sourceTree = "<group>"; };
+		D3E7076B25A20C7F00127B1F /* 20210103-creationTimestamp.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20210103-creationTimestamp.sql"; sourceTree = "<group>"; };
 		D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudFileMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -623,6 +625,7 @@
 				D34151CB2593F99E000E5A00 /* 20201223-links.sql */,
 				D34151C32593E8C9000E5A00 /* 20201223-promptTable.sql */,
 				D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */,
+				D3E7076B25A20C7F00127B1F /* 20210103-creationTimestamp.sql */,
 				D34ACB0125925EA5007C9521 /* initialSchema.sql */,
 				D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */,
 			);
@@ -804,6 +807,7 @@
 				D3F90E7E258EB49300162CFC /* 20201219-content.sql in Resources */,
 				D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */,
 				D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */,
+				D3E7076C25A20C7F00127B1F /* 20210103-creationTimestamp.sql in Resources */,
 				D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */,
 				D3F90E7825889A3400162CFC /* 20201214-noFlakeChallengeTemplate.sql in Resources */,
 				D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */,

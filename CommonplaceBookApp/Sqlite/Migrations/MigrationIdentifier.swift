@@ -29,4 +29,5 @@ internal enum MigrationIdentifier: String {
   case promptTable = "20201223-promptTable"
   case links = "20201223-links"
   case binaryContent = "20201227-binaryContent"
+  case creationTimestamp = "20210103-creationTimestamp"
 }

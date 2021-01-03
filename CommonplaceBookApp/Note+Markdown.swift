@@ -55,6 +55,7 @@ public extension Note {
     }
     self.init(
       metadata: Note.Metadata(
+        creationTimestamp: Date(),
         timestamp: Date(),
         hashtags: parsedString.hashtags,
         title: String(parsedString.title.split(separator: "\n").first ?? "")
@@ -82,6 +83,7 @@ public extension Note {
 
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
+    newNote.metadata.creationTimestamp = metadata.creationTimestamp
     newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }

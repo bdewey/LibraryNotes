@@ -267,6 +267,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     Logger.shared.info("Will navigate to web page at \(url)")
     let placeholderNote = Note(
       metadata: Note.Metadata(
+        creationTimestamp: Date(),
         timestamp: Date(),
         hashtags: [],
         title: ""
