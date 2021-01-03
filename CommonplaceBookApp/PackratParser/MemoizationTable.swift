@@ -16,12 +16,15 @@
 //  under the License.
 
 import Foundation
+import os
 
 /// A Packrat grammar is a collection of parsing rules, one of which is the designated `start` rule.
 public protocol PackratGrammar {
   /// The designated starting rule for parsing the grammar. This rule should produce exactly one syntax tree `Node`.
   var start: ParsingRule { get }
 }
+
+private let log = OSLog(subsystem: "org.brians-brain.PackratParser", category: "PackratParser")
 
 /// Implements a packrat parsing algorithm.
 public final class MemoizationTable: CustomStringConvertible {
@@ -48,7 +51,9 @@ public final class MemoizationTable: CustomStringConvertible {
     if memoizedResults.count < buffer.count + 1 {
       reserveCapacity(buffer.count + 1)
     }
+    os_signpost(.begin, log: log, name: "parseBuffer")
     let result = grammar.start.parsingResult(from: buffer, at: 0, memoizationTable: self)
+    os_signpost(.end, log: log, name: "parseBuffer")
     guard let node = result.node, node.length == buffer.count else {
       throw ParsingError.incompleteParsing(length: result.node?.length ?? result.length)
     }
