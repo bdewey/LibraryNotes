@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-               BuildableName = "CommonplaceBookApp.app"
-               BlueprintName = "CommonplaceBookApp"
-               ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
+               BuildableName = "GrailDiary.app"
+               BlueprintName = "GrailDiary"
+               ReferencedContainer = "container:GrailDiary.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -31,32 +31,12 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-            BuildableName = "CommonplaceBookApp.app"
-            BlueprintName = "CommonplaceBookApp"
-            ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
+            BuildableName = "GrailDiary.app"
+            BlueprintName = "GrailDiary"
+            ReferencedContainer = "container:GrailDiary.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D3DC5ED420EC9B0200F0B74B"
-               BuildableName = "CommonplaceBookAppTests.xctest"
-               BlueprintName = "CommonplaceBookAppTests"
-               ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D3E98F0221D470B2008445DA"
-               BuildableName = "CommonplaceBookAppUITests.xctest"
-               BlueprintName = "CommonplaceBookAppUITests"
-               ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -74,11 +54,17 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-            BuildableName = "CommonplaceBookApp.app"
-            BlueprintName = "CommonplaceBookApp"
-            ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
+            BuildableName = "GrailDiary.app"
+            BlueprintName = "GrailDiary"
+            ReferencedContainer = "container:GrailDiary.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "--uitesting"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -91,9 +77,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-            BuildableName = "CommonplaceBookApp.app"
-            BlueprintName = "CommonplaceBookApp"
-            ReferencedContainer = "container:CommonplaceBookApp.xcodeproj">
+            BuildableName = "GrailDiary.app"
+            BlueprintName = "GrailDiary"
+            ReferencedContainer = "container:GrailDiary.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
