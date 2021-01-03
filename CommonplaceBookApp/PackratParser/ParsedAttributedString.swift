@@ -183,7 +183,7 @@ private extension Logger {
       oldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
       changedAttributesRange: changedAttributesRange.flatMap { self.range(forRawStringRange: NSRange($0)) }
-        ?? NSRange(location: NSNotFound, length: 0)
+        ?? range // Documentation says location == NSNotFound means "no change", but this seems to cause an infinite loop
     )
   }
 

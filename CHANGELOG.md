@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Bug where things would get in an infinite loop if the buffer failed to parse.
+
 ## [0.35.0] - 2021-01-01 Happy New Year!
 
 ### Added
