@@ -63,4 +63,7 @@ public enum ParsingError: Swift.Error {
   /// The supplied grammar did not parse the entire contents of the buffer.
   /// - parameter length: How much of the buffer was consumed by the grammar.
   case incompleteParsing(length: Int)
+
+  /// We just didn't feel like parsing today -- used mostly to test error paths :-)
+  case didntFeelLikeIt
 }

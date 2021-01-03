@@ -173,9 +173,7 @@ private extension Logger {
       applyReplacements(in: node, startingIndex: 0, to: _string)
     }
     // Deliver delegate messages
-    // Because the edit may change the parse tree, `finalEditedRange` might not be the same as `range`
-    let finalEditedRange = self.range(forRawStringRange: bufferRange)
-    Logger.attributedStringLogger.debug("Edit \(range) change in length \(str.utf16.count - finalEditedRange.length)")
+    Logger.attributedStringLogger.debug("Edit \(range) change in length \(_string.length - lengthBeforeChanges)")
     if let range = changedAttributesRange {
       Logger.attributedStringLogger.debug("Changed attributes at \(self.range(forRawStringRange: NSRange(range)))")
     }
@@ -183,7 +181,7 @@ private extension Logger {
       oldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
       changedAttributesRange: changedAttributesRange.flatMap { self.range(forRawStringRange: NSRange($0)) }
-        ?? NSRange(location: NSNotFound, length: 0)
+        ?? NSRange(location: 0, length: 0) // Documentation says location == NSNotFound means "no change", but this seems to cause an infinite loop
     )
   }
 
