@@ -1260,7 +1260,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookAppTests/Info.plist;
+				INFOPLIST_FILE = GrailDiaryTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1273,7 +1273,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CommonplaceBookApp.app/CommonplaceBookApp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GrailDiary.app/GrailDiary";
 			};
 			name = Debug;
 		};
@@ -1285,7 +1285,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookAppTests/Info.plist;
+				INFOPLIST_FILE = GrailDiaryTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1297,7 +1297,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/CommonplaceBookApp.app/CommonplaceBookApp";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GrailDiary.app/GrailDiary";
 			};
 			name = Release;
 		};
@@ -1306,7 +1306,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookAppUITests/Info.plist;
+				INFOPLIST_FILE = GrailDiaryUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1316,9 +1316,10 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CommonplaceBookApp;
+				TEST_TARGET_NAME = GrailDiary;
 			};
 			name = Debug;
 		};
@@ -1327,7 +1328,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = CommonplaceBookAppUITests/Info.plist;
+				INFOPLIST_FILE = GrailDiaryUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1337,9 +1338,10 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = CommonplaceBookApp;
+				TEST_TARGET_NAME = GrailDiary;
 			};
 			name = Release;
 		};

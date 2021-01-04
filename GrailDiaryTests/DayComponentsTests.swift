@@ -2,7 +2,7 @@
 
 // swiftlint:disable force_try
 
-@testable import CommonplaceBookApp
+@testable import GrailDiary
 import XCTest
 
 struct JsonWrapper: Codable {
