@@ -8,7 +8,7 @@ Grail Diary is an iOS notes app inspired by [*Commonplace Books*](https://en.wik
 
 What makes Grail Diary different from other notes apps is its *review mode*. Review mode scans your notes for quotes, prompt questions, and [cloze deletions](https://en.wikipedia.org/wiki/Cloze_test). It prompts you with this material to make sure you constantly refresh your memory with all of the great things you've been capturing.
 
-![studying with spaced repetition](Docs/study-session.gif | width=100)
+![studying with spaced repetition](Docs/study-session.gif)
 
 ## The Basics
 
