@@ -2,6 +2,7 @@
 
 import CommonCrypto
 import Foundation
+import Logging
 
 /// Extensible enum for the different types of prompts.
 /// Also maintains a mapping between each type and the specific PromptCollection class
@@ -48,7 +49,17 @@ public protocol PromptCollection {
 }
 
 public extension PromptCollection {
-  var newPromptDelay: TimeInterval { 4 * .day }
+  /// Default implementation of `newPromptDelay`. If the setting `immediately_schedule_prompts` is true, then we have no delay; otherwise schedule
+  /// new prompts for 4 days from now.
+  var newPromptDelay: TimeInterval {
+    let key = "immediately_schedule_prompts"
+    if UserDefaults.standard.value(forKey: key) == nil {
+      Logger.shared.info("Setting default value for \(key)")
+      UserDefaults.standard.set(true, forKey: key)
+    }
+    let shouldImmediatelySchedule = UserDefaults.standard.bool(forKey: "immediately_schedule_prompts")
+    return shouldImmediatelySchedule ? 0 : 4 * .day
+  }
 }
 
 public extension Array where Element: PromptCollection {

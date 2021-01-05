@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- A setting to control whether new prompts are immediately scheduled. Defaults to TRUE so the behavior of the program is clearer for people who are just trying it out.
+
 ## [0.37.0] - 2021-01-03
 
 ### Changed
