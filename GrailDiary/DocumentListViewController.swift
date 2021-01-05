@@ -111,7 +111,9 @@ final class DocumentListViewController: UIViewController {
       return self.dataSource?.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
-    return UICollectionView(frame: .zero, collectionViewLayout: layout)
+    let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    view.backgroundColor = .grailBackground
+    return view
   }()
 
   internal func showPage(with noteIdentifier: Note.Identifier) {

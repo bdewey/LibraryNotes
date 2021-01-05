@@ -6,6 +6,10 @@
 
 - A setting to control whether new prompts are immediately scheduled. Defaults to TRUE so the behavior of the program is clearer for people who are just trying it out.
 
+### Fixed
+
+- Set the background color for the list view -- without this, it was black if there was nothing in the list.
+
 ## [0.37.0] - 2021-01-03
 
 ### Changed
