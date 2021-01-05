@@ -111,7 +111,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       do {
         let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
         Logger.shared.info("Successfully resolved url: \(url)")
-        try openDocument(at: url, from: browser, animated: false)
+        try openDocument(at: url, from: browser, createWelcomeContent: false, animated: false)
         didOpenSavedDocument = true
       } catch {
         Logger.shared.error("Unexpected error opening document: \(error.localizedDescription)")
@@ -128,7 +128,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     makeMetadataProvider(completion: { metadataProviderResult in
       let openResult = metadataProviderResult.flatMap { metadataProvider in
         Result {
-          try self.openDocument(at: metadataProvider.container.appendingPathComponent("diary.grail"), from: viewController, animated: false)
+          try self.openDocument(
+            at: metadataProvider.container.appendingPathComponent("diary.grail"),
+            from: viewController,
+            createWelcomeContent: true,
+            animated: false
+          )
         }
       }
       if case .failure(let error) = openResult {
@@ -231,7 +236,12 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
   /// Opens a document.
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
-  private func openDocument(at url: URL, from controller: UIDocumentBrowserViewController, animated: Bool) throws {
+  private func openDocument(
+    at url: URL,
+    from controller: UIDocumentBrowserViewController,
+    createWelcomeContent: Bool,
+    animated: Bool
+  ) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
     if url.pathExtension == "grail" {
@@ -253,6 +263,9 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       ]
       Logger.shared.info("In open completion handler. \(properties)")
       if success, !Self.isUITesting {
+        if createWelcomeContent {
+          database.tryCreatingWelcomeContent()
+        }
         Self.openedDocumentBookmark = try? url.bookmarkData()
       }
     })
@@ -273,7 +286,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
       Logger.shared.info("Trying to open \(documentURLs.first?.lastPathComponent ?? "nil") but it isn't a Grail Diary file")
       return
     }
-    try? openDocument(at: url, from: controller, animated: true)
+    try? openDocument(at: url, from: controller, createWelcomeContent: false, animated: true)
   }
 
   func documentBrowser(
@@ -297,6 +310,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
         importHandler(nil, .none)
         return
       }
+      document.tryCreatingWelcomeContent()
       document.save(to: url, for: .forCreating) { saveSuccess in
         if saveSuccess {
           importHandler(url, .move)
@@ -310,7 +324,7 @@ extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
     Logger.shared.info("Imported document to \(destinationURL)")
-    try? openDocument(at: destinationURL, from: controller, animated: true)
+    try? openDocument(at: destinationURL, from: controller, createWelcomeContent: false, animated: true)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
@@ -345,6 +359,23 @@ extension AppDelegate: UISplitViewControllerDelegate {
 
   func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
     return .supplementary
+  }
+}
+
+// MARK: - NoteDocument
+
+private extension NoteDatabase {
+  /// Tries to create a "weclome" note in the database. Logs errors.
+  func tryCreatingWelcomeContent() {
+    if let welcomeURL = Bundle.main.url(forResource: "Welcome", withExtension: "md") {
+      do {
+        let welcomeMarkdown = try String(contentsOf: welcomeURL)
+        let welcomeNote = Note(markdown: welcomeMarkdown)
+        _ = try createNote(welcomeNote)
+      } catch {
+        Logger.shared.error("Unexpected error creating welcome content: \(error)")
+      }
+    }
   }
 }
 

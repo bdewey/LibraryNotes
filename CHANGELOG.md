@@ -4,6 +4,7 @@
 
 ### Added
 
+- Welcome content for new notebooks.
 - A setting to control whether new prompts are immediately scheduled. Defaults to TRUE so the behavior of the program is clearer for people who are just trying it out.
 
 ### Fixed
