@@ -14,25 +14,6 @@ extension Logger {
   public static let shared = Logger(label: sharedLoggerLabel)
 }
 
-@objc protocol AppCommands {
-  func makeNewNote()
-  func openNewFile()
-}
-
-enum AppCommandsButtonItems {
-  static func documentBrowser() -> UIBarButtonItem {
-    let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
-    button.accessibilityIdentifier = "open-files"
-    return button
-  }
-
-  static func newNote() -> UIBarButtonItem {
-    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: nil, action: #selector(AppCommands.makeNewNote))
-    button.accessibilityIdentifier = "new-document"
-    return button
-  }
-}
-
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
@@ -101,24 +82,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   internal static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
-}
-
-// MARK: - AppCommands
-
-//
-// Implements system-wide menu responses
-extension AppDelegate: AppCommands {
-  @objc func openNewFile() {
-    guard let documentListViewController = window?.rootViewController else {
-      return
-    }
-    AppDelegate.openedDocumentBookmark = nil
-    documentListViewController.dismiss(animated: true, completion: nil)
-  }
-
-  @objc func makeNewNote() {
-    topLevelViewController?.makeNewNote()
-  }
 }
 
 // MARK: - UISplitViewControllerDelegate
