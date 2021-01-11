@@ -95,121 +95,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     LoggingSystem.bootstrap(factory.logHandler(for:))
 
     Logger.shared.info("----- Launch application version \(UIApplication.versionString)")
-    let window = UIWindow(frame: UIScreen.main.bounds)
-
-    let browser = UIDocumentBrowserViewController(forOpening: [.grailDiary, .plainText])
-    browser.delegate = self
-
-    window.rootViewController = browser
-    window.makeKeyAndVisible()
-    self.window = window
-
-    var didOpenSavedDocument = false
-    if !Self.isUITesting, let openedDocumentBookmarkData = Self.openedDocumentBookmark {
-      Logger.shared.info("Bookmark data exists for an open document")
-      var isStale: Bool = false
-      do {
-        let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
-        Logger.shared.info("Successfully resolved url: \(url)")
-        try openDocument(at: url, from: browser, createWelcomeContent: false, animated: false)
-        didOpenSavedDocument = true
-      } catch {
-        Logger.shared.error("Unexpected error opening document: \(error.localizedDescription)")
-      }
-    }
-    if !didOpenSavedDocument {
-      Logger.shared.info("Trying to open the default document")
-      openDefaultDocument(from: browser)
-    }
     return true
-  }
-
-  private func openDefaultDocument(from viewController: UIDocumentBrowserViewController) {
-    makeMetadataProvider(completion: { metadataProviderResult in
-      let openResult = metadataProviderResult.flatMap { metadataProvider in
-        Result {
-          try self.openDocument(
-            at: metadataProvider.container.appendingPathComponent("diary.grail"),
-            from: viewController,
-            createWelcomeContent: true,
-            animated: false
-          )
-        }
-      }
-      if case .failure(let error) = openResult {
-        let messageText = "Error opening database: \(error.localizedDescription)"
-        let alertController = UIAlertController(title: "Error", message: messageText, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-        alertController.addAction(okAction)
-        viewController.present(alertController, animated: true, completion: nil)
-        self.loadingViewController.style = .error
-      }
-    })
-  }
-
-  private func makeDirectoryProvider(
-    at container: URL,
-    deleteExistingContents: Bool = false
-  ) -> Result<FileMetadataProvider, Swift.Error> {
-    return Result {
-      try DirectoryMetadataProvider(
-        container: container,
-        deleteExistingContents: deleteExistingContents
-      )
-    }
-  }
-
-  private func makeICloudProvider(
-    completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void
-  ) {
-    DispatchQueue.global(qos: .default).async {
-      if let containerURL = FileManager.default.url(
-        forUbiquityContainerIdentifier: "iCloud.org.brians-brain.CommonplaceBookApp"
-      ) {
-        DispatchQueue.main.async {
-          let metadataProvider = ICloudFileMetadataProvider(
-            container: containerURL.appendingPathComponent("Documents")
-          )
-          completion(.success(metadataProvider))
-        }
-      } else {
-        DispatchQueue.main.async {
-          completion(.failure(Error.noCloud))
-        }
-      }
-    }
   }
 
   internal static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
-
-  private func makeMetadataProvider(completion: @escaping (Result<FileMetadataProvider, Swift.Error>) -> Void) {
-    if Self.isUITesting {
-      let container = FileManager.default.temporaryDirectory.appendingPathComponent("uitesting")
-      completion(makeDirectoryProvider(at: container, deleteExistingContents: true))
-      return
-    }
-    let directoryURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last!
-
-    if UserDefaults.standard.value(forKey: "use_icloud") == nil {
-      Logger.shared.info("Setting default value for use_icloud")
-      UserDefaults.standard.setValue(true, forKey: "use_icloud")
-    }
-    assert(UserDefaults.standard.value(forKey: "use_icloud") != nil)
-    if UserDefaults.standard.bool(forKey: "use_icloud") {
-      Logger.shared.info("Trying to get documents from iCloud")
-      makeICloudProvider { result in
-        let innerResult = result.flatMapError { _ -> Result<FileMetadataProvider, Swift.Error> in
-          Logger.shared.info("Error getting iCloud documents; falling back to local")
-          return self.makeDirectoryProvider(at: directoryURL)
-        }
-        completion(innerResult)
-      }
-    } else {
-      completion(makeDirectoryProvider(at: directoryURL))
-    }
-  }
 }
 
 // MARK: - AppCommands
@@ -227,108 +118,6 @@ extension AppDelegate: AppCommands {
 
   @objc func makeNewNote() {
     topLevelViewController?.makeNewNote()
-  }
-}
-
-// MARK: - UIDocumentBrowserViewControllerDelegate
-
-extension AppDelegate: UIDocumentBrowserViewControllerDelegate {
-  /// Opens a document.
-  /// - parameter url: The URL of the document to open
-  /// - parameter controller: The view controller from which to present the DocumentListViewController
-  private func openDocument(
-    at url: URL,
-    from controller: UIDocumentBrowserViewController,
-    createWelcomeContent: Bool,
-    animated: Bool
-  ) throws {
-    Logger.shared.info("Opening document at \"\(url.path)\"")
-    let database: NoteDatabase
-    if url.pathExtension == "grail" {
-      database = NoteDatabase(fileURL: url)
-    } else {
-      throw Error.unknownFormat
-    }
-    Logger.shared.info("Using document at \(database.fileURL)")
-    let viewController = NotebookViewController(database: database)
-    viewController.modalPresentationStyle = .fullScreen
-    viewController.modalTransitionStyle = .crossDissolve
-    viewController.view.tintColor = .systemOrange
-    controller.present(viewController, animated: animated, completion: nil)
-    database.open(completionHandler: { success in
-      let properties: [String: String] = [
-        "Success": success.description,
-//        "documentState": String(describing: noteArchiveDocument.documentState),
-//        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
-      ]
-      Logger.shared.info("In open completion handler. \(properties)")
-      if success, !Self.isUITesting {
-        if createWelcomeContent {
-          database.tryCreatingWelcomeContent()
-        }
-        Self.openedDocumentBookmark = try? url.bookmarkData()
-      }
-    })
-    topLevelViewController = viewController
-    self.database = database
-  }
-
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-    guard
-      let url = documentURLs.first,
-      let values = try? url.resourceValues(forKeys: [.contentTypeKey]),
-      values.contentType?.conforms(to: .grailDiary) ?? false
-    else {
-      let alert = UIAlertController(title: "Oops", message: "Cannot open this file type", preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-      alert.addAction(okAction)
-      window?.rootViewController?.present(alert, animated: true, completion: nil)
-      Logger.shared.info("Trying to open \(documentURLs.first?.lastPathComponent ?? "nil") but it isn't a Grail Diary file")
-      return
-    }
-    try? openDocument(at: url, from: controller, createWelcomeContent: false, animated: true)
-  }
-
-  func documentBrowser(
-    _ controller: UIDocumentBrowserViewController,
-    didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
-  ) {
-    let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    do {
-      try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-      Logger.shared.info("Created directory at \(directoryURL)")
-    } catch {
-      Logger.shared.error("Unable to create temporary directory at \(directoryURL.path): \(error)")
-      importHandler(nil, .none)
-    }
-    let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = NoteDatabase(fileURL: url)
-    Logger.shared.info("Attempting to create a document at \(url.path)")
-    document.open { openSuccess in
-      guard openSuccess else {
-        Logger.shared.error("Could not open document")
-        importHandler(nil, .none)
-        return
-      }
-      document.tryCreatingWelcomeContent()
-      document.save(to: url, for: .forCreating) { saveSuccess in
-        if saveSuccess {
-          importHandler(url, .move)
-        } else {
-          Logger.shared.error("Could not create document")
-          importHandler(nil, .none)
-        }
-      }
-    }
-  }
-
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-    Logger.shared.info("Imported document to \(destinationURL)")
-    try? openDocument(at: destinationURL, from: controller, createWelcomeContent: false, animated: true)
-  }
-
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
-    Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
   }
 }
 
@@ -359,23 +148,6 @@ extension AppDelegate: UISplitViewControllerDelegate {
 
   func splitViewController(_ svc: UISplitViewController, topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column) -> UISplitViewController.Column {
     return .supplementary
-  }
-}
-
-// MARK: - NoteDocument
-
-private extension NoteDatabase {
-  /// Tries to create a "weclome" note in the database. Logs errors.
-  func tryCreatingWelcomeContent() {
-    if let welcomeURL = Bundle.main.url(forResource: "Welcome", withExtension: "md") {
-      do {
-        let welcomeMarkdown = try String(contentsOf: welcomeURL)
-        let welcomeNote = Note(markdown: welcomeMarkdown)
-        _ = try createNote(welcomeNote)
-      } catch {
-        Logger.shared.error("Unexpected error creating welcome content: \(error)")
-      }
-    }
   }
 }
 

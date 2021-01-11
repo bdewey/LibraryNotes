@@ -28,6 +28,16 @@ extension UIResponder {
       responder = currentResponder.next
     }
   }
+
+  func responderChain() -> String {
+    var responderStrings = [String]()
+    var responder: UIResponder? = self
+    while let currentResponder = responder {
+      responderStrings.append(String(describing: currentResponder))
+      responder = currentResponder.next
+    }
+    return responderStrings.joined(separator: "\n")
+  }
 }
 
 protocol DocumentListViewControllerDelegate: AnyObject {
@@ -177,6 +187,7 @@ final class DocumentListViewController: UIViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     dataSource?.startObservingDatabase()
+    Logger.shared.info("Responder chain: \(responderChain())")
   }
 
   override func viewWillDisappear(_ animated: Bool) {

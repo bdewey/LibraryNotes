@@ -24,6 +24,8 @@
 		D30F402E255D9EDE00AB05EE /* ParsedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */; };
 		D311774A25A4B67600E473FD /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = D311774925A4B67600E473FD /* README.md */; };
 		D311774E25A4B94E00E473FD /* Welcome.md in Resources */ = {isa = PBXBuildFile; fileRef = D311774825A4B66300E473FD /* Welcome.md */; };
+		D311778A25AA384E00E473FD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D311778925AA384E00E473FD /* SceneDelegate.swift */; };
+		D311786D25ABC5AA00E473FD /* FileManager+DefaultContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D311786C25ABC5AA00E473FD /* FileManager+DefaultContainer.swift */; };
 		D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA623D8859B0098A9D9 /* NoteRecord.swift */; };
 		D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */; };
 		D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */; };
@@ -219,6 +221,8 @@
 		D30F402D255D9EDE00AB05EE /* ParsedStringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedStringTests.swift; sourceTree = "<group>"; };
 		D311774825A4B66300E473FD /* Welcome.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Welcome.md; sourceTree = "<group>"; };
 		D311774925A4B67600E473FD /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		D311778925AA384E00E473FD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D311786C25ABC5AA00E473FD /* FileManager+DefaultContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+DefaultContainer.swift"; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRecord.swift; sourceTree = "<group>"; };
@@ -533,6 +537,7 @@
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */,
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
+				D311778925AA384E00E473FD /* SceneDelegate.swift */,
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
 				D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
@@ -557,6 +562,7 @@
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D311786C25ABC5AA00E473FD /* FileManager+DefaultContainer.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -876,6 +882,7 @@
 			files = (
 				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
 				D39D2459256AD22900948A72 /* ParsedAttributedString.swift in Sources */,
+				D311778A25AA384E00E473FD /* SceneDelegate.swift in Sources */,
 				D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */,
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */,
@@ -936,6 +943,7 @@
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
+				D311786D25ABC5AA00E473FD /* FileManager+DefaultContainer.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
