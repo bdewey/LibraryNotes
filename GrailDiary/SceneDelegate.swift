@@ -1,10 +1,4 @@
-//
-//  SceneDelegate.swift
-//  GrailDiary
-//
-//  Created by Brian Dewey on 1/9/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Logging
 import UIKit
@@ -68,7 +62,7 @@ import UIKit
     }
     if !didOpenSavedDocument {
       Logger.shared.info("Trying to open the default document")
-      // TODO
+      // TODO:
 //      openDefaultDocument(from: browser)
     }
   }
