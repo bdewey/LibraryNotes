@@ -25,7 +25,7 @@ final class NotebookViewController: UIViewController {
   }
 
   /// The notebook we are viewing
-  private let database: NoteDatabase
+  public let database: NoteDatabase
 
   /// What are we viewing in the current structure?
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {

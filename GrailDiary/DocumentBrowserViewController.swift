@@ -27,15 +27,59 @@ enum AppCommandsButtonItems {
 final class DocumentBrowserViewController: UIDocumentBrowserViewController {
   override init(forOpening contentTypes: [UTType]?) {
     super.init(forOpening: contentTypes)
-    delegate = self
+    commonInit()
   }
 
   required init?(coder: NSCoder) {
     super.init(coder: coder)
+    commonInit()
+  }
+
+  private func commonInit() {
     delegate = self
+    restorationIdentifier = "DocumentBrowserViewController"
   }
 
   private var topLevelViewController: NotebookViewController?
+
+  private let documentURLKey = "documentURLBookmarkData"
+
+  private enum ActivityKey {
+    static let openDocumentActivity = "org.brians-brain.GrailDiary.OpenNotebook"
+    static let documentURL = "org.brians-brain.GrailDiary.OpenNotebook.URL"
+  }
+
+  /// Makes a NSUserActivity that captures the current state of this UI.
+  func makeUserActivity() -> NSUserActivity? {
+    guard let notebookViewController = topLevelViewController else {
+      return nil
+    }
+    let url = notebookViewController.database.fileURL
+    do {
+      let urlData = try url.bookmarkData()
+      let activity = NSUserActivity(activityType: ActivityKey.openDocumentActivity)
+      activity.title = "View Notebook"
+      activity.addUserInfoEntries(from: [ActivityKey.documentURL: urlData])
+      return activity
+    } catch {
+      Logger.shared.error("Unexpected error creating user activity: \(error)")
+      return nil
+    }
+  }
+
+  func configure(with userActivity: NSUserActivity) {
+    guard let urlData = userActivity.userInfo?[ActivityKey.documentURL] as? Data else {
+      Logger.shared.error("In DocumentBrowserViewController.configure(with:), but cannot get URL from activity")
+      return
+    }
+    do {
+      var isStale = false
+      let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
+      try openDocument(at: url, createWelcomeContent: false, animated: false)
+    } catch {
+      Logger.shared.error("Error opening saved document: \(error)")
+    }
+  }
 }
 
 extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate {
@@ -71,7 +115,6 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
         if createWelcomeContent {
           database.tryCreatingWelcomeContent()
         }
-        AppDelegate.openedDocumentBookmark = try? url.bookmarkData()
       }
     })
     topLevelViewController = viewController
@@ -142,7 +185,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
 // Implements system-wide menu responses
 extension DocumentBrowserViewController: AppCommands {
   @objc func openNewFile() {
-    AppDelegate.openedDocumentBookmark = nil
+    topLevelViewController = nil
     dismiss(animated: true, completion: nil)
   }
 

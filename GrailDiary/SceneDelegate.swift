@@ -12,20 +12,6 @@ import UIKit
 
   private enum UserDefaultKey {
     static let hasRun = "has_run_0"
-    static let openedDocument = "opened_document"
-  }
-
-  static var openedDocumentBookmark: Data? {
-    get {
-      UserDefaults.standard.object(forKey: UserDefaultKey.openedDocument) as? Data
-    }
-    set {
-      if let value = newValue {
-        UserDefaults.standard.set(value, forKey: UserDefaultKey.openedDocument)
-      } else {
-        UserDefaults.standard.removeObject(forKey: UserDefaultKey.openedDocument)
-      }
-    }
   }
 
   static var isUITesting: Bool = {
@@ -45,37 +31,22 @@ import UIKit
 
     window.rootViewController = browser
     window.makeKeyAndVisible()
-    self.window = window
 
-    var didOpenSavedDocument = false
-    if !Self.isUITesting, let openedDocumentBookmarkData = Self.openedDocumentBookmark {
-      Logger.shared.info("Bookmark data exists for an open document")
-      var isStale: Bool = false
-      do {
-        let url = try URL(resolvingBookmarkData: openedDocumentBookmarkData, bookmarkDataIsStale: &isStale)
-        Logger.shared.info("Successfully resolved url: \(url)")
-        try browser.openDocument(at: url, createWelcomeContent: false, animated: false)
-        didOpenSavedDocument = true
-      } catch {
-        Logger.shared.error("Unexpected error opening document: \(error.localizedDescription)")
-      }
+    if let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity {
+      browser.configure(with: userActivity)
     }
-    if !didOpenSavedDocument {
-      Logger.shared.info("Trying to open the default document")
-      // TODO:
-//      openDefaultDocument(from: browser)
-    }
+    self.window = window
   }
 
-  @objc func openNewFile() {
-    guard let documentListViewController = window?.rootViewController else {
+  func sceneWillResignActive(_ scene: UIScene) {
+    guard let browser = window?.rootViewController as? DocumentBrowserViewController else {
       return
     }
-    Self.openedDocumentBookmark = nil
-    documentListViewController.dismiss(animated: true, completion: nil)
+    Logger.shared.info("Saving user activity for sceneWillResignActive")
+    scene.userActivity = browser.makeUserActivity()
   }
 
-  @objc func makeNewNote() {
-    topLevelViewController?.makeNewNote()
+  func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
+    return scene.userActivity
   }
 }

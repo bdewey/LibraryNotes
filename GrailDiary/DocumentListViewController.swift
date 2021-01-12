@@ -187,12 +187,6 @@ final class DocumentListViewController: UIViewController {
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
     dataSource?.startObservingDatabase()
-    Logger.shared.info("Responder chain: \(responderChain())")
-  }
-
-  override func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    Logger.shared.info("Responder chain: \(responderChain())")
   }
 
   override func viewWillDisappear(_ animated: Bool) {

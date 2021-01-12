@@ -49,20 +49,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   private enum UserDefaultKey {
     static let hasRun = "has_run_0"
-    static let openedDocument = "opened_document"
-  }
-
-  static var openedDocumentBookmark: Data? {
-    get {
-      UserDefaults.standard.object(forKey: UserDefaultKey.openedDocument) as? Data
-    }
-    set {
-      if let value = newValue {
-        UserDefaults.standard.set(value, forKey: UserDefaultKey.openedDocument)
-      } else {
-        UserDefaults.standard.removeObject(forKey: UserDefaultKey.openedDocument)
-      }
-    }
   }
 
   func application(
