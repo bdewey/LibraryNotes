@@ -27,6 +27,8 @@ final class NotebookViewController: UIViewController {
   /// The notebook we are viewing
   private let database: NoteDatabase
 
+  public var fileURL: URL { database.fileURL }
+
   /// What are we viewing in the current structure?
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
     didSet {
@@ -124,6 +126,34 @@ final class NotebookViewController: UIViewController {
     let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true)
     currentNoteEditor = viewController
     Logger.shared.info("Created a new view controller for a blank document")
+  }
+
+  private enum ActivityKey {
+    static let notebookStructure = "org.brians-brain.GrailDiary.NotebookStructure"
+    static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
+  }
+
+  func updateUserActivity(_ userActivity: NSUserActivity) {
+    userActivity.addUserInfoEntries(from: [
+      ActivityKey.notebookStructure: focusedNotebookStructure.rawValue,
+      ActivityKey.selectedNote: currentNoteEditor?.noteIdentifier ?? "",
+    ])
+  }
+
+  func configure(with userActivity: NSUserActivity) {
+    if
+      let structureString = userActivity.userInfo?[ActivityKey.notebookStructure] as? String,
+      let focusedNotebookStructure = NotebookStructureViewController.StructureIdentifier(rawValue: structureString)
+    {
+      self.focusedNotebookStructure = focusedNotebookStructure
+    }
+    if
+      let noteIdentifier = userActivity.userInfo?[ActivityKey.selectedNote] as? String,
+      !noteIdentifier.isEmpty,
+      let note = try? database.note(noteIdentifier: noteIdentifier)
+    {
+      documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier)
+    }
   }
 }
 

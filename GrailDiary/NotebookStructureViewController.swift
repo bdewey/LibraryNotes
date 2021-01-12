@@ -12,9 +12,26 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
 final class NotebookStructureViewController: UIViewController {
   /// What subset of notebook pages does the person want to see?
-  enum StructureIdentifier: Hashable, CustomStringConvertible {
+  enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
     case allNotes
     case hashtag(String)
+
+    init?(rawValue: String) {
+      if rawValue == "##all##" {
+        self = .allNotes
+      } else {
+        self = .hashtag(rawValue)
+      }
+    }
+
+    var rawValue: String {
+      switch self {
+      case .allNotes:
+        return "##all##"
+      case .hashtag(let hashtag):
+        return hashtag
+      }
+    }
 
     var description: String {
       switch self {
