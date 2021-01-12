@@ -47,10 +47,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   /// The top-level UISplitViewController that is showing the note contents.
   var topLevelViewController: NotebookViewController?
 
-  private enum UserDefaultKey {
-    static let hasRun = "has_run_0"
-  }
-
   func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?

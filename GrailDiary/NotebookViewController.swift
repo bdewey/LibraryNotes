@@ -25,7 +25,9 @@ final class NotebookViewController: UIViewController {
   }
 
   /// The notebook we are viewing
-  public let database: NoteDatabase
+  private let database: NoteDatabase
+
+  public var fileURL: URL { database.fileURL }
 
   /// What are we viewing in the current structure?
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
@@ -141,13 +143,15 @@ final class NotebookViewController: UIViewController {
   func configure(with userActivity: NSUserActivity) {
     if
       let structureString = userActivity.userInfo?[ActivityKey.notebookStructure] as? String,
-      let focusedNotebookStructure = NotebookStructureViewController.StructureIdentifier(rawValue: structureString) {
+      let focusedNotebookStructure = NotebookStructureViewController.StructureIdentifier(rawValue: structureString)
+    {
       self.focusedNotebookStructure = focusedNotebookStructure
     }
     if
       let noteIdentifier = userActivity.userInfo?[ActivityKey.selectedNote] as? String,
       !noteIdentifier.isEmpty,
-      let note = try? database.note(noteIdentifier: noteIdentifier) {
+      let note = try? database.note(noteIdentifier: noteIdentifier)
+    {
       documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier)
     }
   }

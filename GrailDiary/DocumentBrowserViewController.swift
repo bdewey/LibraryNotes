@@ -54,7 +54,7 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
     guard let notebookViewController = topLevelViewController else {
       return nil
     }
-    let url = notebookViewController.database.fileURL
+    let url = notebookViewController.fileURL
     do {
       let urlData = try url.bookmarkData()
       let activity = NSUserActivity(activityType: ActivityKey.openDocumentActivity)

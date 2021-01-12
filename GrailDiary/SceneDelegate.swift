@@ -10,10 +10,6 @@ import UIKit
   /// The top-level UISplitViewController that is showing the note contents.
   var topLevelViewController: NotebookViewController?
 
-  private enum UserDefaultKey {
-    static let hasRun = "has_run_0"
-  }
-
   static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()

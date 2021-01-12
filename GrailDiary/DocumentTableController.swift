@@ -89,7 +89,7 @@ public final class DocumentTableController: NSObject {
 
   public var noteCount: Int {
     let snapshot = dataSource.snapshot()
-    if nil != snapshot.indexOfSection(.documents) {
+    if snapshot.indexOfSection(.documents) != nil {
       return snapshot.numberOfItems(inSection: .documents)
     } else {
       return 0

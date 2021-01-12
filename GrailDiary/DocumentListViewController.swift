@@ -90,7 +90,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private lazy var dataSource: DocumentTableController = {
-    return DocumentTableController(
+    DocumentTableController(
       collectionView: collectionView,
       database: database,
       delegate: self
