@@ -60,6 +60,7 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
       let activity = NSUserActivity(activityType: ActivityKey.openDocumentActivity)
       activity.title = "View Notebook"
       activity.addUserInfoEntries(from: [ActivityKey.documentURL: urlData])
+      topLevelViewController?.updateUserActivity(activity)
       return activity
     } catch {
       Logger.shared.error("Unexpected error creating user activity: \(error)")
@@ -75,7 +76,9 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
     do {
       var isStale = false
       let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
-      try openDocument(at: url, createWelcomeContent: false, animated: false)
+      try openDocument(at: url, createWelcomeContent: false, animated: false) { [self] _ in
+        self.topLevelViewController?.configure(with: userActivity)
+      }
     } catch {
       Logger.shared.error("Error opening saved document: \(error)")
     }
@@ -89,7 +92,8 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   func openDocument(
     at url: URL,
     createWelcomeContent: Bool,
-    animated: Bool
+    animated: Bool,
+    completion: ((Bool) -> Void)? = nil
   ) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
@@ -116,6 +120,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
           database.tryCreatingWelcomeContent()
         }
       }
+      completion?(success)
     })
     topLevelViewController = viewController
   }

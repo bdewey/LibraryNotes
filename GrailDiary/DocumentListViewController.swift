@@ -85,18 +85,25 @@ final class DocumentListViewController: UIViewController {
       hashtag = selectedHashtag
       title = selectedHashtag
     }
-    dataSource?.filteredHashtag = hashtag
+    dataSource.filteredHashtag = hashtag
     updateStudySession()
   }
 
-  private var dataSource: DocumentTableController?
+  private lazy var dataSource: DocumentTableController = {
+    return DocumentTableController(
+      collectionView: collectionView,
+      database: database,
+      delegate: self
+    )
+  }()
+
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
     get {
-      return dataSource?.dueDate ?? Date()
+      return dataSource.dueDate
     }
     set {
-      dataSource?.dueDate = newValue
+      dataSource.dueDate = newValue
       updateStudySession()
     }
   }
@@ -118,7 +125,7 @@ final class DocumentListViewController: UIViewController {
     listConfiguration.backgroundColor = .grailBackground
     listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
       guard let self = self else { return nil }
-      return self.dataSource?.trailingSwipeActionsConfiguration(forRowAt: indexPath)
+      return self.dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -141,12 +148,6 @@ final class DocumentListViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    let dataSource = DocumentTableController(
-      collectionView: collectionView,
-      database: database,
-      delegate: self
-    )
-    self.dataSource = dataSource
     view.addSubview(collectionView)
     collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
@@ -186,12 +187,12 @@ final class DocumentListViewController: UIViewController {
 
   override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    dataSource?.startObservingDatabase()
+    dataSource.startObservingDatabase()
   }
 
   override func viewWillDisappear(_ animated: Bool) {
     super.viewWillDisappear(animated)
-    dataSource?.stopObservingDatabase()
+    dataSource.stopObservingDatabase()
   }
 
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
@@ -215,7 +216,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let currentHashtag = dataSource?.filteredHashtag
+    let currentHashtag = dataSource.filteredHashtag
     let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
       : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
@@ -228,7 +229,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateToolbar() {
     let countLabel = UILabel(frame: .zero)
-    let noteCount = dataSource?.noteCount ?? 0
+    let noteCount = dataSource.noteCount
     countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
     countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
     countLabel.sizeToFit()
@@ -303,7 +304,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
-      let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource?.filteredHashtag)
+      let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource.filteredHashtag)
       delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil)
     }
   }
@@ -326,16 +327,16 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else {
-      dataSource?.filteredPageIdentifiers = nil
+      dataSource.filteredPageIdentifiers = nil
       updateStudySession()
       return
     }
     let pattern = searchController.searchBar.text ?? ""
     Logger.shared.info("Issuing query: \(pattern)")
-    dataSource?.webURL = pattern.asWebURL
+    dataSource.webURL = pattern.asWebURL
     do {
       let allIdentifiers = try database.search(for: pattern)
-      dataSource?.filteredPageIdentifiers = Set(allIdentifiers)
+      dataSource.filteredPageIdentifiers = Set(allIdentifiers)
     } catch {
       Logger.shared.error("Error issuing full text query: \(error)")
     }
@@ -346,7 +347,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    dataSource?.filteredPageIdentifiers = nil
+    dataSource.filteredPageIdentifiers = nil
   }
 }
 
