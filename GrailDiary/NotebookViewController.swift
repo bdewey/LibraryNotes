@@ -135,7 +135,7 @@ final class NotebookViewController: UIViewController {
   }
 
   @objc func searchBecomeFirstResponder() {
-    splitViewController?.show(.supplementary)
+    notebookSplitViewController.show(.supplementary)
     documentListViewController.searchBecomeFirstResponder()
   }
 
