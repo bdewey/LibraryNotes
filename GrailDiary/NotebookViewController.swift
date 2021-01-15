@@ -54,6 +54,14 @@ final class NotebookViewController: UIViewController {
     }
   }
 
+  private lazy var structureViewController: NotebookStructureViewController = {
+    let structureViewController = NotebookStructureViewController(
+      database: documentListViewController.database
+    )
+    structureViewController.delegate = self
+    return structureViewController
+  }()
+
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
@@ -83,11 +91,7 @@ final class NotebookViewController: UIViewController {
 
   /// The split view we are managing.
   private lazy var notebookSplitViewController: UISplitViewController = {
-    let hashtagViewController = NotebookStructureViewController(
-      database: documentListViewController.database
-    )
-    hashtagViewController.delegate = self
-    let primaryNavigationController = UINavigationController(rootViewController: hashtagViewController)
+    let primaryNavigationController = UINavigationController(rootViewController: structureViewController)
     primaryNavigationController.navigationBar.prefersLargeTitles = true
     primaryNavigationController.navigationBar.barTintColor = .grailBackground
 
@@ -113,7 +117,12 @@ final class NotebookViewController: UIViewController {
     }
     addChild(notebookSplitViewController)
     notebookSplitViewController.didMove(toParent: self)
+    configureKeyCommands()
+  }
 
+  override var canBecomeFirstResponder: Bool { true }
+
+  private func configureKeyCommands() {
     let newNoteCommand = UIKeyCommand(
       title: "New Note",
       action: #selector(makeNewNote),
@@ -122,21 +131,31 @@ final class NotebookViewController: UIViewController {
     )
     addKeyCommand(newNoteCommand)
 
-    let searchKeyCommand = UIKeyCommand(title: "Find", action: #selector(searchBecomeFirstResponder), input: "f", modifierFlags: [.command])
+    let focusTagsCommand = UIKeyCommand(
+      title: "View Tags",
+      action: #selector(tagsBecomeFirstResponder),
+      input: "1",
+      modifierFlags: [.command]
+    )
+    addKeyCommand(focusTagsCommand)
+
+    let searchKeyCommand = UIKeyCommand(
+      title: "Find",
+      action: #selector(searchBecomeFirstResponder),
+      input: "f",
+      modifierFlags: [.command]
+    )
     addKeyCommand(searchKeyCommand)
-  }
-
-  override var canBecomeFirstResponder: Bool { true }
-
-  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-    let result = super.canPerformAction(action, withSender: sender)
-    Logger.shared.info("NotebookViewController canPerformAction \(action) \(result)")
-    return result
   }
 
   @objc func searchBecomeFirstResponder() {
     notebookSplitViewController.show(.supplementary)
     documentListViewController.searchBecomeFirstResponder()
+  }
+
+  @objc func tagsBecomeFirstResponder() {
+    notebookSplitViewController.show(.primary)
+    structureViewController.becomeFirstResponder()
   }
 
   @objc func makeNewNote() {
@@ -152,16 +171,21 @@ final class NotebookViewController: UIViewController {
     Logger.shared.info("Created a new view controller for a blank document")
   }
 
+  // MARK: - State restoration
+
   private enum ActivityKey {
     static let notebookStructure = "org.brians-brain.GrailDiary.NotebookStructure"
     static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
+    static let displayMode = "org.brians-brain.GrailDiary.notebookSplitViewController.displayMode"
   }
 
   func updateUserActivity(_ userActivity: NSUserActivity) {
     userActivity.addUserInfoEntries(from: [
       ActivityKey.notebookStructure: focusedNotebookStructure.rawValue,
       ActivityKey.selectedNote: currentNoteEditor?.noteIdentifier ?? "",
+      ActivityKey.displayMode: notebookSplitViewController.displayMode.rawValue,
     ])
+    structureViewController.updateUserActivity(userActivity)
   }
 
   func configure(with userActivity: NSUserActivity) {
@@ -178,6 +202,11 @@ final class NotebookViewController: UIViewController {
     {
       documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier)
     }
+    if let rawDisplayMode = userActivity.userInfo?[ActivityKey.displayMode] as? Int,
+       let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode) {
+      notebookSplitViewController.preferredDisplayMode = displayMode
+    }
+    structureViewController.configure(with: userActivity)
   }
 }
 

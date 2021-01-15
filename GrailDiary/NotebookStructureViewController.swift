@@ -136,6 +136,37 @@ final class NotebookStructureViewController: UIViewController {
     return dataSource
   }()
 
+  // MARK: - State restoration
+
+  private enum ActivityKey {
+    static let selectedItemIndex = "org.brians-brain.GrailDiary.NotebookStructureViewController.selectedItemIndex"
+  }
+
+  func updateUserActivity(_ activity: NSUserActivity) {
+    guard
+      let selectedIndexPath = collectionView.indexPathsForSelectedItems?.first,
+      let itemIdentifier = dataSource.itemIdentifier(for: selectedIndexPath),
+      let index = dataSource.snapshot().indexOfItem(itemIdentifier) else {
+      return
+    }
+    activity.addUserInfoEntries(from: [ActivityKey.selectedItemIndex: index])
+  }
+
+  func configure(with activity: NSUserActivity) {
+    updateSnapshot()
+    let snapshot = dataSource.snapshot()
+    guard
+      let selectedIndex = activity.userInfo?[ActivityKey.selectedItemIndex] as? Int,
+      let itemIdentifier = (selectedIndex < snapshot.numberOfItems) ? snapshot.itemIdentifiers[selectedIndex] : nil,
+      let indexPath = dataSource.indexPath(for: itemIdentifier)
+    else {
+      return
+    }
+    collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
+  }
+
+  // MARK: - Lifecycle
+
   override func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(collectionView)
@@ -143,8 +174,6 @@ final class NotebookStructureViewController: UIViewController {
       make.edges.equalToSuperview()
     }
     updateSnapshot()
-    // start with "all notes" selected.
-    collectionView.selectItem(at: dataSource.indexPath(for: .allNotes), animated: false, scrollPosition: [])
     notebookSubscription = database.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
@@ -159,6 +188,68 @@ final class NotebookStructureViewController: UIViewController {
 
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     configureToolbar()
+  }
+
+  override var canBecomeFirstResponder: Bool { true }
+
+  override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    Logger.shared.debug("Handling keypress")
+    var didHandleEvent = false
+    for press in presses {
+      guard let key = press.key else { continue }
+      switch key.charactersIgnoringModifiers {
+      case UIKeyCommand.inputDownArrow:
+        moveSelectionDown()
+        didHandleEvent = true
+      case UIKeyCommand.inputUpArrow:
+        moveSelectionUp()
+        didHandleEvent = true
+      default:
+        break
+      }
+    }
+
+    if !didHandleEvent {
+      super.pressesBegan(presses, with: event)
+    }
+  }
+}
+
+// MARK: - Private
+
+private extension NotebookStructureViewController {
+  func moveSelectionDown() {
+    let snapshot = dataSource.snapshot()
+    guard snapshot.numberOfItems > 0 else { return }
+    let nextItemIndex: Int
+    if let indexPath = collectionView.indexPathsForSelectedItems?.first,
+       let item = dataSource.itemIdentifier(for: indexPath),
+       let itemIndex = snapshot.indexOfItem(item) {
+      nextItemIndex = min(itemIndex + 1, snapshot.numberOfItems - 1)
+    } else {
+      nextItemIndex = 0
+    }
+    if let nextIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[nextItemIndex]) {
+      collectionView.selectItem(at: nextIndexPath, animated: true, scrollPosition: .top)
+      collectionView(collectionView, didSelectItemAt: nextIndexPath)
+    }
+  }
+
+  func moveSelectionUp() {
+    let snapshot = dataSource.snapshot()
+    guard snapshot.numberOfItems > 0 else { return }
+    let previousItemIndex: Int
+    if let indexPath = collectionView.indexPathsForSelectedItems?.first,
+       let item = dataSource.itemIdentifier(for: indexPath),
+       let itemIndex = snapshot.indexOfItem(item) {
+      previousItemIndex = max(itemIndex - 1, 0)
+    } else {
+      previousItemIndex = snapshot.numberOfItems - 1
+    }
+    if let previousIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[previousItemIndex]) {
+      collectionView.selectItem(at: previousIndexPath, animated: true, scrollPosition: .bottom)
+      collectionView(collectionView, didSelectItemAt: previousIndexPath)
+    }
   }
 }
 
@@ -223,6 +314,7 @@ private extension NotebookStructureViewController {
   }
 
   func updateSnapshot() {
+    let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap({ dataSource.itemIdentifier(for: $0) })
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])
@@ -233,6 +325,9 @@ private extension NotebookStructureViewController {
     dataSource.apply(snapshot)
     if !hashtagSectionSnapshot.items.isEmpty {
       dataSource.apply(hashtagSectionSnapshot, to: .hashtags)
+    }
+    if let item = selectedItem, let indexPath = dataSource.indexPath(for: item) {
+      collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
   }
 
