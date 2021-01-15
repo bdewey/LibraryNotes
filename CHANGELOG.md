@@ -6,6 +6,7 @@
 
 - Support for iPad multitasking / multiple windows. State restoration covers the open document, selected hashtag, and opened page. Maybe someday I'll add more UI state.
 - Add hashtag typeahead completion
+- Cmd-N to create a new note
 
 ## [0.38.0] - 2020-01-05
 

@@ -113,9 +113,17 @@ final class NotebookViewController: UIViewController {
     }
     addChild(notebookSplitViewController)
     notebookSplitViewController.didMove(toParent: self)
+
+    let newNoteCommand = UIKeyCommand(
+      title: "New Note",
+      action: #selector(makeNewNote),
+      input: "N",
+      modifierFlags: [.command]
+    )
+    addKeyCommand(newNoteCommand)
   }
 
-  func makeNewNote() {
+  @objc func makeNewNote() {
     let hashtag: String?
     switch focusedNotebookStructure {
     case .allNotes:
