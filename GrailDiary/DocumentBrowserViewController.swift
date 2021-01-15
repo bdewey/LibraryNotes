@@ -126,16 +126,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
-    guard
-      let url = documentURLs.first,
-      let values = try? url.resourceValues(forKeys: [.contentTypeKey]),
-      values.contentType?.conforms(to: .grailDiary) ?? false
-    else {
-      let alert = UIAlertController(title: "Oops", message: "Cannot open this file type", preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
-      alert.addAction(okAction)
-      present(alert, animated: true, completion: nil)
-      Logger.shared.info("Trying to open \(documentURLs.first?.lastPathComponent ?? "nil") but it isn't a Grail Diary file")
+    guard let url = documentURLs.first else {
       return
     }
     try? openDocument(at: url, createWelcomeContent: false, animated: true)
