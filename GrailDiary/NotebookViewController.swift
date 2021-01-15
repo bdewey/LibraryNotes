@@ -117,10 +117,26 @@ final class NotebookViewController: UIViewController {
     let newNoteCommand = UIKeyCommand(
       title: "New Note",
       action: #selector(makeNewNote),
-      input: "N",
+      input: "n",
       modifierFlags: [.command]
     )
     addKeyCommand(newNoteCommand)
+
+    let searchKeyCommand = UIKeyCommand(title: "Find", action: #selector(searchBecomeFirstResponder), input: "f", modifierFlags: [.command])
+    addKeyCommand(searchKeyCommand)
+  }
+
+  override var canBecomeFirstResponder: Bool { true }
+
+  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    let result = super.canPerformAction(action, withSender: sender)
+    Logger.shared.info("NotebookViewController canPerformAction \(action) \(result)")
+    return result
+  }
+
+  @objc func searchBecomeFirstResponder() {
+    splitViewController?.show(.supplementary)
+    documentListViewController.searchBecomeFirstResponder()
   }
 
   @objc func makeNewNote() {

@@ -165,9 +165,6 @@ final class DocumentListViewController: UIViewController {
     searchController.obscuresBackgroundDuringPresentation = false
     navigationItem.searchController = searchController
 
-    let searchKeyCommand = UIKeyCommand(title: "Find", action: #selector(searchBecomeFirstResponder), input: "F", modifierFlags: [.command])
-    addKeyCommand(searchKeyCommand)
-
     /// Update the due date as time passes, app foregrounds, etc.
     updateDueDatePipeline = Just(Date())
       .merge(with: makeForegroundDatePublisher(), Timer.publish(every: .hour, on: .main, in: .common).autoconnect())
@@ -179,10 +176,9 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  @objc private func searchBecomeFirstResponder() {
-    view.window?.endEditing(true)
+  func searchBecomeFirstResponder() {
     navigationItem.searchController?.isActive = true
-    navigationItem.searchController?.becomeFirstResponder()
+    navigationItem.searchController?.searchBar.becomeFirstResponder()
     Logger.shared.info("Search should be activeg")
   }
 
