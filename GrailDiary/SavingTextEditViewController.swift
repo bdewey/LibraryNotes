@@ -176,6 +176,17 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
+  func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String] {
+    let existingHashtags = noteStorage.hashtags.filter({ $0.hasPrefix(hashtag) })
+
+    // Make sure that "hashtag" is in the suggested results
+    if existingHashtags.first == hashtag {
+      return existingHashtags
+    } else {
+      return Array([[hashtag], existingHashtags].joined())
+    }
+  }
+
   func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String {
     let key = imageData.sha1Digest() + "." + suffix
     return try noteStorage.storeAssetData(imageData, key: key)
