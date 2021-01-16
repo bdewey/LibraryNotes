@@ -46,6 +46,8 @@ protocol DocumentListViewControllerDelegate: AnyObject {
     didRequestShowNote note: Note,
     noteIdentifier: Note.Identifier?
   )
+
+  func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
 }
 
 /// Implements a filterable list of documents in an interactive notebook.
@@ -144,6 +146,10 @@ final class DocumentListViewController: UIViewController {
     delegate?.documentListViewController(self, didRequestShowNote: note, noteIdentifier: noteIdentifier)
   }
 
+  internal func selectFirstNote() {
+    dataSource.selectFirstNote(in: collectionView)
+  }
+
   // MARK: - Lifecycle
 
   override func viewDidLoad() {
@@ -203,6 +209,44 @@ final class DocumentListViewController: UIViewController {
 
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     updateToolbar()
+  }
+
+  // MARK: - Keyboard support
+
+  override var canBecomeFirstResponder: Bool { true }
+
+  override func becomeFirstResponder() -> Bool {
+    if collectionView.indexPathsForSelectedItems.isEmpty {
+      selectFirstNote()
+    }
+    return super.becomeFirstResponder()
+  }
+
+  override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+    var didHandleEvent = false
+    for press in presses {
+      guard let key = press.key else { continue }
+      switch key.charactersIgnoringModifiers {
+      case UIKeyCommand.inputDownArrow:
+        dataSource.moveSelectionDown(in: collectionView)
+        didHandleEvent = true
+      case UIKeyCommand.inputUpArrow:
+        dataSource.moveSelectionUp(in: collectionView)
+        didHandleEvent = true
+      case "\t":
+        if key.modifierFlags.contains(.shift) {
+          delegate?.documentListViewControllerDidRequestChangeFocus(self)
+          didHandleEvent = true
+        }
+      default:
+        break
+      }
+    }
+
+    if !didHandleEvent {
+      super.pressesBegan(presses, with: event)
+    }
+
   }
 
   /// Stuff we can study based on the current selected documents.

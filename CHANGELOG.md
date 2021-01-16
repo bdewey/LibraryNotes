@@ -9,6 +9,7 @@
 - Cmd-N to create a new note
 - Keyboard support & state restoration for the hashtags
 - Cmd-Enter to enter/exit "edit mode" for the current note
+- Tab & shift tab to change focus between primary and supplementary views
 
 ## [0.38.0] - 2020-01-05
 

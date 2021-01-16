@@ -139,6 +139,14 @@ final class NotebookViewController: UIViewController {
     )
     addKeyCommand(focusTagsCommand)
 
+    let focusNotesCommand = UIKeyCommand(
+      title: "View Notes",
+      action: #selector(notesBecomeFirstResponder),
+      input: "2",
+      modifierFlags: [.command]
+    )
+    addKeyCommand(focusNotesCommand)
+
     let searchKeyCommand = UIKeyCommand(
       title: "Find",
       action: #selector(searchBecomeFirstResponder),
@@ -164,6 +172,11 @@ final class NotebookViewController: UIViewController {
   @objc func tagsBecomeFirstResponder() {
     notebookSplitViewController.show(.primary)
     structureViewController.becomeFirstResponder()
+  }
+
+  @objc func notesBecomeFirstResponder() {
+    notebookSplitViewController.show(.supplementary)
+    documentListViewController.becomeFirstResponder()
   }
 
   @objc func toggleEditMode() {
@@ -236,11 +249,19 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier) {
     focusedNotebookStructure = structure
   }
+
+  func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController) {
+    documentListViewController.becomeFirstResponder()
+  }
 }
 
 // MARK: - DocumentListViewControllerDelegate
 
 extension NotebookViewController: DocumentListViewControllerDelegate {
+  func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController) {
+    tagsBecomeFirstResponder()
+  }
+
   func documentListViewController(
     _ viewController: DocumentListViewController,
     didRequestShowNote note: Note,

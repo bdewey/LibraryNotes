@@ -236,6 +236,57 @@ public final class DocumentTableController: NSObject {
   }
 }
 
+// MARK: - Manage selection / keyboard
+
+public extension DocumentTableController {
+  func selectFirstNote(in collectionView: UICollectionView) {
+    let snapshot = dataSource.snapshot()
+    guard let item = snapshot.itemIdentifiers.first, let indexPath = dataSource.indexPath(for: item) else { return }
+    collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
+    self.collectionView(collectionView, didSelectItemAt: indexPath)
+  }
+
+  func moveSelectionDown(in collectionView: UICollectionView) {
+    let snapshot = dataSource.snapshot()
+    guard snapshot.numberOfItems > 0 else { return }
+    let nextItemIndex: Int
+    if let indexPath = collectionView.indexPathsForSelectedItems?.first,
+       let item = dataSource.itemIdentifier(for: indexPath),
+       let itemIndex = snapshot.indexOfItem(item) {
+      nextItemIndex = min(itemIndex + 1, snapshot.numberOfItems - 1)
+    } else {
+      nextItemIndex = 0
+    }
+    if let nextIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[nextItemIndex]) {
+      collectionView.selectItem(at: nextIndexPath, animated: true, scrollPosition: [])
+      if let cell = collectionView.cellForItem(at: nextIndexPath) {
+        collectionView.scrollRectToVisible(cell.frame, animated: true)
+      }
+      self.collectionView(collectionView, didSelectItemAt: nextIndexPath)
+    }
+  }
+
+  func moveSelectionUp(in collectionView: UICollectionView) {
+    let snapshot = dataSource.snapshot()
+    guard snapshot.numberOfItems > 0 else { return }
+    let previousItemIndex: Int
+    if let indexPath = collectionView.indexPathsForSelectedItems?.first,
+       let item = dataSource.itemIdentifier(for: indexPath),
+       let itemIndex = snapshot.indexOfItem(item) {
+      previousItemIndex = max(itemIndex - 1, 0)
+    } else {
+      previousItemIndex = snapshot.numberOfItems - 1
+    }
+    if let previousIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[previousItemIndex]) {
+      collectionView.selectItem(at: previousIndexPath, animated: true, scrollPosition: [])
+      if let cell = collectionView.cellForItem(at: previousIndexPath) {
+        collectionView.scrollRectToVisible(cell.frame, animated: true)
+      }
+      self.collectionView(collectionView, didSelectItemAt: previousIndexPath)
+    }
+  }
+}
+
 // MARK: - UITableViewDelegate
 
 extension DocumentTableController: UICollectionViewDelegate {

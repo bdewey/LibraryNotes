@@ -7,6 +7,7 @@ import UIKit
 
 protocol NotebookStructureViewControllerDelegate: AnyObject {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier)
+  func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController)
 }
 
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
@@ -209,6 +210,9 @@ final class NotebookStructureViewController: UIViewController {
         didHandleEvent = true
       case UIKeyCommand.inputLeftArrow:
         collapseSelection()
+        didHandleEvent = true
+      case "\t":
+        delegate?.notebookStructureViewControllerDidRequestChangeFocus(self)
         didHandleEvent = true
       default:
         break
