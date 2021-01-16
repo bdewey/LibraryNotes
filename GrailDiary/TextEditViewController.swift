@@ -238,6 +238,35 @@ public final class TextEditViewController: UIViewController {
     super.viewDidLoad()
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
+
+    let insertHashtagAction = UIAction { [textView] _ in
+      let nextLocation = textView.selectedRange.location + 1
+      textView.textStorage.replaceCharacters(in: textView.selectedRange, with: "#")
+      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    }
+    let insertHashtagButton = UIBarButtonItem(title: "#", primaryAction: insertHashtagAction)
+
+    let boldButton = UIBarButtonItem(image: UIImage(systemName: "bold"), primaryAction: UIAction { [textView] _ in
+      let currentSelectedRange = textView.selectedRange
+      let nextLocation = currentSelectedRange.upperBound + 2
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
+      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    })
+
+    let italicButton = UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
+      let currentSelectedRange = textView.selectedRange
+      let nextLocation = currentSelectedRange.upperBound + 1
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "_")
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "_")
+      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    })
+
+    let inputBar = UIToolbar(frame: .zero)
+    inputBar.items = [insertHashtagButton, boldButton, italicButton]
+    inputBar.sizeToFit()
+    inputBar.tintColor = .grailTint
+    textView.inputAccessoryView = inputBar
   }
 
   /// If true, the text view will become first responder upon becoming visible.

@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.39.1]
+
+### Added
+
+- A simple input accessory view for the phone
+
 ## [0.39.0] - 2020-01-16 Happy Birthday, Molly!
 
 ### Added
