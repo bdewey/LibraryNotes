@@ -204,6 +204,12 @@ final class NotebookStructureViewController: UIViewController {
       case UIKeyCommand.inputUpArrow:
         moveSelectionUp()
         didHandleEvent = true
+      case UIKeyCommand.inputRightArrow:
+        expandSelection()
+        didHandleEvent = true
+      case UIKeyCommand.inputLeftArrow:
+        collapseSelection()
+        didHandleEvent = true
       default:
         break
       }
@@ -249,6 +255,41 @@ private extension NotebookStructureViewController {
     if let previousIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[previousItemIndex]) {
       collectionView.selectItem(at: previousIndexPath, animated: true, scrollPosition: .bottom)
       collectionView(collectionView, didSelectItemAt: previousIndexPath)
+    }
+  }
+
+  func expandSelection() {
+    guard
+      let selectedIndexPath = collectionView.indexPathsForSelectedItems?.first,
+      let selectedItem = dataSource.itemIdentifier(for: selectedIndexPath),
+      selectedItem.hasChildren
+    else {
+      return
+    }
+    var snapshot = dataSource.snapshot(for: .hashtags)
+    snapshot.expand([selectedItem])
+    dataSource.apply(snapshot, to: .hashtags, animatingDifferences: true)
+  }
+
+  func collapseSelection() {
+    guard
+      let selectedIndexPath = collectionView.indexPathsForSelectedItems?.first,
+      let selectedItem = dataSource.itemIdentifier(for: selectedIndexPath)
+    else {
+      return
+    }
+    var snapshot = dataSource.snapshot(for: .hashtags)
+    var newlySelectedItem: Item?
+    if snapshot.isExpanded(selectedItem) {
+      snapshot.collapse([selectedItem])
+    } else if let parent = snapshot.parent(of: selectedItem) {
+      snapshot.collapse([parent])
+      newlySelectedItem = parent
+    }
+    dataSource.apply(snapshot, to: .hashtags, animatingDifferences: true)
+    if let newlySelectedItem = newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
+      collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
+      collectionView(collectionView, didSelectItemAt: indexPath)
     }
   }
 }
