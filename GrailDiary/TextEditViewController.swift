@@ -277,6 +277,28 @@ public final class TextEditViewController: UIViewController {
     )
   }
 
+  // MARK: - Commands
+
+  public override var isEditing: Bool {
+    get {
+      textView.isFirstResponder
+    }
+    set {
+      if newValue {
+        _ = textView.becomeFirstResponder()
+      } else {
+        textView.resignFirstResponder()
+      }
+    }
+  }
+
+  func editEndOfDocument() {
+    let endRange = NSRange(location: textView.textStorage.count, length: 0)
+    textView.selectedRange = endRange
+    textView.scrollRangeToVisible(endRange)
+    textView.becomeFirstResponder()
+  }
+
   // MARK: - Keyboard
 
   @objc func handleKeyboardNotification(_ notification: Notification) {

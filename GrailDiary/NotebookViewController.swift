@@ -146,6 +146,14 @@ final class NotebookViewController: UIViewController {
       modifierFlags: [.command]
     )
     addKeyCommand(searchKeyCommand)
+
+    let toggleEditModeCommand = UIKeyCommand(
+      title: "Toggle Edit Mode",
+      action: #selector(toggleEditMode),
+      input: "\r",
+      modifierFlags: [.command]
+    )
+    addKeyCommand(toggleEditModeCommand)
   }
 
   @objc func searchBecomeFirstResponder() {
@@ -156,6 +164,18 @@ final class NotebookViewController: UIViewController {
   @objc func tagsBecomeFirstResponder() {
     notebookSplitViewController.show(.primary)
     structureViewController.becomeFirstResponder()
+  }
+
+  @objc func toggleEditMode() {
+    if currentNoteEditor?.isEditing ?? false {
+      currentNoteEditor?.isEditing = false
+    } else {
+      UIView.animate(withDuration: 0.2) { [notebookSplitViewController] in
+        notebookSplitViewController.preferredDisplayMode = .secondaryOnly
+      } completion: { [currentNoteEditor] success in
+        if success { _ = currentNoteEditor?.editEndOfDocument() }
+      }
+    }
   }
 
   @objc func makeNewNote() {

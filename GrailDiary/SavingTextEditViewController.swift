@@ -75,6 +75,13 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
   }
 
+  override var isEditing: Bool {
+    get { textEditViewController.isEditing }
+    set { textEditViewController.isEditing = newValue }
+  }
+
+  func editEndOfDocument() { textEditViewController.editEndOfDocument() }
+
   override func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(textEditViewController.view)
