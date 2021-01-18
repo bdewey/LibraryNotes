@@ -147,7 +147,8 @@ final class NotebookStructureViewController: UIViewController {
     guard
       let selectedIndexPath = collectionView.indexPathsForSelectedItems?.first,
       let itemIdentifier = dataSource.itemIdentifier(for: selectedIndexPath),
-      let index = dataSource.snapshot().indexOfItem(itemIdentifier) else {
+      let index = dataSource.snapshot().indexOfItem(itemIdentifier)
+    else {
       return
     }
     activity.addUserInfoEntries(from: [ActivityKey.selectedItemIndex: index])
@@ -211,7 +212,7 @@ final class NotebookStructureViewController: UIViewController {
       case UIKeyCommand.inputLeftArrow:
         collapseSelection()
         didHandleEvent = true
-      case "\t":
+      case "\t", "\r":
         delegate?.notebookStructureViewControllerDidRequestChangeFocus(self)
         didHandleEvent = true
       default:
@@ -234,14 +235,15 @@ private extension NotebookStructureViewController {
     let nextItemIndex: Int
     if let indexPath = collectionView.indexPathsForSelectedItems?.first,
        let item = dataSource.itemIdentifier(for: indexPath),
-       let itemIndex = snapshot.indexOfItem(item) {
+       let itemIndex = snapshot.indexOfItem(item)
+    {
       nextItemIndex = min(itemIndex + 1, snapshot.numberOfItems - 1)
     } else {
       nextItemIndex = 0
     }
     if let nextIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[nextItemIndex]) {
       collectionView.selectItem(at: nextIndexPath, animated: true, scrollPosition: .top)
-      collectionView(collectionView, didSelectItemAt: nextIndexPath)
+      selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
     }
   }
 
@@ -251,14 +253,15 @@ private extension NotebookStructureViewController {
     let previousItemIndex: Int
     if let indexPath = collectionView.indexPathsForSelectedItems?.first,
        let item = dataSource.itemIdentifier(for: indexPath),
-       let itemIndex = snapshot.indexOfItem(item) {
+       let itemIndex = snapshot.indexOfItem(item)
+    {
       previousItemIndex = max(itemIndex - 1, 0)
     } else {
       previousItemIndex = snapshot.numberOfItems - 1
     }
     if let previousIndexPath = dataSource.indexPath(for: snapshot.itemIdentifiers[previousItemIndex]) {
       collectionView.selectItem(at: previousIndexPath, animated: true, scrollPosition: .bottom)
-      collectionView(collectionView, didSelectItemAt: previousIndexPath)
+      selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
     }
   }
 
@@ -293,7 +296,16 @@ private extension NotebookStructureViewController {
     dataSource.apply(snapshot, to: .hashtags, animatingDifferences: true)
     if let newlySelectedItem = newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
       collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
-      collectionView(collectionView, didSelectItemAt: indexPath)
+      selectItemAtIndexPath(indexPath, shiftFocus: false)
+    }
+  }
+
+  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) {
+    if let item = dataSource.itemIdentifier(for: indexPath) {
+      delegate?.notebookStructureViewController(self, didSelect: item.structureIdentifier)
+      if shiftFocus {
+        splitViewController?.show(.supplementary)
+      }
     }
   }
 }
@@ -359,7 +371,7 @@ private extension NotebookStructureViewController {
   }
 
   func updateSnapshot() {
-    let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap({ dataSource.itemIdentifier(for: $0) })
+    let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.allNotes])
     snapshot.appendItems([.allNotes])

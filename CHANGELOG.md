@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Navigation on the iPhone. The keyboard support on the iPad broke the iPhone :-(
+
 ## [0.39.1]
 
 ### Added

@@ -50,6 +50,23 @@ final class NotebookViewController: UIViewController {
         currentNoteEditor.chromeStyle = .splitViewController
         secondaryNavigationController.viewControllers = [currentNoteEditor]
       }
+    }
+  }
+
+  private func setCurrentNoteEditor(_ currentNoteEditor: SavingTextEditViewController?, showSecondary: Bool) {
+    self.currentNoteEditor = currentNoteEditor
+    guard let currentNoteEditor = currentNoteEditor else { return }
+    let note = currentNoteEditor.note
+    if let referenceViewController = self.referenceViewController(for: note) {
+      currentNoteEditor.chromeStyle = .modal
+      currentNoteEditor.navigationItem.title = "Related Notes"
+      referenceViewController.relatedNotesViewController = currentNoteEditor
+      secondaryNavigationController.viewControllers = [referenceViewController]
+    } else {
+      currentNoteEditor.chromeStyle = .splitViewController
+      secondaryNavigationController.viewControllers = [currentNoteEditor]
+    }
+    if showSecondary {
       notebookSplitViewController.show(.secondary)
     }
   }
@@ -201,6 +218,7 @@ final class NotebookViewController: UIViewController {
     }
     let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true)
     currentNoteEditor = viewController
+    notebookSplitViewController.show(.secondary)
     Logger.shared.info("Created a new view controller for a blank document")
   }
 
@@ -233,10 +251,11 @@ final class NotebookViewController: UIViewController {
       !noteIdentifier.isEmpty,
       let note = try? database.note(noteIdentifier: noteIdentifier)
     {
-      documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier)
+      documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier, shiftFocus: false)
     }
     if let rawDisplayMode = userActivity.userInfo?[ActivityKey.displayMode] as? Int,
-       let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode) {
+       let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode)
+    {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
@@ -251,6 +270,7 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
   }
 
   func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController) {
+    notebookSplitViewController.show(.supplementary)
     documentListViewController.becomeFirstResponder()
   }
 }
@@ -265,7 +285,8 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
   func documentListViewController(
     _ viewController: DocumentListViewController,
     didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?
+    noteIdentifier: Note.Identifier?,
+    shiftFocus: Bool
   ) {
     let noteViewController = SavingTextEditViewController(
       configuration: SavingTextEditViewController.Configuration(noteIdentifier: noteIdentifier, note: note),
@@ -273,6 +294,9 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     )
     noteViewController.setTitleMarkdown(note.metadata.title)
     currentNoteEditor = noteViewController
+    if shiftFocus {
+      notebookSplitViewController.show(.secondary)
+    }
   }
 
   private func referenceViewController(for note: Note) -> ReferenceViewController? {

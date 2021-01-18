@@ -10,8 +10,8 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func presentStudySessionViewController(for studySession: StudySession)
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
-  func showPage(with noteIdentifier: Note.Identifier)
-  func showWebPage(url: URL)
+  func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
+  func showWebPage(url: URL, shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -239,11 +239,14 @@ public final class DocumentTableController: NSObject {
 // MARK: - Manage selection / keyboard
 
 public extension DocumentTableController {
-  func selectFirstNote(in collectionView: UICollectionView) {
-    let snapshot = dataSource.snapshot()
-    guard let item = snapshot.itemIdentifiers.first, let indexPath = dataSource.indexPath(for: item) else { return }
-    collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
-    self.collectionView(collectionView, didSelectItemAt: indexPath)
+  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+    switch item {
+    case .page(let viewProperties):
+      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
+    case .webPage(let url):
+      delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
+    }
   }
 
   func moveSelectionDown(in collectionView: UICollectionView) {
@@ -252,7 +255,8 @@ public extension DocumentTableController {
     let nextItemIndex: Int
     if let indexPath = collectionView.indexPathsForSelectedItems?.first,
        let item = dataSource.itemIdentifier(for: indexPath),
-       let itemIndex = snapshot.indexOfItem(item) {
+       let itemIndex = snapshot.indexOfItem(item)
+    {
       nextItemIndex = min(itemIndex + 1, snapshot.numberOfItems - 1)
     } else {
       nextItemIndex = 0
@@ -262,7 +266,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: nextIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      self.collectionView(collectionView, didSelectItemAt: nextIndexPath)
+      selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
     }
   }
 
@@ -272,7 +276,8 @@ public extension DocumentTableController {
     let previousItemIndex: Int
     if let indexPath = collectionView.indexPathsForSelectedItems?.first,
        let item = dataSource.itemIdentifier(for: indexPath),
-       let itemIndex = snapshot.indexOfItem(item) {
+       let itemIndex = snapshot.indexOfItem(item)
+    {
       previousItemIndex = max(itemIndex - 1, 0)
     } else {
       previousItemIndex = snapshot.numberOfItems - 1
@@ -282,7 +287,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: previousIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      self.collectionView(collectionView, didSelectItemAt: previousIndexPath)
+      selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
     }
   }
 }
@@ -294,9 +299,9 @@ extension DocumentTableController: UICollectionViewDelegate {
     guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
     switch item {
     case .page(let viewProperties):
-      delegate?.showPage(with: viewProperties.pageKey)
+      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: true)
     case .webPage(let url):
-      delegate?.showWebPage(url: url)
+      delegate?.showWebPage(url: url, shiftFocus: true)
     }
   }
 }

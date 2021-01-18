@@ -208,7 +208,7 @@ public final class TextEditViewController: UIViewController {
     typeaheadSelectionView.delegate = self
     shadowView.addSubview(typeaheadSelectionView)
 
-    let hashtagCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, String> { (cell, _, hashtag) in
+    let hashtagCellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, String> { cell, _, hashtag in
       var contentConfiguration = cell.defaultContentConfiguration()
       contentConfiguration.text = hashtag
       contentConfiguration.textProperties.color = .label
@@ -224,7 +224,7 @@ public final class TextEditViewController: UIViewController {
       collectionView: typeaheadSelectionView,
       dataSource: typeaheadDataSource
     )
-    self.typeaheadAccessory = typeaheadInfo
+    typeaheadAccessory = typeaheadInfo
     return typeaheadInfo
   }
 
@@ -308,7 +308,7 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Commands
 
-  public override var isEditing: Bool {
+  override public var isEditing: Bool {
     get {
       textView.isFirstResponder
     }
@@ -338,7 +338,7 @@ public final class TextEditViewController: UIViewController {
   }
 
   /// Look for arrow keys when the typeahead controller is on screen.
-  public override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+  override public func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
     guard let typeaheadInfo = typeaheadAccessory else {
       super.pressesBegan(presses, with: event)
       return
@@ -367,12 +367,13 @@ public final class TextEditViewController: UIViewController {
         didHandleEvent = true
       }
       if key.charactersIgnoringModifiers == "\r",
-         let selectedItem = typeaheadSelectionView.indexPathsForSelectedItems?.first {
+         let selectedItem = typeaheadSelectionView.indexPathsForSelectedItems?.first
+      {
         collectionView(typeaheadSelectionView, didSelectItemAt: selectedItem)
         didHandleEvent = true
       }
       if key.charactersIgnoringModifiers == UIKeyCommand.inputEscape {
-        self.typeaheadAccessory = nil
+        typeaheadAccessory = nil
         didHandleEvent = true
       }
     }
@@ -412,7 +413,6 @@ extension TextEditViewController: NSTextStorageDelegate {
 // MARK: - UICollectionViewDelegate
 
 extension TextEditViewController: UICollectionViewDelegate {
-
   /// Handles selection for the typeahead accessory -- replaces the hashtag at the cursor with the selected hashtag.
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     let nodePath = textStorage.storage.path(to: textView.selectedRange.location - 1)
@@ -440,7 +440,8 @@ extension TextEditViewController: UITextViewDelegate {
     // the cursor moved. If there's a hashtag view controller, see if we've strayed from its hashtag.
     let nodePath = textStorage.storage.path(to: textView.selectedRange.location - 1)
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }),
-       hashtagNode.range.location == typeaheadAccessory?.anchor {
+       hashtagNode.range.location == typeaheadAccessory?.anchor
+    {
       // The cursor has moved, but we're still in the same hashtag as currently defined in typeaheadInfo, so we leave it.
     } else {
       // In all other cases we make sure we clear the typeahead view.

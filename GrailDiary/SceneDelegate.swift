@@ -28,8 +28,15 @@ import UIKit
     window.rootViewController = browser
     window.makeKeyAndVisible()
 
-    if let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity {
+    if !Self.isUITesting,
+       let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity
+    {
       browser.configure(with: userActivity)
+    }
+    if Self.isUITesting {
+      let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("grail")
+      // swiftlint:disable:next force_try
+      try! browser.openDocument(at: temporaryURL, createWelcomeContent: false, animated: false)
     }
     self.window = window
   }

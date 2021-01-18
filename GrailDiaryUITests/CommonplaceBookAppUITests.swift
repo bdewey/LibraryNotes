@@ -65,6 +65,8 @@ final class CommonplaceBookAppUITests: XCTestCase {
     application.launch()
 
     XCUIDevice.shared.orientation = .portrait
+
+    waitUntilElementExists(application.buttons[Identifiers.newDocumentButton])
   }
 
   func testHasNewDocumentButton() {

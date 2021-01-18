@@ -44,7 +44,8 @@ protocol DocumentListViewControllerDelegate: AnyObject {
   func documentListViewController(
     _ viewController: DocumentListViewController,
     didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?
+    noteIdentifier: Note.Identifier?,
+    shiftFocus: Bool
   )
 
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
@@ -135,7 +136,7 @@ final class DocumentListViewController: UIViewController {
     return view
   }()
 
-  internal func showPage(with noteIdentifier: Note.Identifier) {
+  internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
     let note: Note
     do {
       note = try database.note(noteIdentifier: noteIdentifier)
@@ -143,11 +144,18 @@ final class DocumentListViewController: UIViewController {
       Logger.shared.error("Unexpected error loading page: \(error)")
       return
     }
-    delegate?.documentListViewController(self, didRequestShowNote: note, noteIdentifier: noteIdentifier)
+    delegate?.documentListViewController(
+      self,
+      didRequestShowNote: note,
+      noteIdentifier: noteIdentifier,
+      shiftFocus: shiftFocus
+    )
   }
 
   internal func selectFirstNote() {
-    dataSource.selectFirstNote(in: collectionView)
+    if collectionView.numberOfSections > 0, collectionView.numberOfItems(inSection: 0) > 0 {
+      dataSource.selectItemAtIndexPath(IndexPath(item: 0, section: 0), shiftFocus: false)
+    }
   }
 
   // MARK: - Lifecycle
@@ -215,6 +223,7 @@ final class DocumentListViewController: UIViewController {
 
   override var canBecomeFirstResponder: Bool { true }
 
+  @discardableResult
   override func becomeFirstResponder() -> Bool {
     if collectionView.indexPathsForSelectedItems.isEmpty {
       selectFirstNote()
@@ -238,6 +247,9 @@ final class DocumentListViewController: UIViewController {
           delegate?.documentListViewControllerDidRequestChangeFocus(self)
           didHandleEvent = true
         }
+      case "\r":
+        splitViewController?.show(.secondary)
+        didHandleEvent = true
       default:
         break
       }
@@ -246,7 +258,6 @@ final class DocumentListViewController: UIViewController {
     if !didHandleEvent {
       super.pressesBegan(presses, with: event)
     }
-
   }
 
   /// Stuff we can study based on the current selected documents.
@@ -311,7 +322,7 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showWebPage(url: URL) {
+  func showWebPage(url: URL, shiftFocus: Bool) {
     Logger.shared.info("Will navigate to web page at \(url)")
     let placeholderNote = Note(
       metadata: Note.Metadata(
@@ -324,7 +335,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       reference: .webPage(url),
       promptCollections: [:]
     )
-    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil)
+    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
@@ -355,7 +366,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
       let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource.filteredHashtag)
-      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil)
+      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil, shiftFocus: false)
     }
   }
 
