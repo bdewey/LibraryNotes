@@ -78,18 +78,15 @@ final class DocumentListViewController: UIViewController {
   public let database: NoteDatabase
   public weak var delegate: DocumentListViewControllerDelegate?
 
-  public func setFocus(_ focusedStructure: NotebookStructureViewController.StructureIdentifier) {
-    let hashtag: String?
-    switch focusedStructure {
-    case .allNotes:
-      hashtag = nil
-      title = "All Notes"
-    case .hashtag(let selectedHashtag):
-      hashtag = selectedHashtag
-      title = selectedHashtag
+  public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
+    didSet {
+      do {
+        dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
+        updateStudySession()
+      } catch {
+        Logger.shared.error("Unexpected error changing focus: \(error)")
+      }
     }
-    dataSource.filteredHashtag = hashtag
-    updateStudySession()
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -205,16 +202,6 @@ final class DocumentListViewController: UIViewController {
       .eraseToAnyPublisher()
   }
 
-  override func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    dataSource.startObservingDatabase()
-  }
-
-  override func viewWillDisappear(_ animated: Bool) {
-    super.viewWillDisappear(animated)
-    dataSource.stopObservingDatabase()
-  }
-
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
     updateToolbar()
   }
@@ -276,14 +263,15 @@ final class DocumentListViewController: UIViewController {
     dueDate = dueDate.addingTimeInterval(7 * .day)
   }
 
+  private var studySessionGeneration = 0
+
   private func updateStudySession() {
-    let currentHashtag = dataSource.filteredHashtag
-    let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = (currentHashtag == nil)
-      ? { _, _ in true }
-      : { [currentHashtag] _, properties in properties.noteLinks.map { $0.targetTitle }.contains(currentHashtag!) }
-    let hashtag = currentHashtag
+    let records = dataSource.observableRecords?.records ?? [:]
+    let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = { identifier, _ in records[identifier] != nil }
+    studySessionGeneration += 1
+    let currentStudySessionGeneration = studySessionGeneration
     database.studySession(filter: filter, date: dueDate) {
-      guard currentHashtag == hashtag else { return }
+      guard currentStudySessionGeneration == self.studySessionGeneration else { return }
       self.studySession = $0
     }
   }
@@ -363,7 +351,13 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     }
     if detailViewController.noteIdentifier == noteIdentifier {
       // We just deleted the current page. Show a blank document.
-      let (blankNote, _) = Note.makeBlankNote(hashtag: dataSource.filteredHashtag)
+      let hashtag: String?
+      if case .hashtag(let filteredHashtag) = focusedStructure {
+        hashtag = filteredHashtag
+      } else {
+        hashtag = nil
+      }
+      let (blankNote, _) = Note.makeBlankNote(hashtag: hashtag)
       delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil, shiftFocus: false)
     }
   }

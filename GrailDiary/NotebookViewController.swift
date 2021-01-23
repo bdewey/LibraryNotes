@@ -30,9 +30,10 @@ final class NotebookViewController: UIViewController {
   public var fileURL: URL { database.fileURL }
 
   /// What are we viewing in the current structure?
+  // TODO: Get rid of this copy, just read from documentListViewController
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
     didSet {
-      documentListViewController.setFocus(focusedNotebookStructure)
+      documentListViewController.focusedStructure = focusedNotebookStructure
     }
   }
 
@@ -211,7 +212,7 @@ final class NotebookViewController: UIViewController {
   @objc func makeNewNote() {
     let hashtag: String?
     switch focusedNotebookStructure {
-    case .allNotes:
+    case .allNotes, .archive:
       hashtag = nil
     case .hashtag(let focusedHashtag):
       hashtag = focusedHashtag

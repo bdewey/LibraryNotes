@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Combine
+import GRDB
 import Logging
 import SnapKit
 import UIKit
@@ -15,11 +16,14 @@ final class NotebookStructureViewController: UIViewController {
   /// What subset of notebook pages does the person want to see?
   enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
     case allNotes
+    case archive
     case hashtag(String)
 
     init?(rawValue: String) {
       if rawValue == "##all##" {
         self = .allNotes
+      } else if rawValue == "##archive##" {
+        self = .archive
       } else {
         self = .hashtag(rawValue)
       }
@@ -29,6 +33,8 @@ final class NotebookStructureViewController: UIViewController {
       switch self {
       case .allNotes:
         return "##all##"
+      case .archive:
+        return "##archive##"
       case .hashtag(let hashtag):
         return hashtag
       }
@@ -37,14 +43,37 @@ final class NotebookStructureViewController: UIViewController {
     var description: String {
       switch self {
       case .allNotes: return "All Notes"
+      case .archive: return "Archive"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
+      }
+    }
+
+    var query: QueryInterfaceRequest<NoteMetadataRecord> {
+      let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
+      let query = NoteRecord
+        .filter(NoteRecord.Columns.deleted == false)
+        .including(all: NoteRecord.noteHashtags)
+        .including(all: referenceRecords)
+        .asRequest(of: NoteMetadataRecord.self)
+      switch self {
+      case .allNotes:
+        return query
+      case .archive:
+        return query.filter(NoteRecord.Columns.folder == "Archive")
+      case .hashtag(let hashtag):
+        return NoteRecord
+          .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
+          .filter(NoteRecord.Columns.deleted == false)
+          .including(all: NoteRecord.noteHashtags)
+          .including(all: referenceRecords)
+          .asRequest(of: NoteMetadataRecord.self)
       }
     }
   }
 
   /// Sections of our list.
   private enum Section: CaseIterable {
-    case allNotes
+    case folders
     case hashtags
   }
 
@@ -52,9 +81,11 @@ final class NotebookStructureViewController: UIViewController {
   private struct Item: Hashable, CustomStringConvertible {
     var structureIdentifier: StructureIdentifier
     var hasChildren: Bool
+    var image: UIImage?
 
     var description: String { structureIdentifier.description }
-    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: false)
+    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: false, image: UIImage(systemName: "doc"))
+    static let archive = Item(structureIdentifier: .archive, hasChildren: false, image: UIImage(systemName: "archivebox"))
   }
 
   public init(database: NoteDatabase) {
@@ -93,6 +124,7 @@ final class NotebookStructureViewController: UIViewController {
       var contentConfiguration = cell.defaultContentConfiguration()
       contentConfiguration.text = item.description
       contentConfiguration.textProperties.color = .label
+      contentConfiguration.image = item.image
       cell.contentConfiguration = contentConfiguration
 
       // Only items with children get an outline disclosure identifier.
@@ -373,8 +405,8 @@ private extension NotebookStructureViewController {
   func updateSnapshot() {
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-    snapshot.appendSections([.allNotes])
-    snapshot.appendItems([.allNotes])
+    snapshot.appendSections([.folders])
+    snapshot.appendItems([.allNotes, .archive])
     let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
     if !hashtagSectionSnapshot.items.isEmpty {
       snapshot.appendSections([.hashtags])

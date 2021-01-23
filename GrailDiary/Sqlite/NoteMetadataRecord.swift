@@ -9,6 +9,7 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
   var creationTimestamp: Date
   var modifiedTimestamp: Date
   var deleted: Bool
+  var folder: String?
   var noteLinks: [NoteLinkRecord]
   var contents: [ContentRecord]
 

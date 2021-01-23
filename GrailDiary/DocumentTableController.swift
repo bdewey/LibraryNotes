@@ -116,15 +116,26 @@ public final class DocumentTableController: NSObject {
   }()
 
   /// If non-nil, only pages with these identifiers will be shown.
+  // TODO: Incorporate this into the query
   public var filteredPageIdentifiers: Set<Note.Identifier>? {
     didSet {
       needsPerformUpdates = true
     }
   }
 
-  /// If set, only show pages that contain this hashtag.
-  public var filteredHashtag: String? {
+  public var observableRecords: NoteDatabase.ObservableRecords? {
+    willSet {
+      recordsSubscription?.cancel()
+      recordsSubscription = nil
+    }
     didSet {
+      guard let observableRecords = observableRecords else { return }
+      recordsSubscription = observableRecords.recordsDidChange
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] in
+          self?.updateCardsPerDocument()
+        }
+      updateCardsPerDocument()
       needsPerformUpdates = true
     }
   }
@@ -180,27 +191,12 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: UICollectionViewDiffableDataSource<DocumentSection, Item>
 
-  private var databaseSubscription: AnyCancellable?
-
-  public func startObservingDatabase() {
-    databaseSubscription = database.notesDidChange
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] in
-        self?.updateCardsPerDocument()
-      }
-    updateCardsPerDocument()
-  }
-
-  public func stopObservingDatabase() {
-    databaseSubscription?.cancel()
-    databaseSubscription = nil
-  }
+  private var recordsSubscription: AnyCancellable?
 
   public func performUpdates(animated: Bool) {
     let snapshot = DocumentTableController.snapshot(
-      for: database,
+      for: observableRecords?.records ?? [:],
       cardsPerDocument: cardsPerDocument,
-      filteredHashtag: filteredHashtag,
       filteredPageIdentifiers: filteredPageIdentifiers,
       webURL: webURL
     )
@@ -385,9 +381,8 @@ private extension DocumentTableController {
   }
 
   static func snapshot(
-    for database: NoteDatabase,
+    for records: [Note.Identifier: NoteMetadataRecord],
     cardsPerDocument: [Note.Identifier: Int],
-    filteredHashtag: String?,
     filteredPageIdentifiers: Set<Note.Identifier>?,
     webURL: URL?
   ) -> Snapshot {
@@ -400,17 +395,11 @@ private extension DocumentTableController {
 
     snapshot.appendSections([.documents])
 
-    let propertiesFilteredByHashtag = database.allMetadata
+    let items = records
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)
       }
-      .filter {
-        guard let hashtag = filteredHashtag else { return true }
-        return $0.value.noteLinks.anySatisfy { hashtag.isPathPrefix(of: $0.targetTitle) }
-      }
-
-    let objects = propertiesFilteredByHashtag
       .compactMap { tuple in
         ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0], hasLink: !tuple.value.contents.isEmpty)
       }
@@ -420,8 +409,8 @@ private extension DocumentTableController {
       .map {
         Item.page($0)
       }
-    snapshot.appendItems(objects)
-    Logger.shared.debug("Generating snapshot with \(objects.count) entries")
+    snapshot.appendItems(items)
+    Logger.shared.debug("Generating snapshot with \(items.count) entries")
     return snapshot
   }
 }

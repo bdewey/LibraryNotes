@@ -13,12 +13,14 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var modifiedDevice: String
   var deleted: Bool
   var updateSequenceNumber: Int64
+  var folder: String?
 
   enum Columns {
     static let id = Column(CodingKeys.id)
     static let title = Column(CodingKeys.title)
     static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
     static let deleted = Column(CodingKeys.deleted)
+    static let folder = Column(CodingKeys.folder)
   }
 
   static let noteHashtags = hasMany(NoteLinkRecord.self)

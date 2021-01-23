@@ -15,4 +15,5 @@ internal enum MigrationIdentifier: String {
   case links = "20201223-links"
   case binaryContent = "20201227-binaryContent"
   case creationTimestamp = "20210103-creationTimestamp"
+  case addFolders = "20210122-folder"
 }

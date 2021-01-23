@@ -579,6 +579,73 @@ public final class NoteDatabase: UIDocument {
     }
     return Array(hashtags).sorted()
   }
+
+  /// All folders across all pages, sorted.
+  public var folders: [String] {
+    var folders = Set<String>()
+    for noteMetadata in allMetadata.values {
+      if let folder = noteMetadata.folder {
+        folders.insert(folder)
+      }
+    }
+    return Array(folders).sorted()
+  }
+
+  public class ObservableRecords {
+    fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
+      self.records = try dbQueue.read { db in
+        try Self.fetchAllRecords(query: query, from: db)
+      }
+      self.recordsDidChange = recordsDidChangeSubject.eraseToAnyPublisher()
+      subscription = DatabaseRegionObservation(tracking: [
+        NoteRecord.all(),
+      ]).publisher(in: dbQueue)
+      .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
+          case .finished:
+            Logger.shared.info("Monitoring pipeline shutting down")
+          }
+        },
+        receiveValue: { [weak self] allMetadata in
+          self?.records = allMetadata
+        }
+      )
+    }
+
+    private var subscription: AnyCancellable?
+    public private(set) var records: [Note.Identifier: NoteMetadataRecord] {
+      didSet {
+        recordsDidChangeSubject.send()
+      }
+    }
+    public let recordsDidChange: AnyPublisher<Void, Never>
+    private let recordsDidChangeSubject = PassthroughSubject<Void, Never>()
+
+    private static func fetchAllRecords(
+      query: QueryInterfaceRequest<NoteMetadataRecord>,
+      from db: Database
+    ) throws -> [Note.Identifier: NoteMetadataRecord] {
+      let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
+      let metadata = try query.fetchAll(db)
+      let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
+        (key: metadataItem.id, value: metadataItem)
+      }
+      // Some of my queries return duplicate rows in the results. There's probably some careful sql work that
+      // will prevent that, but in the meanwhile I'm being defensive.
+      return Dictionary(tuples, uniquingKeysWith: { value, _ in value })
+    }
+  }
+
+  func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try ObservableRecords(query: query, dbQueue: dbQueue)
+  }
 }
 
 // MARK: - Internal (to enable dividing into extensions)
@@ -760,6 +827,7 @@ internal extension NoteDatabase {
     try migrator.registerMigrationScript(.links)
     try migrator.registerMigrationScript(.binaryContent)
     try migrator.registerMigrationScript(.creationTimestamp)
+    try migrator.registerMigrationScript(.addFolders)
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
