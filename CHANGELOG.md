@@ -1,18 +1,18 @@
 # Changelog
 
-## Unreleased
+## [0.39.2] - 2020-01-18
 
 ### Fixed
 
 - Navigation on the iPhone. The keyboard support on the iPad broke the iPhone :-(
 
-## [0.39.1]
+## [0.39.1] - 2020-01-16 Happy Birthday, Molly!
 
 ### Added
 
 - A simple input accessory view for the phone
 
-## [0.39.0] - 2020-01-16 Happy Birthday, Molly!
+## [0.39.0]
 
 ### Added
 
