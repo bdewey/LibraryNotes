@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- A link glyph if the page is going to open a reference web page.
+
 ## [0.39.2] - 2020-01-18
 
 ### Fixed
