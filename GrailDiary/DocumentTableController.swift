@@ -147,67 +147,6 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public func trailingSwipeActionsConfiguration(forRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else {
-      return nil
-    }
-    var actions = [UIContextualAction]()
-    switch item {
-    case .page(let properties):
-      if properties.noteProperties.folder != PredefinedFolders.recentlyDeleted.rawValue {
-        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-          do {
-            try self.database.updateNote(noteIdentifier: properties.pageKey, updateBlock: { note in
-              var note = note
-              note.folder = PredefinedFolders.recentlyDeleted.rawValue
-              return note
-            })
-            self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
-            Logger.shared.info("Moved \(properties.pageKey) to \(PredefinedFolders.recentlyDeleted.rawValue)")
-            completion(true)
-          } catch {
-            Logger.shared.error("Unexpected error deleting \(properties.pageKey): \(error)")
-            completion(false)
-          }
-        }
-        deleteAction.image = UIImage(systemName: "trash")
-        actions.append(deleteAction)
-      }
-      if properties.noteProperties.folder != PredefinedFolders.archive.rawValue {
-        let archiveAction = UIContextualAction(style: .normal, title: "Archive") { (_, _, completion) in
-          do {
-            try self.database.updateNote(noteIdentifier: properties.pageKey, updateBlock: { note -> Note in
-              var note = note
-              note.folder = PredefinedFolders.archive.rawValue
-              return note
-            })
-            Logger.shared.info("Moved \(properties.pageKey) to archive")
-            completion(true)
-          } catch {
-            Logger.shared.error("Unexpected error moving \(properties.pageKey) to archive: \(error)")
-            completion(false)
-          }
-        }
-        archiveAction.image = UIImage(systemName: "archivebox")
-        actions.append(archiveAction)
-      }
-      if properties.cardCount > 0 {
-        let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
-          self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {
-            self.delegate?.presentStudySessionViewController(for: $0)
-            completion(true)
-          })
-        }
-        studyAction.image = UIImage(systemName: "rectangle.stack")
-        studyAction.backgroundColor = UIColor.systemBlue
-        actions.append(studyAction)
-      }
-    case .webPage:
-      return nil
-    }
-    return UISwipeActionsConfiguration(actions: actions)
-  }
-
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
@@ -261,6 +200,129 @@ public final class DocumentTableController: NSObject {
       }
     }
     return false
+  }
+}
+
+// MARK: - Swipe & context menu actions
+
+extension DocumentTableController {
+  public func trailingSwipeActionsConfiguration(forRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else {
+      return nil
+    }
+    var actions = [UIContextualAction]()
+    switch item {
+    case .page(let properties):
+      if properties.noteProperties.folder != PredefinedFolders.recentlyDeleted.rawValue {
+        actions.append(deleteAction(for: properties.pageKey))
+      }
+      if properties.noteProperties.folder != nil {
+        actions.append(notesAction(for: properties.pageKey))
+      }
+      if properties.noteProperties.folder != PredefinedFolders.inbox.rawValue {
+        actions.append(inboxAction(for: properties.pageKey))
+      }
+      if properties.noteProperties.folder != PredefinedFolders.archive.rawValue {
+        actions.append(archiveAction(for: properties.pageKey))
+      }
+      if properties.cardCount > 0 {
+        actions.append(studyAction(for: properties.pageKey))
+      }
+    case .webPage:
+      return nil
+    }
+    return UISwipeActionsConfiguration(actions: actions)
+  }
+
+  private func deleteAction(for noteIdentifier: Note.Identifier) -> UIContextualAction {
+    let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+      do {
+        try self.database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note in
+          var note = note
+          note.folder = PredefinedFolders.recentlyDeleted.rawValue
+          return note
+        })
+        self.delegate?.documentTableDidDeleteDocument(with: noteIdentifier)
+        Logger.shared.info("Moved \(noteIdentifier) to \(PredefinedFolders.recentlyDeleted.rawValue)")
+        completion(true)
+      } catch {
+        Logger.shared.error("Unexpected error deleting \(noteIdentifier): \(error)")
+        completion(false)
+      }
+    }
+    deleteAction.image = UIImage(systemName: "trash")
+    return deleteAction
+  }
+
+  private func notesAction(for noteIdentifier: Note.Identifier) -> UIContextualAction {
+    let moveToNotesAction = UIContextualAction(style: .normal, title: "Notes") { (_, _, completion) in
+      do {
+        try self.database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
+          var note = note
+          note.folder = nil
+          return note
+        })
+        Logger.shared.info("Moved \(noteIdentifier) to notes")
+        completion(true)
+      } catch {
+        Logger.shared.error("Unexpected error moving \(noteIdentifier) to notes: \(error)")
+        completion(false)
+      }
+    }
+    moveToNotesAction.image = UIImage(systemName: "doc")
+    moveToNotesAction.backgroundColor = .grailTint
+    return moveToNotesAction
+  }
+
+  private func archiveAction(for noteIdentifier: Note.Identifier) -> UIContextualAction {
+    let archiveAction = UIContextualAction(style: .normal, title: "Archive") { (_, _, completion) in
+      do {
+        try self.database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
+          var note = note
+          note.folder = PredefinedFolders.archive.rawValue
+          return note
+        })
+        Logger.shared.info("Moved \(noteIdentifier) to archive")
+        completion(true)
+      } catch {
+        Logger.shared.error("Unexpected error moving \(noteIdentifier) to archive: \(error)")
+        completion(false)
+      }
+    }
+    archiveAction.image = UIImage(systemName: "archivebox")
+    return archiveAction
+  }
+
+  private func inboxAction(for noteIdentifier: Note.Identifier) -> UIContextualAction {
+    let inboxAction = UIContextualAction(style: .normal, title: "Inbox") { (_, _, completion) in
+      do {
+        try self.database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
+          var note = note
+          note.folder = PredefinedFolders.inbox.rawValue
+          return note
+        })
+        Logger.shared.info("Moved \(noteIdentifier) to inbox")
+        completion(true)
+      } catch {
+        Logger.shared.error("Unexpected error moving \(noteIdentifier) to inbox: \(error)")
+        completion(false)
+      }
+    }
+    inboxAction.image = UIImage(systemName: "tray.and.arrow.down")
+    inboxAction.backgroundColor = .systemIndigo
+    return inboxAction
+  }
+
+  private func studyAction(for noteIdentifier: Note.Identifier) -> UIContextualAction {
+    let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
+      self.database.studySession(filter: { name, _ in name == noteIdentifier }, date: Date(), completion: {
+        self.delegate?.presentStudySessionViewController(for: $0)
+        completion(true)
+      })
+    }
+    studyAction.image = UIImage(systemName: "rectangle.stack")
+    studyAction.backgroundColor = UIColor.systemBlue
+    return studyAction
   }
 }
 
