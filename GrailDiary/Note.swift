@@ -9,6 +9,7 @@ public struct Note: Equatable {
     hashtags: [String],
     title: String, text: String? = nil,
     reference: Note.Reference? = nil,
+    folder: String? = nil,
     promptCollections: [Note.ContentKey: PromptCollection]
   ) {
     self.creationTimestamp = creationTimestamp
@@ -17,6 +18,7 @@ public struct Note: Equatable {
     self.title = title
     self.text = text
     self.reference = reference
+    self.folder = folder
     self.promptCollections = promptCollections
   }
 
@@ -45,6 +47,7 @@ public struct Note: Equatable {
 
   public var text: String?
   public var reference: Reference?
+  public var folder: String?
   public var promptCollections: [ContentKey: PromptCollection]
 
   public static func == (lhs: Note, rhs: Note) -> Bool {
@@ -54,6 +57,7 @@ public struct Note: Equatable {
       lhs.title == rhs.title &&
       lhs.text == rhs.text &&
       lhs.reference == rhs.reference &&
+      lhs.folder == rhs.folder &&
       Set(lhs.promptCollections.keys) == Set(rhs.promptCollections.keys)
   }
 }

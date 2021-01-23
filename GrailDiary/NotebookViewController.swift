@@ -212,7 +212,7 @@ final class NotebookViewController: UIViewController {
   @objc func makeNewNote() {
     let hashtag: String?
     switch focusedNotebookStructure {
-    case .allNotes, .archive:
+    case .allNotes, .archive, .inbox, .trash:
       hashtag = nil
     case .hashtag(let focusedHashtag):
       hashtag = focusedHashtag

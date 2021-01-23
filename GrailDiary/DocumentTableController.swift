@@ -154,14 +154,43 @@ public final class DocumentTableController: NSObject {
     var actions = [UIContextualAction]()
     switch item {
     case .page(let properties):
-      let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
-        try? self.database.deleteNote(noteIdentifier: properties.pageKey)
-        try? self.database.flush()
-        self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
-        completion(true)
+      if properties.noteProperties.folder != PredefinedFolders.recentlyDeleted.rawValue {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { _, _, completion in
+          do {
+            try self.database.updateNote(noteIdentifier: properties.pageKey, updateBlock: { note in
+              var note = note
+              note.folder = PredefinedFolders.recentlyDeleted.rawValue
+              return note
+            })
+            self.delegate?.documentTableDidDeleteDocument(with: properties.pageKey)
+            Logger.shared.info("Moved \(properties.pageKey) to \(PredefinedFolders.recentlyDeleted.rawValue)")
+            completion(true)
+          } catch {
+            Logger.shared.error("Unexpected error deleting \(properties.pageKey): \(error)")
+            completion(false)
+          }
+        }
+        deleteAction.image = UIImage(systemName: "trash")
+        actions.append(deleteAction)
       }
-      deleteAction.image = UIImage(systemName: "trash")
-      actions.append(deleteAction)
+      if properties.noteProperties.folder != PredefinedFolders.archive.rawValue {
+        let archiveAction = UIContextualAction(style: .normal, title: "Archive") { (_, _, completion) in
+          do {
+            try self.database.updateNote(noteIdentifier: properties.pageKey, updateBlock: { note -> Note in
+              var note = note
+              note.folder = PredefinedFolders.archive.rawValue
+              return note
+            })
+            Logger.shared.info("Moved \(properties.pageKey) to archive")
+            completion(true)
+          } catch {
+            Logger.shared.error("Unexpected error moving \(properties.pageKey) to archive: \(error)")
+            completion(false)
+          }
+        }
+        archiveAction.image = UIImage(systemName: "archivebox")
+        actions.append(archiveAction)
+      }
       if properties.cardCount > 0 {
         let studyAction = UIContextualAction(style: .normal, title: "Study") { _, _, completion in
           self.database.studySession(filter: { name, _ in name == properties.pageKey }, date: Date(), completion: {

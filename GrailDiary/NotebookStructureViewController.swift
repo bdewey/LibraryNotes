@@ -17,14 +17,21 @@ final class NotebookStructureViewController: UIViewController {
   enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
     case allNotes
     case archive
+    case inbox
+    case trash
     case hashtag(String)
 
     init?(rawValue: String) {
-      if rawValue == "##all##" {
+      switch rawValue {
+      case "##all##":
         self = .allNotes
-      } else if rawValue == "##archive##" {
+      case "##archive##":
         self = .archive
-      } else {
+      case "##inbox##":
+        self = .inbox
+      case "##trash##":
+        self = .trash
+      default:
         self = .hashtag(rawValue)
       }
     }
@@ -35,6 +42,10 @@ final class NotebookStructureViewController: UIViewController {
         return "##all##"
       case .archive:
         return "##archive##"
+      case .inbox:
+        return "##inbox##"
+      case .trash:
+        return "##trash##"
       case .hashtag(let hashtag):
         return hashtag
       }
@@ -42,9 +53,21 @@ final class NotebookStructureViewController: UIViewController {
 
     var description: String {
       switch self {
-      case .allNotes: return "All Notes"
+      case .allNotes: return "Notes"
       case .archive: return "Archive"
+      case .inbox: return "Inbox"
+      case .trash: return "Trash"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
+      }
+    }
+
+    var longDescription: String {
+      switch self {
+      case .allNotes: return "Notes"
+      case .archive: return "Archive"
+      case .inbox: return "Inbox"
+      case .trash: return "Trash"
+      case .hashtag(let hashtag): return hashtag
       }
     }
 
@@ -57,13 +80,18 @@ final class NotebookStructureViewController: UIViewController {
         .asRequest(of: NoteMetadataRecord.self)
       switch self {
       case .allNotes:
-        return query
+        return query.filter(NoteRecord.Columns.folder == nil)
       case .archive:
-        return query.filter(NoteRecord.Columns.folder == "Archive")
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.archive.rawValue)
+      case .inbox:
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.inbox.rawValue)
+      case .trash:
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.recentlyDeleted.rawValue)
       case .hashtag(let hashtag):
         return NoteRecord
           .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
           .filter(NoteRecord.Columns.deleted == false)
+          .filter(NoteRecord.Columns.folder == nil)
           .including(all: NoteRecord.noteHashtags)
           .including(all: referenceRecords)
           .asRequest(of: NoteMetadataRecord.self)
@@ -86,6 +114,8 @@ final class NotebookStructureViewController: UIViewController {
     var description: String { structureIdentifier.description }
     static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: false, image: UIImage(systemName: "doc"))
     static let archive = Item(structureIdentifier: .archive, hasChildren: false, image: UIImage(systemName: "archivebox"))
+    static let inbox = Item(structureIdentifier: .inbox, hasChildren: false, image: UIImage(systemName: "tray.and.arrow.down"))
+    static let trash = Item(structureIdentifier: .trash, hasChildren: false, image: UIImage(systemName: "trash"))
   }
 
   public init(database: NoteDatabase) {
@@ -406,7 +436,7 @@ private extension NotebookStructureViewController {
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.folders])
-    snapshot.appendItems([.allNotes, .archive])
+    snapshot.appendItems([.allNotes, .inbox, .archive, .trash])
     let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
     if !hashtagSectionSnapshot.items.isEmpty {
       snapshot.appendSections([.hashtags])

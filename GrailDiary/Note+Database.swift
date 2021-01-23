@@ -34,6 +34,7 @@ public extension Note {
       title: sqliteNote.title,
       text: noteText,
       reference: try db.reference(for: identifier),
+      folder: sqliteNote.folder,
       promptCollections: promptCollections
     )
   }
@@ -48,7 +49,8 @@ public extension Note {
       modifiedTimestamp: timestamp,
       modifiedDevice: updateKey.deviceID,
       deleted: false,
-      updateSequenceNumber: updateKey.updateSequenceNumber
+      updateSequenceNumber: updateKey.updateSequenceNumber,
+      folder: folder
     )
     try sqliteNote.save(db)
 

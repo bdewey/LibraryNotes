@@ -81,6 +81,7 @@ final class DocumentListViewController: UIViewController {
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
     didSet {
       do {
+        title = focusedStructure.longDescription
         dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
         updateStudySession()
       } catch {

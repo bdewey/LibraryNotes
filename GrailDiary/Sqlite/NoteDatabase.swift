@@ -574,9 +574,11 @@ public final class NoteDatabase: UIDocument {
 
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
-    let hashtags = allMetadata.values.reduce(into: Set<String>()) { hashtags, props in
-      hashtags.formUnion(props.noteLinks.map { $0.targetTitle })
-    }
+    let hashtags = allMetadata.values
+      .filter { $0.folder == nil }
+      .reduce(into: Set<String>()) { hashtags, props in
+        hashtags.formUnion(props.noteLinks.map { $0.targetTitle })
+      }
     return Array(hashtags).sorted()
   }
 
