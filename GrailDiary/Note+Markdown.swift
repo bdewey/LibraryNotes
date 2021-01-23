@@ -39,12 +39,10 @@ public extension Note {
       keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
     }
     self.init(
-      metadata: Note.Metadata(
-        creationTimestamp: Date(),
-        timestamp: Date(),
-        hashtags: parsedString.hashtags,
-        title: String(parsedString.title.split(separator: "\n").first ?? "")
-      ),
+      creationTimestamp: Date(),
+      timestamp: Date(),
+      hashtags: parsedString.hashtags,
+      title: String(parsedString.title.split(separator: "\n").first ?? ""),
       text: parsedString.string,
       promptCollections: keyedCollection
     )
@@ -68,7 +66,7 @@ public extension Note {
 
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
-    newNote.metadata.creationTimestamp = metadata.creationTimestamp
+    newNote.creationTimestamp = creationTimestamp
     newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }

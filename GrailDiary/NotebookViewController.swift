@@ -292,7 +292,7 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
       configuration: SavingTextEditViewController.Configuration(noteIdentifier: noteIdentifier, note: note),
       noteStorage: database
     )
-    noteViewController.setTitleMarkdown(note.metadata.title)
+    noteViewController.setTitleMarkdown(note.title)
     currentNoteEditor = noteViewController
     if shiftFocus {
       notebookSplitViewController.show(.secondary)

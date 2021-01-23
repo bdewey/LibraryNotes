@@ -50,7 +50,7 @@ public final class DocumentTableController: NSObject {
       var configuration = cell.defaultContentConfiguration()
       let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
       configuration.attributedText = title
-      configuration.secondaryText = viewProperties.noteProperties.hashtags.joined(separator: ", ")
+      configuration.secondaryText = viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", ")
       configuration.secondaryTextProperties.color = .secondaryLabel
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
@@ -346,9 +346,21 @@ private extension DocumentTableController {
     /// UUID for this page
     let pageKey: Note.Identifier
     /// Page properties (serialized into the document)
-    let noteProperties: Note.Metadata
+    let noteProperties: NoteMetadataRecord
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
+    /// Does this note have an associated link?
+    let hasLink: Bool
+
+    // "Identity" for hashing & equality is just the pageKey
+
+    func hash(into hasher: inout Hasher) {
+      hasher.combine(pageKey)
+    }
+
+    static func == (lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      lhs.pageKey == rhs.pageKey
+    }
   }
 
   @objc func handleRefreshControl() {
@@ -392,15 +404,15 @@ private extension DocumentTableController {
       }
       .filter {
         guard let hashtag = filteredHashtag else { return true }
-        return $0.value.hashtags.anySatisfy { hashtag.isPathPrefix(of: $0) }
+        return $0.value.noteLinks.anySatisfy { hashtag.isPathPrefix(of: $0.targetTitle) }
       }
 
     let objects = propertiesFilteredByHashtag
       .compactMap { tuple in
-        ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0])
+        ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0], hasLink: !tuple.value.contents.isEmpty)
       }
       .sorted(
-        by: { $0.noteProperties.timestamp > $1.noteProperties.timestamp }
+        by: { $0.noteProperties.modifiedTimestamp > $1.noteProperties.modifiedTimestamp }
       )
       .map {
         Item.page($0)

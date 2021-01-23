@@ -8,7 +8,7 @@ public extension NoteDatabase {
   func replaceText(
     _ originalText: String,
     with replacementText: String,
-    filter: (Note.Metadata) -> Bool = { _ in true }
+    filter: (NoteMetadataRecord) -> Bool = { _ in true }
   ) throws {
     guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
     try dbQueue.write { database in
@@ -28,7 +28,7 @@ public extension NoteDatabase {
   func renameHashtag(
     _ originalHashtag: String,
     to newHashtag: String,
-    filter: (Note.Metadata) -> Bool = { _ in true }
+    filter: (NoteMetadataRecord) -> Bool = { _ in true }
   ) throws {
     guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
     try dbQueue.write { database in

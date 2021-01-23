@@ -251,7 +251,7 @@ public final class NoteDatabase: UIDocument {
     save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
-  public var allMetadata: [Note.Identifier: Note.Metadata] = [:] {
+  public var allMetadata: [Note.Identifier: NoteMetadataRecord] = [:] {
     willSet {
       assert(Thread.isMainThread)
     }
@@ -525,7 +525,7 @@ public final class NoteDatabase: UIDocument {
   /// - parameter date: An optional date for determining prompt eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   public func studySession(
-    filter: ((Note.Identifier, Note.Metadata) -> Bool)? = nil,
+    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)? = nil,
     date: Date = Date(),
     completion: @escaping (StudySession) -> Void
   ) {
@@ -540,7 +540,7 @@ public final class NoteDatabase: UIDocument {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   internal func synchronousStudySession(
-    filter: ((Note.Identifier, Note.Metadata) -> Bool)? = nil,
+    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
@@ -575,7 +575,7 @@ public final class NoteDatabase: UIDocument {
   /// All hashtags used across all pages, sorted.
   public var hashtags: [String] {
     let hashtags = allMetadata.values.reduce(into: Set<String>()) { hashtags, props in
-      hashtags.formUnion(props.hashtags)
+      hashtags.formUnion(props.noteLinks.map { $0.targetTitle })
     }
     return Array(hashtags).sorted()
   }
@@ -719,20 +719,16 @@ internal extension NoteDatabase {
     return UpdateIdentifier(deviceID: device.uuid, updateSequenceNumber: device.updateSequenceNumber)
   }
 
-  static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: Note.Metadata] {
+  static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: NoteMetadataRecord] {
+    let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
     let metadata = try NoteRecord
       .filter(NoteRecord.Columns.deleted == false)
       .including(all: NoteRecord.noteHashtags)
+      .including(all: referenceRecords)
       .asRequest(of: NoteMetadataRecord.self)
       .fetchAll(db)
-    let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: Note.Metadata) in
-      let metadata = Note.Metadata(
-        creationTimestamp: metadataItem.creationTimestamp,
-        timestamp: metadataItem.modifiedTimestamp,
-        hashtags: metadataItem.noteLinks.map { $0.targetTitle },
-        title: metadataItem.title
-      )
-      return (key: metadataItem.id, value: metadata)
+    let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
+      (key: metadataItem.id, value: metadataItem)
     }
     return Dictionary(uniqueKeysWithValues: tuples)
   }

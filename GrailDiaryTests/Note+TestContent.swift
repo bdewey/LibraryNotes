@@ -5,23 +5,19 @@ import GrailDiary
 
 extension Note {
   static let simpleTest = Note(
-    metadata: Note.Metadata(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: [],
-      title: "Testing"
-    ),
+    creationTimestamp: Date(),
+    timestamp: Date(),
+    hashtags: [],
+    title: "Testing",
     text: "This is a test",
     promptCollections: [:]
   )
 
   static let withHashtags = Note(
-    metadata: Note.Metadata(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: ["#ashtag"],
-      title: "Testing"
-    ),
+    creationTimestamp: Date(),
+    timestamp: Date(),
+    hashtags: ["#ashtag"],
+    title: "Testing",
     text: "This is a test",
     promptCollections: [:]
   )
@@ -43,12 +39,10 @@ extension Note {
   static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
 
   static let withReferenceWebPage = Note(
-    metadata: Metadata(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: ["#test"],
-      title: "The Onion"
-    ),
+    creationTimestamp: Date(),
+    timestamp: Date(),
+    hashtags: ["#test"],
+    title: "The Onion",
     text: nil,
     reference: .webPage(URL(string: "https://www.theonion.com")!),
     promptCollections: [:]

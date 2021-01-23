@@ -131,7 +131,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
   func testLocalChangeIsPreserved() {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
+    modifiedNote.timestamp = Date().addingTimeInterval(60)
     MergeTestCase()
       .withInitialState { storage in
         simpleIdentifier = try storage.createNote(.simpleTest)
@@ -150,7 +150,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
   func testRemoteChangeGetsCopied() {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
+    modifiedNote.timestamp = Date().addingTimeInterval(60)
 
     MergeTestCase()
       .withInitialState { storage in
@@ -169,9 +169,9 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
   func testLastWriterWins() {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.metadata.timestamp = Date().addingTimeInterval(60)
+    modifiedNote.timestamp = Date().addingTimeInterval(60)
     var conflictingNote = Note(markdown: "I'm going to win! #winning")
-    conflictingNote.metadata.timestamp = Date().addingTimeInterval(120)
+    conflictingNote.timestamp = Date().addingTimeInterval(120)
 
     MergeTestCase()
       .withInitialState { storage in

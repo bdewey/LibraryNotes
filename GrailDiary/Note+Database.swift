@@ -28,12 +28,10 @@ public extension Note {
     let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
 
     self.init(
-      metadata: Note.Metadata(
-        creationTimestamp: sqliteNote.creationTimestamp,
-        timestamp: sqliteNote.modifiedTimestamp,
-        hashtags: hashtags,
-        title: sqliteNote.title
-      ),
+      creationTimestamp: sqliteNote.creationTimestamp,
+      timestamp: sqliteNote.modifiedTimestamp,
+      hashtags: hashtags,
+      title: sqliteNote.title,
       text: noteText,
       reference: try db.reference(for: identifier),
       promptCollections: promptCollections
@@ -45,9 +43,9 @@ public extension Note {
   func save(identifier: Note.Identifier, updateKey: UpdateIdentifier, to db: Database) throws {
     let sqliteNote = NoteRecord(
       id: identifier,
-      title: metadata.title,
-      creationTimestamp: metadata.creationTimestamp,
-      modifiedTimestamp: metadata.timestamp,
+      title: title,
+      creationTimestamp: creationTimestamp,
+      modifiedTimestamp: timestamp,
       modifiedDevice: updateKey.deviceID,
       deleted: false,
       updateSequenceNumber: updateKey.updateSequenceNumber
@@ -56,7 +54,7 @@ public extension Note {
 
     try savePrimaryText(noteIdentifier: identifier, database: db)
     try saveReference(noteIdentifier: identifier, database: db)
-    let inMemoryHashtags = Set(metadata.hashtags)
+    let inMemoryHashtags = Set(hashtags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
@@ -96,7 +94,7 @@ public extension Note {
           promptIndex: Int64(index),
           due: today.addingTimeInterval(promptCollection.newPromptDelay.fuzzed()),
           modifiedDevice: updateKey.deviceID,
-          timestamp: metadata.timestamp,
+          timestamp: timestamp,
           updateSequenceNumber: updateKey.updateSequenceNumber
         )
         try promptStatistics.insert(db)

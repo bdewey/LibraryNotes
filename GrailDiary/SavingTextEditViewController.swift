@@ -29,7 +29,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     viewController.autoFirstResponder = configuration.autoFirstResponder
     self.textEditViewController = viewController
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(configuration.note.metadata.title)
+    setTitleMarkdown(configuration.note.title)
   }
 
   /// Initializes a view controller for a new, unsaved note.
@@ -135,7 +135,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     var note = note
     // Copy over the initial reference, if any
     note.reference = configuration.note.reference
-    setTitleMarkdown(note.metadata.title)
+    setTitleMarkdown(note.title)
     do {
       if let noteIdentifier = configuration.noteIdentifier {
         Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")

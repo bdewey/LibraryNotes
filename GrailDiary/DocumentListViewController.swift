@@ -278,9 +278,9 @@ final class DocumentListViewController: UIViewController {
 
   private func updateStudySession() {
     let currentHashtag = dataSource.filteredHashtag
-    let filter: (Note.Identifier, Note.Metadata) -> Bool = (currentHashtag == nil)
+    let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = (currentHashtag == nil)
       ? { _, _ in true }
-      : { [currentHashtag] _, properties in properties.hashtags.contains(currentHashtag!) }
+      : { [currentHashtag] _, properties in properties.noteLinks.map { $0.targetTitle }.contains(currentHashtag!) }
     let hashtag = currentHashtag
     database.studySession(filter: filter, date: dueDate) {
       guard currentHashtag == hashtag else { return }
@@ -325,12 +325,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   func showWebPage(url: URL, shiftFocus: Bool) {
     Logger.shared.info("Will navigate to web page at \(url)")
     let placeholderNote = Note(
-      metadata: Note.Metadata(
-        creationTimestamp: Date(),
-        timestamp: Date(),
-        hashtags: [],
-        title: ""
-      ),
+      creationTimestamp: Date(),
+      timestamp: Date(),
+      hashtags: [],
+      title: "",
       text: "This is a test note",
       reference: .webPage(url),
       promptCollections: [:]

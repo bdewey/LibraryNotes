@@ -52,13 +52,13 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       let identifier = try database.createNote(Note.withHashtags)
       try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
         var note = oldNote
-        note.metadata.hashtags = ["#updated"]
+        note.hashtags = ["#updated"]
         return note
       })
       XCTAssertTrue(database.hasUnsavedChanges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       var expectedNote = Note.withHashtags
-      expectedNote.metadata.hashtags = ["#updated"]
+      expectedNote.hashtags = ["#updated"]
       XCTAssertEqual(expectedNote, roundTripNote)
     }
   }
@@ -99,7 +99,7 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     makeAndOpenEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
       XCTAssertEqual(1, database.allMetadata.count)
-      XCTAssertEqual(database.allMetadata[identifier], Note.withHashtags.metadata)
+      XCTAssertEqual(database.allMetadata[identifier]?.title, Note.withHashtags.title)
     }
   }
 
