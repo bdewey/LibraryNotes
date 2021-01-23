@@ -52,6 +52,9 @@ public final class DocumentTableController: NSObject {
       configuration.attributedText = title
       configuration.secondaryText = viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", ")
       configuration.secondaryTextProperties.color = .secondaryLabel
+      if viewProperties.hasLink {
+        configuration.image = UIImage(systemName: "link")
+      }
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
