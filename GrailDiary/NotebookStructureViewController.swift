@@ -116,7 +116,7 @@ final class NotebookStructureViewController: UIViewController {
     var image: UIImage?
 
     var description: String { structureIdentifier.description }
-    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: false, image: UIImage(systemName: "doc"))
+    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: true, image: UIImage(systemName: "doc"))
     static let archive = Item(structureIdentifier: .archive, hasChildren: false, image: UIImage(systemName: "archivebox"))
     static let inbox = Item(structureIdentifier: .inbox, hasChildren: false, image: UIImage(systemName: "tray.and.arrow.down"))
     static let trash = Item(structureIdentifier: .trash, hasChildren: false, image: UIImage(systemName: "trash"))
@@ -438,6 +438,8 @@ private extension NotebookStructureViewController {
   }
 
   func updateSnapshot() {
+    let existingNoteSnapshot = dataSource.snapshot(for: .notes)
+    let isNotesExpanded = existingNoteSnapshot.index(of: .allNotes) == nil || existingNoteSnapshot.isExpanded(.allNotes)
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.notePrefix])
@@ -445,14 +447,17 @@ private extension NotebookStructureViewController {
     snapshot.appendSections([.notes, .noteSuffix])
     snapshot.appendItems([.archive, .trash])
     dataSource.apply(snapshot)
-    let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
-    dataSource.apply(hashtagSectionSnapshot, to: .notes)
+    var noteSectionSnapshot = makeNoteSectionSnapshot()
+    if isNotesExpanded {
+      noteSectionSnapshot.expand([.allNotes])
+    }
+    dataSource.apply(noteSectionSnapshot, to: .notes)
     if let item = selectedItem, let indexPath = dataSource.indexPath(for: item) {
       collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
   }
 
-  private func makeHashtagSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
+  private func makeNoteSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.allNotes

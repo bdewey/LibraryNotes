@@ -4,7 +4,7 @@ import UIKit
 import XCTest
 
 private enum Identifiers {
-  static let backButton = "All Notes"
+  static let backButton = "Notes"
   static let currentCardView = "current-card"
   static let documentList = "document-list"
   static let editDocumentView = "edit-document-view"
