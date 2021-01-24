@@ -29,7 +29,7 @@ final class ShareViewController: SLComposeServiceViewController {
       for attachment in item.attachments ?? [] where attachment.canLoadObject(ofClass: NSURL.self) {
         attachment.loadObject(ofClass: NSURL.self) { url, error in
           if let url = url as? NSURL {
-            let messageComponents: [String?] = [item.attributedTitle?.string, item.attributedContentText?.string, "#link"]
+            let messageComponents: [String?] = [item.attributedTitle?.string, item.attributedContentText?.string]
             let message = messageComponents.compactMap { $0 }.joined(separator: "\n\n")
             let config = ShareConfiguration(url: url as URL, message: message)
             completion(.success(config))
