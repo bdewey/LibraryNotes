@@ -101,8 +101,12 @@ final class NotebookStructureViewController: UIViewController {
 
   /// Sections of our list.
   private enum Section: CaseIterable {
-    case folders
-    case hashtags
+    // Section that holds "Inbox"
+    case notePrefix
+    // Section that holds "Notes"
+    case notes
+    // Holds Archive & Trash
+    case noteSuffix
   }
 
   /// Item identifier -- this is separate from StructureIdentifier because we need to know if we have children for the disclosure indicator
@@ -138,7 +142,7 @@ final class NotebookStructureViewController: UIViewController {
       var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
       config.backgroundColor = .grailBackground
       // the first section has no header; everything else gets a header.
-      config.headerMode = (sectionIndex == 0) ? .none : .supplementary
+      config.headerMode = .none
       // The last section gets a footer
       config.footerMode = (sectionIndex == Section.allCases.count - 1) ? .supplementary : .none
       let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
@@ -170,19 +174,6 @@ final class NotebookStructureViewController: UIViewController {
     }
 
     dataSource.supplementaryViewProvider = { [weak dataSource] collectionView, kind, indexPath in
-      guard dataSource?.snapshot().indexOfSection(.hashtags) == indexPath.section
-      else {
-        Logger.shared.debug("Skipping supplementary view for \(indexPath) because it isn't the hashtag section")
-        return nil
-      }
-      if kind == UICollectionView.elementKindSectionHeader {
-        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewCell>(elementKind: UICollectionView.elementKindSectionHeader) { headerView, _, _ in
-          var headerConfiguration = UIListContentConfiguration.sidebarHeader()
-          headerConfiguration.text = "Tags"
-          headerView.contentConfiguration = headerConfiguration
-        }
-        return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
-      }
       if kind == UICollectionView.elementKindSectionFooter {
         let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
           var footerConfiguration = footerView.defaultContentConfiguration()
@@ -335,9 +326,9 @@ private extension NotebookStructureViewController {
     else {
       return
     }
-    var snapshot = dataSource.snapshot(for: .hashtags)
+    var snapshot = dataSource.snapshot(for: .notes)
     snapshot.expand([selectedItem])
-    dataSource.apply(snapshot, to: .hashtags, animatingDifferences: true)
+    dataSource.apply(snapshot, to: .notes, animatingDifferences: true)
   }
 
   func collapseSelection() {
@@ -347,7 +338,7 @@ private extension NotebookStructureViewController {
     else {
       return
     }
-    var snapshot = dataSource.snapshot(for: .hashtags)
+    var snapshot = dataSource.snapshot(for: .notes)
     var newlySelectedItem: Item?
     if snapshot.isExpanded(selectedItem) {
       snapshot.collapse([selectedItem])
@@ -355,7 +346,7 @@ private extension NotebookStructureViewController {
       snapshot.collapse([parent])
       newlySelectedItem = parent
     }
-    dataSource.apply(snapshot, to: .hashtags, animatingDifferences: true)
+    dataSource.apply(snapshot, to: .notes, animatingDifferences: true)
     if let newlySelectedItem = newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
       collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
       selectItemAtIndexPath(indexPath, shiftFocus: false)
@@ -449,16 +440,13 @@ private extension NotebookStructureViewController {
   func updateSnapshot() {
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-    snapshot.appendSections([.folders])
-    snapshot.appendItems([.allNotes, .inbox, .archive, .trash])
-    let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
-    if !hashtagSectionSnapshot.items.isEmpty {
-      snapshot.appendSections([.hashtags])
-    }
+    snapshot.appendSections([.notePrefix])
+    snapshot.appendItems([.inbox])
+    snapshot.appendSections([.notes, .noteSuffix])
+    snapshot.appendItems([.archive, .trash])
     dataSource.apply(snapshot)
-    if !hashtagSectionSnapshot.items.isEmpty {
-      dataSource.apply(hashtagSectionSnapshot, to: .hashtags)
-    }
+    let hashtagSectionSnapshot = makeHashtagSectionSnapshot()
+    dataSource.apply(hashtagSectionSnapshot, to: .notes)
     if let item = selectedItem, let indexPath = dataSource.indexPath(for: item) {
       collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
@@ -466,6 +454,10 @@ private extension NotebookStructureViewController {
 
   private func makeHashtagSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
+
+    var root = Item.allNotes
+    root.hasChildren = !database.hashtags.isEmpty
+    snapshot.append([root])
 
     // Enumerate every hashtag and make sure there is an entry for the hashtag *and all prefixes*.
     // Denote that each prefix has children.
@@ -490,7 +482,7 @@ private extension NotebookStructureViewController {
         .lastIndex(of: "/")
         .flatMap { String(hashtag.prefix(upTo: $0)) }
         .flatMap { stringToItem[$0] }
-      snapshot.append([stringToItem[hashtag]!], to: parent)
+      snapshot.append([stringToItem[hashtag]!], to: parent ?? root)
     }
     return snapshot
   }
