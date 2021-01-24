@@ -4,6 +4,7 @@
 
 ### Added
 
+- Folder structure! Items from the share extension go to "Inbox." You can move stuff to "Archive" if you don't want it cluttering the tag list.
 - A link glyph if the page is going to open a reference web page.
 
 ## [0.39.2] - 2020-01-18
