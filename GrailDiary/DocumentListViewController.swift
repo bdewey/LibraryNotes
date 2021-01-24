@@ -80,13 +80,17 @@ final class DocumentListViewController: UIViewController {
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
     didSet {
-      do {
-        title = focusedStructure.longDescription
-        dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
-        updateStudySession()
-      } catch {
-        Logger.shared.error("Unexpected error changing focus: \(error)")
-      }
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
+  private func monitorDatabaseForFocusedStructure() {
+    do {
+      title = focusedStructure.longDescription
+      dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
+      updateStudySession()
+    } catch {
+      Logger.shared.error("Unexpected error changing focus: \(error)")
     }
   }
 
@@ -186,6 +190,7 @@ final class DocumentListViewController: UIViewController {
     if AppDelegate.isUITesting {
       navigationItem.rightBarButtonItem = advanceTimeButton
     }
+    monitorDatabaseForFocusedStructure()
   }
 
   func searchBecomeFirstResponder() {
