@@ -21,6 +21,8 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
     static let modifiedTimestamp = Column(CodingKeys.modifiedTimestamp)
     static let deleted = Column(CodingKeys.deleted)
     static let folder = Column(CodingKeys.folder)
+    static let modifiedDevice = Column(CodingKeys.modifiedDevice)
+    static let updateSequenceNumber = Column(CodingKeys.updateSequenceNumber)
   }
 
   static let noteHashtags = hasMany(NoteLinkRecord.self)

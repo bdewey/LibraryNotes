@@ -2,6 +2,7 @@
 
 import Foundation
 import GRDB
+import Logging
 
 public extension NoteDatabase {
   /// Does a global replacement of `originalText` with `replacementText` across all notes in a single transaction.
@@ -55,6 +56,24 @@ public extension NoteDatabase {
           note.updateMarkdown(parsedText.string)
           try note.save(identifier: identifier, updateKey: updateKey, to: database)
         }
+      }
+    }
+  }
+
+  func moveNotesTaggedWithHashtag(_ hashtag: String, to folder: String?) throws {
+    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+    try dbQueue.write { database in
+      let updateKey = try updateIdentifier(in: database)
+      let records = try NoteRecord
+        .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
+        .filter(NoteRecord.Columns.folder == nil)
+        .fetchAll(database)
+      for record in records {
+        var record = record
+        record.modifiedDevice = updateKey.deviceID
+        record.updateSequenceNumber = updateKey.updateSequenceNumber
+        record.folder = folder
+        try record.update(database)
       }
     }
   }

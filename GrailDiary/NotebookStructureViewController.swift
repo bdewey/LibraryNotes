@@ -416,7 +416,21 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
         alert.view.tintColor = .grailTint
         self.present(alert, animated: true, completion: nil)
       }
-      return UIMenu(title: "", children: [rename])
+      let moveToArchiveAction = UIAction(title: "Move to Archive", image: UIImage(systemName: "archivebox")) { _ in
+        do {
+          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolders.archive.rawValue)
+        } catch {
+          Logger.shared.error("Error moving notes tagged \(hashtag) to archive: \(error)")
+        }
+      }
+      let moveToInboxAction = UIAction(title: "Move to Inbox", image: UIImage(systemName: "tray.and.arrow.down")) { _ in
+        do {
+          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolders.inbox.rawValue)
+        } catch {
+          Logger.shared.error("Error moving notes tagged \(hashtag) to inbox: \(error)")
+        }
+      }
+      return UIMenu(title: "", children: [rename, moveToArchiveAction, moveToInboxAction])
     }
   }
 }
