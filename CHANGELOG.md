@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- Editing notes always moved them to the "Notes" folder. Now they stay where they started.
+
+## [0.40.0] - 2020-01-23
+
 ### Added
 
 - Folder structure! Items from the share extension go to "Inbox." You can move stuff to "Archive" if you don't want it cluttering the tag list.
