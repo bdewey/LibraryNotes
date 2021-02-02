@@ -262,8 +262,19 @@ public final class TextEditViewController: UIViewController {
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
     })
 
+    let quoteButton = UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage] _ in
+      let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
+      if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
+        textStorage.replaceCharacters(in: NSRange(location: blockQuote.range.location, length: 2), with: "")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
+      } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
+        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "> ")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
+      }
+    })
+
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = [insertHashtagButton, boldButton, italicButton]
+    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton]
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar

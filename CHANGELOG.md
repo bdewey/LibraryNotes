@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Quote formatting button
+
 ### Fixed
 
 - Editing notes always moved them to the "Notes" folder. Now they stay where they started.
