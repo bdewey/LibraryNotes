@@ -52,18 +52,39 @@ public final class StudyViewController: UIViewController {
 
   private weak var delegate: StudyViewControllerDelegate?
 
-  /// UIKitDynamics behavior used to put the card in ts desired resting position
-  private var cardSnapBehavior: UISnapBehavior?
-
   /// Just holds the "correct" versus "incorrect" color whilst swiping
   private lazy var colorWashView: UIView = {
     let view = UIView(frame: .zero)
     return view
   }()
 
+  private var shouldChangeColor = false
+
   private lazy var blurView: UIVisualEffectView = {
     let view = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterial))
     return view
+  }()
+
+  private lazy var gotItRightButton: UIButton = {
+    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { _ in
+      Logger.shared.info("Got it right!")
+    }))
+    button.setTitle("Got it right", for: .normal)
+    button.setTitleColor(.systemGreen, for: .normal)
+    button.setTitleColor(.systemGray, for: .disabled)
+    button.isEnabled = false
+    return button
+  }()
+
+  private lazy var needsReviewButton: UIButton = {
+    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { _ in
+      Logger.shared.info("Needs review")
+    }))
+    button.setTitle("Needs review", for: .normal)
+    button.setTitleColor(.systemRed, for: .normal)
+    button.setTitleColor(.systemGray, for: .disabled)
+    button.isEnabled = false
+    return button
   }()
 
   private struct Swipe: Identifiable {
@@ -153,11 +174,9 @@ public final class StudyViewController: UIViewController {
     for (_, label) in statusMessageLabels {
       label.alpha = 0
     }
+    gotItRightButton.isEnabled = false
+    needsReviewButton.isEnabled = false
   }
-
-  /// Encapsulates the current swipe state. As this item moves, either because of panning or
-  /// because of animations, it also changes the color/alpha of `colorWashView` and the alpha of `swipeDescriptionLabel`
-  private var currentDynamicItem: ColorTranslatingDynamicItem?
 
   /// The view displaying the current card.
   /// - note: Changing this value will animate away the old card view and animate in the new.
@@ -167,8 +186,6 @@ public final class StudyViewController: UIViewController {
       oldValue?.accessibilityIdentifier = nil
       oldValue?.alpha = 0
       oldValue?.removeFromSuperview()
-      cardSnapBehavior.map { animator.removeBehavior($0) }
-      currentDynamicItem = currentCardView.map { ColorTranslatingDynamicItem(view: $0, origin: view.center, viewController: self) }
       attachPanGestureRecognizer()
       UIView.animate(
         withDuration: 0.2,
@@ -182,21 +199,10 @@ public final class StudyViewController: UIViewController {
           if let current = self.currentCardView {
             current.becomeFirstResponder()
             current.accessibilityIdentifier = "current-card"
-            self.attachSnapBehavior()
           }
         }
       )
     }
-  }
-
-  private func attachSnapBehavior() {
-    // TODO: Refactor so I don't have to force unwrap
-    guard let dynamicItem = currentDynamicItem, dynamicItem.bounds.size != .zero else {
-      return
-    }
-    let snapBehavior = UISnapBehavior(item: dynamicItem, snapTo: view.center)
-    animator.addBehavior(snapBehavior)
-    cardSnapBehavior = snapBehavior
   }
 
   private func attachPanGestureRecognizer() {
@@ -220,11 +226,8 @@ public final class StudyViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    view.addSubview(colorWashView)
-    view.addSubview(blurView)
+    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton].forEach(view.addSubview)
     makeStatusLabels()
-    view.addSubview(doneImageView)
-    view.addSubview(progressView)
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
@@ -242,8 +245,16 @@ public final class StudyViewController: UIViewController {
     for (_, label) in statusMessageLabels {
       label.snp.makeConstraints { make in
         make.centerX.equalToSuperview()
-        make.top.equalTo(doneImageView).offset(-16)
+        make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
       }
+    }
+    needsReviewButton.snp.makeConstraints { make in
+      make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
+      make.left.equalToSuperview().offset(16)
+    }
+    gotItRightButton.snp.makeConstraints { make in
+      make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
+      make.right.equalToSuperview().offset(-16)
     }
     studySession.studySessionStartDate = Date()
     configureUI(animated: false, completion: nil)
@@ -259,46 +270,68 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  override public func viewDidAppear(_ animated: Bool) {
-    super.viewDidAppear(animated)
-    attachSnapBehavior()
-  }
-
   @objc private func didPan(sender: UIPanGestureRecognizer) {
     guard
-      let currentCard = currentDynamicItem,
-      let isAnswerVisible = currentCardView?.isAnswerVisible,
-      let snap = cardSnapBehavior
+      let currentCard = currentCardView
     else {
       return
     }
-    let translation = sender.translation(in: currentCard.view)
+    let translation = sender.translation(in: currentCard)
     switch sender.state {
     case .began:
-      cardSnapBehavior.map { animator.removeBehavior($0) }
+      break
     case .changed:
+      let rotationStrength = min(translation.x / 320, 1)
+      let rotationAngle = (CGFloat.pi / 8) * rotationStrength
+      currentCard.transform = CGAffineTransform(rotationAngle: rotationAngle)
       currentCard.center = view.center + translation
+      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: currentCard.isAnswerVisible) {
+        colorWashView.backgroundColor = swipe.color
+        colorWashView.alpha = 0.4 * strength
+      } else {
+        colorWashView.backgroundColor = .clear
+      }
     case .ended:
       var correct: Bool?
       var shouldDismiss = false
-      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: isAnswerVisible), strength >= 1 {
+      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: currentCard.isAnswerVisible), strength >= 1 {
         correct = swipe.correct
         shouldDismiss = swipe.shouldDismiss
-        snap.snapPoint = swipe.snapPoint(view)
       }
-      cardSnapBehavior.map { animator.addBehavior($0) }
       if shouldDismiss {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+        let finalCenter = CGPoint(x: view.center.x + 2 * translation.x, y: view.bounds.height + currentCard.frame.height)
+        let finalRotationStrength = min((finalCenter.x - view.center.x) / 320, 1)
+        let finalRotationAngle = (CGFloat.pi / 8) * finalRotationStrength
+        UIView.animate(withDuration: 0.3) {
+          currentCard.center = finalCenter
+          currentCard.transform = CGAffineTransform(rotationAngle: finalRotationAngle)
+        } completion: { _ in
           self.finishStudySession()
         }
       } else if let correct = correct {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-          // TODO: Get rid of force unwrap
+        let horizontalTranslation = correct ? view.bounds.width : -1 * view.bounds.width
+        let finalCenter = CGPoint(x: view.center.x + horizontalTranslation, y: view.center.y + 2 * translation.y)
+        let finalRotationStrength = min((finalCenter.x - view.center.x) / 320, 1)
+        let finalRotationAngle = (CGFloat.pi / 8) * finalRotationStrength
+        UIView.animate(withDuration: 0.3) {
+          currentCard.center = finalCenter
+          currentCard.transform = CGAffineTransform(rotationAngle: finalRotationAngle)
+        } completion: { _ in
           self.userDidRespond(correct: correct)
+        }
+      } else {
+        // Need to return
+        sender.isEnabled = false
+        UIView.animate(withDuration: 0.7, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.7, options: .curveEaseInOut) {
+          currentCard.center = self.view.center
+          currentCard.transform = .identity
+        } completion: { _ in
+          sender.isEnabled = true
         }
       }
     case .cancelled, .failed:
-      cardSnapBehavior.map { animator.addBehavior($0) }
+      // Need to return
+      break
     default:
       break
     }
@@ -385,60 +418,10 @@ extension StudyViewController: UIAdaptivePresentationControllerDelegate {
   }
 }
 
-private extension StudyViewController {
-  /// Changes the color wash of `colorWashView` as the position of `view` changes.
-  final class ColorTranslatingDynamicItem: NSObject, UIDynamicItem {
-    init(view: UIView, origin: CGPoint, viewController: StudyViewController) {
-      self.view = view
-      self.origin = origin
-      self.viewController = viewController
-    }
-
-    let view: UIView
-    weak var viewController: StudyViewController?
-    var shouldChangeColor = false
-
-    var origin: CGPoint {
-      didSet {
-        configureUI()
-      }
-    }
-
-    var center: CGPoint {
-      get { view.center }
-      set {
-        view.center = newValue
-        configureUI()
-      }
-    }
-
-    var bounds: CGRect {
-      get { view.bounds }
-      set { view.bounds = newValue }
-    }
-
-    var transform: CGAffineTransform {
-      get { view.transform }
-      set { view.transform = newValue }
-    }
-
-    private func configureUI() {
-      let vector = CGVector(origin: origin, destination: center)
-      if let (swipe, alpha) = viewController?.bestSwipe(for: vector, answerVisible: shouldChangeColor) {
-        let intensity = alpha * 0.4
-        viewController?.setAlpha(alpha, for: swipe)
-        viewController?.colorWashView.backgroundColor = swipe.color.withAlphaComponent(intensity)
-      } else {
-        viewController?.hideAllSwipeMessages()
-        viewController?.colorWashView.backgroundColor = .clear
-      }
-    }
-  }
-}
-
 extension StudyViewController: PromptViewDelegate {
   public func promptViewDidRevealAnswer(_ promptView: PromptView) {
-    currentDynamicItem?.shouldChangeColor = true
+    gotItRightButton.isEnabled = true
+    needsReviewButton.isEnabled = true
   }
 }
 
