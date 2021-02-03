@@ -264,12 +264,12 @@ extension DocumentTableController {
 
     static func deleteItem(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       return ActionConfiguration(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
-        if viewProperties.noteProperties.folder == PredefinedFolders.recentlyDeleted.rawValue {
+        if viewProperties.noteProperties.folder == PredefinedFolder.recentlyDeleted.rawValue {
           try database.deleteNote(noteIdentifier: viewProperties.pageKey)
         } else {
           try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in
             var note = note
-            note.folder = PredefinedFolders.recentlyDeleted.rawValue
+            note.folder = PredefinedFolder.recentlyDeleted.rawValue
             return note
           })
         }
@@ -289,11 +289,11 @@ extension DocumentTableController {
     }
 
     static func moveItemToArchive(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolders.archive.rawValue { return nil }
+      if viewProperties.noteProperties.folder == PredefinedFolder.archive.rawValue { return nil }
       return ActionConfiguration(title: "Move to Archive", image: UIImage(systemName: "archivebox")) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolders.archive.rawValue
+          note.folder = PredefinedFolder.archive.rawValue
           return note
         })
         Logger.shared.info("Moved \(viewProperties.pageKey) to archive")
@@ -301,11 +301,11 @@ extension DocumentTableController {
     }
 
     static func moveItemToInbox(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolders.inbox.rawValue { return nil }
+      if viewProperties.noteProperties.folder == PredefinedFolder.inbox.rawValue { return nil }
       return ActionConfiguration(title: "Move to Inbox", image: UIImage(systemName: "tray.and.arrow.down"), backgroundColor: .systemIndigo) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolders.inbox.rawValue
+          note.folder = PredefinedFolder.inbox.rawValue
           return note
         })
         Logger.shared.info("Moved \(viewProperties.pageKey) to inbox")

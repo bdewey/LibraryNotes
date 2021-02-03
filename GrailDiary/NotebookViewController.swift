@@ -97,7 +97,7 @@ final class NotebookViewController: UIViewController {
   }()
 
   private lazy var secondaryNavigationController: UINavigationController = {
-    let detailViewController = SavingTextEditViewController(database: documentListViewController.database)
+    let detailViewController = SavingTextEditViewController(database: documentListViewController.database, folder: nil)
     let navigationController = UINavigationController(
       rootViewController: detailViewController
     )
@@ -210,14 +210,9 @@ final class NotebookViewController: UIViewController {
   }
 
   @objc func makeNewNote() {
-    let hashtag: String?
-    switch focusedNotebookStructure {
-    case .allNotes, .archive, .inbox, .trash:
-      hashtag = nil
-    case .hashtag(let focusedHashtag):
-      hashtag = focusedHashtag
-    }
-    let viewController = SavingTextEditViewController(database: database, currentHashtag: hashtag, autoFirstResponder: true)
+    let hashtag = focusedNotebookStructure.hashtag
+    let folder = focusedNotebookStructure.predefinedFolder
+    let viewController = SavingTextEditViewController(database: database, folder: folder, currentHashtag: hashtag, autoFirstResponder: true)
     currentNoteEditor = viewController
     notebookSplitViewController.show(.secondary)
     Logger.shared.info("Created a new view controller for a blank document")
@@ -289,8 +284,14 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteIdentifier: Note.Identifier?,
     shiftFocus: Bool
   ) {
+    let existingOrUncreatedNote: SavingTextEditViewController.ExistingOrUncreatedNote
+    if let noteIdentifier = noteIdentifier {
+      existingOrUncreatedNote = .existing(identifier: noteIdentifier)
+    } else {
+      existingOrUncreatedNote = .unsaved(folder: focusedNotebookStructure.predefinedFolder)
+    }
     let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(noteIdentifier: noteIdentifier, note: note),
+      configuration: SavingTextEditViewController.Configuration(noteIdentifier: existingOrUncreatedNote, note: note),
       noteStorage: database
     )
     noteViewController.setTitleMarkdown(note.title)

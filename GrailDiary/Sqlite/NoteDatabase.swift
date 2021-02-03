@@ -144,7 +144,7 @@ public final class NoteDatabase: UIDocument {
     for savedURL in sharedDefaults.pendingSavedURLs {
       var note = Note(markdown: savedURL.message)
       note.reference = .webPage(savedURL.url)
-      note.folder = PredefinedFolders.inbox.rawValue
+      note.folder = PredefinedFolder.inbox.rawValue
       _ = try createNote(note)
       count += 1
     }

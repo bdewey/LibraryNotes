@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D304D3E325BBD48400178590 /* 20210122-folder.sql in Resources */ = {isa = PBXBuildFile; fileRef = D304D3E225BBD48400178590 /* 20210122-folder.sql */; };
-		D304D3EB25BC8A6100178590 /* PredefinedFolders.swift in Sources */ = {isa = PBXBuildFile; fileRef = D304D3EA25BC8A6000178590 /* PredefinedFolders.swift */; };
+		D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D304D3EA25BC8A6000178590 /* PredefinedFolder.swift */; };
 		D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0242229E513C00F3B459 /* StudyLog.swift */; };
 		D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */; };
 		D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */; };
@@ -206,7 +206,7 @@
 		A8D2C034B73F8605B9C553FE /* Pods_CommonplaceBookApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2519F393D974710775AF26A /* Pods_CommonplaceBookAppTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_CommonplaceBookAppTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D304D3E225BBD48400178590 /* 20210122-folder.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20210122-folder.sql"; sourceTree = "<group>"; };
-		D304D3EA25BC8A6000178590 /* PredefinedFolders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedFolders.swift; sourceTree = "<group>"; };
+		D304D3EA25BC8A6000178590 /* PredefinedFolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PredefinedFolder.swift; sourceTree = "<group>"; };
 		D30B0242229E513C00F3B459 /* StudyLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLog.swift; sourceTree = "<group>"; };
 		D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavingTextEditViewController.swift; sourceTree = "<group>"; };
 		D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Collection.swift"; sourceTree = "<group>"; };
@@ -536,7 +536,7 @@
 				D3DD9B66256FF9A50019167E /* PackratParser */,
 				D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */,
 				D3DD9B67256FFA9B0019167E /* PieceTable */,
-				D304D3EA25BC8A6000178590 /* PredefinedFolders.swift */,
+				D304D3EA25BC8A6000178590 /* PredefinedFolder.swift */,
 				D31AFA83229D61E800ED2B76 /* Prompt.swift */,
 				D31AFA97229D61EB00ED2B76 /* PromptCollection.swift */,
 				D31AFA7A229D61E800ED2B76 /* PromptView.swift */,
@@ -950,7 +950,7 @@
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
-				D304D3EB25BC8A6100178590 /* PredefinedFolders.swift in Sources */,
+				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,

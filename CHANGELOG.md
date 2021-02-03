@@ -9,6 +9,7 @@
 ### Fixed
 
 - Editing notes always moved them to the "Notes" folder. Now they stay where they started.
+- When you are looking at a particular folder and create a new note, it will be in that folder. (Even the trash!)
 
 ## [0.40.0] - 2020-01-23
 

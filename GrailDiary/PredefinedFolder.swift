@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum PredefinedFolders: String {
+public enum PredefinedFolder: String {
   case archive
   case inbox
   case recentlyDeleted

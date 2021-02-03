@@ -8,9 +8,17 @@ import UIKit
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
+  enum ExistingOrUncreatedNote {
+    /// An unsaved note that will go into a folder when it is created.
+    case unsaved(folder: PredefinedFolder?)
+
+    /// An existing note. It lives in whatever folder it lives in.
+    case existing(identifier: Note.Identifier)
+  }
+
   /// Holds configuration settings for the view controller.
   struct Configuration {
-    var noteIdentifier: Note.Identifier?
+    var noteIdentifier: ExistingOrUncreatedNote
     var note: Note
     var initialSelectedRange = NSRange(location: 0, length: 0)
     var autoFirstResponder = false
@@ -33,10 +41,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   /// Initializes a view controller for a new, unsaved note.
-  convenience init(database: NoteDatabase, currentHashtag: String? = nil, autoFirstResponder: Bool = false) {
+  convenience init(database: NoteDatabase, folder: PredefinedFolder?, currentHashtag: String? = nil, autoFirstResponder: Bool = false) {
     let (note, initialOffset) = Note.makeBlankNote(hashtag: currentHashtag)
     let configuration = Configuration(
-      noteIdentifier: nil,
+      noteIdentifier: .unsaved(folder: folder),
       note: note,
       initialSelectedRange: NSRange(location: initialOffset, length: 0),
       autoFirstResponder: autoFirstResponder
@@ -65,7 +73,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var autosaveTimer: Timer?
 
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
-  var noteIdentifier: Note.Identifier? { configuration.noteIdentifier }
+  var noteIdentifier: Note.Identifier? {
+    guard case .existing(let noteIdentifier) = configuration.noteIdentifier else {
+      return nil
+    }
+    return noteIdentifier
+  }
 
   /// The current note.
   var note: Note { configuration.note }
@@ -137,7 +150,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
     do {
-      if let noteIdentifier = configuration.noteIdentifier {
+      switch configuration.noteIdentifier {
+      case .existing(identifier: let noteIdentifier):
         Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
         try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
           var mergedNote = note
@@ -145,9 +159,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
           mergedNote.folder = oldNote.folder
           return mergedNote
         })
-      } else {
-        configuration.noteIdentifier = try noteStorage.createNote(note)
-        Logger.shared.info("SavingTextEditViewController: Created note \(configuration.noteIdentifier!)")
+      case .unsaved(folder: let folder):
+        note.folder = folder?.rawValue
+        let noteIdentifier = try noteStorage.createNote(note)
+        Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier)")
+        configuration.noteIdentifier = .existing(identifier: noteIdentifier)
       }
     } catch {
       Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")

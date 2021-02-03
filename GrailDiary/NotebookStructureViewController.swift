@@ -71,6 +71,22 @@ final class NotebookStructureViewController: UIViewController {
       }
     }
 
+    var predefinedFolder: PredefinedFolder? {
+      switch self {
+      case .allNotes, .hashtag: return nil
+      case .archive: return .archive
+      case .inbox: return .inbox
+      case .trash: return .recentlyDeleted
+      }
+    }
+
+    var hashtag: String? {
+      guard case .hashtag(let hashtag) = self else {
+        return nil
+      }
+      return hashtag
+    }
+
     var query: QueryInterfaceRequest<NoteMetadataRecord> {
       let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
       let query = NoteRecord
@@ -82,11 +98,11 @@ final class NotebookStructureViewController: UIViewController {
       case .allNotes:
         return query.filter(NoteRecord.Columns.folder == nil)
       case .archive:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.archive.rawValue)
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.archive.rawValue)
       case .inbox:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.inbox.rawValue)
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.inbox.rawValue)
       case .trash:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolders.recentlyDeleted.rawValue)
+        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.recentlyDeleted.rawValue)
       case .hashtag(let hashtag):
         return NoteRecord
           .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
@@ -409,14 +425,14 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
       }
       let moveToArchiveAction = UIAction(title: "Move to Archive", image: UIImage(systemName: "archivebox")) { _ in
         do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolders.archive.rawValue)
+          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.archive.rawValue)
         } catch {
           Logger.shared.error("Error moving notes tagged \(hashtag) to archive: \(error)")
         }
       }
       let moveToInboxAction = UIAction(title: "Move to Inbox", image: UIImage(systemName: "tray.and.arrow.down")) { _ in
         do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolders.inbox.rawValue)
+          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.inbox.rawValue)
         } catch {
           Logger.shared.error("Error moving notes tagged \(hashtag) to inbox: \(error)")
         }
