@@ -337,6 +337,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       delegate: self
     )
     studyVC.title = navigationItem.title
+    studyVC.view.tintColor = .grailTint
     studyVC.modalTransitionStyle = .crossDissolve
     studyVC.modalPresentationStyle = .overFullScreen
     present(

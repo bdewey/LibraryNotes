@@ -66,8 +66,9 @@ public final class StudyViewController: UIViewController {
   }()
 
   private lazy var gotItRightButton: UIButton = {
-    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { _ in
+    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
       Logger.shared.info("Got it right!")
+      self?.markCurrentCardCorrect(true, currentTranslation: .zero)
     }))
     button.setTitle("Got it right", for: .normal)
     button.setTitleColor(.systemGreen, for: .normal)
@@ -77,13 +78,24 @@ public final class StudyViewController: UIViewController {
   }()
 
   private lazy var needsReviewButton: UIButton = {
-    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { _ in
+    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
       Logger.shared.info("Needs review")
+      self?.markCurrentCardCorrect(false, currentTranslation: .zero)
     }))
     button.setTitle("Needs review", for: .normal)
     button.setTitleColor(.systemRed, for: .normal)
     button.setTitleColor(.systemGray, for: .disabled)
     button.isEnabled = false
+    return button
+  }()
+
+  private lazy var closeButton: UIButton = {
+    let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
+      Logger.shared.info("Needs review")
+      self?.finishStudySession()
+    }))
+    button.setImage(UIImage(systemName: "xmark"), for: .normal)
+    button.setTitleColor(.systemGray, for: .normal)
     return button
   }()
 
@@ -213,9 +225,12 @@ public final class StudyViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton].forEach(view.addSubview)
+    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton].forEach(view.addSubview)
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
+    }
+    closeButton.snp.makeConstraints { make in
+      make.top.right.equalTo(view.safeAreaLayoutGuide).inset(16)
     }
     blurView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
@@ -301,16 +316,7 @@ public final class StudyViewController: UIViewController {
           self.finishStudySession()
         }
       } else if let correct = correct {
-        let horizontalTranslation = correct ? view.bounds.width : -1 * view.bounds.width
-        let finalCenter = CGPoint(x: view.center.x + horizontalTranslation, y: view.center.y + 2 * translation.y)
-        UIView.animate(withDuration: 0.3) {
-          currentCard.center = finalCenter
-          currentCard.transform = RotationParameters.default.transform(for: horizontalTranslation)
-          self.gotItRightButton.alpha = 1
-          self.needsReviewButton.alpha = 1
-        } completion: { _ in
-          self.userDidRespond(correct: correct)
-        }
+        markCurrentCardCorrect(correct, currentTranslation: translation)
       } else {
         // Need to return
         sender.isEnabled = false
@@ -328,6 +334,24 @@ public final class StudyViewController: UIViewController {
       break
     default:
       break
+    }
+  }
+
+  private func markCurrentCardCorrect(_ correct: Bool, currentTranslation: CGPoint) {
+    guard
+      let currentCard = currentCardView
+    else {
+      return
+    }
+    let horizontalTranslation = correct ? view.bounds.width : -1 * view.bounds.width
+    let finalCenter = CGPoint(x: view.center.x + horizontalTranslation, y: view.center.y + 2 * currentTranslation.y)
+    UIView.animate(withDuration: 0.3) {
+      currentCard.center = finalCenter
+      currentCard.transform = RotationParameters.default.transform(for: horizontalTranslation)
+      self.gotItRightButton.alpha = 1
+      self.needsReviewButton.alpha = 1
+    } completion: { _ in
+      self.userDidRespond(correct: correct)
     }
   }
 
