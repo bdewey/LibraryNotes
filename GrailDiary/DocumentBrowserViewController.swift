@@ -103,16 +103,11 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
     Logger.shared.info("Using document at \(database.fileURL)")
-    let viewController = NotebookViewController(database: database)
-    viewController.modalPresentationStyle = .fullScreen
-    viewController.modalTransitionStyle = .crossDissolve
-    viewController.view.tintColor = .systemOrange
-    present(viewController, animated: animated, completion: nil)
-    database.open(completionHandler: { success in
+    database.open(completionHandler: { [weak self] success in
+      guard let self = self else { return }
       let properties: [String: String] = [
         "Success": success.description,
-//        "documentState": String(describing: noteArchiveDocument.documentState),
-//        "previousError": noteArchiveDocument.previousError?.localizedDescription ?? "nil",
+        "documentState": String(describing: database.documentState),
       ]
       Logger.shared.info("In open completion handler. \(properties)")
       if success, !AppDelegate.isUITesting {
@@ -120,9 +115,14 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
           database.tryCreatingWelcomeContent()
         }
       }
+      let viewController = NotebookViewController(database: database)
+      viewController.modalPresentationStyle = .fullScreen
+      viewController.modalTransitionStyle = .crossDissolve
+      viewController.view.tintColor = .systemOrange
+      self.present(viewController, animated: animated, completion: nil)
+      self.topLevelViewController = viewController
       completion?(success)
     })
-    topLevelViewController = viewController
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
