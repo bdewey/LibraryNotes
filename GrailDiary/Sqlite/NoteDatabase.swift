@@ -600,23 +600,23 @@ public final class NoteDatabase: UIDocument {
         try Self.fetchAllRecords(query: query, from: db)
       }
       self.recordsDidChange = recordsDidChangeSubject.eraseToAnyPublisher()
-      subscription = DatabaseRegionObservation(tracking: [
+      self.subscription = DatabaseRegionObservation(tracking: [
         NoteRecord.all(),
       ]).publisher(in: dbQueue)
-      .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
-      .sink(
-        receiveCompletion: { completion in
-          switch completion {
-          case .failure(let error):
-            Logger.shared.error("Unexpected error monitoring database: \(error)")
-          case .finished:
-            Logger.shared.info("Monitoring pipeline shutting down")
+        .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
+        .sink(
+          receiveCompletion: { completion in
+            switch completion {
+            case .failure(let error):
+              Logger.shared.error("Unexpected error monitoring database: \(error)")
+            case .finished:
+              Logger.shared.info("Monitoring pipeline shutting down")
+            }
+          },
+          receiveValue: { [weak self] allMetadata in
+            self?.records = allMetadata
           }
-        },
-        receiveValue: { [weak self] allMetadata in
-          self?.records = allMetadata
-        }
-      )
+        )
     }
 
     private var subscription: AnyCancellable?
@@ -625,6 +625,7 @@ public final class NoteDatabase: UIDocument {
         recordsDidChangeSubject.send()
       }
     }
+
     public let recordsDidChange: AnyPublisher<Void, Never>
     private let recordsDidChangeSubject = PassthroughSubject<Void, Never>()
 

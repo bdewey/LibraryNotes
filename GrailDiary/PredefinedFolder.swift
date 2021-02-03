@@ -1,10 +1,4 @@
-//
-//  PredefinedFolders.swift
-//  GrailDiary
-//
-//  Created by Brian Dewey on 1/23/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 
