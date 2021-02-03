@@ -111,7 +111,7 @@ public final class StudyViewController: UIViewController {
     Swipe(
       classifier: LinearPanTranslationClassifier(direction: .down),
       message: "Dismiss",
-      color: .clear,
+      color: .systemGray,
       requiresVisibleAnswer: false,
       correct: nil,
       shouldDismiss: true,
@@ -159,21 +159,8 @@ public final class StudyViewController: UIViewController {
       }
   }
 
-  /// Mapping of possible swipe gestures with labels that tell the person we are going to match that swipe.
-  private var statusMessageLabels: [Swipe.ID: UILabel] = [:]
-
-  /// Sets the alpha of a particular swipe label to `alpha` and all other labels to zero.
-  private func setAlpha(_ alpha: CGFloat, for swipe: Swipe) {
-    for (swipeID, label) in statusMessageLabels {
-      label.alpha = (swipeID == swipe.id) ? alpha : 0
-    }
-  }
-
   /// Sets the alpha for all swipe messages to 0.
   private func hideAllSwipeMessages() {
-    for (_, label) in statusMessageLabels {
-      label.alpha = 0
-    }
     gotItRightButton.isEnabled = false
     needsReviewButton.isEnabled = false
   }
@@ -227,7 +214,6 @@ public final class StudyViewController: UIViewController {
   override public func viewDidLoad() {
     super.viewDidLoad()
     [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton].forEach(view.addSubview)
-    makeStatusLabels()
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
@@ -241,12 +227,6 @@ public final class StudyViewController: UIViewController {
       make.left.equalTo(view.safeAreaLayoutGuide).inset(16)
       make.centerY.equalTo(doneImageView.snp.centerY)
       make.right.equalTo(doneImageView.snp.left).offset(-8)
-    }
-    for (_, label) in statusMessageLabels {
-      label.snp.makeConstraints { make in
-        make.centerX.equalToSuperview()
-        make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
-      }
     }
     needsReviewButton.snp.makeConstraints { make in
       make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
@@ -262,11 +242,16 @@ public final class StudyViewController: UIViewController {
     navigationController?.presentationController?.delegate = self
   }
 
-  private func makeStatusLabels() {
-    for swipe in swipeClassifiers {
-      let label = swipe.makeLabel()
-      statusMessageLabels[swipe.id] = label
-      view.addSubview(label)
+  struct RotationParameters {
+    var rotationStrength: CGFloat
+    var rotationAngle: CGFloat
+
+    static let `default` = RotationParameters(rotationStrength: 320, rotationAngle: .pi / 8)
+
+    func transform(for xTranslation: CGFloat) -> CGAffineTransform {
+      let strength = min(xTranslation / rotationStrength, 1)
+      let angle = rotationAngle * strength
+      return CGAffineTransform(rotationAngle: angle)
     }
   }
 
@@ -281,15 +266,22 @@ public final class StudyViewController: UIViewController {
     case .began:
       break
     case .changed:
-      let rotationStrength = min(translation.x / 320, 1)
-      let rotationAngle = (CGFloat.pi / 8) * rotationStrength
-      currentCard.transform = CGAffineTransform(rotationAngle: rotationAngle)
+      currentCard.transform = RotationParameters.default.transform(for: translation.x)
       currentCard.center = view.center + translation
-      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: currentCard.isAnswerVisible) {
+      if let (swipe, strength) = bestSwipe(for: CGVector(destination: translation), answerVisible: currentCard.isAnswerVisible), strength > 0 {
         colorWashView.backgroundColor = swipe.color
         colorWashView.alpha = 0.4 * strength
+        if let correct = swipe.correct {
+          gotItRightButton.alpha = correct ? 1.0 : 1.0 - strength
+          needsReviewButton.alpha = !correct ? 1.0 : 1.0 - strength
+        } else {
+          gotItRightButton.alpha = 1.0 - strength
+          needsReviewButton.alpha = 1.0 - strength
+        }
       } else {
         colorWashView.backgroundColor = .clear
+        gotItRightButton.alpha = 1
+        needsReviewButton.alpha = 1
       }
     case .ended:
       var correct: Bool?
@@ -311,11 +303,11 @@ public final class StudyViewController: UIViewController {
       } else if let correct = correct {
         let horizontalTranslation = correct ? view.bounds.width : -1 * view.bounds.width
         let finalCenter = CGPoint(x: view.center.x + horizontalTranslation, y: view.center.y + 2 * translation.y)
-        let finalRotationStrength = min((finalCenter.x - view.center.x) / 320, 1)
-        let finalRotationAngle = (CGFloat.pi / 8) * finalRotationStrength
         UIView.animate(withDuration: 0.3) {
           currentCard.center = finalCenter
-          currentCard.transform = CGAffineTransform(rotationAngle: finalRotationAngle)
+          currentCard.transform = RotationParameters.default.transform(for: horizontalTranslation)
+          self.gotItRightButton.alpha = 1
+          self.needsReviewButton.alpha = 1
         } completion: { _ in
           self.userDidRespond(correct: correct)
         }
@@ -325,6 +317,8 @@ public final class StudyViewController: UIViewController {
         UIView.animate(withDuration: 0.7, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.7, options: .curveEaseInOut) {
           currentCard.center = self.view.center
           currentCard.transform = .identity
+          self.gotItRightButton.alpha = 1
+          self.needsReviewButton.alpha = 1
         } completion: { _ in
           sender.isEnabled = true
         }
