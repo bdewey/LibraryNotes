@@ -257,16 +257,34 @@ public final class StudyViewController: UIViewController {
     navigationController?.presentationController?.delegate = self
   }
 
+  /// How to transform the image while swiping.
+  /// The idea comes from https://github.com/cwRichardKim/RKSwipeCards/blob/master/RKSwipeCards/DraggableView.m
   struct RotationParameters {
-    var rotationStrength: CGFloat
+
+    /// Affects the amount of rotation based on lateral movement. Higher number == slower rotation
+    var rotationDenominator: CGFloat
+
+    /// Maximum amount of rotation (radians)
     var rotationAngle: CGFloat
 
-    static let `default` = RotationParameters(rotationStrength: 320, rotationAngle: .pi / 8)
+    /// Affects the amount of scaling based on lateral movement. Higher number == slower scaling
+    var scaleDenominator: CGFloat
+
+    /// The smallest we will scale the image.
+    var scaleMin: CGFloat
+
+    static let `default` = RotationParameters(
+      rotationDenominator: 320,
+      rotationAngle: .pi / 8,
+      scaleDenominator: 4,
+      scaleMin: 0.93
+    )
 
     func transform(for xTranslation: CGFloat) -> CGAffineTransform {
-      let strength = min(xTranslation / rotationStrength, 1)
+      let strength = min(xTranslation / rotationDenominator, 1)
       let angle = rotationAngle * strength
-      return CGAffineTransform(rotationAngle: angle)
+      let scale = max(1 - abs(strength) / scaleDenominator, scaleMin)
+      return CGAffineTransform(rotationAngle: angle).scaledBy(x: scale, y: scale)
     }
   }
 
