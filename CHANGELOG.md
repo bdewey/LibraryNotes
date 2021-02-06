@@ -4,6 +4,7 @@
 
 ### Added
 
+- New "rotate and shrink" effect in the study view
 - Quote formatting button
 
 ### Fixed
