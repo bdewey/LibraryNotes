@@ -355,7 +355,18 @@ public final class Literal: ParsingRule {
   }
 
   override public var possibleOpeningCharacters: CharacterSet {
-    [literalString.unicodeScalars[literalString.startIndex]]
+    guard let firstCharacter = literalString.first else {
+      return CharacterSet()
+    }
+    var characterSet: CharacterSet = [firstCharacter.unicodeScalars.first!]
+    if compareOptions.contains(.caseInsensitive), firstCharacter.isCased {
+      if firstCharacter.isUppercase {
+        characterSet.insert(firstCharacter.lowercased().unicodeScalars.first!)
+      } else {
+        characterSet.insert(firstCharacter.uppercased().unicodeScalars.first!)
+      }
+    }
+    return characterSet
   }
 }
 
