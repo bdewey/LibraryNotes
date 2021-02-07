@@ -271,8 +271,19 @@ public final class TextEditViewController: UIViewController {
       }
     })
 
+    let summaryButton = UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
+      let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
+      if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
+        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "tl;dr: ")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
+      } else {
+        textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
+      }
+    })
+
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton]
+    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton, summaryButton]
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar
