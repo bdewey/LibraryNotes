@@ -54,7 +54,7 @@ public final class DocumentTableController: NSObject {
         viewProperties.noteProperties.summary,
         viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", "),
       ]
-      configuration.secondaryText = secondaryComponents.compactMap({ $0 }).joined(separator: " ")
+      configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
       if viewProperties.hasLink {
         configuration.image = UIImage(systemName: "link")
