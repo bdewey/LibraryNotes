@@ -50,7 +50,11 @@ public final class DocumentTableController: NSObject {
       var configuration = cell.defaultContentConfiguration()
       let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
       configuration.attributedText = title
-      configuration.secondaryText = viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", ")
+      let secondaryComponents: [String?] = [
+        viewProperties.noteProperties.summary,
+        viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", "),
+      ]
+      configuration.secondaryText = secondaryComponents.compactMap({ $0 }).joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
       if viewProperties.hasLink {
         configuration.image = UIImage(systemName: "link")

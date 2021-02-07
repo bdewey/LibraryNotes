@@ -10,6 +10,7 @@ public struct Note: Equatable {
     title: String, text: String? = nil,
     reference: Note.Reference? = nil,
     folder: String? = nil,
+    summary: String? = nil,
     promptCollections: [Note.ContentKey: PromptCollection]
   ) {
     self.creationTimestamp = creationTimestamp
@@ -19,6 +20,7 @@ public struct Note: Equatable {
     self.text = text
     self.reference = reference
     self.folder = folder
+    self.summary = summary
     self.promptCollections = promptCollections
   }
 
@@ -48,6 +50,9 @@ public struct Note: Equatable {
   public var text: String?
   public var reference: Reference?
   public var folder: String?
+
+  /// A short summary of the contents of this note. This shows up in the note list.
+  public var summary: String?
   public var promptCollections: [ContentKey: PromptCollection]
 
   public static func == (lhs: Note, rhs: Note) -> Bool {

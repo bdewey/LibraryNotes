@@ -44,6 +44,7 @@ public extension Note {
       hashtags: parsedString.hashtags,
       title: String(parsedString.title.split(separator: "\n").first ?? ""),
       text: parsedString.string,
+      summary: parsedString.summary,
       promptCollections: keyedCollection
     )
   }
@@ -83,6 +84,17 @@ public extension ParsedString {
       results.insert(String(utf16CodeUnits: chars, count: chars.count))
     }
     return [String](results)
+  }
+
+  var summary: String? {
+    guard
+      let anchor = (try? result.get()).flatMap({ AnchoredNode(node: $0, startIndex: 0) }),
+      let summaryBody = anchor.first(where: { $0.type == .summaryBody })
+    else {
+      return nil
+    }
+    let chars = self[summaryBody.range]
+    return String(utf16CodeUnits: chars, count: chars.count)
   }
 
   var title: String {

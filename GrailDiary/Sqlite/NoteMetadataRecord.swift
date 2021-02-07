@@ -12,6 +12,7 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
   var folder: String?
   var noteLinks: [NoteLinkRecord]
   var contents: [ContentRecord]
+  var summary: String?
 
   static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
 }

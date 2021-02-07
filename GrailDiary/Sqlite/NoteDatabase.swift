@@ -832,6 +832,11 @@ internal extension NoteDatabase {
     try migrator.registerMigrationScript(.binaryContent)
     try migrator.registerMigrationScript(.creationTimestamp)
     try migrator.registerMigrationScript(.addFolders)
+    migrator.registerMigration("addSummary", migrate: { database in
+      try database.alter(table: "note", body: { table in
+        table.add(column: "summary", .text)
+      })
+    })
 
     let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
     try migrator.migrate(databaseQueue)
