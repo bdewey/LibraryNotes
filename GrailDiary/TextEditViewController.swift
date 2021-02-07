@@ -72,26 +72,24 @@ public final class TextEditViewController: UIViewController {
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { _, attributes in
       attributes.color = .quaternaryLabel
-      // TODO: Support Q&A cards
-//      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
-//        attributes.bold = true
-//        attributes.listLevel = 1
-//      } else {
-//        attributes.color = UIColor.quaternaryLabel
-//      }
     }
     formatters[.questionAndAnswer] = { $1.listLevel = 1 }
     formatters[.qnaDelimiter] = { $1.bold = true }
     formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
 
-    // TODO:
     formatters[.code] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
       $1.color = UIColor.secondaryLabel
     }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
+
+    formatters[.summaryDelimiter] = { $1.bold = true }
+    formatters[.summary] = {
+      $1.blockquoteBorderColor = UIColor.systemOrange
+      $1.italic = true
+    }
 
     formatters[.blockquote] = {
       $1.italic = true
@@ -273,8 +271,19 @@ public final class TextEditViewController: UIViewController {
       }
     })
 
+    let summaryButton = UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
+      let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
+      if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
+        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "tl;dr: ")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
+      } else {
+        textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
+        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
+      }
+    })
+
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton]
+    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton, summaryButton]
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar

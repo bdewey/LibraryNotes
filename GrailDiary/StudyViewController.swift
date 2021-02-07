@@ -260,7 +260,6 @@ public final class StudyViewController: UIViewController {
   /// How to transform the image while swiping.
   /// The idea comes from https://github.com/cwRichardKim/RKSwipeCards/blob/master/RKSwipeCards/DraggableView.m
   struct RotationParameters {
-
     /// Affects the amount of rotation based on lateral movement. Higher number == slower rotation
     var rotationDenominator: CGFloat
 

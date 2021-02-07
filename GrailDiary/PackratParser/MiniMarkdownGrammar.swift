@@ -28,6 +28,9 @@ public extension SyntaxTreeNodeType {
   static let qnaQuestion: SyntaxTreeNodeType = "qna_question"
   static let qnaAnswer: SyntaxTreeNodeType = "qna_answer"
   static let qnaDelimiter: SyntaxTreeNodeType = "qna_delimiter"
+  static let summaryDelimiter: SyntaxTreeNodeType = "summary_delimiter"
+  static let summaryBody: SyntaxTreeNodeType = "summary_body"
+  static let summary: SyntaxTreeNodeType = "summary"
 }
 
 public enum ListType {
@@ -62,6 +65,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     orderedList,
     blockquote,
     questionAndAnswer,
+    summary,
     paragraph
   ).memoize()
 
@@ -73,10 +77,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   lazy var header = InOrder(
     Characters(["#"]).repeating(1 ..< 7).as(.delimiter),
     softTab,
-    InOrder(
-      InOrder(newline.assertInverse(), dot).repeating(0...),
-      Choice(newline, dot.assertInverse())
-    ).as(.text)
+    singleLineStyledText
   ).wrapping(in: .header).memoize()
 
   /// My custom addition to markdown for handling questions-and-answers
@@ -87,6 +88,14 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     singleLineStyledText.wrapping(in: .qnaAnswer),
     paragraphTermination.zeroOrOne().wrapping(in: .text)
   ).wrapping(in: .questionAndAnswer).memoize()
+
+  lazy var summary = InOrder(
+    Choice(
+      InOrder(Literal("Summary: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
+      InOrder(Literal("tl;dr: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
+    ),
+    singleLineStyledText.wrapping(in: .summaryBody)
+  ).wrapping(in: .summary).memoize()
 
   lazy var paragraph = InOrder(
     nonDelimitedHashtag.zeroOrOne(),

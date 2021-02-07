@@ -14,6 +14,7 @@ struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
   var deleted: Bool
   var updateSequenceNumber: Int64
   var folder: String?
+  var summary: String?
 
   enum Columns {
     static let id = Column(CodingKeys.id)

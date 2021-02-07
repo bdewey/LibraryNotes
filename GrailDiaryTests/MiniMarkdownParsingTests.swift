@@ -211,6 +211,21 @@ final class MiniMarkdownParsingTests: XCTestCase {
     parseText("#books/2020", expectedStructure: "(document (paragraph hashtag))")
   }
 
+  func testSummary() {
+    let example = """
+    # _Book_, Author (Year)
+
+    tl;dr: I loved it. **Everyone** should read it.
+
+    Detailed notes here.
+    """
+
+    parseText(
+      example,
+      expectedStructure: "(document (header delimiter tab (emphasis delimiter text delimiter) text) blank_line (summary summary_delimiter (summary_body text (strong_emphasis delimiter text delimiter) text)) blank_line (paragraph text))"
+    )
+  }
+
   func testFile() {
     let pieceTable = PieceTable(TestStrings.markdownCanonical)
     let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
