@@ -222,7 +222,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
 
     parseText(
       example,
-      expectedStructure: "(document (header delimiter tab (emphasis delimiter text delimiter) text) blank_line (summary summary_delimiter tab (summary_body text (strong_emphasis delimiter text delimiter) text)) blank_line (paragraph text))"
+      expectedStructure: "(document (header delimiter tab (emphasis delimiter text delimiter) text) blank_line (summary summary_delimiter (summary_body text (strong_emphasis delimiter text delimiter) text)) blank_line (paragraph text))"
     )
   }
 

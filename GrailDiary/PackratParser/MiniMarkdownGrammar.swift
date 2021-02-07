@@ -91,10 +91,9 @@ public final class MiniMarkdownGrammar: PackratGrammar {
 
   lazy var summary = InOrder(
     Choice(
-      InOrder(Literal("Summary:", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
-      InOrder(Literal("tl;dr:", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
+      InOrder(Literal("Summary: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
+      InOrder(Literal("tl;dr: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
     ),
-    Literal(" ").as(.softTab),
     singleLineStyledText.wrapping(in: .summaryBody)
   ).wrapping(in: .summary).memoize()
 

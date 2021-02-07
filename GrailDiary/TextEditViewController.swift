@@ -87,7 +87,6 @@ public final class TextEditViewController: UIViewController {
 
     formatters[.summaryDelimiter] = { $1.bold = true }
     formatters[.summary] = {
-      $1.listLevel += 1
       $1.blockquoteBorderColor = UIColor.systemOrange
       $1.italic = true
     }

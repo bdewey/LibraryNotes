@@ -62,7 +62,7 @@ final class ParsedTextStorageTests: XCTestCase {
       ],
       are: Array([
         DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 50), changeInLength: 50),
-        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 10, length: 31), changeInLength: 1),
+        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 8, length: 33), changeInLength: 1),
       ].joined())
     )
   }
