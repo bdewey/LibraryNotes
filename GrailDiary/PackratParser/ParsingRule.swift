@@ -326,31 +326,36 @@ final class Characters: ParsingRule {
 }
 
 public final class Literal: ParsingRule {
-  init(_ string: String) {
-    self.chars = Array(string.utf16)
+  init(_ string: String, compareOptions: String.CompareOptions = []) {
+    self.literalString = string
+    self.utfCount = string.utf16.count
+    self.compareOptions = compareOptions
   }
 
-  let chars: [unichar]
+  let literalString: String
+  let utfCount: Int
+  let compareOptions: String.CompareOptions
 
   override public var description: String {
-    let str = String(utf16CodeUnits: chars, count: chars.count)
-    return "\(super.description) \(str)"
+    return "\(super.description) \(literalString)"
   }
 
   override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
-    var length = 0
-    while length < chars.count, let char = buffer.utf16(at: index + length), char == chars[length] {
-      length += 1
-    }
-    if length == chars.count {
-      return performanceCounters.recordResult(ParsingResult(succeeded: true, length: length, examinedLength: length))
+    let bufferString = String(
+      utf16CodeUnitsNoCopy: buffer[NSRange(location: index, length: min(utfCount, buffer.count - index))],
+      count: utfCount,
+      freeWhenDone: false
+    )
+    let commonPrefix = literalString.commonPrefix(with: bufferString, options: compareOptions)
+    if commonPrefix.count == literalString.count {
+      return performanceCounters.recordResult(ParsingResult(succeeded: true, length: utfCount, examinedLength: utfCount))
     } else {
-      return performanceCounters.recordResult(ParsingResult(succeeded: false, length: 0, examinedLength: length + 1))
+      return performanceCounters.recordResult(ParsingResult(succeeded: false, length: 0, examinedLength: commonPrefix.count + 1))
     }
   }
 
   override public var possibleOpeningCharacters: CharacterSet {
-    return [Unicode.Scalar(chars[0])!]
+    [literalString.unicodeScalars[literalString.startIndex]]
   }
 }
 

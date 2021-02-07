@@ -72,26 +72,25 @@ public final class TextEditViewController: UIViewController {
     formatters[.list] = { $1.listLevel += 1 }
     formatters[.delimiter] = { _, attributes in
       attributes.color = .quaternaryLabel
-      // TODO: Support Q&A cards
-//      if delimiter.parent is QuestionAndAnswer.PrefixedLine {
-//        attributes.bold = true
-//        attributes.listLevel = 1
-//      } else {
-//        attributes.color = UIColor.quaternaryLabel
-//      }
     }
     formatters[.questionAndAnswer] = { $1.listLevel = 1 }
     formatters[.qnaDelimiter] = { $1.bold = true }
     formatters[.strongEmphasis] = { $1.bold = true }
     formatters[.emphasis] = { $1.italic.toggle() }
 
-    // TODO:
     formatters[.code] = { $1.familyName = "Menlo" }
     formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
     formatters[.clozeHint] = {
       $1.color = UIColor.secondaryLabel
     }
     formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
+
+    formatters[.summaryDelimiter] = { $1.bold = true }
+    formatters[.summary] = {
+      $1.listLevel += 1
+      $1.blockquoteBorderColor = UIColor.systemOrange
+      $1.italic = true
+    }
 
     formatters[.blockquote] = {
       $1.italic = true
