@@ -4,6 +4,7 @@
 
 ### Added
 
+- You can add a summary to notes, which will show up in the notes view.
 - New "rotate and shrink" effect in the study view
 - Quote formatting button
 
