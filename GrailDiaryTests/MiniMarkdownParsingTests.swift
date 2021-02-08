@@ -150,7 +150,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
 
   func testParseImages() {
     let example = "This text has an image reference: ![xkcd](https://imgs.xkcd.com/comics/october_30th.png)"
-    parseText(example, expectedStructure: "(document (paragraph text image))")
+    parseText(example, expectedStructure: "(document (paragraph text (image text link_alt_text text link_target text)))")
   }
 
   func testUnderlineEmphasis() {

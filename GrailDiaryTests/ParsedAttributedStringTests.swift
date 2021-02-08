@@ -6,7 +6,8 @@ import XCTest
 private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
-  buffer: SafeUnicodeBuffer
+  buffer: SafeUnicodeBuffer,
+  attributes: inout AttributedStringAttributes
 ) -> [unichar] {
   return Array("\t".utf16)
 }
@@ -86,7 +87,7 @@ final class ParsedAttributedStringTests: XCTestCase {
       formattingFunctions: formattingFunctions,
       replacementFunctions: [
         .softTab: formatTab,
-        .delimiter: { _, _, _ in [] },
+        .delimiter: { _, _, _, _ in [] },
       ]
     )
   }

@@ -7,7 +7,8 @@ import XCTest
 private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
-  buffer: SafeUnicodeBuffer
+  buffer: SafeUnicodeBuffer,
+  attributes: inout AttributedStringAttributes
 ) -> [unichar] {
   return Array("\t".utf16)
 }

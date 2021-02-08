@@ -12,6 +12,8 @@ public extension SyntaxTreeNodeType {
   static let hashtag: SyntaxTreeNodeType = "hashtag"
   static let header: SyntaxTreeNodeType = "header"
   static let image: SyntaxTreeNodeType = "image"
+  static let linkAltText: SyntaxTreeNodeType = "link_alt_text"
+  static let linkTarget: SyntaxTreeNodeType = "link_target"
   static let list: SyntaxTreeNodeType = "list"
   static let listItem: SyntaxTreeNodeType = "list_item"
   static let paragraph: SyntaxTreeNodeType = "paragraph"
@@ -135,12 +137,12 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   lazy var nonDelimitedHashtag = InOrder(Literal("#"), nonWhitespace.repeating(1...)).as(.hashtag).memoize()
 
   lazy var image = InOrder(
-    Literal("!["),
-    Characters(CharacterSet(charactersIn: "\n]").inverted).repeating(0...),
-    Literal("]("),
-    Characters(CharacterSet(charactersIn: "\n)").inverted).repeating(0...),
-    Literal(")")
-  ).as(.image).memoize()
+    Literal("![").as(.text),
+    Characters(CharacterSet(charactersIn: "\n]").inverted).repeating(0...).as(.linkAltText),
+    Literal("](").as(.text),
+    Characters(CharacterSet(charactersIn: "\n)").inverted).repeating(0...).as(.linkTarget),
+    Literal(")").as(.text)
+  ).wrapping(in: .image).memoize()
 
   lazy var cloze = InOrder(
     Literal("?[").as(.delimiter),

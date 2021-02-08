@@ -73,7 +73,7 @@ extension ParsedAttributedString.Settings {
   static func clozeRenderer(hidingClozeAt index: Int) -> ParsedAttributedString.Settings {
     var settings = ParsedAttributedString.Settings.plainText(textStyle: .body)
     var replaceClozeCount = 0
-    settings.replacementFunctions[.cloze] = { node, startIndex, buffer in
+    settings.replacementFunctions[.cloze] = { node, startIndex, buffer, _ in
       let shouldHide = replaceClozeCount == index
       replaceClozeCount += 1
       if shouldHide {

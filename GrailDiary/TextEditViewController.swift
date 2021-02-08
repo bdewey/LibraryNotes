@@ -14,9 +14,6 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
   public init() {
-    self.textStorage = TextEditViewController.makeTextStorage(
-      formatters: TextEditViewController.formatters()
-    )
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
     NotificationCenter.default.addObserver(
@@ -40,9 +37,58 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  public let textStorage: ParsedTextStorage
+  public lazy var textStorage: ParsedTextStorage = {
+    var defaultAttributes: AttributedStringAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.label,
+    ]
+    defaultAttributes.headIndent = 28
+    defaultAttributes.firstLineHeadIndent = 28
+    let storage = ParsedAttributedString(
+      grammar: MiniMarkdownGrammar.shared,
+      defaultAttributes: defaultAttributes,
+      formattingFunctions: formatters,
+      replacementFunctions: [
+        .softTab: { _, _, _, _ in Array("\t".utf16) },
+        .unorderedListOpening: { _, _, _, _ in Array("\u{2022}".utf16) },
+        .image: imageReplacement,
+      ]
+    )
+    return ParsedTextStorage(storage: storage)
+  }()
 
-  public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
+  private func imageReplacement(
+    node: SyntaxTreeNode,
+    startIndex: Int,
+    buffer: SafeUnicodeBuffer,
+    attributes: inout AttributedStringAttributes
+  ) -> [unichar]? {
+    let anchoredNode = AnchoredNode(node: node, startIndex: startIndex)
+    guard let targetNode = anchoredNode.first(where: { $0.type == .linkTarget }) else {
+      attributes.color = .quaternaryLabel
+      return nil
+    }
+    let targetChars = buffer[targetNode.range]
+    let target = String(utf16CodeUnits: targetChars, count: targetChars.count)
+    do {
+      // TODO: What's the right image width?
+      if let imageData = try delegate?.retrieveImageDataForKey(target),
+         let image = imageData.image(maxSize: 200) {
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        attributes[.attachment] = attachment
+        return Array("\u{fffc}".utf16)
+      }
+    } catch {
+      Logger.shared.error("Unexpected error getting image data: \(error)")
+    }
+
+    // fallback -- show the markdown code instead of the image
+    attributes.color = .quaternaryLabel
+    return nil
+  }
+
+  public weak var delegate: (TextEditViewControllerDelegate & ImageStorage)?
 
   /// The markdown
   public var markdown: String {
@@ -54,8 +100,7 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  private static func formatters(
-  ) -> [SyntaxTreeNodeType: FormattingFunction] {
+  private lazy var formatters: [SyntaxTreeNodeType: FormattingFunction] = {
     var formatters: [SyntaxTreeNodeType: FormattingFunction] = [:]
     formatters[.header] = {
       let headingLevel = $0.children[0].length
@@ -97,31 +142,9 @@ public final class TextEditViewController: UIViewController {
       $1.listLevel += 1
     }
     return formatters
-  }
+  }()
 
-  private static func makeTextStorage(
-    formatters: [SyntaxTreeNodeType: FormattingFunction]
-  ) -> ParsedTextStorage {
-    var defaultAttributes: AttributedStringAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: .body),
-      .foregroundColor: UIColor.label,
-    ]
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
-    let storage = ParsedAttributedString(
-      grammar: MiniMarkdownGrammar.shared,
-      defaultAttributes: defaultAttributes,
-      formattingFunctions: formatters,
-      replacementFunctions: [
-        .softTab: formatTab,
-        .unorderedListOpening: formatBullet,
-        .image: imageReplacement,
-      ]
-    )
-    return ParsedTextStorage(storage: storage)
-  }
-
-  private lazy var textView: UITextView = {
+  private lazy var textView: MarkdownEditingTextView = {
     let layoutManager = LayoutManager()
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
@@ -583,28 +606,17 @@ private extension TextEditViewController {
   }
 }
 
-// MARK: - Replacement functions
-
-private func formatTab(
-  node: SyntaxTreeNode,
-  startIndex: Int,
-  buffer: SafeUnicodeBuffer
-) -> [unichar] {
-  return Array("\t".utf16)
-}
-
-private func formatBullet(
-  node: SyntaxTreeNode,
-  startIndex: Int,
-  buffer: SafeUnicodeBuffer
-) -> [unichar] {
-  return Array("\u{2022}".utf16)
-}
-
-private func imageReplacement(
-  node: SyntaxTreeNode,
-  startIndex: Int,
-  buffer: SafeUnicodeBuffer
-) -> [unichar] {
-  return Array("\u{fffc}".utf16)
+private extension Data {
+  func image(maxSize: CGFloat) -> UIImage? {
+    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
+      return nil
+    }
+    let options: [NSString: NSObject] = [
+      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
+      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
+      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
+    ]
+    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
+    return image
+  }
 }

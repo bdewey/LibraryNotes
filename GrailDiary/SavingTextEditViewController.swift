@@ -7,7 +7,7 @@ import UIKit
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
-final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, MarkdownEditingTextViewImageStoring {
+final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, ImageStorage {
   enum ExistingOrUncreatedNote {
     /// An unsaved note that will go into a folder when it is created.
     case unsaved(folder: PredefinedFolder?)
@@ -212,12 +212,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
-  func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String {
+  func storeImageData(_ imageData: Data, suffix: String) throws -> String {
     let key = imageData.sha1Digest() + "." + suffix
     return try noteStorage.storeAssetData(imageData, key: key)
   }
 
-  func markdownEditingTextView(_ textView: MarkdownEditingTextView, imageDataForKey key: String) throws -> Data {
+  func retrieveImageDataForKey(_ key: String) throws -> Data {
     return try noteStorage.retrieveAssetDataForKey(key)
   }
 }

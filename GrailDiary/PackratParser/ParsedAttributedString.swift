@@ -8,7 +8,7 @@ import UIKit
 public typealias FormattingFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
 
 /// A function that overlays replacements...
-public typealias ReplacementFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer) -> [unichar]?
+public typealias ReplacementFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
 
 private extension Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
@@ -229,7 +229,8 @@ private extension ParsedAttributedString {
     }
     var attributes = attributes
     formattingFunctions[node.type]?(node, &attributes)
-    if let replacementFunction = replacementFunctions[node.type], let textReplacement = replacementFunction(node, startingIndex, rawString) {
+    if let replacementFunction = replacementFunctions[node.type],
+       let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes) {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
@@ -286,8 +287,8 @@ public extension ParsedAttributedString.Settings {
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.strongEmphasis] = { $1.bold = true }
     formattingFunctions[.code] = { $1.familyName = "Menlo" }
-    replacementFunctions[.delimiter] = { _, _, _ in [] }
-    replacementFunctions[.clozeHint] = { _, _, _ in [] }
+    replacementFunctions[.delimiter] = { _, _, _, _ in [] }
+    replacementFunctions[.clozeHint] = { _, _, _, _ in [] }
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: textStyle),
       .foregroundColor: textColor,
