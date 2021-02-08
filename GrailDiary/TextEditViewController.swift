@@ -115,6 +115,7 @@ public final class TextEditViewController: UIViewController {
       replacementFunctions: [
         .softTab: formatTab,
         .unorderedListOpening: formatBullet,
+        .image: imageReplacement,
       ]
     )
     return ParsedTextStorage(storage: storage)
@@ -598,4 +599,12 @@ private func formatBullet(
   buffer: SafeUnicodeBuffer
 ) -> [unichar] {
   return Array("\u{2022}".utf16)
+}
+
+private func imageReplacement(
+  node: SyntaxTreeNode,
+  startIndex: Int,
+  buffer: SafeUnicodeBuffer
+) -> [unichar] {
+  return Array("\u{fffc}".utf16)
 }

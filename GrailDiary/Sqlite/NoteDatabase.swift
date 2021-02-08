@@ -392,21 +392,6 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public var assetKeys: [String] {
-    do {
-      guard let dbQueue = dbQueue else {
-        throw Error.databaseIsNotOpen
-      }
-      return try dbQueue.read { db in
-        let request = AssetRecord.select([AssetRecord.Columns.id])
-        return try String.fetchAll(db, request)
-      }
-    } catch {
-      Logger.shared.error("Unexpected error getting asset keys: \(error)")
-      return []
-    }
-  }
-
   public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
@@ -428,6 +413,18 @@ public final class NoteDatabase: UIDocument {
       try asset.save(db)
       return key
     }
+  }
+
+  public func retrieveAssetDataForKey(_ key: String) throws -> Data {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    guard let record = try dbQueue.read({ db in
+      try AssetRecord.filter(key: key).fetchOne(db)
+    }) else {
+      throw Error.noSuchAsset
+    }
+    return record.data
   }
 
   public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedPrompts: Bool) throws {

@@ -14,6 +14,9 @@ public protocol MarkdownEditingTextViewImageStoring: AnyObject {
   /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
   /// - returns: A string key that can locate this image later.
   func markdownEditingTextView(_ textView: MarkdownEditingTextView, store imageData: Data, suffix: String) throws -> String
+
+  /// Given the key returned from `markdownEditingTextView(_:store:suffix:)`, retrieve the corresponding image data.
+  func markdownEditingTextView(_ textView: MarkdownEditingTextView, imageDataForKey: String) throws -> Data
 }
 
 /// Custom UITextView subclass that overrides "copy" to copy Markdown.
