@@ -404,29 +404,6 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public func storeAssetData(_ data: Data, key: String) throws -> String {
-    guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
-    }
-    return try dbQueue.write { db in
-      let asset = AssetRecord(id: key, data: data)
-      try asset.save(db)
-      return key
-    }
-  }
-
-  public func retrieveAssetDataForKey(_ key: String) throws -> Data {
-    guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
-    }
-    guard let record = try dbQueue.read({ db in
-      try AssetRecord.filter(key: key).fetchOne(db)
-    }) else {
-      throw Error.noSuchAsset
-    }
-    return record.data
-  }
-
   public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedPrompts: Bool) throws {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen

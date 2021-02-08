@@ -13,9 +13,11 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  public init() {
+  public init(imageStorage: ImageStorage) {
+    self.imageStorage = imageStorage
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
+    textView.imageStorage = imageStorage
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleKeyboardNotification(_:)),
@@ -35,6 +37,8 @@ public final class TextEditViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  private let imageStorage: ImageStorage
+
   // Init-time state.
 
   public lazy var textStorage: ParsedTextStorage = {
@@ -51,44 +55,13 @@ public final class TextEditViewController: UIViewController {
       replacementFunctions: [
         .softTab: { _, _, _, _ in Array("\t".utf16) },
         .unorderedListOpening: { _, _, _, _ in Array("\u{2022}".utf16) },
-        .image: imageReplacement,
+        .image: imageStorage.imageReplacement,
       ]
     )
     return ParsedTextStorage(storage: storage)
   }()
 
-  private func imageReplacement(
-    node: SyntaxTreeNode,
-    startIndex: Int,
-    buffer: SafeUnicodeBuffer,
-    attributes: inout AttributedStringAttributes
-  ) -> [unichar]? {
-    let anchoredNode = AnchoredNode(node: node, startIndex: startIndex)
-    guard let targetNode = anchoredNode.first(where: { $0.type == .linkTarget }) else {
-      attributes.color = .quaternaryLabel
-      return nil
-    }
-    let targetChars = buffer[targetNode.range]
-    let target = String(utf16CodeUnits: targetChars, count: targetChars.count)
-    do {
-      // TODO: What's the right image width?
-      if let imageData = try delegate?.retrieveImageDataForKey(target),
-         let image = imageData.image(maxSize: 200) {
-        let attachment = NSTextAttachment()
-        attachment.image = image
-        attributes[.attachment] = attachment
-        return Array("\u{fffc}".utf16)
-      }
-    } catch {
-      Logger.shared.error("Unexpected error getting image data: \(error)")
-    }
-
-    // fallback -- show the markdown code instead of the image
-    attributes.color = .quaternaryLabel
-    return nil
-  }
-
-  public weak var delegate: (TextEditViewControllerDelegate & ImageStorage)?
+  public weak var delegate: TextEditViewControllerDelegate?
 
   /// The markdown
   public var markdown: String {
@@ -160,7 +133,6 @@ public final class TextEditViewController: UIViewController {
         kUTTypePlainText as String,
       ]
     )
-    textView.imageStorage = delegate
     return textView
   }()
 
@@ -603,20 +575,5 @@ private extension TextEditViewController {
     textView.selectedRange = NSRange(location: range.lowerBound, length: 0)
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
-  }
-}
-
-private extension Data {
-  func image(maxSize: CGFloat) -> UIImage? {
-    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
-      return nil
-    }
-    let options: [NSString: NSObject] = [
-      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
-      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
-      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
-    ]
-    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
-    return image
   }
 }

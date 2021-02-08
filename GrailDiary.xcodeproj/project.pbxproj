@@ -105,6 +105,7 @@
 		D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = D39D2467256C013100948A72 /* ParsedTextStorage.m */; };
 		D39D246E256C0E5C00948A72 /* PlainTextGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */; };
 		D39D247C256C328900948A72 /* ParsedAttributedStringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39D247B256C328900948A72 /* ParsedAttributedStringTests.swift */; };
+		D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */; };
 		D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */; };
 		D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A5255A241E65350044F8A2 /* AssetRecord.swift */; };
 		D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */; };
@@ -308,6 +309,7 @@
 		D39D2467256C013100948A72 /* ParsedTextStorage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ParsedTextStorage.m; sourceTree = "<group>"; };
 		D39D246D256C0E5C00948A72 /* PlainTextGrammar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlainTextGrammar.swift; sourceTree = "<group>"; };
 		D39D247B256C328900948A72 /* ParsedAttributedStringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsedAttributedStringTests.swift; sourceTree = "<group>"; };
+		D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryRecord.swift; sourceTree = "<group>"; };
 		D3A5255A241E65350044F8A2 /* AssetRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetRecord.swift; sourceTree = "<group>"; };
 		D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MergeableRecord.swift; sourceTree = "<group>"; };
@@ -422,7 +424,6 @@
 		D3456DC7256F07DF00D32D14 /* Sqlite */ = {
 			isa = PBXGroup;
 			children = (
-				D3F90E5E2587301300162CFC /* Migrations */,
 				D3A5255A241E65350044F8A2 /* AssetRecord.swift */,
 				D32B16BE259943B800766D55 /* BinaryContentRecord.swift */,
 				D32B16C42599457A00766D55 /* ContentIdentifier.swift */,
@@ -430,7 +431,9 @@
 				D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */,
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
+				D3F90E5E2587301300162CFC /* Migrations */,
 				D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */,
+				D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */,
 				D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteLinkRecord.swift */,
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
@@ -919,6 +922,7 @@
 				D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
 				D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */,
+				D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */,
 				D30D6B512549C44800F5902D /* ParsingRule.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,

@@ -7,7 +7,7 @@ import UIKit
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
-final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate, ImageStorage {
+final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
   enum ExistingOrUncreatedNote {
     /// An unsaved note that will go into a folder when it is created.
     case unsaved(folder: PredefinedFolder?)
@@ -63,7 +63,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var configuration: Configuration
   private let noteStorage: NoteDatabase
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = TextEditViewController()
+    let viewController = TextEditViewController(imageStorage: noteStorage)
     viewController.delegate = self
     viewController.markdown = configuration.note.text ?? ""
     viewController.selectedRange = configuration.initialSelectedRange
@@ -210,14 +210,5 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     } else {
       return Array([[hashtag], existingHashtags].joined())
     }
-  }
-
-  func storeImageData(_ imageData: Data, suffix: String) throws -> String {
-    let key = imageData.sha1Digest() + "." + suffix
-    return try noteStorage.storeAssetData(imageData, key: key)
-  }
-
-  func retrieveImageDataForKey(_ key: String) throws -> Data {
-    return try noteStorage.retrieveAssetDataForKey(key)
   }
 }

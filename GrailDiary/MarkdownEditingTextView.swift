@@ -7,17 +7,6 @@ import UIKit
 
 private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "TextView")
 
-public protocol ImageStorage: AnyObject {
-  /// Store image data.
-  /// - parameter imageData: The image data to store
-  /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
-  /// - returns: A string key that can locate this image later.
-  func storeImageData(_ imageData: Data, suffix: String) throws -> String
-
-  /// Given the key returned from `markdownEditingTextView(_:store:suffix:)`, retrieve the corresponding image data.
-  func retrieveImageDataForKey(_ key: String) throws -> Data
-}
-
 /// Custom UITextView subclass that overrides "copy" to copy Markdown.
 // TODO: Move renderers, MiniMarkdown text storage management, etc. to this class.
 public final class MarkdownEditingTextView: UITextView {
@@ -46,7 +35,7 @@ public final class MarkdownEditingTextView: UITextView {
     super.paste(itemProviders: itemProviders)
   }
 
-  public weak var imageStorage: ImageStorage?
+  public var imageStorage: ImageStorage?
 
   override public func paste(_ sender: Any?) {
     if let image = UIPasteboard.general.image, let imageStorage = self.imageStorage {

@@ -230,7 +230,8 @@ private extension ParsedAttributedString {
     var attributes = attributes
     formattingFunctions[node.type]?(node, &attributes)
     if let replacementFunction = replacementFunctions[node.type],
-       let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes) {
+       let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes)
+    {
       node.textReplacement = textReplacement
       node.hasTextReplacement = true
       node.textReplacementChangeInLength = textReplacement.count - node.length
