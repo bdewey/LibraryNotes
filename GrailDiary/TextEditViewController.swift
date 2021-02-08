@@ -51,8 +51,8 @@ public final class TextEditViewController: UIViewController {
     let storage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
-      formattingFunctions: formatters,
-      replacementFunctions: [
+      quickFormatFunctions: formatters,
+      fullFormatFunctions: [
         .softTab: { _, _, _, _ in Array("\t".utf16) },
         .unorderedListOpening: { _, _, _, _ in Array("\u{2022}".utf16) },
         .image: imageStorage.imageReplacement,
@@ -73,8 +73,8 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  private lazy var formatters: [SyntaxTreeNodeType: FormattingFunction] = {
-    var formatters: [SyntaxTreeNodeType: FormattingFunction] = [:]
+  private lazy var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = {
+    var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = [:]
     formatters[.header] = {
       let headingLevel = $0.children[0].length
       switch headingLevel {

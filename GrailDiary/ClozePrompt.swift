@@ -67,11 +67,11 @@ extension ClozePrompt: Prompt {
   }
 }
 
-private extension ParsedAttributedString.Settings {
+extension ParsedAttributedString.Settings {
   func hidingCloze(at index: Int) -> Self {
     var settings = self
     var replaceClozeCount = 0
-    settings.replacementFunctions[.cloze] = { node, startIndex, buffer, attributes in
+    settings.fullFormatFunctions[.cloze] = { node, startIndex, buffer, attributes in
       let shouldHide = replaceClozeCount == index
       replaceClozeCount += 1
       if shouldHide {
@@ -101,7 +101,7 @@ private extension ParsedAttributedString.Settings {
     }
 
     var formatClozeCount = 0
-    settings.formattingFunctions[.cloze] = { _, attributes in
+    settings.quickFormatFunctions[.cloze] = { _, attributes in
       let shouldHighlight = formatClozeCount == index
       formatClozeCount += 1
       if shouldHighlight {
@@ -115,7 +115,7 @@ private extension ParsedAttributedString.Settings {
   func highlightingCloze(at index: Int) -> Self {
     var settings = self
     var formatClozeCount = 0
-    settings.formattingFunctions[.cloze] = { _, attributes in
+    settings.quickFormatFunctions[.cloze] = { _, attributes in
       let shouldHighlight = formatClozeCount == index
       formatClozeCount += 1
       if shouldHighlight {

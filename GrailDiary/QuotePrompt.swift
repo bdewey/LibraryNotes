@@ -60,7 +60,7 @@ extension QuotePrompt: Prompt {
   }
 
   public func renderCardFront(
-    imageStorage: ImageStorage
+    imageStorage: ImageStorage?
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
     let renderedMarkdown = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body, imageStorage: imageStorage))
     let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""

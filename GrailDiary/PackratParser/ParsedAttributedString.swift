@@ -4,11 +4,12 @@ import Foundation
 import Logging
 import UIKit
 
-/// A function that modifies NSAttributedString attributes based the syntax tree.
-public typealias FormattingFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
+/// A quick format function can change *only* string attributes based *only* on the type of syntax tree node, but it can do it with simpler syntax than FullFormatFunction.
+public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
 
-/// A function that overlays replacements...
-public typealias ReplacementFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
+/// A function can change both formatting *and* the actual string characters that represent a part of the syntax tree. It also gets to examine the actual text as opposed to
+/// just knowing the type.
+public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
 
 private extension Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
@@ -37,8 +38,8 @@ private extension Logger {
   public struct Settings {
     var grammar: PackratGrammar
     var defaultAttributes: AttributedStringAttributes
-    var formattingFunctions: [SyntaxTreeNodeType: FormattingFunction]
-    var replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
+    var quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
+    var fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   }
 
   public convenience init(string: String, settings: Settings) {
@@ -46,8 +47,8 @@ private extension Logger {
       string: string,
       grammar: settings.grammar,
       defaultAttributes: settings.defaultAttributes,
-      formattingFunctions: settings.formattingFunctions,
-      replacementFunctions: settings.replacementFunctions
+      quickFormatFunctions: settings.quickFormatFunctions,
+      fullFormatFunctions: settings.fullFormatFunctions
     )
   }
 
@@ -56,8 +57,8 @@ private extension Logger {
     self.init(
       grammar: PlainTextGrammar(),
       defaultAttributes: [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.label],
-      formattingFunctions: [:],
-      replacementFunctions: [:]
+      quickFormatFunctions: [:],
+      fullFormatFunctions: [:]
     )
   }
 
@@ -65,12 +66,12 @@ private extension Logger {
     string: String = "",
     grammar: PackratGrammar,
     defaultAttributes: AttributedStringAttributes,
-    formattingFunctions: [SyntaxTreeNodeType: FormattingFunction],
-    replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
+    quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction],
+    fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   ) {
     self.defaultAttributes = defaultAttributes
-    self.formattingFunctions = formattingFunctions
-    self.replacementFunctions = replacementFunctions
+    self.formattingFunctions = quickFormatFunctions
+    self.replacementFunctions = fullFormatFunctions
     self.rawString = ParsedString(string, grammar: grammar)
     self._string = PieceTableString(pieceTable: PieceTable(rawString.text))
     super.init()
@@ -108,10 +109,10 @@ private extension Logger {
   private let defaultAttributes: AttributedStringAttributes
 
   /// A set of functions that customize attributes based upon the nodes in the AST.
-  private let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction]
+  private let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
 
   /// A set of functions that replace the contents of `rawString` -- e.g., these can be used to remove delimiters or change spaces to tabs.
-  private let replacementFunctions: [SyntaxTreeNodeType: ReplacementFunction]
+  private let replacementFunctions: [SyntaxTreeNodeType: FullFormatFunction]
 
   /// Given a range in `string`, computes the equivalent range in `rawString`
   /// - note: Characters from a "replacement" are an atomic unit. If the input range overlaps with part of the characters in a replacement, the resulting range will encompass the entire replacement.
@@ -284,8 +285,8 @@ public extension ParsedAttributedString.Settings {
     imageStorage: ImageStorage? = nil,
     extraAttributes: [NSAttributedString.Key: Any] = [:]
   ) -> ParsedAttributedString.Settings {
-    var formattingFunctions = [SyntaxTreeNodeType: FormattingFunction]()
-    var replacementFunctions = [SyntaxTreeNodeType: ReplacementFunction]()
+    var formattingFunctions = [SyntaxTreeNodeType: QuickFormatFunction]()
+    var replacementFunctions = [SyntaxTreeNodeType: FullFormatFunction]()
     formattingFunctions[.emphasis] = { $1.italic = true }
     formattingFunctions[.strongEmphasis] = { $1.bold = true }
     formattingFunctions[.code] = { $1.familyName = "Menlo" }
@@ -303,8 +304,8 @@ public extension ParsedAttributedString.Settings {
     return ParsedAttributedString.Settings(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
-      formattingFunctions: formattingFunctions,
-      replacementFunctions: replacementFunctions
+      quickFormatFunctions: formattingFunctions,
+      fullFormatFunctions: replacementFunctions
     )
   }
 }

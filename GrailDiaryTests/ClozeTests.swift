@@ -33,7 +33,10 @@ final class ClozeTests: XCTestCase {
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let renderedFront = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(hidingClozeAt: clozeCards[0].clozeIndex))
+    let renderedFront = ParsedAttributedString(
+      string: clozeCards[0].markdown,
+      settings: .plainText(textStyle: .body).hidingCloze(at: clozeCards[0].clozeIndex)
+    )
     XCTAssertEqual(
       renderedFront.string,
       "Yo to be de España. ¿De dónde es ustedes?"
@@ -41,11 +44,14 @@ final class ClozeTests: XCTestCase {
     XCTAssertEqual(
       ParsedAttributedString(
         string: clozeCards[1].markdown,
-        settings: .clozeRenderer(hidingClozeAt: clozeCards[1].clozeIndex)
+        settings: .plainText(textStyle: .body).hidingCloze(at: clozeCards[1].clozeIndex)
       ).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
-    let renderedBack = ParsedAttributedString(string: clozeCards[0].markdown, settings: .clozeRenderer(highlightingClozeAt: clozeCards[0].clozeIndex))
+    let renderedBack = ParsedAttributedString(
+      string: clozeCards[0].markdown,
+      settings: .plainText(textStyle: .body).highlightingCloze(at: clozeCards[0].clozeIndex)
+    )
     XCTAssertEqual(
       renderedBack.string,
       "Yo soy de España. ¿De dónde es ustedes?"
@@ -66,8 +72,8 @@ final class ClozeTests: XCTestCase {
       string: "",
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: [:],
-      formattingFunctions: [.cloze: { $1.bold = true }],
-      replacementFunctions: [:]
+      quickFormatFunctions: [.cloze: { $1.bold = true }],
+      fullFormatFunctions: [:]
     ))
     let layoutManager = NSLayoutManager()
     textStorage.addLayoutManager(layoutManager)

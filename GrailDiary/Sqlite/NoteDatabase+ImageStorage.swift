@@ -52,7 +52,7 @@ extension ImageStorage {
 public extension ParsedAttributedString.Settings {
   func renderingImages(from imageStorage: ImageStorage) -> Self {
     var copy = self
-    copy.replacementFunctions[.image] = imageStorage.imageReplacement
+    copy.fullFormatFunctions[.image] = imageStorage.imageReplacement
     return copy
   }
 }

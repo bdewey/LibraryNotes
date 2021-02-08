@@ -19,7 +19,7 @@ final class ParsedTextStorageTests: XCTestCase {
   override func setUp() {
     super.setUp()
     #if !os(macOS)
-      let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
+      let quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction] = [
         .emphasis: { $1.italic = true },
         .header: { $1.fontSize = 24 },
         .list: { $1.listLevel += 1 },
@@ -37,8 +37,8 @@ final class ParsedTextStorageTests: XCTestCase {
     let storage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: defaultAttributes,
-      formattingFunctions: formattingFunctions,
-      replacementFunctions: [.softTab: formatTab]
+      quickFormatFunctions: quickFormatFunctions,
+      fullFormatFunctions: [.softTab: formatTab]
     )
     textStorage = ParsedTextStorage(storage: storage)
   }
@@ -131,8 +131,8 @@ private extension ParsedTextStorageTests {
       storage: ParsedAttributedString(
         grammar: MiniMarkdownGrammar(),
         defaultAttributes: [:],
-        formattingFunctions: [:],
-        replacementFunctions: [.softTab: formatTab]
+        quickFormatFunctions: [:],
+        fullFormatFunctions: [.softTab: formatTab]
       )
     )
     let miniMarkdownRecorder = TextStorageMessageRecorder()
