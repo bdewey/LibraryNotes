@@ -31,11 +31,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.configuration = configuration
     self.noteStorage = noteStorage
 
-    let viewController = TextEditViewController()
-    viewController.markdown = configuration.note.text ?? ""
-    viewController.selectedRange = configuration.initialSelectedRange
-    viewController.autoFirstResponder = configuration.autoFirstResponder
-    self.textEditViewController = viewController
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(configuration.note.title)
   }
@@ -67,7 +62,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var configuration: Configuration
   private let noteStorage: NoteDatabase
-  private let textEditViewController: TextEditViewController
+  private lazy var textEditViewController: TextEditViewController = {
+    let viewController = TextEditViewController()
+    viewController.delegate = self
+    viewController.markdown = configuration.note.text ?? ""
+    viewController.selectedRange = configuration.initialSelectedRange
+    viewController.autoFirstResponder = configuration.autoFirstResponder
+    return viewController
+  }()
 
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?
@@ -103,7 +105,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
     addChild(textEditViewController)
     textEditViewController.didMove(toParent: self)
-    textEditViewController.delegate = self
     autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
       if self?.hasUnsavedChanges ?? false { Logger.shared.info("SavingTextEditViewController: autosave") }
       self?.saveIfNeeded()
