@@ -281,6 +281,7 @@ public extension ParsedAttributedString.Settings {
   static func plainText(
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
+    imageStorage: ImageStorage? = nil,
     extraAttributes: [NSAttributedString.Key: Any] = [:]
   ) -> ParsedAttributedString.Settings {
     var formattingFunctions = [SyntaxTreeNodeType: FormattingFunction]()
@@ -290,6 +291,9 @@ public extension ParsedAttributedString.Settings {
     formattingFunctions[.code] = { $1.familyName = "Menlo" }
     replacementFunctions[.delimiter] = { _, _, _, _ in [] }
     replacementFunctions[.clozeHint] = { _, _, _, _ in [] }
+    if let imageStorage = imageStorage {
+      replacementFunctions[.image] = imageStorage.imageReplacement
+    }
     var defaultAttributes: AttributedStringAttributes = [
       .font: UIFont.preferredFont(forTextStyle: textStyle),
       .foregroundColor: textColor,

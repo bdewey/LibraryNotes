@@ -48,7 +48,7 @@ extension QuotePrompt: Prompt {
         .kern: 2.0,
       ]
     )
-    let (front, chapterAndVerse) = renderCardFront()
+    let (front, chapterAndVerse) = renderCardFront(imageStorage: database)
     view.front = front.trimmingTrailingWhitespace()
     let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, settings: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
@@ -60,8 +60,9 @@ extension QuotePrompt: Prompt {
   }
 
   public func renderCardFront(
+    imageStorage: ImageStorage
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
-    let renderedMarkdown = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
+    let renderedMarkdown = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body, imageStorage: imageStorage))
     let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""
     let front = renderedMarkdown.removingChapterAndVerseAnnotation()
     return (front: front, chapterAndVerse: chapterAndVerse)
