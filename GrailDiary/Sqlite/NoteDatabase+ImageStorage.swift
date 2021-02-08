@@ -49,6 +49,14 @@ extension ImageStorage {
   }
 }
 
+public extension ParsedAttributedString.Settings {
+  func renderingImages(from imageStorage: ImageStorage) -> Self {
+    var copy = self
+    copy.replacementFunctions[.image] = imageStorage.imageReplacement
+    return copy
+  }
+}
+
 public extension NoteDatabase {
   /// Stores arbitrary data in the database.
   /// - Parameters:
