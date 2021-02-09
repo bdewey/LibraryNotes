@@ -179,18 +179,21 @@ public struct PieceTable {
     case .original:
       return updatedBound.contentIndex
     case .added:
-      switch bound {
-      case .lowerBound:
-        if let priorOriginalPiece = pieces.prefix(updatedBound.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty }) {
-          return priorOriginalPiece.endIndex
-        } else {
-          return 0
-        }
-      case .upperBound:
+      // `updatedBound` references a bit of replacement text.
+      //
+      // If it references something *beyond* the start of the replacement text *and* we need an end range, then find the next
+      // original index. Otherwise, return the *previous* original index.
+      if updatedBound.contentIndex > pieces[updatedBound.pieceIndex].startIndex, bound == .upperBound {
         if let nextOriginalPiece = pieces.dropFirst(updatedBound.pieceIndex).first(where: { $0.source == .original && !$0.isEmpty }) {
           return nextOriginalPiece.startIndex
         } else {
           return originalContents.length
+        }
+      } else {
+        if let priorOriginalPiece = pieces.prefix(updatedBound.pieceIndex).reversed().first(where: { $0.source == .original && !$0.isEmpty }) {
+          return priorOriginalPiece.endIndex
+        } else {
+          return 0
         }
       }
     }

@@ -38,7 +38,10 @@ final class ParsedTextStorageTests: XCTestCase {
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: defaultAttributes,
       quickFormatFunctions: quickFormatFunctions,
-      fullFormatFunctions: [.softTab: formatTab]
+      fullFormatFunctions: [
+        .softTab: formatTab,
+        .image: { _, _, _, _ in Array("\u{fffc}".utf16)}
+      ]
     )
     textStorage = ParsedTextStorage(storage: storage)
   }
@@ -83,10 +86,11 @@ final class ParsedTextStorageTests: XCTestCase {
     )
   }
 
+  // TODO: Figure out a way to get access to the raw string contents
 //  func testReplacementsAffectStringsButNotRawText() {
 //    textStorage.append(NSAttributedString(string: "# This is a heading\n\nAnd this is a paragraph"))
 //    XCTAssertEqual(textStorage.string, "#\tThis is a heading\n\nAnd this is a paragraph")
-//    XCTAssertEqual(textStorage.rawString, "# This is a heading\n\nAnd this is a paragraph")
+//    XCTAssertEqual(textStorage.storage.rawString, "# This is a heading\n\nAnd this is a paragraph")
 //  }
 
   /// This used to crash because I was inproperly managing the blank_line nodes when coalescing them. It showed up when
@@ -102,6 +106,15 @@ final class ParsedTextStorageTests: XCTestCase {
       insertionPoint += 1
     }
     XCTAssertEqual(textStorage.string, "#\tWelcome to Scrap Paper.\n\n\n\n##\tA second heading\n\n")
+  }
+
+  func testEditsAroundImages() {
+    let initialString = "Test ![](image.png) image"
+    textStorage.append(NSAttributedString(string: initialString))
+    XCTAssertEqual(textStorage.string.count, 12)
+    textStorage.replaceCharacters(in: NSRange(location: 5, length: 0), with: "x")
+    // We should now have one more character than we did previously
+    XCTAssertEqual(textStorage.string.count, 13)
   }
 
   #if !os(macOS)
