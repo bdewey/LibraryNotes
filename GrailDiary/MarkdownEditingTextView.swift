@@ -4,6 +4,7 @@ import Logging
 import MobileCoreServices
 import os
 import UIKit
+import UniformTypeIdentifiers
 
 private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "TextView")
 
@@ -41,15 +42,15 @@ public final class MarkdownEditingTextView: UITextView {
     if let image = UIPasteboard.general.image, let imageStorage = self.imageStorage {
       Logger.shared.info("Pasting an image")
       let imageKey: String?
-      if let jpegData = UIPasteboard.general.data(forPasteboardType: kUTTypeJPEG as String) {
+      if let jpegData = UIPasteboard.general.data(forPasteboardType: UTType.jpeg.identifier) {
         Logger.shared.info("Got JPEG data = \(jpegData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(jpegData, suffix: "jpeg")
-      } else if let pngData = UIPasteboard.general.data(forPasteboardType: kUTTypePNG as String) {
+        imageKey = try? imageStorage.storeImageData(jpegData, type: .jpeg)
+      } else if let pngData = UIPasteboard.general.data(forPasteboardType: UTType.png.identifier) {
         Logger.shared.info("Got PNG data = \(pngData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(pngData, suffix: "png")
+        imageKey = try? imageStorage.storeImageData(pngData, type: .png)
       } else if let convertedData = image.jpegData(compressionQuality: 0.8) {
         Logger.shared.info("Did JPEG conversion ourselves = \(convertedData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(convertedData, suffix: "jpeg")
+        imageKey = try? imageStorage.storeImageData(convertedData, type: .jpeg)
       } else {
         Logger.shared.error("Could not get image data")
         imageKey = nil

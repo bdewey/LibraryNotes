@@ -40,7 +40,7 @@ final class ParsedTextStorageTests: XCTestCase {
       quickFormatFunctions: quickFormatFunctions,
       fullFormatFunctions: [
         .softTab: formatTab,
-        .image: { _, _, _, _ in Array("\u{fffc}".utf16)}
+        .image: { _, _, _, _ in Array("\u{fffc}".utf16) },
       ]
     )
     textStorage = ParsedTextStorage(storage: storage)

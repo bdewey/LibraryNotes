@@ -9,7 +9,7 @@ struct BinaryContentRecord: Codable, FetchableRecord, PersistableRecord {
   var blob: Data
   var noteId: String
   var key: String
-  var role: ContentRole
+  var role: String
   var mimeType: String
 
   enum Columns: String, ColumnExpression {

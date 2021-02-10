@@ -4,6 +4,7 @@ import Foundation
 import Logging
 import SnapKit
 import UIKit
+import UniformTypeIdentifiers
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
@@ -63,7 +64,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var configuration: Configuration
   private let noteStorage: NoteDatabase
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = TextEditViewController(imageStorage: noteStorage)
+    let viewController = TextEditViewController(imageStorage: self)
     viewController.delegate = self
     viewController.markdown = configuration.note.text ?? ""
     viewController.selectedRange = configuration.initialSelectedRange
@@ -144,28 +145,35 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   /// Writes a note to storage.
-  private func updateNote(_ note: Note) {
+  @discardableResult
+  private func updateNote(_ note: Note) throws -> Note.Identifier {
     assert(Thread.isMainThread)
     var note = note
     // Copy over the initial reference, if any
     note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
+    switch configuration.noteIdentifier {
+    case .existing(identifier: let noteIdentifier):
+      Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
+      try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
+        var mergedNote = note
+        mergedNote.copyContentKeysForMatchingContent(from: oldNote)
+        mergedNote.folder = oldNote.folder
+        return mergedNote
+      })
+      return noteIdentifier
+    case .unsaved(folder: let folder):
+      note.folder = folder?.rawValue
+      let noteIdentifier = try noteStorage.createNote(note)
+      Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier)")
+      configuration.noteIdentifier = .existing(identifier: noteIdentifier)
+      return noteIdentifier
+    }
+  }
+
+  private func tryUpdateNote(_ note: Note) {
     do {
-      switch configuration.noteIdentifier {
-      case .existing(identifier: let noteIdentifier):
-        Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
-        try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
-          var mergedNote = note
-          mergedNote.copyContentKeysForMatchingContent(from: oldNote)
-          mergedNote.folder = oldNote.folder
-          return mergedNote
-        })
-      case .unsaved(folder: let folder):
-        note.folder = folder?.rawValue
-        let noteIdentifier = try noteStorage.createNote(note)
-        Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier)")
-        configuration.noteIdentifier = .existing(identifier: noteIdentifier)
-      }
+      try updateNote(note)
     } catch {
       Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")
       let alert = UIAlertController(title: "Oops", message: "There was an error saving this note: \(error)", preferredStyle: .alert)
@@ -183,7 +191,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return
     }
     let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
-    updateNote(note)
+    tryUpdateNote(note)
     hasUnsavedChanges = false
     completion?()
   }
@@ -210,5 +218,25 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     } else {
       return Array([[hashtag], existingHashtags].joined())
     }
+  }
+}
+
+extension SavingTextEditViewController: ImageStorage {
+  func storeImageData(_ imageData: Data, type: UTType) throws -> String {
+    let noteIdentifier = try ensureNoteIdentifier()
+    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type)
+  }
+
+  private func ensureNoteIdentifier() throws -> Note.Identifier {
+    if let noteIdentifier = noteIdentifier {
+      return noteIdentifier
+    } else {
+      return try updateNote(Note(parsedString: textEditViewController.textStorage.storage.rawString))
+    }
+  }
+
+  func retrieveImageDataForKey(_ key: String) throws -> Data {
+    let noteIdentifier = try ensureNoteIdentifier()
+    return try noteStorage.readAssociatedData(from: noteIdentifier, key: key)
   }
 }

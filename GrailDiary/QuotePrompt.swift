@@ -48,7 +48,7 @@ extension QuotePrompt: Prompt {
         .kern: 2.0,
       ]
     )
-    let (front, chapterAndVerse) = renderCardFront(imageStorage: database)
+    let (front, chapterAndVerse) = renderCardFront(imageStorage: BoundNote(identifier: properties.documentName, database: database))
     view.front = front.trimmingTrailingWhitespace()
     let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, settings: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()

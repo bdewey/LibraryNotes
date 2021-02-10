@@ -33,7 +33,8 @@ extension ClozePrompt: Prompt {
   ) -> PromptView {
     let cardView = TwoSidedCardView(frame: .zero)
     cardView.context = context()
-    let baseSettings = ParsedAttributedString.Settings.plainText(textStyle: .body).renderingImages(from: database)
+    let baseSettings = ParsedAttributedString.Settings.plainText(textStyle: .body)
+      .renderingImages(from: BoundNote(identifier: properties.documentName, database: database))
     let (front, chapterAndVerse) = ParsedAttributedString(
       string: markdown,
       settings: baseSettings.hidingCloze(at: clozeIndex)

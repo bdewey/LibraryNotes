@@ -12,7 +12,13 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
   var folder: String?
   var noteLinks: [NoteLinkRecord]
   var contents: [ContentRecord]
+  var thumbnailImage: [BinaryContentRecord]?
   var summary: String?
+  var image: String?
 
-  static let request = NoteRecord.including(all: NoteRecord.noteHashtags)
+  static let request = NoteRecord
+    .including(all: NoteRecord.noteHashtags)
+    .including(optional: NoteRecord.binaryContentRecords
+                .filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue)
+                .forKey("thumbnailImage"))
 }

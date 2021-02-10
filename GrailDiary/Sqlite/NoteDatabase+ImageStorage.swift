@@ -2,6 +2,7 @@
 
 import Foundation
 import Logging
+import UniformTypeIdentifiers
 
 /// A protocol that the text views use to store images on paste
 public protocol ImageStorage {
@@ -9,7 +10,7 @@ public protocol ImageStorage {
   /// - parameter imageData: The image data to store
   /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
   /// - returns: A string key that can locate this image later.
-  func storeImageData(_ imageData: Data, suffix: String) throws -> String
+  func storeImageData(_ imageData: Data, type: UTType) throws -> String
 
   /// Given the key returned from `markdownEditingTextView(_:store:suffix:)`, retrieve the corresponding image data.
   func retrieveImageDataForKey(_ key: String) throws -> Data
@@ -46,6 +47,21 @@ extension ImageStorage {
     // fallback -- show the markdown code instead of the image
     attributes.color = .quaternaryLabel
     return nil
+  }
+}
+
+public struct BoundNote {
+  let identifier: Note.Identifier
+  let database: NoteDatabase
+}
+
+extension BoundNote: ImageStorage {
+  public func storeImageData(_ imageData: Data, type: UTType) throws -> String {
+    return try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: type)
+  }
+
+  public func retrieveImageDataForKey(_ key: String) throws -> Data {
+    return try database.readAssociatedData(from: identifier, key: key)
   }
 }
 
@@ -90,30 +106,48 @@ public extension NoteDatabase {
     }
     return record.data
   }
-}
 
-extension NoteDatabase: ImageStorage {
-  public func storeImageData(_ imageData: Data, suffix: String) throws -> String {
-    let key = imageData.sha1Digest() + "." + suffix
-    return try storeAssetData(imageData, key: key)
-  }
-
-  public func retrieveImageDataForKey(_ key: String) throws -> Data {
-    return try retrieveAssetDataForKey(key)
-  }
-}
-
-private extension Data {
-  func image(maxSize: CGFloat) -> UIImage? {
-    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
-      return nil
+  func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType) throws -> String {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
     }
-    let options: [NSString: NSObject] = [
-      kCGImageSourceThumbnailMaxPixelSize: maxSize as NSObject,
-      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
-      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
-    ]
-    let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?).flatMap { UIImage(cgImage: $0) }
-    return image
+    let key = ["./" + data.sha1Digest(), type.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
+    let binaryRecord = BinaryContentRecord(
+      blob: data,
+      noteId: noteIdentifier,
+      key: key,
+      role: role,
+      mimeType: type.preferredMIMEType ?? "application/octet-stream"
+    )
+    try dbQueue.write { db in
+      try binaryRecord.save(db)
+    }
+    return key
+  }
+
+  func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return try dbQueue.read { db in
+      guard let record = try BinaryContentRecord.fetchOne(
+        db,
+        key: [BinaryContentRecord.Columns.noteId.rawValue: noteIdentifier, BinaryContentRecord.Columns.key.rawValue: key]
+      ) else {
+        throw Error.noSuchAsset
+      }
+      return record.blob
+    }
   }
 }
+
+// extension NoteDatabase: ImageStorage {
+//  public func storeImageData(_ imageData: Data, suffix: String) throws -> String {
+//    let key = imageData.sha1Digest() + "." + suffix
+//    return try storeAssetData(imageData, key: key)
+//  }
+//
+//  public func retrieveImageDataForKey(_ key: String) throws -> Data {
+//    return try retrieveAssetDataForKey(key)
+//  }
+// }
