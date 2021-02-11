@@ -100,8 +100,12 @@ public extension ParsedString {
   var title: String {
     guard let root = try? result.get() else { return "" }
     let anchoredRoot = AnchoredNode(node: root, startIndex: 0)
-    if let header = anchoredRoot.first(where: { $0.type == .header }), let text = header.first(where: { $0.type == .text }) {
-      let chars = self[text.range]
+    if let header = anchoredRoot.first(where: { $0.type == .header }), let tab = header.first(where: { $0.type == .softTab }) {
+      var headerRange = header.range
+      // Remove everything in the header before the tab.
+      headerRange.length -= (tab.range.location - header.range.location + 1)
+      headerRange.location = tab.range.location + 1
+      let chars = self[headerRange]
       return String(utf16CodeUnits: chars, count: chars.count)
     } else if let nonBlank = anchoredRoot.first(where: { $0.type != .blankLine && $0.type != .document }) {
       let chars = self[nonBlank.range]
