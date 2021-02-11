@@ -93,6 +93,7 @@ final class NotebookStructureViewController: UIViewController {
         .filter(NoteRecord.Columns.deleted == false)
         .including(all: NoteRecord.noteHashtags)
         .including(all: referenceRecords)
+        .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
         .asRequest(of: NoteMetadataRecord.self)
       switch self {
       case .allNotes:
@@ -110,6 +111,7 @@ final class NotebookStructureViewController: UIViewController {
           .filter(NoteRecord.Columns.folder == nil)
           .including(all: NoteRecord.noteHashtags)
           .including(all: referenceRecords)
+          .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
           .asRequest(of: NoteMetadataRecord.self)
       }
     }

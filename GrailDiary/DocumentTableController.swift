@@ -59,6 +59,9 @@ public final class DocumentTableController: NSObject {
       if viewProperties.hasLink {
         configuration.image = UIImage(systemName: "link")
       }
+      if let imageData = viewProperties.noteProperties.thumbnailImage.first {
+        configuration.image = imageData.blob.image(maxSize: 100)
+      }
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())

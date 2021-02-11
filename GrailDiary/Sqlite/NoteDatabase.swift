@@ -770,6 +770,7 @@ internal extension NoteDatabase {
       .filter(NoteRecord.Columns.deleted == false)
       .including(all: NoteRecord.noteHashtags)
       .including(all: referenceRecords)
+      .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
       .asRequest(of: NoteMetadataRecord.self)
       .fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in

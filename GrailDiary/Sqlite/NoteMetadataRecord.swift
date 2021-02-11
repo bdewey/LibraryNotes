@@ -12,7 +12,7 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
   var folder: String?
   var noteLinks: [NoteLinkRecord]
   var contents: [ContentRecord]
-  var thumbnailImage: [BinaryContentRecord]?
+  var thumbnailImage: [BinaryContentRecord]
   var summary: String?
   var image: String?
 
