@@ -11,7 +11,7 @@ public extension NSCharacterSet {
 public extension CharacterSet {
   func contains(_ char: unichar) -> Bool {
     guard let scalar = UnicodeScalar(char) else {
-      assertionFailure()
+      // Probably an emoji
       return false
     }
     return contains(scalar)

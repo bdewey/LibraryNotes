@@ -88,31 +88,19 @@ final class NotebookStructureViewController: UIViewController {
     }
 
     var query: QueryInterfaceRequest<NoteMetadataRecord> {
-      let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
-      let query = NoteRecord
-        .filter(NoteRecord.Columns.deleted == false)
-        .including(all: NoteRecord.noteHashtags)
-        .including(all: referenceRecords)
-        .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
-        .asRequest(of: NoteMetadataRecord.self)
       switch self {
       case .allNotes:
-        return query.filter(NoteRecord.Columns.folder == nil)
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == nil)
       case .archive:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.archive.rawValue)
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.archive.rawValue)
       case .inbox:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.inbox.rawValue)
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.inbox.rawValue)
       case .trash:
-        return query.filter(NoteRecord.Columns.folder == PredefinedFolder.recentlyDeleted.rawValue)
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.recentlyDeleted.rawValue)
       case .hashtag(let hashtag):
-        return NoteRecord
+        let hashtagRequest = NoteRecord
           .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
-          .filter(NoteRecord.Columns.deleted == false)
-          .filter(NoteRecord.Columns.folder == nil)
-          .including(all: NoteRecord.noteHashtags)
-          .including(all: referenceRecords)
-          .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
-          .asRequest(of: NoteMetadataRecord.self)
+        return NoteMetadataRecord.request(baseRequest: hashtagRequest)
       }
     }
   }

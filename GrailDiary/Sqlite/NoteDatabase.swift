@@ -766,13 +766,7 @@ internal extension NoteDatabase {
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: NoteMetadataRecord] {
     let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
-    let metadata = try NoteRecord
-      .filter(NoteRecord.Columns.deleted == false)
-      .including(all: NoteRecord.noteHashtags)
-      .including(all: referenceRecords)
-      .including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage"))
-      .asRequest(of: NoteMetadataRecord.self)
-      .fetchAll(db)
+    let metadata = try NoteMetadataRecord.request().fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
       (key: metadataItem.id, value: metadataItem)
     }
