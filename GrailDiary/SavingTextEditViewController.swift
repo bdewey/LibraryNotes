@@ -65,10 +65,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let noteStorage: NoteDatabase
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: self)
-    viewController.delegate = self
     viewController.markdown = configuration.note.text ?? ""
     viewController.selectedRange = configuration.initialSelectedRange
     viewController.autoFirstResponder = configuration.autoFirstResponder
+    viewController.delegate = self
     return viewController
   }()
 
