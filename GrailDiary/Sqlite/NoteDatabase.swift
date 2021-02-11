@@ -392,21 +392,6 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public var assetKeys: [String] {
-    do {
-      guard let dbQueue = dbQueue else {
-        throw Error.databaseIsNotOpen
-      }
-      return try dbQueue.read { db in
-        let request = AssetRecord.select([AssetRecord.Columns.id])
-        return try String.fetchAll(db, request)
-      }
-    } catch {
-      Logger.shared.error("Unexpected error getting asset keys: \(error)")
-      return []
-    }
-  }
-
   public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
@@ -416,17 +401,6 @@ public final class NoteDatabase: UIDocument {
         throw Error.noSuchAsset
       }
       return asset.data
-    }
-  }
-
-  public func storeAssetData(_ data: Data, key: String) throws -> String {
-    guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
-    }
-    return try dbQueue.write { db in
-      let asset = AssetRecord(id: key, data: data)
-      try asset.save(db)
-      return key
     }
   }
 
@@ -792,12 +766,7 @@ internal extension NoteDatabase {
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: NoteMetadataRecord] {
     let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
-    let metadata = try NoteRecord
-      .filter(NoteRecord.Columns.deleted == false)
-      .including(all: NoteRecord.noteHashtags)
-      .including(all: referenceRecords)
-      .asRequest(of: NoteMetadataRecord.self)
-      .fetchAll(db)
+    let metadata = try NoteMetadataRecord.request().fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
       (key: metadataItem.id, value: metadataItem)
     }

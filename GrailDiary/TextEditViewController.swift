@@ -13,12 +13,11 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  public init() {
-    self.textStorage = TextEditViewController.makeTextStorage(
-      formatters: TextEditViewController.formatters()
-    )
+  public init(imageStorage: ImageStorage) {
+    self.imageStorage = imageStorage
     super.init(nibName: nil, bundle: nil)
     textStorage.delegate = self
+    textView.imageStorage = imageStorage
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(handleKeyboardNotification(_:)),
@@ -38,11 +37,31 @@ public final class TextEditViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  private let imageStorage: ImageStorage
+
   // Init-time state.
 
-  public let textStorage: ParsedTextStorage
+  public lazy var textStorage: ParsedTextStorage = {
+    var defaultAttributes: AttributedStringAttributes = [
+      .font: UIFont.preferredFont(forTextStyle: .body),
+      .foregroundColor: UIColor.label,
+    ]
+    defaultAttributes.headIndent = 28
+    defaultAttributes.firstLineHeadIndent = 28
+    let storage = ParsedAttributedString(
+      grammar: MiniMarkdownGrammar.shared,
+      defaultAttributes: defaultAttributes,
+      quickFormatFunctions: formatters,
+      fullFormatFunctions: [
+        .softTab: { _, _, _, _ in Array("\t".utf16) },
+        .unorderedListOpening: { _, _, _, _ in Array("\u{2022}".utf16) },
+        .image: imageStorage.imageReplacement,
+      ]
+    )
+    return ParsedTextStorage(storage: storage)
+  }()
 
-  public weak var delegate: (TextEditViewControllerDelegate & MarkdownEditingTextViewImageStoring)?
+  public weak var delegate: TextEditViewControllerDelegate?
 
   /// The markdown
   public var markdown: String {
@@ -54,9 +73,8 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  private static func formatters(
-  ) -> [SyntaxTreeNodeType: FormattingFunction] {
-    var formatters: [SyntaxTreeNodeType: FormattingFunction] = [:]
+  private lazy var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = {
+    var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = [:]
     formatters[.header] = {
       let headingLevel = $0.children[0].length
       switch headingLevel {
@@ -97,30 +115,9 @@ public final class TextEditViewController: UIViewController {
       $1.listLevel += 1
     }
     return formatters
-  }
+  }()
 
-  private static func makeTextStorage(
-    formatters: [SyntaxTreeNodeType: FormattingFunction]
-  ) -> ParsedTextStorage {
-    var defaultAttributes: AttributedStringAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: .body),
-      .foregroundColor: UIColor.label,
-    ]
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
-    let storage = ParsedAttributedString(
-      grammar: MiniMarkdownGrammar.shared,
-      defaultAttributes: defaultAttributes,
-      formattingFunctions: formatters,
-      replacementFunctions: [
-        .softTab: formatTab,
-        .unorderedListOpening: formatBullet,
-      ]
-    )
-    return ParsedTextStorage(storage: storage)
-  }
-
-  private lazy var textView: UITextView = {
+  private lazy var textView: MarkdownEditingTextView = {
     let layoutManager = LayoutManager()
     textStorage.addLayoutManager(layoutManager)
     let textContainer = NSTextContainer()
@@ -136,7 +133,6 @@ public final class TextEditViewController: UIViewController {
         kUTTypePlainText as String,
       ]
     )
-    textView.imageStorage = delegate
     return textView
   }()
 
@@ -282,8 +278,20 @@ public final class TextEditViewController: UIViewController {
       }
     })
 
+    let bulletButton = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage] _ in
+      let nodePath = textStorage.storage.path(to: max(0, textView.selectedRange.location - 1))
+      let existingSelectedLocation = textView.selectedRange.location
+      if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
+        textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
+        textView.selectedRange = NSRange(location: existingSelectedLocation - 2, length: textView.selectedRange.length)
+      } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
+        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "* ")
+        textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
+      }
+    })
+
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton, summaryButton]
+    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton, summaryButton, bulletButton]
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar
@@ -580,22 +588,4 @@ private extension TextEditViewController {
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
   }
-}
-
-// MARK: - Replacement functions
-
-private func formatTab(
-  node: SyntaxTreeNode,
-  startIndex: Int,
-  buffer: SafeUnicodeBuffer
-) -> [unichar] {
-  return Array("\t".utf16)
-}
-
-private func formatBullet(
-  node: SyntaxTreeNode,
-  startIndex: Int,
-  buffer: SafeUnicodeBuffer
-) -> [unichar] {
-  return Array("\u{2022}".utf16)
 }

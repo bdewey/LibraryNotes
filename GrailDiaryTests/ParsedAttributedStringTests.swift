@@ -6,14 +6,15 @@ import XCTest
 private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
-  buffer: SafeUnicodeBuffer
+  buffer: SafeUnicodeBuffer,
+  attributes: inout AttributedStringAttributes
 ) -> [unichar] {
   return Array("\t".utf16)
 }
 
 final class ParsedAttributedStringTests: XCTestCase {
   func testReplacementsAffectStringsButNotRawText() {
-    let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
+    let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction] = [
       .emphasis: { $1.italic = true },
       .header: { $1.fontSize = 24 },
       .list: { $1.listLevel += 1 },
@@ -28,8 +29,8 @@ final class ParsedAttributedStringTests: XCTestCase {
     let textStorage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: defaultAttributes,
-      formattingFunctions: formattingFunctions,
-      replacementFunctions: [.softTab: formatTab]
+      quickFormatFunctions: formattingFunctions,
+      fullFormatFunctions: [.softTab: formatTab]
     )
 
     textStorage.append(NSAttributedString(string: "# This is a heading\n\nAnd this is a paragraph"))
@@ -69,7 +70,7 @@ final class ParsedAttributedStringTests: XCTestCase {
   }
 
   static func makeNoDelimiterStorage() -> ParsedAttributedString {
-    let formattingFunctions: [SyntaxTreeNodeType: FormattingFunction] = [
+    let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction] = [
       .emphasis: { $1.italic = true },
       .header: { $1.fontSize = 24 },
       .list: { $1.listLevel += 1 },
@@ -83,10 +84,10 @@ final class ParsedAttributedStringTests: XCTestCase {
     return ParsedAttributedString(
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: defaultAttributes,
-      formattingFunctions: formattingFunctions,
-      replacementFunctions: [
+      quickFormatFunctions: formattingFunctions,
+      fullFormatFunctions: [
         .softTab: formatTab,
-        .delimiter: { _, _, _ in [] },
+        .delimiter: { _, _, _, _ in [] },
       ]
     )
   }

@@ -54,7 +54,7 @@ final class QuoteTemplateTests: XCTestCase {
     let buffer = ParsedString(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
 
-    let (front, _) = quoteTemplates[0].renderCardFront()
+    let (front, _) = quoteTemplates[0].renderCardFront(imageStorage: nil)
     XCTAssertEqual(
       front.string,
       "We had to learn for ourselves and, furthermore, we had to teach the despairing men, that it did not really matter what we expected from life, but rather what life expected from us."

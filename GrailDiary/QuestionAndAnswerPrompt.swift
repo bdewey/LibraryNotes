@@ -42,9 +42,10 @@ extension QuestionAndAnswerPrompt: Prompt {
   public func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
     view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, extraAttributes: [.kern: 2.0]))
-    // TODO: Need to re-invent images :-(
-//    document.addImageRenderer(to: &renderer.renderFunctions)
-    let formattedString = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body))
+    let formattedString = ParsedAttributedString(
+      string: markdown,
+      settings: .plainText(textStyle: .body, imageStorage: BoundNote(identifier: properties.documentName, database: database))
+    )
     if let node = try? formattedString.rawString.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)
       if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {

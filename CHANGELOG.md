@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Support for images! You can paste images into your notes. Not sure about overall efficiency but I want to start playing with it.
+
 ## [0.41.0] - 2020-02-07
 
 ### Added

@@ -9,6 +9,9 @@ enum ContentRole: String, Codable {
 
   /// An optional "reference" is the material that a note is about (a web page, PDF, book citation, etc)
   case reference
+
+  /// An embedded image
+  case embeddedImage
 }
 
 /// For rows that contain text, this is the text.
