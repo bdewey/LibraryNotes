@@ -227,6 +227,7 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     if let apiKey = Bundle.main.infoDictionary?["GOOGLE_BOOKS_API_KEY"] as? String, !apiKey.isEmpty {
       let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
         let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
+        bookSearchViewController.delegate = self
         self?.present(UINavigationController(rootViewController: bookSearchViewController), animated: true)
       })
       extraActions.append(bookNoteAction)
@@ -275,6 +276,24 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+  }
+}
+
+// MARK: - BookSearchViewControllerDelegate
+
+extension NotebookViewController: BookSearchViewControllerDelegate {
+  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+    dismiss(animated: true, completion: nil)
+    let hashtag = focusedNotebookStructure.hashtag
+    let folder = focusedNotebookStructure.predefinedFolder
+    let viewController = SavingTextEditViewController(database: database, folder: folder, currentHashtag: hashtag, autoFirstResponder: true)
+    currentNoteEditor = viewController
+    notebookSplitViewController.show(.secondary)
+    Logger.shared.info("Created a new view controller for a book!")
+  }
+
+  func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
   }
 }
 

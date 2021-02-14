@@ -2,6 +2,7 @@
 
 import Foundation
 
+/// A simple in-memory image cache, backed with `NSCache`
 public final class ImageCache {
   public enum Error: Swift.Error {
     case unknownError
@@ -9,6 +10,9 @@ public final class ImageCache {
 
   private let cache = NSCache<NSURL, UIImage>()
 
+  /// Gets an image from a URL.
+  /// - parameter url: The URL to load
+  /// - parameter completion: Called upon getting the image. If the image is in the cache this is called synchronously. Otherwise, it will be called asynchronously on the main thread.
   public func image(for url: URL, completion: @escaping (Result<UIImage, Swift.Error>) -> Void) {
     let url = url.asSecureURL()
     let nsURL = url as NSURL

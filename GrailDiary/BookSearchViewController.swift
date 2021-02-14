@@ -4,49 +4,26 @@ import Combine
 import Logging
 import UIKit
 
-public struct Book: Codable, Hashable {
-  var title: String
-  var subtitle: String?
-  var authors: [String]?
-  var publishedDate: String?
-  var imageLinks: ImageLink?
-}
-
-public struct ImageLink: Codable, Hashable {
-  var smallThumbnail: String?
-  var thumbnail: String?
-}
-
-struct GoogleBooksResponse: Codable {
-  var totalItems: Int
-  var items: [GoogleBooksItem]
-}
-
-struct GoogleBooksItem: Codable {
-  var id: String
-  var volumeInfo: Book
-}
-
-private struct BookViewModel: Hashable {
+public struct Book: Hashable {
   var id: String
   var title: String
   var authors: [String]
   var publishedDate: String?
   var coverImage: UIImage?
   var coverImageURL: URL?
-
-  init(_ item: GoogleBooksItem) {
-    self.id = item.id
-    self.title = item.volumeInfo.title
-    self.authors = item.volumeInfo.authors ?? []
-    self.publishedDate = item.volumeInfo.publishedDate
-    self.coverImage = nil
-    if let urlString = item.volumeInfo.imageLinks?.smallThumbnail ?? item.volumeInfo.imageLinks?.thumbnail {
-      self.coverImageURL = URL(string: urlString)
-    }
-  }
 }
 
+/// Delegate protocol.
+public protocol BookSearchViewControllerDelegate: AnyObject {
+  /// The person selected a book.
+  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book)
+
+  /// The person canceled without selecting a book.
+  /// (Note this is not guaranteed to be called with the pull-down presentation style)
+  func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController)
+}
+
+/// Searches Google for information about a book.
 public final class BookSearchViewController: UIViewController {
   public init(apiKey: String) {
     self.apiKey = apiKey
@@ -57,6 +34,7 @@ public final class BookSearchViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  public weak var delegate: BookSearchViewControllerDelegate?
   private let apiKey: String
 
   public enum Error: Swift.Error {
@@ -78,11 +56,12 @@ public final class BookSearchViewController: UIViewController {
     listConfiguration.backgroundColor = .grailBackground
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    collectionView.delegate = self
     return collectionView
   }()
 
-  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, BookViewModel> = {
-    let bookRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, BookViewModel> { cell, _, book in
+  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, Book> = {
+    let bookRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Book> { cell, _, book in
       var configuration = cell.defaultContentConfiguration()
       if let publishedDate = book.publishedDate {
         let year = publishedDate.prefix(4)
@@ -101,7 +80,7 @@ public final class BookSearchViewController: UIViewController {
       cell.backgroundConfiguration = backgroundConfiguration
     }
 
-    return UICollectionViewDiffableDataSource<Int, BookViewModel>(collectionView: collectionView) { collectionView, indexPath, book in
+    return UICollectionViewDiffableDataSource<Int, Book>(collectionView: collectionView) { collectionView, indexPath, book in
       collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: book)
     }
   }()
@@ -109,14 +88,14 @@ public final class BookSearchViewController: UIViewController {
   private let currentSearchTerm = CurrentValueSubject<String, Never>("")
   private var currentSearch: AnyCancellable?
   private let imageCache = ImageCache()
-  private var viewModels = [BookViewModel]()
+  private var viewModels = [Book]()
   private lazy var decoder: JSONDecoder = {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
     return decoder
   }()
 
-  private func updateViewModels(_ viewModels: [BookViewModel]) {
+  private func updateViewModels(_ viewModels: [Book]) {
     assert(Thread.isMainThread)
     isBatchUpdating = true
     self.viewModels = viewModels
@@ -144,7 +123,7 @@ public final class BookSearchViewController: UIViewController {
   private func updateSnapshot() {
     assert(Thread.isMainThread)
     guard !isBatchUpdating else { return }
-    var snapshot = NSDiffableDataSourceSnapshot<Int, BookViewModel>()
+    var snapshot = NSDiffableDataSourceSnapshot<Int, Book>()
     snapshot.appendSections([0])
     snapshot.appendItems(viewModels)
     dataSource.apply(snapshot, animatingDifferences: true)
@@ -193,13 +172,60 @@ public final class BookSearchViewController: UIViewController {
         }
       } receiveValue: { [weak self] data in
         DispatchQueue.main.async {
-          self?.updateViewModels(data.items.map { BookViewModel($0) })
+          self?.updateViewModels(data.items.map { Book($0) })
         }
       }
   }
 
   override public func viewDidAppear(_ animated: Bool) {
     searchController.isActive = true
+  }
+}
+
+extension BookSearchViewController: UICollectionViewDelegate {
+  public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    guard let book = dataSource.itemIdentifier(for: indexPath) else { return }
+    delegate?.bookSearchViewController(self, didSelect: book)
+  }
+}
+
+// MARK: - Private
+
+private extension BookSearchViewController {
+  struct GoogleBooksResponse: Codable {
+    var totalItems: Int
+    var items: [GoogleBooksItem]
+  }
+
+  struct GoogleBooksItem: Codable {
+    var id: String
+    var volumeInfo: VolumeInfo
+  }
+
+  struct VolumeInfo: Codable {
+    var title: String
+    var subtitle: String?
+    var authors: [String]?
+    var publishedDate: String?
+    var imageLinks: ImageLink?
+  }
+
+  struct ImageLink: Codable {
+    var smallThumbnail: String?
+    var thumbnail: String?
+  }
+}
+
+private extension Book {
+  init(_ item: BookSearchViewController.GoogleBooksItem) {
+    self.id = item.id
+    self.title = item.volumeInfo.title
+    self.authors = item.volumeInfo.authors ?? []
+    self.publishedDate = item.volumeInfo.publishedDate
+    self.coverImage = nil
+    if let urlString = item.volumeInfo.imageLinks?.smallThumbnail ?? item.volumeInfo.imageLinks?.thumbnail {
+      self.coverImageURL = URL(string: urlString)
+    }
   }
 }
 
