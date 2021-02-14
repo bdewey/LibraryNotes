@@ -40,7 +40,7 @@ extension UIResponder {
   }
 }
 
-protocol DocumentListViewControllerDelegate: AnyObject {
+protocol DocumentListViewControllerDelegate: AnyObject, ToolbarButtonBuilder {
   func documentListViewController(
     _ viewController: DocumentListViewController,
     didRequestShowNote note: Note,
@@ -301,8 +301,8 @@ final class DocumentListViewController: UIViewController {
       countItem,
       UIBarButtonItem.flexibleSpace(),
     ]
-    if splitViewController?.isCollapsed ?? false {
-      toolbarItems.append(AppCommandsButtonItems.newNote())
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = delegate?.makeNewNoteButtonItem() {
+      toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
   }

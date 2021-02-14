@@ -9,11 +9,15 @@ protocol ReferenceViewController: UIViewController {
   var relatedNotesViewController: UIViewController? { get set }
 }
 
+protocol ToolbarButtonBuilder {
+  func makeNewNoteButtonItem() -> UIBarButtonItem
+}
+
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
 /// - secondary: An individual note
-final class NotebookViewController: UIViewController {
+final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   init(database: NoteDatabase) {
     self.database = database
     super.init(nibName: nil, bundle: nil)
@@ -216,6 +220,22 @@ final class NotebookViewController: UIViewController {
     currentNoteEditor = viewController
     notebookSplitViewController.show(.secondary)
     Logger.shared.info("Created a new view controller for a blank document")
+  }
+
+  func makeNewNoteButtonItem() -> UIBarButtonItem {
+    var extraActions = [UIAction]()
+    if let apiKey = Bundle.main.infoDictionary?["GOOGLE_BOOKS_API_KEY"] as? String, !apiKey.isEmpty {
+      let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
+        let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
+        self?.present(UINavigationController(rootViewController: bookSearchViewController), animated: true)
+      })
+      extraActions.append(bookNoteAction)
+    }
+    let menu: UIMenu? = extraActions.isEmpty ? nil : UIMenu(options: [.displayInline], children: extraActions)
+    let primaryAction = UIAction { [weak self] _ in
+      self?.makeNewNote()
+    }
+    return UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction, menu: menu)
   }
 
   // MARK: - State restoration
