@@ -6,7 +6,7 @@ import Logging
 import SnapKit
 import UIKit
 
-protocol NotebookStructureViewControllerDelegate: AnyObject {
+protocol NotebookStructureViewControllerDelegate: AnyObject, ToolbarButtonBuilder {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier)
   func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController)
 }
@@ -437,8 +437,8 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
 private extension NotebookStructureViewController {
   func configureToolbar() {
     var toolbarItems = [AppCommandsButtonItems.documentBrowser(), UIBarButtonItem.flexibleSpace()]
-    if splitViewController?.isCollapsed ?? false {
-      toolbarItems.append(AppCommandsButtonItems.newNote())
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = delegate?.makeNewNoteButtonItem() {
+      toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
   }

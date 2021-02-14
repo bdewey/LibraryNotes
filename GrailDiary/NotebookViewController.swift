@@ -9,8 +9,23 @@ protocol ReferenceViewController: UIViewController {
   var relatedNotesViewController: UIViewController? { get set }
 }
 
-protocol ToolbarButtonBuilder {
+public protocol ToolbarButtonBuilder {
   func makeNewNoteButtonItem() -> UIBarButtonItem
+}
+
+public extension UIViewController {
+  /// Walk up the parent view controllers to find one that implements ToolbarButtonBuilder
+  var toolbarButtonBuilder: ToolbarButtonBuilder? {
+    var currentViewController: UIViewController? = self
+    while currentViewController != nil {
+      print("Looking at \(currentViewController!)")
+      if let builder = currentViewController as? ToolbarButtonBuilder {
+        return builder
+      }
+      currentViewController = currentViewController?.parent ?? currentViewController?.presentingViewController
+    }
+    return nil
+  }
 }
 
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
