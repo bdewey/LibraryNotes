@@ -228,7 +228,9 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
         let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
         bookSearchViewController.delegate = self
-        self?.present(UINavigationController(rootViewController: bookSearchViewController), animated: true)
+        let navigationController = UINavigationController(rootViewController: bookSearchViewController)
+        navigationController.navigationBar.tintColor = .grailTint
+        self?.present(navigationController, animated: true)
       })
       extraActions.append(bookNoteAction)
     }

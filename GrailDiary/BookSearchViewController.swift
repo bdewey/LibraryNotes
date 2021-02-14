@@ -136,7 +136,14 @@ public final class BookSearchViewController: UIViewController {
   override public func viewDidLoad() {
     super.viewDidLoad()
     title = "Find a Book"
+    view.tintColor = .grailTint
     view.backgroundColor = .grailBackground
+    let cancelButton = UIBarButtonItem(systemItem: .cancel)
+    cancelButton.primaryAction = UIAction { [weak self] _ in
+      guard let self = self else { return }
+      self.delegate?.bookSearchViewControllerDidCancel(self)
+    }
+    navigationItem.leftBarButtonItem = cancelButton
     navigationItem.searchController = searchController
 
     currentSearch = currentSearchTerm
