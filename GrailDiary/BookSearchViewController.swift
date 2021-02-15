@@ -25,7 +25,6 @@ public struct Book: Hashable {
   }
 }
 
-/// Delegate protocol.
 public protocol BookSearchViewControllerDelegate: AnyObject {
   /// The person selected a book.
   func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book)

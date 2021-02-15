@@ -18,7 +18,6 @@ public extension UIViewController {
   var toolbarButtonBuilder: ToolbarButtonBuilder? {
     var currentViewController: UIViewController? = self
     while currentViewController != nil {
-      print("Looking at \(currentViewController!)")
       if let builder = currentViewController as? ToolbarButtonBuilder {
         return builder
       }
