@@ -100,7 +100,7 @@ final class NotebookStructureViewController: UIViewController {
       case .hashtag(let hashtag):
         let hashtagRequest = NoteRecord
           .joining(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)%")))
-        return NoteMetadataRecord.request(baseRequest: hashtagRequest)
+        return NoteMetadataRecord.request(baseRequest: hashtagRequest).filter(NoteRecord.Columns.folder == nil)
       }
     }
   }

@@ -6,6 +6,10 @@
 
 - Google Books integration! You can either add book details to an existing note or create a new note based upon a book.
 
+### Fixed
+
+- Deleted notes showed up in the hashtag views
+
 ## [0.42.0] - 2020-02-13
 
 ### Added
