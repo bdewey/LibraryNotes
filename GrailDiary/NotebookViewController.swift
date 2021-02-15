@@ -121,7 +121,6 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     )
     navigationController.navigationBar.prefersLargeTitles = false
     navigationController.navigationBar.barTintColor = .grailBackground
-    navigationController.hidesBarsOnSwipe = true
     return navigationController
   }()
 

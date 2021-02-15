@@ -6,6 +6,10 @@
 
 - Google Books integration! You can either add book details to an existing note or create a new note based upon a book.
 
+### Changed
+
+- Stop the "hide on swipe" behavior for the note view
+
 ### Fixed
 
 - Deleted notes showed up in the hashtag views
