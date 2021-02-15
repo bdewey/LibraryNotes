@@ -286,7 +286,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     try dbQueue.write { db in
-      let existingNote = try Note(identifier: noteIdentifier, database: db)
+      let existingNote = (try? Note(identifier: noteIdentifier, database: db)) ?? Note(markdown: "")
       let updatedNote = updateBlock(existingNote)
       let updateKey = try updateIdentifier(in: db)
       try updatedNote.save(identifier: noteIdentifier, updateKey: updateKey, to: db)

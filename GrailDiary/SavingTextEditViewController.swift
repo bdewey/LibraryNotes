@@ -9,17 +9,11 @@ import UniformTypeIdentifiers
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
-  enum ExistingOrUncreatedNote {
-    /// An unsaved note that will go into a folder when it is created.
-    case unsaved(folder: PredefinedFolder?)
-
-    /// An existing note. It lives in whatever folder it lives in.
-    case existing(identifier: Note.Identifier)
-  }
 
   /// Holds configuration settings for the view controller.
   struct Configuration {
-    var noteIdentifier: ExistingOrUncreatedNote
+    var folder: PredefinedFolder?
+    var noteIdentifier: String
     var note: Note
     var initialSelectedRange = NSRange(location: 0, length: 0)
     var autoFirstResponder = false
@@ -31,7 +25,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   init(configuration: Configuration, noteStorage: NoteDatabase) {
     self.configuration = configuration
     self.noteStorage = noteStorage
-
+    self.noteIdentifier = configuration.noteIdentifier
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(configuration.note.title)
   }
@@ -41,17 +35,31 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     database: NoteDatabase,
     folder: PredefinedFolder?,
     title: String? = nil,
+    initialImage: UIImage? = nil,
     currentHashtag: String? = nil,
     autoFirstResponder: Bool = false
   ) {
     let (note, initialOffset) = Note.makeBlankNote(title: title, hashtag: currentHashtag)
     let configuration = Configuration(
-      noteIdentifier: .unsaved(folder: folder),
+      folder: folder,
+      noteIdentifier: UUID().uuidString,
       note: note,
       initialSelectedRange: NSRange(location: initialOffset, length: 0),
       autoFirstResponder: autoFirstResponder
     )
     self.init(configuration: configuration, noteStorage: database)
+    if let initialImage = initialImage,
+       let convertedData = initialImage.jpegData(compressionQuality: 0.8) {
+      do {
+        hasUnsavedChanges = true
+        saveIfNeeded()
+        let reference = try storeImageData(convertedData, type: .jpeg)
+        let markdown = "\n\n![](\(reference))\n\n"
+        textEditViewController.textStorage.replaceCharacters(in: configuration.initialSelectedRange, with: markdown)
+      } catch {
+        Logger.shared.error("Could not save initial image: \(error)")
+      }
+    }
   }
 
   @available(*, unavailable)
@@ -82,12 +90,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var autosaveTimer: Timer?
 
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
-  var noteIdentifier: Note.Identifier? {
-    guard case .existing(let noteIdentifier) = configuration.noteIdentifier else {
-      return nil
-    }
-    return noteIdentifier
-  }
+  let noteIdentifier: Note.Identifier
 
   /// The current note.
   var note: Note { configuration.note }
@@ -153,30 +156,20 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   /// Writes a note to storage.
-  @discardableResult
-  private func updateNote(_ note: Note) throws -> Note.Identifier {
+  private func updateNote(_ note: Note) throws {
     assert(Thread.isMainThread)
     var note = note
     // Copy over the initial reference, if any
     note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
-    switch configuration.noteIdentifier {
-    case .existing(identifier: let noteIdentifier):
-      Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
-      try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
-        var mergedNote = note
-        mergedNote.copyContentKeysForMatchingContent(from: oldNote)
-        mergedNote.folder = oldNote.folder
-        return mergedNote
-      })
-      return noteIdentifier
-    case .unsaved(folder: let folder):
-      note.folder = folder?.rawValue
-      let noteIdentifier = try noteStorage.createNote(note)
-      Logger.shared.info("SavingTextEditViewController: Created note \(noteIdentifier)")
-      configuration.noteIdentifier = .existing(identifier: noteIdentifier)
-      return noteIdentifier
-    }
+    note.folder = configuration.folder?.rawValue
+    Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
+    try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
+      var mergedNote = note
+      mergedNote.copyContentKeysForMatchingContent(from: oldNote)
+      mergedNote.folder = oldNote.folder
+      return mergedNote
+    })
   }
 
   private func tryUpdateNote(_ note: Note) {
@@ -231,20 +224,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
 extension SavingTextEditViewController: ImageStorage {
   func storeImageData(_ imageData: Data, type: UTType) throws -> String {
-    let noteIdentifier = try ensureNoteIdentifier()
     return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type)
   }
 
-  private func ensureNoteIdentifier() throws -> Note.Identifier {
-    if let noteIdentifier = noteIdentifier {
-      return noteIdentifier
-    } else {
-      return try updateNote(Note(parsedString: textEditViewController.textStorage.storage.rawString))
-    }
-  }
-
   func retrieveImageDataForKey(_ key: String) throws -> Data {
-    let noteIdentifier = try ensureNoteIdentifier()
     return try noteStorage.readAssociatedData(from: noteIdentifier, key: key)
   }
 }

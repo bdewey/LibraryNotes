@@ -253,7 +253,9 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     let primaryAction = UIAction { [weak self] _ in
       self?.makeNewNote()
     }
-    return UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction, menu: menu)
+    let button = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction, menu: menu)
+    button.accessibilityIdentifier = "new-document"
+    return button
   }
 
   // MARK: - State restoration
@@ -315,6 +317,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
       database: database,
       folder: folder,
       title: title,
+      initialImage: book.coverImage,
       currentHashtag: hashtag,
       autoFirstResponder: true
     )
@@ -354,14 +357,13 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteIdentifier: Note.Identifier?,
     shiftFocus: Bool
   ) {
-    let existingOrUncreatedNote: SavingTextEditViewController.ExistingOrUncreatedNote
-    if let noteIdentifier = noteIdentifier {
-      existingOrUncreatedNote = .existing(identifier: noteIdentifier)
-    } else {
-      existingOrUncreatedNote = .unsaved(folder: focusedNotebookStructure.predefinedFolder)
-    }
+    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
     let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(noteIdentifier: existingOrUncreatedNote, note: note),
+      configuration: SavingTextEditViewController.Configuration(
+        folder: focusedNotebookStructure.predefinedFolder,
+        noteIdentifier: actualNoteIdentifier,
+        note: note
+      ),
       noteStorage: database
     )
     noteViewController.setTitleMarkdown(note.title)

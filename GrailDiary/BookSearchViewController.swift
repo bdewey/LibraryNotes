@@ -125,7 +125,7 @@ public final class BookSearchViewController: UIViewController {
     guard !isBatchUpdating else { return }
     var snapshot = NSDiffableDataSourceSnapshot<Int, Book>()
     snapshot.appendSections([0])
-    snapshot.appendItems(viewModels)
+    snapshot.appendItems(viewModels.removingDuplicates())
     dataSource.apply(snapshot, animatingDifferences: true)
   }
 
@@ -243,3 +243,14 @@ extension BookSearchViewController: UISearchResultsUpdating {
 }
 
 extension BookSearchViewController: UISearchBarDelegate {}
+
+private extension Array where Element: Hashable {
+  func removingDuplicates() -> Self {
+    var alreadySeen: Set<Element> = []
+    return self.filter {
+      if alreadySeen.contains($0) { return false }
+      alreadySeen.insert($0)
+      return true
+    }
+  }
+}
