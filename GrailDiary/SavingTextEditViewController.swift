@@ -37,8 +37,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   /// Initializes a view controller for a new, unsaved note.
-  convenience init(database: NoteDatabase, folder: PredefinedFolder?, currentHashtag: String? = nil, autoFirstResponder: Bool = false) {
-    let (note, initialOffset) = Note.makeBlankNote(hashtag: currentHashtag)
+  convenience init(
+    database: NoteDatabase,
+    folder: PredefinedFolder?,
+    title: String? = nil,
+    currentHashtag: String? = nil,
+    autoFirstResponder: Bool = false
+  ) {
+    let (note, initialOffset) = Note.makeBlankNote(title: title, hashtag: currentHashtag)
     let configuration = Configuration(
       noteIdentifier: .unsaved(folder: folder),
       note: note,

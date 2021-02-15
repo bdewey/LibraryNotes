@@ -303,7 +303,21 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     dismiss(animated: true, completion: nil)
     let hashtag = focusedNotebookStructure.hashtag
     let folder = focusedNotebookStructure.predefinedFolder
-    let viewController = SavingTextEditViewController(database: database, folder: folder, currentHashtag: hashtag, autoFirstResponder: true)
+    var title = "_\(book.title)_"
+    if !book.authors.isEmpty {
+      let authors = book.authors.joined(separator: ", ")
+      title += ": \(authors)"
+    }
+    if let publishedDate = book.publishedDate {
+      title += " (\(publishedDate.prefix(4)))"
+    }
+    let viewController = SavingTextEditViewController(
+      database: database,
+      folder: folder,
+      title: title,
+      currentHashtag: hashtag,
+      autoFirstResponder: true
+    )
     currentNoteEditor = viewController
     notebookSplitViewController.show(.secondary)
     Logger.shared.info("Created a new view controller for a book!")
