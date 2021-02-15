@@ -50,15 +50,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.init(configuration: configuration, noteStorage: database)
     if let initialImage = initialImage,
        let convertedData = initialImage.jpegData(compressionQuality: 0.8) {
-      do {
-        hasUnsavedChanges = true
-        saveIfNeeded()
-        let reference = try storeImageData(convertedData, type: .jpeg)
-        let markdown = "\n\n![](\(reference))\n\n"
-        textEditViewController.textStorage.replaceCharacters(in: configuration.initialSelectedRange, with: markdown)
-      } catch {
-        Logger.shared.error("Could not save initial image: \(error)")
-      }
+      insertImageData(convertedData, type: .jpeg)
     }
   }
 
@@ -195,6 +187,30 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     tryUpdateNote(note)
     hasUnsavedChanges = false
     completion?()
+  }
+
+  /// Saves the current contents to the database, whether or not hasUnsavedChanges is true.
+  private func forceSave() throws {
+    let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
+    try updateNote(note)
+    hasUnsavedChanges = false
+  }
+
+  /// Inserts an image at the current insertion point.
+  private func insertImageData(_ imageData: Data, type: UTType) {
+    do {
+      try forceSave()
+      let reference = try storeImageData(imageData, type: type)
+      let markdown = "\n\n![](\(reference))\n\n"
+      let initialRange = textEditViewController.selectedRange
+      var rawRange = textEditViewController.textStorage.storage.rawStringRange(forRange: initialRange)
+      rawRange.location += markdown.utf16.count
+      rawRange.length = 0
+      textEditViewController.textStorage.replaceCharacters(in: initialRange, with: markdown)
+      textEditViewController.selectedRange = textEditViewController.textStorage.storage.range(forRawStringRange: rawRange)
+    } catch {
+      Logger.shared.error("Could not save initial image: \(error)")
+    }
   }
 
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController) {
