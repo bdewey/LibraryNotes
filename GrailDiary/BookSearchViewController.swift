@@ -160,7 +160,7 @@ public final class BookSearchViewController: UIViewController {
 
     currentSearch = currentSearchTerm
       .filter { !$0.isEmpty }
-      .debounce(for: 0.1, scheduler: RunLoop.main)
+      .debounce(for: 0.5, scheduler: RunLoop.main)
       .map { [apiKey] queryValue -> URL in
         var urlComponents = URLComponents(string: "https://www.googleapis.com/books/v1/volumes")!
         urlComponents.queryItems = [
