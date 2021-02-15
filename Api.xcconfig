@@ -1,0 +1,9 @@
+// Low-value API secrets used in this app.
+//
+// These secrets will be in the Info.plist, so they won't really be "secret", but at least they're not in a git repo.
+
+GOOGLE_BOOKS_API_KEY =
+
+// To use your own values for these API keys, put them in an ApiSecrets.xcconfig file, which is in the .gitignore for this
+// project.
+#include? "./ApiSecrets.xcconfig"

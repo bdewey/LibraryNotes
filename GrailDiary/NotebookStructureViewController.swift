@@ -437,8 +437,8 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
 private extension NotebookStructureViewController {
   func configureToolbar() {
     var toolbarItems = [AppCommandsButtonItems.documentBrowser(), UIBarButtonItem.flexibleSpace()]
-    if splitViewController?.isCollapsed ?? false {
-      toolbarItems.append(AppCommandsButtonItems.newNote())
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = toolbarButtonBuilder?.makeNewNoteButtonItem() {
+      toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
   }

@@ -78,6 +78,9 @@
 		D34ACAEE2590E545007C9521 /* 20201220-contentKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */; };
 		D34ACAF825915662007C9521 /* 20201221-prompt.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACAF725915662007C9521 /* 20201221-prompt.sql */; };
 		D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACB0125925EA5007C9521 /* initialSchema.sql */; };
+		D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookSearchViewController.swift */; };
+		D3558D7725D9741100746600 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7625D9741100746600 /* ImageCache.swift */; };
+		D3558D7A25DA130900746600 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7925DA130900746600 /* ApiKey.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */; };
 		D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */; };
@@ -280,6 +283,10 @@
 		D34ACAED2590E545007C9521 /* 20201220-contentKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201220-contentKey.sql"; sourceTree = "<group>"; };
 		D34ACAF725915662007C9521 /* 20201221-prompt.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201221-prompt.sql"; sourceTree = "<group>"; };
 		D34ACB0125925EA5007C9521 /* initialSchema.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = initialSchema.sql; sourceTree = "<group>"; };
+		D3558D7425D87F3000746600 /* BookSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSearchViewController.swift; sourceTree = "<group>"; };
+		D3558D7625D9741100746600 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
+		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
+		D3558D7925DA130900746600 /* ApiKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
 		D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaveToGrailDiary.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -470,6 +477,7 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
+				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
 				D35C8BCE259E842E00A92CEB /* Shared */,
@@ -499,8 +507,10 @@
 			isa = PBXGroup;
 			children = (
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
+				D3558D7925DA130900746600 /* ApiKey.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
+				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */,
 				D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */,
@@ -524,6 +534,7 @@
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
+				D3558D7625D9741100746600 /* ImageCache.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
@@ -959,9 +970,11 @@
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,
+				D3558D7725D9741100746600 /* ImageCache.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D30D6B2B2549BD0700F5902D /* PieceTable.swift in Sources */,
+				D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */,
 				D54C311E21E7E3CD007AE62E /* MarkdownEditingTextView.swift in Sources */,
 				D3198DB123DBCA0F0098A9D9 /* PromptRecord.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
@@ -981,6 +994,7 @@
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
+				D3558D7A25DA130900746600 /* ApiKey.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,
@@ -1121,6 +1135,7 @@
 		};
 		D3DC5EDC20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
@@ -1183,6 +1198,7 @@
 		};
 		D3DC5EDD20EC9B0200F0B74B /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;

@@ -301,8 +301,8 @@ final class DocumentListViewController: UIViewController {
       countItem,
       UIBarButtonItem.flexibleSpace(),
     ]
-    if splitViewController?.isCollapsed ?? false {
-      toolbarItems.append(AppCommandsButtonItems.newNote())
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = toolbarButtonBuilder?.makeNewNoteButtonItem() {
+      toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
   }

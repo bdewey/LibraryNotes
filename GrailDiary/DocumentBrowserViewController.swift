@@ -5,7 +5,6 @@ import UIKit
 import UniformTypeIdentifiers
 
 @objc protocol AppCommands {
-  func makeNewNote()
   func openNewFile()
 }
 
@@ -13,12 +12,6 @@ enum AppCommandsButtonItems {
   static func documentBrowser() -> UIBarButtonItem {
     let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
     button.accessibilityIdentifier = "open-files"
-    return button
-  }
-
-  static func newNote() -> UIBarButtonItem {
-    let button = UIBarButtonItem(barButtonSystemItem: .compose, target: nil, action: #selector(AppCommands.makeNewNote))
-    button.accessibilityIdentifier = "new-document"
     return button
   }
 }

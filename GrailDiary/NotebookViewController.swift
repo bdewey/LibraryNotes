@@ -9,11 +9,29 @@ protocol ReferenceViewController: UIViewController {
   var relatedNotesViewController: UIViewController? { get set }
 }
 
+public protocol ToolbarButtonBuilder {
+  func makeNewNoteButtonItem() -> UIBarButtonItem
+}
+
+public extension UIViewController {
+  /// Walk up the parent view controllers to find one that implements ToolbarButtonBuilder
+  var toolbarButtonBuilder: ToolbarButtonBuilder? {
+    var currentViewController: UIViewController? = self
+    while currentViewController != nil {
+      if let builder = currentViewController as? ToolbarButtonBuilder {
+        return builder
+      }
+      currentViewController = currentViewController?.parent ?? currentViewController?.presentingViewController
+    }
+    return nil
+  }
+}
+
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
 /// - secondary: An individual note
-final class NotebookViewController: UIViewController {
+final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   init(database: NoteDatabase) {
     self.database = database
     super.init(nibName: nil, bundle: nil)
@@ -218,6 +236,28 @@ final class NotebookViewController: UIViewController {
     Logger.shared.info("Created a new view controller for a blank document")
   }
 
+  func makeNewNoteButtonItem() -> UIBarButtonItem {
+    var extraActions = [UIAction]()
+    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
+      let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
+        let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
+        bookSearchViewController.delegate = self
+        bookSearchViewController.title = "New Note About Book"
+        let navigationController = UINavigationController(rootViewController: bookSearchViewController)
+        navigationController.navigationBar.tintColor = .grailTint
+        self?.present(navigationController, animated: true)
+      })
+      extraActions.append(bookNoteAction)
+    }
+    let menu: UIMenu? = extraActions.isEmpty ? nil : UIMenu(options: [.displayInline], children: extraActions)
+    let primaryAction = UIAction { [weak self] _ in
+      self?.makeNewNote()
+    }
+    let button = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction, menu: menu)
+    button.accessibilityIdentifier = "new-document"
+    return button
+  }
+
   // MARK: - State restoration
 
   private enum ActivityKey {
@@ -258,6 +298,31 @@ final class NotebookViewController: UIViewController {
   }
 }
 
+// MARK: - BookSearchViewControllerDelegate
+
+extension NotebookViewController: BookSearchViewControllerDelegate {
+  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+    dismiss(animated: true, completion: nil)
+    let hashtag = focusedNotebookStructure.hashtag
+    let folder = focusedNotebookStructure.predefinedFolder
+    let viewController = SavingTextEditViewController(
+      database: database,
+      folder: folder,
+      title: book.markdownTitle,
+      initialImage: book.coverImage,
+      currentHashtag: hashtag,
+      autoFirstResponder: true
+    )
+    currentNoteEditor = viewController
+    notebookSplitViewController.show(.secondary)
+    Logger.shared.info("Created a new view controller for a book!")
+  }
+
+  func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
+  }
+}
+
 // MARK: - NotebookStructureViewControllerDelegate
 
 extension NotebookViewController: NotebookStructureViewControllerDelegate {
@@ -284,14 +349,13 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteIdentifier: Note.Identifier?,
     shiftFocus: Bool
   ) {
-    let existingOrUncreatedNote: SavingTextEditViewController.ExistingOrUncreatedNote
-    if let noteIdentifier = noteIdentifier {
-      existingOrUncreatedNote = .existing(identifier: noteIdentifier)
-    } else {
-      existingOrUncreatedNote = .unsaved(folder: focusedNotebookStructure.predefinedFolder)
-    }
+    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
     let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(noteIdentifier: existingOrUncreatedNote, note: note),
+      configuration: SavingTextEditViewController.Configuration(
+        folder: focusedNotebookStructure.predefinedFolder,
+        noteIdentifier: actualNoteIdentifier,
+        note: note
+      ),
       noteStorage: database
     )
     noteViewController.setTitleMarkdown(note.title)
