@@ -11,6 +11,18 @@ public struct Book: Hashable {
   var publishedDate: String?
   var coverImage: UIImage?
   var coverImageURL: URL?
+
+  var markdownTitle: String {
+    var title = "_\(title)_"
+    if !authors.isEmpty {
+      let authors = authors.joined(separator: ", ")
+      title += ": \(authors)"
+    }
+    if let publishedDate = publishedDate {
+      title += " (\(publishedDate.prefix(4)))"
+    }
+    return title
+  }
 }
 
 /// Delegate protocol.
@@ -30,6 +42,7 @@ public final class BookSearchViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -135,7 +148,6 @@ public final class BookSearchViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    title = "Find a Book"
     view.tintColor = .grailTint
     view.backgroundColor = .grailBackground
     let cancelButton = UIBarButtonItem(systemItem: .cancel)
@@ -247,7 +259,7 @@ extension BookSearchViewController: UISearchBarDelegate {}
 private extension Array where Element: Hashable {
   func removingDuplicates() -> Self {
     var alreadySeen: Set<Element> = []
-    return self.filter {
+    return filter {
       if alreadySeen.contains($0) { return false }
       alreadySeen.insert($0)
       return true

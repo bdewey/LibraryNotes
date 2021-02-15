@@ -233,30 +233,32 @@ public final class TextEditViewController: UIViewController {
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
 
+    var inputBarItems = [UIBarButtonItem]()
+
     let insertHashtagAction = UIAction { [textView] _ in
       let nextLocation = textView.selectedRange.location + 1
       textView.textStorage.replaceCharacters(in: textView.selectedRange, with: "#")
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
     }
-    let insertHashtagButton = UIBarButtonItem(title: "#", primaryAction: insertHashtagAction)
+    inputBarItems.append(UIBarButtonItem(title: "#", primaryAction: insertHashtagAction))
 
-    let boldButton = UIBarButtonItem(image: UIImage(systemName: "bold"), primaryAction: UIAction { [textView] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "bold"), primaryAction: UIAction { [textView] _ in
       let currentSelectedRange = textView.selectedRange
       let nextLocation = currentSelectedRange.upperBound + 2
       textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
       textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
-    })
+    }))
 
-    let italicButton = UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
       let currentSelectedRange = textView.selectedRange
       let nextLocation = currentSelectedRange.upperBound + 1
       textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "_")
       textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "_")
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
-    })
+    }))
 
-    let quoteButton = UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage] _ in
       let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
       if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
         textStorage.replaceCharacters(in: NSRange(location: blockQuote.range.location, length: 2), with: "")
@@ -265,9 +267,9 @@ public final class TextEditViewController: UIViewController {
         textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "> ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
       }
-    })
+    }))
 
-    let summaryButton = UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
+    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
       let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
       if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
         textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "tl;dr: ")
@@ -276,9 +278,9 @@ public final class TextEditViewController: UIViewController {
         textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
       }
-    })
+    }))
 
-    let bulletButton = UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage] _ in
       let nodePath = textStorage.storage.path(to: max(0, textView.selectedRange.location - 1))
       let existingSelectedLocation = textView.selectedRange.location
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
@@ -288,10 +290,16 @@ public final class TextEditViewController: UIViewController {
         textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "* ")
         textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
       }
-    })
+    }))
+
+    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
+      inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
+        self?.insertBookDetails(apiKey: apiKey)
+      }))
+    }
 
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = [insertHashtagButton, boldButton, italicButton, quoteButton, summaryButton, bulletButton]
+    inputBar.items = inputBarItems
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar
@@ -587,5 +595,33 @@ private extension TextEditViewController {
     textView.selectedRange = NSRange(location: range.lowerBound, length: 0)
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
+  }
+
+  func insertBookDetails(apiKey: String) {
+    let bookViewController = BookSearchViewController(apiKey: apiKey)
+    bookViewController.delegate = self
+    bookViewController.title = "Insert Book Details"
+    let navigationController = UINavigationController(rootViewController: bookViewController)
+    navigationController.navigationBar.tintColor = .grailTint
+    present(navigationController, animated: true, completion: nil)
+  }
+}
+
+extension TextEditViewController: BookSearchViewControllerDelegate {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+    var imageKey: String?
+    if let image = book.coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+      imageKey = try? imageStorage.storeImageData(imageData, type: .jpeg)
+    }
+    var markdown = book.markdownTitle
+    if let imageKey = imageKey {
+      markdown += "\n\n![](\(imageKey))\n\n"
+    }
+    textView.textStorage.replaceCharacters(in: selectedRange, with: markdown)
+    dismiss(animated: true, completion: nil)
+  }
+
+  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
   }
 }

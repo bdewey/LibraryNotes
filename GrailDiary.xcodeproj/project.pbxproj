@@ -80,6 +80,7 @@
 		D34ACB0225925EA5007C9521 /* initialSchema.sql in Resources */ = {isa = PBXBuildFile; fileRef = D34ACB0125925EA5007C9521 /* initialSchema.sql */; };
 		D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookSearchViewController.swift */; };
 		D3558D7725D9741100746600 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7625D9741100746600 /* ImageCache.swift */; };
+		D3558D7A25DA130900746600 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7925DA130900746600 /* ApiKey.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */; };
 		D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */; };
@@ -285,6 +286,7 @@
 		D3558D7425D87F3000746600 /* BookSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSearchViewController.swift; sourceTree = "<group>"; };
 		D3558D7625D9741100746600 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
+		D3558D7925DA130900746600 /* ApiKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
 		D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaveToGrailDiary.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -505,6 +507,7 @@
 			isa = PBXGroup;
 			children = (
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
+				D3558D7925DA130900746600 /* ApiKey.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
@@ -991,6 +994,7 @@
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
+				D3558D7A25DA130900746600 /* ApiKey.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,

@@ -239,10 +239,11 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
 
   func makeNewNoteButtonItem() -> UIBarButtonItem {
     var extraActions = [UIAction]()
-    if let apiKey = Bundle.main.infoDictionary?["GOOGLE_BOOKS_API_KEY"] as? String, !apiKey.isEmpty {
+    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
       let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
         let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
         bookSearchViewController.delegate = self
+        bookSearchViewController.title = "New Note About Book"
         let navigationController = UINavigationController(rootViewController: bookSearchViewController)
         navigationController.navigationBar.tintColor = .grailTint
         self?.present(navigationController, animated: true)
@@ -305,18 +306,10 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     dismiss(animated: true, completion: nil)
     let hashtag = focusedNotebookStructure.hashtag
     let folder = focusedNotebookStructure.predefinedFolder
-    var title = "_\(book.title)_"
-    if !book.authors.isEmpty {
-      let authors = book.authors.joined(separator: ", ")
-      title += ": \(authors)"
-    }
-    if let publishedDate = book.publishedDate {
-      title += " (\(publishedDate.prefix(4)))"
-    }
     let viewController = SavingTextEditViewController(
       database: database,
       folder: folder,
-      title: title,
+      title: book.markdownTitle,
       initialImage: book.coverImage,
       currentHashtag: hashtag,
       autoFirstResponder: true
