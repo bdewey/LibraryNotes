@@ -10,17 +10,20 @@ public protocol WebScrapingViewControllerDelegate: AnyObject {
 }
 
 public final class WebScrapingViewController: UIViewController {
-  init(initialURL: URL) {
+  init(initialURL: URL, javascript: String) {
     self.initialURL = initialURL
+    self.javascript = javascript
     super.init(nibName: nil, bundle: nil)
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
 
   public weak var delegate: WebScrapingViewControllerDelegate?
   public let initialURL: URL
+  public let javascript: String
 
   private lazy var webView: WKWebView = {
     let preferences = WKPreferences()
@@ -54,8 +57,8 @@ public final class WebScrapingViewController: UIViewController {
     }
   )
 
-  public override func loadView() {
-    self.view = webView
+  override public func loadView() {
+    view = webView
   }
 
   override public func viewDidLoad() {
@@ -105,13 +108,3 @@ extension WebScrapingViewController: WKNavigationDelegate {
     configureUI()
   }
 }
-
-private let javascript = #"""
-  "use strict";
-  var _a, _b;
-  const title = (_a = window.document.querySelector("h3.kp-notebook-metadata")) === null || _a === void 0 ? void 0 : _a.textContent;
-  const author = (_b = window.document.querySelector("p.kp-notebook-metadata.a-color-secondary")) === null || _b === void 0 ? void 0 : _b.textContent;
-  const elements = Array.from(window.document.getElementsByClassName("kp-notebook-highlight"));
-  const quotes = elements.map(e => `> ${e.textContent}`).join("\n\n");
-  `# ${title}: ${author}\n\n${quotes}`;
-"""#

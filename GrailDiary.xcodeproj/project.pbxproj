@@ -98,6 +98,7 @@
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
 		D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */; };
 		D377818325DC0ADD004DD38F /* WebScrapingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */; };
+		D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */; };
 		D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */ = {isa = PBXBuildFile; productRef = D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */; };
 		D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */; };
 		D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */; };
@@ -308,6 +309,7 @@
 		D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentListViewController.swift; sourceTree = "<group>"; };
 		D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CommonplaceBookApp.entitlements; sourceTree = "<group>"; };
 		D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebScrapingViewController.swift; sourceTree = "<group>"; };
+		D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebImporterConfiguration.swift; sourceTree = "<group>"; };
 		D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateMatcher.swift; sourceTree = "<group>"; };
 		D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Set.swift"; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
@@ -588,6 +590,7 @@
 				D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -996,6 +999,7 @@
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
+				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
 				D3558D7A25DA130900746600 /* ApiKey.swift in Sources */,

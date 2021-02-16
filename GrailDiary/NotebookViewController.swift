@@ -248,14 +248,17 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       })
       extraActions.append(bookNoteAction)
     }
-    extraActions.append(UIAction(title: "Amazon Kindle Import", image: UIImage(systemName: "safari"), handler: { [weak self] _ in
-      guard let self = self else { return }
-      let webViewController = WebScrapingViewController(initialURL: URL(string: "https://read.amazon.com/notebook")!)
-      webViewController.delegate = self
-      let navigationController = UINavigationController(rootViewController: webViewController)
-      navigationController.navigationBar.tintColor = .grailTint
-      self.present(navigationController, animated: true, completion: nil)
-    }))
+    let webImporters = WebImporterConfiguration.shared.map { config -> UIAction in
+      UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
+        guard let self = self else { return }
+        let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
+        webViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: webViewController)
+        navigationController.navigationBar.tintColor = .grailTint
+        self.present(navigationController, animated: true, completion: nil)
+      })
+    }
+    extraActions.append(contentsOf: webImporters)
     let menu: UIMenu? = extraActions.isEmpty ? nil : UIMenu(options: [.displayInline], children: extraActions)
     let primaryAction = UIAction { [weak self] _ in
       self?.makeNewNote()
