@@ -18,11 +18,11 @@ extension WebImporterConfiguration {
       importJavascript: #"""
         "use strict";
         var _a, _b;
-        const title = (_a = window.document.querySelector("h3.kp-notebook-metadata")) === null || _a === void 0 ? void 0 : _a.textContent;
-        const author = (_b = window.document.querySelector("p.kp-notebook-metadata.a-color-secondary")) === null || _b === void 0 ? void 0 : _b.textContent;
-        const elements = Array.from(window.document.getElementsByClassName("kp-notebook-highlight"));
-        const quotes = elements.map(e => `> ${e.textContent}`).join("\n\n");
-        `# ${title}: ${author}\n\n${quotes}`;
+        const bookTitle = (_a = window.document.querySelector("h3.kp-notebook-metadata")) === null || _a === void 0 ? void 0 : _a.textContent;
+        const bookAuthor = (_b = window.document.querySelector("span.kp-notebook-metadata.a-color-secondary")) === null || _b === void 0 ? void 0 : _b.textContent;
+        const highlightElements = Array.from(window.document.getElementsByClassName("kp-notebook-highlight"));
+        const bookQuotes = highlightElements.map(e => `> ${e.textContent}`).join("\n\n");
+        `# ${bookTitle}: ${bookAuthor}\n\n${bookQuotes}`;
       """#
     ),
   ]
