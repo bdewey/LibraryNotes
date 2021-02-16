@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.43.0] - 2020-02-14 Happy Valentine's Day!
 
 ### Added
 
@@ -12,7 +12,7 @@
 
 ### Fixed
 
-- Deleted notes showed up in the hashtag views
+- Deleted notes no longer show up in the hashtag views
 
 ## [0.42.0] - 2020-02-13
 
