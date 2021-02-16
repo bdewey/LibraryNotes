@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Import your Kindle hightlights straight from Amazon!
+
 ## [0.43.0] - 2020-02-14 Happy Valentine's Day!
 
 ### Added
