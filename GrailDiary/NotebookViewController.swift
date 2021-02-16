@@ -248,6 +248,14 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       })
       extraActions.append(bookNoteAction)
     }
+    extraActions.append(UIAction(title: "Amazon Kindle Import", image: UIImage(systemName: "safari"), handler: { [weak self] _ in
+      guard let self = self else { return }
+      let webViewController = WebScrapingViewController(initialURL: URL(string: "https://read.amazon.com/notebook")!)
+      webViewController.delegate = self
+      let navigationController = UINavigationController(rootViewController: webViewController)
+      navigationController.navigationBar.tintColor = .grailTint
+      self.present(navigationController, animated: true, completion: nil)
+    }))
     let menu: UIMenu? = extraActions.isEmpty ? nil : UIMenu(options: [.displayInline], children: extraActions)
     let primaryAction = UIAction { [weak self] _ in
       self?.makeNewNote()
@@ -294,6 +302,33 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+  }
+}
+
+// MARK: - WebScrapingViewControllerDelegate
+
+extension NotebookViewController: WebScrapingViewControllerDelegate {
+  func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown markdown: String) {
+    dismiss(animated: true, completion: nil)
+    Logger.shared.info("Creating a new page with markdown: \(markdown)")
+    // TODO: There's an awful lot repeated in the book search method
+    let hashtag = focusedNotebookStructure.hashtag
+    let folder = focusedNotebookStructure.predefinedFolder
+    // TODO: I'm abusing the "title" parameter here
+    let viewController = SavingTextEditViewController(
+      database: database,
+      folder: folder,
+      title: markdown,
+      currentHashtag: hashtag,
+      autoFirstResponder: true
+    )
+    currentNoteEditor = viewController
+    notebookSplitViewController.show(.secondary)
+    Logger.shared.info("Created a new view controller for a book!")
+  }
+
+  func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
+    dismiss(animated: true, completion: nil)
   }
 }
 

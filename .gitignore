@@ -1,5 +1,7 @@
 ApiSecrets.xcconfig
+node_modules
 xcuserdata
 .DS_Store
 GrailDiary.xcodeproj/xcuserdata/brian.xcuserdatad/xcschemes/xcschememanagement.plist
 *.grail
+*.js
