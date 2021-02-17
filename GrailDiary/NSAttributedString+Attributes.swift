@@ -216,6 +216,16 @@ public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
       paragraphStyle = listStyling
     }
   }
+
+  /// True iff the receiver renders equivalently to `otherAttributes` in an attributed string.
+  func rendersEquivalent(to otherAttributes: AttributedStringAttributes) -> Bool {
+    return font == otherAttributes.font
+      && paragraphStyle == otherAttributes.paragraphStyle
+      && color == otherAttributes.color
+      && backgroundColor == otherAttributes.backgroundColor
+      && blockquoteBorderColor == otherAttributes.blockquoteBorderColor
+      && kern == otherAttributes.kern
+  }
 }
 
 private extension UIFontDescriptor {
@@ -230,13 +240,4 @@ private extension UIFontDescriptor {
 
 private extension NSAttributedString.Key {
   static let listLevel = NSAttributedString.Key(rawValue: "org.brians-brain.list-level")
-}
-
-public extension UIFont {
-  var attributesDictionary: [NSAttributedString.Key: Any] {
-    var attributes = [NSAttributedString.Key: Any]()
-    attributes.font = self
-    attributes.lineHeightMultiple = 1.2
-    return attributes
-  }
 }

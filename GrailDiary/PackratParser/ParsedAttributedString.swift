@@ -211,6 +211,7 @@ private extension Logger {
   ) {
     // TODO. Maybe just ignore? But this is how emojis and misspellings get formatted
     // by the system.
+    Logger.shared.info("Ignoring attempt to set attributes at range \(range)")
   }
 }
 
