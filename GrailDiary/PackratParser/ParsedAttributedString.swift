@@ -223,9 +223,12 @@ private extension ParsedAttributedString {
       node.hasTextReplacement = false
     }
     var childLength = 0
-    if node.children.isEmpty {
+    if node.children.isEmpty || node.hasTextReplacement {
       // We are a leaf. Adjust leafNodeRange.
-      resultingAttributesArray.appendAttributes(attributes, length: node.length)
+      resultingAttributesArray.appendAttributes(attributes, length: node.length + node.textReplacementChangeInLength)
+    }
+    if node.hasTextReplacement {
+      return
     }
     var childTextReplacementChangeInLength = 0
     for child in node.children {

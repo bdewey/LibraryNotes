@@ -225,6 +225,7 @@ public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
       && backgroundColor == otherAttributes.backgroundColor
       && blockquoteBorderColor == otherAttributes.blockquoteBorderColor
       && kern == otherAttributes.kern
+      && (self[.attachment] as? NSTextAttachment) == (otherAttributes[.attachment] as? NSTextAttachment)
   }
 }
 
