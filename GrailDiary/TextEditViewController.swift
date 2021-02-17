@@ -292,10 +292,24 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
+    var importActions = WebImporterConfiguration.shared.map { config in
+      UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
+        guard let self = self else { return }
+        let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
+        webViewController.delegate = self
+        let navigationController = UINavigationController(rootViewController: webViewController)
+        navigationController.navigationBar.tintColor = .grailTint
+        self.present(navigationController, animated: true, completion: nil)
+      })
+    }
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
-      inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
+      importActions.append(UIAction(title: "Search Google Books", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
         self?.insertBookDetails(apiKey: apiKey)
       }))
+    }
+
+    if !importActions.isEmpty {
+      inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), menu: UIMenu(children: importActions)))
     }
 
     let inputBar = UIToolbar(frame: .zero)
@@ -606,6 +620,21 @@ private extension TextEditViewController {
     present(navigationController, animated: true, completion: nil)
   }
 }
+
+// MARK: - WebScrapingViewControllerDelegate
+
+extension TextEditViewController: WebScrapingViewControllerDelegate {
+  public func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown markdown: String) {
+    textView.textStorage.replaceCharacters(in: selectedRange, with: markdown)
+    dismiss(animated: true, completion: nil)
+  }
+
+  public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
+    dismiss(animated: true, completion: nil)
+  }
+}
+
+// MARK: - BookSearchViewControllerDelegate
 
 extension TextEditViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
