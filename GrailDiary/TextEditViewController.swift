@@ -289,8 +289,9 @@ public final class TextEditViewController: UIViewController {
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
         textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
         textView.selectedRange = NSRange(location: existingSelectedLocation - 2, length: textView.selectedRange.length)
-      } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "* ")
+      } else {
+        let lineRange = self.lineRange(at: existingSelectedLocation)
+        textStorage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: "* ")
         textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
       }
     }))
@@ -582,22 +583,13 @@ extension TextEditViewController: UITextViewDelegate {
 
   /// Gets the line of text that contains a given location.
   private func line(at location: Int) -> String {
-    let string = textStorage.string
-    var startIndex = string.index(string.startIndex, offsetBy: location)
-    if startIndex == string.endIndex || string[startIndex] == "\n" {
-      startIndex = string.index(before: startIndex)
-    }
-    while startIndex != string.startIndex, startIndex == string.endIndex || string[startIndex] != "\n" {
-      startIndex = string.index(before: startIndex)
-    }
-    if string[startIndex] == "\n" {
-      startIndex = string.index(after: startIndex)
-    }
-    var endIndex = startIndex
-    while endIndex != string.endIndex, string[endIndex] != "\n" {
-      endIndex = string.index(after: endIndex)
-    }
-    return String(string[startIndex ..< endIndex])
+    let nsstring = textStorage.string as NSString
+    let lineRange = nsstring.lineRange(for: NSRange(location: location, length: 0))
+    return nsstring.substring(with: lineRange)
+  }
+
+  private func lineRange(at location: Int) -> NSRange {
+    (textStorage.string as NSString).lineRange(for: NSRange(location: location, length: 0))
   }
 }
 

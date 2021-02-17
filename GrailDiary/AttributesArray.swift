@@ -7,6 +7,11 @@ public struct AttributesArray {
   private var runs: [Run]
   public private(set) var count: Int
 
+  public init() {
+    runs = []
+    count = 0
+  }
+
   public enum Error: Swift.Error {
     /// When comparing attribute arrays, the arrays have different lengths.
     case arraysHaveDifferentLength
@@ -19,15 +24,22 @@ public struct AttributesArray {
     } else {
       runs.append(Run(attributes: attributes, length: length))
     }
+    assert(runs.map({ $0.length }).reduce(0, +) == count)
   }
 
-  public mutating func adjustLengthOfRun(at location: Int, by amount: Int) {
+  public mutating func adjustLengthOfRun(at location: Int, by amount: Int, defaultAttributes: AttributedStringAttributes) {
     count += amount
     let index = self.index(startIndex, offsetBy: location)
-    runs[index.runIndex].adjustLength(by: amount)
+    if index == endIndex {
+      assert(amount >= 0)
+      runs.append(Run(attributes: defaultAttributes, length: amount))
+    } else {
+      runs[index.runIndex].adjustLength(by: amount)
+    }
     if runs[index.runIndex].length == 0 {
       runs.remove(at: index.runIndex)
     }
+    assert(runs.map({ $0.length }).reduce(0, +) == count)
   }
 
   public mutating func setAttributes(_ attributes: AttributedStringAttributes, range: NSRange) {
@@ -35,11 +47,12 @@ public struct AttributesArray {
     let sliceStartIndex = index(startIndex, offsetBy: range.location)
     let sliceEndIndex = index(startIndex, offsetBy: range.location + range.length)
     let replacementRuns = [
-      runs[sliceStartIndex.runIndex].adjustingLength(by: -1 * sliceStartIndex.offsetInRun).nilIfZeroLength(),
+      runs[sliceStartIndex.runIndex].adjustingLength(by: -1 * (runs[sliceStartIndex.runIndex].length - sliceStartIndex.offsetInRun)).nilIfZeroLength(),
       Run(attributes: attributes, length: range.length),
-      runs[sliceEndIndex.runIndex].adjustingLength(by: -1 * sliceEndIndex.offsetInRun).nilIfZeroLength(),
+      runIfChanging(at: sliceEndIndex)?.adjustingLength(by: -1 * sliceEndIndex.offsetInRun).nilIfZeroLength(),
     ].compactMap { $0 }
-    runs.replaceSubrange(sliceStartIndex.runIndex ... sliceEndIndex.runIndex, with: replacementRuns)
+    runs.replaceSubrange(runRange(for: sliceStartIndex ..< sliceEndIndex), with: replacementRuns)
+    assert(runs.map({ $0.length }).reduce(0, +) == count)
   }
 
   public func attributes(at location: Int, effectiveRange: NSRangePointer?) -> AttributedStringAttributes {
@@ -52,8 +65,48 @@ public struct AttributesArray {
     if count != otherAttributes.count {
       throw Error.arraysHaveDifferentLength
     }
-    // TODO:
-    return NSRange(location: 0, length: count)
+    var firstDifferingIndex = 0
+    for (lhs, rhs) in zip(runs, otherAttributes.runs) {
+      if !lhs.attributes.rendersEquivalent(to: rhs.attributes) {
+        break
+      }
+      firstDifferingIndex += Swift.min(lhs.length, rhs.length)
+      if lhs.length != rhs.length {
+        break
+      }
+    }
+    if firstDifferingIndex == count {
+      return nil
+    }
+    var lastDifferingIndex = count
+    for (lhs, rhs) in zip(runs.reversed(), otherAttributes.runs.reversed()) {
+      if !lhs.attributes.rendersEquivalent(to: rhs.attributes) {
+        break
+      }
+      lastDifferingIndex -= Swift.min(lhs.length, rhs.length)
+      if lhs.length != rhs.length {
+        break
+      }
+    }
+    assert(lastDifferingIndex >= firstDifferingIndex)
+    if lastDifferingIndex > firstDifferingIndex {
+      return NSRange(location: firstDifferingIndex, length: lastDifferingIndex - firstDifferingIndex)
+    } else {
+      return nil
+    }
+  }
+
+  private func runIfChanging(at index: Index) -> Run? {
+    index.offsetInRun > 0 ? runs[index.runIndex] : nil
+  }
+
+  private func runRange<R: RangeExpression>(for indexRange: R) -> Range<Int> where R.Bound == Index {
+    let bounds = indexRange.relative(to: self)
+    if bounds.upperBound.offsetInRun > 0 {
+      return bounds.lowerBound.runIndex ..< bounds.upperBound.runIndex + 1
+    } else {
+      return bounds.lowerBound.runIndex ..< bounds.upperBound.runIndex
+    }
   }
 }
 

@@ -74,14 +74,14 @@ private extension Logger {
     self.replacementFunctions = fullFormatFunctions
     self.rawString = ParsedString(string, grammar: grammar)
     self._string = PieceTableString(pieceTable: PieceTable(rawString.text))
+    self.attributesArray = AttributesArray()
     super.init()
-    var range: Range<Int>?
     if case .success(let node) = rawString.result {
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &range
+        resultingAttributesArray: &attributesArray
       )
       applyReplacements(in: node, startingIndex: 0, to: _string)
     }
@@ -107,6 +107,8 @@ private extension Logger {
 
   /// Default attributes
   private let defaultAttributes: AttributedStringAttributes
+
+  private var attributesArray: AttributesArray
 
   /// A set of functions that customize attributes based upon the nodes in the AST.
   private let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
@@ -141,7 +143,6 @@ private extension Logger {
 
   /// Replaces the characters in the given range with the characters of the given string.
   override public func replaceCharacters(in range: NSRange, with str: String) {
-    var changedAttributesRange: Range<Int>?
     let lengthBeforeChanges = _string.length
     let bufferRange = rawStringRange(forRange: range)
     rawString.replaceCharacters(
@@ -149,25 +150,28 @@ private extension Logger {
       with: str
     )
     _string.revertToOriginal()
+    var newAttributes = AttributesArray()
     if case .success(let node) = rawString.result {
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &changedAttributesRange
+        resultingAttributesArray: &newAttributes
       )
       applyReplacements(in: node, startingIndex: 0, to: _string)
+    } else {
+      newAttributes = attributesArray
     }
     // Deliver delegate messages
     Logger.attributedStringLogger.debug("Edit \(range) change in length \(_string.length - lengthBeforeChanges)")
-    if let range = changedAttributesRange {
-      Logger.attributedStringLogger.debug("Changed attributes at \(self.range(forRawStringRange: NSRange(range)))")
-    }
+    attributesArray.adjustLengthOfRun(at: range.location, by: _string.length - lengthBeforeChanges, defaultAttributes: defaultAttributes)
+    // swiftlint:disable:next force_try
+    let changedAttributesRange = (try! attributesArray.rangeOfAttributeDifferences(from: newAttributes)) ?? NSRange(location: 0, length: 0)
+    attributesArray = newAttributes
     delegate?.attributedStringDidChange(
       oldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
-      changedAttributesRange: changedAttributesRange.flatMap { self.range(forRawStringRange: NSRange($0)) }
-        ?? NSRange(location: 0, length: 0) // Documentation says location == NSNotFound means "no change", but this seems to cause an infinite loop
+      changedAttributesRange: changedAttributesRange
     )
   }
 
@@ -180,25 +184,7 @@ private extension Logger {
     at location: Int,
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
-    guard let tree = try? rawString.result.get() else {
-      range?.pointee = NSRange(location: 0, length: rawString.count)
-      return defaultAttributes
-    }
-    var bufferLocation = rawStringRange(forRange: NSRange(location: location, length: 0)).location
-    repeat {
-      // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
-      let leafNode = try! tree.leafNode(containing: bufferLocation) // swiftlint:disable:this force_try
-      let visibleRange = self.range(forRawStringRange: leafNode.range)
-      if visibleRange.length > 0 {
-        assert(visibleRange.contains(location))
-        range?.pointee = visibleRange
-        Logger.attributedStringLogger.debug("Found attributes at location \(bufferLocation) for range \(visibleRange) (\(visibleRange.upperBound)), length = \(length)")
-        return leafNode.node.attributedStringAttributes!
-      } else {
-        // We landed on a node that isn't visible in the final result. Skip to the next node.
-        bufferLocation += leafNode.node.length
-      }
-    } while true
+    return attributesArray.attributes(at: location, effectiveRange: range)
   }
 
   /// Sets the attributes for the characters in the specified range to the specified attributes.
@@ -209,9 +195,9 @@ private extension Logger {
     _ attrs: [NSAttributedString.Key: Any]?,
     range: NSRange
   ) {
-    // TODO. Maybe just ignore? But this is how emojis and misspellings get formatted
-    // by the system.
-    Logger.shared.info("Ignoring attempt to set attributes at range \(range)")
+    guard let attrs = attrs, !attrs.isEmpty else { return }
+    Logger.attributedStringLogger.info("Setting attributes at range \(range)")
+    attributesArray.setAttributes(attrs, range: range)
   }
 }
 
@@ -223,12 +209,8 @@ private extension ParsedAttributedString {
     to node: SyntaxTreeNode,
     attributes: AttributedStringAttributes,
     startingIndex: Int,
-    leafNodeRange: inout Range<Int>?
+    resultingAttributesArray: inout AttributesArray
   ) {
-    // If we already have attributes we don't need to do anything else.
-    guard node[NodeAttributesKey.self] == nil else {
-      return
-    }
     var attributes = attributes
     formattingFunctions[node.type]?(node, &attributes)
     if let replacementFunction = replacementFunctions[node.type],
@@ -240,13 +222,10 @@ private extension ParsedAttributedString {
     } else {
       node.hasTextReplacement = false
     }
-    node.attributedStringAttributes = attributes
     var childLength = 0
     if node.children.isEmpty {
       // We are a leaf. Adjust leafNodeRange.
-      let lowerBound = Swift.min(startingIndex, leafNodeRange?.lowerBound ?? Int.max)
-      let upperBound = Swift.max(startingIndex + node.length, leafNodeRange?.upperBound ?? Int.min)
-      leafNodeRange = lowerBound ..< upperBound
+      resultingAttributesArray.appendAttributes(attributes, length: node.length)
     }
     var childTextReplacementChangeInLength = 0
     for child in node.children {
@@ -254,7 +233,7 @@ private extension ParsedAttributedString {
         to: child,
         attributes: attributes,
         startingIndex: startingIndex + childLength,
-        leafNodeRange: &leafNodeRange
+        resultingAttributesArray: &resultingAttributesArray
       )
       childLength += child.length
       childTextReplacementChangeInLength += child.textReplacementChangeInLength
@@ -311,13 +290,6 @@ public extension ParsedAttributedString.Settings {
   }
 }
 
-/// Key for storing the string attributes associated with a node.
-private struct NodeAttributesKey: SyntaxTreeNodePropertyKey {
-  typealias Value = AttributedStringAttributes
-
-  static let key = "attributes"
-}
-
 private struct NodeTextReplacementKey: SyntaxTreeNodePropertyKey {
   typealias Value = [unichar]
   static let key = "textReplacement"
@@ -334,16 +306,6 @@ private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
 }
 
 private extension SyntaxTreeNode {
-  /// The attributes associated with this node, if set.
-  var attributedStringAttributes: AttributedStringAttributes? {
-    get {
-      self[NodeAttributesKey.self]
-    }
-    set {
-      self[NodeAttributesKey.self] = newValue
-    }
-  }
-
   var textReplacement: [unichar]? {
     get {
       self[NodeTextReplacementKey.self]
