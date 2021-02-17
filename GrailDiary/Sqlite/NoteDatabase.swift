@@ -278,6 +278,20 @@ public final class NoteDatabase: UIDocument {
     return identifier
   }
 
+  public func bulkCreateNotes(_ notes: [Note]) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      let updateKey = try updateIdentifier(in: db)
+      for note in notes {
+        let identifier = UUID().uuidString
+        try note.save(identifier: identifier, updateKey: updateKey, to: db)
+      }
+      Logger.shared.info("Finished bulk import of \(notes.count) note(s)")
+    }
+  }
+
   /// Updates a note.
   /// - parameter noteIdentifier: The identifier of the note to update.
   /// - parameter updateBlock: A block that receives the current value of the note and returns the updated value.

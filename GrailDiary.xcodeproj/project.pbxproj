@@ -67,6 +67,7 @@
 		D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16BE259943B800766D55 /* BinaryContentRecord.swift */; };
 		D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C42599457A00766D55 /* ContentIdentifier.swift */; };
 		D32B16C925994BAE00766D55 /* Note+Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C825994BAE00766D55 /* Note+Database.swift */; };
+		D33279C225DCA7DD00A4213F /* LibraryThing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33279C125DCA7DD00A4213F /* LibraryThing.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
 		D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuotePrompt.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
@@ -274,6 +275,7 @@
 		D32B16BE259943B800766D55 /* BinaryContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryContentRecord.swift; sourceTree = "<group>"; };
 		D32B16C42599457A00766D55 /* ContentIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
 		D32B16C825994BAE00766D55 /* Note+Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Database.swift"; sourceTree = "<group>"; };
+		D33279C125DCA7DD00A4213F /* LibraryThing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryThing.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuotePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotePrompt.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
@@ -544,6 +546,7 @@
 				D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
+				D33279C125DCA7DD00A4213F /* LibraryThing.swift */,
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
@@ -1007,6 +1010,7 @@
 				D31AFADC229D61EE00ED2B76 /* DayComponents.swift in Sources */,
 				D3198DAB23D9DDB50098A9D9 /* ContentRecord.swift in Sources */,
 				D31AFABB229D61EE00ED2B76 /* StudyViewController.swift in Sources */,
+				D33279C225DCA7DD00A4213F /* LibraryThing.swift in Sources */,
 				D31AFAD0229D61EE00ED2B76 /* ClozePromptCollection.swift in Sources */,
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,

@@ -196,6 +196,10 @@ final class NotebookStructureViewController: UIViewController {
     return dataSource
   }()
 
+  private lazy var importButton = UIBarButtonItem(title: "Import", primaryAction: UIAction { [weak self] _ in
+    self?.importLibraryThing()
+  })
+
   // MARK: - State restoration
 
   private enum ActivityKey {
@@ -367,6 +371,27 @@ private extension NotebookStructureViewController {
       }
     }
   }
+
+  func importLibraryThing() {
+    let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [.json], asCopy: true)
+    documentPicker.view.tintColor = .grailTint
+    documentPicker.delegate = self
+    present(documentPicker, animated: true, completion: nil)
+  }
+}
+
+extension NotebookStructureViewController: UIDocumentPickerDelegate {
+  func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+    guard let url = urls.first else { return }
+    do {
+      let data = try Data(contentsOf: url)
+      let books = try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values.filter { $0.review != nil }
+      Logger.shared.info("Found \(books.count) LibraryThing books")
+      try database.bulkCreateNotes(books.map { Note($0) })
+    } catch {
+      Logger.shared.error("Error importing LibaryThing file: \(error)")
+    }
+  }
 }
 
 // MARK: - UICollectionViewDelegate
@@ -436,7 +461,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
 
 private extension NotebookStructureViewController {
   func configureToolbar() {
-    var toolbarItems = [AppCommandsButtonItems.documentBrowser(), UIBarButtonItem.flexibleSpace()]
+    var toolbarItems = [AppCommandsButtonItems.documentBrowser(), .flexibleSpace(), importButton, .flexibleSpace()]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = toolbarButtonBuilder?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
