@@ -166,7 +166,7 @@ private extension Logger {
     Logger.attributedStringLogger.debug("Edit \(range) change in length \(_string.length - lengthBeforeChanges)")
     attributesArray.adjustLengthOfRun(at: range.location, by: _string.length - lengthBeforeChanges, defaultAttributes: defaultAttributes)
     // swiftlint:disable:next force_try
-    let changedAttributesRange = (try! attributesArray.rangeOfAttributeDifferences(from: newAttributes)) ?? NSRange(location: 0, length: 0)
+    let changedAttributesRange = (try! attributesArray.rangeOfAttributeDifferences(from: newAttributes)) ?? NSRange(location: range.location, length: 0)
     attributesArray = newAttributes
     delegate?.attributedStringDidChange(
       oldRange: range,

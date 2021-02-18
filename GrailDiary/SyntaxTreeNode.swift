@@ -89,12 +89,6 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     frozen = true
   }
 
-  public func makeCopy() -> SyntaxTreeNode {
-    let copy = SyntaxTreeNode(type: type, length: length)
-    copy.children = children.map { $0.makeCopy() }
-    return copy
-  }
-
   public func appendChild(_ child: SyntaxTreeNode) {
     assert(!frozen)
     length += child.length

@@ -58,6 +58,8 @@ final class ParsedTextStorageTests: XCTestCase {
     )
   }
 
+  // TODO: With the new method of determining if attributes have changed, this is no longer an
+  // effective test to ensure that incremental parsing is happening.
   func testEditMakesMinimumAttributeChange() {
     assertDelegateMessages(
       for: [
@@ -66,7 +68,7 @@ final class ParsedTextStorageTests: XCTestCase {
       ],
       are: Array([
         DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 50), changeInLength: 50),
-        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 8, length: 33), changeInLength: 1),
+        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 39, length: 1), changeInLength: 1),
       ].joined())
     )
   }
@@ -143,7 +145,7 @@ private extension ParsedTextStorageTests {
     let textStorage = ParsedTextStorage(
       storage: ParsedAttributedString(
         grammar: MiniMarkdownGrammar(),
-        defaultAttributes: [:],
+        defaultAttributes: [.font: UIFont.systemFont(ofSize: 12)],
         quickFormatFunctions: [:],
         fullFormatFunctions: [.softTab: formatTab]
       )
