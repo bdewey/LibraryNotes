@@ -35,7 +35,7 @@ final class ClozeTests: XCTestCase {
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
     let renderedFront = ParsedAttributedString(
       string: clozeCards[0].markdown,
-      settings: .plainText(textStyle: .body).hidingCloze(at: clozeCards[0].clozeIndex)
+      settings: ParsedAttributedString.Settings.plainText(textStyle: .body).hidingCloze(at: clozeCards[0].clozeIndex)
     )
     XCTAssertEqual(
       renderedFront.string,
@@ -44,13 +44,13 @@ final class ClozeTests: XCTestCase {
     XCTAssertEqual(
       ParsedAttributedString(
         string: clozeCards[1].markdown,
-        settings: .plainText(textStyle: .body).hidingCloze(at: clozeCards[1].clozeIndex)
+        settings: ParsedAttributedString.Settings.plainText(textStyle: .body).hidingCloze(at: clozeCards[1].clozeIndex)
       ).string,
       "Yo soy de España. ¿De dónde to be ustedes?"
     )
     let renderedBack = ParsedAttributedString(
       string: clozeCards[0].markdown,
-      settings: .plainText(textStyle: .body).highlightingCloze(at: clozeCards[0].clozeIndex)
+      settings: ParsedAttributedString.Settings.plainText(textStyle: .body).highlightingCloze(at: clozeCards[0].clozeIndex)
     )
     XCTAssertEqual(
       renderedBack.string,

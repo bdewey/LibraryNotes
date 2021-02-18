@@ -13,9 +13,9 @@ public struct Book: Hashable {
   var coverImageURL: URL?
 
   var markdownTitle: String {
-    var title = "_\(title)_"
+    var title = "_\(self.title)_"
     if !authors.isEmpty {
-      let authors = authors.joined(separator: ", ")
+      let authors = self.authors.joined(separator: ", ")
       title += ": \(authors)"
     }
     if let publishedDate = publishedDate {
