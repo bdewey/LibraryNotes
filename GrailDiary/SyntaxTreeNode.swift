@@ -40,6 +40,34 @@ public extension SyntaxTreeNodePropertyKey {
   }
 }
 
+public struct SyntaxTreeNodeList {
+  private var nodes = [SyntaxTreeNode]()
+
+  public mutating func removeFirst() {
+    nodes.removeFirst()
+  }
+
+  public mutating func removeLast() {
+    nodes.removeLast()
+  }
+
+  public mutating func append(_ node: SyntaxTreeNode) {
+    nodes.append(node)
+  }
+
+  public mutating func append(contentsOf newElements: SyntaxTreeNodeList) {
+    nodes.append(contentsOf: newElements.nodes)
+  }
+}
+
+extension SyntaxTreeNodeList: BidirectionalCollection {
+  public var startIndex: Int { 0 }
+  public var endIndex: Int { nodes.endIndex }
+  public func index(after i: Int) -> Int { i + 1 }
+  public func index(before i: Int) -> Int { i - 1 }
+  public subscript(position: Int) -> SyntaxTreeNode { nodes[position] }
+}
+
 /// A node in the markup language's syntax tree.
 public final class SyntaxTreeNode: CustomStringConvertible {
   public init(type: SyntaxTreeNodeType, length: Int = 0) {
@@ -72,7 +100,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   private var disconnectedFromResult = false
 
   /// Children of this node.
-  public var children = [SyntaxTreeNode]() {
+  public var children = SyntaxTreeNodeList() {
     willSet {
       assert(!frozen)
     }
@@ -118,7 +146,8 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     } else {
       let copy = SyntaxTreeNode(type: last.type, length: last.length + length)
       copy.disconnectedFromResult = true
-      children[children.count - 1] = copy
+      children.removeLast()
+      children.append(copy)
     }
   }
 
