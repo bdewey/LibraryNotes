@@ -56,7 +56,7 @@ public struct AttributesArray {
   }
 
   public func attributes(at location: Int, effectiveRange: NSRangePointer?) -> AttributedStringAttributes {
-    let index = index(startIndex, offsetBy: location)
+    let index = self.index(startIndex, offsetBy: location)
     effectiveRange?.pointee = NSRange(location: location - index.offsetInRun, length: runs[index.runIndex].length)
     return runs[index.runIndex].attributes
   }
