@@ -385,7 +385,7 @@ extension NotebookStructureViewController: UIDocumentPickerDelegate {
     guard let url = urls.first else { return }
     do {
       let data = try Data(contentsOf: url)
-      let books = try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values.filter { $0.review != nil }
+      let books = try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values.filter { $0.review != nil || $0.rating != nil }
       Logger.shared.info("Found \(books.count) LibraryThing books")
       try database.bulkCreateNotes(books.map { Note($0) })
     } catch {

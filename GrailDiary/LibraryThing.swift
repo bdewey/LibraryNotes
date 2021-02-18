@@ -9,6 +9,7 @@ struct LibraryThingBook: Codable {
   var authors: [LibraryThingAuthor]
   var date: Int?
   var review: String?
+  var rating: Int?
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -17,6 +18,7 @@ struct LibraryThingBook: Codable {
     self.authors = (try? container.decode([LibraryThingAuthor].self, forKey: .authors)) ?? []
     self.date = Int(try container.decode(String.self, forKey: .date))
     self.review = try? container.decode(String.self, forKey: .review)
+    self.rating = try? container.decode(Int.self, forKey: .rating)
   }
 }
 
@@ -37,6 +39,9 @@ extension Note {
     markdown += "\n\n"
     if let review = book.review {
       markdown += "tl;dr: \(review)\n\n"
+    }
+    if let rating = book.rating {
+      markdown += "#rating/" + String(repeating: "⭐️", count: rating) + " "
     }
     markdown += "#libarything\n\n"
     self.init(markdown: markdown)
