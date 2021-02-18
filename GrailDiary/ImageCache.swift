@@ -33,14 +33,3 @@ public final class ImageCache {
     task.resume()
   }
 }
-
-private extension URL {
-  /// If this is an http url, convert it to https
-  func asSecureURL() -> URL {
-    guard var components = URLComponents(string: absoluteString) else { return self }
-    if components.scheme == "http" {
-      components.scheme = "https"
-    }
-    return components.url!
-  }
-}

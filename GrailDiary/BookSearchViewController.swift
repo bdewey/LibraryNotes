@@ -180,7 +180,7 @@ public final class BookSearchViewController: UIViewController {
         Logger.shared.debug("Got valid data")
         return data
       }
-      .decode(type: GoogleBooksResponse.self, decoder: decoder)
+      .decode(type: GoogleBooks.Response.self, decoder: decoder)
       .sink { completion in
         switch completion {
         case .failure(let error):
@@ -209,33 +209,8 @@ extension BookSearchViewController: UICollectionViewDelegate {
 
 // MARK: - Private
 
-private extension BookSearchViewController {
-  struct GoogleBooksResponse: Codable {
-    var totalItems: Int
-    var items: [GoogleBooksItem]
-  }
-
-  struct GoogleBooksItem: Codable {
-    var id: String
-    var volumeInfo: VolumeInfo
-  }
-
-  struct VolumeInfo: Codable {
-    var title: String
-    var subtitle: String?
-    var authors: [String]?
-    var publishedDate: String?
-    var imageLinks: ImageLink?
-  }
-
-  struct ImageLink: Codable {
-    var smallThumbnail: String?
-    var thumbnail: String?
-  }
-}
-
 private extension Book {
-  init(_ item: BookSearchViewController.GoogleBooksItem) {
+  init(_ item: GoogleBooks.Item) {
     self.id = item.id
     self.title = item.volumeInfo.title
     self.authors = item.volumeInfo.authors ?? []

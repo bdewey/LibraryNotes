@@ -145,6 +145,7 @@ final class NotebookStructureViewController: UIViewController {
   public weak var delegate: NotebookStructureViewControllerDelegate?
   private let database: NoteDatabase
   private var notebookSubscription: AnyCancellable?
+  var libraryThingImporter: LibraryThingImporter?
 
   private lazy var collectionView: UICollectionView = {
     let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
@@ -388,9 +389,16 @@ extension NotebookStructureViewController: UIDocumentPickerDelegate {
     guard let url = urls.first else { return }
     do {
       let data = try Data(contentsOf: url)
-      let books = try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values.filter { $0.review != nil || $0.rating != nil }
-      Logger.shared.info("Found \(books.count) LibraryThing books")
-      try database.bulkCreateNotes(books.map { Note($0) })
+      let books = Array(try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values)
+      libraryThingImporter = LibraryThingImporter(database: database, apiKey: ApiKey.googleBooks, books: books)
+      libraryThingImporter?.importBooks(progressCallback: { processed, total in
+        if processed == total || processed % 5 == 0 {
+          Logger.shared.info("Processed \(processed) of \(total) books")
+        }
+      }, completion: { [weak self] in
+        Logger.shared.info("Done with import")
+        self?.libraryThingImporter = nil
+      })
     } catch {
       Logger.shared.error("Error importing LibaryThing file: \(error)")
     }

@@ -292,6 +292,16 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
+  public func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      let updateKey = try updateIdentifier(in: db)
+      try updateBlock(db, updateKey)
+    }
+  }
+
   /// Updates a note.
   /// - parameter noteIdentifier: The identifier of the note to update.
   /// - parameter updateBlock: A block that receives the current value of the note and returns the updated value.
