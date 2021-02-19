@@ -2,7 +2,10 @@
 
 import Foundation
 import Logging
+import os
 import UIKit
+
+private let log = OSLog(subsystem: "org.brians-brain.GrailDiary", category: "ParsedAttributedString")
 
 /// A quick format function can change *only* string attributes based *only* on the type of syntax tree node, but it can do it with simpler syntax than FullFormatFunction.
 public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
@@ -11,7 +14,7 @@ public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAt
 /// just knowing the type.
 public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
 
-private extension Logger {
+private extension Logging.Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
 }
 
@@ -152,12 +155,14 @@ private extension Logger {
     _string.revertToOriginal()
     var newAttributes = AttributesArray()
     if case .success(let node) = rawString.result {
+      os_signpost(.begin, log: log, name: "applyAttributes")
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
         resultingAttributesArray: &newAttributes
       )
+      os_signpost(.end, log: log, name: "applyAttributes")
       applyReplacements(in: node, startingIndex: 0, to: _string)
     } else {
       newAttributes = attributesArray
