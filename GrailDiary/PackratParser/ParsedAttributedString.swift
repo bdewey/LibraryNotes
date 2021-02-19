@@ -192,6 +192,8 @@ private extension Logging.Logger {
     return attributesArray.attributes(at: location, effectiveRange: range)
   }
 
+  @objc public var countOfSetAttributesCalls = 0
+
   /// Sets the attributes for the characters in the specified range to the specified attributes.
   /// - Parameters:
   ///   - attrs: A dictionary containing the attributes to set.
@@ -201,7 +203,8 @@ private extension Logging.Logger {
     range: NSRange
   ) {
     guard let attrs = attrs, !attrs.isEmpty else { return }
-    Logger.attributedStringLogger.info("Setting attributes at range \(range)")
+    countOfSetAttributesCalls += 1
+    Logger.attributedStringLogger.info("Setting attributes at range \(range) \(countOfSetAttributesCalls)")
     attributesArray.setAttributes(attrs, range: range)
   }
 }
