@@ -40,7 +40,18 @@ public extension SyntaxTreeNodePropertyKey {
   }
 }
 
-public struct SyntaxTreeNodeList {
+public protocol SyntaxTreeNodeChildren : Sequence {
+  mutating func removeFirst()
+  mutating func removeLast()
+  mutating func append(_ node: SyntaxTreeNode)
+  mutating func append(contentsOf newElements: Self)
+  var count: Int { get }
+  var isEmpty: Bool { get }
+  var first: SyntaxTreeNode? { get }
+  var last: SyntaxTreeNode? { get }
+}
+
+public struct SyntaxTreeNodeList: SyntaxTreeNodeChildren {
   private var nodes = [SyntaxTreeNode]()
 
   public mutating func removeFirst() {
@@ -58,14 +69,135 @@ public struct SyntaxTreeNodeList {
   public mutating func append(contentsOf newElements: SyntaxTreeNodeList) {
     nodes.append(contentsOf: newElements.nodes)
   }
+
+  public var count: Int { nodes.count }
+  public var isEmpty: Bool { nodes.isEmpty }
+  public var first: SyntaxTreeNode? { nodes.first }
+  public var last: SyntaxTreeNode? { nodes.last }
 }
 
-extension SyntaxTreeNodeList: BidirectionalCollection {
-  public var startIndex: Int { 0 }
-  public var endIndex: Int { nodes.endIndex }
-  public func index(after i: Int) -> Int { i + 1 }
-  public func index(before i: Int) -> Int { i - 1 }
-  public subscript(position: Int) -> SyntaxTreeNode { nodes[position] }
+extension SyntaxTreeNodeList: Sequence {
+  public typealias Element = SyntaxTreeNode
+
+  public struct Iterator: IteratorProtocol {
+    var index = 0
+    var nodes: [SyntaxTreeNode]
+
+    public mutating func next() -> SyntaxTreeNode? {
+      if index == nodes.endIndex { return nil }
+      let item = nodes[index]
+      index += 1
+      return item
+    }
+  }
+
+  public func makeIterator() -> Iterator {
+    return Iterator(nodes: nodes)
+  }
+}
+
+private final class DoublyLinkedNode {
+  internal init(value: SyntaxTreeNode, next: DoublyLinkedNode? = nil, previous: DoublyLinkedNode? = nil) {
+    self.value = value
+    self.next = next
+    self.previous = previous
+  }
+
+  let value: SyntaxTreeNode
+  var next: DoublyLinkedNode?
+  var previous: DoublyLinkedNode?
+}
+
+public final class DoublyLinkedList: SyntaxTreeNodeChildren {
+  public var count: Int = 0
+
+  // swiftlint:disable:next empty_count
+  public var isEmpty: Bool { count == 0 }
+
+  private var head: DoublyLinkedNode?
+  private var tail: DoublyLinkedNode?
+
+  public func removeFirst() {
+    count -= 1
+    if head === tail {
+      // swiftlint:disable:next empty_count
+      assert(count == 0)
+      head = nil
+      tail = nil
+    } else {
+      let next = head?.next
+      next?.previous = nil
+      head = next
+    }
+    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+  }
+
+  public func removeLast() {
+    count -= 1
+    if head === tail {
+      // swiftlint:disable:next empty_count
+      assert(count == 0)
+      head = nil
+      tail = nil
+    } else {
+      let previous = tail?.previous
+      previous?.next = nil
+      tail = previous
+    }
+    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+  }
+
+  public func append(_ node: SyntaxTreeNode) {
+    count += 1
+    if tail == nil {
+      tail = DoublyLinkedNode(value: node, next: nil, previous: nil)
+      head = tail
+    } else {
+      let newNode = DoublyLinkedNode(value: node, next: nil, previous: tail)
+      tail?.next = newNode
+      tail = newNode
+    }
+    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+  }
+
+  // NOTE: This is destructive.
+  public func append(contentsOf newElements: DoublyLinkedList) {
+    // swiftlint:disable empty_count
+    if tail == nil {
+      assert(count == 0 && head == nil)
+      head = newElements.head
+      tail = newElements.tail
+      count = newElements.count
+    } else if newElements.head == nil {
+      assert(newElements.count == 0)
+      // DO NOTHING
+    } else {
+      count += newElements.count
+      tail?.next = newElements.head
+      newElements.head?.previous = tail
+      tail = newElements.tail
+    }
+    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+  }
+
+  public var first: SyntaxTreeNode? { head?.value }
+  public var last: SyntaxTreeNode? { tail?.value }
+}
+
+extension DoublyLinkedList: Sequence {
+  public struct Iterator: IteratorProtocol {
+    fileprivate var node: DoublyLinkedNode?
+
+    public mutating func next() -> SyntaxTreeNode? {
+      let item = node?.value
+      node = node?.next
+      return item
+    }
+  }
+
+  public func makeIterator() -> Iterator {
+    return Iterator(node: head)
+  }
 }
 
 /// A node in the markup language's syntax tree.
@@ -100,7 +232,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   private var disconnectedFromResult = false
 
   /// Children of this node.
-  public var children = SyntaxTreeNodeList() {
+  public var children = DoublyLinkedList() {
     willSet {
       assert(!frozen)
     }

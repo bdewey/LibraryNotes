@@ -76,7 +76,7 @@ public final class TextEditViewController: UIViewController {
   private lazy var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = {
     var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = [:]
     formatters[.header] = {
-      let headingLevel = $0.children[0].length
+      let headingLevel = $0.children.first!.length
       switch headingLevel {
       case 1:
         $1.textStyle = .title1
