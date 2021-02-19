@@ -217,15 +217,20 @@ private extension ParsedAttributedString {
     resultingAttributesArray: inout AttributesArray
   ) {
     var attributes = attributes
-    formattingFunctions[node.type]?(node, &attributes)
-    if let replacementFunction = replacementFunctions[node.type],
-       let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes)
-    {
-      node.textReplacement = textReplacement
-      node.hasTextReplacement = true
-      node.textReplacementChangeInLength = textReplacement.count - node.length
+    if let precomputedAttributes = node.attributedStringAttributes {
+      attributes = precomputedAttributes
     } else {
-      node.hasTextReplacement = false
+      formattingFunctions[node.type]?(node, &attributes)
+      if let replacementFunction = replacementFunctions[node.type],
+         let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes)
+      {
+        node.textReplacement = textReplacement
+        node.hasTextReplacement = true
+        node.textReplacementChangeInLength = textReplacement.count - node.length
+      } else {
+        node.hasTextReplacement = false
+      }
+      node.attributedStringAttributes = attributes
     }
     var childLength = 0
     if node.children.isEmpty || node.hasTextReplacement {
@@ -298,6 +303,13 @@ public extension ParsedAttributedString.Settings {
   }
 }
 
+/// Key for storing the string attributes associated with a node.
+private struct NodeAttributesKey: SyntaxTreeNodePropertyKey {
+  typealias Value = AttributedStringAttributes
+
+  static let key = "attributes"
+}
+
 private struct NodeTextReplacementKey: SyntaxTreeNodePropertyKey {
   typealias Value = [unichar]
   static let key = "textReplacement"
@@ -314,6 +326,16 @@ private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
 }
 
 private extension SyntaxTreeNode {
+  /// The attributes associated with this node, if set.
+   var attributedStringAttributes: AttributedStringAttributes? {
+     get {
+       self[NodeAttributesKey.self]
+     }
+     set {
+       self[NodeAttributesKey.self] = newValue
+     }
+   }
+
   var textReplacement: [unichar]? {
     get {
       self[NodeTextReplacementKey.self]
