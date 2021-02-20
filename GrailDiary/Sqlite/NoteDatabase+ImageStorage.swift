@@ -22,7 +22,7 @@ extension ImageStorage {
     node: SyntaxTreeNode,
     startIndex: Int,
     buffer: SafeUnicodeBuffer,
-    attributes: inout AttributedStringAttributes
+    attributes: inout AttributedStringAttributesDescriptor
   ) -> [unichar]? {
     let anchoredNode = AnchoredNode(node: node, startIndex: startIndex)
     guard let targetNode = anchoredNode.first(where: { $0.type == .linkTarget }) else {
@@ -37,7 +37,7 @@ extension ImageStorage {
       if let image = imageData.image(maxSize: 200) {
         let attachment = NSTextAttachment()
         attachment.image = image
-        attributes[.attachment] = attachment
+        attributes.attachment = attachment
         return Array("\u{fffc}".utf16) // "object replacement character"
       }
     } catch {

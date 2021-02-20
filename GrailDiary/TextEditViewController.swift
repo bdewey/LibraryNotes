@@ -42,12 +42,7 @@ public final class TextEditViewController: UIViewController {
   // Init-time state.
 
   public lazy var textStorage: ParsedTextStorage = {
-    var defaultAttributes: AttributedStringAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: .body),
-      .foregroundColor: UIColor.label,
-    ]
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
+    let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
     let storage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,

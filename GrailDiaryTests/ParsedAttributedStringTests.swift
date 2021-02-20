@@ -7,7 +7,7 @@ private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer,
-  attributes: inout AttributedStringAttributes
+  attributes: inout AttributedStringAttributesDescriptor
 ) -> [unichar] {
   return Array("\t".utf16)
 }
@@ -20,11 +20,7 @@ final class ParsedAttributedStringTests: XCTestCase {
       .list: { $1.listLevel += 1 },
       .strongEmphasis: { $1.bold = true },
     ]
-    var defaultAttributes: AttributedStringAttributes = [:]
-    defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
-    defaultAttributes.color = .label
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
+    let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
 
     let textStorage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar(),
@@ -76,11 +72,7 @@ final class ParsedAttributedStringTests: XCTestCase {
       .list: { $1.listLevel += 1 },
       .strongEmphasis: { $1.bold = true },
     ]
-    var defaultAttributes: AttributedStringAttributes = [:]
-    defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
-    defaultAttributes.color = .label
-    defaultAttributes.headIndent = 28
-    defaultAttributes.firstLineHeadIndent = 28
+    let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
     return ParsedAttributedString(
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: defaultAttributes,

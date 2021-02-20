@@ -8,11 +8,11 @@ import UIKit
 private let log = OSLog(subsystem: "org.brians-brain.GrailDiary", category: "ParsedAttributedString")
 
 /// A quick format function can change *only* string attributes based *only* on the type of syntax tree node, but it can do it with simpler syntax than FullFormatFunction.
-public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
+public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributesDescriptor) -> Void
 
 /// A function can change both formatting *and* the actual string characters that represent a part of the syntax tree. It also gets to examine the actual text as opposed to
 /// just knowing the type.
-public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
+public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributesDescriptor) -> [unichar]?
 
 private extension Logging.Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
@@ -40,7 +40,7 @@ private extension Logging.Logger {
 @objc public final class ParsedAttributedString: NSMutableAttributedString {
   public struct Settings {
     var grammar: PackratGrammar
-    var defaultAttributes: AttributedStringAttributes
+    var defaultAttributes: AttributedStringAttributesDescriptor
     var quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
     var fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   }
@@ -59,7 +59,7 @@ private extension Logging.Logger {
     assertionFailure("Are you sure you want a plain-text attributed string?")
     self.init(
       grammar: PlainTextGrammar(),
-      defaultAttributes: [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.label],
+      defaultAttributes: AttributedStringAttributesDescriptor(textStyle: .body, color: .label),
       quickFormatFunctions: [:],
       fullFormatFunctions: [:]
     )
@@ -68,7 +68,7 @@ private extension Logging.Logger {
   public init(
     string: String = "",
     grammar: PackratGrammar,
-    defaultAttributes: AttributedStringAttributes,
+    defaultAttributes: AttributedStringAttributesDescriptor,
     quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction],
     fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   ) {
@@ -109,7 +109,7 @@ private extension Logging.Logger {
   override public var string: String { _string as String }
 
   /// Default attributes
-  private let defaultAttributes: AttributedStringAttributes
+  private let defaultAttributes: AttributedStringAttributesDescriptor
 
   private var attributesArray: AttributesArray
 
@@ -192,8 +192,6 @@ private extension Logging.Logger {
     return attributesArray.attributes(at: location, effectiveRange: range)
   }
 
-  @objc public var countOfSetAttributesCalls = 0
-
   /// Sets the attributes for the characters in the specified range to the specified attributes.
   /// - Parameters:
   ///   - attrs: A dictionary containing the attributes to set.
@@ -202,9 +200,12 @@ private extension Logging.Logger {
     _ attrs: [NSAttributedString.Key: Any]?,
     range: NSRange
   ) {
-    guard let attrs = attrs, !attrs.isEmpty else { return }
-    countOfSetAttributesCalls += 1
-    Logger.attributedStringLogger.info("Setting attributes at range \(range) \(countOfSetAttributesCalls)")
+    // If Apple is helpfully telling us that we've got an emoji and need to use the emoji font,
+    // then allow the attribute override. Otherwise, ignore it.
+    guard let attrs = attrs, let font = attrs[.font] as? UIFont, font.fontName == ".AppleColorEmojiUI" else {
+      return
+    }
+    Logger.shared.debug("Allowing emoji override at \(range)")
     attributesArray.setAttributes(attrs, range: range)
   }
 }
@@ -215,7 +216,7 @@ private extension ParsedAttributedString {
   /// Associates AttributedStringAttributes with this part of the syntax tree.
   func applyAttributes(
     to node: SyntaxTreeNode,
-    attributes: AttributedStringAttributes,
+    attributes: AttributedStringAttributesDescriptor,
     startingIndex: Int,
     resultingAttributesArray: inout AttributesArray
   ) {
@@ -279,7 +280,7 @@ public extension ParsedAttributedString.Settings {
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
     imageStorage: ImageStorage? = nil,
-    extraAttributes: [NSAttributedString.Key: Any] = [:]
+    kern: CGFloat = 0
   ) -> ParsedAttributedString.Settings {
     var formattingFunctions = [SyntaxTreeNodeType: QuickFormatFunction]()
     var replacementFunctions = [SyntaxTreeNodeType: FullFormatFunction]()
@@ -291,12 +292,9 @@ public extension ParsedAttributedString.Settings {
     if let imageStorage = imageStorage {
       replacementFunctions[.image] = imageStorage.imageReplacement
     }
-    var defaultAttributes: AttributedStringAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: textStyle),
-      .foregroundColor: textColor,
-    ]
+    var defaultAttributes = AttributedStringAttributesDescriptor(textStyle: textStyle, color: textColor)
     defaultAttributes.lineHeightMultiple = 1.2
-    defaultAttributes.merge(extraAttributes, uniquingKeysWith: { _, new in new })
+    defaultAttributes.kern = kern
     return ParsedAttributedString.Settings(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
@@ -308,7 +306,7 @@ public extension ParsedAttributedString.Settings {
 
 /// Key for storing the string attributes associated with a node.
 private struct NodeAttributesKey: SyntaxTreeNodePropertyKey {
-  typealias Value = AttributedStringAttributes
+  typealias Value = AttributedStringAttributesDescriptor
 
   static let key = "attributes"
 }
@@ -330,7 +328,7 @@ private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
 
 private extension SyntaxTreeNode {
   /// The attributes associated with this node, if set.
-   var attributedStringAttributes: AttributedStringAttributes? {
+   var attributedStringAttributes: AttributedStringAttributesDescriptor? {
      get {
        self[NodeAttributesKey.self]
      }

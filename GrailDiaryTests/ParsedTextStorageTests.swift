@@ -8,7 +8,7 @@ private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer,
-  attributes: inout AttributedStringAttributes
+  attributes: inout AttributedStringAttributesDescriptor
 ) -> [unichar] {
   return Array("\t".utf16)
 }
@@ -25,11 +25,7 @@ final class ParsedTextStorageTests: XCTestCase {
         .list: { $1.listLevel += 1 },
         .strongEmphasis: { $1.bold = true },
       ]
-      var defaultAttributes: AttributedStringAttributes = [:]
-      defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
-      defaultAttributes.color = .label
-      defaultAttributes.headIndent = 28
-      defaultAttributes.firstLineHeadIndent = 28
+      let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
     #else
       let formattingFunctions: [NodeType: FormattingFunction] = [:]
       let defaultAttributes: AttributedStringAttributes = [:]
@@ -125,10 +121,10 @@ final class ParsedTextStorageTests: XCTestCase {
     func testFormatting() {
       textStorage.append(NSAttributedString(string: "# Header\n\nParagraph with almost **bold*\n\nUnrelated"))
       var range = NSRange(location: NSNotFound, length: 0)
-      let attributes = textStorage.attributes(at: 0, effectiveRange: &range)
+      let descriptor = textStorage.attributes(at: 0, effectiveRange: &range)
       var expectedAttributes: AttributedStringAttributes = [:]
       expectedAttributes.fontSize = 24
-      XCTAssertEqual(expectedAttributes.font, attributes.font)
+      XCTAssertEqual(expectedAttributes.font, descriptor.font)
     }
   #endif
 }
@@ -145,7 +141,7 @@ private extension ParsedTextStorageTests {
     let textStorage = ParsedTextStorage(
       storage: ParsedAttributedString(
         grammar: MiniMarkdownGrammar(),
-        defaultAttributes: [.font: UIFont.systemFont(ofSize: 12)],
+        defaultAttributes: AttributedStringAttributesDescriptor(fontSize: 12),
         quickFormatFunctions: [:],
         fullFormatFunctions: [.softTab: formatTab]
       )

@@ -12,6 +12,100 @@ public extension NSAttributedString.Key {
   static let blockquoteBorderColor = NSAttributedString.Key(rawValue: "verticalBarColor")
 }
 
+public struct AttributedStringAttributesDescriptor: Hashable {
+  public init(textStyle: UIFont.TextStyle = .body, familyName: String? = nil, fontSize: CGFloat = UIFont.preferredFont(forTextStyle: .body).pointSize, color: UIColor? = nil, backgroundColor: UIColor? = nil, blockquoteBorderColor: UIColor? = nil, kern: CGFloat = 0, bold: Bool = false, italic: Bool = false, headIndent: CGFloat = 0, firstLineHeadIndent: CGFloat = 0, alignment: NSTextAlignment? = nil, lineHeightMultiple: CGFloat = 0, listLevel: Int = 0, attachment: NSTextAttachment? = nil) {
+    self.textStyle = textStyle
+    self.familyName = familyName
+    self.fontSize = fontSize
+    self.color = color
+    self.backgroundColor = backgroundColor
+    self.blockquoteBorderColor = blockquoteBorderColor
+    self.kern = kern
+    self.bold = bold
+    self.italic = italic
+    self.headIndent = headIndent
+    self.firstLineHeadIndent = firstLineHeadIndent
+    self.alignment = alignment
+    self.lineHeightMultiple = lineHeightMultiple
+    self.listLevel = listLevel
+    self.attachment = attachment
+  }
+  
+  public var textStyle: UIFont.TextStyle = .body {
+    didSet {
+      fontSize = UIFont.preferredFont(forTextStyle: textStyle).pointSize
+    }
+  }
+  public var familyName: String?
+  public var fontSize: CGFloat = UIFont.preferredFont(forTextStyle: .body).pointSize
+  public var color: UIColor?
+  public var backgroundColor: UIColor?
+  public var blockquoteBorderColor: UIColor?
+  public var kern: CGFloat = 0
+  public var bold: Bool = false
+  public var italic: Bool = false
+  public var headIndent: CGFloat = 0
+  public var firstLineHeadIndent: CGFloat = 0
+  public var alignment: NSTextAlignment?
+  public var lineHeightMultiple: CGFloat = 0
+  public var listLevel: Int = 0
+  public var attachment: NSTextAttachment?
+
+  public func makeAttributes() -> AttributedStringAttributes {
+    var attributes: AttributedStringAttributes = [
+      .font: makeFont(),
+      .paragraphStyle: makeParagraphStyle(),
+      .kern: kern,
+    ]
+    color.flatMap { attributes[.foregroundColor] = $0 }
+    backgroundColor.flatMap { attributes[.backgroundColor] = $0 }
+    blockquoteBorderColor.flatMap { attributes[.blockquoteBorderColor] = $0 }
+    attachment.flatMap { attributes[.attachment] = $0 }
+    return attributes
+  }
+
+  private func makeFont() -> UIFont {
+    var fontAttributes = [UIFontDescriptor.AttributeName: Any]()
+    // Set EITHER the family name or the text style, but not both
+    if let familyName = familyName {
+      fontAttributes[.family] = familyName
+    } else {
+      fontAttributes[.textStyle] = textStyle
+      if textStyle != .body {
+        Logger.shared.debug("Trying to make something new")
+      }
+    }
+    var fontDescriptor = UIFontDescriptor(fontAttributes: fontAttributes)
+    if italic { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitItalic) ?? fontDescriptor }
+    if bold { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitBold) ?? fontDescriptor }
+    return UIFont(descriptor: fontDescriptor, size: fontSize)
+  }
+
+  private func makeParagraphStyle() -> NSParagraphStyle {
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.headIndent = headIndent
+    paragraphStyle.firstLineHeadIndent = firstLineHeadIndent
+    alignment.flatMap { paragraphStyle.alignment = $0 }
+    paragraphStyle.lineHeightMultiple = lineHeightMultiple
+    if listLevel > 0 {
+      let indentAmountPerLevel: CGFloat = headIndent > 0 ? headIndent : 16
+      paragraphStyle.headIndent = indentAmountPerLevel * CGFloat(listLevel)
+      paragraphStyle.firstLineHeadIndent = indentAmountPerLevel * CGFloat(listLevel - 1)
+      var tabStops: [NSTextTab] = []
+      for i in 0 ..< 4 {
+        let listTab = NSTextTab(
+          textAlignment: .natural,
+          location: paragraphStyle.headIndent + CGFloat(i) * indentAmountPerLevel,
+          options: [:]
+        )
+        tabStops.append(listTab)
+      }
+      paragraphStyle.tabStops = tabStops
+    }
+    return paragraphStyle
+  }
+}
+
 /// Convenience extensions for working with an NSAttributedString attributes dictionary.
 public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
   /// The font attribute.
@@ -130,7 +224,7 @@ public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
     }
   }
 
-  var paragraphStyle: NSParagraphStyle? {
+  private var paragraphStyle: NSParagraphStyle? {
     get { return self[.paragraphStyle] as? NSParagraphStyle }
     set { self[.paragraphStyle] = newValue }
   }

@@ -76,19 +76,19 @@ extension ParsedAttributedString.Settings {
       let shouldHide = replaceClozeCount == index
       replaceClozeCount += 1
       if shouldHide {
-        attributes[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
         let hintNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeHint })
         let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
         let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
         if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
-          attributes[.foregroundColor] = attributes[.backgroundColor]
+          attributes.color = attributes.backgroundColor
           if let answerNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeAnswer }) {
             return buffer[answerNode.range]
           } else {
             return nil
           }
         } else {
-          attributes[.foregroundColor] = UIColor.secondaryLabel
+          attributes.color = .secondaryLabel
           return Array(hint.utf16)
         }
       } else {
@@ -106,8 +106,8 @@ extension ParsedAttributedString.Settings {
       let shouldHighlight = formatClozeCount == index
       formatClozeCount += 1
       if shouldHighlight {
-        attributes[.foregroundColor] = UIColor.secondaryLabel
-        attributes[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+        attributes.color = .secondaryLabel
+        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
       }
     }
     return settings
@@ -120,7 +120,7 @@ extension ParsedAttributedString.Settings {
       let shouldHighlight = formatClozeCount == index
       formatClozeCount += 1
       if shouldHighlight {
-        attributes[.backgroundColor] = UIColor.systemYellow.withAlphaComponent(0.3)
+        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
       }
     }
     return settings

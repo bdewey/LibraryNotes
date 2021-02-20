@@ -71,7 +71,7 @@ final class ClozeTests: XCTestCase {
     let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
       string: "",
       grammar: MiniMarkdownGrammar(),
-      defaultAttributes: [:],
+      defaultAttributes: AttributedStringAttributesDescriptor(),
       quickFormatFunctions: [.cloze: { $1.bold = true }],
       fullFormatFunctions: [:]
     ))
