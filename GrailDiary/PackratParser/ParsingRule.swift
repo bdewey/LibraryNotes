@@ -322,6 +322,22 @@ final class Characters: ParsingRule {
   }
 }
 
+final class CharacterPredicate: ParsingRule {
+  init(_ predicate: @escaping (Character) -> Bool) {
+    self.predicate = predicate
+  }
+
+  let predicate: (Character) -> Bool
+
+  override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+    guard let character = buffer.character(at: index), predicate(character) else {
+      return performanceCounters.recordResult(.fail)
+    }
+    let count = character.utf16.count
+    return performanceCounters.recordResult(ParsingResult(succeeded: true, length: count, examinedLength: count, node: nil))
+  }
+}
+
 public final class Literal: ParsingRule {
   init(_ string: String, compareOptions: String.CompareOptions = []) {
     self.literalString = string

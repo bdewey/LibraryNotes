@@ -153,6 +153,10 @@ final class MiniMarkdownParsingTests: XCTestCase {
     parseText(example, expectedStructure: "(document (paragraph text))")
   }
 
+  func testParseEmoji() {
+    parseText("Working code makes me feel 😀!", expectedStructure: "(document (paragraph text emoji text))")
+  }
+
   func testParseImages() {
     let example = "This text has an image reference: ![xkcd](https://imgs.xkcd.com/comics/october_30th.png)"
     parseText(example, expectedStructure: "(document (paragraph text (image text link_alt_text text link_target text)))")
