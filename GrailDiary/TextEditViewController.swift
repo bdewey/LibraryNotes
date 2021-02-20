@@ -114,6 +114,9 @@ public final class TextEditViewController: UIViewController {
       $1.blockquoteBorderColor = UIColor.systemOrange
       $1.listLevel += 1
     }
+    formatters[.emoji] = {
+      $1.familyName = "Apple Color Emoji"
+    }
     return formatters
   }()
 
