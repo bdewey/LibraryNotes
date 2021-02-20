@@ -58,6 +58,11 @@ extension PieceTableString: SafeUnicodeBuffer {
     return character(at: index)
   }
 
+  public func character(at index: Int) -> Character? {
+    if index >= length { return nil }
+    return pieceTable.character(at: index)
+  }
+
   public subscript(range: NSRange) -> [unichar] { pieceTable[range] }
 
   public var string: String { pieceTable.string }

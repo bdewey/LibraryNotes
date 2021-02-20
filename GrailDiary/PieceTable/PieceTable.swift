@@ -334,12 +334,44 @@ extension PieceTable: Collection {
   }
 }
 
-private extension Array {
-  /// I don't know why there isn't a version of this provided by Array -- Array can cast to an UnsafePointer and that's what I need
-  /// to execute a copy, but the standard library provides all sorts of other pointers instead. I feel like there's something obvious about
-  /// pointers in Swift that I don't understand.
-  func withUnsafePointer(_ body: (UnsafePointer<Element>) -> Void) {
-    body(self)
+extension PieceTable: SafeUnicodeBuffer {
+  /// Returns the unicode characters at a specific range.
+  public subscript(range: NSRange) -> [unichar] {
+    let tableRange = Range(range, in: self)!
+    return self[tableRange]
+  }
+
+  /// Returns a single unicode character at a specific index. If the index is at or after the end of the buffer contents, returns nil.
+  public func utf16(at index: Int) -> unichar? {
+    guard let tableIndex = self.index(startIndex, offsetBy: index, limitedBy: endIndex), tableIndex < endIndex else {
+      return nil
+    }
+    return self[tableIndex]
+  }
+
+  public func character(at index: Int) -> Character? {
+    guard let tableIndex = self.index(startIndex, offsetBy: index, limitedBy: endIndex), tableIndex < endIndex else {
+      return nil
+    }
+    let characterString: String
+    switch pieces[tableIndex.pieceIndex].source {
+    case .original:
+      let range = originalContents.rangeOfComposedCharacterSequence(at: tableIndex.contentIndex)
+      characterString = originalContents.substring(with: range)
+    case .added:
+      let range = addedContents.rangeOfComposedCharacterSequence(at: tableIndex.contentIndex)
+      characterString = addedContents.substring(with: range)
+    }
+    assert(characterString.count == 1)
+    return characterString.first
+  }
+}
+
+extension PieceTable: RangeReplaceableSafeUnicodeBuffer {
+  /// Replace the utf16 scalars in a range with the utf16 scalars from a string.
+  public mutating func replaceCharacters(in range: NSRange, with str: String) {
+    let tableRange = Range(range, in: self)!
+    replaceSubrange(tableRange, with: str.utf16)
   }
 }
 
