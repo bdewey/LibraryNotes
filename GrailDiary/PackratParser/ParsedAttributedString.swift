@@ -231,11 +231,11 @@ private extension ParsedAttributedString {
       node.attributedStringAttributes = attributes
     }
     var childLength = 0
-    if node.children.isEmpty || node.hasTextReplacement {
+    if node.children.isEmpty || node.textReplacement != nil {
       // We are a leaf. Adjust leafNodeRange.
       resultingAttributesArray.appendAttributes(attributes, length: node.length + node.textReplacementChangeInLength)
     }
-    if node.hasTextReplacement {
+    if node.textReplacement != nil {
       return
     }
     var childTextReplacementChangeInLength = 0
