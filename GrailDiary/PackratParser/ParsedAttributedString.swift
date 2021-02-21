@@ -77,7 +77,7 @@ private extension Logging.Logger {
     self.replacementFunctions = fullFormatFunctions
     self.rawString = ParsedString(string, grammar: grammar)
     self._string = PieceTableString(pieceTable: PieceTable(rawString.text))
-    self.attributesArray = AttributesArray()
+    self.attributesArray = AttributesArray(attributesCache: attributesCache)
     super.init()
     if case .success(let node) = rawString.result {
       applyAttributes(
@@ -119,6 +119,9 @@ private extension Logging.Logger {
   /// A set of functions that replace the contents of `rawString` -- e.g., these can be used to remove delimiters or change spaces to tabs.
   private let replacementFunctions: [SyntaxTreeNodeType: FullFormatFunction]
 
+  /// Caches a mapping from descriptor to actual attributes for the lifetime of this ParsedAttributedString
+  private let attributesCache = AttributesCache()
+
   /// Given a range in `string`, computes the equivalent range in `rawString`
   /// - note: Characters from a "replacement" are an atomic unit. If the input range overlaps with part of the characters in a replacement, the resulting range will encompass the entire replacement.
   public func rawStringRange(forRange visibleNSRange: NSRange) -> NSRange {
@@ -153,7 +156,7 @@ private extension Logging.Logger {
       with: str
     )
     _string.revertToOriginal()
-    var newAttributes = AttributesArray()
+    var newAttributes = AttributesArray(attributesCache: attributesCache)
     if case .success(let node) = rawString.result {
       os_signpost(.begin, log: log, name: "applyAttributes")
       applyAttributes(

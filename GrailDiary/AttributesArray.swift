@@ -3,14 +3,31 @@
 import Foundation
 import Logging
 
+public final class AttributesCache {
+  private var cache = [AttributedStringAttributesDescriptor: AttributedStringAttributes]()
+
+  public func getAttributes(
+    for descriptor: AttributedStringAttributesDescriptor
+  ) -> AttributedStringAttributes {
+    if let cachedAttributes = cache[descriptor] {
+      return cachedAttributes
+    }
+    let attributes = descriptor.makeAttributes()
+    cache[descriptor] = attributes
+    return attributes
+  }
+}
+
 /// A run-length encoded array of NSAttributedString attributes.
 public struct AttributesArray {
   private var runs: [Run]
   public private(set) var count: Int
+  private let attributesCache: AttributesCache
 
-  public init() {
+  public init(attributesCache: AttributesCache) {
     runs = []
     count = 0
+    self.attributesCache = attributesCache
   }
 
   public enum Error: Swift.Error {
@@ -43,39 +60,10 @@ public struct AttributesArray {
     assert(runs.map({ $0.length }).reduce(0, +) == count)
   }
 
-  public mutating func setAttributes(_ attributes: AttributedStringAttributes, range: NSRange) {
-    guard range.length > 0 else { return }
-    let sliceStartIndex = index(startIndex, offsetBy: range.location)
-    let sliceEndIndex = index(startIndex, offsetBy: range.location + range.length)
-    logDifferenceBetweenAttributes(runs[sliceStartIndex.runIndex].makeAttributes(), and: attributes, at: range.location)
-    let replacementRuns = [
-      runs[sliceStartIndex.runIndex].adjustingLength(by: -1 * (runs[sliceStartIndex.runIndex].length - sliceStartIndex.offsetInRun)).nilIfZeroLength(),
-      Run(attributes: attributes, length: range.length),
-      runIfChanging(at: sliceEndIndex)?.adjustingLength(by: -1 * sliceEndIndex.offsetInRun).nilIfZeroLength(),
-    ].compactMap { $0 }
-    runs.replaceSubrange(runRange(for: sliceStartIndex ..< sliceEndIndex), with: replacementRuns)
-    assert(runs.map({ $0.length }).reduce(0, +) == count)
-  }
-
-  private func logDifferenceBetweenAttributes(_ lhsAttributes: AttributedStringAttributes, and rhsAttributes: AttributedStringAttributes, at location: Int) {
-    if (lhsAttributes as NSDictionary).isEqual(to: rhsAttributes) {
-      Logger.shared.debug("Location \(location): Arrays are the same?")
-    }
-    for key in lhsAttributes.keys {
-      if let lhsValue = lhsAttributes[key] as? NSObject, let rhsValue = rhsAttributes[key] as? NSObject, lhsValue != rhsValue {
-        Logger.shared.debug("Location \(location), key \(key): \(lhsValue) vs \(rhsValue)")
-      }
-    }
-
-    for key in Set(rhsAttributes.keys).subtracting(lhsAttributes.keys) {
-      Logger.shared.debug("Location \(location) has new key \(key): \(rhsAttributes[key]!)")
-     }
-  }
-
   public func attributes(at location: Int, effectiveRange: NSRangePointer?) -> AttributedStringAttributes {
     let index = self.index(startIndex, offsetBy: location)
     effectiveRange?.pointee = NSRange(location: location - index.offsetInRun, length: runs[index.runIndex].length)
-    return runs[index.runIndex].makeAttributes()
+    return attributesCache.getAttributes(for: runs[index.runIndex].descriptor)
   }
 
   public func rangeOfAttributeDifferences(from otherAttributes: AttributesArray) throws -> NSRange? {
@@ -187,7 +175,7 @@ extension AttributesArray: Collection {
   }
 
   public subscript(position: Index) -> AttributedStringAttributes {
-    return runs[position.runIndex].makeAttributes()
+    return attributesCache.getAttributes(for: runs[position.runIndex].descriptor)
   }
 }
 
@@ -196,47 +184,14 @@ extension AttributesArray: Collection {
 private var hackCache = [AttributedStringAttributesDescriptor: AttributedStringAttributes]()
 
 private extension AttributesArray {
-  enum DescriptorOrAttributes {
-    case descriptor(AttributedStringAttributesDescriptor)
-    case attributes(AttributedStringAttributes)
-  }
-
   struct Run {
     internal init(descriptor: AttributedStringAttributesDescriptor, length: Int) {
-      self.descriptorOrAttributes = .descriptor(descriptor)
+      self.descriptor = descriptor
       self.length = length
     }
 
-    internal init(attributes: AttributedStringAttributes, length: Int) {
-      self.descriptorOrAttributes = .attributes(attributes)
-      self.length = length
-    }
-
-    var descriptorOrAttributes: DescriptorOrAttributes
+    var descriptor: AttributedStringAttributesDescriptor
     var length: Int
-
-    var descriptor: AttributedStringAttributesDescriptor? {
-      switch descriptorOrAttributes {
-      case .descriptor(let descriptor):
-        return descriptor
-      case .attributes:
-        return nil
-      }
-    }
-
-    func makeAttributes() -> AttributedStringAttributes {
-      switch descriptorOrAttributes {
-      case .attributes(let attributes):
-        return attributes
-      case .descriptor(let descriptor):
-        if let cachedAttributes = hackCache[descriptor] {
-          return cachedAttributes
-        }
-        let attributes = descriptor.makeAttributes()
-        hackCache[descriptor] = attributes
-        return attributes
-      }
-    }
 
     func adjustingLength(by amount: Int) -> Self {
       var copy = self
