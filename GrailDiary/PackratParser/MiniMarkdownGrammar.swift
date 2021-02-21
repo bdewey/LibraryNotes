@@ -135,7 +135,10 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     whitespace.as(.text),
     nonDelimitedHashtag
   )
-  lazy var nonDelimitedHashtag = InOrder(Literal("#"), nonWhitespace.repeating(1...)).as(.hashtag).memoize()
+  lazy var nonDelimitedHashtag = InOrder(
+    Literal("#").as(.text),
+    Choice(emoji, nonWhitespace.as(.text)).repeating(1...)
+  ).wrapping(in: .hashtag).memoize()
 
   lazy var image = InOrder(
     Literal("![").as(.text),
@@ -153,7 +156,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     Literal(")").as(.delimiter)
   ).wrapping(in: .cloze).memoize()
 
-  lazy var emoji = CharacterPredicate({ $0.isEmoji }).repeating(1...).as(.emoji)
+  lazy var emoji = CharacterPredicate({ $0.isEmoji }).repeating(1...).as(.emoji).memoize()
 
   lazy var textStyles = Choice(
     bold,

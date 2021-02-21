@@ -136,16 +136,17 @@ final class MiniMarkdownParsingTests: XCTestCase {
   }
 
   func testParseHashtag() {
-    parseText("#hashtag\n", expectedStructure: "(document (paragraph hashtag text))")
+    parseText("#hashtag\n", expectedStructure: "(document (paragraph (hashtag text) text))")
   }
 
   func testParseEmojiHashtag() {
-    parseText("#hashtag/⭐️⭐️⭐️\n", expectedStructure: "(document (paragraph hashtag text))")
-    parseText("#hashtag/😀\n", expectedStructure: "(document (paragraph hashtag text))")
+    parseText("#hashtag/⭐️⭐️⭐️\n", expectedStructure: "(document (paragraph (hashtag text emoji) text))")
+    parseText("#hashtag/😀\n", expectedStructure: "(document (paragraph (hashtag text emoji) text))")
+    parseText("😀⭐️", expectedStructure: "(document (paragraph emoji))")
   }
 
   func testParseHashtagInText() {
-    parseText("Paragraph with #hashtag\n", expectedStructure: "(document (paragraph text hashtag text))")
+    parseText("Paragraph with #hashtag\n", expectedStructure: "(document (paragraph text (hashtag text) text))")
   }
 
   func testHashtagCannotStartInTheMiddleOfAWord() {
@@ -217,7 +218,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
   }
 
   func testHierarchicalHashtag() {
-    parseText("#books/2020", expectedStructure: "(document (paragraph hashtag))")
+    parseText("#books/2020", expectedStructure: "(document (paragraph (hashtag text)))")
   }
 
   func testSummary() {
