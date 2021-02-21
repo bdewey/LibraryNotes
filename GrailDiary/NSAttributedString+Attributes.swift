@@ -30,12 +30,13 @@ public struct AttributedStringAttributesDescriptor: Hashable {
     self.listLevel = listLevel
     self.attachment = attachment
   }
-  
+
   public var textStyle: UIFont.TextStyle = .body {
     didSet {
       fontSize = UIFont.preferredFont(forTextStyle: textStyle).pointSize
     }
   }
+
   public var familyName: String?
   public var fontSize: CGFloat = UIFont.preferredFont(forTextStyle: .body).pointSize
   public var color: UIColor?

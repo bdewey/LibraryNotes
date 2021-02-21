@@ -156,7 +156,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     Literal(")").as(.delimiter)
   ).wrapping(in: .cloze).memoize()
 
-  lazy var emoji = CharacterPredicate({ $0.isEmoji }).repeating(1...).as(.emoji).memoize()
+  lazy var emoji = CharacterPredicate { $0.isEmoji }.repeating(1...).as(.emoji).memoize()
 
   lazy var textStyles = Choice(
     bold,
@@ -245,8 +245,10 @@ private extension Character {
     }
     return firstScalar.properties.isEmoji && firstScalar.value > 0x238C
   }
+
   var isCombinedIntoEmoji: Bool {
     unicodeScalars.count > 1 && unicodeScalars.first?.properties.isEmoji ?? false
   }
+
   var isEmoji: Bool { isSimpleEmoji || isCombinedIntoEmoji }
 }

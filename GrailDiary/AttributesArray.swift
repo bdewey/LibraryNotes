@@ -25,8 +25,8 @@ public struct AttributesArray {
   private let attributesCache: AttributesCache
 
   public init(attributesCache: AttributesCache) {
-    runs = []
-    count = 0
+    self.runs = []
+    self.count = 0
     self.attributesCache = attributesCache
   }
 
@@ -42,7 +42,7 @@ public struct AttributesArray {
     } else {
       runs.append(Run(descriptor: attributes, length: length))
     }
-    assert(runs.map({ $0.length }).reduce(0, +) == count)
+    assert(runs.map { $0.length }.reduce(0, +) == count)
   }
 
   public mutating func adjustLengthOfRun(at location: Int, by amount: Int, defaultAttributes: AttributedStringAttributesDescriptor) {
@@ -57,7 +57,7 @@ public struct AttributesArray {
     if runs[index.runIndex].length == 0 {
       runs.remove(at: index.runIndex)
     }
-    assert(runs.map({ $0.length }).reduce(0, +) == count)
+    assert(runs.map { $0.length }.reduce(0, +) == count)
   }
 
   public func attributes(at location: Int, effectiveRange: NSRangePointer?) -> AttributedStringAttributes {

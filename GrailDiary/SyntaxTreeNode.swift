@@ -40,7 +40,7 @@ public extension SyntaxTreeNodePropertyKey {
   }
 }
 
-public protocol SyntaxTreeNodeChildren : Sequence {
+public protocol SyntaxTreeNodeChildren: Sequence {
   mutating func removeFirst()
   mutating func removeLast()
   mutating func append(_ node: SyntaxTreeNode)
@@ -129,7 +129,7 @@ public final class DoublyLinkedList: SyntaxTreeNodeChildren {
       next?.previous = nil
       head = next
     }
-    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+    assert(map { _ in 1 }.reduce(0, +) == count)
   }
 
   public func removeLast() {
@@ -144,7 +144,7 @@ public final class DoublyLinkedList: SyntaxTreeNodeChildren {
       previous?.next = nil
       tail = previous
     }
-    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+    assert(map { _ in 1 }.reduce(0, +) == count)
   }
 
   public func append(_ node: SyntaxTreeNode) {
@@ -157,7 +157,7 @@ public final class DoublyLinkedList: SyntaxTreeNodeChildren {
       tail?.next = newNode
       tail = newNode
     }
-    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+    assert(map { _ in 1 }.reduce(0, +) == count)
   }
 
   // NOTE: This is destructive.
@@ -177,7 +177,7 @@ public final class DoublyLinkedList: SyntaxTreeNodeChildren {
       newElements.head?.previous = tail
       tail = newElements.tail
     }
-    assert(self.map({ _ in 1 }).reduce(0, +) == count)
+    assert(map { _ in 1 }.reduce(0, +) == count)
   }
 
   public var first: SyntaxTreeNode? { head?.value }

@@ -325,14 +325,14 @@ private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
 
 private extension SyntaxTreeNode {
   /// The attributes associated with this node, if set.
-   var attributedStringAttributes: AttributedStringAttributesDescriptor? {
-     get {
-       self[NodeAttributesKey.self]
-     }
-     set {
-       self[NodeAttributesKey.self] = newValue
-     }
-   }
+  var attributedStringAttributes: AttributedStringAttributesDescriptor? {
+    get {
+      self[NodeAttributesKey.self]
+    }
+    set {
+      self[NodeAttributesKey.self] = newValue
+    }
+  }
 
   var textReplacement: [unichar]? {
     get {
