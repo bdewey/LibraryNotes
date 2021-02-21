@@ -7,7 +7,7 @@
 - Support for Unicode / Emoji throughout the editing surface, including #hashtags
 - Import your Kindle hightlights straight from Amazon!
 
-## Changed
+### Changed
 
 - Faster when making edits in large files. This involved core changes to building the parse syntax tree & attributed string attributes.
 
