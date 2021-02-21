@@ -51,51 +51,7 @@ public protocol SyntaxTreeNodeChildren: Sequence {
   var last: SyntaxTreeNode? { get }
 }
 
-public struct SyntaxTreeNodeList: SyntaxTreeNodeChildren {
-  private var nodes = [SyntaxTreeNode]()
-
-  public mutating func removeFirst() {
-    nodes.removeFirst()
-  }
-
-  public mutating func removeLast() {
-    nodes.removeLast()
-  }
-
-  public mutating func append(_ node: SyntaxTreeNode) {
-    nodes.append(node)
-  }
-
-  public mutating func append(contentsOf newElements: SyntaxTreeNodeList) {
-    nodes.append(contentsOf: newElements.nodes)
-  }
-
-  public var count: Int { nodes.count }
-  public var isEmpty: Bool { nodes.isEmpty }
-  public var first: SyntaxTreeNode? { nodes.first }
-  public var last: SyntaxTreeNode? { nodes.last }
-}
-
-extension SyntaxTreeNodeList: Sequence {
-  public typealias Element = SyntaxTreeNode
-
-  public struct Iterator: IteratorProtocol {
-    var index = 0
-    var nodes: [SyntaxTreeNode]
-
-    public mutating func next() -> SyntaxTreeNode? {
-      if index == nodes.endIndex { return nil }
-      let item = nodes[index]
-      index += 1
-      return item
-    }
-  }
-
-  public func makeIterator() -> Iterator {
-    return Iterator(nodes: nodes)
-  }
-}
-
+/// Holds a SyntaxTreeNode in a doubly-linked list.
 private final class DoublyLinkedNode {
   internal init(value: SyntaxTreeNode, next: DoublyLinkedNode? = nil, previous: DoublyLinkedNode? = nil) {
     self.value = value
@@ -108,6 +64,7 @@ private final class DoublyLinkedNode {
   var previous: DoublyLinkedNode?
 }
 
+/// A specific DoublyLinkedList of SyntaxTreeNode values.
 public final class DoublyLinkedList: SyntaxTreeNodeChildren {
   public var count: Int = 0
 

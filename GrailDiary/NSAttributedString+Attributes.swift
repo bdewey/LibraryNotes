@@ -311,17 +311,6 @@ public extension Dictionary where Key == NSAttributedString.Key, Value == Any {
       paragraphStyle = listStyling
     }
   }
-
-  /// True iff the receiver renders equivalently to `otherAttributes` in an attributed string.
-  func rendersEquivalent(to otherAttributes: AttributedStringAttributes) -> Bool {
-    return font == otherAttributes.font
-      && paragraphStyle == otherAttributes.paragraphStyle
-      && color == otherAttributes.color
-      && backgroundColor == otherAttributes.backgroundColor
-      && blockquoteBorderColor == otherAttributes.blockquoteBorderColor
-      && kern == otherAttributes.kern
-      && (self[.attachment] as? NSTextAttachment) == (otherAttributes[.attachment] as? NSTextAttachment)
-  }
 }
 
 private extension UIFontDescriptor {

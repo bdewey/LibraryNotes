@@ -3,6 +3,8 @@
 import Foundation
 import Logging
 
+/// A helper class that keeps a cache of instantiated `AttributedStringAttributes` for an `AttributedStringAttributesDescriptor`.
+/// Note this does **no** cleanup under memory pressure, so make sure to discard the entire cache periodically.
 public final class AttributesCache {
   private var cache = [AttributedStringAttributesDescriptor: AttributedStringAttributes]()
 
@@ -35,6 +37,7 @@ public struct AttributesArray {
     case arraysHaveDifferentLength
   }
 
+  /// Append a single set of attributes for a run of  `length`
   public mutating func appendAttributes(_ attributes: AttributedStringAttributesDescriptor, length: Int) {
     count += length
     if let last = runs.last, last.descriptor == attributes {
@@ -45,6 +48,7 @@ public struct AttributesArray {
     assert(runs.map { $0.length }.reduce(0, +) == count)
   }
 
+  /// Changes the length of a particular run in the array. Useful to keep the attributes array updated in response to typing events.
   public mutating func adjustLengthOfRun(at location: Int, by amount: Int, defaultAttributes: AttributedStringAttributesDescriptor) {
     count += amount
     let index = self.index(startIndex, offsetBy: location)
@@ -60,12 +64,17 @@ public struct AttributesArray {
     assert(runs.map { $0.length }.reduce(0, +) == count)
   }
 
+  /// Gets the attributes at a specific location, along with the range at which the attributes are the same.
   public func attributes(at location: Int, effectiveRange: NSRangePointer?) -> AttributedStringAttributes {
     let index = self.index(startIndex, offsetBy: location)
     effectiveRange?.pointee = NSRange(location: location - index.offsetInRun, length: runs[index.runIndex].length)
     return attributesCache.getAttributes(for: runs[index.runIndex].descriptor)
   }
 
+  /// Computes a range of locations that bound where the receiver is different from `otherAttributes`.
+  /// There are guaranteed to be no differences in attributes at locations outside the returned range.
+  /// If there are no differences between the arrays, returns nil.
+  /// Note it is invalid if `otherAttributes` represents a different count of text than the receiver, and the method will throw an error in this case.
   public func rangeOfAttributeDifferences(from otherAttributes: AttributesArray) throws -> NSRange? {
     if count != otherAttributes.count {
       throw Error.arraysHaveDifferentLength
@@ -98,19 +107,6 @@ public struct AttributesArray {
       return NSRange(location: firstDifferingIndex, length: lastDifferingIndex - firstDifferingIndex)
     } else {
       return nil
-    }
-  }
-
-  private func runIfChanging(at index: Index) -> Run? {
-    index.offsetInRun > 0 ? runs[index.runIndex] : nil
-  }
-
-  private func runRange<R: RangeExpression>(for indexRange: R) -> Range<Int> where R.Bound == Index {
-    let bounds = indexRange.relative(to: self)
-    if bounds.upperBound.offsetInRun > 0 {
-      return bounds.lowerBound.runIndex ..< bounds.upperBound.runIndex + 1
-    } else {
-      return bounds.lowerBound.runIndex ..< bounds.upperBound.runIndex
     }
   }
 }
@@ -181,8 +177,6 @@ extension AttributesArray: Collection {
 
 // MARK: - Private
 
-private var hackCache = [AttributedStringAttributesDescriptor: AttributedStringAttributes]()
-
 private extension AttributesArray {
   struct Run {
     internal init(descriptor: AttributedStringAttributesDescriptor, length: Int) {
@@ -201,11 +195,6 @@ private extension AttributesArray {
 
     mutating func adjustLength(by amount: Int) {
       length += amount
-    }
-
-    func nilIfZeroLength() -> Self? {
-      if length == 0 { return nil }
-      return self
     }
   }
 }
