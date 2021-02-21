@@ -71,7 +71,7 @@ final class ClozeTests: XCTestCase {
     let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
       string: "",
       grammar: MiniMarkdownGrammar(),
-      defaultAttributes: [:],
+      defaultAttributes: AttributedStringAttributesDescriptor(),
       quickFormatFunctions: [.cloze: { $1.bold = true }],
       fullFormatFunctions: [:]
     ))
@@ -96,6 +96,6 @@ final class ClozeTests: XCTestCase {
     // swiftlint:disable:next force_cast
     let actualFont = textStorage.attributes(at: 0, effectiveRange: &testRange)[.font] as! UIFont
     XCTAssert(actualFont.fontDescriptor.symbolicTraits.contains(.traitBold))
-    XCTAssertEqual(testRange, NSRange(location: 0, length: 4))
+    XCTAssertEqual(testRange, NSRange(location: 0, length: 12))
   }
 }

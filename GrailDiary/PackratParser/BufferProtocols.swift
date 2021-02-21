@@ -10,6 +10,9 @@ public protocol SafeUnicodeBuffer {
   /// Gets the UTF-16 value at an index. If the index is out of bounds, returns nil.
   func utf16(at index: Int) -> unichar?
 
+  /// Gets a Character that starts at index. Note that Character may be composed of several UTF-16 code units. (E.g., emoji)
+  func character(at index: Int) -> Character?
+
   /// Gets a substring from the buffer, objc-style
   subscript(range: NSRange) -> [unichar] { get }
 
@@ -34,6 +37,13 @@ extension String: SafeUnicodeBuffer {
       return nil
     }
     return utf16[stringIndex]
+  }
+
+  public func character(at i: Int) -> Character? {
+    guard let stringIndex = index(startIndex, offsetBy: i, limitedBy: endIndex), stringIndex < endIndex else {
+      return nil
+    }
+    return self[stringIndex]
   }
 
   public var string: String { self }

@@ -8,7 +8,7 @@ private func formatTab(
   node: SyntaxTreeNode,
   startIndex: Int,
   buffer: SafeUnicodeBuffer,
-  attributes: inout AttributedStringAttributes
+  attributes: inout AttributedStringAttributesDescriptor
 ) -> [unichar] {
   return Array("\t".utf16)
 }
@@ -25,11 +25,7 @@ final class ParsedTextStorageTests: XCTestCase {
         .list: { $1.listLevel += 1 },
         .strongEmphasis: { $1.bold = true },
       ]
-      var defaultAttributes: AttributedStringAttributes = [:]
-      defaultAttributes.font = UIFont.preferredFont(forTextStyle: .body)
-      defaultAttributes.color = .label
-      defaultAttributes.headIndent = 28
-      defaultAttributes.firstLineHeadIndent = 28
+      let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
     #else
       let formattingFunctions: [NodeType: FormattingFunction] = [:]
       let defaultAttributes: AttributedStringAttributes = [:]
@@ -58,6 +54,8 @@ final class ParsedTextStorageTests: XCTestCase {
     )
   }
 
+  // TODO: With the new method of determining if attributes have changed, this is no longer an
+  // effective test to ensure that incremental parsing is happening.
   func testEditMakesMinimumAttributeChange() {
     assertDelegateMessages(
       for: [
@@ -66,7 +64,7 @@ final class ParsedTextStorageTests: XCTestCase {
       ],
       are: Array([
         DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 50), changeInLength: 50),
-        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 8, length: 33), changeInLength: 1),
+        DelegateMessage.messagePair(editedMask: [.editedAttributes, .editedCharacters], editedRange: NSRange(location: 39, length: 1), changeInLength: 1),
       ].joined())
     )
   }
@@ -81,7 +79,7 @@ final class ParsedTextStorageTests: XCTestCase {
       for: [.append(text: "# Hello"), .append(text: ", world!\n\n")],
       are: Array([
         DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 7), changeInLength: 7),
-        DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 17), changeInLength: 10),
+        DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 7, length: 10), changeInLength: 10),
       ].joined())
     )
   }
@@ -123,10 +121,10 @@ final class ParsedTextStorageTests: XCTestCase {
     func testFormatting() {
       textStorage.append(NSAttributedString(string: "# Header\n\nParagraph with almost **bold*\n\nUnrelated"))
       var range = NSRange(location: NSNotFound, length: 0)
-      let attributes = textStorage.attributes(at: 0, effectiveRange: &range)
+      let descriptor = textStorage.attributes(at: 0, effectiveRange: &range)
       var expectedAttributes: AttributedStringAttributes = [:]
       expectedAttributes.fontSize = 24
-      XCTAssertEqual(expectedAttributes.font, attributes.font)
+      XCTAssertEqual(expectedAttributes.font, descriptor.font)
     }
   #endif
 }
@@ -143,7 +141,7 @@ private extension ParsedTextStorageTests {
     let textStorage = ParsedTextStorage(
       storage: ParsedAttributedString(
         grammar: MiniMarkdownGrammar(),
-        defaultAttributes: [:],
+        defaultAttributes: AttributedStringAttributesDescriptor(fontSize: 12),
         quickFormatFunctions: [:],
         fullFormatFunctions: [.softTab: formatTab]
       )

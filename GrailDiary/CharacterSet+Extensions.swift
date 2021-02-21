@@ -7,13 +7,3 @@ public extension NSCharacterSet {
     utf16.map(characterIsMember) ?? includesNil
   }
 }
-
-public extension CharacterSet {
-  func contains(_ char: unichar) -> Bool {
-    guard let scalar = UnicodeScalar(char) else {
-      // Probably an emoji
-      return false
-    }
-    return contains(scalar)
-  }
-}

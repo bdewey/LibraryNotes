@@ -225,10 +225,6 @@ public struct ParsingResult {
     return node
   }
 
-  /// Represents the "dot" in PEG grammars -- matches a single character. Does not create a node; this result will need to
-  /// get absorbed into something else.
-  public static let dot = ParsingResult(succeeded: true, length: 1, examinedLength: 1, node: nil)
-
   /// Static result representing failure after looking at one character.
   public static let fail = ParsingResult(succeeded: false, length: 0, examinedLength: 1, node: nil)
 }
@@ -292,11 +288,11 @@ public extension ParsingRule {
 /// - note: In PEG grammars, matching a single character is represented by a ".", thus the name.
 final class DotRule: ParsingRule {
   override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
-    if index < buffer.count {
-      return performanceCounters.recordResult(.dot)
-    } else {
+    guard let character = buffer.character(at: index) else {
       return performanceCounters.recordResult(.fail)
     }
+    let utf16count = character.utf16.count
+    return performanceCounters.recordResult(ParsingResult(succeeded: true, length: utf16count, examinedLength: utf16count, node: nil))
   }
 }
 
@@ -310,10 +306,11 @@ final class Characters: ParsingRule {
   let characters: CharacterSet
 
   override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
-    guard let char = buffer.utf16(at: index), characters.contains(char) else {
+    guard let character = buffer.character(at: index), character.unicodeScalars.count == 1, characters.contains(character.unicodeScalars.first!) else {
       return performanceCounters.recordResult(.fail)
     }
-    return performanceCounters.recordResult(.dot)
+    let count = character.utf16.count
+    return performanceCounters.recordResult(ParsingResult(succeeded: true, length: count, examinedLength: count, node: nil))
   }
 
   override var description: String {
@@ -322,6 +319,22 @@ final class Characters: ParsingRule {
 
   override var possibleOpeningCharacters: CharacterSet {
     return characters
+  }
+}
+
+final class CharacterPredicate: ParsingRule {
+  init(_ predicate: @escaping (Character) -> Bool) {
+    self.predicate = predicate
+  }
+
+  let predicate: (Character) -> Bool
+
+  override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+    guard let character = buffer.character(at: index), predicate(character) else {
+      return performanceCounters.recordResult(.fail)
+    }
+    let count = character.utf16.count
+    return performanceCounters.recordResult(ParsingResult(succeeded: true, length: count, examinedLength: count, node: nil))
   }
 }
 
@@ -587,7 +600,7 @@ private extension Optional where Wrapped == CharacterSet {
     }
   }
 
-  func contains(_ maybeChar: unichar?) -> Bool {
+  func contains(_ maybeChar: Character?) -> Bool {
     switch (self, maybeChar) {
     case (.none, _):
       // nil character set accepts everything
@@ -596,7 +609,7 @@ private extension Optional where Wrapped == CharacterSet {
       // Non-nil character set and nil character always fails
       return false
     case (.some(let set), .some(let char)):
-      return set.contains(char)
+      return char.unicodeScalars.count == 1 && set.contains(char.unicodeScalars.first!)
     }
   }
 }
@@ -661,7 +674,7 @@ public final class Choice: ParsingRuleSequenceWrapper {
 
   override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     var examinedLength = 1
-    let character = buffer.utf16(at: index)
+    let character = buffer.character(at: index)
     guard _possibleCharacters.contains(character) else {
       return .fail
     }

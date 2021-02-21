@@ -33,6 +33,7 @@ public extension SyntaxTreeNodeType {
   static let summaryDelimiter: SyntaxTreeNodeType = "summary_delimiter"
   static let summaryBody: SyntaxTreeNodeType = "summary_body"
   static let summary: SyntaxTreeNodeType = "summary"
+  static let emoji: SyntaxTreeNodeType = "emoji"
 }
 
 public enum ListType {
@@ -134,7 +135,10 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     whitespace.as(.text),
     nonDelimitedHashtag
   )
-  lazy var nonDelimitedHashtag = InOrder(Literal("#"), nonWhitespace.repeating(1...)).as(.hashtag).memoize()
+  lazy var nonDelimitedHashtag = InOrder(
+    Literal("#").as(.text),
+    Choice(emoji, nonWhitespace.as(.text)).repeating(1...)
+  ).wrapping(in: .hashtag).memoize()
 
   lazy var image = InOrder(
     Literal("![").as(.text),
@@ -152,6 +156,8 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     Literal(")").as(.delimiter)
   ).wrapping(in: .cloze).memoize()
 
+  lazy var emoji = CharacterPredicate { $0.isEmoji }.repeating(1...).as(.emoji).memoize()
+
   lazy var textStyles = Choice(
     bold,
     italic,
@@ -159,7 +165,8 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     code,
     hashtag,
     image,
-    cloze
+    cloze,
+    emoji
   ).memoize()
 
   lazy var styledText = InOrder(
@@ -229,4 +236,19 @@ public final class MiniMarkdownGrammar: PackratGrammar {
 
   lazy var unorderedList = list(type: .unordered, openingDelimiter: unorderedListOpening)
   lazy var orderedList = list(type: .ordered, openingDelimiter: orderedListOpening)
+}
+
+private extension Character {
+  var isSimpleEmoji: Bool {
+    guard let firstScalar = unicodeScalars.first else {
+      return false
+    }
+    return firstScalar.properties.isEmoji && firstScalar.value > 0x238C
+  }
+
+  var isCombinedIntoEmoji: Bool {
+    unicodeScalars.count > 1 && unicodeScalars.first?.properties.isEmoji ?? false
+  }
+
+  var isEmoji: Bool { isSimpleEmoji || isCombinedIntoEmoji }
 }

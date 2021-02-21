@@ -57,6 +57,10 @@ extension ParsedString: RangeReplaceableSafeUnicodeBuffer {
     return text.utf16(at: index)
   }
 
+  public func character(at index: Int) -> Character? {
+    return text.character(at: index)
+  }
+
   override public func replaceCharacters(in range: NSRange, with str: String) {
     text.replaceCharacters(in: range, with: str)
     memoizationTable.applyEdit(originalRange: range, replacementLength: str.utf16.count)

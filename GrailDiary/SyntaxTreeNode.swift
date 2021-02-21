@@ -40,6 +40,123 @@ public extension SyntaxTreeNodePropertyKey {
   }
 }
 
+public protocol SyntaxTreeNodeChildren: Sequence {
+  mutating func removeFirst()
+  mutating func removeLast()
+  mutating func append(_ node: SyntaxTreeNode)
+  mutating func append(contentsOf newElements: Self)
+  var count: Int { get }
+  var isEmpty: Bool { get }
+  var first: SyntaxTreeNode? { get }
+  var last: SyntaxTreeNode? { get }
+}
+
+/// Holds a SyntaxTreeNode in a doubly-linked list.
+private final class DoublyLinkedNode {
+  internal init(value: SyntaxTreeNode, next: DoublyLinkedNode? = nil, previous: DoublyLinkedNode? = nil) {
+    self.value = value
+    self.next = next
+    self.previous = previous
+  }
+
+  let value: SyntaxTreeNode
+  var next: DoublyLinkedNode?
+  var previous: DoublyLinkedNode?
+}
+
+/// A specific DoublyLinkedList of SyntaxTreeNode values.
+public final class DoublyLinkedList: SyntaxTreeNodeChildren {
+  public var count: Int = 0
+
+  // swiftlint:disable:next empty_count
+  public var isEmpty: Bool { count == 0 }
+
+  private var head: DoublyLinkedNode?
+  private var tail: DoublyLinkedNode?
+
+  public func removeFirst() {
+    count -= 1
+    if head === tail {
+      // swiftlint:disable:next empty_count
+      assert(count == 0)
+      head = nil
+      tail = nil
+    } else {
+      let next = head?.next
+      next?.previous = nil
+      head = next
+    }
+    assert(map { _ in 1 }.reduce(0, +) == count)
+  }
+
+  public func removeLast() {
+    count -= 1
+    if head === tail {
+      // swiftlint:disable:next empty_count
+      assert(count == 0)
+      head = nil
+      tail = nil
+    } else {
+      let previous = tail?.previous
+      previous?.next = nil
+      tail = previous
+    }
+    assert(map { _ in 1 }.reduce(0, +) == count)
+  }
+
+  public func append(_ node: SyntaxTreeNode) {
+    count += 1
+    if tail == nil {
+      tail = DoublyLinkedNode(value: node, next: nil, previous: nil)
+      head = tail
+    } else {
+      let newNode = DoublyLinkedNode(value: node, next: nil, previous: tail)
+      tail?.next = newNode
+      tail = newNode
+    }
+    assert(map { _ in 1 }.reduce(0, +) == count)
+  }
+
+  // NOTE: This is destructive.
+  public func append(contentsOf newElements: DoublyLinkedList) {
+    // swiftlint:disable empty_count
+    if tail == nil {
+      assert(count == 0 && head == nil)
+      head = newElements.head
+      tail = newElements.tail
+      count = newElements.count
+    } else if newElements.head == nil {
+      assert(newElements.count == 0)
+      // DO NOTHING
+    } else {
+      count += newElements.count
+      tail?.next = newElements.head
+      newElements.head?.previous = tail
+      tail = newElements.tail
+    }
+    assert(map { _ in 1 }.reduce(0, +) == count)
+  }
+
+  public var first: SyntaxTreeNode? { head?.value }
+  public var last: SyntaxTreeNode? { tail?.value }
+}
+
+extension DoublyLinkedList: Sequence {
+  public struct Iterator: IteratorProtocol {
+    fileprivate var node: DoublyLinkedNode?
+
+    public mutating func next() -> SyntaxTreeNode? {
+      let item = node?.value
+      node = node?.next
+      return item
+    }
+  }
+
+  public func makeIterator() -> Iterator {
+    return Iterator(node: head)
+  }
+}
+
 /// A node in the markup language's syntax tree.
 public final class SyntaxTreeNode: CustomStringConvertible {
   public init(type: SyntaxTreeNodeType, length: Int = 0) {
@@ -72,7 +189,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   private var disconnectedFromResult = false
 
   /// Children of this node.
-  public var children = [SyntaxTreeNode]() {
+  public var children = DoublyLinkedList() {
     willSet {
       assert(!frozen)
     }
@@ -87,12 +204,6 @@ public final class SyntaxTreeNode: CustomStringConvertible {
 
   public func freeze() {
     frozen = true
-  }
-
-  public func makeCopy() -> SyntaxTreeNode {
-    let copy = SyntaxTreeNode(type: type, length: length)
-    copy.children = children.map { $0.makeCopy() }
-    return copy
   }
 
   public func appendChild(_ child: SyntaxTreeNode) {
@@ -124,7 +235,8 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     } else {
       let copy = SyntaxTreeNode(type: last.type, length: last.length + length)
       copy.disconnectedFromResult = true
-      children[children.count - 1] = copy
+      children.removeLast()
+      children.append(copy)
     }
   }
 

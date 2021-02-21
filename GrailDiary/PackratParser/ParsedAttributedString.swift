@@ -2,16 +2,19 @@
 
 import Foundation
 import Logging
+import os
 import UIKit
 
+private let log = OSLog(subsystem: "org.brians-brain.GrailDiary", category: "ParsedAttributedString")
+
 /// A quick format function can change *only* string attributes based *only* on the type of syntax tree node, but it can do it with simpler syntax than FullFormatFunction.
-public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributes) -> Void
+public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAttributesDescriptor) -> Void
 
 /// A function can change both formatting *and* the actual string characters that represent a part of the syntax tree. It also gets to examine the actual text as opposed to
 /// just knowing the type.
-public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributes) -> [unichar]?
+public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributesDescriptor) -> [unichar]?
 
-private extension Logger {
+private extension Logging.Logger {
   static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
 }
 
@@ -37,7 +40,7 @@ private extension Logger {
 @objc public final class ParsedAttributedString: NSMutableAttributedString {
   public struct Settings {
     var grammar: PackratGrammar
-    var defaultAttributes: AttributedStringAttributes
+    var defaultAttributes: AttributedStringAttributesDescriptor
     var quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
     var fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   }
@@ -56,7 +59,7 @@ private extension Logger {
     assertionFailure("Are you sure you want a plain-text attributed string?")
     self.init(
       grammar: PlainTextGrammar(),
-      defaultAttributes: [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.label],
+      defaultAttributes: AttributedStringAttributesDescriptor(textStyle: .body, color: .label),
       quickFormatFunctions: [:],
       fullFormatFunctions: [:]
     )
@@ -65,7 +68,7 @@ private extension Logger {
   public init(
     string: String = "",
     grammar: PackratGrammar,
-    defaultAttributes: AttributedStringAttributes,
+    defaultAttributes: AttributedStringAttributesDescriptor,
     quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction],
     fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   ) {
@@ -74,14 +77,14 @@ private extension Logger {
     self.replacementFunctions = fullFormatFunctions
     self.rawString = ParsedString(string, grammar: grammar)
     self._string = PieceTableString(pieceTable: PieceTable(rawString.text))
+    self.attributesArray = AttributesArray(attributesCache: attributesCache)
     super.init()
-    var range: Range<Int>?
     if case .success(let node) = rawString.result {
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &range
+        resultingAttributesArray: &attributesArray
       )
       applyReplacements(in: node, startingIndex: 0, to: _string)
     }
@@ -106,13 +109,18 @@ private extension Logger {
   override public var string: String { _string as String }
 
   /// Default attributes
-  private let defaultAttributes: AttributedStringAttributes
+  private let defaultAttributes: AttributedStringAttributesDescriptor
+
+  private var attributesArray: AttributesArray
 
   /// A set of functions that customize attributes based upon the nodes in the AST.
   private let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
 
   /// A set of functions that replace the contents of `rawString` -- e.g., these can be used to remove delimiters or change spaces to tabs.
   private let replacementFunctions: [SyntaxTreeNodeType: FullFormatFunction]
+
+  /// Caches a mapping from descriptor to actual attributes for the lifetime of this ParsedAttributedString
+  private let attributesCache = AttributesCache()
 
   /// Given a range in `string`, computes the equivalent range in `rawString`
   /// - note: Characters from a "replacement" are an atomic unit. If the input range overlaps with part of the characters in a replacement, the resulting range will encompass the entire replacement.
@@ -141,7 +149,6 @@ private extension Logger {
 
   /// Replaces the characters in the given range with the characters of the given string.
   override public func replaceCharacters(in range: NSRange, with str: String) {
-    var changedAttributesRange: Range<Int>?
     let lengthBeforeChanges = _string.length
     let bufferRange = rawStringRange(forRange: range)
     rawString.replaceCharacters(
@@ -149,25 +156,30 @@ private extension Logger {
       with: str
     )
     _string.revertToOriginal()
+    var newAttributes = AttributesArray(attributesCache: attributesCache)
     if case .success(let node) = rawString.result {
+      os_signpost(.begin, log: log, name: "applyAttributes")
       applyAttributes(
         to: node,
         attributes: defaultAttributes,
         startingIndex: 0,
-        leafNodeRange: &changedAttributesRange
+        resultingAttributesArray: &newAttributes
       )
+      os_signpost(.end, log: log, name: "applyAttributes")
       applyReplacements(in: node, startingIndex: 0, to: _string)
+    } else {
+      newAttributes = attributesArray
     }
     // Deliver delegate messages
     Logger.attributedStringLogger.debug("Edit \(range) change in length \(_string.length - lengthBeforeChanges)")
-    if let range = changedAttributesRange {
-      Logger.attributedStringLogger.debug("Changed attributes at \(self.range(forRawStringRange: NSRange(range)))")
-    }
+    attributesArray.adjustLengthOfRun(at: range.location, by: _string.length - lengthBeforeChanges, defaultAttributes: defaultAttributes)
+    // swiftlint:disable:next force_try
+    let changedAttributesRange = (try! attributesArray.rangeOfAttributeDifferences(from: newAttributes)) ?? NSRange(location: range.location, length: 0)
+    attributesArray = newAttributes
     delegate?.attributedStringDidChange(
       oldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
-      changedAttributesRange: changedAttributesRange.flatMap { self.range(forRawStringRange: NSRange($0)) }
-        ?? NSRange(location: 0, length: 0) // Documentation says location == NSNotFound means "no change", but this seems to cause an infinite loop
+      changedAttributesRange: changedAttributesRange
     )
   }
 
@@ -180,25 +192,7 @@ private extension Logger {
     at location: Int,
     effectiveRange range: NSRangePointer?
   ) -> [NSAttributedString.Key: Any] {
-    guard let tree = try? rawString.result.get() else {
-      range?.pointee = NSRange(location: 0, length: rawString.count)
-      return defaultAttributes
-    }
-    var bufferLocation = rawStringRange(forRange: NSRange(location: location, length: 0)).location
-    repeat {
-      // Crash on invalid location or if I didn't set attributes (shouldn't happen?)
-      let leafNode = try! tree.leafNode(containing: bufferLocation) // swiftlint:disable:this force_try
-      let visibleRange = self.range(forRawStringRange: leafNode.range)
-      if visibleRange.length > 0 {
-        assert(visibleRange.contains(location))
-        range?.pointee = visibleRange
-        Logger.attributedStringLogger.debug("Found attributes at location \(bufferLocation) for range \(visibleRange) (\(visibleRange.upperBound)), length = \(length)")
-        return leafNode.node.attributedStringAttributes!
-      } else {
-        // We landed on a node that isn't visible in the final result. Skip to the next node.
-        bufferLocation += leafNode.node.length
-      }
-    } while true
+    return attributesArray.attributes(at: location, effectiveRange: range)
   }
 
   /// Sets the attributes for the characters in the specified range to the specified attributes.
@@ -209,8 +203,7 @@ private extension Logger {
     _ attrs: [NSAttributedString.Key: Any]?,
     range: NSRange
   ) {
-    // TODO. Maybe just ignore? But this is how emojis and misspellings get formatted
-    // by the system.
+    // IGNORE -- we do syntax highlighting
   }
 }
 
@@ -220,32 +213,33 @@ private extension ParsedAttributedString {
   /// Associates AttributedStringAttributes with this part of the syntax tree.
   func applyAttributes(
     to node: SyntaxTreeNode,
-    attributes: AttributedStringAttributes,
+    attributes: AttributedStringAttributesDescriptor,
     startingIndex: Int,
-    leafNodeRange: inout Range<Int>?
+    resultingAttributesArray: inout AttributesArray
   ) {
-    // If we already have attributes we don't need to do anything else.
-    guard node[NodeAttributesKey.self] == nil else {
-      return
-    }
     var attributes = attributes
-    formattingFunctions[node.type]?(node, &attributes)
-    if let replacementFunction = replacementFunctions[node.type],
-       let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes)
-    {
-      node.textReplacement = textReplacement
-      node.hasTextReplacement = true
-      node.textReplacementChangeInLength = textReplacement.count - node.length
+    if let precomputedAttributes = node.attributedStringAttributes {
+      attributes = precomputedAttributes
     } else {
-      node.hasTextReplacement = false
+      formattingFunctions[node.type]?(node, &attributes)
+      if let replacementFunction = replacementFunctions[node.type],
+         let textReplacement = replacementFunction(node, startingIndex, rawString, &attributes)
+      {
+        node.textReplacement = textReplacement
+        node.hasTextReplacement = true
+        node.textReplacementChangeInLength = textReplacement.count - node.length
+      } else {
+        node.hasTextReplacement = false
+      }
+      node.attributedStringAttributes = attributes
     }
-    node.attributedStringAttributes = attributes
     var childLength = 0
-    if node.children.isEmpty {
+    if node.children.isEmpty || node.textReplacement != nil {
       // We are a leaf. Adjust leafNodeRange.
-      let lowerBound = Swift.min(startingIndex, leafNodeRange?.lowerBound ?? Int.max)
-      let upperBound = Swift.max(startingIndex + node.length, leafNodeRange?.upperBound ?? Int.min)
-      leafNodeRange = lowerBound ..< upperBound
+      resultingAttributesArray.appendAttributes(attributes, length: node.length + node.textReplacementChangeInLength)
+    }
+    if node.textReplacement != nil {
+      return
     }
     var childTextReplacementChangeInLength = 0
     for child in node.children {
@@ -253,7 +247,7 @@ private extension ParsedAttributedString {
         to: child,
         attributes: attributes,
         startingIndex: startingIndex + childLength,
-        leafNodeRange: &leafNodeRange
+        resultingAttributesArray: &resultingAttributesArray
       )
       childLength += child.length
       childTextReplacementChangeInLength += child.textReplacementChangeInLength
@@ -283,7 +277,7 @@ public extension ParsedAttributedString.Settings {
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
     imageStorage: ImageStorage? = nil,
-    extraAttributes: [NSAttributedString.Key: Any] = [:]
+    kern: CGFloat = 0
   ) -> ParsedAttributedString.Settings {
     var formattingFunctions = [SyntaxTreeNodeType: QuickFormatFunction]()
     var replacementFunctions = [SyntaxTreeNodeType: FullFormatFunction]()
@@ -295,12 +289,9 @@ public extension ParsedAttributedString.Settings {
     if let imageStorage = imageStorage {
       replacementFunctions[.image] = imageStorage.imageReplacement
     }
-    var defaultAttributes: AttributedStringAttributes = [
-      .font: UIFont.preferredFont(forTextStyle: textStyle),
-      .foregroundColor: textColor,
-    ]
+    var defaultAttributes = AttributedStringAttributesDescriptor(textStyle: textStyle, color: textColor)
     defaultAttributes.lineHeightMultiple = 1.2
-    defaultAttributes.merge(extraAttributes, uniquingKeysWith: { _, new in new })
+    defaultAttributes.kern = kern
     return ParsedAttributedString.Settings(
       grammar: MiniMarkdownGrammar.shared,
       defaultAttributes: defaultAttributes,
@@ -312,7 +303,7 @@ public extension ParsedAttributedString.Settings {
 
 /// Key for storing the string attributes associated with a node.
 private struct NodeAttributesKey: SyntaxTreeNodePropertyKey {
-  typealias Value = AttributedStringAttributes
+  typealias Value = AttributedStringAttributesDescriptor
 
   static let key = "attributes"
 }
@@ -334,7 +325,7 @@ private struct NodeTextReplacementChangeInLengthKey: SyntaxTreeNodePropertyKey {
 
 private extension SyntaxTreeNode {
   /// The attributes associated with this node, if set.
-  var attributedStringAttributes: AttributedStringAttributes? {
+  var attributedStringAttributes: AttributedStringAttributesDescriptor? {
     get {
       self[NodeAttributesKey.self]
     }

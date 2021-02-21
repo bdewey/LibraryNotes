@@ -53,14 +53,6 @@ final class ParsingRuleTests: XCTestCase {
     assertSameAnswers(unmodified, trace)
   }
 
-  func testParagraphMembership() {
-    let grammar = MiniMarkdownGrammar()
-    XCTAssertTrue(grammar.paragraphTermination.possibleOpeningCharacters!.contains("\n"))
-    XCTAssertTrue(grammar.textStyles.possibleOpeningCharacters!.contains("*"))
-    XCTAssertTrue(grammar.styledText.possibleOpeningCharacters?.contains("*") ?? true)
-    XCTAssertTrue(grammar.paragraph.possibleOpeningCharacters?.contains("*") ?? true)
-  }
-
   let testString = "#abc123!?xABC\n \t."
 
   func assertSameAnswers(_ set1: CharacterSet?, _ set2: CharacterSet?, file: StaticString = #file, line: UInt = #line) {
