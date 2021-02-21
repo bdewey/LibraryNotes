@@ -79,7 +79,7 @@ final class ParsedTextStorageTests: XCTestCase {
       for: [.append(text: "# Hello"), .append(text: ", world!\n\n")],
       are: Array([
         DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 7), changeInLength: 7),
-        DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 0, length: 17), changeInLength: 10),
+        DelegateMessage.messagePair(editedMask: [.editedCharacters, .editedAttributes], editedRange: NSRange(location: 7, length: 10), changeInLength: 10),
       ].joined())
     )
   }

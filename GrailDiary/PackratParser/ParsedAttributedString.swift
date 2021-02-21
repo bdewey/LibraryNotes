@@ -200,13 +200,7 @@ private extension Logging.Logger {
     _ attrs: [NSAttributedString.Key: Any]?,
     range: NSRange
   ) {
-    // If Apple is helpfully telling us that we've got an emoji and need to use the emoji font,
-    // then allow the attribute override. Otherwise, ignore it.
-    guard let attrs = attrs, let font = attrs[.font] as? UIFont, font.fontName == ".AppleColorEmojiUI" else {
-      return
-    }
-    Logger.shared.debug("Allowing emoji override at \(range)")
-    attributesArray.setAttributes(attrs, range: range)
+    // IGNORE -- we do syntax highlighting
   }
 }
 
