@@ -72,9 +72,6 @@ public struct AttributedStringAttributesDescriptor: Hashable {
       fontAttributes[.family] = familyName
     } else {
       fontAttributes[.textStyle] = textStyle
-      if textStyle != .body {
-        Logger.shared.debug("Trying to make something new")
-      }
     }
     var fontDescriptor = UIFontDescriptor(fontAttributes: fontAttributes)
     if italic { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitItalic) ?? fontDescriptor }
