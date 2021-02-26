@@ -101,7 +101,7 @@ public final class StudyViewController: UIViewController {
 
   private struct Swipe: Identifiable {
     var id: CGVector.Direction { classifier.direction }
-    let classifier: LinearPanTranslationClassifier
+    let classifier: PanTranslationClassifier
     let message: String
     let color: UIColor
     let requiresVisibleAnswer: Bool
@@ -121,7 +121,7 @@ public final class StudyViewController: UIViewController {
 
   private let swipeClassifiers: [Swipe] = [
     Swipe(
-      classifier: LinearPanTranslationClassifier(direction: .down),
+      classifier: SimpleSwipeClassifier(direction: .down),
       message: "Dismiss",
       color: .systemGray,
       requiresVisibleAnswer: false,
@@ -130,7 +130,7 @@ public final class StudyViewController: UIViewController {
       snapPoint: { CGPoint(x: $0.center.x, y: $0.center.y + $0.frame.height) }
     ),
     Swipe(
-      classifier: LinearPanTranslationClassifier(direction: .right),
+      classifier: SimpleSwipeClassifier(direction: .right),
       message: "I got it right",
       color: .systemGreen,
       requiresVisibleAnswer: true,
@@ -139,7 +139,7 @@ public final class StudyViewController: UIViewController {
       snapPoint: { CGPoint(x: $0.center.x + $0.frame.width, y: $0.center.y) }
     ),
     Swipe(
-      classifier: LinearPanTranslationClassifier(direction: .left),
+      classifier: SimpleSwipeClassifier(direction: .left),
       message: "Need to review",
       color: .systemRed,
       requiresVisibleAnswer: true,

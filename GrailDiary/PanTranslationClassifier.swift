@@ -7,59 +7,54 @@ import UIKit
 /// matches a specific pattern. Matching is not "binary" (match / not match), but is instead expressed in a range of 0 ... 1
 /// where 0 is a definite not match and a 1 is a definite match.
 public protocol PanTranslationClassifier {
+  /// The direction this classifier is looking for
+  var direction: CGVector.Direction { get }
   /// - returns: A value in the range 0.0 ... 1.0 representing how well this pan gesture translation matches this classifier.
   func matchStrength(vector: CGVector) -> CGFloat
 }
 
-/// A LinearPanTranslationClassifier determines how well a pan translation matches a direction and triggering magitude.
-/// To perfectly match, the translation must be in the specified direction (+/- `epsilon`) and have magnitude at least
-/// `triggeringMagnitude`.
-public struct LinearPanTranslationClassifier: PanTranslationClassifier {
-  public init(
-    direction: CGVector.Direction,
-    epsilon: CGFloat = CGFloat.pi / 4,
-    triggeringMagnitude: CGFloat = 100,
-    debug: Bool = false
-  ) {
-    self.direction = direction
-    self.epsilon = epsilon
-    self.triggeringMagnitude = triggeringMagnitude
-    self.debug = debug
-  }
-
-  /// Direction, in radians, of the specific direction.
+/// This classifier tries to be much simplier than LinearPanTranslation.
+/// To trigger:
+/// - the swipe has to be "more" in the intended direction than any other direction
+/// - the swipe length needs to be at least the triggering distance.
+public struct SimpleSwipeClassifier: PanTranslationClassifier {
+  /// The direction this classifier is looking for
   public let direction: CGVector.Direction
 
-  /// How close the pan gesture translation must be to the specified direction to match.
-  public let epsilon: CGFloat
-
-  /// How large the pan gesture translation must be to match
-  public let triggeringMagnitude: CGFloat
-
-  /// If true we log debugging about triggering the classifier
-  public var debug: Bool
+  /// The minimum distance for triggering this classifier
+  public let triggeringMagnitude: CGFloat = 150
 
   public func matchStrength(vector: CGVector) -> CGFloat {
-    let angleDelta = min(abs(vector.direction.rawValue - direction.rawValue), abs(vector.direction.rawValue + 2 * CGFloat.pi - direction.rawValue))
-    let directionFactor = angleDelta
-      .unitScale(zero: epsilon / 2, one: epsilon)
-      .clamped(to: 0 ... 1)
-      .inverted()
-    let magnitudeFactor = vector.magnitude
-      .unitScale(zero: triggeringMagnitude / 2, one: triggeringMagnitude)
-      .clamped(to: 0 ... 1)
-    if debug {
-      Logger.shared.debug("Vector \(vector.direction) \(vector.magnitude), angleDelta = \(angleDelta), magnitudeFactor = \(magnitudeFactor) directionFactor = \(directionFactor)")
+    if vector.isInDirection(direction) {
+      return (vector.magnitude / triggeringMagnitude).clamped(to: 0...1)
+    } else {
+      return 0
     }
-    return directionFactor * magnitudeFactor
+  }
+}
+
+private extension CGVector {
+  func isInDirection(_ direction: CGVector.Direction) -> Bool {
+    switch direction {
+    case .up:
+      return dy < 0 && abs(dy) > abs(dx)
+    case .down:
+      return dy > 0 && abs(dy) > abs(dx)
+
+    // HACK: I know I never look for the direction "up", so don't worry about negative "dy" which would indicate
+    // "this swipe is more up than left/right"
+    case .left:
+      return dx < 0 && abs(dx) > dy
+    case .right:
+      return dx > 0 && abs(dx) > dy
+    default:
+      assertionFailure()
+      return false
+    }
   }
 }
 
 private extension CGFloat {
-  func unitScale(zero: CGFloat, one: CGFloat) -> CGFloat {
-    return (self - zero) / (one - zero)
-  }
-
   func clamped(to range: ClosedRange<CGFloat>) -> CGFloat {
     if self < range.lowerBound {
       return range.lowerBound
@@ -68,9 +63,5 @@ private extension CGFloat {
       return range.upperBound
     }
     return self
-  }
-
-  func inverted() -> CGFloat {
-    return 1.0 - self
   }
 }
