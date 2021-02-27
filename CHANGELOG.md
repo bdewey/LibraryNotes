@@ -14,6 +14,7 @@
 ## Fixed
 
 - Swiping left/right is no longer as finicky
+- All fonts were 17.0 points, irrespective of text style.
 
 ## [0.43.0] - 2020-02-14 Happy Valentine's Day!
 

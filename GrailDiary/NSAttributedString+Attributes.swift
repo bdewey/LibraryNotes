@@ -13,7 +13,7 @@ public extension NSAttributedString.Key {
 }
 
 public struct AttributedStringAttributesDescriptor: Hashable {
-  public init(textStyle: UIFont.TextStyle = .body, familyName: String? = nil, fontSize: CGFloat = UIFont.preferredFont(forTextStyle: .body).pointSize, color: UIColor? = nil, backgroundColor: UIColor? = nil, blockquoteBorderColor: UIColor? = nil, kern: CGFloat = 0, bold: Bool = false, italic: Bool = false, headIndent: CGFloat = 0, firstLineHeadIndent: CGFloat = 0, alignment: NSTextAlignment? = nil, lineHeightMultiple: CGFloat = 0, listLevel: Int = 0, attachment: NSTextAttachment? = nil) {
+  public init(textStyle: UIFont.TextStyle = .body, familyName: String? = nil, fontSize: CGFloat = 0, color: UIColor? = nil, backgroundColor: UIColor? = nil, blockquoteBorderColor: UIColor? = nil, kern: CGFloat = 0, bold: Bool = false, italic: Bool = false, headIndent: CGFloat = 0, firstLineHeadIndent: CGFloat = 0, alignment: NSTextAlignment? = nil, lineHeightMultiple: CGFloat = 0, listLevel: Int = 0, attachment: NSTextAttachment? = nil) {
     self.textStyle = textStyle
     self.familyName = familyName
     self.fontSize = fontSize
@@ -38,7 +38,7 @@ public struct AttributedStringAttributesDescriptor: Hashable {
   }
 
   public var familyName: String?
-  public var fontSize: CGFloat = UIFont.preferredFont(forTextStyle: .body).pointSize
+  public var fontSize: CGFloat = 0
   public var color: UIColor?
   public var backgroundColor: UIColor?
   public var blockquoteBorderColor: UIColor?
@@ -67,16 +67,23 @@ public struct AttributedStringAttributesDescriptor: Hashable {
 
   private func makeFont() -> UIFont {
     var fontAttributes = [UIFontDescriptor.AttributeName: Any]()
+    var size = fontSize
     // Set EITHER the family name or the text style, but not both
     if let familyName = familyName {
       fontAttributes[.family] = familyName
+      if size == 0 {
+        size = UIFont.preferredFont(forTextStyle: .body).pointSize
+      }
     } else {
       fontAttributes[.textStyle] = textStyle
+      if size == 0 {
+        size = UIFont.preferredFont(forTextStyle: textStyle).pointSize
+      }
     }
     var fontDescriptor = UIFontDescriptor(fontAttributes: fontAttributes)
     if italic { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitItalic) ?? fontDescriptor }
     if bold { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitBold) ?? fontDescriptor }
-    return UIFont(descriptor: fontDescriptor, size: fontSize)
+    return UIFont(descriptor: fontDescriptor, size: size)
   }
 
   private func makeParagraphStyle() -> NSParagraphStyle {
