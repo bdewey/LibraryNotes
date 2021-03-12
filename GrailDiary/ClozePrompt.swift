@@ -81,7 +81,9 @@ extension ParsedAttributedString.Settings {
         let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
         let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
         if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
-          attributes.color = attributes.backgroundColor
+          // There is no hint. We're going to show a blank.
+          // The only question is: How big is the blank? Try to make it the size of the answer.
+          attributes.color = .clear
           if let answerNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeAnswer }) {
             return buffer[answerNode.range]
           } else {

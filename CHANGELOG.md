@@ -15,6 +15,7 @@
 
 - Swiping left/right is no longer as finicky
 - All fonts were 17.0 points, irrespective of text style.
+- If there wasn't a cloze hint, the answer was actually visible. Turns out making the foreground color equal the background color does not make the text invisible *if* the color is semitransparent. The layering winds up giving the text a different alpha value than the background.
 
 ## [0.43.0] - 2020-02-14 Happy Valentine's Day!
 
