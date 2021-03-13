@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.44.0] - 2020-03-12 Happy birthday to me!
 
 ### Added
 
