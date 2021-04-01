@@ -213,7 +213,7 @@ public struct ParsingResult {
       if node.frozen {
         // Return a shallow copy
         let shallowCopy = SyntaxTreeNode(type: node.type, length: node.length)
-        shallowCopy.children = node.children
+        shallowCopy.children.append(contentsOf: node.children)
         self.node = shallowCopy
         return shallowCopy
       } else {
@@ -388,10 +388,15 @@ public final class Literal: ParsingRule {
 final class MemoizingRule: ParsingRuleWrapper {
   override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     if let memoizedResult = memoizationTable.memoizedResult(rule: ObjectIdentifier(self), index: index) {
+      Swift.assert(memoizedResult.node == nil || memoizedResult.node?.length == memoizedResult.length)
       return performanceCounters.recordResult(memoizedResult)
     }
     let result = rule.parsingResult(from: buffer, at: index, memoizationTable: memoizationTable)
+    Swift.assert(result.node == nil || result.length == result.node?.length)
     result.node?.freeze()
+    #if DEBUG
+    try! result.node?.validateLength() // swiftlint:disable:this force_try
+    #endif
     memoizationTable.memoizeResult(result, rule: ObjectIdentifier(self), index: index)
     return performanceCounters.recordResult(result)
   }

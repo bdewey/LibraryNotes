@@ -42,6 +42,9 @@ public final class MemoizationTable: CustomStringConvertible {
     guard let node = result.node, node.length == buffer.count else {
       throw ParsingError.incompleteParsing(length: result.node?.length ?? result.length)
     }
+    #if DEBUG
+    try! node.validateLength() // swiftlint:disable:this force_try
+    #endif
     return node
   }
 
@@ -76,6 +79,13 @@ public final class MemoizationTable: CustomStringConvertible {
   public func memoizeResult(_ result: ParsingResult, rule: ObjectIdentifier, index: Int) {
     assert(result.examinedLength > 0)
     assert(result.examinedLength >= result.length)
+    #if DEBUG
+    do {
+      try result.node?.validateLength()
+    } catch {
+      fatalError()
+    }
+    #endif
     memoizedResults[index][rule] = result
   }
 
@@ -128,6 +138,21 @@ public final class MemoizationTable: CustomStringConvertible {
     }
     return (totalEntries: totalEntries, successfulEntries: successfulEntries)
   }
+
+  #if DEBUG
+  func debugPrintInterestingContents() {
+    for index in memoizedResults.indices {
+      for (_, result) in memoizedResults[index] where result.succeeded && result.length > 0 {
+        do {
+          try result.node?.validateLength()
+          print("Column \(index): \(result)")
+        } catch {
+          print("Column \(index): INVALID LENGTH \(result)")
+        }
+      }
+    }
+  }
+  #endif
 }
 
 // MARK: - Memoization

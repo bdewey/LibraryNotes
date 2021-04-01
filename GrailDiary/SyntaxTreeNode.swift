@@ -44,7 +44,7 @@ public protocol SyntaxTreeNodeChildren: Sequence {
   mutating func removeFirst()
   mutating func removeLast()
   mutating func append(_ node: SyntaxTreeNode)
-  mutating func append(contentsOf newElements: Self)
+  mutating func merge(with newElements: Self)
   var count: Int { get }
   var isEmpty: Bool { get }
   var first: SyntaxTreeNode? { get }
@@ -117,8 +117,15 @@ public final class DoublyLinkedList: SyntaxTreeNodeChildren {
     assert(map { _ in 1 }.reduce(0, +) == count)
   }
 
-  // NOTE: This is destructive.
-  public func append(contentsOf newElements: DoublyLinkedList) {
+  public func append<S: Sequence>(contentsOf sequence: S) where S.Element == SyntaxTreeNode {
+    for otherElement in sequence {
+      append(otherElement)
+    }
+  }
+
+  /// Combine two DoublyLinkedLists in O(1) time.
+  /// - note: This is destructive. Both the receiver and `newElements` will be the same merged list at the end.
+  public func merge(with newElements: DoublyLinkedList) {
     // swiftlint:disable empty_count
     if tail == nil {
       assert(count == 0 && head == nil)
@@ -185,6 +192,22 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     }
   }
 
+  #if DEBUG
+  @discardableResult
+  public func validateLength() throws -> Int {
+    // If we are a leaf, we are valid.
+    if children.isEmpty { return length }
+
+    // Otherwise, first make sure each child has a valid length.
+    let childValidatedLength = try children.map({ try $0.validateLength() }).reduce(0, +)
+    if childValidatedLength != length {
+      throw MachError(.invalidValue)
+    }
+    assert(childValidatedLength == length)
+    return length
+  }
+  #endif
+
   /// We do a couple of tree-construction optimizations that mutate existing nodes that don't "belong" to us
   private var disconnectedFromResult = false
 
@@ -210,13 +233,27 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     assert(!frozen)
     length += child.length
     if child.isFragment {
-      var fragmentNodes = child.children
+      #if DEBUG
+      try! child.validateLength() // swiftlint:disable:this force_try
+      #endif
+
+      let fragmentNodes = child.children
+      var mergedChildNodes = false
       if let last = children.last, let first = fragmentNodes.first, last.children.isEmpty, first.children.isEmpty, last.type == first.type {
+        // The last of our children & the first of the fragment's children have the same type. Rather than creating two nodes
+        // of the same type, just change the length of our node.
+        // TODO: Perhaps this can be done in a cleaner way inside of DoublyLinkedList.append(contentsOf:)?
         incrementLastChildNodeLength(by: first.length)
-        fragmentNodes.removeFirst()
+        mergedChildNodes = true
       }
-      children.append(contentsOf: fragmentNodes)
+      children.append(contentsOf: fragmentNodes.dropFirst(mergedChildNodes ? 1 : 0))
+
+      #if DEBUG
+      try! validateLength() // swiftlint:disable:this force_try
+      #endif
+
     } else {
+
       // Special optimization: Adding a terminal node of the same type of the last terminal node
       // can just be a range update.
       if let lastNode = children.last, lastNode.children.isEmpty, child.children.isEmpty, lastNode.type == child.type {
@@ -229,6 +266,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
 
   private func incrementLastChildNodeLength(by length: Int) {
     guard let last = children.last else { return }
+    assert(!frozen)
     precondition(last.children.isEmpty)
     if last.disconnectedFromResult {
       last.length += length

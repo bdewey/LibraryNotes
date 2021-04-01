@@ -15,7 +15,11 @@ public typealias QuickFormatFunction = (SyntaxTreeNode, inout AttributedStringAt
 public typealias FullFormatFunction = (SyntaxTreeNode, Int, SafeUnicodeBuffer, inout AttributedStringAttributesDescriptor) -> [unichar]?
 
 private extension Logging.Logger {
-  static let attributedStringLogger = Logger(label: "org.brians-brain.ParsedAttributedString")
+  static let attributedStringLogger: Logging.Logger = {
+    var logger = Logger(label: "org.brians-brain.ParsedAttributedString")
+    logger.logLevel = .info
+    return logger
+  }()
 }
 
 @objc public protocol ParsedAttributedStringDelegate: AnyObject {
@@ -218,6 +222,7 @@ private extension ParsedAttributedString {
     resultingAttributesArray: inout AttributesArray
   ) {
     var attributes = attributes
+    let initialAttributesArrayCount = resultingAttributesArray.count
     if let precomputedAttributes = node.attributedStringAttributes {
       attributes = precomputedAttributes
     } else {
@@ -252,8 +257,10 @@ private extension ParsedAttributedString {
       childLength += child.length
       childTextReplacementChangeInLength += child.textReplacementChangeInLength
       node.hasTextReplacement = node.hasTextReplacement || child.hasTextReplacement
+      assert(childLength + childTextReplacementChangeInLength == resultingAttributesArray.count - initialAttributesArrayCount)
     }
     node.textReplacementChangeInLength += childTextReplacementChangeInLength
+    assert(node.length + node.textReplacementChangeInLength == resultingAttributesArray.count - initialAttributesArrayCount)
   }
 
   func applyReplacements(in node: SyntaxTreeNode, startingIndex: Int, to string: NSMutableString) {
