@@ -259,7 +259,7 @@ private extension ParsedAttributedString {
       node.hasTextReplacement = node.hasTextReplacement || child.hasTextReplacement
       assert(childLength + childTextReplacementChangeInLength == resultingAttributesArray.count - initialAttributesArrayCount)
     }
-    node.textReplacementChangeInLength += childTextReplacementChangeInLength
+    node.textReplacementChangeInLength = childTextReplacementChangeInLength
     assert(node.length + node.textReplacementChangeInLength == resultingAttributesArray.count - initialAttributesArrayCount)
   }
 

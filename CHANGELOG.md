@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fixed some subtle bugs deep in the parsing code that could lead to crashes and nonsensical parsing. There might be a perf cost to this, but "accuracy" is more important than "speed"! (In general many of my optimizations in parsing seem a source of bugs & instability, and I wonder if I optimized prematurely when I rewrote with a focus on measuring performance at each step.)
+- Fixed a bug computing the "text replacement change in length" that exhibited itself in, guess what, node reuse through memoization and incremental parsing.
 
 ## [0.44.0] - 2020-03-12 Happy birthday to me!
 

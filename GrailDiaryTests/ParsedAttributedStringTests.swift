@@ -65,6 +65,20 @@ final class ParsedAttributedStringTests: XCTestCase {
     XCTAssertEqual(markdown.count - 8, noDelimiterTextStorage.count)
   }
 
+  func testImageAndReplacements() {
+    let markdown = """
+      # _Tom Kundig: Houses_: Dung Ngo, Tom Kundig, Steven Holl, Rick Joy, Billie Tsien (2006)
+
+      ![](./288c09ac036eef237952e10cb8f62626441ee8f5.jpeg)
+
+      """
+
+    let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
+    noDelimiterTextStorage.append(NSAttributedString(string: markdown))
+    noDelimiterTextStorage.append(NSAttributedString(string: "\n\n#b"))
+    XCTAssertEqual(noDelimiterTextStorage.count, 93)
+  }
+
   static func makeNoDelimiterStorage() -> ParsedAttributedString {
     let formattingFunctions: [SyntaxTreeNodeType: QuickFormatFunction] = [
       .emphasis: { $1.italic = true },
@@ -80,6 +94,7 @@ final class ParsedAttributedStringTests: XCTestCase {
       fullFormatFunctions: [
         .softTab: formatTab,
         .delimiter: { _, _, _, _ in [] },
+        .image: { _, _, _, _ in Array("\u{fffc}".utf16) },
       ]
     )
   }
