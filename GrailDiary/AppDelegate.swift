@@ -10,8 +10,11 @@ extension UTType {
 }
 
 extension Logger {
-  fileprivate static let sharedLoggerLabel = "org.brians-brain.grail-diary"
-  public static let shared = Logger(label: sharedLoggerLabel)
+  public static let shared: Logger = {
+    var logger = Logger(label: "org.brians-brain.grail-diary")
+    logger.logLevel = .info
+    return logger
+  }()
 }
 
 @UIApplicationMain
@@ -52,9 +55,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     let factory = LogHandlerFactory()
-    // Here's how you enable debug logging for different loggers...
-    factory.logLevelsForLabel[Logger.sharedLoggerLabel] = .debug
-    factory.logLevelsForLabel[Logger.webViewLoggerLabel] = .debug
     LoggingSystem.bootstrap(factory.logHandler(for:))
 
     Logger.shared.info("----- Launch application version \(UIApplication.versionString)")

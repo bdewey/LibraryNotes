@@ -155,7 +155,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
     note.folder = configuration.folder?.rawValue
-    Logger.shared.info("SavingTextEditViewController: Updating note \(noteIdentifier)")
+    Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)

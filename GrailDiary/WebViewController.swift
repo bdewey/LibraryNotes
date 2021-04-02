@@ -5,8 +5,11 @@ import UIKit
 import WebKit
 
 extension Logger {
-  static let webViewLoggerLabel = "org.brians-brain.WebViewController"
-  static let webView = Logger(label: webViewLoggerLabel)
+  static let webView: Logger = {
+    var logger = Logger(label:  "org.brians-brain.WebViewController")
+    logger.logLevel = .debug
+    return logger
+  }()
 }
 
 public final class WebViewController: UIViewController, ReferenceViewController {

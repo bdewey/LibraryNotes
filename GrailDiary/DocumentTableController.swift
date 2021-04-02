@@ -491,7 +491,7 @@ private extension DocumentTableController {
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
         }
-      Logger.shared.info(
+      Logger.shared.debug(
         "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
       )
     }
