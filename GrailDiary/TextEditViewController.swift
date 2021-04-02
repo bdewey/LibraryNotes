@@ -504,7 +504,8 @@ extension TextEditViewController: UITextViewDelegate {
       let hashtag = String(utf16CodeUnits: textStorage.storage[hashtagNode.range], count: hashtagNode.range.length)
       let suggestions = delegate?.testEditViewController(self, hashtagSuggestionsFor: hashtag) ?? []
       if suggestions.isEmpty { typeaheadAccessory = nil }
-      let typeaheadInfo = makeTypeaheadAccessoryIfNecessary(anchoredAt: hashtagNode.range.location)
+      let visibleRange = textStorage.storage.range(forRawStringRange: hashtagNode.range)
+      let typeaheadInfo = makeTypeaheadAccessoryIfNecessary(anchoredAt: visibleRange.location)
       var snapshot = NSDiffableDataSourceSnapshot<String, String>()
       snapshot.appendSections(["main"])
       snapshot.appendItems(suggestions)
