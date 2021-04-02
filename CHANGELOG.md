@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.45.0] - 2020-04-02 No Fooling
 
 ### Fixed
 
