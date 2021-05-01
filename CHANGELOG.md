@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The app now uses a book-oriented navigation structure instead of a note-oriented navigation structure
+
+### Fixed
+
+- When you create new notes, they are placed inside the container you are currently viewing.
+
 ## [0.45.0] - 2020-04-02 No Fooling
 
 ### Fixed
