@@ -229,9 +229,9 @@ extension DocumentTableController {
   fileprivate func availableItemActionConfigurations(_ viewProperties: ViewProperties) -> [ActionConfiguration] {
     let actions: [ActionConfiguration?] = [
       .studyItem(viewProperties, in: database, delegate: delegate),
-      .moveItemToInbox(viewProperties, in: database),
-      .moveItemToArchive(viewProperties, in: database),
-      .moveItemToNotes(viewProperties, in: database),
+      .moveItemToWantToRead(viewProperties, in: database),
+      .moveItemToCurrentlyReading(viewProperties, in: database),
+      .moveItemToRead(viewProperties, in: database),
       .deleteItem(viewProperties, in: database),
     ]
     return actions.compactMap { $0 }
@@ -283,39 +283,39 @@ extension DocumentTableController {
       }
     }
 
-    static func moveItemToNotes(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+    static func moveItemToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       if viewProperties.noteProperties.folder == nil { return nil }
-      return ActionConfiguration(title: "Move to Notes", image: UIImage(systemName: "doc"), backgroundColor: .grailTint) {
+      return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
           note.folder = nil
           return note
         })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to notes")
+        Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
       }
     }
 
-    static func moveItemToArchive(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolder.archive.rawValue { return nil }
-      return ActionConfiguration(title: "Move to Archive", image: UIImage(systemName: "archivebox")) {
+    static func moveItemToCurrentlyReading(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+      if viewProperties.noteProperties.folder == PredefinedFolder.currentlyReading.rawValue { return nil }
+      return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolder.archive.rawValue
+          note.folder = PredefinedFolder.currentlyReading.rawValue
           return note
         })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to archive")
+        Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
       }
     }
 
-    static func moveItemToInbox(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolder.inbox.rawValue { return nil }
-      return ActionConfiguration(title: "Move to Inbox", image: UIImage(systemName: "tray.and.arrow.down"), backgroundColor: .systemIndigo) {
+    static func moveItemToWantToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+      if viewProperties.noteProperties.folder == PredefinedFolder.wantToRead.rawValue { return nil }
+      return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolder.inbox.rawValue
+          note.folder = PredefinedFolder.wantToRead.rawValue
           return note
         })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to inbox")
+        Logger.shared.info("Moved \(viewProperties.pageKey) to 'want to read'")
       }
     }
 

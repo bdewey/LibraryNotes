@@ -15,22 +15,24 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 final class NotebookStructureViewController: UIViewController {
   /// What subset of notebook pages does the person want to see?
   enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
-    case allNotes
-    case archive
-    case inbox
     case trash
     case hashtag(String)
 
+    case wantToRead
+    case currentlyReading
+    case read
+
+    /// The raw value is used to serialize the focused element for state restoration.
     init?(rawValue: String) {
       switch rawValue {
       case "##all##":
-        self = .allNotes
-      case "##archive##":
-        self = .archive
+        self = .read
       case "##inbox##":
-        self = .inbox
+        self = .wantToRead
       case "##trash##":
         self = .trash
+      case "##currentlyReading##":
+        self = .currentlyReading
       default:
         self = .hashtag(rawValue)
       }
@@ -38,14 +40,14 @@ final class NotebookStructureViewController: UIViewController {
 
     var rawValue: String {
       switch self {
-      case .allNotes:
-        return "##all##"
-      case .archive:
-        return "##archive##"
-      case .inbox:
-        return "##inbox##"
       case .trash:
         return "##trash##"
+      case .wantToRead:
+        return "##inbox##"
+      case .currentlyReading:
+        return "##currentlyReading##"
+      case .read:
+        return "##all##"
       case .hashtag(let hashtag):
         return hashtag
       }
@@ -53,30 +55,30 @@ final class NotebookStructureViewController: UIViewController {
 
     var description: String {
       switch self {
-      case .allNotes: return "Notes"
-      case .archive: return "Archive"
-      case .inbox: return "Inbox"
       case .trash: return "Trash"
+      case .wantToRead: return "Want to read"
+      case .currentlyReading: return "Currently reading"
+      case .read: return "Read"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
       }
     }
 
     var longDescription: String {
       switch self {
-      case .allNotes: return "Notes"
-      case .archive: return "Archive"
-      case .inbox: return "Inbox"
       case .trash: return "Trash"
+      case .wantToRead: return "Want to read"
+      case .currentlyReading: return "Currently reading"
+      case .read: return "Read"
       case .hashtag(let hashtag): return hashtag
       }
     }
 
     var predefinedFolder: PredefinedFolder? {
       switch self {
-      case .allNotes, .hashtag: return nil
-      case .archive: return .archive
-      case .inbox: return .inbox
+      case .hashtag, .read: return nil
       case .trash: return .recentlyDeleted
+      case .wantToRead: return .wantToRead
+      case .currentlyReading: return .currentlyReading
       }
     }
 
@@ -88,22 +90,16 @@ final class NotebookStructureViewController: UIViewController {
     }
 
     var query: QueryInterfaceRequest<NoteMetadataRecord> {
-      switch self {
-      case .allNotes:
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == nil)
-      case .archive:
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.archive.rawValue)
-      case .inbox:
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.inbox.rawValue)
-      case .trash:
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == PredefinedFolder.recentlyDeleted.rawValue)
-      case .hashtag(let hashtag):
+      if case .hashtag(let hashtag) = self {
         let hashtagRequest = NoteRecord
           .joining(
             required: NoteRecord.noteHashtags
               .filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))
           )
         return NoteMetadataRecord.request(baseRequest: hashtagRequest).filter(NoteRecord.Columns.folder == nil)
+      } else {
+        let folderValue = predefinedFolder?.rawValue
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == folderValue)
       }
     }
   }
@@ -125,10 +121,11 @@ final class NotebookStructureViewController: UIViewController {
     var image: UIImage?
 
     var description: String { structureIdentifier.description }
-    static let allNotes = Item(structureIdentifier: .allNotes, hasChildren: true, image: UIImage(systemName: "doc"))
-    static let archive = Item(structureIdentifier: .archive, hasChildren: false, image: UIImage(systemName: "archivebox"))
-    static let inbox = Item(structureIdentifier: .inbox, hasChildren: false, image: UIImage(systemName: "tray.and.arrow.down"))
     static let trash = Item(structureIdentifier: .trash, hasChildren: false, image: UIImage(systemName: "trash"))
+
+    static let wantToRead = Item(structureIdentifier: .wantToRead, hasChildren: false, image: UIImage(systemName: "list.star"))
+    static let currentlyReading = Item(structureIdentifier: .currentlyReading, hasChildren: false, image: UIImage(systemName: "book"))
+    static let read = Item(structureIdentifier: .read, hasChildren: true, image: UIImage(systemName: "books.vertical"))
   }
 
   public init(database: NoteDatabase) {
@@ -416,21 +413,14 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
         alert.view.tintColor = .grailTint
         self.present(alert, animated: true, completion: nil)
       }
-      let moveToArchiveAction = UIAction(title: "Move to Archive", image: UIImage(systemName: "archivebox")) { _ in
+      let moveToInboxAction = UIAction(title: "Want to Read", image: UIImage(systemName: "list.star")) { _ in
         do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.archive.rawValue)
-        } catch {
-          Logger.shared.error("Error moving notes tagged \(hashtag) to archive: \(error)")
-        }
-      }
-      let moveToInboxAction = UIAction(title: "Move to Inbox", image: UIImage(systemName: "tray.and.arrow.down")) { _ in
-        do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.inbox.rawValue)
+          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.wantToRead.rawValue)
         } catch {
           Logger.shared.error("Error moving notes tagged \(hashtag) to inbox: \(error)")
         }
       }
-      return UIMenu(title: "", children: [rename, moveToArchiveAction, moveToInboxAction])
+      return UIMenu(title: "", children: [rename, moveToInboxAction])
     }
   }
 }
@@ -448,17 +438,17 @@ private extension NotebookStructureViewController {
 
   func updateSnapshot() {
     let existingNoteSnapshot = dataSource.snapshot(for: .notes)
-    let isNotesExpanded = existingNoteSnapshot.index(of: .allNotes) == nil || existingNoteSnapshot.isExpanded(.allNotes)
+    let isNotesExpanded = existingNoteSnapshot.index(of: .read) == nil || existingNoteSnapshot.isExpanded(.read)
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.notePrefix])
-    snapshot.appendItems([.inbox])
+    snapshot.appendItems([.wantToRead, .currentlyReading])
     snapshot.appendSections([.notes, .noteSuffix])
-    snapshot.appendItems([.archive, .trash])
+    snapshot.appendItems([.trash])
     dataSource.apply(snapshot)
     var noteSectionSnapshot = makeNoteSectionSnapshot()
     if isNotesExpanded {
-      noteSectionSnapshot.expand([.allNotes])
+      noteSectionSnapshot.expand([.read])
     }
     dataSource.apply(noteSectionSnapshot, to: .notes)
     if let item = selectedItem, let indexPath = dataSource.indexPath(for: item) {
@@ -469,7 +459,7 @@ private extension NotebookStructureViewController {
   private func makeNoteSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
-    var root = Item.allNotes
+    var root = Item.read
     root.hasChildren = !database.hashtags.isEmpty
     snapshot.append([root])
 

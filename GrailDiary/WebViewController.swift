@@ -6,7 +6,7 @@ import WebKit
 
 extension Logger {
   static let webView: Logger = {
-    var logger = Logger(label:  "org.brians-brain.WebViewController")
+    var logger = Logger(label: "org.brians-brain.WebViewController")
     logger.logLevel = .debug
     return logger
   }()

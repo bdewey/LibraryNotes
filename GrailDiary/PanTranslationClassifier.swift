@@ -26,7 +26,7 @@ public struct SimpleSwipeClassifier: PanTranslationClassifier {
 
   public func matchStrength(vector: CGVector) -> CGFloat {
     if vector.isInDirection(direction) {
-      return (vector.magnitude / triggeringMagnitude).clamped(to: 0...1)
+      return (vector.magnitude / triggeringMagnitude).clamped(to: 0 ... 1)
     } else {
       return 0
     }

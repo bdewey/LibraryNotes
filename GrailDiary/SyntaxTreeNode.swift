@@ -193,19 +193,19 @@ public final class SyntaxTreeNode: CustomStringConvertible {
   }
 
   #if DEBUG
-  @discardableResult
-  public func validateLength() throws -> Int {
-    // If we are a leaf, we are valid.
-    if children.isEmpty { return length }
+    @discardableResult
+    public func validateLength() throws -> Int {
+      // If we are a leaf, we are valid.
+      if children.isEmpty { return length }
 
-    // Otherwise, first make sure each child has a valid length.
-    let childValidatedLength = try children.map({ try $0.validateLength() }).reduce(0, +)
-    if childValidatedLength != length {
-      throw MachError(.invalidValue)
+      // Otherwise, first make sure each child has a valid length.
+      let childValidatedLength = try children.map { try $0.validateLength() }.reduce(0, +)
+      if childValidatedLength != length {
+        throw MachError(.invalidValue)
+      }
+      assert(childValidatedLength == length)
+      return length
     }
-    assert(childValidatedLength == length)
-    return length
-  }
   #endif
 
   /// We do a couple of tree-construction optimizations that mutate existing nodes that don't "belong" to us
@@ -234,7 +234,7 @@ public final class SyntaxTreeNode: CustomStringConvertible {
     length += child.length
     if child.isFragment {
       #if DEBUG
-      try! child.validateLength() // swiftlint:disable:this force_try
+        try! child.validateLength() // swiftlint:disable:this force_try
       #endif
 
       let fragmentNodes = child.children
@@ -249,11 +249,10 @@ public final class SyntaxTreeNode: CustomStringConvertible {
       children.append(contentsOf: fragmentNodes.dropFirst(mergedChildNodes ? 1 : 0))
 
       #if DEBUG
-      try! validateLength() // swiftlint:disable:this force_try
+        try! validateLength() // swiftlint:disable:this force_try
       #endif
 
     } else {
-
       // Special optimization: Adding a terminal node of the same type of the last terminal node
       // can just be a range update.
       if let lastNode = children.last, lastNode.children.isEmpty, child.children.isEmpty, lastNode.type == child.type {

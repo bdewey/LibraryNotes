@@ -3,7 +3,9 @@
 import Foundation
 
 public enum PredefinedFolder: String {
-  case archive
-  case inbox
+  case wantToRead = "inbox"
   case recentlyDeleted
+
+  // Bookshelves
+  case currentlyReading
 }
