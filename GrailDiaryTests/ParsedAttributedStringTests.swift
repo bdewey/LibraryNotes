@@ -67,11 +67,11 @@ final class ParsedAttributedStringTests: XCTestCase {
 
   func testImageAndReplacements() {
     let markdown = """
-      # _Tom Kundig: Houses_: Dung Ngo, Tom Kundig, Steven Holl, Rick Joy, Billie Tsien (2006)
+    # _Tom Kundig: Houses_: Dung Ngo, Tom Kundig, Steven Holl, Rick Joy, Billie Tsien (2006)
 
-      ![](./288c09ac036eef237952e10cb8f62626441ee8f5.jpeg)
+    ![](./288c09ac036eef237952e10cb8f62626441ee8f5.jpeg)
 
-      """
+    """
 
     let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
     noDelimiterTextStorage.append(NSAttributedString(string: markdown))

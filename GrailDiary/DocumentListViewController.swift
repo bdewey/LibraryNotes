@@ -62,7 +62,7 @@ final class DocumentListViewController: UIViewController {
     self.database = database
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
-    navigationItem.title = NotebookStructureViewController.StructureIdentifier.allNotes.description
+    navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
     self.databaseSubscription = database.notesDidChange
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
@@ -78,7 +78,7 @@ final class DocumentListViewController: UIViewController {
   public let database: NoteDatabase
   public weak var delegate: DocumentListViewControllerDelegate?
 
-  public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
+  public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
       monitorDatabaseForFocusedStructure()
     }

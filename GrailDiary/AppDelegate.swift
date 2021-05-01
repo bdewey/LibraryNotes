@@ -9,8 +9,8 @@ extension UTType {
   static let grailDiary = UTType("org.brians-brain.graildiary")!
 }
 
-extension Logger {
-  public static let shared: Logger = {
+public extension Logger {
+  static let shared: Logger = {
     var logger = Logger(label: "org.brians-brain.grail-diary")
     logger.logLevel = .info
     return logger

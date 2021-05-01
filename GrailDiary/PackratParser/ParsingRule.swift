@@ -395,7 +395,7 @@ final class MemoizingRule: ParsingRuleWrapper {
     Swift.assert(result.node == nil || result.length == result.node?.length)
     result.node?.freeze()
     #if DEBUG
-    try! result.node?.validateLength() // swiftlint:disable:this force_try
+      try! result.node?.validateLength() // swiftlint:disable:this force_try
     #endif
     memoizationTable.memoizeResult(result, rule: ObjectIdentifier(self), index: index)
     return performanceCounters.recordResult(result)

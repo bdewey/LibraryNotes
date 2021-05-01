@@ -49,7 +49,7 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
 
   /// What are we viewing in the current structure?
   // TODO: Get rid of this copy, just read from documentListViewController
-  private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .allNotes {
+  private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
       documentListViewController.focusedStructure = focusedNotebookStructure
     }
