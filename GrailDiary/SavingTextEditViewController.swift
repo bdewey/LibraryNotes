@@ -159,7 +159,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)
-      mergedNote.folder = oldNote.folder
+      mergedNote.folder = note.folder
       return mergedNote
     })
   }
