@@ -123,6 +123,7 @@
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
 		D3ACABEA263EDD2F009D32E3 /* QuoteCategoriesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */; };
+		D3ACABEC263EE53D009D32E3 /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */; };
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */; };
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
@@ -335,6 +336,7 @@
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
 		D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteCategoriesViewController.swift; sourceTree = "<group>"; };
+		D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
@@ -567,6 +569,7 @@
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */,
 				D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */,
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
+				D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D311778925AA384E00E473FD /* SceneDelegate.swift */,
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
@@ -950,6 +953,7 @@
 				D30D6B512549C44800F5902D /* ParsingRule.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
+				D3ACABEC263EE53D009D32E3 /* QuotesViewController.swift in Sources */,
 				D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */,
 				D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */,
 				D30D6B542549C44800F5902D /* MemoizationTable.swift in Sources */,

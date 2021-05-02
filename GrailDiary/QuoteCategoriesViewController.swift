@@ -17,7 +17,7 @@ final class QuoteCategoriesViewController: UIViewController {
   private let database: NoteDatabase
 
   private lazy var collectionView: UICollectionView = {
-    let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+    let layout = UICollectionViewCompositionalLayout { _, layoutEnvironment in
       var config = UICollectionLayoutListConfiguration(appearance: .plain)
       config.backgroundColor = .grailBackground
       let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)

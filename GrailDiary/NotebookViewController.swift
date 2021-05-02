@@ -53,9 +53,14 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     didSet {
       if focusedNotebookStructure == .quotes {
         supplementaryNavigationController.viewControllers = [quoteCategoriesViewController]
+        secondaryNavigationController.viewControllers = [quotesViewController]
+        notebookSplitViewController.show(.secondary)
       } else {
         if oldValue == .quotes {
           supplementaryNavigationController.viewControllers = [documentListViewController]
+          if let currentNoteEditor = currentNoteEditor {
+            secondaryNavigationController.viewControllers = [currentNoteEditor]
+          }
         }
         documentListViewController.focusedStructure = focusedNotebookStructure
       }
@@ -115,6 +120,12 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   /// Lets the learner navigate through the quotes in the database.
   private lazy var quoteCategoriesViewController: QuoteCategoriesViewController = {
     let viewController = QuoteCategoriesViewController(database: database)
+    viewController.title = "Quotes"
+    return viewController
+  }()
+
+  private lazy var quotesViewController: QuotesViewController = {
+    let viewController = QuotesViewController(database: database)
     viewController.title = "Quotes"
     return viewController
   }()
