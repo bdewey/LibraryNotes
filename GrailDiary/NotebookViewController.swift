@@ -51,7 +51,14 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   // TODO: Get rid of this copy, just read from documentListViewController
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
-      documentListViewController.focusedStructure = focusedNotebookStructure
+      if focusedNotebookStructure == .quotes {
+        supplementaryNavigationController.viewControllers = [quoteCategoriesViewController]
+      } else {
+        if oldValue == .quotes {
+          supplementaryNavigationController.viewControllers = [documentListViewController]
+        }
+        documentListViewController.focusedStructure = focusedNotebookStructure
+      }
     }
   }
 
@@ -103,6 +110,13 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     let documentListViewController = DocumentListViewController(database: database)
     documentListViewController.delegate = self
     return documentListViewController
+  }()
+
+  /// Lets the learner navigate through the quotes in the database.
+  private lazy var quoteCategoriesViewController: QuoteCategoriesViewController = {
+    let viewController = QuoteCategoriesViewController(database: database)
+    viewController.title = "Quotes"
+    return viewController
   }()
 
   private lazy var supplementaryNavigationController: UINavigationController = {

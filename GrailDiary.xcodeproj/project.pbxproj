@@ -122,6 +122,7 @@
 		D3A68EEA2556053C0049B8E5 /* TestStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A68EE92556053C0049B8E5 /* TestStrings.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
+		D3ACABEA263EDD2F009D32E3 /* QuoteCategoriesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */; };
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */; };
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
@@ -333,6 +334,7 @@
 		D3A68EE92556053C0049B8E5 /* TestStrings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TestStrings.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
+		D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteCategoriesViewController.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
@@ -563,6 +565,7 @@
 				D31AFA97229D61EB00ED2B76 /* PromptCollection.swift */,
 				D31AFA7A229D61E800ED2B76 /* PromptView.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */,
+				D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */,
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D311778925AA384E00E473FD /* SceneDelegate.swift */,
@@ -954,6 +957,7 @@
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
 				D377818325DC0ADD004DD38F /* WebScrapingViewController.swift in Sources */,
 				D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */,
+				D3ACABEA263EDD2F009D32E3 /* QuoteCategoriesViewController.swift in Sources */,
 				D31AFACA229D61EE00ED2B76 /* ClozePrompt.swift in Sources */,
 				D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,

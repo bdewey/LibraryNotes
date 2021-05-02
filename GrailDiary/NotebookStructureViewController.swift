@@ -22,6 +22,8 @@ final class NotebookStructureViewController: UIViewController {
     case currentlyReading
     case read
 
+    case quotes
+
     /// The raw value is used to serialize the focused element for state restoration.
     init?(rawValue: String) {
       switch rawValue {
@@ -33,6 +35,8 @@ final class NotebookStructureViewController: UIViewController {
         self = .trash
       case "##currentlyReading##":
         self = .currentlyReading
+      case "##quotes##":
+        self = .quotes
       default:
         self = .hashtag(rawValue)
       }
@@ -48,6 +52,8 @@ final class NotebookStructureViewController: UIViewController {
         return "##currentlyReading##"
       case .read:
         return "##all##"
+      case .quotes:
+        return "##quotes##"
       case .hashtag(let hashtag):
         return hashtag
       }
@@ -59,6 +65,7 @@ final class NotebookStructureViewController: UIViewController {
       case .wantToRead: return "Want to read"
       case .currentlyReading: return "Currently reading"
       case .read: return "Read"
+      case .quotes: return "Quotes"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
       }
     }
@@ -69,13 +76,14 @@ final class NotebookStructureViewController: UIViewController {
       case .wantToRead: return "Want to read"
       case .currentlyReading: return "Currently reading"
       case .read: return "Read"
+      case .quotes: return "Quotes"
       case .hashtag(let hashtag): return hashtag
       }
     }
 
     var predefinedFolder: PredefinedFolder? {
       switch self {
-      case .hashtag, .read: return nil
+      case .hashtag, .read, .quotes: return nil
       case .trash: return .recentlyDeleted
       case .wantToRead: return .wantToRead
       case .currentlyReading: return .currentlyReading
@@ -123,6 +131,7 @@ final class NotebookStructureViewController: UIViewController {
     var description: String { structureIdentifier.description }
     static let trash = Item(structureIdentifier: .trash, hasChildren: false, image: UIImage(systemName: "trash"))
 
+    static let quotes = Item(structureIdentifier: .quotes, hasChildren: false, image: UIImage(systemName: "text.quote"))
     static let wantToRead = Item(structureIdentifier: .wantToRead, hasChildren: false, image: UIImage(systemName: "list.star"))
     static let currentlyReading = Item(structureIdentifier: .currentlyReading, hasChildren: false, image: UIImage(systemName: "book"))
     static let read = Item(structureIdentifier: .read, hasChildren: true, image: UIImage(systemName: "books.vertical"))
@@ -442,7 +451,7 @@ private extension NotebookStructureViewController {
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
     snapshot.appendSections([.notePrefix])
-    snapshot.appendItems([.wantToRead, .currentlyReading])
+    snapshot.appendItems([.quotes, .wantToRead, .currentlyReading])
     snapshot.appendSections([.notes, .noteSuffix])
     snapshot.appendItems([.trash])
     dataSource.apply(snapshot)
