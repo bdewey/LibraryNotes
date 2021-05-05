@@ -14,7 +14,7 @@ struct QuotesList: View {
     ScrollView {
       LazyVStack {
         ForEach(quotes) { quote in
-          Quote(quote: quote)
+          Quote(viewModel: quote)
         }
       }
     }

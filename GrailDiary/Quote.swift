@@ -3,16 +3,18 @@
 import SwiftUI
 
 struct Quote: View {
-  let quote: QuoteViewModel
+  let viewModel: QuoteViewModel
+  var syntaxModifiers: [SyntaxTreeNodeType: ParsedStringView.TextModifier] = [
+    .delimiter: { _ in Text("") },
+    .strongEmphasis: { $0.bold() },
+    .emphasis: { $0.italic() },
+  ]
 
   var body: some View {
     HStack {
-      quote.quote.makeText(
-        conversionFunctions: [
-          .delimiter: { _ in Text("") },
-          .strongEmphasis: { $0.bold() },
-          .emphasis: { $0.italic() },
-        ]
+      ParsedStringView(
+        parsedString: viewModel.quote,
+        syntaxModifiers: syntaxModifiers
       )
       Spacer()
     }
@@ -38,7 +40,7 @@ struct Quote_Previews: PreviewProvider {
           id: "\(index)",
           quote: ParsedString(quoteStrings[index], grammar: MiniMarkdownGrammar.shared)
         )
-        Quote(quote: viewModel)
+        Quote(viewModel: viewModel)
       }
     }
   }
