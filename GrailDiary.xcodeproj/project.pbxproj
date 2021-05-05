@@ -124,6 +124,8 @@
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
 		D3ACABEA263EDD2F009D32E3 /* QuoteCategoriesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */; };
 		D3ACABEC263EE53D009D32E3 /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */; };
+		D3ACABEE26403B8F009D32E3 /* NodeTextConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */; };
+		D3ACABF026403E70009D32E3 /* QuotesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABEF26403E70009D32E3 /* QuotesList.swift */; };
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */; };
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
@@ -337,6 +339,8 @@
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
 		D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteCategoriesViewController.swift; sourceTree = "<group>"; };
 		D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
+		D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeTextConverter.swift; sourceTree = "<group>"; };
+		D3ACABEF26403E70009D32E3 /* QuotesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesList.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
@@ -598,6 +602,8 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */,
+				D3ACABEF26403E70009D32E3 /* QuotesList.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -986,6 +992,7 @@
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,
+				D3ACABF026403E70009D32E3 /* QuotesList.swift in Sources */,
 				D3558D7725D9741100746600 /* ImageCache.swift in Sources */,
 				D30D6B4F2549C44800F5902D /* SyntaxTreeNodeType.swift in Sources */,
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
@@ -1009,6 +1016,7 @@
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
 				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
+				D3ACABEE26403B8F009D32E3 /* NodeTextConverter.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
 				D3558D7A25DA130900746600 /* ApiKey.swift in Sources */,
 				D31AFAD5229D61EE00ED2B76 /* StudySession.swift in Sources */,

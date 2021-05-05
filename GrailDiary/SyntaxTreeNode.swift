@@ -434,6 +434,16 @@ public final class AnchoredNode {
   /// Convenience mechanism for getting the range covered by this node.
   public var range: NSRange { NSRange(location: startIndex, length: node.length) }
 
+  public var children: [AnchoredNode] {
+    var children: [AnchoredNode] = []
+    var index = startIndex
+    for child in node.children {
+      children.append(AnchoredNode(node: child, startIndex: index))
+      index += child.length
+    }
+    return children
+  }
+
   /// Enumerates all of the nodes, depth-first.
   /// - parameter block: Receives the node, the start index of the node. Set the Bool to `false` to stop enumeration.
   public func forEach(_ block: (SyntaxTreeNode, Int, inout Bool) -> Void) {
