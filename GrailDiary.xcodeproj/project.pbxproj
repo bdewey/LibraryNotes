@@ -126,6 +126,7 @@
 		D3ACABEC263EE53D009D32E3 /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */; };
 		D3ACABEE26403B8F009D32E3 /* NodeTextConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */; };
 		D3ACABF026403E70009D32E3 /* QuotesList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABEF26403E70009D32E3 /* QuotesList.swift */; };
+		D3ACABF226425E7B009D32E3 /* Quote.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ACABF126425E7B009D32E3 /* Quote.swift */; };
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
 		D3AD01CE23BEADB7004BB7DF /* StudyLogEntryInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */; };
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
@@ -341,6 +342,7 @@
 		D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeTextConverter.swift; sourceTree = "<group>"; };
 		D3ACABEF26403E70009D32E3 /* QuotesList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesList.swift; sourceTree = "<group>"; };
+		D3ACABF126425E7B009D32E3 /* Quote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Quote.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
@@ -555,6 +557,7 @@
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
 				D54C311D21E7E3CD007AE62E /* MarkdownEditingTextView.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
+				D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */,
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D32B16C825994BAE00766D55 /* Note+Database.swift */,
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
@@ -571,8 +574,10 @@
 				D31AFA97229D61EB00ED2B76 /* PromptCollection.swift */,
 				D31AFA7A229D61E800ED2B76 /* PromptView.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */,
+				D3ACABF126425E7B009D32E3 /* Quote.swift */,
 				D3ACABE9263EDD2F009D32E3 /* QuoteCategoriesViewController.swift */,
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
+				D3ACABEF26403E70009D32E3 /* QuotesList.swift */,
 				D3ACABEB263EE53D009D32E3 /* QuotesViewController.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D311778925AA384E00E473FD /* SceneDelegate.swift */,
@@ -602,8 +607,6 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
-				D3ACABED26403B8F009D32E3 /* NodeTextConverter.swift */,
-				D3ACABEF26403E70009D32E3 /* QuotesList.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -1014,6 +1017,7 @@
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
+				D3ACABF226425E7B009D32E3 /* Quote.swift in Sources */,
 				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3ACABEE26403B8F009D32E3 /* NodeTextConverter.swift in Sources */,

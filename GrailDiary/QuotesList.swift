@@ -11,23 +11,13 @@ struct QuotesList: View {
   let quotes: [QuoteViewModel]
 
   var body: some View {
-    List(quotes) { quote in
-      Quote(quote: quote)
+    ScrollView {
+      LazyVStack {
+        ForEach(quotes) { quote in
+          Quote(quote: quote)
+        }
+      }
     }
-  }
-}
-
-struct Quote: View {
-  let quote: QuoteViewModel
-
-  var body: some View {
-    quote.quote.makeText(
-      conversionFunctions: [
-        .delimiter: { _ in Text("") },
-        .strongEmphasis: { $0.bold() },
-        .emphasis: { $0.italic() },
-      ]
-    )
   }
 }
 
