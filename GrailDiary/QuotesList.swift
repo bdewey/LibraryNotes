@@ -2,11 +2,6 @@
 
 import SwiftUI
 
-struct QuoteViewModel: Identifiable {
-  let id: String
-  let quote: ParsedString
-}
-
 struct QuotesList: View {
   let quotes: [QuoteViewModel]
 
@@ -32,7 +27,8 @@ struct QuotesList_Previews: PreviewProvider {
     let quotes = strings.enumerated().map { (index, quoteString) -> QuoteViewModel in
       QuoteViewModel(
         id: "\(index)",
-        quote: ParsedString(quoteString, grammar: MiniMarkdownGrammar.shared)
+        quote: ParsedString(quoteString, grammar: MiniMarkdownGrammar.shared),
+        attributionTitle: ParsedString("# Bartlett's Familiar Quotations", grammar: MiniMarkdownGrammar.shared)
       )
     }
     return QuotesList(quotes: quotes)

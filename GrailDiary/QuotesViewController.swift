@@ -58,6 +58,7 @@ private extension QuoteViewModel {
   init(_ attributedQuote: AttributedQuote) {
     self.id = attributedQuote.note.id + ":" + attributedQuote.key
     self.quote = ParsedString(attributedQuote.text, grammar: MiniMarkdownGrammar.shared)
+    self.attributionTitle = ParsedString(attributedQuote.note.title, grammar: MiniMarkdownGrammar.shared)
   }
 }
 

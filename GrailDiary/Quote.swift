@@ -2,6 +2,12 @@
 
 import SwiftUI
 
+struct QuoteViewModel: Identifiable {
+  let id: String
+  let quote: ParsedString
+  let attributionTitle: ParsedString
+}
+
 struct Quote: View {
   let viewModel: QuoteViewModel
   var syntaxModifiers: [SyntaxTreeNodeType: ParsedStringView.TextModifier] = [
@@ -12,10 +18,21 @@ struct Quote: View {
 
   var body: some View {
     HStack {
-      ParsedStringView(
-        parsedString: viewModel.quote,
-        syntaxModifiers: syntaxModifiers
-      )
+      VStack(alignment: .leading) {
+        ParsedStringView(
+          parsedString: viewModel.quote,
+          syntaxModifiers: syntaxModifiers,
+          leafModifier: { $0.font(.body) }
+        ).padding([.bottom])
+        HStack(spacing: 0) {
+          Text("— ").font(.caption).foregroundColor(.gray)
+          ParsedStringView(
+            parsedString: viewModel.attributionTitle,
+            syntaxModifiers: syntaxModifiers,
+            leafModifier: { $0.font(.caption).foregroundColor(.gray) }
+          )
+        }
+      }
       Spacer()
     }
     .padding()
@@ -38,7 +55,8 @@ struct Quote_Previews: PreviewProvider {
       ForEach(quoteStrings.indices, id: \.self) { index in
         let viewModel = QuoteViewModel(
           id: "\(index)",
-          quote: ParsedString(quoteStrings[index], grammar: MiniMarkdownGrammar.shared)
+          quote: ParsedString(quoteStrings[index], grammar: MiniMarkdownGrammar.shared),
+          attributionTitle: ParsedString("# _Educated_, Tara Westover (2019)", grammar: MiniMarkdownGrammar.shared)
         )
         Quote(viewModel: viewModel)
       }
