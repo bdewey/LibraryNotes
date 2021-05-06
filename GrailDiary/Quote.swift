@@ -45,7 +45,7 @@ struct Quote: View {
 }
 
 private let quoteStrings = [
-  "> In retrospect, I see that this was my education, the one that would matter: the hours I spent sitting at a borrowed desk, struggling to parse narrow strands of Mormon doctrine in mimicry of a brother who’d deserted me. The skill I was learning was a crucial one, the patience to read things I could not yet understand. (62)",
+  "> In retrospect, I see that this was my education, the one that would matter: the hours I spent sitting at a borrowed desk, struggling to parse narrow strands of Mormon doctrine in mimicry of a brother who’d deserted me. The skill I was learning was a crucial one, the patience to read things I could not yet understand. (62)\n\n\n\n\n",
   "> I'll be back.",
 ]
 
@@ -55,7 +55,7 @@ struct Quote_Previews: PreviewProvider {
       ForEach(quoteStrings.indices, id: \.self) { index in
         let viewModel = QuoteViewModel(
           id: "\(index)",
-          quote: ParsedString(quoteStrings[index], grammar: MiniMarkdownGrammar.shared),
+          quote: ParsedString(String(quoteStrings[index].strippingLeadingAndTrailingWhitespace), grammar: MiniMarkdownGrammar.shared),
           attributionTitle: ParsedString("# _Educated_, Tara Westover (2019)", grammar: MiniMarkdownGrammar.shared)
         )
         Quote(viewModel: viewModel)

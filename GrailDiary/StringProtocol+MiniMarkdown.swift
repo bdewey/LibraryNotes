@@ -37,7 +37,7 @@ public extension StringProtocol where Self.SubSequence == Substring {
   }
 
   var leadingWhitespace: SubstringPair {
-    return prefixAndSuffix(where: { $0.isWhitespace })
+    return prefixAndSuffix(where: { $0.isWhitespaceOrNewline })
   }
 
   /// The substring of `self` that excludes any leading whitespace.
@@ -47,7 +47,7 @@ public extension StringProtocol where Self.SubSequence == Substring {
 
   /// The substring of `self` that excludes any leading and trailing whitespace
   var strippingLeadingAndTrailingWhitespace: Substring {
-    return strippingLeadingWhitespace.suffixAndPrefix(where: { $0.isWhitespace }).prefix
+    return strippingLeadingWhitespace.suffixAndPrefix(where: { $0.isWhitespaceOrNewline }).prefix
   }
 
   /// True if the entire contents of the string is a valid table delimiter cell

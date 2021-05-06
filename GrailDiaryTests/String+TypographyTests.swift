@@ -18,7 +18,7 @@ final class StringTypographyTests: XCTestCase {
   ]
 
   // TODO: Find out why this crashes
-  func BROKEN_testExamples() {
+  func testExamples() {
     for testCase in examples {
       XCTAssertEqual(testCase.key.withTypographySubstitutions, testCase.value)
     }
