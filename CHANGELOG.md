@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.46.0] - 2021-05-07
 
 ### Changed
 
@@ -10,7 +10,7 @@
 
 - When you create new notes, they are placed inside the container you are currently viewing.
 
-## [0.45.0] - 2020-04-02 No Fooling
+## [0.45.0] - 2021-04-02 No Fooling
 
 ### Fixed
 
@@ -18,7 +18,7 @@
 - Fixed a bug computing the "text replacement change in length" that exhibited itself in, guess what, node reuse through memoization and incremental parsing.
 - Fixed a bug where the hashtag suggestion UI wouldn't appear
 
-## [0.44.0] - 2020-03-12 Happy birthday to me!
+## [0.44.0] - 2021-03-12 Happy birthday to me!
 
 ### Added
 
@@ -35,7 +35,7 @@
 - All fonts were 17.0 points, irrespective of text style.
 - If there wasn't a cloze hint, the answer was actually visible. Turns out making the foreground color equal the background color does not make the text invisible *if* the color is semitransparent. The layering winds up giving the text a different alpha value than the background.
 
-## [0.43.0] - 2020-02-14 Happy Valentine's Day!
+## [0.43.0] - 2021-02-14 Happy Valentine's Day!
 
 ### Added
 
@@ -49,13 +49,13 @@
 
 - Deleted notes no longer show up in the hashtag views
 
-## [0.42.0] - 2020-02-13
+## [0.42.0] - 2021-02-13
 
 ### Added
 
 - Support for images! You can paste images into your notes. Not sure about overall efficiency but I want to start playing with it.
 
-## [0.41.0] - 2020-02-07
+## [0.41.0] - 2021-02-07
 
 ### Added
 
@@ -69,20 +69,20 @@
 - When you are looking at a particular folder and create a new note, it will be in that folder. (Even the trash!)
 - When opening a document for the first time, the UI would not properly display
 
-## [0.40.0] - 2020-01-23
+## [0.40.0] - 2021-01-23
 
 ### Added
 
 - Folder structure! Items from the share extension go to "Inbox." You can move stuff to "Archive" if you don't want it cluttering the tag list.
 - A link glyph if the page is going to open a reference web page.
 
-## [0.39.2] - 2020-01-18
+## [0.39.2] - 2021-01-18
 
 ### Fixed
 
 - Navigation on the iPhone. The keyboard support on the iPad broke the iPhone :-(
 
-## [0.39.1] - 2020-01-16 Happy Birthday, Molly!
+## [0.39.1] - 2021-01-16 Happy Birthday, Molly!
 
 ### Added
 
@@ -99,7 +99,7 @@
 - Cmd-Enter to enter/exit "edit mode" for the current note
 - Tab & shift tab to change focus between primary and supplementary views
 
-## [0.38.0] - 2020-01-05
+## [0.38.0] - 2021-01-05
 
 ### Added
 
