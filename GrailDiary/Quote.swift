@@ -22,7 +22,7 @@ struct Quote: View {
         ParsedStringView(
           parsedString: viewModel.quote,
           syntaxModifiers: syntaxModifiers,
-          leafModifier: { $0.font(.body) }
+          leafModifier: { $0.font(.system(.body, design: .serif)) }
         ).padding([.bottom])
         HStack(spacing: 0) {
           Text("— ").font(.caption).foregroundColor(.gray)
