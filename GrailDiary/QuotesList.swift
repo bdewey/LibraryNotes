@@ -13,6 +13,7 @@ struct QuotesList: View {
         }
       }
     }
+    .background(Color(UIColor.grailBackground ?? .clear))
   }
 }
 

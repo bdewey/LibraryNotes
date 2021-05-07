@@ -52,15 +52,13 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
       if focusedNotebookStructure == .quotes {
-        supplementaryNavigationController.viewControllers = [quoteCategoriesViewController]
-        secondaryNavigationController.viewControllers = [quotesViewController]
-        notebookSplitViewController.show(.secondary)
+        notebookSplitViewController.setViewController(quoteCategoriesViewController, for: .supplementary)
+        notebookSplitViewController.setViewController(quotesViewController, for: .secondary)
+        notebookSplitViewController.show(.supplementary)
       } else {
         if oldValue == .quotes {
-          supplementaryNavigationController.viewControllers = [documentListViewController]
-          if let currentNoteEditor = currentNoteEditor {
-            secondaryNavigationController.viewControllers = [currentNoteEditor]
-          }
+          notebookSplitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
+          notebookSplitViewController.setViewController(secondaryNavigationController, for: .secondary)
         }
         documentListViewController.focusedStructure = focusedNotebookStructure
       }
@@ -118,16 +116,16 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   }()
 
   /// Lets the learner navigate through the quotes in the database.
-  private lazy var quoteCategoriesViewController: QuoteCategoriesViewController = {
+  private lazy var quoteCategoriesViewController: UIViewController = {
     let viewController = QuoteCategoriesViewController(database: database)
     viewController.title = "Quotes"
-    return viewController
+    return UINavigationController(rootViewController: viewController)
   }()
 
-  private lazy var quotesViewController: QuotesViewController = {
+  private lazy var quotesViewController: UIViewController = {
     let viewController = QuotesViewController(database: database)
     viewController.title = "Quotes"
-    return viewController
+    return UINavigationController(rootViewController: viewController)
   }()
 
   private lazy var supplementaryNavigationController: UINavigationController = {

@@ -24,6 +24,7 @@ final class QuoteCategoriesViewController: UIViewController {
       return section
     }
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    view.delegate = self
     return view
   }()
 
@@ -52,6 +53,14 @@ final class QuoteCategoriesViewController: UIViewController {
       make.edges.equalToSuperview()
     }
     updateSnapshot()
+  }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension QuoteCategoriesViewController: UICollectionViewDelegate {
+  func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    splitViewController?.show(.secondary)
   }
 }
 

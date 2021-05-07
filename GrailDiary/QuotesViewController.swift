@@ -40,7 +40,7 @@ final class QuotesViewController: UIViewController {
       addChild(quotesListHost)
       quotesListHost.didMove(toParent: self)
       quotesListHost.view.snp.makeConstraints { make in
-        make.edges.equalToSuperview()
+        make.edges.equalTo(view.safeAreaLayoutGuide)
       }
     } catch {
       Logger.quotes.error("Unexpected error getting quotes: \(error)")
