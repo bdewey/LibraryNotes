@@ -568,6 +568,8 @@ public final class NoteDatabase: UIDocument {
     return Array(folders).sorted()
   }
 
+  /// This class holds `records`, a mapping between `Note.Identifier` and `NoteMetadataRecords` that is the result of an arbitrary query for records in the database.
+  /// The mapping will update as the contents of the database change, and you can subscribe to changes via `recordsDidChange`.
   public class ObservableRecords {
     fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
       self.records = try dbQueue.read { db in
