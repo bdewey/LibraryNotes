@@ -3,6 +3,7 @@
 import Combine
 import CoreServices
 import CoreSpotlight
+import GRDB
 import Logging
 import SafariServices
 import SnapKit
@@ -67,6 +68,7 @@ final class DocumentListViewController: UIViewController {
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateStudySession()
+        self?.updateQuoteList()
       }
   }
 
@@ -89,6 +91,7 @@ final class DocumentListViewController: UIViewController {
       title = focusedStructure.longDescription
       dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
       updateStudySession()
+      updateQuoteList()
     } catch {
       Logger.shared.error("Unexpected error changing focus: \(error)")
     }
@@ -260,6 +263,8 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  private var quoteList: [ContentFromNote] = []
+
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
     presentStudySessionViewController(for: studySession)
@@ -279,6 +284,15 @@ final class DocumentListViewController: UIViewController {
     database.studySession(filter: filter, date: dueDate) {
       guard currentStudySessionGeneration == self.studySessionGeneration else { return }
       self.studySession = $0
+    }
+  }
+
+  private func updateQuoteList() {
+    do {
+      quoteList = try database.attributedQuotes(focusedOn: focusedStructure)
+      Logger.shared.info("Found \(quoteList.count) quotes")
+    } catch {
+      Logger.shared.error("Unexpected error getting quotes: \(error)")
     }
   }
 
@@ -444,5 +458,35 @@ private extension String {
       }
     }
     return nil
+  }
+}
+
+private struct ContentFromNote: Decodable, FetchableRecord {
+  var key: String
+  var text: String
+  var note: NoteRecord
+}
+
+private extension NoteDatabase {
+  func attributedQuotes(focusedOn structureIdentifier: NotebookStructureViewController.StructureIdentifier) throws -> [ContentFromNote] {
+    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+
+    let request: QueryInterfaceRequest<ContentFromNote>
+    if case .hashtag(let hashtag) = structureIdentifier {
+      request = ContentRecord
+        .filter(ContentRecord.Columns.role == "prompt=quote")
+        .including(required: ContentRecord.note.including(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))))
+        .asRequest(of: ContentFromNote.self)
+    } else {
+      let folderValue = structureIdentifier.predefinedFolder?.rawValue
+      request = ContentRecord
+        .filter(ContentRecord.Columns.role == "prompt=quote")
+        .including(required: ContentRecord.note.filter(NoteRecord.Columns.folder == folderValue))
+        .asRequest(of: ContentFromNote.self)
+    }
+
+    return try dbQueue.read { db in
+      try request.asRequest(of: ContentFromNote.self).fetchAll(db)
+    }
   }
 }

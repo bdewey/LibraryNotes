@@ -5,7 +5,7 @@ import GRDB
 
 /// Core record for the `note` table
 struct NoteRecord: Codable, FetchableRecord, PersistableRecord {
-  static let databaseTableName = "Note"
+  static let databaseTableName = "note"
   var id: Note.Identifier
   var title: String
   var creationTimestamp: Date
