@@ -34,9 +34,7 @@ final class QuotesViewController: UIViewController {
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ContentFromNote> = {
     let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ContentFromNote> { cell, _, quote in
-      var configuration = cell.defaultContentConfiguration()
-      let attributedQuote = ParsedAttributedString(string: quote.text, settings: .plainText(textStyle: .body))
-      configuration.attributedText = attributedQuote
+      var configuration = QuoteContentConfiguration(quote: quote)
       cell.contentConfiguration = configuration
 
       var background = UIBackgroundConfiguration.listPlainCell()
@@ -62,5 +60,59 @@ final class QuotesViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
+  }
+}
+
+private struct QuoteContentConfiguration: UIContentConfiguration {
+  let quote: ContentFromNote
+
+  func makeContentView() -> UIView & UIContentView {
+    QuoteView(configuration: self)
+  }
+
+  func updated(for state: UIConfigurationState) -> QuoteContentConfiguration {
+    self
+  }
+}
+
+private final class QuoteView: UIView, UIContentView {
+  var configuration: UIContentConfiguration {
+    didSet {
+      apply(configuration: configuration)
+    }
+  }
+
+  init(configuration: QuoteContentConfiguration) {
+    self.configuration = configuration
+    super.init(frame: .zero)
+
+    let stack = UIStackView(arrangedSubviews: [quoteLabel])
+    [
+      stack,
+    ].forEach(addSubview)
+
+    stack.snp.makeConstraints { make in
+      make.top.bottom.equalToSuperview().inset(8)
+      make.left.right.equalTo(readableContentGuide)
+    }
+    apply(configuration: configuration)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  private let quoteLabel: UILabel = {
+    let label = UILabel()
+    label.numberOfLines = 0
+    return label
+  }()
+
+  private func apply(configuration: UIContentConfiguration) {
+    guard let quoteContentConfiguration = configuration as? QuoteContentConfiguration else {
+      return
+    }
+    quoteLabel.attributedText = ParsedAttributedString(string: quoteContentConfiguration.quote.text, settings: .plainText(textStyle: .body))
   }
 }
