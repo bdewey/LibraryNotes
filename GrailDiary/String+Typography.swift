@@ -28,6 +28,7 @@ private protocol Scannable: BidirectionalCollection where Element == Character {
 private struct TypographyScanner<S: Scannable> {
   var scannable: S
   var index: S.Index
+  var replacedCharacter = false
 
   init(_ string: S) {
     self.scannable = string
@@ -59,17 +60,23 @@ private struct TypographyScanner<S: Scannable> {
   }
 
   mutating func replaceCurrent(with character: Character) {
+    let currentDistance = scannable.distance(from: scannable.startIndex, to: index)
     scannable.replaceSubrange(index ... index, with: [character])
+    let newIndex = scannable.index(scannable.startIndex, offsetBy: currentDistance)
+    assert(newIndex == index)
+    index = newIndex
+    replacedCharacter = true
   }
 
   mutating func replaceCurrent(if match: String, with replacement: String) {
-    if scannable.distance(from: scannable.startIndex, to: index) < match.count - 1 {
+    if index >= scannable.endIndex || scannable.distance(from: scannable.startIndex, to: index) < match.count - 1 {
       return
     }
     let potentialStartIndex = scannable.index(index, offsetBy: -1 * (match.count - 1))
     if scannable.string(from: potentialStartIndex ... index) == match {
+      let replacementStartDistance = scannable.distance(from: scannable.startIndex, to: potentialStartIndex)
       scannable.replaceSubrange(potentialStartIndex ... index, with: replacement)
-      index = scannable.index(potentialStartIndex, offsetBy: replacement.count - 1)
+      index = scannable.index(scannable.startIndex, offsetBy: replacementStartDistance + replacement.count - 1)
     }
   }
 

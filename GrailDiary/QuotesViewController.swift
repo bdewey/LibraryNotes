@@ -34,8 +34,7 @@ final class QuotesViewController: UIViewController {
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ContentFromNote> = {
     let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ContentFromNote> { cell, _, quote in
-      var configuration = QuoteContentConfiguration(quote: quote)
-      cell.contentConfiguration = configuration
+      cell.contentConfiguration = QuoteContentConfiguration(quote: quote)
 
       var background = UIBackgroundConfiguration.listPlainCell()
       background.backgroundColor = .grailBackground
@@ -113,6 +112,9 @@ private final class QuoteView: UIView, UIContentView {
     guard let quoteContentConfiguration = configuration as? QuoteContentConfiguration else {
       return
     }
-    quoteLabel.attributedText = ParsedAttributedString(string: quoteContentConfiguration.quote.text, settings: .plainText(textStyle: .body))
+    quoteLabel.attributedText = ParsedAttributedString(
+      string: String(quoteContentConfiguration.quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
+      settings: .plainText(textStyle: .body)
+    )
   }
 }
