@@ -626,6 +626,18 @@ public final class NoteDatabase: UIDocument {
     }
     return try ObservableRecords(query: query, dbQueue: dbQueue)
   }
+
+  /// Returns a publisher for a given query.
+  func queryPublisher<T: FetchableRecord>(
+    for query: QueryInterfaceRequest<T>
+  ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error> {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return ValueObservation.tracking { db in
+      try query.fetchAll(db)
+    }.publisher(in: dbQueue).eraseToAnyPublisher()
+  }
 }
 
 // MARK: - Internal (to enable dividing into extensions)

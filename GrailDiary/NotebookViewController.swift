@@ -402,6 +402,14 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     }
   }
 
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentFromNote]) {
+    let quotesViewController = QuotesViewController(nibName: nil, bundle: nil)
+    quotesViewController.quotes = quotes
+    quotesViewController.title = "Quotes"
+    secondaryNavigationController.viewControllers = [quotesViewController]
+    notebookSplitViewController.show(.secondary)
+  }
+
   private func referenceViewController(for note: Note) -> ReferenceViewController? {
     switch note.reference {
     case .none: return nil

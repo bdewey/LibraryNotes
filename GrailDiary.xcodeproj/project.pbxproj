@@ -127,6 +127,8 @@
 		D3AD01D123BEB137004BB7DF /* GRDBCombine in Frameworks */ = {isa = PBXBuildFile; productRef = D3AD01D023BEB137004BB7DF /* GRDBCombine */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
+		D3C0B5DA2650172C00A33CCA /* NoteDatabase+Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0B5D92650172C00A33CCA /* NoteDatabase+Content.swift */; };
+		D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
@@ -337,6 +339,8 @@
 		D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryInfo.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		D3C0B5D92650172C00A33CCA /* NoteDatabase+Content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+Content.swift"; sourceTree = "<group>"; };
+		D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
@@ -455,6 +459,7 @@
 				D3AD01CD23BEADB7004BB7DF /* StudyLogEntryInfo.swift */,
 				D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */,
 				D3A58F14240D469700CE3251 /* VersionVector.swift */,
+				D3C0B5D92650172C00A33CCA /* NoteDatabase+Content.swift */,
 			);
 			path = Sqlite;
 			sourceTree = "<group>";
@@ -564,6 +569,7 @@
 				D31AFA7A229D61E800ED2B76 /* PromptView.swift */,
 				D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */,
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
+				D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D311778925AA384E00E473FD /* SceneDelegate.swift */,
 				D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */,
@@ -919,6 +925,7 @@
 				D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */,
 				D30D6B4E2549C44800F5902D /* CharacterSet+Extensions.swift in Sources */,
 				D31AFACB229D61EE00ED2B76 /* PromptCollection.swift in Sources */,
+				D3C0B5DA2650172C00A33CCA /* NoteDatabase+Content.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
 				D3E9B5802564F97400E47375 /* NSAttributedString+Attributes.swift in Sources */,
 				D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */,
@@ -946,6 +953,7 @@
 				D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */,
 				D30D6B512549C44800F5902D /* ParsingRule.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
+				D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
 				D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */,
 				D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */,

@@ -49,6 +49,8 @@ protocol DocumentListViewControllerDelegate: AnyObject {
     shiftFocus: Bool
   )
 
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote])
+
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
 }
 
@@ -263,8 +265,6 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private var quoteList: [ContentFromNote] = []
-
   @objc private func startStudySession() {
     guard let studySession = studySession else { return }
     presentStudySessionViewController(for: studySession)
@@ -289,8 +289,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateQuoteList() {
     do {
-      quoteList = try database.attributedQuotes(focusedOn: focusedStructure)
-      Logger.shared.info("Found \(quoteList.count) quotes")
+      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.attributedQuotesQuery)
     } catch {
       Logger.shared.error("Unexpected error getting quotes: \(error)")
     }
@@ -342,6 +341,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       promptCollections: [:]
     )
     delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
+  }
+
+  func showQuotes(quotes: [ContentFromNote]) {
+    delegate?.documentListViewController(self, didRequestShowQuotes: quotes)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
@@ -458,35 +461,5 @@ private extension String {
       }
     }
     return nil
-  }
-}
-
-private struct ContentFromNote: Decodable, FetchableRecord {
-  var key: String
-  var text: String
-  var note: NoteRecord
-}
-
-private extension NoteDatabase {
-  func attributedQuotes(focusedOn structureIdentifier: NotebookStructureViewController.StructureIdentifier) throws -> [ContentFromNote] {
-    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
-
-    let request: QueryInterfaceRequest<ContentFromNote>
-    if case .hashtag(let hashtag) = structureIdentifier {
-      request = ContentRecord
-        .filter(ContentRecord.Columns.role == "prompt=quote")
-        .including(required: ContentRecord.note.including(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))))
-        .asRequest(of: ContentFromNote.self)
-    } else {
-      let folderValue = structureIdentifier.predefinedFolder?.rawValue
-      request = ContentRecord
-        .filter(ContentRecord.Columns.role == "prompt=quote")
-        .including(required: ContentRecord.note.filter(NoteRecord.Columns.folder == folderValue))
-        .asRequest(of: ContentFromNote.self)
-    }
-
-    return try dbQueue.read { db in
-      try request.asRequest(of: ContentFromNote.self).fetchAll(db)
-    }
   }
 }
