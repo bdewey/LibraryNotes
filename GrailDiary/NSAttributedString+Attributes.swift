@@ -39,6 +39,7 @@ public struct AttributedStringAttributesDescriptor: Hashable {
 
   public var familyName: String?
   public var fontSize: CGFloat = 0
+  public var fontDesign: UIFontDescriptor.SystemDesign = .default
   public var color: UIColor?
   public var backgroundColor: UIColor?
   public var blockquoteBorderColor: UIColor?
@@ -80,7 +81,7 @@ public struct AttributedStringAttributesDescriptor: Hashable {
         size = UIFont.preferredFont(forTextStyle: textStyle).pointSize
       }
     }
-    var fontDescriptor = UIFontDescriptor(fontAttributes: fontAttributes)
+    var fontDescriptor = UIFontDescriptor(fontAttributes: fontAttributes).withDesignIfPossible(fontDesign)
     if italic { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitItalic) ?? fontDescriptor }
     if bold { fontDescriptor = fontDescriptor.withSymbolicTraits(.traitBold) ?? fontDescriptor }
     return UIFont(descriptor: fontDescriptor, size: size)
@@ -324,6 +325,14 @@ private extension UIFontDescriptor {
     var attributes = fontAttributes
     attributes.removeValue(forKey: .textStyle)
     return UIFontDescriptor(fontAttributes: attributes)
+  }
+
+  func withDesignIfPossible(_ design: SystemDesign) -> UIFontDescriptor {
+    if let newDescriptor = withDesign(design) {
+      return newDescriptor
+    } else {
+      return self
+    }
   }
 }
 

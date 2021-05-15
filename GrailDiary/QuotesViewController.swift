@@ -114,7 +114,7 @@ private final class QuoteView: UIView, UIContentView {
     }
     quoteLabel.attributedText = ParsedAttributedString(
       string: String(quoteContentConfiguration.quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
-      settings: .plainText(textStyle: .body)
+      settings: .plainText(textStyle: .body, fontDesign: .serif)
     )
   }
 }
