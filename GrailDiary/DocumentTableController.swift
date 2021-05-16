@@ -386,6 +386,18 @@ public extension DocumentTableController {
     }
   }
 
+  func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
+    let item = dataSource.snapshot().itemIdentifiers.first { item in
+      if case let .page(viewProperties) = item {
+        return viewProperties.pageKey == noteIdentifier
+      } else {
+        return false
+      }
+    }
+    guard let item = item else { return nil }
+    return dataSource.indexPath(for: item)
+  }
+
   func selectFirstNote() {
     let notes = dataSource.snapshot().itemIdentifiers(inSection: .documents)
     if let firstNote = notes.first, case .page(let viewProperties) = firstNote {

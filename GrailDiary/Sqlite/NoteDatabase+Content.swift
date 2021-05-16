@@ -3,7 +3,7 @@
 import Foundation
 import GRDB
 
-public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashable {
+public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashable, NoteIdentifying {
   public var id: String { "\(noteId):\(key)" }
   public var noteId: String
   public var key: String
@@ -18,6 +18,8 @@ public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashabl
   public func hash(into hasher: inout Hasher) {
     hasher.combine(id)
   }
+
+  var noteIdentifier: Note.Identifier { note.id }
 }
 
 extension NotebookStructureViewController.StructureIdentifier {

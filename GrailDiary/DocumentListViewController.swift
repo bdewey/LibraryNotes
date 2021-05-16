@@ -159,6 +159,13 @@ final class DocumentListViewController: UIViewController {
     )
   }
 
+  func selectPage(with noteIdentifier: Note.Identifier) {
+    guard let indexPath = dataSource.indexPath(noteIdentifier: noteIdentifier) else {
+      return
+    }
+    collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
+  }
+
   internal func selectFirstNote() {
     dataSource.selectFirstNote()
   }

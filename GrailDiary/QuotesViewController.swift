@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import Logging
 import SnapKit
 import UIKit
 
@@ -10,6 +11,8 @@ final class QuotesViewController: UIViewController {
       shuffleQuotes()
     }
   }
+
+  public weak var notebookViewController: NotebookViewController?
 
   private lazy var layout: UICollectionViewLayout = {
     var config = UICollectionLayoutListConfiguration(appearance:
@@ -22,6 +25,7 @@ final class QuotesViewController: UIViewController {
 
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    collectionView.delegate = self
     return collectionView
   }()
 
@@ -51,6 +55,25 @@ final class QuotesViewController: UIViewController {
 
     collectionView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
+    }
+  }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension QuotesViewController: UICollectionViewDelegate {
+  func collectionView(
+    _ collectionView: UICollectionView,
+    contextMenuConfigurationForItemAt indexPath: IndexPath,
+    point: CGPoint
+  ) -> UIContextMenuConfiguration? {
+    let content = dataSource.itemIdentifier(for: indexPath)
+    let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
+      Logger.shared.info("Navigating to book ____")
+      notebookViewController?.openNoteCommand(sender: content)
+    }
+    return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+      UIMenu(title: "", children: [viewNoteAction])
     }
   }
 }

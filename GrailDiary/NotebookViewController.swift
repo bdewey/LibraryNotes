@@ -27,6 +27,14 @@ public extension UIViewController {
   }
 }
 
+@objc protocol NotebookCommands {
+  func openNoteCommand(sender: Any)
+}
+
+protocol NoteIdentifying {
+  var noteIdentifier: Note.Identifier { get }
+}
+
 /// Manages the UISplitViewController that shows the contents of a notebook. It's a three-column design:
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
@@ -268,6 +276,23 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     return button
   }
 
+  func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
+    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
+    let noteViewController = SavingTextEditViewController(
+      configuration: SavingTextEditViewController.Configuration(
+        folder: focusedNotebookStructure.predefinedFolder,
+        noteIdentifier: actualNoteIdentifier,
+        note: note
+      ),
+      noteStorage: database
+    )
+    noteViewController.setTitleMarkdown(note.title)
+    currentNoteEditor = noteViewController
+    if shiftFocus {
+      notebookSplitViewController.show(.secondary)
+    }
+  }
+
   // MARK: - State restoration
 
   private enum ActivityKey {
@@ -305,6 +330,24 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+  }
+}
+
+extension NotebookViewController: NotebookCommands {
+  func openNoteCommand(sender: Any) {
+    guard let noteIdentifying = sender as? NoteIdentifying else {
+      Logger.shared.error("Expected the sender of openNoteCommand to conform to NoteIdentifying")
+      return
+    }
+    let noteIdentifier = noteIdentifying.noteIdentifier
+    Logger.shared.info("Handling openNoteCommand. Note id = \(noteIdentifier)")
+    do {
+      let note = try database.note(noteIdentifier: noteIdentifier)
+      showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: true)
+      documentListViewController.selectPage(with: noteIdentifier)
+    } catch {
+      Logger.shared.error("Unexpected error getting note \(noteIdentifier): \(error)")
+    }
   }
 }
 
@@ -386,29 +429,14 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteIdentifier: Note.Identifier?,
     shiftFocus: Bool
   ) {
-    if notebookSplitViewController.viewController(for: .secondary) != secondaryNavigationController {
-      notebookSplitViewController.setViewController(secondaryNavigationController, for: .secondary)
-    }
-    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
-    let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(
-        folder: focusedNotebookStructure.predefinedFolder,
-        noteIdentifier: actualNoteIdentifier,
-        note: note
-      ),
-      noteStorage: database
-    )
-    noteViewController.setTitleMarkdown(note.title)
-    currentNoteEditor = noteViewController
-    if shiftFocus {
-      notebookSplitViewController.show(.secondary)
-    }
+    showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
   }
 
   func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentFromNote], shiftFocus: Bool) {
     let quotesViewController = QuotesViewController(nibName: nil, bundle: nil)
     quotesViewController.quotes = quotes
     quotesViewController.title = "Random Quotes"
+    quotesViewController.notebookViewController = self
     let navigationController = UINavigationController(rootViewController: quotesViewController)
     notebookSplitViewController.setViewController(navigationController, for: .secondary)
     if shiftFocus {
