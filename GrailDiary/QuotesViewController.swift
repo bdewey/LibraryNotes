@@ -1,10 +1,4 @@
-//
-//  QuotesViewController.swift
-//  GrailDiary
-//
-//  Created by Brian Dewey on 5/15/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import SnapKit
 import UIKit
@@ -138,7 +132,7 @@ private final class QuoteView: UIView, UIContentView {
       let attributionMarkdown = [
         String(quoteContentConfiguration.quote.note.title.strippingLeadingAndTrailingWhitespace),
         String(trimmedFragment),
-      ].filter({ !$0.isEmpty }).joined(separator: ", ")
+      ].filter { !$0.isEmpty }.joined(separator: ", ")
       attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
     }
   }

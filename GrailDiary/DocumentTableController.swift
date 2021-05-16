@@ -48,7 +48,7 @@ public final class DocumentTableController: NSObject {
       cell.contentConfiguration = configuration
     }
 
-    let viewQuotesRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+    let viewQuotesRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, _ in
       var configuration = cell.defaultContentConfiguration()
       configuration.text = "Random Quotes"
       configuration.image = UIImage(systemName: "text.quote")
