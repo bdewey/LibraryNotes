@@ -49,7 +49,7 @@ protocol DocumentListViewControllerDelegate: AnyObject {
     shiftFocus: Bool
   )
 
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote])
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote], shiftFocus: Bool)
 
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
 }
@@ -160,9 +160,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   internal func selectFirstNote() {
-    if collectionView.numberOfSections > 0, collectionView.numberOfItems(inSection: 0) > 0 {
-      dataSource.selectItemAtIndexPath(IndexPath(item: 0, section: 0), shiftFocus: false)
-    }
+    dataSource.selectFirstNote()
   }
 
   // MARK: - Lifecycle
@@ -343,8 +341,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
   }
 
-  func showQuotes(quotes: [ContentFromNote]) {
-    delegate?.documentListViewController(self, didRequestShowQuotes: quotes)
+  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool) {
+    delegate?.documentListViewController(self, didRequestShowQuotes: quotes, shiftFocus: shiftFocus)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {

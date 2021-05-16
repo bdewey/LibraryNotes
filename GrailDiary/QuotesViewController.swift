@@ -22,7 +22,9 @@ final class QuotesViewController: UIViewController {
 
   private lazy var layout: UICollectionViewLayout = {
     var config = UICollectionLayoutListConfiguration(appearance:
-      .insetGrouped)
+      .plain
+    )
+    config.showsSeparators = false
     config.backgroundColor = .grailBackground
     return UICollectionViewCompositionalLayout.list(using: config)
   }()
@@ -35,10 +37,7 @@ final class QuotesViewController: UIViewController {
   private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ContentFromNote> = {
     let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ContentFromNote> { cell, _, quote in
       cell.contentConfiguration = QuoteContentConfiguration(quote: quote)
-
-      var background = UIBackgroundConfiguration.listPlainCell()
-      background.backgroundColor = .grailBackground
-      cell.backgroundConfiguration = background
+      cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
     }
     let dataSource = UICollectionViewDiffableDataSource<Int, ContentFromNote>(collectionView: collectionView) { collectionView, indexPath, quote in
       collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: quote)
@@ -85,13 +84,16 @@ private final class QuoteView: UIView, UIContentView {
     self.configuration = configuration
     super.init(frame: .zero)
 
-    let stack = UIStackView(arrangedSubviews: [quoteLabel])
+    let stack = UIStackView(arrangedSubviews: [quoteLabel, attributionLabel])
+    stack.axis = .vertical
+    stack.spacing = 8
     [
       stack,
     ].forEach(addSubview)
 
     stack.snp.makeConstraints { make in
-      make.top.bottom.equalToSuperview().inset(8)
+      make.top.equalToSuperview().inset(8)
+      make.bottom.equalToSuperview().inset(40)
       make.left.right.equalTo(readableContentGuide)
     }
     apply(configuration: configuration)
@@ -108,13 +110,36 @@ private final class QuoteView: UIView, UIContentView {
     return label
   }()
 
+  private let attributionLabel: UILabel = {
+    let label = UILabel()
+    label.numberOfLines = 0
+    return label
+  }()
+
   private func apply(configuration: UIContentConfiguration) {
     guard let quoteContentConfiguration = configuration as? QuoteContentConfiguration else {
       return
     }
-    quoteLabel.attributedText = ParsedAttributedString(
+    let (formattedQuote, attributionFragment) = ParsedAttributedString(
       string: String(quoteContentConfiguration.quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
       settings: .plainText(textStyle: .body, fontDesign: .serif)
-    )
+    ).decomposedChapterAndVerseAnnotation
+    quoteLabel.attributedText = formattedQuote
+
+    // Strip the opening & closing parenthesis of attributionFragment
+    let trimmedFragment = attributionFragment
+      .strippingLeadingAndTrailingWhitespace
+      .dropFirst()
+      .dropLast()
+    if trimmedFragment.split(separator: " ").count > 1 {
+      // It looks like the attribution fragment is more than one word. Use that exclusively as the attribution.
+      attributionLabel.attributedText = ParsedAttributedString(string: String(trimmedFragment), settings: .plainText(textStyle: .caption1))
+    } else {
+      let attributionMarkdown = [
+        String(quoteContentConfiguration.quote.note.title.strippingLeadingAndTrailingWhitespace),
+        String(trimmedFragment),
+      ].filter({ !$0.isEmpty }).joined(separator: ", ")
+      attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
+    }
   }
 }

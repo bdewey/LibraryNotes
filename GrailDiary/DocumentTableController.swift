@@ -14,7 +14,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showWebPage(url: URL, shiftFocus: Bool)
-  func showQuotes(quotes: [ContentFromNote])
+  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -49,11 +49,11 @@ public final class DocumentTableController: NSObject {
     }
 
     let viewQuotesRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
-      guard case .reviewQuotes(let count) = item else { return }
       var configuration = cell.defaultContentConfiguration()
-      configuration.text = "View Quotes (\(count))"
+      configuration.text = "Random Quotes"
       configuration.image = UIImage(systemName: "text.quote")
       cell.contentConfiguration = configuration
+      cell.accessories = [.disclosureIndicator()]
     }
 
     let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
@@ -382,7 +382,14 @@ public extension DocumentTableController {
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
     case .reviewQuotes:
-      delegate?.showQuotes(quotes: quotes)
+      delegate?.showQuotes(quotes: Array(quotes.shuffled().prefix(5)), shiftFocus: shiftFocus)
+    }
+  }
+
+  func selectFirstNote() {
+    let notes = dataSource.snapshot().itemIdentifiers(inSection: .documents)
+    if let firstNote = notes.first, case .page(let viewProperties) = firstNote {
+      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: false)
     }
   }
 

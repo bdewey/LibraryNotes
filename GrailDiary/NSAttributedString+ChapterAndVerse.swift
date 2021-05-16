@@ -8,7 +8,7 @@ public extension NSAttributedString {
   /// The range of a "chapter and verse" annotation inside the receiver.
   internal var rangeOfChapterAndVerseAnnotation: NSRange? {
     guard let chapterAndVerseRegularExpression = try? NSRegularExpression(
-      pattern: "\\s+\\(\\S*\\)\\s*$",
+      pattern: #"\s+\([^\)]*\)\W*$"#,
       options: []
     ) else {
       assertionFailure()
