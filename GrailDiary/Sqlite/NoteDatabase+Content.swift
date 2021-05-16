@@ -21,7 +21,7 @@ public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashabl
 }
 
 extension NotebookStructureViewController.StructureIdentifier {
-  public var attributedQuotesQuery: QueryInterfaceRequest<ContentFromNote> {
+  var attributedQuotesQuery: QueryInterfaceRequest<ContentFromNote> {
     if case .hashtag(let hashtag) = self {
       return ContentRecord
         .filter(ContentRecord.Columns.role == "prompt=quote")
