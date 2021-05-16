@@ -382,7 +382,7 @@ public extension DocumentTableController {
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
     case .reviewQuotes:
-      delegate?.showQuotes(quotes: Array(quotes.shuffled().prefix(5)), shiftFocus: shiftFocus)
+      delegate?.showQuotes(quotes: quotes, shiftFocus: shiftFocus)
     }
   }
 

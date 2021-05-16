@@ -7,10 +7,7 @@ import UIKit
 final class QuotesViewController: UIViewController {
   public var quotes: [ContentFromNote] = [] {
     didSet {
-      var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
-      snapshot.appendSections([0])
-      snapshot.appendItems(quotes)
-      dataSource.apply(snapshot)
+      shuffleQuotes()
     }
   }
 
@@ -45,6 +42,9 @@ final class QuotesViewController: UIViewController {
     super.viewDidLoad()
     view.backgroundColor = .grailBackground
 
+    let shuffleButton = UIBarButtonItem(image: UIImage(systemName: "shuffle"), style: .plain, target: self, action: #selector(shuffleQuotes))
+    navigationItem.rightBarButtonItem = shuffleButton
+
     [
       collectionView,
     ].forEach(view.addSubview)
@@ -52,6 +52,17 @@ final class QuotesViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
+  }
+}
+
+// MARK: - Private
+
+private extension QuotesViewController {
+  @objc func shuffleQuotes() {
+    var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
+    snapshot.appendSections([0])
+    snapshot.appendItems(Array(quotes.shuffled().prefix(5)))
+    dataSource.apply(snapshot)
   }
 }
 
