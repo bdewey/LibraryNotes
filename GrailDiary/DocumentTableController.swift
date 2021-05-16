@@ -1,6 +1,8 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Combine
+import GRDB
+import GRDBCombine
 import Logging
 import UIKit
 
@@ -12,6 +14,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showWebPage(url: URL, shiftFocus: Bool)
+  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -45,6 +48,14 @@ public final class DocumentTableController: NSObject {
       cell.contentConfiguration = configuration
     }
 
+    let viewQuotesRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, _ in
+      var configuration = cell.defaultContentConfiguration()
+      configuration.text = "Random Quotes"
+      configuration.image = UIImage(systemName: "text.quote")
+      cell.contentConfiguration = configuration
+      cell.accessories = [.disclosureIndicator()]
+    }
+
     let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item else { return }
       var configuration = cell.defaultContentConfiguration()
@@ -75,6 +86,8 @@ public final class DocumentTableController: NSObject {
         switch item {
         case .webPage:
           return collectionView.dequeueConfiguredReusableCell(using: openWebPageRegistration, for: indexPath, item: item)
+        case .reviewQuotes:
+          return collectionView.dequeueConfiguredReusableCell(using: viewQuotesRegistration, for: indexPath, item: item)
         case .page:
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
         }
@@ -147,6 +160,29 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  private var quotesSubscription: AnyCancellable?
+  private var quotes: [ContentFromNote] = [] {
+    didSet {
+      needsPerformUpdates = true
+    }
+  }
+
+  public var quotesPublisher: AnyPublisher<[ContentFromNote], Error>? {
+    willSet {
+      quotesSubscription?.cancel()
+      quotesSubscription = nil
+      quotes = []
+    }
+    didSet {
+      quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
+        Logger.shared.error("Unexpected error getting quotes: \(error)")
+      }, receiveValue: { [weak self] quotes in
+        self?.quotes = quotes
+        Logger.shared.info("Got \(quotes.count) quotes")
+      })
+    }
+  }
+
   /// If non-nil, the table view should show a cell representing this web page at the top of the table.
   public var webURL: URL? {
     didSet {
@@ -173,7 +209,8 @@ public final class DocumentTableController: NSObject {
       for: observableRecords?.records ?? [:],
       cardsPerDocument: cardsPerDocument,
       filteredPageIdentifiers: filteredPageIdentifiers,
-      webURL: webURL
+      webURL: webURL,
+      quoteCount: quotes.count
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -221,7 +258,7 @@ extension DocumentTableController {
     case .page(let properties):
       let actions = availableItemActionConfigurations(properties).reversed().map { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
-    case .webPage:
+    case .webPage, .reviewQuotes:
       return nil
     }
   }
@@ -344,6 +381,15 @@ public extension DocumentTableController {
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
+    case .reviewQuotes:
+      delegate?.showQuotes(quotes: quotes, shiftFocus: shiftFocus)
+    }
+  }
+
+  func selectFirstNote() {
+    let notes = dataSource.snapshot().itemIdentifiers(inSection: .documents)
+    if let firstNote = notes.first, case .page(let viewProperties) = firstNote {
+      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: false)
     }
   }
 
@@ -394,13 +440,7 @@ public extension DocumentTableController {
 
 extension DocumentTableController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
-    switch item {
-    case .page(let viewProperties):
-      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: true)
-    case .webPage(let url):
-      delegate?.showWebPage(url: url, shiftFocus: true)
-    }
+    selectItemAtIndexPath(indexPath, shiftFocus: true)
   }
 
   public func collectionView(
@@ -439,6 +479,8 @@ private extension DocumentTableController {
   enum DocumentSection {
     /// A section with cells that represent navigation to other pages.
     case webNavigation
+    /// A section with cells that represent review actions
+    case actions
     /// List of documents.
     case documents
   }
@@ -446,6 +488,7 @@ private extension DocumentTableController {
   enum Item: Hashable, CustomStringConvertible {
     case webPage(URL)
     case page(ViewProperties)
+    case reviewQuotes(count: Int)
 
     var description: String {
       switch self {
@@ -453,6 +496,8 @@ private extension DocumentTableController {
         return "Web page: \(url)"
       case .page(let viewProperties):
         return "Page \(viewProperties.pageKey)"
+      case .reviewQuotes(count: let count):
+        return "Quotes: \(count)"
       }
     }
   }
@@ -501,13 +546,19 @@ private extension DocumentTableController {
     for records: [Note.Identifier: NoteMetadataRecord],
     cardsPerDocument: [Note.Identifier: Int],
     filteredPageIdentifiers: Set<Note.Identifier>?,
-    webURL: URL?
+    webURL: URL?,
+    quoteCount: Int
   ) -> Snapshot {
     var snapshot = Snapshot()
 
     if let webURL = webURL {
       snapshot.appendSections([.webNavigation])
       snapshot.appendItems([.webPage(webURL)])
+    }
+
+    if quoteCount > 0 {
+      snapshot.appendSections([.actions])
+      snapshot.appendItems([.reviewQuotes(count: quoteCount)])
     }
 
     snapshot.appendSections([.documents])

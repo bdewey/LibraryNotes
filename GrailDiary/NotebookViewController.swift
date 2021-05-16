@@ -386,6 +386,9 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     noteIdentifier: Note.Identifier?,
     shiftFocus: Bool
   ) {
+    if notebookSplitViewController.viewController(for: .secondary) != secondaryNavigationController {
+      notebookSplitViewController.setViewController(secondaryNavigationController, for: .secondary)
+    }
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
     let noteViewController = SavingTextEditViewController(
       configuration: SavingTextEditViewController.Configuration(
@@ -397,6 +400,17 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     )
     noteViewController.setTitleMarkdown(note.title)
     currentNoteEditor = noteViewController
+    if shiftFocus {
+      notebookSplitViewController.show(.secondary)
+    }
+  }
+
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentFromNote], shiftFocus: Bool) {
+    let quotesViewController = QuotesViewController(nibName: nil, bundle: nil)
+    quotesViewController.quotes = quotes
+    quotesViewController.title = "Random Quotes"
+    let navigationController = UINavigationController(rootViewController: quotesViewController)
+    notebookSplitViewController.setViewController(navigationController, for: .secondary)
     if shiftFocus {
       notebookSplitViewController.show(.secondary)
     }

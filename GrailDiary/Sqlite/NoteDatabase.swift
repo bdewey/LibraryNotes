@@ -568,6 +568,8 @@ public final class NoteDatabase: UIDocument {
     return Array(folders).sorted()
   }
 
+  /// This class holds `records`, a mapping between `Note.Identifier` and `NoteMetadataRecords` that is the result of an arbitrary query for records in the database.
+  /// The mapping will update as the contents of the database change, and you can subscribe to changes via `recordsDidChange`.
   public class ObservableRecords {
     fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
       self.records = try dbQueue.read { db in
@@ -623,6 +625,18 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try ObservableRecords(query: query, dbQueue: dbQueue)
+  }
+
+  /// Returns a publisher for a given query.
+  func queryPublisher<T: FetchableRecord>(
+    for query: QueryInterfaceRequest<T>
+  ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error> {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    return ValueObservation.tracking { db in
+      try query.fetchAll(db)
+    }.publisher(in: dbQueue).eraseToAnyPublisher()
   }
 }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Display a random selection of quotes from the selected books.
+
 ## [0.46.0] - 2021-05-07
 
 ### Changed

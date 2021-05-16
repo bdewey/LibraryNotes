@@ -3,6 +3,7 @@
 import Combine
 import CoreServices
 import CoreSpotlight
+import GRDB
 import Logging
 import SafariServices
 import SnapKit
@@ -48,6 +49,8 @@ protocol DocumentListViewControllerDelegate: AnyObject {
     shiftFocus: Bool
   )
 
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote], shiftFocus: Bool)
+
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
 }
 
@@ -67,6 +70,7 @@ final class DocumentListViewController: UIViewController {
       .receive(on: DispatchQueue.main)
       .sink { [weak self] in
         self?.updateStudySession()
+        self?.updateQuoteList()
       }
   }
 
@@ -89,6 +93,7 @@ final class DocumentListViewController: UIViewController {
       title = focusedStructure.longDescription
       dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
       updateStudySession()
+      updateQuoteList()
     } catch {
       Logger.shared.error("Unexpected error changing focus: \(error)")
     }
@@ -155,9 +160,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   internal func selectFirstNote() {
-    if collectionView.numberOfSections > 0, collectionView.numberOfItems(inSection: 0) > 0 {
-      dataSource.selectItemAtIndexPath(IndexPath(item: 0, section: 0), shiftFocus: false)
-    }
+    dataSource.selectFirstNote()
   }
 
   // MARK: - Lifecycle
@@ -282,6 +285,14 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  private func updateQuoteList() {
+    do {
+      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.attributedQuotesQuery)
+    } catch {
+      Logger.shared.error("Unexpected error getting quotes: \(error)")
+    }
+  }
+
   private func updateToolbar() {
     let countLabel = UILabel(frame: .zero)
     let noteCount = dataSource.noteCount
@@ -328,6 +339,10 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       promptCollections: [:]
     )
     delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
+  }
+
+  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool) {
+    delegate?.documentListViewController(self, didRequestShowQuotes: quotes, shiftFocus: shiftFocus)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
