@@ -3,7 +3,7 @@
 import Foundation
 import GRDB
 
-public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashable, NoteIdentifying {
+public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashable {
   public var id: String { "\(noteId):\(key)" }
   public var noteId: String
   public var key: String

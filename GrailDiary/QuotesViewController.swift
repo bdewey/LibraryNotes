@@ -12,8 +12,6 @@ final class QuotesViewController: UIViewController {
     }
   }
 
-  public weak var notebookViewController: NotebookViewController?
-
   private lazy var layout: UICollectionViewLayout = {
     var config = UICollectionLayoutListConfiguration(appearance:
       .plain
@@ -67,10 +65,10 @@ extension QuotesViewController: UICollectionViewDelegate {
     contextMenuConfigurationForItemAt indexPath: IndexPath,
     point: CGPoint
   ) -> UIContextMenuConfiguration? {
-    let content = dataSource.itemIdentifier(for: indexPath)
+    guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
     let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
       Logger.shared.info("Navigating to book ____")
-      notebookViewController?.openNoteCommand(sender: content)
+      notebookViewController?.openNote(with: content.note.id)
     }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
       UIMenu(title: "", children: [viewNoteAction])

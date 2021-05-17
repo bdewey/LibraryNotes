@@ -375,7 +375,6 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     if let item = dataSource.itemIdentifier(for: indexPath) {
       delegate?.notebookStructureViewController(self, didSelect: item.structureIdentifier)
-      splitViewController?.show(.supplementary)
     }
   }
 
@@ -430,7 +429,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
 private extension NotebookStructureViewController {
   func configureToolbar() {
     var toolbarItems = [AppCommandsButtonItems.documentBrowser(), UIBarButtonItem.flexibleSpace()]
-    if splitViewController?.isCollapsed ?? false, let newNoteButton = toolbarButtonBuilder?.makeNewNoteButtonItem() {
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
