@@ -68,7 +68,7 @@ extension QuotesViewController: UICollectionViewDelegate {
     guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
     let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
       Logger.shared.info("Navigating to book ____")
-      notebookViewController?.openNote(with: content.note.id)
+      notebookViewController?.pushNote(with: content.note.id)
     }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
       UIMenu(title: "", children: [viewNoteAction])

@@ -77,6 +77,14 @@ public final class NotebookViewController: UIViewController {
     }
   }
 
+  public func pushSecondaryViewController(_ viewController: UIViewController) {
+    if notebookSplitViewController.isCollapsed {
+      compactNavigationController.pushViewController(viewController, animated: true)
+    } else {
+      notebookSplitViewController.setViewController(viewController, for: .secondary)
+    }
+  }
+
   private lazy var primaryNavigationController: UINavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
 
   private lazy var structureViewController = makeStructureViewController()
@@ -296,11 +304,22 @@ public final class NotebookViewController: UIViewController {
 }
 
 public extension NotebookViewController {
-  func openNote(with noteIdentifier: Note.Identifier) {
+  func pushNote(with noteIdentifier: Note.Identifier) {
     Logger.shared.info("Handling openNoteCommand. Note id = \(noteIdentifier)")
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
-      showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: true)
+      let noteViewController = SavingTextEditViewController(
+        configuration: SavingTextEditViewController.Configuration(
+          folder: focusedNotebookStructure.predefinedFolder,
+          noteIdentifier: noteIdentifier,
+          note: note
+        ),
+        noteStorage: database
+      )
+      noteViewController.setTitleMarkdown(note.title)
+      setSecondaryViewController(noteViewController, pushIfCollapsed: true)
+      // TODO: Figure out how to make a "push" make sense in a split view controller
+      //      pushSecondaryViewController(noteViewController)
       documentListViewController.selectPage(with: noteIdentifier)
     } catch {
       Logger.shared.error("Unexpected error getting note \(noteIdentifier): \(error)")
