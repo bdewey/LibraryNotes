@@ -195,6 +195,7 @@ public final class NotebookViewController: UIViewController {
   }
 
   @objc func toggleEditMode() {
+    assertionFailure("Not implemented")
 //    if currentNoteEditor?.isEditing ?? false {
 //      currentNoteEditor?.isEditing = false
 //    } else {
@@ -324,7 +325,6 @@ public final class NotebookViewController: UIViewController {
     }
     structureViewController.configure(with: userActivity)
 
-    // TODO: Recover secondary controller
     if let secondaryViewControllerType = userActivity.userInfo?[ActivityKey.secondaryViewControllerType] as? String,
        let secondaryViewControllerData = userActivity.userInfo?[ActivityKey.secondaryViewControllerData] as? Data
     {
