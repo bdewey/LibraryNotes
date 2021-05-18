@@ -92,7 +92,7 @@ public final class QuotesViewController: UIViewController {
 
   // MARK: - View lifecycle
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .grailBackground
 
@@ -114,6 +114,7 @@ public final class QuotesViewController: UIViewController {
 }
 
 // MARK: - NotebookSecondaryViewController
+
 extension QuotesViewController: NotebookSecondaryViewController {
   private struct ViewControllerState: Codable {
     let title: String?

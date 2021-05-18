@@ -84,7 +84,7 @@ public final class NotebookViewController: UIViewController {
     }
   }
 
-  private lazy var primaryNavigationController: UINavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
+  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
 
   private lazy var structureViewController = makeStructureViewController()
 
@@ -122,7 +122,7 @@ public final class NotebookViewController: UIViewController {
     return splitViewController
   }()
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
 
     // Set up notebookSplitViewController as a child
@@ -135,7 +135,7 @@ public final class NotebookViewController: UIViewController {
     configureKeyCommands()
   }
 
-  public override var canBecomeFirstResponder: Bool { true }
+  override public var canBecomeFirstResponder: Bool { true }
 
   private func configureKeyCommands() {
     let newNoteCommand = UIKeyCommand(
@@ -326,7 +326,8 @@ public final class NotebookViewController: UIViewController {
 
     // TODO: Recover secondary controller
     if let secondaryViewControllerType = userActivity.userInfo?[ActivityKey.secondaryViewControllerType] as? String,
-       let secondaryViewControllerData = userActivity.userInfo?[ActivityKey.secondaryViewControllerData] as? Data {
+       let secondaryViewControllerData = userActivity.userInfo?[ActivityKey.secondaryViewControllerData] as? Data
+    {
       do {
         let secondaryViewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
           type: secondaryViewControllerType,
