@@ -54,21 +54,6 @@ public extension Note {
     self.init(parsedString: buffer)
   }
 
-  @available(*, deprecated, message: "use makeBlankNoteText")
-  static func makeBlankNote(title: String? = nil, hashtag: String? = nil) -> (Note, Int) {
-    var initialText = "# "
-    if let title = title {
-      initialText += title
-    }
-    let initialOffset = initialText.count
-    initialText += "\n"
-    if let hashtag = hashtag {
-      initialText += hashtag
-      initialText += "\n"
-    }
-    return (Note(markdown: initialText), initialOffset)
-  }
-
   static func makeBlankNoteText(title: String? = nil, hashtag: String? = nil) -> (String, Int) {
     var initialText = "# "
     if let title = title {
