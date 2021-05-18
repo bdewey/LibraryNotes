@@ -36,7 +36,7 @@ public final class QuotesViewController: UIViewController {
     }
     didSet {
       do {
-        quoteSubscription = try database.queryPublisher(for: attributedQuotesQuery(for: quoteIdentifiers))
+        quoteSubscription = try database.queryPublisher(for: attributedQuotesQuery(for: visibleQuoteIdentifiers))
           .sink(receiveCompletion: { error in
             Logger.shared.error("Received error completion from quotes query: \(error)")
           }, receiveValue: { [weak self] quotes in
