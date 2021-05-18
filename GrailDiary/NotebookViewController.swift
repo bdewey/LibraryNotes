@@ -255,7 +255,8 @@ public final class NotebookViewController: UIViewController {
       configuration: SavingTextEditViewController.Configuration(
         folder: focusedNotebookStructure.predefinedFolder,
         noteIdentifier: actualNoteIdentifier,
-        note: note
+        noteRawText: note.text ?? "",
+        noteTitle: note.title
       ),
       noteStorage: database
     )
@@ -267,17 +268,33 @@ public final class NotebookViewController: UIViewController {
 
   private enum ActivityKey {
     static let notebookStructure = "org.brians-brain.GrailDiary.NotebookStructure"
-    static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
     static let displayMode = "org.brians-brain.GrailDiary.notebookSplitViewController.displayMode"
+    static let secondaryViewControllerType = "org.brians-brain.GrailDiary.notebookSplitViewController.secondaryType"
   }
 
   func updateUserActivity(_ userActivity: NSUserActivity) {
     userActivity.addUserInfoEntries(from: [
       ActivityKey.notebookStructure: focusedNotebookStructure.rawValue,
-//      ActivityKey.selectedNote: currentNoteEditor?.noteIdentifier ?? "",
       ActivityKey.displayMode: notebookSplitViewController.displayMode.rawValue,
     ])
     structureViewController.updateUserActivity(userActivity)
+
+    if let secondaryViewController = self.secondaryViewController {
+      userActivity.addUserInfoEntries(from: [ActivityKey.secondaryViewControllerType: secondaryViewController.notebookDetailType])
+      secondaryViewController.updateUserActivity(userActivity)
+    }
+  }
+
+  var secondaryViewController: NotebookSecondaryViewController? {
+    if notebookSplitViewController.isCollapsed {
+      if compactNavigationController.viewControllers.count >= 3 {
+        return compactNavigationController.topViewController as? NotebookSecondaryViewController
+      } else {
+        return nil
+      }
+    } else {
+      return notebookSplitViewController.viewController(for: .secondary) as? NotebookSecondaryViewController
+    }
   }
 
   func configure(with userActivity: NSUserActivity) {
@@ -287,19 +304,14 @@ public final class NotebookViewController: UIViewController {
     {
       self.focusedNotebookStructure = focusedNotebookStructure
     }
-    if
-      let noteIdentifier = userActivity.userInfo?[ActivityKey.selectedNote] as? String,
-      !noteIdentifier.isEmpty,
-      let note = try? database.note(noteIdentifier: noteIdentifier)
-    {
-      documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier, shiftFocus: false)
-    }
     if let rawDisplayMode = userActivity.userInfo?[ActivityKey.displayMode] as? Int,
        let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode)
     {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+    // TODO: Recover secondary controller
+    assertionFailure("Not implemented")
   }
 }
 
@@ -312,7 +324,8 @@ public extension NotebookViewController {
         configuration: SavingTextEditViewController.Configuration(
           folder: focusedNotebookStructure.predefinedFolder,
           noteIdentifier: noteIdentifier,
-          note: note
+          noteRawText: note.text ?? "",
+          noteTitle: note.title
         ),
         noteStorage: database
       )
@@ -463,6 +476,10 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     _ svc: UISplitViewController,
     topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
   ) -> UISplitViewController.Column {
+    let compactDocumentList = DocumentListViewController(database: database)
+    compactDocumentList.focusedStructure = focusedNotebookStructure
+    compactNavigationController.popToRootViewController(animated: false)
+    compactNavigationController.pushViewController(compactDocumentList, animated: false)
     return .compact
 //    guard let currentNoteEditor = currentNoteEditor else {
 //      // If there's nothing meaningful in the secondary pane, we should show supplementary.

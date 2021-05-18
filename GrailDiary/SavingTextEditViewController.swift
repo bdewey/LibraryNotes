@@ -13,7 +13,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   struct Configuration {
     var folder: PredefinedFolder?
     var noteIdentifier: String
-    var note: Note
+    var noteRawText: String
+    var noteTitle: String
     var initialSelectedRange = NSRange(location: 0, length: 0)
     var autoFirstResponder = false
   }
@@ -26,7 +27,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.noteStorage = noteStorage
     self.noteIdentifier = configuration.noteIdentifier
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(configuration.note.title)
+    setTitleMarkdown(configuration.noteTitle)
   }
 
   /// Initializes a view controller for a new, unsaved note.
@@ -38,11 +39,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     currentHashtag: String? = nil,
     autoFirstResponder: Bool = false
   ) {
-    let (note, initialOffset) = Note.makeBlankNote(title: title, hashtag: currentHashtag)
+    let (noteText, initialOffset) = Note.makeBlankNoteText(title: title, hashtag: currentHashtag)
     let configuration = Configuration(
       folder: folder,
       noteIdentifier: UUID().uuidString,
-      note: note,
+      noteRawText: noteText,
+      noteTitle: title ?? "",
       initialSelectedRange: NSRange(location: initialOffset, length: 0),
       autoFirstResponder: autoFirstResponder
     )
@@ -71,7 +73,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let noteStorage: NoteDatabase
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: self)
-    viewController.markdown = configuration.note.text ?? ""
+    viewController.markdown = configuration.noteRawText
     viewController.selectedRange = configuration.initialSelectedRange
     viewController.autoFirstResponder = configuration.autoFirstResponder
     viewController.delegate = self
@@ -83,9 +85,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
   let noteIdentifier: Note.Identifier
-
-  /// The current note.
-  var note: Note { configuration.note }
 
   internal func setTitleMarkdown(_ markdown: String) {
     guard chromeStyle == .splitViewController else { return }
@@ -151,8 +150,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func updateNote(_ note: Note) throws {
     assert(Thread.isMainThread)
     var note = note
-    // Copy over the initial reference, if any
-    note.reference = configuration.note.reference
+    // TODO: Copy over the initial reference, if any
+//    note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
     note.folder = configuration.folder?.rawValue
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
@@ -235,6 +234,20 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     } else {
       return Array([[hashtag], existingHashtags].joined())
     }
+  }
+}
+
+extension SavingTextEditViewController: NotebookSecondaryViewController {
+  var notebookDetailType: String { "SavingTextEditViewController" }
+
+  private enum ActivityKey {
+    static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
+  }
+
+  func updateUserActivity(_ userActivity: NSUserActivity) {
+    userActivity.addUserInfoEntries(from: [
+      ActivityKey.selectedNote: noteIdentifier
+    ])
   }
 }
 

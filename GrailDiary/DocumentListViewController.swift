@@ -144,19 +144,21 @@ final class DocumentListViewController: UIViewController {
   }()
 
   internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
-    let note: Note
     do {
-      note = try database.note(noteIdentifier: noteIdentifier)
+      let note = try database.note(noteIdentifier: noteIdentifier)
+      let editor = SavingTextEditViewController(
+        configuration: SavingTextEditViewController.Configuration(
+          folder: note.folder.flatMap { PredefinedFolder(rawValue: $0) },
+          noteIdentifier: noteIdentifier,
+          noteRawText: note.text ?? "",
+          noteTitle: note.title
+        ),
+        noteStorage: database
+      )
+      notebookViewController?.setSecondaryViewController(editor, pushIfCollapsed: shiftFocus)
     } catch {
       Logger.shared.error("Unexpected error loading page: \(error)")
-      return
     }
-    delegate?.documentListViewController(
-      self,
-      didRequestShowNote: note,
-      noteIdentifier: noteIdentifier,
-      shiftFocus: shiftFocus
-    )
   }
 
   func selectPage(with noteIdentifier: Note.Identifier) {
