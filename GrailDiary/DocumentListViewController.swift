@@ -148,7 +148,7 @@ final class DocumentListViewController: UIViewController {
       let note = try database.note(noteIdentifier: noteIdentifier)
       let editor = SavingTextEditViewController(
         configuration: SavingTextEditViewController.Configuration(
-          folder: note.folder.flatMap { PredefinedFolder(rawValue: $0) },
+          folder: note.folder,
           noteIdentifier: noteIdentifier,
           noteRawText: note.text ?? "",
           noteTitle: note.title

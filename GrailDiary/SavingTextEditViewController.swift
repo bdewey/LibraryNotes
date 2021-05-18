@@ -10,8 +10,8 @@ import UniformTypeIdentifiers
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
   /// Holds configuration settings for the view controller.
-  struct Configuration {
-    var folder: PredefinedFolder?
+  struct Configuration: Codable {
+    var folder: String?
     var noteIdentifier: String
     var noteRawText: String
     var noteTitle: String
@@ -41,7 +41,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   ) {
     let (noteText, initialOffset) = Note.makeBlankNoteText(title: title, hashtag: currentHashtag)
     let configuration = Configuration(
-      folder: folder,
+      folder: folder?.rawValue,
       noteIdentifier: UUID().uuidString,
       noteRawText: noteText,
       noteTitle: title ?? "",
@@ -153,7 +153,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     // TODO: Copy over the initial reference, if any
 //    note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
-    note.folder = configuration.folder?.rawValue
+    note.folder = configuration.folder
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
@@ -238,16 +238,15 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 }
 
 extension SavingTextEditViewController: NotebookSecondaryViewController {
-  var notebookDetailType: String { "SavingTextEditViewController" }
+  static var notebookDetailType: String { "SavingTextEditViewController" }
 
-  private enum ActivityKey {
-    static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
+  func userActivityData() throws -> Data {
+    try JSONEncoder().encode(configuration)
   }
 
-  func updateUserActivity(_ userActivity: NSUserActivity) {
-    userActivity.addUserInfoEntries(from: [
-      ActivityKey.selectedNote: noteIdentifier
-    ])
+  static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> SavingTextEditViewController {
+    let configuration = try JSONDecoder().decode(Configuration.self, from: data)
+    return SavingTextEditViewController(configuration: configuration, noteStorage: database)
   }
 }
 

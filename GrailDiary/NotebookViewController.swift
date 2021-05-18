@@ -62,7 +62,7 @@ public final class NotebookViewController: UIViewController {
     }
   }
 
-  public func setSecondaryViewController(_ viewController: UIViewController, pushIfCollapsed: Bool) {
+  public func setSecondaryViewController(_ viewController: NotebookSecondaryViewController, pushIfCollapsed: Bool) {
     if notebookSplitViewController.isCollapsed {
       if pushIfCollapsed {
         if compactNavigationController.viewControllers.count < 3 {
@@ -253,7 +253,7 @@ public final class NotebookViewController: UIViewController {
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
     let noteViewController = SavingTextEditViewController(
       configuration: SavingTextEditViewController.Configuration(
-        folder: focusedNotebookStructure.predefinedFolder,
+        folder: focusedNotebookStructure.predefinedFolder?.rawValue,
         noteIdentifier: actualNoteIdentifier,
         noteRawText: note.text ?? "",
         noteTitle: note.title
@@ -270,6 +270,7 @@ public final class NotebookViewController: UIViewController {
     static let notebookStructure = "org.brians-brain.GrailDiary.NotebookStructure"
     static let displayMode = "org.brians-brain.GrailDiary.notebookSplitViewController.displayMode"
     static let secondaryViewControllerType = "org.brians-brain.GrailDiary.notebookSplitViewController.secondaryType"
+    static let secondaryViewControllerData = "org.brians-brain.GrailDiary.notebookSplitViewController.secondaryData"
   }
 
   func updateUserActivity(_ userActivity: NSUserActivity) {
@@ -280,21 +281,35 @@ public final class NotebookViewController: UIViewController {
     structureViewController.updateUserActivity(userActivity)
 
     if let secondaryViewController = self.secondaryViewController {
-      userActivity.addUserInfoEntries(from: [ActivityKey.secondaryViewControllerType: secondaryViewController.notebookDetailType])
-      secondaryViewController.updateUserActivity(userActivity)
+      do {
+        let controllerType = type(of: secondaryViewController).notebookDetailType
+        userActivity.addUserInfoEntries(
+          from: [
+            ActivityKey.secondaryViewControllerType: controllerType,
+            ActivityKey.secondaryViewControllerData: try secondaryViewController.userActivityData(),
+          ]
+        )
+      } catch {
+        Logger.shared.error("Unexpected error saving secondary VC: \(error)")
+      }
     }
   }
 
   var secondaryViewController: NotebookSecondaryViewController? {
-    if notebookSplitViewController.isCollapsed {
+    secondaryViewController(forCollaped: notebookSplitViewController.isCollapsed)
+  }
+
+  func secondaryViewController(forCollaped collapsed: Bool) -> NotebookSecondaryViewController? {
+    if collapsed {
       if compactNavigationController.viewControllers.count >= 3 {
         return compactNavigationController.topViewController as? NotebookSecondaryViewController
       } else {
         return nil
       }
-    } else {
-      return notebookSplitViewController.viewController(for: .secondary) as? NotebookSecondaryViewController
+    } else if let navigationController = notebookSplitViewController.viewController(for: .secondary) as? UINavigationController {
+      return navigationController.viewControllers.first as? NotebookSecondaryViewController
     }
+    return nil
   }
 
   func configure(with userActivity: NSUserActivity) {
@@ -310,8 +325,21 @@ public final class NotebookViewController: UIViewController {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+
     // TODO: Recover secondary controller
-    assertionFailure("Not implemented")
+    if let secondaryViewControllerType = userActivity.userInfo?[ActivityKey.secondaryViewControllerType] as? String,
+       let secondaryViewControllerData = userActivity.userInfo?[ActivityKey.secondaryViewControllerData] as? Data {
+      do {
+        let secondaryViewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: secondaryViewControllerType,
+          data: secondaryViewControllerData,
+          database: database
+        )
+        setSecondaryViewController(secondaryViewController, pushIfCollapsed: true)
+      } catch {
+        Logger.shared.error("Error recovering secondary view controller: \(error)")
+      }
+    }
   }
 }
 
@@ -322,7 +350,7 @@ public extension NotebookViewController {
       let note = try database.note(noteIdentifier: noteIdentifier)
       let noteViewController = SavingTextEditViewController(
         configuration: SavingTextEditViewController.Configuration(
-          folder: focusedNotebookStructure.predefinedFolder,
+          folder: focusedNotebookStructure.predefinedFolder?.rawValue,
           noteIdentifier: noteIdentifier,
           noteRawText: note.text ?? "",
           noteTitle: note.title
@@ -480,24 +508,21 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     compactDocumentList.focusedStructure = focusedNotebookStructure
     compactNavigationController.popToRootViewController(animated: false)
     compactNavigationController.pushViewController(compactDocumentList, animated: false)
+
+    if let secondaryViewController = self.secondaryViewController(forCollaped: false) {
+      do {
+        let activityData = try secondaryViewController.userActivityData()
+        let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: type(of: secondaryViewController).notebookDetailType,
+          data: activityData,
+          database: database
+        )
+        compactNavigationController.pushViewController(viewController, animated: false)
+      } catch {
+        Logger.shared.error("Unexpected error rebuilding view hierarchy")
+      }
+    }
     return .compact
-//    guard let currentNoteEditor = currentNoteEditor else {
-//      // If there's nothing meaningful in the secondary pane, we should show supplementary.
-//      return .supplementary
-//    }
-//
-//    // If the current note has reference material, keep it in view.
-//    if currentNoteEditor.note.reference != nil {
-//      return .secondary
-//    }
-//
-//    // If the current note isn't saved, prefer the supplementary view.
-//    if currentNoteEditor.noteIdentifier == nil {
-//      return .supplementary
-//    }
-//
-//    // No reason to second-guess UIKit.
-//    return proposedTopColumn
   }
 }
 

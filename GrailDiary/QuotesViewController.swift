@@ -57,6 +57,20 @@ final class QuotesViewController: UIViewController {
   }
 }
 
+// MARK: - NotebookSecondaryViewController
+extension QuotesViewController: NotebookSecondaryViewController {
+  static var notebookDetailType: String { "QuotesViewController" }
+
+  func userActivityData() throws -> Data {
+    throw CocoaError.error(.executableNotLoadable)
+  }
+
+  static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> QuotesViewController {
+    let quoteVC = QuotesViewController(nibName: nil, bundle: nil)
+    throw CocoaError.error(.coderReadCorrupt)
+  }
+}
+
 // MARK: - UICollectionViewDelegate
 
 extension QuotesViewController: UICollectionViewDelegate {
