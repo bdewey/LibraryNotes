@@ -55,7 +55,6 @@ public final class NotebookViewController: UIViewController {
       documentListViewController.focusedStructure = focusedNotebookStructure
       if notebookSplitViewController.isCollapsed {
         let compactListViewController = DocumentListViewController(database: database)
-        compactListViewController.delegate = self
         compactListViewController.focusedStructure = focusedNotebookStructure
         compactNavigationController.pushViewController(compactListViewController, animated: true)
       }
@@ -100,7 +99,6 @@ public final class NotebookViewController: UIViewController {
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
-    documentListViewController.delegate = self
     return documentListViewController
   }()
 
@@ -249,18 +247,18 @@ public final class NotebookViewController: UIViewController {
     return button
   }
 
-  func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
+  func showNoteEditor(noteIdentifier: Note.Identifier?, noteText: String, noteTitle: String, shiftFocus: Bool) {
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
     let noteViewController = SavingTextEditViewController(
       configuration: SavingTextEditViewController.Configuration(
         folder: focusedNotebookStructure.predefinedFolder?.rawValue,
         noteIdentifier: actualNoteIdentifier,
-        noteRawText: note.text ?? "",
-        noteTitle: note.title
+        noteRawText: noteText,
+        noteTitle: noteTitle
       ),
       noteStorage: database
     )
-    noteViewController.setTitleMarkdown(note.title)
+    noteViewController.setTitleMarkdown(noteTitle)
     setSecondaryViewController(noteViewController, pushIfCollapsed: shiftFocus)
   }
 
@@ -433,25 +431,9 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
 
 // MARK: - DocumentListViewControllerDelegate
 
-extension NotebookViewController: DocumentListViewControllerDelegate {
+extension NotebookViewController {
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController) {
     tagsBecomeFirstResponder()
-  }
-
-  func documentListViewController(
-    _ viewController: DocumentListViewController,
-    didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?,
-    shiftFocus: Bool
-  ) {
-    showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
-  }
-
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentIdentifier], shiftFocus: Bool) {
-    let quotesViewController = QuotesViewController(database: database)
-    quotesViewController.quoteIdentifiers = Array(quotes.shuffled().prefix(5))
-    quotesViewController.title = "Random Quotes"
-    setSecondaryViewController(quotesViewController, pushIfCollapsed: shiftFocus)
   }
 
   private func referenceViewController(for note: Note) -> ReferenceViewController? {

@@ -41,19 +41,6 @@ extension UIResponder {
   }
 }
 
-protocol DocumentListViewControllerDelegate: AnyObject {
-  func documentListViewController(
-    _ viewController: DocumentListViewController,
-    didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?,
-    shiftFocus: Bool
-  )
-
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentIdentifier], shiftFocus: Bool)
-
-  func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
-}
-
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
   /// Designated initializer.
@@ -80,7 +67,6 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
-  public weak var delegate: DocumentListViewControllerDelegate?
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
@@ -146,16 +132,7 @@ final class DocumentListViewController: UIViewController {
   internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
-      let editor = SavingTextEditViewController(
-        configuration: SavingTextEditViewController.Configuration(
-          folder: note.folder,
-          noteIdentifier: noteIdentifier,
-          noteRawText: note.text ?? "",
-          noteTitle: note.title
-        ),
-        noteStorage: database
-      )
-      notebookViewController?.setSecondaryViewController(editor, pushIfCollapsed: shiftFocus)
+      notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, noteText: note.text ?? "", noteTitle: note.title, shiftFocus: shiftFocus)
     } catch {
       Logger.shared.error("Unexpected error loading page: \(error)")
     }
@@ -249,7 +226,7 @@ final class DocumentListViewController: UIViewController {
         didHandleEvent = true
       case "\t":
         if key.modifierFlags.contains(.shift) {
-          delegate?.documentListViewControllerDidRequestChangeFocus(self)
+          notebookViewController?.documentListViewControllerDidRequestChangeFocus(self)
           didHandleEvent = true
         }
       case "\r":
@@ -347,7 +324,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       reference: .webPage(url),
       promptCollections: [:]
     )
-    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
+    assertionFailure()
+//    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
   }
 
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
@@ -374,6 +352,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     )
   }
 
+  // TODO: This isn't actually called :-(
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
       let splitViewController = self.splitViewController,
@@ -391,8 +370,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       } else {
         hashtag = nil
       }
-      let (blankNote, _) = Note.makeBlankNote(hashtag: hashtag)
-      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil, shiftFocus: false)
+      let (blankText, _) = Note.makeBlankNoteText(hashtag: hashtag)
+      notebookViewController?.showNoteEditor(noteIdentifier: nil, noteText: blankText, noteTitle: "", shiftFocus: false)
     }
   }
 
