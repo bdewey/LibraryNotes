@@ -447,9 +447,9 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
     showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
   }
 
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentFromNote], shiftFocus: Bool) {
-    let quotesViewController = QuotesViewController(nibName: nil, bundle: nil)
-    quotesViewController.quotes = quotes
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentIdentifier], shiftFocus: Bool) {
+    let quotesViewController = QuotesViewController(database: database)
+    quotesViewController.quoteIdentifiers = Array(quotes.shuffled().prefix(5))
     quotesViewController.title = "Random Quotes"
     setSecondaryViewController(quotesViewController, pushIfCollapsed: shiftFocus)
   }

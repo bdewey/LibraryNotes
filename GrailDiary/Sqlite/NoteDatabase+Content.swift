@@ -23,6 +23,8 @@ public struct ContentFromNote: Decodable, FetchableRecord, Identifiable, Hashabl
 }
 
 extension NotebookStructureViewController.StructureIdentifier {
+  // TODO: Remove
+  @available(*, deprecated, message: "Use allQuoteIdentifiersQuery")
   var attributedQuotesQuery: QueryInterfaceRequest<ContentFromNote> {
     if case .hashtag(let hashtag) = self {
       return ContentRecord
@@ -37,6 +39,22 @@ extension NotebookStructureViewController.StructureIdentifier {
         .asRequest(of: ContentFromNote.self)
     }
   }
+
+  var allQuoteIdentifiersQuery: QueryInterfaceRequest<ContentIdentifier> {
+    // TODO: Turn this in to .joining rather than .including
+    if case .hashtag(let hashtag) = self {
+      return ContentRecord
+        .filter(ContentRecord.Columns.role == "prompt=quote")
+        .including(required: ContentRecord.note.including(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))))
+        .asRequest(of: ContentIdentifier.self)
+    } else {
+      let folderValue = predefinedFolder?.rawValue
+      return ContentRecord
+        .filter(ContentRecord.Columns.role == "prompt=quote")
+        .including(required: ContentRecord.note.filter(NoteRecord.Columns.folder == folderValue))
+        .asRequest(of: ContentIdentifier.self)
+    }
+  }
 }
 
 extension NoteDatabase {
@@ -45,7 +63,14 @@ extension NoteDatabase {
     guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
 
     return try dbQueue.read { db in
-      try structureIdentifier.attributedQuotesQuery.asRequest(of: ContentFromNote.self).fetchAll(db)
+      try structureIdentifier.attributedQuotesQuery.fetchAll(db)
+    }
+  }
+
+  func quoteIdentifiers(focusedOn structureIdentifier: NotebookStructureViewController.StructureIdentifier) throws -> [ContentIdentifier] {
+    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+    return try dbQueue.read { db in
+      try structureIdentifier.attributedQuotesQuery.asRequest(of: ContentIdentifier.self).fetchAll(db)
     }
   }
 }

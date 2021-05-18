@@ -377,7 +377,7 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      let identifier = ContentIdentifier(noteId: promptIdentifier.noteId, promptKey: promptIdentifier.promptKey)
+      let identifier = ContentIdentifier(noteId: promptIdentifier.noteId, key: promptIdentifier.promptKey)
       let promptCollection = try Self.promptCollection(identifier: identifier, database: db)
       return promptCollection.prompts[Int(promptIdentifier.promptIndex)]
     }
@@ -609,7 +609,6 @@ public final class NoteDatabase: UIDocument {
       query: QueryInterfaceRequest<NoteMetadataRecord>,
       from db: Database
     ) throws -> [Note.Identifier: NoteMetadataRecord] {
-      let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
       let metadata = try query.fetchAll(db)
       let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
         (key: metadataItem.id, value: metadataItem)
@@ -779,7 +778,6 @@ internal extension NoteDatabase {
   }
 
   static func fetchAllMetadata(from db: Database) throws -> [Note.Identifier: NoteMetadataRecord] {
-    let referenceRecords = NoteRecord.contentRecords.filter(ContentRecord.Columns.role == ContentRole.reference.rawValue)
     let metadata = try NoteMetadataRecord.request().fetchAll(db)
     let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
       (key: metadataItem.id, value: metadataItem)
@@ -788,7 +786,7 @@ internal extension NoteDatabase {
   }
 
   static func promptCollection(identifier: ContentIdentifier, database: Database) throws -> PromptCollection {
-    guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.promptKey]) else {
+    guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.key]) else {
       throw Error.unknownPromptCollection
     }
     return try record.asPromptCollection()

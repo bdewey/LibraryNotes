@@ -14,7 +14,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showWebPage(url: URL, shiftFocus: Bool)
-  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool)
+  func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
@@ -161,24 +161,24 @@ public final class DocumentTableController: NSObject {
   }
 
   private var quotesSubscription: AnyCancellable?
-  private var quotes: [ContentFromNote] = [] {
+  private var quoteIdentifiers: [ContentIdentifier] = [] {
     didSet {
       needsPerformUpdates = true
     }
   }
 
-  public var quotesPublisher: AnyPublisher<[ContentFromNote], Error>? {
+  public var quotesPublisher: AnyPublisher<[ContentIdentifier], Error>? {
     willSet {
       quotesSubscription?.cancel()
       quotesSubscription = nil
-      quotes = []
+      quoteIdentifiers = []
     }
     didSet {
       quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
         Logger.shared.error("Unexpected error getting quotes: \(error)")
-      }, receiveValue: { [weak self] quotes in
-        self?.quotes = quotes
-        Logger.shared.info("Got \(quotes.count) quotes")
+      }, receiveValue: { [weak self] quoteIdentifiers in
+        self?.quoteIdentifiers = quoteIdentifiers
+        Logger.shared.info("Got \(quoteIdentifiers.count) quotes")
       })
     }
   }
@@ -210,7 +210,7 @@ public final class DocumentTableController: NSObject {
       cardsPerDocument: cardsPerDocument,
       filteredPageIdentifiers: filteredPageIdentifiers,
       webURL: webURL,
-      quoteCount: quotes.count
+      quoteCount: quoteIdentifiers.count
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -382,7 +382,7 @@ public extension DocumentTableController {
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
     case .reviewQuotes:
-      delegate?.showQuotes(quotes: quotes, shiftFocus: shiftFocus)
+      delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
     }
   }
 

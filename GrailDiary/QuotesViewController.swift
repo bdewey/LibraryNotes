@@ -1,15 +1,67 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import Combine
+import GRDB
+import GRDBCombine
 import Logging
 import SnapKit
 import UIKit
 
 /// Displays a list of quotes.
-final class QuotesViewController: UIViewController {
-  public var quotes: [ContentFromNote] = [] {
+public final class QuotesViewController: UIViewController {
+  public init(database: NoteDatabase) {
+    self.database = database
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  private let database: NoteDatabase
+  private var quoteSubscription: AnyCancellable?
+
+  /// This is the set of *all* eligible quote identifiers ot show. We will show a subset of these.
+  public var quoteIdentifiers: [ContentIdentifier] = [] {
     didSet {
       shuffleQuotes()
     }
+  }
+
+  /// This is the set of *visible* quote identifiers -- a randomly selected subset from `quoteIdentifiers`
+  private var visibleQuoteIdentifiers: [ContentIdentifier] = [] {
+    willSet {
+      quoteSubscription = nil
+    }
+    didSet {
+      do {
+        quoteSubscription = try database.queryPublisher(for: attributedQuotesQuery(for: quoteIdentifiers))
+          .sink(receiveCompletion: { error in
+            Logger.shared.error("Received error completion from quotes query: \(error)")
+          }, receiveValue: { [weak self] quotes in
+            self?.updateSnapshot(with: quotes)
+          })
+      } catch {
+        Logger.shared.error("Unexpected error fetching quotes: \(error)")
+      }
+    }
+  }
+
+  /// Turns a set of queries for quote IDs into a content query.
+  private func attributedQuotesQuery(for quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<ContentFromNote> {
+    ContentRecord
+      .filter(keys: quoteIdentifiers.map { $0.keyArray })
+      .including(required: ContentRecord.note)
+      .asRequest(of: ContentFromNote.self)
+  }
+
+  /// Updates the collection view given quotes.
+  private func updateSnapshot(with quotes: [ContentFromNote]) {
+    var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
+    snapshot.appendSections([0])
+    snapshot.appendItems(quotes.shuffled())
+    dataSource.apply(snapshot)
   }
 
   private lazy var layout: UICollectionViewLayout = {
@@ -40,7 +92,7 @@ final class QuotesViewController: UIViewController {
 
   // MARK: - View lifecycle
 
-  override func viewDidLoad() {
+  public override func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .grailBackground
 
@@ -55,26 +107,42 @@ final class QuotesViewController: UIViewController {
       make.edges.equalToSuperview()
     }
   }
+
+  @objc private func shuffleQuotes() {
+    visibleQuoteIdentifiers = Array(quoteIdentifiers.shuffled().prefix(5))
+  }
 }
 
 // MARK: - NotebookSecondaryViewController
 extension QuotesViewController: NotebookSecondaryViewController {
-  static var notebookDetailType: String { "QuotesViewController" }
-
-  func userActivityData() throws -> Data {
-    throw CocoaError.error(.executableNotLoadable)
+  private struct ViewControllerState: Codable {
+    let title: String?
+    let quoteIdentifiers: [ContentIdentifier]
   }
 
-  static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> QuotesViewController {
-    let quoteVC = QuotesViewController(nibName: nil, bundle: nil)
-    throw CocoaError.error(.coderReadCorrupt)
+  public static var notebookDetailType: String { "QuotesViewController" }
+
+  private var currentViewControllerState: ViewControllerState {
+    ViewControllerState(title: title, quoteIdentifiers: quoteIdentifiers)
+  }
+
+  public func userActivityData() throws -> Data {
+    try JSONEncoder().encode(currentViewControllerState)
+  }
+
+  public static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> QuotesViewController {
+    let quoteVC = QuotesViewController(database: database)
+    let viewControllerState = try JSONDecoder().decode(ViewControllerState.self, from: data)
+    quoteVC.quoteIdentifiers = viewControllerState.quoteIdentifiers
+    quoteVC.title = viewControllerState.title
+    return quoteVC
   }
 }
 
 // MARK: - UICollectionViewDelegate
 
 extension QuotesViewController: UICollectionViewDelegate {
-  func collectionView(
+  public func collectionView(
     _ collectionView: UICollectionView,
     contextMenuConfigurationForItemAt indexPath: IndexPath,
     point: CGPoint
@@ -91,15 +159,6 @@ extension QuotesViewController: UICollectionViewDelegate {
 }
 
 // MARK: - Private
-
-private extension QuotesViewController {
-  @objc func shuffleQuotes() {
-    var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
-    snapshot.appendSections([0])
-    snapshot.appendItems(Array(quotes.shuffled().prefix(5)))
-    dataSource.apply(snapshot)
-  }
-}
 
 private struct QuoteContentConfiguration: UIContentConfiguration {
   let quote: ContentFromNote

@@ -7,7 +7,7 @@ import UIKit
 
 // swiftlint:disable file_length
 
-public protocol StudyViewControllerDelegate: class {
+public protocol StudyViewControllerDelegate: AnyObject {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
   func studyViewControllerDidCancel(_ studyViewController: StudyViewController)
 }

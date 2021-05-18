@@ -2,7 +2,7 @@
 
 import Foundation
 
-public protocol MetadataQueryDelegate: class {
+public protocol MetadataQueryDelegate: AnyObject {
   func metadataQuery(_ metadataQuery: MetadataQuery, didFindItems items: [NSMetadataItem])
 }
 

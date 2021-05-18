@@ -49,7 +49,7 @@ protocol DocumentListViewControllerDelegate: AnyObject {
     shiftFocus: Bool
   )
 
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote], shiftFocus: Bool)
+  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentIdentifier], shiftFocus: Bool)
 
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
 }
@@ -296,7 +296,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateQuoteList() {
     do {
-      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.attributedQuotesQuery)
+      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.allQuoteIdentifiersQuery)
     } catch {
       Logger.shared.error("Unexpected error getting quotes: \(error)")
     }
@@ -350,8 +350,11 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
   }
 
-  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool) {
-    delegate?.documentListViewController(self, didRequestShowQuotes: quotes, shiftFocus: shiftFocus)
+  func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
+    let quotesVC = QuotesViewController(database: database)
+    quotesVC.quoteIdentifiers = quotes
+    quotesVC.title = "Random Quotes"
+    notebookViewController?.setSecondaryViewController(quotesVC, pushIfCollapsed: shiftFocus)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
