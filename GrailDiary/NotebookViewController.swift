@@ -479,25 +479,25 @@ private extension UINavigationController {
 
 extension NotebookViewController: UISplitViewControllerDelegate {
   public func splitViewController(
-    _ splitViewController: UISplitViewController,
-    collapseSecondary secondaryViewController: UIViewController,
-    onto primaryViewController: UIViewController
-  ) -> Bool {
-    guard
-      let navigationController = secondaryViewController as? UINavigationController,
-      let textEditViewController = navigationController.visibleViewController as? SavingTextEditViewController
-    else {
-      assertionFailure()
-      return false
+    _ svc: UISplitViewController,
+    displayModeForExpandingToProposedDisplayMode proposedDisplayMode: UISplitViewController.DisplayMode
+  ) -> UISplitViewController.DisplayMode {
+    if let secondaryViewController = self.secondaryViewController(forCollaped: true) {
+      do {
+        let activityData = try secondaryViewController.userActivityData()
+        let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: type(of: secondaryViewController).notebookDetailType,
+          data: activityData,
+          database: database
+        )
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+          self.setSecondaryViewController(viewController, pushIfCollapsed: false)
+        }
+      } catch {
+        Logger.shared.error("Unexpected error rebuilding view hierarchy")
+      }
     }
-    // Per documentation:
-    // Return false to let the split view controller try and incorporate the secondary view
-    // controller’s content into the collapsed interface or true to indicate that you do not want
-    // the split view controller to do anything with the secondary view controller.
-    //
-    // In our case, if the textEditViewController doesn't represent a real page, we don't
-    // want to show it.
-    return textEditViewController.noteIdentifier == nil
+    return proposedDisplayMode
   }
 
   public func splitViewController(
