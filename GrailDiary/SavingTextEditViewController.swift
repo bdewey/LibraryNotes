@@ -74,7 +74,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: self)
     viewController.markdown = configuration.noteRawText
-    viewController.selectedRange = configuration.initialSelectedRange
+    viewController.selectedRawTextRange = configuration.initialSelectedRange
     viewController.autoFirstResponder = configuration.autoFirstResponder
     viewController.delegate = self
     return viewController

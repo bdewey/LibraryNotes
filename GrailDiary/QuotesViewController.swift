@@ -31,7 +31,6 @@ private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashab
     ContentRecord
       .filter(keys: quoteIdentifiers.map { $0.keyArray })
       .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
-//      .including(all: ContentRecord.note.including(all: NoteRecord.binaryContentRecords))
       .asRequest(of: AttributedQuote.self)
   }
 }
@@ -171,8 +170,7 @@ extension QuotesViewController: UICollectionViewDelegate {
   ) -> UIContextMenuConfiguration? {
     guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
     let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
-      Logger.shared.info("Navigating to book ____")
-      notebookViewController?.pushNote(with: content.note.id)
+      notebookViewController?.pushNote(with: content.note.id, selectedText: content.text, autoFirstResponder: true)
     }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
       UIMenu(title: "", children: [viewNoteAction])
@@ -215,14 +213,21 @@ private final class QuoteView: UIView, UIContentView {
     stack.alignment = .top
     stack.spacing = 8
 
+    let quoteBackground = UIView(frame: .zero)
+    quoteBackground.addSubview(stack)
+
     [
-      stack,
+      quoteBackground,
     ].forEach(addSubview)
 
+    quoteBackground.snp.makeConstraints { make in
+      make.top.equalToSuperview().inset(24)
+      make.bottom.equalToSuperview().inset(24)
+      make.left.right.equalTo(readableContentGuide).inset(8)
+    }
+
     stack.snp.makeConstraints { make in
-      make.top.equalToSuperview().inset(8)
-      make.bottom.equalToSuperview().inset(40)
-      make.left.right.equalTo(readableContentGuide)
+      make.edges.equalToSuperview().inset(8)
     }
     apply(configuration: configuration)
   }

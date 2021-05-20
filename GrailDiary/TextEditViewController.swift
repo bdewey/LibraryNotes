@@ -143,6 +143,17 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
+  public var selectedRawTextRange: NSRange {
+    get {
+      let selectedRange = textView.selectedRange
+      return textStorage.storage.rawStringRange(forRange: selectedRange)
+    }
+    set {
+      let visibleRange = textStorage.storage.range(forRawStringRange: newValue)
+      textView.selectedRange = visibleRange
+    }
+  }
+
   /// All of the related data for our typeahead accessory.
   private struct TypeaheadAccessory {
     /// The text location that the accessory is anchored at. This the first character of a hashtag.
@@ -471,8 +482,9 @@ extension TextEditViewController: UICollectionViewDelegate {
     else {
       return
     }
-    textView.textStorage.replaceCharacters(in: hashtagNode.range, with: selectedHashtag)
-    textView.selectedRange = NSRange(location: hashtagNode.range.location + selectedHashtag.utf16.count, length: 0)
+    let hashtagVisibleRange = textStorage.storage.range(forRawStringRange: hashtagNode.range)
+    textView.textStorage.replaceCharacters(in: hashtagVisibleRange, with: selectedHashtag)
+    textView.selectedRange = NSRange(location: hashtagVisibleRange.location + selectedHashtag.utf16.count, length: 0)
     typeaheadAccessory = nil
   }
 }

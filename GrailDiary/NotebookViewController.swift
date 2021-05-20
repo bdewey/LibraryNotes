@@ -343,16 +343,20 @@ public final class NotebookViewController: UIViewController {
 }
 
 public extension NotebookViewController {
-  func pushNote(with noteIdentifier: Note.Identifier) {
+  func pushNote(with noteIdentifier: Note.Identifier, selectedText: String? = nil, autoFirstResponder: Bool = false) {
     Logger.shared.info("Handling openNoteCommand. Note id = \(noteIdentifier)")
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
+      let rawText = note.text ?? ""
+      let initialRange = selectedText.flatMap { (rawText as NSString).range(of: $0) } ?? NSRange(location: 0, length: 0)
       let noteViewController = SavingTextEditViewController(
         configuration: SavingTextEditViewController.Configuration(
           folder: focusedNotebookStructure.predefinedFolder?.rawValue,
           noteIdentifier: noteIdentifier,
           noteRawText: note.text ?? "",
-          noteTitle: note.title
+          noteTitle: note.title,
+          initialSelectedRange: initialRange,
+          autoFirstResponder: autoFirstResponder
         ),
         noteStorage: database
       )
