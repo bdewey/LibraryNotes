@@ -205,15 +205,16 @@ private final class QuoteView: UIView, UIContentView {
     self.configuration = configuration
     super.init(frame: .zero)
 
-    let attributionRow = UIStackView(arrangedSubviews: [coverImageView, attributionLabel])
-    attributionRow.axis = .horizontal
-    attributionRow.distribution = .fillProportionally
-    attributionRow.alignment = .top
-    attributionRow.spacing = 8
+    let textStack = UIStackView(arrangedSubviews: [quoteLabel, attributionLabel])
+    textStack.axis = .vertical
+    textStack.spacing = 16
 
-    let stack = UIStackView(arrangedSubviews: [quoteLabel, attributionRow])
-    stack.axis = .vertical
-    stack.spacing = 16
+    let stack = UIStackView(arrangedSubviews: [coverImageView, textStack])
+    stack.axis = .horizontal
+    stack.distribution = .fillProportionally
+    stack.alignment = .top
+    stack.spacing = 8
+
     [
       stack,
     ].forEach(addSubview)
@@ -234,6 +235,7 @@ private final class QuoteView: UIView, UIContentView {
   private let quoteLabel: UILabel = {
     let label = UILabel()
     label.numberOfLines = 0
+    label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     return label
   }()
 
@@ -246,6 +248,7 @@ private final class QuoteView: UIView, UIContentView {
   private let coverImageView: UIImageView = {
     let imageView = UIImageView()
     imageView.contentMode = .scaleAspectFit
+    imageView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
     return imageView
   }()
 
