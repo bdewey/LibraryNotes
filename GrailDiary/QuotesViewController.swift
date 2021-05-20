@@ -7,6 +7,35 @@ import Logging
 import SnapKit
 import UIKit
 
+private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {
+  var id: String { "\(noteId):\(key)" }
+  var noteId: String
+  var key: String
+  var text: String
+  var role: String
+  var note: NoteRecord
+  var thumbnailImage: [BinaryContentRecord]
+
+  public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
+    return lhs.id == rhs.id
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
+
+  var noteIdentifier: Note.Identifier { note.id }
+
+  /// Turns a set of queries for quote IDs into a content query.
+  static func query(quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<AttributedQuote> {
+    ContentRecord
+      .filter(keys: quoteIdentifiers.map { $0.keyArray })
+      .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
+//      .including(all: ContentRecord.note.including(all: NoteRecord.binaryContentRecords))
+      .asRequest(of: AttributedQuote.self)
+  }
+}
+
 /// Displays a list of quotes.
 public final class QuotesViewController: UIViewController {
   public init(database: NoteDatabase) {
@@ -36,7 +65,7 @@ public final class QuotesViewController: UIViewController {
     }
     didSet {
       do {
-        quoteSubscription = try database.queryPublisher(for: attributedQuotesQuery(for: visibleQuoteIdentifiers))
+        quoteSubscription = try database.queryPublisher(for: AttributedQuote.query(quoteIdentifiers: visibleQuoteIdentifiers))
           .sink(receiveCompletion: { error in
             Logger.shared.error("Received error completion from quotes query: \(error)")
           }, receiveValue: { [weak self] quotes in
@@ -48,17 +77,9 @@ public final class QuotesViewController: UIViewController {
     }
   }
 
-  /// Turns a set of queries for quote IDs into a content query.
-  private func attributedQuotesQuery(for quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<ContentFromNote> {
-    ContentRecord
-      .filter(keys: quoteIdentifiers.map { $0.keyArray })
-      .including(required: ContentRecord.note)
-      .asRequest(of: ContentFromNote.self)
-  }
-
   /// Updates the collection view given quotes.
-  private func updateSnapshot(with quotes: [ContentFromNote]) {
-    var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
+  private func updateSnapshot(with quotes: [AttributedQuote]) {
+    var snapshot = NSDiffableDataSourceSnapshot<Int, AttributedQuote>()
     snapshot.appendSections([0])
     snapshot.appendItems(quotes.shuffled())
     dataSource.apply(snapshot)
@@ -79,12 +100,12 @@ public final class QuotesViewController: UIViewController {
     return collectionView
   }()
 
-  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ContentFromNote> = {
-    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ContentFromNote> { cell, _, quote in
+  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, AttributedQuote> = {
+    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, AttributedQuote> { cell, _, quote in
       cell.contentConfiguration = QuoteContentConfiguration(quote: quote)
       cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
     }
-    let dataSource = UICollectionViewDiffableDataSource<Int, ContentFromNote>(collectionView: collectionView) { collectionView, indexPath, quote in
+    let dataSource = UICollectionViewDiffableDataSource<Int, AttributedQuote>(collectionView: collectionView) { collectionView, indexPath, quote in
       collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: quote)
     }
     return dataSource
@@ -162,7 +183,7 @@ extension QuotesViewController: UICollectionViewDelegate {
 // MARK: - Private
 
 private struct QuoteContentConfiguration: UIContentConfiguration {
-  let quote: ContentFromNote
+  let quote: AttributedQuote
 
   func makeContentView() -> UIView & UIContentView {
     QuoteView(configuration: self)
@@ -184,9 +205,15 @@ private final class QuoteView: UIView, UIContentView {
     self.configuration = configuration
     super.init(frame: .zero)
 
-    let stack = UIStackView(arrangedSubviews: [quoteLabel, attributionLabel])
+    let attributionRow = UIStackView(arrangedSubviews: [coverImageView, attributionLabel])
+    attributionRow.axis = .horizontal
+    attributionRow.distribution = .fillProportionally
+    attributionRow.alignment = .top
+    attributionRow.spacing = 8
+
+    let stack = UIStackView(arrangedSubviews: [quoteLabel, attributionRow])
     stack.axis = .vertical
-    stack.spacing = 8
+    stack.spacing = 16
     [
       stack,
     ].forEach(addSubview)
@@ -216,6 +243,12 @@ private final class QuoteView: UIView, UIContentView {
     return label
   }()
 
+  private let coverImageView: UIImageView = {
+    let imageView = UIImageView()
+    imageView.contentMode = .scaleAspectFit
+    return imageView
+  }()
+
   private func apply(configuration: UIContentConfiguration) {
     guard let quoteContentConfiguration = configuration as? QuoteContentConfiguration else {
       return
@@ -240,6 +273,13 @@ private final class QuoteView: UIView, UIContentView {
         String(trimmedFragment),
       ].filter { !$0.isEmpty }.joined(separator: ", ")
       attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
+    }
+
+    if let imageData = quoteContentConfiguration.quote.thumbnailImage.first {
+      coverImageView.isHidden = false
+      coverImageView.image = imageData.blob.image(maxSize: 100)
+    } else {
+      coverImageView.isHidden = true
     }
   }
 }
