@@ -169,12 +169,46 @@ extension QuotesViewController: UICollectionViewDelegate {
     point: CGPoint
   ) -> UIContextMenuConfiguration? {
     guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
+    let cellFrame = collectionView.cellForItem(at: indexPath)?.frame ?? CGRect(origin: point, size: .zero)
     let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
       notebookViewController?.pushNote(with: content.note.id, selectedText: content.text, autoFirstResponder: true)
     }
-    return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-      UIMenu(title: "", children: [viewNoteAction])
+    let shareQuoteAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+      self?.shareQuote(quote: content, sourceFrame: cellFrame)
     }
+    return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+      UIMenu(title: "", children: [viewNoteAction, shareQuoteAction])
+    }
+  }
+
+  private func shareQuote(quote: AttributedQuote, sourceFrame: CGRect) {
+    let configuration = QuoteContentConfiguration(quote: quote)
+    let view = configuration.makeContentView()
+    let backgroundView = UIView(frame: CGRect(origin: .zero, size: CGSize(width: 600, height: 100)))
+    backgroundView.backgroundColor = .grailBackground
+    backgroundView.addSubview(view)
+    view.snp.makeConstraints { make in
+      make.edges.equalToSuperview().inset(8)
+    }
+    backgroundView.layoutIfNeeded()
+    let size = backgroundView.systemLayoutSizeFitting(CGSize(width: 600, height: CGFloat.greatestFiniteMagnitude))
+    backgroundView.frame = CGRect(origin: .zero, size: size)
+    let renderer = UIGraphicsImageRenderer(size: backgroundView.bounds.size)
+    let image = renderer.image { _ in
+        backgroundView.drawHierarchy(in: backgroundView.bounds, afterScreenUpdates: true)
+    }
+
+    // TODO: copypasta
+    let (formattedQuote, _) = ParsedAttributedString(
+      string: String(quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
+      settings: .plainText(textStyle: .body, fontDesign: .serif)
+    ).decomposedChapterAndVerseAnnotation
+
+    let activityViewController = UIActivityViewController(activityItems: [image, formattedQuote.string], applicationActivities: nil)
+    let popover = activityViewController.popoverPresentationController
+    popover?.sourceView = view
+    popover?.sourceRect = sourceFrame
+    present(activityViewController, animated: true, completion: nil)
   }
 }
 

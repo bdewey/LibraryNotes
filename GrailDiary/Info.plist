@@ -63,6 +63,8 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Grail Diary can save your quotes to your Photos Libary.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.org.brians-brain.CommonplaceBookApp</key>
