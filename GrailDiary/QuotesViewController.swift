@@ -263,6 +263,7 @@ private final class QuoteView: UIView, UIContentView {
     stack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(8)
     }
+
     apply(configuration: configuration)
   }
 
@@ -301,6 +302,18 @@ private final class QuoteView: UIView, UIContentView {
     ).decomposedChapterAndVerseAnnotation
     quoteLabel.attributedText = formattedQuote
 
+    // Try to line up the top of the capheight of the quote with the top of any image that appears in the cell
+    let attributes = formattedQuote.attributes(at: 0, effectiveRange: nil)
+    let lineHeightMultiple = attributes.lineHeightMultiple
+    if lineHeightMultiple > 0 {
+      let font = attributes.font
+      let firstLineExtraHeight = (lineHeightMultiple - 1) * font.lineHeight
+      let ascenderCapHeightDelta = font.ascender - font.capHeight
+      quoteLabel.superview?.transform = CGAffineTransform(translationX: 0, y: -(firstLineExtraHeight + ascenderCapHeightDelta))
+    } else {
+      quoteLabel.superview?.transform = .identity
+    }
+
     // Strip the opening & closing parenthesis of attributionFragment
     let trimmedFragment = attributionFragment
       .strippingLeadingAndTrailingWhitespace
@@ -317,9 +330,13 @@ private final class QuoteView: UIView, UIContentView {
       attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
     }
 
-    if let imageData = quoteContentConfiguration.quote.thumbnailImage.first {
+    if let imageData = quoteContentConfiguration.quote.thumbnailImage.first, let image = imageData.blob.image(maxSize: 320) {
       coverImageView.isHidden = false
-      coverImageView.image = imageData.blob.image(maxSize: 100)
+      coverImageView.image = image
+      coverImageView.snp.remakeConstraints { make in
+        make.width.equalTo(self).multipliedBy(0.25)
+        make.height.equalTo(coverImageView.snp.width).multipliedBy(image.size.height / image.size.width)
+      }
     } else {
       coverImageView.isHidden = true
     }
