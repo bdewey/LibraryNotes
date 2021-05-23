@@ -41,19 +41,6 @@ extension UIResponder {
   }
 }
 
-protocol DocumentListViewControllerDelegate: AnyObject {
-  func documentListViewController(
-    _ viewController: DocumentListViewController,
-    didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?,
-    shiftFocus: Bool
-  )
-
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes: [ContentFromNote], shiftFocus: Bool)
-
-  func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController)
-}
-
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
   /// Designated initializer.
@@ -80,7 +67,6 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
-  public weak var delegate: DocumentListViewControllerDelegate?
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
@@ -144,19 +130,19 @@ final class DocumentListViewController: UIViewController {
   }()
 
   internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
-    let note: Note
     do {
-      note = try database.note(noteIdentifier: noteIdentifier)
+      let note = try database.note(noteIdentifier: noteIdentifier)
+      notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, noteText: note.text ?? "", noteTitle: note.title, shiftFocus: shiftFocus)
     } catch {
       Logger.shared.error("Unexpected error loading page: \(error)")
+    }
+  }
+
+  func selectPage(with noteIdentifier: Note.Identifier) {
+    guard let indexPath = dataSource.indexPath(noteIdentifier: noteIdentifier) else {
       return
     }
-    delegate?.documentListViewController(
-      self,
-      didRequestShowNote: note,
-      noteIdentifier: noteIdentifier,
-      shiftFocus: shiftFocus
-    )
+    collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
   }
 
   internal func selectFirstNote() {
@@ -240,7 +226,7 @@ final class DocumentListViewController: UIViewController {
         didHandleEvent = true
       case "\t":
         if key.modifierFlags.contains(.shift) {
-          delegate?.documentListViewControllerDidRequestChangeFocus(self)
+          notebookViewController?.documentListViewControllerDidRequestChangeFocus(self)
           didHandleEvent = true
         }
       case "\r":
@@ -287,7 +273,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateQuoteList() {
     do {
-      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.attributedQuotesQuery)
+      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.allQuoteIdentifiersQuery)
     } catch {
       Logger.shared.error("Unexpected error getting quotes: \(error)")
     }
@@ -312,7 +298,7 @@ final class DocumentListViewController: UIViewController {
       countItem,
       UIBarButtonItem.flexibleSpace(),
     ]
-    if splitViewController?.isCollapsed ?? false, let newNoteButton = toolbarButtonBuilder?.makeNewNoteButtonItem() {
+    if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
@@ -338,11 +324,15 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       reference: .webPage(url),
       promptCollections: [:]
     )
-    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
+    assertionFailure()
+//    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
   }
 
-  func showQuotes(quotes: [ContentFromNote], shiftFocus: Bool) {
-    delegate?.documentListViewController(self, didRequestShowQuotes: quotes, shiftFocus: shiftFocus)
+  func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
+    let quotesVC = QuotesViewController(database: database)
+    quotesVC.quoteIdentifiers = quotes
+    quotesVC.title = "Random Quotes"
+    notebookViewController?.setSecondaryViewController(quotesVC, pushIfCollapsed: shiftFocus)
   }
 
   func presentStudySessionViewController(for studySession: StudySession) {
@@ -362,6 +352,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
     )
   }
 
+  // TODO: This isn't actually called :-(
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
       let splitViewController = self.splitViewController,
@@ -379,8 +370,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       } else {
         hashtag = nil
       }
-      let (blankNote, _) = Note.makeBlankNote(hashtag: hashtag)
-      delegate?.documentListViewController(self, didRequestShowNote: blankNote, noteIdentifier: nil, shiftFocus: false)
+      let (blankText, _) = Note.makeBlankNoteText(hashtag: hashtag)
+      notebookViewController?.showNoteEditor(noteIdentifier: nil, noteText: blankText, noteTitle: "", shiftFocus: false)
     }
   }
 

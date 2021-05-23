@@ -54,7 +54,7 @@ public extension Note {
     self.init(parsedString: buffer)
   }
 
-  static func makeBlankNote(title: String? = nil, hashtag: String? = nil) -> (Note, Int) {
+  static func makeBlankNoteText(title: String? = nil, hashtag: String? = nil) -> (String, Int) {
     var initialText = "# "
     if let title = title {
       initialText += title
@@ -65,7 +65,7 @@ public extension Note {
       initialText += hashtag
       initialText += "\n"
     }
-    return (Note(markdown: initialText), initialOffset)
+    return (initialText, initialOffset)
   }
 
   mutating func updateMarkdown(_ markdown: String) {

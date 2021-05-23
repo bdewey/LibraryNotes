@@ -70,9 +70,9 @@ public final class WebViewController: UIViewController, ReferenceViewController 
     if splitViewController?.isCollapsed ?? false {
       navigationItem.rightBarButtonItems = []
       navigationController?.isToolbarHidden = false
-      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), toolbarButtonBuilder?.makeNewNoteButtonItem()].compactMap { $0 }
+      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), notebookViewController?.makeNewNoteButtonItem()].compactMap { $0 }
     } else {
-      navigationItem.rightBarButtonItems = [toolbarButtonBuilder?.makeNewNoteButtonItem(), showNotesButton].compactMap { $0 }
+      navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), showNotesButton].compactMap { $0 }
       navigationController?.isToolbarHidden = true
       toolbarItems = []
     }

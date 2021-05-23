@@ -1,14 +1,87 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import Combine
+import GRDB
+import GRDBCombine
+import Logging
 import SnapKit
 import UIKit
 
+private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {
+  var id: String { "\(noteId):\(key)" }
+  var noteId: String
+  var key: String
+  var text: String
+  var role: String
+  var note: NoteRecord
+  var thumbnailImage: [BinaryContentRecord]
+
+  public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
+    return lhs.id == rhs.id
+  }
+
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(id)
+  }
+
+  var noteIdentifier: Note.Identifier { note.id }
+
+  /// Turns a set of queries for quote IDs into a content query.
+  static func query(quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<AttributedQuote> {
+    ContentRecord
+      .filter(keys: quoteIdentifiers.map { $0.keyArray })
+      .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
+      .asRequest(of: AttributedQuote.self)
+  }
+}
+
 /// Displays a list of quotes.
-final class QuotesViewController: UIViewController {
-  public var quotes: [ContentFromNote] = [] {
+public final class QuotesViewController: UIViewController {
+  public init(database: NoteDatabase) {
+    self.database = database
+    super.init(nibName: nil, bundle: nil)
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  private let database: NoteDatabase
+  private var quoteSubscription: AnyCancellable?
+
+  /// This is the set of *all* eligible quote identifiers ot show. We will show a subset of these.
+  public var quoteIdentifiers: [ContentIdentifier] = [] {
     didSet {
       shuffleQuotes()
     }
+  }
+
+  /// This is the set of *visible* quote identifiers -- a randomly selected subset from `quoteIdentifiers`
+  private var visibleQuoteIdentifiers: [ContentIdentifier] = [] {
+    willSet {
+      quoteSubscription = nil
+    }
+    didSet {
+      do {
+        quoteSubscription = try database.queryPublisher(for: AttributedQuote.query(quoteIdentifiers: visibleQuoteIdentifiers))
+          .sink(receiveCompletion: { error in
+            Logger.shared.error("Received error completion from quotes query: \(error)")
+          }, receiveValue: { [weak self] quotes in
+            self?.updateSnapshot(with: quotes)
+          })
+      } catch {
+        Logger.shared.error("Unexpected error fetching quotes: \(error)")
+      }
+    }
+  }
+
+  /// Updates the collection view given quotes.
+  private func updateSnapshot(with quotes: [AttributedQuote]) {
+    var snapshot = NSDiffableDataSourceSnapshot<Int, AttributedQuote>()
+    snapshot.appendSections([0])
+    snapshot.appendItems(quotes.shuffled())
+    dataSource.apply(snapshot)
   }
 
   private lazy var layout: UICollectionViewLayout = {
@@ -22,15 +95,16 @@ final class QuotesViewController: UIViewController {
 
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+    collectionView.delegate = self
     return collectionView
   }()
 
-  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ContentFromNote> = {
-    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ContentFromNote> { cell, _, quote in
+  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, AttributedQuote> = {
+    let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, AttributedQuote> { cell, _, quote in
       cell.contentConfiguration = QuoteContentConfiguration(quote: quote)
       cell.backgroundConfiguration = UIBackgroundConfiguration.clear()
     }
-    let dataSource = UICollectionViewDiffableDataSource<Int, ContentFromNote>(collectionView: collectionView) { collectionView, indexPath, quote in
+    let dataSource = UICollectionViewDiffableDataSource<Int, AttributedQuote>(collectionView: collectionView) { collectionView, indexPath, quote in
       collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: quote)
     }
     return dataSource
@@ -38,7 +112,7 @@ final class QuotesViewController: UIViewController {
 
   // MARK: - View lifecycle
 
-  override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     view.backgroundColor = .grailBackground
 
@@ -53,21 +127,95 @@ final class QuotesViewController: UIViewController {
       make.edges.equalToSuperview()
     }
   }
+
+  @objc private func shuffleQuotes() {
+    visibleQuoteIdentifiers = Array(quoteIdentifiers.shuffled().prefix(5))
+  }
+}
+
+// MARK: - NotebookSecondaryViewController
+
+extension QuotesViewController: NotebookSecondaryViewController {
+  private struct ViewControllerState: Codable {
+    let title: String?
+    let quoteIdentifiers: [ContentIdentifier]
+  }
+
+  public static var notebookDetailType: String { "QuotesViewController" }
+
+  private var currentViewControllerState: ViewControllerState {
+    ViewControllerState(title: title, quoteIdentifiers: quoteIdentifiers)
+  }
+
+  public func userActivityData() throws -> Data {
+    try JSONEncoder().encode(currentViewControllerState)
+  }
+
+  public static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> QuotesViewController {
+    let quoteVC = QuotesViewController(database: database)
+    let viewControllerState = try JSONDecoder().decode(ViewControllerState.self, from: data)
+    quoteVC.quoteIdentifiers = viewControllerState.quoteIdentifiers
+    quoteVC.title = viewControllerState.title
+    return quoteVC
+  }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension QuotesViewController: UICollectionViewDelegate {
+  public func collectionView(
+    _ collectionView: UICollectionView,
+    contextMenuConfigurationForItemAt indexPath: IndexPath,
+    point: CGPoint
+  ) -> UIContextMenuConfiguration? {
+    guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
+    let cellFrame = collectionView.cellForItem(at: indexPath)?.frame ?? CGRect(origin: point, size: .zero)
+    let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
+      notebookViewController?.pushNote(with: content.note.id, selectedText: content.text, autoFirstResponder: true)
+    }
+    let shareQuoteAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+      self?.shareQuote(quote: content, sourceFrame: cellFrame)
+    }
+    return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+      UIMenu(title: "", children: [viewNoteAction, shareQuoteAction])
+    }
+  }
+
+  private func shareQuote(quote: AttributedQuote, sourceFrame: CGRect) {
+    let configuration = QuoteContentConfiguration(quote: quote)
+    let view = configuration.makeContentView()
+    let backgroundView = UIView(frame: CGRect(origin: .zero, size: CGSize(width: 600, height: 100)))
+    backgroundView.backgroundColor = .grailBackground
+    backgroundView.addSubview(view)
+    view.snp.makeConstraints { make in
+      make.edges.equalToSuperview().inset(8)
+    }
+    backgroundView.layoutIfNeeded()
+    let size = backgroundView.systemLayoutSizeFitting(CGSize(width: 600, height: CGFloat.greatestFiniteMagnitude))
+    backgroundView.frame = CGRect(origin: .zero, size: size)
+    let renderer = UIGraphicsImageRenderer(size: backgroundView.bounds.size)
+    let image = renderer.image { _ in
+        backgroundView.drawHierarchy(in: backgroundView.bounds, afterScreenUpdates: true)
+    }
+
+    // TODO: copypasta
+    let (formattedQuote, _) = ParsedAttributedString(
+      string: String(quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
+      settings: .plainText(textStyle: .body, fontDesign: .serif)
+    ).decomposedChapterAndVerseAnnotation
+
+    let activityViewController = UIActivityViewController(activityItems: [image, formattedQuote.string], applicationActivities: nil)
+    let popover = activityViewController.popoverPresentationController
+    popover?.sourceView = view
+    popover?.sourceRect = sourceFrame
+    present(activityViewController, animated: true, completion: nil)
+  }
 }
 
 // MARK: - Private
 
-private extension QuotesViewController {
-  @objc func shuffleQuotes() {
-    var snapshot = NSDiffableDataSourceSnapshot<Int, ContentFromNote>()
-    snapshot.appendSections([0])
-    snapshot.appendItems(Array(quotes.shuffled().prefix(5)))
-    dataSource.apply(snapshot)
-  }
-}
-
 private struct QuoteContentConfiguration: UIContentConfiguration {
-  let quote: ContentFromNote
+  let quote: AttributedQuote
 
   func makeContentView() -> UIView & UIContentView {
     QuoteView(configuration: self)
@@ -89,18 +237,33 @@ private final class QuoteView: UIView, UIContentView {
     self.configuration = configuration
     super.init(frame: .zero)
 
-    let stack = UIStackView(arrangedSubviews: [quoteLabel, attributionLabel])
-    stack.axis = .vertical
+    let textStack = UIStackView(arrangedSubviews: [quoteLabel, attributionLabel])
+    textStack.axis = .vertical
+    textStack.spacing = 16
+
+    let stack = UIStackView(arrangedSubviews: [coverImageView, textStack])
+    stack.axis = .horizontal
+    stack.distribution = .fillProportionally
+    stack.alignment = .top
     stack.spacing = 8
+
+    let quoteBackground = UIView(frame: .zero)
+    quoteBackground.addSubview(stack)
+
     [
-      stack,
+      quoteBackground,
     ].forEach(addSubview)
 
-    stack.snp.makeConstraints { make in
-      make.top.equalToSuperview().inset(8)
-      make.bottom.equalToSuperview().inset(40)
-      make.left.right.equalTo(readableContentGuide)
+    quoteBackground.snp.makeConstraints { make in
+      make.top.equalToSuperview().inset(24)
+      make.bottom.equalToSuperview().inset(24)
+      make.left.right.equalTo(readableContentGuide).inset(8)
     }
+
+    stack.snp.makeConstraints { make in
+      make.edges.equalToSuperview().inset(8)
+    }
+
     apply(configuration: configuration)
   }
 
@@ -112,6 +275,7 @@ private final class QuoteView: UIView, UIContentView {
   private let quoteLabel: UILabel = {
     let label = UILabel()
     label.numberOfLines = 0
+    label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
     return label
   }()
 
@@ -119,6 +283,13 @@ private final class QuoteView: UIView, UIContentView {
     let label = UILabel()
     label.numberOfLines = 0
     return label
+  }()
+
+  private let coverImageView: UIImageView = {
+    let imageView = UIImageView()
+    imageView.contentMode = .scaleAspectFit
+    imageView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+    return imageView
   }()
 
   private func apply(configuration: UIContentConfiguration) {
@@ -130,6 +301,18 @@ private final class QuoteView: UIView, UIContentView {
       settings: .plainText(textStyle: .body, fontDesign: .serif)
     ).decomposedChapterAndVerseAnnotation
     quoteLabel.attributedText = formattedQuote
+
+    // Try to line up the top of the capheight of the quote with the top of any image that appears in the cell
+    let attributes = formattedQuote.attributes(at: 0, effectiveRange: nil)
+    let lineHeightMultiple = attributes.lineHeightMultiple
+    if lineHeightMultiple > 0 {
+      let font = attributes.font
+      let firstLineExtraHeight = (lineHeightMultiple - 1) * font.lineHeight
+      let ascenderCapHeightDelta = font.ascender - font.capHeight
+      quoteLabel.superview?.transform = CGAffineTransform(translationX: 0, y: -(firstLineExtraHeight + ascenderCapHeightDelta))
+    } else {
+      quoteLabel.superview?.transform = .identity
+    }
 
     // Strip the opening & closing parenthesis of attributionFragment
     let trimmedFragment = attributionFragment
@@ -145,6 +328,17 @@ private final class QuoteView: UIView, UIContentView {
         String(trimmedFragment),
       ].filter { !$0.isEmpty }.joined(separator: ", ")
       attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
+    }
+
+    if let imageData = quoteContentConfiguration.quote.thumbnailImage.first, let image = imageData.blob.image(maxSize: 320) {
+      coverImageView.isHidden = false
+      coverImageView.image = image
+      coverImageView.snp.remakeConstraints { make in
+        make.width.equalTo(self).multipliedBy(0.25)
+        make.height.equalTo(coverImageView.snp.width).multipliedBy(image.size.height / image.size.width)
+      }
+    } else {
+      coverImageView.isHidden = true
     }
   }
 }

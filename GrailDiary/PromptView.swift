@@ -4,7 +4,7 @@ import AVFoundation
 import Foundation
 import UIKit
 
-public protocol PromptViewDelegate: class {
+public protocol PromptViewDelegate: AnyObject {
   func promptViewDidRevealAnswer(_ promptView: PromptView)
 }
 

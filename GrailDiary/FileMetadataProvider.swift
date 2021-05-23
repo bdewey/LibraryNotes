@@ -3,7 +3,7 @@
 import Foundation
 import Logging
 
-public protocol FileMetadataProviderDelegate: class {
+public protocol FileMetadataProviderDelegate: AnyObject {
   /// Sent when there are new FileMetadata items in the provider.
   ///
   /// - parameter provider: The file metadata provider
@@ -13,7 +13,7 @@ public protocol FileMetadataProviderDelegate: class {
 
 /// A FileMetadataProvider knows how to obtain all of the FileMetadata structures corresponding
 /// to a single container (e.g., iCloud container or documents folder)
-public protocol FileMetadataProvider: class {
+public protocol FileMetadataProvider: AnyObject {
   var container: URL { get }
 
   /// The current array of metadata.

@@ -9,17 +9,18 @@ protocol ReferenceViewController: UIViewController {
   var relatedNotesViewController: UIViewController? { get set }
 }
 
-public protocol ToolbarButtonBuilder {
-  func makeNewNoteButtonItem() -> UIBarButtonItem
-}
-
 public extension UIViewController {
-  /// Walk up the parent view controllers to find one that implements ToolbarButtonBuilder
-  var toolbarButtonBuilder: ToolbarButtonBuilder? {
+  /// Walks up parent view controllers to find one that is a NotebookViewController.
+  var notebookViewController: NotebookViewController? {
+    findParent(where: { $0 is NotebookViewController }) as? NotebookViewController
+  }
+
+  func findParent(where predicate: (UIViewController) -> Bool) -> UIViewController? {
     var currentViewController: UIViewController? = self
     while currentViewController != nil {
-      if let builder = currentViewController as? ToolbarButtonBuilder {
-        return builder
+      // See the line above, we know this is non-nil
+      if predicate(currentViewController!) {
+        return currentViewController
       }
       currentViewController = currentViewController?.parent ?? currentViewController?.presentingViewController
     }
@@ -31,7 +32,7 @@ public extension UIViewController {
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
 /// - secondary: An individual note
-final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
+public final class NotebookViewController: UIViewController {
   init(database: NoteDatabase) {
     self.database = database
     super.init(nibName: nil, bundle: nil)
@@ -52,97 +53,76 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
       documentListViewController.focusedStructure = focusedNotebookStructure
-    }
-  }
-
-  /// The current editor.
-  private var currentNoteEditor: SavingTextEditViewController? {
-    didSet {
-      guard let currentNoteEditor = currentNoteEditor else { return }
-      let note = currentNoteEditor.note
-      if let referenceViewController = self.referenceViewController(for: note) {
-        currentNoteEditor.chromeStyle = .modal
-        currentNoteEditor.navigationItem.title = "Related Notes"
-        referenceViewController.relatedNotesViewController = currentNoteEditor
-        secondaryNavigationController.viewControllers = [referenceViewController]
-      } else {
-        currentNoteEditor.chromeStyle = .splitViewController
-        secondaryNavigationController.viewControllers = [currentNoteEditor]
+      if notebookSplitViewController.isCollapsed {
+        let compactListViewController = DocumentListViewController(database: database)
+        compactListViewController.focusedStructure = focusedNotebookStructure
+        compactNavigationController.pushViewController(compactListViewController, animated: true)
       }
     }
   }
 
-  private func setCurrentNoteEditor(_ currentNoteEditor: SavingTextEditViewController?, showSecondary: Bool) {
-    self.currentNoteEditor = currentNoteEditor
-    guard let currentNoteEditor = currentNoteEditor else { return }
-    let note = currentNoteEditor.note
-    if let referenceViewController = self.referenceViewController(for: note) {
-      currentNoteEditor.chromeStyle = .modal
-      currentNoteEditor.navigationItem.title = "Related Notes"
-      referenceViewController.relatedNotesViewController = currentNoteEditor
-      secondaryNavigationController.viewControllers = [referenceViewController]
+  public func setSecondaryViewController(_ viewController: NotebookSecondaryViewController, pushIfCollapsed: Bool) {
+    if notebookSplitViewController.isCollapsed {
+      if pushIfCollapsed {
+        if compactNavigationController.viewControllers.count < 3 {
+          compactNavigationController.pushViewController(viewController, animated: true)
+        } else {
+          compactNavigationController.popToViewController(compactNavigationController.viewControllers[1], animated: true)
+          compactNavigationController.pushViewController(viewController, animated: true)
+        }
+      }
     } else {
-      currentNoteEditor.chromeStyle = .splitViewController
-      secondaryNavigationController.viewControllers = [currentNoteEditor]
-    }
-    if showSecondary {
-      notebookSplitViewController.show(.secondary)
+      notebookSplitViewController.setViewController(UINavigationController.notebookNavigationController(rootViewController: viewController), for: .secondary)
     }
   }
 
-  private lazy var structureViewController: NotebookStructureViewController = {
+  public func pushSecondaryViewController(_ viewController: UIViewController) {
+    if notebookSplitViewController.isCollapsed {
+      compactNavigationController.pushViewController(viewController, animated: true)
+    } else {
+      notebookSplitViewController.setViewController(viewController, for: .secondary)
+    }
+  }
+
+  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
+
+  private lazy var structureViewController = makeStructureViewController()
+
+  private func makeStructureViewController() -> NotebookStructureViewController {
     let structureViewController = NotebookStructureViewController(
       database: documentListViewController.database
     )
     structureViewController.delegate = self
     return structureViewController
-  }()
+  }
 
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
     let documentListViewController = DocumentListViewController(database: database)
-    documentListViewController.delegate = self
     return documentListViewController
   }()
 
-  private lazy var supplementaryNavigationController: UINavigationController = {
-    let supplementaryNavigationController = UINavigationController(
-      rootViewController: documentListViewController
-    )
-    supplementaryNavigationController.navigationBar.prefersLargeTitles = false
-    supplementaryNavigationController.navigationBar.barTintColor = .grailBackground
-    return supplementaryNavigationController
-  }()
-
-  private lazy var secondaryNavigationController: UINavigationController = {
-    let detailViewController = SavingTextEditViewController(database: documentListViewController.database, folder: nil)
-    let navigationController = UINavigationController(
-      rootViewController: detailViewController
-    )
-    navigationController.navigationBar.prefersLargeTitles = false
-    navigationController.navigationBar.barTintColor = .grailBackground
-    return navigationController
-  }()
+  private lazy var compactNavigationController = UINavigationController.notebookNavigationController(rootViewController: makeStructureViewController(), prefersLargeTitles: true)
 
   /// The split view we are managing.
   private lazy var notebookSplitViewController: UISplitViewController = {
-    let primaryNavigationController = UINavigationController(rootViewController: structureViewController)
-    primaryNavigationController.navigationBar.prefersLargeTitles = true
-    primaryNavigationController.navigationBar.barTintColor = .grailBackground
+    let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController)
 
     let splitViewController = UISplitViewController(style: .tripleColumn)
-    splitViewController.viewControllers = [
-      primaryNavigationController,
-      supplementaryNavigationController,
-      secondaryNavigationController,
-    ]
+    splitViewController.setViewController(primaryNavigationController, for: .primary)
+    splitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
+    splitViewController.setViewController(
+      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, folder: nil)),
+      for: .secondary
+    )
+    splitViewController.setViewController(compactNavigationController, for: .compact)
     splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.showsSecondaryOnlyButton = true
     splitViewController.delegate = self
     return splitViewController
   }()
 
-  override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
 
     // Set up notebookSplitViewController as a child
@@ -155,7 +135,7 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     configureKeyCommands()
   }
 
-  override var canBecomeFirstResponder: Bool { true }
+  override public var canBecomeFirstResponder: Bool { true }
 
   private func configureKeyCommands() {
     let newNoteCommand = UIKeyCommand(
@@ -215,27 +195,27 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
   }
 
   @objc func toggleEditMode() {
-    if currentNoteEditor?.isEditing ?? false {
-      currentNoteEditor?.isEditing = false
-    } else {
-      UIView.animate(withDuration: 0.2) { [notebookSplitViewController] in
-        notebookSplitViewController.preferredDisplayMode = .secondaryOnly
-      } completion: { [currentNoteEditor] success in
-        if success { _ = currentNoteEditor?.editEndOfDocument() }
-      }
-    }
+    assertionFailure("Not implemented")
+//    if currentNoteEditor?.isEditing ?? false {
+//      currentNoteEditor?.isEditing = false
+//    } else {
+//      UIView.animate(withDuration: 0.2) { [notebookSplitViewController] in
+//        notebookSplitViewController.preferredDisplayMode = .secondaryOnly
+//      } completion: { [currentNoteEditor] success in
+//        if success { _ = currentNoteEditor?.editEndOfDocument() }
+//      }
+//    }
   }
 
   @objc func makeNewNote() {
     let hashtag = focusedNotebookStructure.hashtag
     let folder = focusedNotebookStructure.predefinedFolder
     let viewController = SavingTextEditViewController(database: database, folder: folder, currentHashtag: hashtag, autoFirstResponder: true)
-    currentNoteEditor = viewController
-    notebookSplitViewController.show(.secondary)
+    setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a blank document")
   }
 
-  func makeNewNoteButtonItem() -> UIBarButtonItem {
+  public func makeNewNoteButtonItem() -> UIBarButtonItem {
     var extraActions = [UIAction]()
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
       let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
@@ -268,21 +248,67 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     return button
   }
 
+  func showNoteEditor(noteIdentifier: Note.Identifier?, noteText: String, noteTitle: String, shiftFocus: Bool) {
+    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
+    let noteViewController = SavingTextEditViewController(
+      configuration: SavingTextEditViewController.Configuration(
+        folder: focusedNotebookStructure.predefinedFolder?.rawValue,
+        noteIdentifier: actualNoteIdentifier,
+        noteRawText: noteText,
+        noteTitle: noteTitle
+      ),
+      noteStorage: database
+    )
+    noteViewController.setTitleMarkdown(noteTitle)
+    setSecondaryViewController(noteViewController, pushIfCollapsed: shiftFocus)
+  }
+
   // MARK: - State restoration
 
   private enum ActivityKey {
     static let notebookStructure = "org.brians-brain.GrailDiary.NotebookStructure"
-    static let selectedNote = "org.brians-brain.GrailDiary.SelectedNote"
     static let displayMode = "org.brians-brain.GrailDiary.notebookSplitViewController.displayMode"
+    static let secondaryViewControllerType = "org.brians-brain.GrailDiary.notebookSplitViewController.secondaryType"
+    static let secondaryViewControllerData = "org.brians-brain.GrailDiary.notebookSplitViewController.secondaryData"
   }
 
   func updateUserActivity(_ userActivity: NSUserActivity) {
     userActivity.addUserInfoEntries(from: [
       ActivityKey.notebookStructure: focusedNotebookStructure.rawValue,
-      ActivityKey.selectedNote: currentNoteEditor?.noteIdentifier ?? "",
       ActivityKey.displayMode: notebookSplitViewController.displayMode.rawValue,
     ])
     structureViewController.updateUserActivity(userActivity)
+
+    if let secondaryViewController = self.secondaryViewController {
+      do {
+        let controllerType = type(of: secondaryViewController).notebookDetailType
+        userActivity.addUserInfoEntries(
+          from: [
+            ActivityKey.secondaryViewControllerType: controllerType,
+            ActivityKey.secondaryViewControllerData: try secondaryViewController.userActivityData(),
+          ]
+        )
+      } catch {
+        Logger.shared.error("Unexpected error saving secondary VC: \(error)")
+      }
+    }
+  }
+
+  var secondaryViewController: NotebookSecondaryViewController? {
+    secondaryViewController(forCollaped: notebookSplitViewController.isCollapsed)
+  }
+
+  func secondaryViewController(forCollaped collapsed: Bool) -> NotebookSecondaryViewController? {
+    if collapsed {
+      if compactNavigationController.viewControllers.count >= 3 {
+        return compactNavigationController.topViewController as? NotebookSecondaryViewController
+      } else {
+        return nil
+      }
+    } else if let navigationController = notebookSplitViewController.viewController(for: .secondary) as? UINavigationController {
+      return navigationController.viewControllers.first as? NotebookSecondaryViewController
+    }
+    return nil
   }
 
   func configure(with userActivity: NSUserActivity) {
@@ -292,26 +318,63 @@ final class NotebookViewController: UIViewController, ToolbarButtonBuilder {
     {
       self.focusedNotebookStructure = focusedNotebookStructure
     }
-    if
-      let noteIdentifier = userActivity.userInfo?[ActivityKey.selectedNote] as? String,
-      !noteIdentifier.isEmpty,
-      let note = try? database.note(noteIdentifier: noteIdentifier)
-    {
-      documentListViewController(documentListViewController, didRequestShowNote: note, noteIdentifier: noteIdentifier, shiftFocus: false)
-    }
     if let rawDisplayMode = userActivity.userInfo?[ActivityKey.displayMode] as? Int,
        let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode)
     {
       notebookSplitViewController.preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
+
+    if let secondaryViewControllerType = userActivity.userInfo?[ActivityKey.secondaryViewControllerType] as? String,
+       let secondaryViewControllerData = userActivity.userInfo?[ActivityKey.secondaryViewControllerData] as? Data
+    {
+      do {
+        let secondaryViewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: secondaryViewControllerType,
+          data: secondaryViewControllerData,
+          database: database
+        )
+        setSecondaryViewController(secondaryViewController, pushIfCollapsed: true)
+      } catch {
+        Logger.shared.error("Error recovering secondary view controller: \(error)")
+      }
+    }
+  }
+}
+
+public extension NotebookViewController {
+  func pushNote(with noteIdentifier: Note.Identifier, selectedText: String? = nil, autoFirstResponder: Bool = false) {
+    Logger.shared.info("Handling openNoteCommand. Note id = \(noteIdentifier)")
+    do {
+      let note = try database.note(noteIdentifier: noteIdentifier)
+      let rawText = note.text ?? ""
+      let initialRange = selectedText.flatMap { (rawText as NSString).range(of: $0) } ?? NSRange(location: 0, length: 0)
+      let noteViewController = SavingTextEditViewController(
+        configuration: SavingTextEditViewController.Configuration(
+          folder: focusedNotebookStructure.predefinedFolder?.rawValue,
+          noteIdentifier: noteIdentifier,
+          noteRawText: note.text ?? "",
+          noteTitle: note.title,
+          initialSelectedRange: initialRange,
+          autoFirstResponder: autoFirstResponder
+        ),
+        noteStorage: database
+      )
+      noteViewController.setTitleMarkdown(note.title)
+      setSecondaryViewController(noteViewController, pushIfCollapsed: true)
+      // TODO: Figure out how to make a "push" make sense in a split view controller
+      //      pushSecondaryViewController(noteViewController)
+      documentListViewController.selectPage(with: noteIdentifier)
+    } catch {
+      Logger.shared.error("Unexpected error getting note \(noteIdentifier): \(error)")
+    }
   }
 }
 
 // MARK: - WebScrapingViewControllerDelegate
 
 extension NotebookViewController: WebScrapingViewControllerDelegate {
-  func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown markdown: String) {
+  public func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown markdown: String) {
     dismiss(animated: true, completion: nil)
     Logger.shared.info("Creating a new page with markdown: \(markdown)")
     // TODO: There's an awful lot repeated in the book search method
@@ -325,12 +388,11 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
       currentHashtag: hashtag,
       autoFirstResponder: true
     )
-    currentNoteEditor = viewController
-    notebookSplitViewController.show(.secondary)
+    setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a book!")
   }
 
-  func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
+  public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
     dismiss(animated: true, completion: nil)
   }
 }
@@ -338,7 +400,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 // MARK: - BookSearchViewControllerDelegate
 
 extension NotebookViewController: BookSearchViewControllerDelegate {
-  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
     dismiss(animated: true, completion: nil)
     let hashtag = focusedNotebookStructure.hashtag
     let folder = focusedNotebookStructure.predefinedFolder
@@ -350,12 +412,11 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
       currentHashtag: hashtag,
       autoFirstResponder: true
     )
-    currentNoteEditor = viewController
-    notebookSplitViewController.show(.secondary)
+    setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a book!")
   }
 
-  func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
     dismiss(animated: true, completion: nil)
   }
 }
@@ -375,45 +436,9 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
 
 // MARK: - DocumentListViewControllerDelegate
 
-extension NotebookViewController: DocumentListViewControllerDelegate {
+extension NotebookViewController {
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController) {
     tagsBecomeFirstResponder()
-  }
-
-  func documentListViewController(
-    _ viewController: DocumentListViewController,
-    didRequestShowNote note: Note,
-    noteIdentifier: Note.Identifier?,
-    shiftFocus: Bool
-  ) {
-    if notebookSplitViewController.viewController(for: .secondary) != secondaryNavigationController {
-      notebookSplitViewController.setViewController(secondaryNavigationController, for: .secondary)
-    }
-    let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
-    let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(
-        folder: focusedNotebookStructure.predefinedFolder,
-        noteIdentifier: actualNoteIdentifier,
-        note: note
-      ),
-      noteStorage: database
-    )
-    noteViewController.setTitleMarkdown(note.title)
-    currentNoteEditor = noteViewController
-    if shiftFocus {
-      notebookSplitViewController.show(.secondary)
-    }
-  }
-
-  func documentListViewController(_ viewController: DocumentListViewController, didRequestShowQuotes quotes: [ContentFromNote], shiftFocus: Bool) {
-    let quotesViewController = QuotesViewController(nibName: nil, bundle: nil)
-    quotesViewController.quotes = quotes
-    quotesViewController.title = "Random Quotes"
-    let navigationController = UINavigationController(rootViewController: quotesViewController)
-    notebookSplitViewController.setViewController(navigationController, for: .secondary)
-    if shiftFocus {
-      notebookSplitViewController.show(.secondary)
-    }
   }
 
   private func referenceViewController(for note: Note) -> ReferenceViewController? {
@@ -425,51 +450,74 @@ extension NotebookViewController: DocumentListViewControllerDelegate {
   }
 }
 
+private extension UINavigationController {
+  /// Creates a UINavigationController with the expected configuration for being a notebook navigation controller.
+  static func notebookNavigationController(rootViewController: UIViewController, prefersLargeTitles: Bool = false) -> UINavigationController {
+    let navigationController = HackNavigationController(
+      rootViewController: rootViewController
+    )
+    navigationController.navigationBar.prefersLargeTitles = prefersLargeTitles
+    navigationController.navigationBar.barTintColor = .grailBackground
+    return navigationController
+  }
+}
+
 // MARK: - UISplitViewControllerDelegate
 
 extension NotebookViewController: UISplitViewControllerDelegate {
-  func splitViewController(
-    _ splitViewController: UISplitViewController,
-    collapseSecondary secondaryViewController: UIViewController,
-    onto primaryViewController: UIViewController
-  ) -> Bool {
-    guard
-      let navigationController = secondaryViewController as? UINavigationController,
-      let textEditViewController = navigationController.visibleViewController as? SavingTextEditViewController
-    else {
-      assertionFailure()
-      return false
+  public func splitViewController(
+    _ svc: UISplitViewController,
+    displayModeForExpandingToProposedDisplayMode proposedDisplayMode: UISplitViewController.DisplayMode
+  ) -> UISplitViewController.DisplayMode {
+    if let secondaryViewController = self.secondaryViewController(forCollaped: true) {
+      do {
+        let activityData = try secondaryViewController.userActivityData()
+        let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: type(of: secondaryViewController).notebookDetailType,
+          data: activityData,
+          database: database
+        )
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
+          self.setSecondaryViewController(viewController, pushIfCollapsed: false)
+        }
+      } catch {
+        Logger.shared.error("Unexpected error rebuilding view hierarchy")
+      }
     }
-    // Per documentation:
-    // Return false to let the split view controller try and incorporate the secondary view
-    // controller’s content into the collapsed interface or true to indicate that you do not want
-    // the split view controller to do anything with the secondary view controller.
-    //
-    // In our case, if the textEditViewController doesn't represent a real page, we don't
-    // want to show it.
-    return textEditViewController.noteIdentifier == nil
+    return proposedDisplayMode
   }
 
-  func splitViewController(
+  public func splitViewController(
     _ svc: UISplitViewController,
     topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
   ) -> UISplitViewController.Column {
-    guard let currentNoteEditor = currentNoteEditor else {
-      // If there's nothing meaningful in the secondary pane, we should show supplementary.
-      return .supplementary
-    }
+    let compactDocumentList = DocumentListViewController(database: database)
+    compactDocumentList.focusedStructure = focusedNotebookStructure
+    compactNavigationController.popToRootViewController(animated: false)
+    compactNavigationController.pushViewController(compactDocumentList, animated: false)
 
-    // If the current note has reference material, keep it in view.
-    if currentNoteEditor.note.reference != nil {
-      return .secondary
+    if let secondaryViewController = self.secondaryViewController(forCollaped: false) {
+      do {
+        let activityData = try secondaryViewController.userActivityData()
+        let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
+          type: type(of: secondaryViewController).notebookDetailType,
+          data: activityData,
+          database: database
+        )
+        compactNavigationController.pushViewController(viewController, animated: false)
+      } catch {
+        Logger.shared.error("Unexpected error rebuilding view hierarchy")
+      }
     }
+    return .compact
+  }
+}
 
-    // If the current note isn't saved, prefer the supplementary view.
-    if currentNoteEditor.noteIdentifier == nil {
-      return .supplementary
+private final class HackNavigationController: UINavigationController {
+  override func pushViewController(_ viewController: UIViewController, animated: Bool) {
+    if viewController is UINavigationController {
+      Logger.shared.error("What are you doing bro?")
     }
-
-    // No reason to second-guess UIKit.
-    return proposedTopColumn
+    super.pushViewController(viewController, animated: animated)
   }
 }

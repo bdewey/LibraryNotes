@@ -94,6 +94,7 @@
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36214652334F607008C8FF4 /* LayoutManager.swift */; };
 		D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362CC2E25431C6E00462683 /* NotebookViewController.swift */; };
+		D3677C772652A45F00307EEA /* NotebookSecondaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */; };
 		D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */; };
 		D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
@@ -305,6 +306,7 @@
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
 		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
+		D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSecondaryViewController.swift; sourceTree = "<group>"; };
 		D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanTranslationClassifier.swift; sourceTree = "<group>"; };
 		D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGVector+Extensions.swift"; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
@@ -598,6 +600,7 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -939,6 +942,7 @@
 				D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */,
 				D3E5E024256F13CD0062BDD4 /* NoteMetadataRecord.swift in Sources */,
 				D39D2468256C013100948A72 /* ParsedTextStorage.m in Sources */,
+				D3677C772652A45F00307EEA /* NotebookSecondaryViewController.swift in Sources */,
 				D35C8BCA259E831600A92CEB /* SharedUserDefaults.swift in Sources */,
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D30D6B2A2549BD0700F5902D /* PieceTableString.swift in Sources */,
@@ -1103,7 +1107,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 66;
+				CURRENT_PROJECT_VERSION = 69;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
@@ -1113,7 +1117,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.46.0;
+				MARKETING_VERSION = 0.47.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1129,7 +1133,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 66;
+				CURRENT_PROJECT_VERSION = 69;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -1138,7 +1142,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 0.46.0;
+				MARKETING_VERSION = 0.47.0;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1277,7 +1281,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 66;
+				CURRENT_PROJECT_VERSION = 69;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
@@ -1286,7 +1290,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.46.0;
+				MARKETING_VERSION = 0.47.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = NO;
@@ -1305,7 +1309,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 66;
+				CURRENT_PROJECT_VERSION = 69;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
@@ -1314,7 +1318,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.46.0;
+				MARKETING_VERSION = 0.47.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTS_MACCATALYST = NO;
