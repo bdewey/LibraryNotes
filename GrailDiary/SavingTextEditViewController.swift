@@ -252,6 +252,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 
 extension SavingTextEditViewController: ImageStorage {
   func storeImageData(_ imageData: Data, type: UTType) throws -> String {
+    try forceSave()
     return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type)
   }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Cover images weren't getting inserted into brand new notes
+
 ## [0.47.0] - 2021-05-22
 
 ### Added

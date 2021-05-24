@@ -643,7 +643,11 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
     var imageKey: String?
     if let image = book.coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
-      imageKey = try? imageStorage.storeImageData(imageData, type: .jpeg)
+      do {
+        imageKey = try imageStorage.storeImageData(imageData, type: .jpeg)
+      } catch {
+        Logger.shared.error("Unexpected error saving image data: \(error)")
+      }
     }
     var markdown = book.markdownTitle
     if let imageKey = imageKey {
