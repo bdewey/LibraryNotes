@@ -5,6 +5,7 @@
 ### Fixed
 
 - Cover images weren't getting inserted into brand new notes
+- Prevent the note list from flashing while typing on non-compact layouts
 
 ## [0.47.0] - 2021-05-22
 

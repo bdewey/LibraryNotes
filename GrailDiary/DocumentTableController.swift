@@ -171,7 +171,6 @@ public final class DocumentTableController: NSObject {
     willSet {
       quotesSubscription?.cancel()
       quotesSubscription = nil
-      quoteIdentifiers = []
     }
     didSet {
       quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
@@ -238,6 +237,8 @@ public final class DocumentTableController: NSObject {
           return true
         }
       case (.webPage, .webPage):
+        continue
+      case (.reviewQuotes, .reviewQuotes):
         continue
       default:
         return true
