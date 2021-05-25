@@ -4,45 +4,6 @@ import Combine
 import Logging
 import UIKit
 
-/// Core model for a "book"
-public struct Book: Hashable, Codable {
-  /// Unique ID for this book
-  var id: String
-
-  /// The book title
-  var title: String
-
-  /// The book authors, in "First Last" format
-  var authors: [String]
-
-  /// When this book was publisehd
-  var yearPublished: Int?
-
-  var originalYearPublished: Int?
-
-  var publisher: String?
-
-  var isbn: String?
-
-  var isbn13: String?
-
-  var dateRead: Date?
-
-  var numberOfPages: Int?
-
-  var markdownTitle: String {
-    var title = "_\(self.title)_"
-    if !authors.isEmpty {
-      let authors = self.authors.joined(separator: ", ")
-      title += ": \(authors)"
-    }
-    if let publishedDate = yearPublished {
-      title += " (\(publishedDate))"
-    }
-    return title
-  }
-}
-
 private struct ViewModel: Hashable {
   var book: Book
   var coverImage: UIImage?

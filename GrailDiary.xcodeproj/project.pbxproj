@@ -135,6 +135,7 @@
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3CFF2D325533DA500A008FD /* PieceTableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3CFF2D225533DA500A008FD /* PieceTableTests.swift */; };
 		D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D05D2925507C89007C443A /* ParsedString.swift */; };
+		D3D093DD265CBB26002FFD23 /* Book.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D093DC265CBB26002FFD23 /* Book.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
 		D3D867B3259EA262008254DF /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B2259EA262008254DF /* Logging */; };
@@ -348,6 +349,7 @@
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3CFF2D225533DA500A008FD /* PieceTableTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PieceTableTests.swift; sourceTree = "<group>"; };
 		D3D05D2925507C89007C443A /* ParsedString.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParsedString.swift; sourceTree = "<group>"; };
+		D3D093DC265CBB26002FFD23 /* Book.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Book.swift; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GrailDiary.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -522,6 +524,7 @@
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D34C88B325DD7C4C00849E0B /* AttributesArray.swift */,
+				D3D093DC265CBB26002FFD23 /* Book.swift */,
 				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */,
@@ -557,6 +560,7 @@
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D32B16C825994BAE00766D55 /* Note+Database.swift */,
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
+				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
 				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
 				D3E9B57F2564F97400E47375 /* NSAttributedString+Attributes.swift */,
@@ -600,7 +604,6 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
-				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -1009,6 +1012,7 @@
 				D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */,
 				D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
+				D3D093DD265CBB26002FFD23 /* Book.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
 				D3D05D2B25507C89007C443A /* ParsedString.swift in Sources */,
 				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
