@@ -223,6 +223,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return Array([[hashtag], existingHashtags].joined())
     }
   }
+
+  func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
+
+  }
 }
 
 extension SavingTextEditViewController: NotebookSecondaryViewController {

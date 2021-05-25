@@ -7,6 +7,9 @@ import Logging
 private enum ApplicationMimeType: String {
   /// Private MIME type for URLs.
   case url = "text/vnd.grail.url"
+
+  /// MIME type for Book
+  case book = "application/json;type=Book"
 }
 
 public extension Note {
@@ -152,17 +155,28 @@ public extension Note {
 
   private func saveReference(noteIdentifier: Note.Identifier, database: Database) throws {
     guard let reference = reference else { return }
+    let record: ContentRecord
     switch reference {
     case .webPage(let url):
-      let record = ContentRecord(
+      record = ContentRecord(
         text: url.absoluteString,
         noteId: noteIdentifier,
         key: ContentRole.reference.rawValue,
         role: ContentRole.reference.rawValue,
         mimeType: ApplicationMimeType.url.rawValue
       )
-      try record.save(database)
+    case .book(let book):
+      let bookData = try JSONEncoder().encode(book)
+      let bookString = String(data: bookData, encoding: .utf8)!
+      record = ContentRecord(
+        text: bookString,
+        noteId: noteIdentifier,
+        key: ContentRole.reference.rawValue,
+        role: ContentRole.reference.rawValue,
+        mimeType: ApplicationMimeType.book.rawValue
+      )
     }
+    try record.save(database)
   }
 }
 
@@ -187,6 +201,10 @@ private extension Database {
         Logger.shared.error("Could not turn string into URL: \(record.text)")
         return nil
       }
+    case .book:
+      let bookData = record.text.data(using: .utf8)!
+      let book = try JSONDecoder().decode(Book.self, from: bookData)
+      return .book(book)
     }
   }
 }

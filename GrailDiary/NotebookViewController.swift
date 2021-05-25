@@ -431,7 +431,7 @@ extension NotebookViewController {
 
   private func referenceViewController(for note: Note) -> ReferenceViewController? {
     switch note.reference {
-    case .none: return nil
+    case .none, .book: return nil
     case .some(.webPage(let url)):
       return WebViewController(url: url)
     }
