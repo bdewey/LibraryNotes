@@ -74,12 +74,14 @@ public extension ParsedAttributedString.Settings {
 }
 
 public extension NoteDatabase {
+  // TODO: Remove AssetRecord from the schema
   /// Stores arbitrary data in the database.
   /// - Parameters:
   ///   - data: The asset data to store
   ///   - key: A unique key for the data
   /// - Throws: .databaseIsNotOpen
   /// - Returns: The key??
+  @available(*, deprecated, message: "Use writeAssociatedData: instead")
   func storeAssetData(_ data: Data, key: String) throws -> String {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen

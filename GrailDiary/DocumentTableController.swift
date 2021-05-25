@@ -236,6 +236,10 @@ public final class DocumentTableController: NSObject {
         if lhsPage.pageKey != rhsPage.pageKey {
           return true
         }
+        // If the page transitions from image to non image, or vice versa, animate the change.
+        if (lhsPage.noteProperties.image != nil) != (rhsPage.noteProperties.image != nil) {
+          return true
+        }
       case (.webPage, .webPage):
         continue
       case (.reviewQuotes, .reviewQuotes):
