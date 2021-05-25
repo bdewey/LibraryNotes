@@ -4,9 +4,6 @@ import Foundation
 
 /// Core model for a "book"
 public struct Book: Hashable, Codable {
-  /// Unique ID for this book
-  public var id: String
-
   /// The book title
   public var title: String
 
@@ -22,7 +19,7 @@ public struct Book: Hashable, Codable {
   /// The book publisher.
   public var publisher: String?
 
-  /// 9-digit ISBN
+  /// 10-digit ISBN
   public var isbn: String?
 
   /// 13-digit ISBN

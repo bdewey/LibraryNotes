@@ -4,13 +4,15 @@ import Combine
 import Logging
 import UIKit
 
-private struct ViewModel: Hashable {
+private struct ViewModel: Hashable, Identifiable {
+  var id: UUID = UUID()
   var book: Book
   var coverImage: UIImage?
   var coverImageURL: URL?
 
-  init(_ item: BookSearchViewController.GoogleBooksItem) {
-    self.book = Book(item)
+  init?(_ item: BookSearchViewController.GoogleBooksItem) {
+    guard let book = Book(item) else { return nil }
+    self.book = book
     self.coverImage = nil
     if let urlString = item.volumeInfo.imageLinks?.smallThumbnail ?? item.volumeInfo.imageLinks?.thumbnail {
       self.coverImageURL = URL(string: urlString)
@@ -107,7 +109,7 @@ public final class BookSearchViewController: UIViewController {
       if let url = viewModel.coverImageURL {
         imageCache.image(for: url) { result in
           guard let image = try? result.get() else { return }
-          self.setViewModelImage(image, key: viewModel.book.id)
+          self.setViewModelImage(image, key: viewModel.id)
         }
       }
     }
@@ -115,9 +117,9 @@ public final class BookSearchViewController: UIViewController {
     updateSnapshot()
   }
 
-  private func setViewModelImage(_ image: UIImage, key: String) {
+  private func setViewModelImage(_ image: UIImage, key: UUID) {
     assert(Thread.isMainThread)
-    guard let index = viewModels.firstIndex(where: { $0.book.id == key }) else { return }
+    guard let index = viewModels.firstIndex(where: { $0.id == key }) else { return }
     viewModels[index].coverImage = image
     updateSnapshot()
   }
@@ -182,7 +184,7 @@ public final class BookSearchViewController: UIViewController {
         }
       } receiveValue: { [weak self] data in
         DispatchQueue.main.async {
-          self?.updateViewModels(data.items.map { ViewModel($0) })
+          self?.updateViewModels(data.items.compactMap { ViewModel($0) })
         }
       }
   }
@@ -225,7 +227,7 @@ private extension BookSearchViewController {
   }
 
   struct VolumeInfo: Codable {
-    var title: String
+    var title: String?
     var subtitle: String?
     var authors: [String]?
     var publishedDate: String?
@@ -240,9 +242,13 @@ private extension BookSearchViewController {
 }
 
 private extension Book {
-  init(_ item: BookSearchViewController.GoogleBooksItem) {
-    self.id = item.id
-    self.title = item.volumeInfo.title
+  /// Construct a Book model from a Google Books search result.
+  init?(_ item: BookSearchViewController.GoogleBooksItem) {
+    guard let title = item.volumeInfo.title else {
+      Logger.shared.info("Item without title: \(item)")
+      return nil
+    }
+    self.title = title
     self.authors = item.volumeInfo.authors ?? []
     if let datePrefix = item.volumeInfo.publishedDate?.prefix(4) {
       self.yearPublished = Int(datePrefix)
