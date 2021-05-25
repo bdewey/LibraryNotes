@@ -653,9 +653,9 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 // MARK: - BookSearchViewControllerDelegate
 
 extension TextEditViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
     var imageKey: String?
-    if let image = book.coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+    if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
         imageKey = try imageStorage.storeImageData(imageData, type: .jpeg)
       } catch {

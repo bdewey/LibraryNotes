@@ -388,7 +388,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 // MARK: - BookSearchViewControllerDelegate
 
 extension NotebookViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
     dismiss(animated: true, completion: nil)
     let (text, offset) = Note.makeBlankNoteText(title: book.markdownTitle, hashtag: focusedNotebookStructure.hashtag)
     var note = Note(markdown: text)
@@ -397,7 +397,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
       note: note,
       database: database,
       initialSelectedRange: NSRange(location: offset, length: 0),
-      initialImage: book.coverImage,
+      initialImage: coverImage,
       autoFirstResponder: true
     )
     setSecondaryViewController(viewController, pushIfCollapsed: true)

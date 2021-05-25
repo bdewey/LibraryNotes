@@ -12,7 +12,7 @@ extension UTType {
 public extension Logger {
   static let shared: Logger = {
     var logger = Logger(label: "org.brians-brain.grail-diary")
-    logger.logLevel = .info
+    logger.logLevel = .debug
     return logger
   }()
 }
