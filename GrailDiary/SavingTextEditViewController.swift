@@ -225,7 +225,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
-
+    Logger.shared.info("Attaching book: \(book.title)")
+    note.reference = .book(book)
   }
 }
 

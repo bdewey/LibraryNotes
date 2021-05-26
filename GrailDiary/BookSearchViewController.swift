@@ -233,6 +233,8 @@ private extension BookSearchViewController {
     var publishedDate: String?
     var imageLinks: ImageLink?
     var industryIdentifiers: [IndustryIdentifier]?
+    var pageCount: Int?
+    var publisher: String?
   }
 
   struct ImageLink: Codable {
@@ -250,6 +252,8 @@ private extension Book {
     }
     self.title = title
     self.authors = item.volumeInfo.authors ?? []
+    self.numberOfPages = item.volumeInfo.pageCount
+    self.publisher = item.volumeInfo.publisher
     if let datePrefix = item.volumeInfo.publishedDate?.prefix(4) {
       self.yearPublished = Int(datePrefix)
     }
