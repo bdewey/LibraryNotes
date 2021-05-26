@@ -10,49 +10,26 @@ import UniformTypeIdentifiers
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
   /// Holds configuration settings for the view controller.
-  struct Configuration: Codable {
-    var folder: String?
+  private struct RestorationState: Codable {
     var noteIdentifier: String
-    var noteTitle: String
-    var initialSelectedRange = NSRange(location: 0, length: 0)
-    var autoFirstResponder = false
   }
 
-  // TODO: These two initializers don't make sense. I think the right way to rationalize this:
-  // - One initializer that says, "Show an editor for a new note that won't exist in the database until saved."
-  // - One initializer that says, "Show an editor for an existing note."
-  // And redefine "Configuration" to something like "State" and make it private. Its scope is just to allow UI restoration.
-
-  /// Designated initializer.
-  /// - parameter configuration: Configuration object
-  /// - parameter NoteSqliteStorage: Where to save the contents.
-  init(configuration: Configuration, initialText: String, noteStorage: NoteDatabase) {
-    self.configuration = configuration
-    self.noteStorage = noteStorage
-    self.noteIdentifier = configuration.noteIdentifier
-    self.initialText = initialText
-    super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(configuration.noteTitle)
-  }
-
-  /// Initializes a view controller for a new, unsaved note.
-  convenience init(
+  init(
+    noteIdentifier: Note.Identifier = UUID().uuidString,
+    note: Note = Note(markdown: "# \n"),
     database: NoteDatabase,
-    folder: PredefinedFolder?,
-    title: String? = nil,
+    initialSelectedRange: NSRange? = nil,
     initialImage: UIImage? = nil,
-    currentHashtag: String? = nil,
     autoFirstResponder: Bool = false
   ) {
-    let (noteText, initialOffset) = Note.makeBlankNoteText(title: title, hashtag: currentHashtag)
-    let configuration = Configuration(
-      folder: folder?.rawValue,
-      noteIdentifier: UUID().uuidString,
-      noteTitle: title ?? "",
-      initialSelectedRange: NSRange(location: initialOffset, length: 0),
-      autoFirstResponder: autoFirstResponder
-    )
-    self.init(configuration: configuration, initialText: noteText, noteStorage: database)
+    self.noteIdentifier = noteIdentifier
+    self.note = note
+    self.noteStorage = database
+    self.initialSelectedRange = initialSelectedRange
+    self.autoFirstResponder = autoFirstResponder
+    self.restorationState = RestorationState(noteIdentifier: noteIdentifier)
+    super.init(nibName: nil, bundle: nil)
+    setTitleMarkdown(note.title)
     if let initialImage = initialImage,
        let convertedData = initialImage.jpegData(compressionQuality: 0.8)
     {
@@ -73,14 +50,18 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// Controls configuration of toolbars & navigation items
   public var chromeStyle = ChromeStyle.splitViewController
 
-  private var configuration: Configuration
+  private var note: Note
   private let noteStorage: NoteDatabase
-  private let initialText: String
+  private let restorationState: RestorationState
+  private let initialSelectedRange: NSRange?
+  private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: self)
-    viewController.markdown = initialText
-    viewController.selectedRawTextRange = configuration.initialSelectedRange
-    viewController.autoFirstResponder = configuration.autoFirstResponder
+    viewController.markdown = note.text ?? ""
+    if let initialSelectedRange = initialSelectedRange {
+      viewController.selectedRawTextRange = initialSelectedRange
+    }
+    viewController.autoFirstResponder = autoFirstResponder
     viewController.delegate = self
     return viewController
   }()
@@ -155,10 +136,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func updateNote(_ note: Note) throws {
     assert(Thread.isMainThread)
     var note = note
-    // TODO: Copy over the initial reference, if any
-//    note.reference = configuration.note.reference
     setTitleMarkdown(note.title)
-    note.folder = configuration.folder
+    // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
+    // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
+    // or if it was a blank note instead.
+    note.folder = self.note.folder
+    note.reference = self.note.reference
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
@@ -246,22 +229,21 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
   static var notebookDetailType: String { "SavingTextEditViewController" }
 
   func userActivityData() throws -> Data {
-    try JSONEncoder().encode(configuration)
+    return try JSONEncoder().encode(restorationState)
   }
 
   static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> SavingTextEditViewController {
-    let configuration = try JSONDecoder().decode(Configuration.self, from: data)
-    let initialText: String
+    let restorationState = try JSONDecoder().decode(RestorationState.self, from: data)
+    let note: Note
     do {
-      let note = try database.note(noteIdentifier: configuration.noteIdentifier)
-      initialText = note.text ?? ""
+      note = try database.note(noteIdentifier: restorationState.noteIdentifier)
     } catch {
-      Logger.shared.warning("Could not load note \(configuration.noteIdentifier) when recovering user activity. Assuming note wasn't saved.")
-      let (text, _) = Note.makeBlankNoteText(title: configuration.noteTitle)
-      initialText = text
+      Logger.shared.warning("Could not load note \(restorationState.noteIdentifier) when recovering user activity. Assuming note wasn't saved.")
+      let (text, _) = Note.makeBlankNoteText()
+      note = Note(markdown: text)
     }
 
-    return SavingTextEditViewController(configuration: configuration, initialText: initialText, noteStorage: database)
+    return SavingTextEditViewController(noteIdentifier: restorationState.noteIdentifier, note: note, database: database)
   }
 }
 

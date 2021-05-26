@@ -132,7 +132,7 @@ final class DocumentListViewController: UIViewController {
   internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
-      notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, noteText: note.text ?? "", noteTitle: note.title, shiftFocus: shiftFocus)
+      notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
     } catch {
       Logger.shared.error("Unexpected error loading page: \(error)")
     }
@@ -372,7 +372,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
         hashtag = nil
       }
       let (blankText, _) = Note.makeBlankNoteText(hashtag: hashtag)
-      notebookViewController?.showNoteEditor(noteIdentifier: nil, noteText: blankText, noteTitle: "", shiftFocus: false)
+      let note = Note(markdown: blankText)
+      notebookViewController?.showNoteEditor(noteIdentifier: nil, note: note, shiftFocus: false)
     }
   }
 

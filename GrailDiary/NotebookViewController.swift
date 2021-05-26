@@ -112,7 +112,7 @@ public final class NotebookViewController: UIViewController {
     splitViewController.setViewController(primaryNavigationController, for: .primary)
     splitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
     splitViewController.setViewController(
-      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, folder: nil)),
+      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database)),
       for: .secondary
     )
     splitViewController.setViewController(compactNavigationController, for: .compact)
@@ -210,7 +210,10 @@ public final class NotebookViewController: UIViewController {
   @objc func makeNewNote() {
     let hashtag = focusedNotebookStructure.hashtag
     let folder = focusedNotebookStructure.predefinedFolder
-    let viewController = SavingTextEditViewController(database: database, folder: folder, currentHashtag: hashtag, autoFirstResponder: true)
+    let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
+    var note = Note(markdown: text)
+    note.folder = folder?.rawValue
+    let viewController = SavingTextEditViewController(note: note, database: database, initialSelectedRange: NSRange(location: offset, length: 0), autoFirstResponder: true)
     setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a blank document")
   }
@@ -248,18 +251,9 @@ public final class NotebookViewController: UIViewController {
     return button
   }
 
-  func showNoteEditor(noteIdentifier: Note.Identifier?, noteText: String, noteTitle: String, shiftFocus: Bool) {
+  func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
-    let noteViewController = SavingTextEditViewController(
-      configuration: SavingTextEditViewController.Configuration(
-        folder: focusedNotebookStructure.predefinedFolder?.rawValue,
-        noteIdentifier: actualNoteIdentifier,
-        noteTitle: noteTitle
-      ),
-      initialText: noteText,
-      noteStorage: database
-    )
-    noteViewController.setTitleMarkdown(noteTitle)
+    let noteViewController = SavingTextEditViewController(noteIdentifier: actualNoteIdentifier, note: note, database: database)
     setSecondaryViewController(noteViewController, pushIfCollapsed: shiftFocus)
   }
 
@@ -348,19 +342,14 @@ public extension NotebookViewController {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
       let rawText = note.text ?? ""
-      let initialRange = selectedText.flatMap { (rawText as NSString).range(of: $0) } ?? NSRange(location: 0, length: 0)
+      let initialRange = selectedText.flatMap { (rawText as NSString).range(of: $0) }
       let noteViewController = SavingTextEditViewController(
-        configuration: SavingTextEditViewController.Configuration(
-          folder: focusedNotebookStructure.predefinedFolder?.rawValue,
-          noteIdentifier: noteIdentifier,
-          noteTitle: note.title,
-          initialSelectedRange: initialRange,
-          autoFirstResponder: autoFirstResponder
-        ),
-        initialText: note.text ?? "",
-        noteStorage: database
+        noteIdentifier: noteIdentifier,
+        note: note,
+        database: database,
+        initialSelectedRange: initialRange,
+        autoFirstResponder: autoFirstResponder
       )
-      noteViewController.setTitleMarkdown(note.title)
       setSecondaryViewController(noteViewController, pushIfCollapsed: true)
       // TODO: Figure out how to make a "push" make sense in a split view controller
       //      pushSecondaryViewController(noteViewController)
@@ -377,15 +366,14 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
   public func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown markdown: String) {
     dismiss(animated: true, completion: nil)
     Logger.shared.info("Creating a new page with markdown: \(markdown)")
-    // TODO: There's an awful lot repeated in the book search method
-    let hashtag = focusedNotebookStructure.hashtag
-    let folder = focusedNotebookStructure.predefinedFolder
+    let (text, offset) = Note.makeBlankNoteText(title: markdown, hashtag: focusedNotebookStructure.hashtag)
+    var note = Note(markdown: text)
+    note.folder = focusedNotebookStructure.predefinedFolder?.rawValue
     // TODO: I'm abusing the "title" parameter here
     let viewController = SavingTextEditViewController(
+      note: note,
       database: database,
-      folder: folder,
-      title: markdown,
-      currentHashtag: hashtag,
+      initialSelectedRange: NSRange(location: offset, length: 0),
       autoFirstResponder: true
     )
     setSecondaryViewController(viewController, pushIfCollapsed: true)
@@ -402,14 +390,14 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 extension NotebookViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
     dismiss(animated: true, completion: nil)
-    let hashtag = focusedNotebookStructure.hashtag
-    let folder = focusedNotebookStructure.predefinedFolder
+    let (text, offset) = Note.makeBlankNoteText(title: book.markdownTitle, hashtag: focusedNotebookStructure.hashtag)
+    var note = Note(markdown: text)
+    note.folder = focusedNotebookStructure.predefinedFolder?.rawValue
     let viewController = SavingTextEditViewController(
+      note: note,
       database: database,
-      folder: folder,
-      title: book.markdownTitle,
+      initialSelectedRange: NSRange(location: offset, length: 0),
       initialImage: book.coverImage,
-      currentHashtag: hashtag,
       autoFirstResponder: true
     )
     setSecondaryViewController(viewController, pushIfCollapsed: true)
