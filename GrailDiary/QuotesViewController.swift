@@ -81,7 +81,7 @@ public final class QuotesViewController: UIViewController {
     var snapshot = NSDiffableDataSourceSnapshot<Int, AttributedQuote>()
     snapshot.appendSections([0])
     snapshot.appendItems(quotes.shuffled())
-    dataSource.apply(snapshot)
+    dataSource.apply(snapshot, animatingDifferences: dataSource.snapshot().numberOfItems > 0)
   }
 
   private lazy var layout: UICollectionViewLayout = {
@@ -96,6 +96,7 @@ public final class QuotesViewController: UIViewController {
   private lazy var collectionView: UICollectionView = {
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     collectionView.delegate = self
+    collectionView.backgroundColor = .grailBackground
     return collectionView
   }()
 
@@ -334,7 +335,7 @@ private final class QuoteView: UIView, UIContentView {
       coverImageView.isHidden = false
       coverImageView.image = image
       coverImageView.snp.remakeConstraints { make in
-        make.width.equalTo(self).multipliedBy(0.25)
+        make.width.equalTo(readableContentGuide).multipliedBy(0.25)
         make.height.equalTo(coverImageView.snp.width).multipliedBy(image.size.height / image.size.width)
       }
     } else {
