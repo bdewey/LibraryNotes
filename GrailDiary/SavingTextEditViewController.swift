@@ -13,7 +13,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   struct Configuration: Codable {
     var folder: String?
     var noteIdentifier: String
-    var noteRawText: String
     var noteTitle: String
     var initialSelectedRange = NSRange(location: 0, length: 0)
     var autoFirstResponder = false
@@ -22,10 +21,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// Designated initializer.
   /// - parameter configuration: Configuration object
   /// - parameter NoteSqliteStorage: Where to save the contents.
-  init(configuration: Configuration, noteStorage: NoteDatabase) {
+  init(configuration: Configuration, initialText: String, noteStorage: NoteDatabase) {
     self.configuration = configuration
     self.noteStorage = noteStorage
     self.noteIdentifier = configuration.noteIdentifier
+    self.initialText = initialText
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(configuration.noteTitle)
   }
@@ -43,12 +43,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     let configuration = Configuration(
       folder: folder?.rawValue,
       noteIdentifier: UUID().uuidString,
-      noteRawText: noteText,
       noteTitle: title ?? "",
       initialSelectedRange: NSRange(location: initialOffset, length: 0),
       autoFirstResponder: autoFirstResponder
     )
-    self.init(configuration: configuration, noteStorage: database)
+    self.init(configuration: configuration, initialText: noteText, noteStorage: database)
     if let initialImage = initialImage,
        let convertedData = initialImage.jpegData(compressionQuality: 0.8)
     {
@@ -71,9 +70,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var configuration: Configuration
   private let noteStorage: NoteDatabase
+  private let initialText: String
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: self)
-    viewController.markdown = configuration.noteRawText
+    viewController.markdown = initialText
     viewController.selectedRawTextRange = configuration.initialSelectedRange
     viewController.autoFirstResponder = configuration.autoFirstResponder
     viewController.delegate = self
@@ -246,7 +246,17 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 
   static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> SavingTextEditViewController {
     let configuration = try JSONDecoder().decode(Configuration.self, from: data)
-    return SavingTextEditViewController(configuration: configuration, noteStorage: database)
+    let initialText: String
+    do {
+      let note = try database.note(noteIdentifier: configuration.noteIdentifier)
+      initialText = note.text ?? ""
+    } catch {
+      Logger.shared.warning("Could not load note \(configuration.noteIdentifier) when recovering user activity. Assuming note wasn't saved.")
+      let (text, _) = Note.makeBlankNoteText(title: configuration.noteTitle)
+      initialText = text
+    }
+
+    return SavingTextEditViewController(configuration: configuration, initialText: initialText, noteStorage: database)
   }
 }
 

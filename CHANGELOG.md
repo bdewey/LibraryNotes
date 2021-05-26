@@ -6,6 +6,7 @@
 
 - Cover images weren't getting inserted into brand new notes
 - Prevent the note list from flashing while typing on non-compact layouts
+- Note UI didn't show recently entered text on background/restore
 
 ## [0.47.0] - 2021-05-22
 

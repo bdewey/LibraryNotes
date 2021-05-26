@@ -254,9 +254,9 @@ public final class NotebookViewController: UIViewController {
       configuration: SavingTextEditViewController.Configuration(
         folder: focusedNotebookStructure.predefinedFolder?.rawValue,
         noteIdentifier: actualNoteIdentifier,
-        noteRawText: noteText,
         noteTitle: noteTitle
       ),
+      initialText: noteText,
       noteStorage: database
     )
     noteViewController.setTitleMarkdown(noteTitle)
@@ -353,11 +353,11 @@ public extension NotebookViewController {
         configuration: SavingTextEditViewController.Configuration(
           folder: focusedNotebookStructure.predefinedFolder?.rawValue,
           noteIdentifier: noteIdentifier,
-          noteRawText: note.text ?? "",
           noteTitle: note.title,
           initialSelectedRange: initialRange,
           autoFirstResponder: autoFirstResponder
         ),
+        initialText: note.text ?? "",
         noteStorage: database
       )
       noteViewController.setTitleMarkdown(note.title)
