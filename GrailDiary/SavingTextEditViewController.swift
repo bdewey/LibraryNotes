@@ -18,6 +18,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     var autoFirstResponder = false
   }
 
+  // TODO: These two initializers don't make sense. I think the right way to rationalize this:
+  // - One initializer that says, "Show an editor for a new note that won't exist in the database until saved."
+  // - One initializer that says, "Show an editor for an existing note."
+  // And redefine "Configuration" to something like "State" and make it private. Its scope is just to allow UI restoration.
+
   /// Designated initializer.
   /// - parameter configuration: Configuration object
   /// - parameter NoteSqliteStorage: Where to save the contents.
