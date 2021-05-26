@@ -7,6 +7,7 @@ public struct Note: Equatable {
     creationTimestamp: Date,
     timestamp: Date,
     hashtags: [String],
+    referencedImageKeys: [String],
     title: String, text: String? = nil,
     reference: Note.Reference? = nil,
     folder: String? = nil,
@@ -16,6 +17,7 @@ public struct Note: Equatable {
     self.creationTimestamp = creationTimestamp
     self.timestamp = timestamp
     self.hashtags = hashtags
+    self.referencedImageKeys = referencedImageKeys
     self.title = title
     self.text = text
     self.reference = reference
@@ -38,6 +40,9 @@ public struct Note: Equatable {
   /// Hashtags present in the page.
   /// - note: Need to keep sorted to make comparisons canonical. Can't be a Set or serialization isn't canonical :-(
   public var hashtags: [String]
+
+  /// Images referenced by this note.
+  public var referencedImageKeys: [String]
 
   /// Title of the page. May include Markdown formatting.
   public var title: String

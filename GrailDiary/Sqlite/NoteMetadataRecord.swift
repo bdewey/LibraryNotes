@@ -14,7 +14,6 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
   var contents: [ContentRecord]
   var thumbnailImage: [BinaryContentRecord]
   var summary: String?
-  var image: String?
 
   /// Includes all of the joins you need to get the base information for a NoteMetadataRecord.
   /// You can chain other filters on this.

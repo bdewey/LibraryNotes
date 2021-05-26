@@ -319,6 +319,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
       creationTimestamp: Date(),
       timestamp: Date(),
       hashtags: [],
+      referencedImageKeys: [],
       title: "",
       text: "This is a test note",
       reference: .webPage(url),

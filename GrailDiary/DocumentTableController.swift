@@ -237,7 +237,7 @@ public final class DocumentTableController: NSObject {
           return true
         }
         // If the page transitions from image to non image, or vice versa, animate the change.
-        if (lhsPage.noteProperties.image != nil) != (rhsPage.noteProperties.image != nil) {
+        if lhsPage.noteProperties.thumbnailImage.isEmpty != rhsPage.noteProperties.thumbnailImage.isEmpty {
           return true
         }
       case (.webPage, .webPage):

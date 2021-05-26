@@ -42,6 +42,7 @@ public extension Note {
       creationTimestamp: Date(),
       timestamp: Date(),
       hashtags: parsedString.hashtags,
+      referencedImageKeys: parsedString.referencedImageKeys,
       title: String(parsedString.title.split(separator: "\n").first ?? ""),
       text: parsedString.string,
       summary: parsedString.summary,
@@ -83,6 +84,17 @@ public extension ParsedString {
     var results = Set<String>()
     root.forEach { node, startIndex, _ in
       guard node.type == .hashtag else { return }
+      let chars = self[NSRange(location: startIndex, length: node.length)]
+      results.insert(String(utf16CodeUnits: chars, count: chars.count))
+    }
+    return [String](results)
+  }
+
+  var referencedImageKeys: [String] {
+    guard let root = try? result.get() else { return [] }
+    var results = Set<String>()
+    root.forEach { node, startIndex, _ in
+      guard node.type == .linkTarget else { return }
       let chars = self[NSRange(location: startIndex, length: node.length)]
       results.insert(String(utf16CodeUnits: chars, count: chars.count))
     }

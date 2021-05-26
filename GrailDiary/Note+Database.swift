@@ -10,6 +10,7 @@ private enum ApplicationMimeType: String {
 }
 
 public extension Note {
+  // TODO: Should this all be done in a single massive join? Instead there are lots of database round-trips.
   /// Loads a note from the database.
   init(identifier: Note.Identifier, database db: Database) throws {
     guard
@@ -27,10 +28,17 @@ public extension Note {
     let promptCollections = Dictionary(uniqueKeysWithValues: tuples)
     let noteText = contentRecords.first(where: { $0.role == "primary" })?.text
 
+    // TODO: This will actually fetch the *image data* ... do we want to just fetch the image IDs here?
+    let imageKeys = try BinaryContentRecord
+      .filter(BinaryContentRecord.Columns.noteId == identifier)
+      .filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue)
+      .fetchAll(db)
+
     self.init(
       creationTimestamp: sqliteNote.creationTimestamp,
       timestamp: sqliteNote.modifiedTimestamp,
       hashtags: hashtags,
+      referencedImageKeys: imageKeys.map { $0.key },
       title: sqliteNote.title,
       text: noteText,
       reference: try db.reference(for: identifier),
@@ -68,6 +76,17 @@ public extension Note {
     for obsoleteHashtag in onDiskHashtags.subtracting(inMemoryHashtags) {
       let deleted = try NoteLinkRecord.deleteOne(db, key: ["noteId": identifier, "targetTitle": obsoleteHashtag])
       assert(deleted)
+    }
+
+    // Delete stale image references
+    let onDiskImageKeys = try sqliteNote.binaryContentRecords
+      .filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue)
+      .fetchAll(db)
+      .map { $0.key }
+      .asSet()
+    let obsoleteImages = onDiskImageKeys.subtracting(referencedImageKeys)
+    try obsoleteImages.forEach { imageKey in
+      try BinaryContentRecord.deleteOne(db, key: ["noteId": identifier, "key": imageKey])
     }
 
     let inMemoryContentKeys = Set(promptCollections.keys)
