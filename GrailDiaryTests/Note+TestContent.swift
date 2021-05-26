@@ -8,6 +8,7 @@ extension Note {
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: [],
+    referencedImageKeys: [],
     title: "Testing",
     text: "This is a test",
     promptCollections: [:]
@@ -17,6 +18,7 @@ extension Note {
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: ["#ashtag"],
+    referencedImageKeys: [],
     title: "Testing",
     text: "This is a test",
     promptCollections: [:]
@@ -42,6 +44,7 @@ extension Note {
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: ["#test"],
+    referencedImageKeys: [],
     title: "The Onion",
     text: nil,
     reference: .webPage(URL(string: "https://www.theonion.com")!),
