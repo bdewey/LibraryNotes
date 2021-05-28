@@ -270,10 +270,12 @@ public final class TextEditViewController: UIViewController {
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage] _ in
       let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
       if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
-        textStorage.replaceCharacters(in: NSRange(location: blockQuote.range.location, length: 2), with: "")
+        let quoteDelimiterVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
+        textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
         textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
       } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "> ")
+        let paragraphStartVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
+        textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
       }
     }))
@@ -281,7 +283,8 @@ public final class TextEditViewController: UIViewController {
     inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
       let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
       if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        textStorage.replaceCharacters(in: NSRange(location: paragraph.range.location, length: 0), with: "tl;dr: ")
+        let paragraphStartVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
+        textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
       } else {
         textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
@@ -545,11 +548,9 @@ extension TextEditViewController: UITextViewDelegate {
         if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
           // List termination! Someone's hitting return on a list item that contains nothing.
           // Erase this marker.
+          let visibleRange = textStorage.storage.range(forRawStringRange: listItem.range)
           replaceCharacters(
-            in: NSRange(
-              location: listItem.startIndex,
-              length: listItem.node.length
-            ),
+            in: visibleRange,
             with: "\n"
           )
           return false
@@ -568,7 +569,7 @@ extension TextEditViewController: UITextViewDelegate {
       case .ordered:
         let listNumber: Int
         if let listNumberNode = listItem.first(where: { $0.type == .orderedListNumber }) {
-          let chars = textStorage.storage[NSRange(location: listNumberNode.startIndex, length: listNumberNode.node.length)]
+          let chars = textStorage.storage[listNumberNode.range]
           let string = String(utf16CodeUnits: chars, count: chars.count)
           listNumber = Int(string) ?? 0
         } else {
@@ -578,7 +579,11 @@ extension TextEditViewController: UITextViewDelegate {
       }
       return false
     } else if line(at: range.location).hasPrefix("Q: ") {
-      replaceCharacters(in: range, with: "\nA: ")
+      if line(at: range.location).count <= 4 {
+        replaceCharacters(in: lineRange(at: range.location), with: "")
+      } else {
+        replaceCharacters(in: range, with: "\nA: ")
+      }
     } else if line(at: range.location).hasPrefix("A:\t") {
       replaceCharacters(in: range, with: "\n\nQ: ")
     } else {
