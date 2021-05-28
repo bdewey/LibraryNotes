@@ -325,8 +325,16 @@ public final class TextEditViewController: UIViewController {
       inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), menu: UIMenu(children: importActions)))
     }
 
+    var barItemsWithSpaces = [UIBarButtonItem]()
+    for barItem in inputBarItems {
+      if !barItemsWithSpaces.isEmpty {
+        barItemsWithSpaces.append(.flexibleSpace())
+      }
+      barItemsWithSpaces.append(barItem)
+    }
+
     let inputBar = UIToolbar(frame: .zero)
-    inputBar.items = inputBarItems
+    inputBar.items = barItemsWithSpaces
     inputBar.sizeToFit()
     inputBar.tintColor = .grailTint
     textView.inputAccessoryView = inputBar
