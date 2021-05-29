@@ -31,6 +31,10 @@ public struct Book: Hashable, Codable {
   /// Number of pages in the book
   public var numberOfPages: Int?
 
+  // TODO: Figure out if I actually want these in the "Book" model
+  var review: String?
+  var rating: Int?
+
   // TODO: This should probably be in an extension somewhere.
   /// A citation for this book in simple Markdown.
   var markdownTitle: String {

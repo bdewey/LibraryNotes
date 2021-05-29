@@ -8,14 +8,6 @@ import UniformTypeIdentifiers
   func openNewFile()
 }
 
-enum AppCommandsButtonItems {
-  static func documentBrowser() -> UIBarButtonItem {
-    let button = UIBarButtonItem(title: "Open", style: .plain, target: nil, action: #selector(AppCommands.openNewFile))
-    button.accessibilityIdentifier = "open-files"
-    return button
-  }
-}
-
 /// Our custom DocumentBrowserViewController that knows how to open new files, etc.
 final class DocumentBrowserViewController: UIDocumentBrowserViewController {
   override init(forOpening contentTypes: [UTType]?) {

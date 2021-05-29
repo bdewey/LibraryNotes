@@ -5,7 +5,7 @@ import Logging
 import UIKit
 
 private struct ViewModel: Hashable, Identifiable {
-  var id: UUID = UUID()
+  var id = UUID()
   var book: Book
   var coverImage: UIImage?
   var coverImageURL: URL?
