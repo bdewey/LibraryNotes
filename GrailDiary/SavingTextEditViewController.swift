@@ -86,6 +86,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    if case .book(let book) = note.reference {
+      textEditViewController.scrollawayHeaderView = BookHeader(book: book)
+    }
     view.addSubview(textEditViewController.view)
     textEditViewController.view.snp.makeConstraints { make in
       make.edges.equalToSuperview()
@@ -261,4 +264,39 @@ extension SavingTextEditViewController: ImageStorage {
   func retrieveImageDataForKey(_ key: String) throws -> Data {
     return try noteStorage.readAssociatedData(from: noteIdentifier, key: key)
   }
+}
+
+private final class BookHeader: UIView {
+  init(book: Book) {
+    super.init(frame: .zero)
+    preservesSuperviewLayoutMargins = true
+    backgroundColor = .grailBackground
+    titleLabel.text = book.title
+    authorLabel.text = book.authors.joined(separator: ", ")
+    let stack = UIStackView(arrangedSubviews: [titleLabel, authorLabel])
+    stack.axis = .vertical
+    addSubview(stack)
+    stack.snp.makeConstraints { make in
+      make.edges.equalTo(layoutMarginsGuide)
+    }
+  }
+
+  @available(*, unavailable)
+  required init?(coder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+
+  private let titleLabel: UILabel = {
+    let label = UILabel()
+    label.font = .preferredFont(forTextStyle: .headline)
+    label.textColor = .label
+    return label
+  }()
+
+  private let authorLabel: UILabel = {
+    let label = UILabel()
+    label.font = .preferredFont(forTextStyle: .caption1)
+    label.textColor = .secondaryLabel
+    return label
+  }()
 }

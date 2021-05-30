@@ -3,6 +3,7 @@
 import Logging
 import MobileCoreServices
 import UIKit
+import SnapKit
 
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
@@ -155,6 +156,45 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
+  /// To create the illusion of scrolling with its content, the top of `scrollawayHeaderView` will be positioned on top of this y-offset in the content.
+  var scrollawayContentAnchor: CGFloat = 0
+
+  /// A constraint for positioning `scrollawayHeaderView` at the top of the screen. Adjusts as the user scrolls.
+  var scrollawayTopConstraint: Constraint?
+
+  /// An optional view that will appear at the top of the textView and scroll away as the content scrolls.
+  var scrollawayHeaderView: UIView? {
+    willSet {
+      scrollawayHeaderView?.removeFromSuperview()
+    }
+    didSet {
+      guard let header = scrollawayHeaderView else { return }
+      view.addSubview(header)
+      header.snp.makeConstraints { make in
+        scrollawayTopConstraint = make.top.equalTo(view.safeAreaLayoutGuide).constraint
+        make.top.left.right.equalTo(view.safeAreaLayoutGuide)
+      }
+      view.setNeedsLayout()
+    }
+  }
+
+  private func positionScrollawayHeader() {
+    guard let scrollawayHeaderView = scrollawayHeaderView else {
+      return
+    }
+    // XXX
+    let maxScrollAmount = scrollawayHeaderView.frame.height
+    var newTopConstraintConstant = scrollawayContentAnchor - textView.contentOffset.y
+    if newTopConstraintConstant < -maxScrollAmount {
+      scrollawayContentAnchor = textView.contentOffset.y - maxScrollAmount
+      newTopConstraintConstant = -maxScrollAmount
+    } else if newTopConstraintConstant > 0 {
+      scrollawayContentAnchor = textView.contentOffset.y
+      newTopConstraintConstant = 0
+    }
+    scrollawayTopConstraint?.update(offset: newTopConstraintConstant)
+  }
+
   /// All of the related data for our typeahead accessory.
   private struct TypeaheadAccessory {
     /// The text location that the accessory is anchored at. This the first character of a hashtag.
@@ -234,12 +274,12 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Lifecycle
 
-  override public func loadView() {
-    view = textView
-  }
-
   override public func viewDidLoad() {
     super.viewDidLoad()
+    view.addSubview(textView)
+    textView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
 
@@ -352,7 +392,8 @@ public final class TextEditViewController: UIViewController {
       // We only do this behavior on first appearance.
       autoFirstResponder = false
     }
-    adjustMargins(size: view!.bounds.size)
+    scrollawayContentAnchor = textView.contentOffset.y
+    adjustMargins()
     let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
@@ -364,17 +405,24 @@ public final class TextEditViewController: UIViewController {
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    adjustMargins(size: view.frame.size)
+    adjustMargins()
   }
 
-  private func adjustMargins(size: CGSize) {
+  private func adjustMargins() {
     // I wish I could use autolayout to set the insets.
-    let readableContentGuide = textView.readableContentGuide
-    textView.textContainerInset = UIEdgeInsets(
+    let scrollawayHeight = scrollawayHeaderView?.systemLayoutSizeFitting(view.bounds.size, withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel).height ?? 0
+    let readableContentGuide = view.readableContentGuide
+    scrollawayHeaderView?.layoutMargins = UIEdgeInsets(
       top: 8,
       left: readableContentGuide.layoutFrame.minX,
       bottom: 8,
-      right: textView.bounds.maxX - readableContentGuide.layoutFrame.maxX
+      right: view.bounds.maxX - readableContentGuide.layoutFrame.maxX
+    )
+    textView.textContainerInset = UIEdgeInsets(
+      top: scrollawayHeight + 8,
+      left: readableContentGuide.layoutFrame.minX,
+      bottom: 8,
+      right: view.bounds.maxX - readableContentGuide.layoutFrame.maxX
     )
   }
 
@@ -612,6 +660,10 @@ extension TextEditViewController: UITextViewDelegate {
 
   private func lineRange(at location: Int) -> NSRange {
     (textStorage.string as NSString).lineRange(for: NSRange(location: location, length: 0))
+  }
+
+  public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    positionScrollawayHeader()
   }
 }
 
