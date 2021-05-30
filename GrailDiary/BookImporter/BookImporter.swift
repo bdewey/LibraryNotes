@@ -49,8 +49,10 @@ final class BookImporter {
             }
           self.currentRequests.insert(request)
         } else {
-          self.booksAndImages.append(BookAndImage(book: book, image: nil))
-          progressCallback(self.booksAndImages.count, books.count)
+          DispatchQueue.main.async {
+            self.booksAndImages.append(BookAndImage(book: book, image: nil))
+            progressCallback(self.booksAndImages.count, books.count)
+          }
         }
       }
       group.notify(queue: .main, execute: {

@@ -142,6 +142,11 @@ final class NotebookStructureViewController: UIViewController {
   public weak var delegate: NotebookStructureViewControllerDelegate?
   private let database: NoteDatabase
   private var notebookSubscription: AnyCancellable?
+  private var progressView: UIProgressView? {
+    didSet {
+      configureToolbar()
+    }
+  }
 
   private lazy var collectionView: UICollectionView = {
     let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
@@ -444,6 +449,10 @@ private extension UIBarButtonItem {
 private extension NotebookStructureViewController {
   func configureToolbar() {
     var toolbarItems: [UIBarButtonItem] = [documentActionMenu(), .flexibleSpace()]
+    if let progressView = progressView {
+      toolbarItems.append(UIBarButtonItem(customView: progressView))
+      toolbarItems.append(.flexibleSpace())
+    }
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
@@ -456,6 +465,7 @@ private extension NotebookStructureViewController {
       guard let self = self else { return }
       Logger.shared.info("Importing from LibraryThing")
       let bookImporterViewController = BookImporterViewController(database: self.database)
+      bookImporterViewController.delegate = self
       self.present(bookImporterViewController, animated: true)
     }
     return UIBarButtonItem(
@@ -522,5 +532,21 @@ private extension NotebookStructureViewController {
       snapshot.append([stringToItem[hashtag]!], to: parent ?? root)
     }
     return snapshot
+  }
+}
+
+extension NotebookStructureViewController: BookImporterViewControllerDelegate {
+  func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int) {
+    let progressView = UIProgressView(progressViewStyle: .bar)
+    progressView.progress = 0
+    self.progressView = progressView
+  }
+
+  func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int) {
+    progressView?.progress = Float(partialCount) / Float(totalCount)
+  }
+
+  func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
+    progressView = nil
   }
 }

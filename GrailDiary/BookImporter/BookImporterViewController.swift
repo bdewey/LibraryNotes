@@ -5,6 +5,12 @@ import SnapKit
 import SwiftUI
 import UIKit
 
+protocol BookImporterViewControllerDelegate: AnyObject {
+  func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int)
+  func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int)
+  func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController)
+}
+
 final class BookImporterViewController: UIViewController {
   init(database: NoteDatabase) {
     self.bookImporter = BookImporter(database: database, apiKey: ApiKey.googleBooks)
@@ -16,6 +22,7 @@ final class BookImporterViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
+  weak var delegate: BookImporterViewControllerDelegate?
   private lazy var importForm = UIHostingController(rootView: ImportForm(importAction: importBooks))
   private let bookImporter: BookImporter
 
@@ -39,12 +46,15 @@ final class BookImporterViewController: UIViewController {
       let data = try Data(contentsOf: url)
       let libraryThingBooks = Array(try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values)
       let books = libraryThingBooks.map { Book($0) }
-      bookImporter.importBooks(books: books, dryRun: dryRun, downloadImages: downloadImages) { processed, total in
+      delegate?.bookImporter(self, didStartImporting: books.count)
+      bookImporter.importBooks(books: books, dryRun: dryRun, downloadImages: downloadImages) { [self] processed, total in
         if processed == total || processed % 5 == 0 {
           Logger.shared.info("Processed \(processed) of \(total) books")
         }
-      } completion: {
+        self.delegate?.bookImporter(self, didProcess: processed, of: total)
+      } completion: { [self] in
         Logger.shared.info("Done with import")
+        self.delegate?.bookImporterDidFinishImporting(self)
       }
     } catch {
       Logger.shared.error("Error importing LibaryThing file: \(error)")
