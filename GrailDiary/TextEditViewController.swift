@@ -430,7 +430,7 @@ public final class TextEditViewController: UIViewController {
         verticalFittingPriority: .fittingSizeLevel
       ).height
       scrollawayHeaderView.frame.size = CGSize(
-        width: view.bounds.width - view.layoutMargins.left,
+        width: view.bounds.width,
         height: scrollawayHeight
       )
       Logger.textView.info("Computed header size: \(scrollawayHeaderView.frame.size)")

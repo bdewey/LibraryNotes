@@ -33,7 +33,17 @@ final class BookHeader: UIView {
     let stack = UIStackView(arrangedSubviews: [coverImageView, textStack])
     stack.axis = .horizontal
     stack.spacing = 8
-    addSubview(stack)
+
+    let background = UIVisualEffectView(effect: UIBlurEffect(style: .systemMaterial))
+    [
+      background,
+      stack,
+    ].forEach(addSubview)
+    background.snp.makeConstraints { make in
+      // Make the top extend beyond the frame for rubber-banding
+      make.top.equalToSuperview().inset(-1000)
+      make.left.right.bottom.equalToSuperview()
+    }
     stack.snp.makeConstraints { make in
       make.left.right.equalTo(layoutMarginsGuide)
       make.top.bottom.equalToSuperview().inset(8)
