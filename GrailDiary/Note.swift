@@ -56,7 +56,13 @@ public struct Note: Equatable {
   }
 
   public var text: String?
-  public var reference: Reference?
+  public var reference: Reference? {
+    didSet {
+      if case .book(let book) = reference {
+        title = "_\(book.title)_, \(book.authors.joined(separator: ", "))"
+      }
+    }
+  }
   public var folder: String?
 
   /// A short summary of the contents of this note. This shows up in the note list.

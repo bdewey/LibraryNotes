@@ -142,12 +142,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func updateNote(_ note: Note) throws {
     assert(Thread.isMainThread)
     var note = note
-    setTitleMarkdown(note.title)
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
     note.folder = self.note.folder
     note.reference = self.note.reference
+    setTitleMarkdown(note.title)
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
