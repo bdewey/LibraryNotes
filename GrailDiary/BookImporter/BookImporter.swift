@@ -75,7 +75,7 @@ final class BookImporter {
             let binaryRecord = BinaryContentRecord(
               blob: typedData.data,
               noteId: identifier,
-              key: typedData.key,
+              key: Note.coverImageKey,
               role: "embeddedImage",
               mimeType: typedData.type.preferredMIMEType ?? "application/octet-stream"
             )
@@ -109,17 +109,7 @@ final class BookImporter {
 extension Note {
   init(_ bookAndImage: BookImporter.BookAndImage) {
     let book = bookAndImage.book
-    var markdown = "# _\(book.title)_"
-    if !book.authors.isEmpty {
-      markdown += ": " + book.authors.joined(separator: ", ")
-    }
-    if let date = book.yearPublished {
-      markdown += " (\(date))"
-    }
-    if let typedData = bookAndImage.image {
-      markdown += "\n\n![cover](\(typedData.key))"
-    }
-    markdown += "\n\n"
+    var markdown = ""
     if let review = book.review {
       markdown += "\(review)\n\n"
     }

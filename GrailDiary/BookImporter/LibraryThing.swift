@@ -37,9 +37,6 @@ struct TypedData {
   var type: UTType
 
   let uuid = UUID().uuidString
-  var key: String {
-    "./\(uuid).\(type.preferredFilenameExtension ?? "")"
-  }
 }
 
 extension Book {
