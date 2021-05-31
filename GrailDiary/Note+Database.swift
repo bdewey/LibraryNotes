@@ -42,7 +42,6 @@ public extension Note {
       timestamp: sqliteNote.modifiedTimestamp,
       hashtags: hashtags,
       referencedImageKeys: imageKeys.map { $0.key },
-      coverImageData: imageKeys.first?.blob,
       title: sqliteNote.title,
       text: noteText,
       reference: try db.reference(for: identifier),
@@ -88,7 +87,9 @@ public extension Note {
       .fetchAll(db)
       .map { $0.key }
       .asSet()
-    let obsoleteImages = onDiskImageKeys.subtracting(referencedImageKeys)
+    var obsoleteImages = onDiskImageKeys.subtracting(referencedImageKeys)
+    // An image with the special key "coverImage" is always considered referenced; never remove it.
+    obsoleteImages.remove(Note.coverImageKey)
     try obsoleteImages.forEach { imageKey in
       try BinaryContentRecord.deleteOne(db, key: ["noteId": identifier, "key": imageKey])
     }

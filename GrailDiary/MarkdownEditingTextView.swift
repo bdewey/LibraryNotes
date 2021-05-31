@@ -44,13 +44,13 @@ public final class MarkdownEditingTextView: UITextView {
       let imageKey: String?
       if let jpegData = UIPasteboard.general.data(forPasteboardType: UTType.jpeg.identifier) {
         Logger.shared.info("Got JPEG data = \(jpegData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(jpegData, type: .jpeg)
+        imageKey = try? imageStorage.storeImageData(jpegData, type: .jpeg, key: nil)
       } else if let pngData = UIPasteboard.general.data(forPasteboardType: UTType.png.identifier) {
         Logger.shared.info("Got PNG data = \(pngData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(pngData, type: .png)
+        imageKey = try? imageStorage.storeImageData(pngData, type: .png, key: nil)
       } else if let convertedData = image.jpegData(compressionQuality: 0.8) {
         Logger.shared.info("Did JPEG conversion ourselves = \(convertedData.count) bytes")
-        imageKey = try? imageStorage.storeImageData(convertedData, type: .jpeg)
+        imageKey = try? imageStorage.storeImageData(convertedData, type: .jpeg, key: nil)
       } else {
         Logger.shared.error("Could not get image data")
         imageKey = nil

@@ -9,8 +9,9 @@ public protocol ImageStorage {
   /// Store image data.
   /// - parameter imageData: The image data to store
   /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
+  /// - parameter key: Optional pre-defined key to use for this image.
   /// - returns: A string key that can locate this image later.
-  func storeImageData(_ imageData: Data, type: UTType) throws -> String
+  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String
 
   /// Given the key returned from `markdownEditingTextView(_:store:suffix:)`, retrieve the corresponding image data.
   func retrieveImageDataForKey(_ key: String) throws -> Data
@@ -56,8 +57,8 @@ public struct BoundNote {
 }
 
 extension BoundNote: ImageStorage {
-  public func storeImageData(_ imageData: Data, type: UTType) throws -> String {
-    return try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: type)
+  public func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
+    return try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: type, key: key)
   }
 
   public func retrieveImageDataForKey(_ key: String) throws -> Data {
@@ -109,22 +110,28 @@ public extension NoteDatabase {
     return record.data
   }
 
-  func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType) throws -> String {
+  func writeAssociatedData(
+    _ data: Data,
+    noteIdentifier: Note.Identifier,
+    role: String,
+    type: UTType,
+    key: String? = nil
+  ) throws -> String {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
     }
-    let key = ["./" + data.sha1Digest(), type.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
+    let actualKey = key ?? ["./" + data.sha1Digest(), type.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
     let binaryRecord = BinaryContentRecord(
       blob: data,
       noteId: noteIdentifier,
-      key: key,
+      key: actualKey,
       role: role,
       mimeType: type.preferredMIMEType ?? "application/octet-stream"
     )
     try dbQueue.write { db in
       try binaryRecord.save(db)
     }
-    return key
+    return actualKey
   }
 
   func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {

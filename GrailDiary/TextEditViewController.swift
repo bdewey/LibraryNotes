@@ -724,20 +724,15 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 
 extension TextEditViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
-    var imageKey: String?
     if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
-        imageKey = try imageStorage.storeImageData(imageData, type: .jpeg)
+        _ = try imageStorage.storeImageData(imageData, type: .jpeg, key: Note.coverImageKey)
       } catch {
         Logger.shared.error("Unexpected error saving image data: \(error)")
       }
     }
-    var markdown = book.markdownTitle
-    if let imageKey = imageKey {
-      markdown += "\n\n![](\(imageKey))\n\n"
-    }
-    textView.textStorage.replaceCharacters(in: selectedRange, with: markdown)
     delegate?.textEditViewController(self, didAttach: book)
+    scrollawayHeaderView = BookHeader(book: book, coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 

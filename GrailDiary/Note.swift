@@ -8,7 +8,6 @@ public struct Note: Equatable {
     timestamp: Date,
     hashtags: [String],
     referencedImageKeys: [String],
-    coverImageData: Data? = nil,
     title: String, text: String? = nil,
     reference: Note.Reference? = nil,
     folder: String? = nil,
@@ -19,7 +18,6 @@ public struct Note: Equatable {
     self.timestamp = timestamp
     self.hashtags = hashtags
     self.referencedImageKeys = referencedImageKeys
-    self.coverImageData = coverImageData
     self.title = title
     self.text = text
     self.reference = reference
@@ -46,9 +44,7 @@ public struct Note: Equatable {
   /// Images referenced by this note.
   public var referencedImageKeys: [String]
 
-  // TODO: Should this be a UIImage?
-  /// Data that can be turned into a cover image for this note.
-  public var coverImageData: Data?
+  public static let coverImageKey: String = "coverImage"
 
   /// Title of the page. May include Markdown formatting.
   public var title: String

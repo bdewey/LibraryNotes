@@ -87,7 +87,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   override func viewDidLoad() {
     super.viewDidLoad()
     if case .book(let book) = note.reference {
-      textEditViewController.scrollawayHeaderView = BookHeader(book: book, coverImage: note.coverImageData?.image(maxSize: 250))
+      textEditViewController.scrollawayHeaderView = BookHeader(
+        book: book,
+        coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
+      )
     }
     view.addSubview(textEditViewController.view)
     textEditViewController.view.snp.makeConstraints { make in
@@ -190,7 +193,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func insertImageData(_ imageData: Data, type: UTType) {
     do {
       try forceSave()
-      let reference = try storeImageData(imageData, type: type)
+      let reference = try storeImageData(imageData, type: type, key: nil)
       let markdown = "\n\n![](\(reference))\n\n"
       let initialRange = textEditViewController.selectedRange
       var rawRange = textEditViewController.textStorage.storage.rawStringRange(forRange: initialRange)
@@ -256,9 +259,9 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 }
 
 extension SavingTextEditViewController: ImageStorage {
-  func storeImageData(_ imageData: Data, type: UTType) throws -> String {
+  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
     try forceSave()
-    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type)
+    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type, key: key)
   }
 
   func retrieveImageDataForKey(_ key: String) throws -> Data {
