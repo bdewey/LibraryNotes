@@ -84,9 +84,9 @@ public final class TextEditViewController: UIViewController {
       let headingLevel = $0.children.first!.length
       switch headingLevel {
       case 1:
-        $1.textStyle = .title1
-      case 2:
         $1.textStyle = .title2
+      case 2:
+        $1.textStyle = .title3
       default:
         $1.textStyle = .title3
       }
@@ -429,7 +429,10 @@ public final class TextEditViewController: UIViewController {
         withHorizontalFittingPriority: .required,
         verticalFittingPriority: .fittingSizeLevel
       ).height
-      scrollawayHeaderView.frame.size = CGSize(width: view.bounds.width, height: scrollawayHeight)
+      scrollawayHeaderView.frame.size = CGSize(
+        width: view.bounds.width - view.layoutMargins.left,
+        height: scrollawayHeight
+      )
       Logger.textView.info("Computed header size: \(scrollawayHeaderView.frame.size)")
     }
     textView.textContainerInset = UIEdgeInsets(

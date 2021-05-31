@@ -42,6 +42,7 @@ public extension Note {
       timestamp: sqliteNote.modifiedTimestamp,
       hashtags: hashtags,
       referencedImageKeys: imageKeys.map { $0.key },
+      coverImageData: imageKeys.first?.blob,
       title: sqliteNote.title,
       text: noteText,
       reference: try db.reference(for: identifier),

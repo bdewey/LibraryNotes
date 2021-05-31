@@ -159,6 +159,7 @@
 		D3E9B5952564FD4900E47375 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3E9B5942564FD4900E47375 /* Logging */; };
 		D3F4EDBC2662A0DB001289EC /* LibraryThing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBB2662A0DB001289EC /* LibraryThing.swift */; };
 		D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBD2662F51C001289EC /* BookImporter.swift */; };
+		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */; };
 		D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */; };
 		D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */; };
@@ -380,6 +381,7 @@
 		D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Character+MiniMarkdown.swift"; sourceTree = "<group>"; };
 		D3F4EDBB2662A0DB001289EC /* LibraryThing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryThing.swift; sourceTree = "<group>"; };
 		D3F4EDBD2662F51C001289EC /* BookImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporter.swift; sourceTree = "<group>"; };
+		D3F4EDBF266515E1001289EC /* BookHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookHeader.swift; sourceTree = "<group>"; };
 		D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationIdentifier.swift; sourceTree = "<group>"; };
 		D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201213-deviceUUIDKey.sql"; sourceTree = "<group>"; };
 		D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeNote.sql"; sourceTree = "<group>"; };
@@ -547,6 +549,7 @@
 				D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */,
 				D34C88B325DD7C4C00849E0B /* AttributesArray.swift */,
 				D3D093DC265CBB26002FFD23 /* Book.swift */,
+				D3F4EDBF266515E1001289EC /* BookHeader.swift */,
 				D331457526628DCE00B4687F /* BookImporter */,
 				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
@@ -960,6 +963,7 @@
 				D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */,
 				D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */,
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
+				D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */,
 				D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */,
 				D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */,
 				D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */,
