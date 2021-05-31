@@ -277,7 +277,8 @@ private final class BookHeader: UIView {
     stack.axis = .vertical
     addSubview(stack)
     stack.snp.makeConstraints { make in
-      make.edges.equalTo(layoutMarginsGuide)
+      make.left.right.equalTo(layoutMarginsGuide)
+      make.top.bottom.equalToSuperview().inset(8)
     }
   }
 
