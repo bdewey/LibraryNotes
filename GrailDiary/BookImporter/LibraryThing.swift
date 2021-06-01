@@ -14,6 +14,7 @@ struct LibraryThingBook: Codable {
   var review: String?
   var rating: Int?
   var isbn: [String: String]?
+  var entrydate: DayComponents?
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -24,6 +25,7 @@ struct LibraryThingBook: Codable {
     self.review = try? container.decode(String.self, forKey: .review)
     self.rating = try? container.decode(Int.self, forKey: .rating)
     self.isbn = try? container.decode([String: String].self, forKey: .isbn)
+    self.entrydate = try? container.decode(DayComponents.self, forKey: .entrydate)
   }
 }
 

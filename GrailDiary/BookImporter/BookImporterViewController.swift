@@ -45,7 +45,7 @@ final class BookImporterViewController: UIViewController {
     do {
       let data = try Data(contentsOf: url)
       let libraryThingBooks = Array(try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values)
-      let books = libraryThingBooks.map { Book($0) }
+      let books = libraryThingBooks.map { (Book($0), $0.entrydate?.date ?? Date()) }
       delegate?.bookImporter(self, didStartImporting: books.count)
       bookImporter.importBooks(books: books, dryRun: dryRun, downloadImages: downloadImages) { [self] processed, total in
         if processed == total || processed % 5 == 0 {

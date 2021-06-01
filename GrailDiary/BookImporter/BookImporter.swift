@@ -15,6 +15,7 @@ final class BookImporter {
 
   struct BookAndImage {
     var book: Book
+    var creationDate: Date
     var image: TypedData?
   }
 
@@ -24,7 +25,7 @@ final class BookImporter {
   private var currentRequests = Set<AnyCancellable>()
 
   func importBooks(
-    books: [Book],
+    books: [(book: Book, creationDate: Date)],
     dryRun: Bool,
     downloadImages: Bool,
     progressCallback: @escaping (Int, Int) -> Void,
@@ -34,11 +35,11 @@ final class BookImporter {
     let books = dryRun ? Array(books.prefix(10)) : books
     DispatchQueue.global(qos: .default).async {
       let group = DispatchGroup()
-      for book in books {
-        if downloadImages, let isbn = book.isbn13 {
+      for bookInfo in books {
+        if downloadImages, let isbn = bookInfo.book.isbn13 {
           semaphore.wait()
           group.enter()
-          let request = self.openLibraryCoverPublisher(for: book, isbn: isbn)
+          let request = self.openLibraryCoverPublisher(for: bookInfo, isbn: isbn)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] bookAndImage in
               guard let self = self else { return }
@@ -50,7 +51,7 @@ final class BookImporter {
           self.currentRequests.insert(request)
         } else {
           DispatchQueue.main.async {
-            self.booksAndImages.append(BookAndImage(book: book, image: nil))
+            self.booksAndImages.append(BookAndImage(book: bookInfo.book, creationDate: bookInfo.creationDate, image: nil))
             progressCallback(self.booksAndImages.count, books.count)
           }
         }
@@ -69,6 +70,7 @@ final class BookImporter {
         for bookAndImage in booksAndImages {
           let identifier = UUID().uuidString
           var note = Note(bookAndImage)
+          note.creationTimestamp = bookAndImage.creationDate
           note.reference = .book(bookAndImage.book)
           try note.save(identifier: identifier, updateKey: updateIdentifier, to: db)
           if let typedData = bookAndImage.image {
@@ -95,12 +97,12 @@ final class BookImporter {
     case cannotDecodeImage
   }
 
-  private func openLibraryCoverPublisher(for book: Book, isbn: String) -> AnyPublisher<BookAndImage, Never> {
+  private func openLibraryCoverPublisher(for bookInfo: (Book, Date), isbn: String) -> AnyPublisher<BookAndImage, Never> {
     return OpenLibrary.coverImagePublisher(isbn: isbn)
-      .map { BookAndImage(book: book, image: $0) }
+      .map { BookAndImage(book: bookInfo.0, creationDate: bookInfo.1, image: $0) }
       .catch { error -> Just<BookImporter.BookAndImage> in
         Logger.shared.error("Error getting image for book \(isbn): \(error)")
-        return Just(BookAndImage(book: book, image: nil))
+        return Just(BookAndImage(book: bookInfo.0, creationDate: bookInfo.1, image: nil))
       }
       .eraseToAnyPublisher()
   }
