@@ -45,6 +45,11 @@ final class ScrollawayContainerView: UIView {
     layoutScrollawayHeaderView()
   }
 
+  func showScrollawayHeader() {
+    forceScrollawayViewToTop = true
+    setNeedsLayout()
+  }
+
   override func layoutSubviews() {
     scrollView?.frame = bounds
     layoutScrollawayHeaderView()
@@ -77,9 +82,15 @@ final class ScrollawayContainerView: UIView {
     }
   }
 
+  private var forceScrollawayViewToTop = false
+
   private func layoutScrollawayHeaderView() {
     guard let scrollawayHeaderView = scrollawayHeaderView, let scrollView = scrollView else {
       return
+    }
+    if forceScrollawayViewToTop {
+      forceScrollawayViewToTop = false
+      scrollawayContentAnchor = scrollView.contentOffset.y
     }
     let maxScrollAmount = scrollawayHeaderView.frame.size.height
     var newTopConstraintConstant = scrollawayContentAnchor - scrollView.contentOffset.y

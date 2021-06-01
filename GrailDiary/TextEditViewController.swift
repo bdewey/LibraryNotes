@@ -363,6 +363,7 @@ public final class TextEditViewController: UIViewController {
       autoFirstResponder = false
     }
     adjustMargins()
+    scrollawayContainerView.showScrollawayHeader()
     let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
