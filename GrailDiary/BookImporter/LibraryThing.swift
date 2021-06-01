@@ -32,8 +32,8 @@ struct LibraryThingBook: Codable {
 }
 
 struct LibraryThingAuthor: Codable {
-  var lf: String
-  var fl: String
+  var lf: String?
+  var fl: String?
 }
 
 struct TypedData {
@@ -46,7 +46,7 @@ struct TypedData {
 extension Book {
   init(_ libraryThingBook: LibraryThingBook) {
     self.title = libraryThingBook.title
-    self.authors = libraryThingBook.authors.map { $0.fl }
+    self.authors = libraryThingBook.authors.compactMap { $0.fl }
     self.yearPublished = libraryThingBook.date
     self.isbn = libraryThingBook.isbn?["0"]
     self.isbn13 = libraryThingBook.isbn?["2"]

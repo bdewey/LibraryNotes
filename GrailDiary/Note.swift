@@ -59,7 +59,12 @@ public struct Note: Equatable {
   public var reference: Reference? {
     didSet {
       if case .book(let book) = reference {
-        title = "_\(book.title)_, \(book.authors.joined(separator: ", "))"
+        var newTitle = "_\(book.title)_"
+        let authors = book.authors.joined(separator: ", ").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !authors.isEmpty {
+          newTitle += ": \(authors)"
+        }
+        title = newTitle
       }
     }
   }

@@ -4,14 +4,6 @@ import Foundation
 import GRDB
 import Logging
 
-private enum ApplicationMimeType: String {
-  /// Private MIME type for URLs.
-  case url = "text/vnd.grail.url"
-
-  /// MIME type for Book
-  case book = "application/json;type=Book"
-}
-
 public extension Note {
   // TODO: Should this all be done in a single massive join? Instead there are lots of database round-trips.
   /// Loads a note from the database.
