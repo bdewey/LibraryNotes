@@ -119,6 +119,11 @@ extension Note {
       markdown += "#rating/" + String(repeating: "⭐️", count: rating) + " "
     }
     markdown += "#libarything\n\n"
+    if let tags = book.tags {
+      for tag in tags {
+        markdown += "\(tag)\n"
+      }
+    }
     self.init(markdown: markdown)
   }
 }

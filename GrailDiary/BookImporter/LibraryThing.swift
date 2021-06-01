@@ -15,6 +15,7 @@ struct LibraryThingBook: Codable {
   var rating: Int?
   var isbn: [String: String]?
   var entrydate: DayComponents?
+  var genre: [String]?
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -26,6 +27,7 @@ struct LibraryThingBook: Codable {
     self.rating = try? container.decode(Int.self, forKey: .rating)
     self.isbn = try? container.decode([String: String].self, forKey: .isbn)
     self.entrydate = try? container.decode(DayComponents.self, forKey: .entrydate)
+    self.genre = try? container.decode([String].self, forKey: .genre)
   }
 }
 
@@ -50,6 +52,21 @@ extension Book {
     self.isbn13 = libraryThingBook.isbn?["2"]
     self.review = libraryThingBook.review
     self.rating = libraryThingBook.rating
+    self.tags = libraryThingBook.genre?.map { $0.asGenreTag() }.compactMap { $0 }
+  }
+}
+
+extension String {
+  func asGenreTag() -> String? {
+    let coreGenre = lowercased()
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+      .replacingOccurrences(of: #"[^\w\s]"#, with: "", options: .regularExpression)
+      .replacingOccurrences(of: #"\s+"#, with: "-", options: .regularExpression)
+    if coreGenre.isEmpty {
+      return nil
+    } else {
+      return "#genre/" + coreGenre
+    }
   }
 }
 

@@ -31,6 +31,9 @@ public struct Book: Hashable, Codable {
   /// Number of pages in the book
   public var numberOfPages: Int?
 
+  /// An arbitrary collection of tags for this book.
+  public var tags: [String]?
+
   // TODO: Figure out if I actually want these in the "Book" model
   var review: String?
   var rating: Int?
