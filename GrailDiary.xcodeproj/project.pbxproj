@@ -160,6 +160,7 @@
 		D3F4EDBC2662A0DB001289EC /* LibraryThing.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBB2662A0DB001289EC /* LibraryThing.swift */; };
 		D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBD2662F51C001289EC /* BookImporter.swift */; };
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
+		D3F4EDC22665ABF4001289EC /* ScrollawayContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC12665ABF4001289EC /* ScrollawayContainerView.swift */; };
 		D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */; };
 		D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */; };
 		D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */; };
@@ -382,6 +383,7 @@
 		D3F4EDBB2662A0DB001289EC /* LibraryThing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryThing.swift; sourceTree = "<group>"; };
 		D3F4EDBD2662F51C001289EC /* BookImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporter.swift; sourceTree = "<group>"; };
 		D3F4EDBF266515E1001289EC /* BookHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookHeader.swift; sourceTree = "<group>"; };
+		D3F4EDC12665ABF4001289EC /* ScrollawayContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollawayContainerView.swift; sourceTree = "<group>"; };
 		D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationIdentifier.swift; sourceTree = "<group>"; };
 		D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201213-deviceUUIDKey.sql"; sourceTree = "<group>"; };
 		D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeNote.sql"; sourceTree = "<group>"; };
@@ -630,6 +632,7 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D3F4EDC12665ABF4001289EC /* ScrollawayContainerView.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -1011,6 +1014,7 @@
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32B16C925994BAE00766D55 /* Note+Database.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
+				D3F4EDC22665ABF4001289EC /* ScrollawayContainerView.swift in Sources */,
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
 				D30D6B532549C44800F5902D /* BufferProtocols.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,

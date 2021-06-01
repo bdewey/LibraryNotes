@@ -63,6 +63,7 @@ public struct Note: Equatable {
       }
     }
   }
+
   public var folder: String?
 
   /// A short summary of the contents of this note. This shows up in the note list.
