@@ -589,7 +589,7 @@ private extension DocumentTableController {
         ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0], hasLink: !tuple.value.contents.isEmpty)
       }
       .sorted(
-        by: { $0.noteProperties.modifiedTimestamp > $1.noteProperties.modifiedTimestamp }
+        by: { $0.noteProperties.creationTimestamp > $1.noteProperties.creationTimestamp }
       )
       .map {
         Item.page($0)

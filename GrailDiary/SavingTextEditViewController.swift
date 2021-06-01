@@ -147,6 +147,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     // or if it was a blank note instead.
     note.folder = self.note.folder
     note.reference = self.note.reference
+    note.creationTimestamp = self.note.creationTimestamp
     setTitleMarkdown(note.title)
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
