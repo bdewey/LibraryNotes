@@ -91,6 +91,7 @@ final class ScrollawayContainerView: UIView {
     if forceScrollawayViewToTop {
       forceScrollawayViewToTop = false
       scrollawayContentAnchor = scrollView.contentOffset.y
+      Logger.scrollaway.debug("forceScrollawayViewToTop is true. scrollawayContentAnchor = \(scrollawayContentAnchor)")
     }
     let maxScrollAmount = scrollawayHeaderView.frame.size.height
     var newTopConstraintConstant = scrollawayContentAnchor - scrollView.contentOffset.y
@@ -105,7 +106,7 @@ final class ScrollawayContainerView: UIView {
       origin: CGPoint(x: 0, y: safeAreaInsets.top + newTopConstraintConstant),
       size: CGSize(width: bounds.width, height: scrollawayHeaderView.bounds.height)
     )
-    Logger.scrollaway.debug("New scrollaway frame = \(scrollawayHeaderView.frame). scrollawayContentAnchor = \(scrollawayContentAnchor).")
+    Logger.scrollaway.debug("New scrollaway frame = \(scrollawayHeaderView.frame). scrollawayContentAnchor = \(scrollawayContentAnchor). contentOffset.y = \(scrollView.contentOffset.y)")
   }
 }
 

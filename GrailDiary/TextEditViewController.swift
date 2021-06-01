@@ -378,6 +378,16 @@ public final class TextEditViewController: UIViewController {
     adjustMargins()
   }
 
+  var didPerformInitialLayout = false
+
+  public override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    if !didPerformInitialLayout {
+      scrollawayContainerView.showScrollawayHeader()
+      didPerformInitialLayout = true
+    }
+  }
+
   private func adjustMargins() {
     // I wish I could use autolayout to set the insets.
     let scrollawayHeight: CGFloat = scrollawayContainerView.scrollawayHeaderView?.frame.height ?? 0

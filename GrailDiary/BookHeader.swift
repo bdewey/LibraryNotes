@@ -53,17 +53,28 @@ final class BookHeader: UIView {
 
   private lazy var padding: CGFloat = ceil(authorLabel.font.lineHeight * 0.5)
 
+  override func layoutMarginsDidChange() {
+    super.layoutMarginsDidChange()
+    setNeedsLayout()
+  }
+
+  private func constrainedImageSize(layoutSize: CGSize) -> CGSize {
+    CGSize(
+      width: layoutSize.width * imageWidthPercent,
+      height: titleLabel.font.lineHeight * 2 + titleLabel.font.leading + padding + authorLabel.font.lineHeight
+    )
+  }
+
   override func sizeThatFits(_ size: CGSize) -> CGSize {
     var size = size
     size.width -= layoutMargins.left + layoutMargins.right
-    let imageWidth = ceil(size.width * imageWidthPercent)
-    let imageHeight = coverImageView?.image.flatMap { image in imageWidth * image.size.height / image.size.width } ?? 0
-    let textWidth = size.width - (imageWidth + padding)
+    let imageSize = coverImageView?.image.flatMap { $0.size.fitting(constrainedSize: constrainedImageSize(layoutSize: size)) } ?? .zero
+    let textWidth = size.width - (imageSize.width + padding)
     let titleHeight = titleLabel.sizeThatFits(CGSize(width: textWidth, height: .greatestFiniteMagnitude)).height
     let authorHeight = authorLabel.sizeThatFits(CGSize(width: textWidth, height: .greatestFiniteMagnitude)).height
     return CGSize(
       width: size.width + layoutMargins.left + layoutMargins.right,
-      height: max(imageHeight, titleHeight + padding + authorHeight) + 2 * padding
+      height: max(imageSize.height, titleHeight + padding + authorHeight) + 2 * padding
     )
   }
 
@@ -73,14 +84,25 @@ final class BookHeader: UIView {
     background.frame.size.height += 1000
     var layoutArea = bounds.inset(by: UIEdgeInsets(top: padding, left: layoutMargins.left, bottom: padding, right: layoutMargins.right))
     if let coverImageView = coverImageView, let image = coverImageView.image {
-      let imageWidth = ceil(layoutArea.size.width * imageWidthPercent)
-      let imageHeight = imageWidth * image.size.height / image.size.width
-      coverImageView.frame = CGRect(origin: layoutArea.origin, size: CGSize(width: imageWidth, height: imageHeight))
-      (_, layoutArea) = layoutArea.divided(atDistance: imageWidth + padding, from: .minXEdge)
+      let imageSize = image.size.fitting(constrainedSize: constrainedImageSize(layoutSize: layoutArea.size))
+      coverImageView.frame = CGRect(origin: layoutArea.origin, size: imageSize)
+      (_, layoutArea) = layoutArea.divided(atDistance: imageSize.width + padding, from: .minXEdge)
     }
     let titleHeight = titleLabel.sizeThatFits(CGSize(width: layoutArea.width, height: .greatestFiniteMagnitude)).height
-    (titleLabel.frame, layoutArea) = layoutArea.divided(atDistance: titleHeight + padding, from: .minYEdge)
+    (titleLabel.frame, layoutArea) = layoutArea.divided(atDistance: titleHeight, from: .minYEdge)
+    (_, layoutArea) = layoutArea.divided(atDistance: padding, from: .minYEdge)
     let authorHeight = authorLabel.sizeThatFits(CGSize(width: layoutArea.width, height: .greatestFiniteMagnitude)).height
     (authorLabel.frame, layoutArea) = layoutArea.divided(atDistance: authorHeight, from: .minYEdge)
+  }
+}
+
+private extension CGSize {
+  /// Determines the largest size that fits in `constrainedSize` while preserving the aspect ratio of the receiver.
+  func fitting(constrainedSize: CGSize) -> CGSize {
+    guard width != 0, height != 0 else { return self }
+    let scaleToFitWidth = constrainedSize.width / width
+    let scaleToFitHeight = constrainedSize.height / height
+    let scale = min(scaleToFitWidth, scaleToFitHeight)
+    return CGSize(width: width * scale, height: height * scale)
   }
 }
