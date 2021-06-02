@@ -71,6 +71,7 @@ final class BookImporter {
           let identifier = UUID().uuidString
           var note = Note(bookAndImage)
           note.creationTimestamp = bookAndImage.creationDate
+          note.timestamp = bookAndImage.creationDate
           note.reference = .book(bookAndImage.book)
           try note.save(identifier: identifier, updateKey: updateIdentifier, to: db)
           if let typedData = bookAndImage.image {
