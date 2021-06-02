@@ -86,6 +86,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    if case .book(let book) = note.reference {
+      textEditViewController.scrollawayHeaderView = BookHeader(
+        book: book,
+        coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
+      )
+    }
     view.addSubview(textEditViewController.view)
     textEditViewController.view.snp.makeConstraints { make in
       make.edges.equalToSuperview()
@@ -136,12 +142,13 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func updateNote(_ note: Note) throws {
     assert(Thread.isMainThread)
     var note = note
-    setTitleMarkdown(note.title)
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
     note.folder = self.note.folder
     note.reference = self.note.reference
+    note.creationTimestamp = self.note.creationTimestamp
+    setTitleMarkdown(note.title)
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
@@ -187,7 +194,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func insertImageData(_ imageData: Data, type: UTType) {
     do {
       try forceSave()
-      let reference = try storeImageData(imageData, type: type)
+      let reference = try storeImageData(imageData, type: type, key: nil)
       let markdown = "\n\n![](\(reference))\n\n"
       let initialRange = textEditViewController.selectedRange
       var rawRange = textEditViewController.textStorage.storage.rawStringRange(forRange: initialRange)
@@ -223,6 +230,13 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return Array([[hashtag], existingHashtags].joined())
     }
   }
+
+  func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
+    Logger.shared.info("Attaching book: \(book.title)")
+    note.reference = .book(book)
+    note.timestamp = Date()
+    tryUpdateNote(note)
+  }
 }
 
 extension SavingTextEditViewController: NotebookSecondaryViewController {
@@ -248,9 +262,9 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 }
 
 extension SavingTextEditViewController: ImageStorage {
-  func storeImageData(_ imageData: Data, type: UTType) throws -> String {
+  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
     try forceSave()
-    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type)
+    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type, key: key)
   }
 
   func retrieveImageDataForKey(_ key: String) throws -> Data {

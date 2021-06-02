@@ -28,3 +28,15 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
       .asRequest(of: NoteMetadataRecord.self)
   }
 }
+
+public extension NoteMetadataRecord {
+  var book: Book? {
+    guard
+      let bookContent = contents.first(where: { $0.mimeType == ApplicationMimeType.book.rawValue }),
+      let book = try? JSONDecoder().decode(Book.self, from: bookContent.text.data(using: .utf8)!)
+    else {
+      return nil
+    }
+    return book
+  }
+}

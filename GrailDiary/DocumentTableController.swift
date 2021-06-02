@@ -203,13 +203,40 @@ public final class DocumentTableController: NSObject {
 
   private var recordsSubscription: AnyCancellable?
 
+  var currentSortOrder = SortOrder.creationTimestamp {
+    didSet {
+      needsPerformUpdates = true
+    }
+  }
+
+  enum SortOrder: String, CaseIterable {
+    case author = "Author"
+    case title = "Title"
+    case creationTimestamp = "Created Date"
+    case modificationTimestap = "Modified Date"
+
+    fileprivate var sortFunction: (ViewProperties, ViewProperties) -> Bool {
+      switch self {
+      case .author:
+        return ViewProperties.lessThanPriorityAuthor
+      case .title:
+        return ViewProperties.lessThanPriorityTitle
+      case .creationTimestamp:
+        return { ViewProperties.lessThanPriorityCreation(lhs: $1, rhs: $0) }
+      case .modificationTimestap:
+        return { ViewProperties.lessThanPriorityModified(lhs: $1, rhs: $0) }
+      }
+    }
+  }
+
   public func performUpdates(animated: Bool) {
     let snapshot = DocumentTableController.snapshot(
       for: observableRecords?.records ?? [:],
       cardsPerDocument: cardsPerDocument,
       filteredPageIdentifiers: filteredPageIdentifiers,
       webURL: webURL,
-      quoteCount: quoteIdentifiers.count
+      quoteCount: quoteIdentifiers.count,
+      sortOrder: currentSortOrder
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
 
@@ -530,6 +557,28 @@ private extension DocumentTableController {
     /// Does this note have an associated link?
     let hasLink: Bool
 
+    let author: PersonNameComponents?
+
+    init(pageKey: Note.Identifier, noteProperties: NoteMetadataRecord, cardCount: Int, hasLink: Bool) {
+      self.pageKey = pageKey
+      self.noteProperties = noteProperties
+      self.cardCount = cardCount
+      self.hasLink = hasLink
+
+      if let book = noteProperties.book, let rawAuthorString = book.authors.first {
+        let splitRawAuthor = rawAuthorString.split(separator: " ")
+        var nameComponents = PersonNameComponents()
+        if let last = splitRawAuthor.last {
+          let first = splitRawAuthor.dropLast()
+          nameComponents.familyName = String(last)
+          nameComponents.givenName = first.joined(separator: " ")
+        }
+        self.author = nameComponents
+      } else {
+        self.author = nil
+      }
+    }
+
     // "Identity" for hashing & equality is just the pageKey
 
     func hash(into hasher: inout Hasher) {
@@ -538,6 +587,30 @@ private extension DocumentTableController {
 
     static func == (lhs: ViewProperties, rhs: ViewProperties) -> Bool {
       lhs.pageKey == rhs.pageKey
+    }
+
+    static func lessThanPriorityAuthor(lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      return
+        (lhs.author, lhs.noteProperties.title, lhs.noteProperties.creationTimestamp, lhs.noteProperties.modifiedTimestamp) <
+        (rhs.author, rhs.noteProperties.title, rhs.noteProperties.creationTimestamp, rhs.noteProperties.modifiedTimestamp)
+    }
+
+    static func lessThanPriorityTitle(lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      return
+        (lhs.noteProperties.title, lhs.author, lhs.noteProperties.creationTimestamp, lhs.noteProperties.modifiedTimestamp) <
+        (rhs.noteProperties.title, rhs.author, rhs.noteProperties.creationTimestamp, rhs.noteProperties.modifiedTimestamp)
+    }
+
+    static func lessThanPriorityCreation(lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      return
+        (lhs.noteProperties.creationTimestamp, lhs.author, lhs.noteProperties.title, lhs.noteProperties.modifiedTimestamp) <
+        (rhs.noteProperties.creationTimestamp, rhs.author, rhs.noteProperties.title, rhs.noteProperties.modifiedTimestamp)
+    }
+
+    static func lessThanPriorityModified(lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      return
+        (lhs.noteProperties.modifiedTimestamp, lhs.author, lhs.noteProperties.title, lhs.noteProperties.creationTimestamp) <
+        (rhs.noteProperties.modifiedTimestamp, rhs.author, rhs.noteProperties.title, rhs.noteProperties.creationTimestamp)
     }
   }
 
@@ -564,7 +637,8 @@ private extension DocumentTableController {
     cardsPerDocument: [Note.Identifier: Int],
     filteredPageIdentifiers: Set<Note.Identifier>?,
     webURL: URL?,
-    quoteCount: Int
+    quoteCount: Int,
+    sortOrder: SortOrder = .author
   ) -> Snapshot {
     var snapshot = Snapshot()
 
@@ -580,17 +654,22 @@ private extension DocumentTableController {
 
     snapshot.appendSections([.documents])
 
-    let items = records
+    let viewProperties = records
       .filter {
         guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
         return filteredPageIdentifiers.contains($0.key)
       }
       .compactMap { tuple in
-        ViewProperties(pageKey: tuple.key, noteProperties: tuple.value, cardCount: cardsPerDocument[tuple.key, default: 0], hasLink: !tuple.value.contents.isEmpty)
+        ViewProperties(
+          pageKey: tuple.key,
+          noteProperties: tuple.value,
+          cardCount: cardsPerDocument[tuple.key, default: 0],
+          hasLink: !tuple.value.contents.isEmpty
+        )
       }
-      .sorted(
-        by: { $0.noteProperties.modifiedTimestamp > $1.noteProperties.modifiedTimestamp }
-      )
+
+    let items = viewProperties
+      .sorted(by: sortOrder.sortFunction)
       .map {
         Item.page($0)
       }
@@ -604,5 +683,34 @@ private extension CGFloat {
   func roundedToScreenScale(_ rule: FloatingPointRoundingRule = .toNearestOrAwayFromZero) -> CGFloat {
     let scale: CGFloat = 1.0 / UIScreen.main.scale
     return scale * (self / scale).rounded(rule)
+  }
+}
+
+private extension PersonNameComponents {
+  func compare(to other: PersonNameComponents) -> ComparisonResult {
+    if let familyName = self.familyName, let otherFamilyName = other.familyName {
+      let result = familyName.compare(otherFamilyName, options: [.diacriticInsensitive, .caseInsensitive])
+      if result != .orderedSame { return result }
+    }
+    if let givenName = self.givenName, let otherGivenName = other.givenName {
+      return givenName.compare(otherGivenName)
+    }
+    return .orderedSame
+  }
+}
+
+extension Optional: Comparable where Wrapped == PersonNameComponents {
+  public static func < (lhs: Wrapped?, rhs: Wrapped?) -> Bool {
+    switch (lhs, rhs) {
+    case (.none, .some):
+      // No name before name
+      return true
+    case (.some, .none):
+      return false
+    case (.none, .none):
+      return false
+    case (.some(let lhs), .some(let rhs)):
+      return lhs.compare(to: rhs) == .orderedAscending
+    }
   }
 }

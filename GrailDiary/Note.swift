@@ -44,16 +44,31 @@ public struct Note: Equatable {
   /// Images referenced by this note.
   public var referencedImageKeys: [String]
 
+  public static let coverImageKey: String = "coverImage"
+
   /// Title of the page. May include Markdown formatting.
   public var title: String
 
   /// What this note is "about."
   public enum Reference: Equatable {
+    case book(Book)
     case webPage(URL)
   }
 
   public var text: String?
-  public var reference: Reference?
+  public var reference: Reference? {
+    didSet {
+      if case .book(let book) = reference {
+        var newTitle = "_\(book.title)_"
+        let authors = book.authors.joined(separator: ", ").trimmingCharacters(in: .whitespacesAndNewlines)
+        if !authors.isEmpty {
+          newTitle += ": \(authors)"
+        }
+        title = newTitle
+      }
+    }
+  }
+
   public var folder: String?
 
   /// A short summary of the contents of this note. This shows up in the note list.

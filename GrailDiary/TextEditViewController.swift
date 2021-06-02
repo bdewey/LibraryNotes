@@ -2,12 +2,14 @@
 
 import Logging
 import MobileCoreServices
+import SnapKit
 import UIKit
 
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String]
+  func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book)
 }
 
 /// Allows editing of a single text file.
@@ -74,9 +76,9 @@ public final class TextEditViewController: UIViewController {
       let headingLevel = $0.children.first!.length
       switch headingLevel {
       case 1:
-        $1.textStyle = .title1
-      case 2:
         $1.textStyle = .title2
+      case 2:
+        $1.textStyle = .title3
       default:
         $1.textStyle = .title3
       }
@@ -152,6 +154,12 @@ public final class TextEditViewController: UIViewController {
       let visibleRange = textStorage.storage.range(forRawStringRange: newValue)
       textView.selectedRange = visibleRange
     }
+  }
+
+  /// An optional view that will appear at the top of the textView and scroll away as the content scrolls.
+  var scrollawayHeaderView: UIView? {
+    get { scrollawayContainerView.scrollawayHeaderView }
+    set { scrollawayContainerView.scrollawayHeaderView = newValue }
   }
 
   /// All of the related data for our typeahead accessory.
@@ -233,12 +241,15 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Lifecycle
 
+  private lazy var scrollawayContainerView = ScrollawayContainerView(frame: .zero)
+
   override public func loadView() {
-    view = textView
+    view = scrollawayContainerView
   }
 
   override public func viewDidLoad() {
     super.viewDidLoad()
+    scrollawayContainerView.scrollView = textView
     view.accessibilityIdentifier = "edit-document-view"
     textView.delegate = self
 
@@ -351,7 +362,8 @@ public final class TextEditViewController: UIViewController {
       // We only do this behavior on first appearance.
       autoFirstResponder = false
     }
-    adjustMargins(size: view!.bounds.size)
+    adjustMargins()
+    scrollawayContainerView.showScrollawayHeader()
     let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
     UIMenuController.shared.menuItems = [highlightMenuItem]
   }
@@ -363,17 +375,28 @@ public final class TextEditViewController: UIViewController {
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    adjustMargins(size: view.frame.size)
+    adjustMargins()
   }
 
-  private func adjustMargins(size: CGSize) {
+  var didPerformInitialLayout = false
+
+  override public func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    if !didPerformInitialLayout {
+      scrollawayContainerView.showScrollawayHeader()
+      didPerformInitialLayout = true
+    }
+  }
+
+  private func adjustMargins() {
     // I wish I could use autolayout to set the insets.
-    let readableContentGuide = textView.readableContentGuide
+    let scrollawayHeight: CGFloat = scrollawayContainerView.scrollawayHeaderView?.frame.height ?? 0
+    let readableContentGuide = view.readableContentGuide
     textView.textContainerInset = UIEdgeInsets(
-      top: 8,
+      top: scrollawayHeight + 8,
       left: readableContentGuide.layoutFrame.minX,
       bottom: 8,
-      right: textView.bounds.maxX - readableContentGuide.layoutFrame.maxX
+      right: view.bounds.maxX - readableContentGuide.layoutFrame.maxX
     )
   }
 
@@ -612,6 +635,10 @@ extension TextEditViewController: UITextViewDelegate {
   private func lineRange(at location: Int) -> NSRange {
     (textStorage.string as NSString).lineRange(for: NSRange(location: location, length: 0))
   }
+
+  public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    scrollawayContainerView.scrollViewDidScroll()
+  }
 }
 
 // MARK: - Commands
@@ -653,20 +680,16 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 // MARK: - BookSearchViewControllerDelegate
 
 extension TextEditViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book) {
-    var imageKey: String?
-    if let image = book.coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
+    if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
-        imageKey = try imageStorage.storeImageData(imageData, type: .jpeg)
+        _ = try imageStorage.storeImageData(imageData, type: .jpeg, key: Note.coverImageKey)
       } catch {
         Logger.shared.error("Unexpected error saving image data: \(error)")
       }
     }
-    var markdown = book.markdownTitle
-    if let imageKey = imageKey {
-      markdown += "\n\n![](\(imageKey))\n\n"
-    }
-    textView.textStorage.replaceCharacters(in: selectedRange, with: markdown)
+    delegate?.textEditViewController(self, didAttach: book)
+    scrollawayHeaderView = BookHeader(book: book, coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 

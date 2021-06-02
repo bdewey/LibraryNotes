@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- *Tons* of improvements around importing LibraryThing content
+- Book pages now get a dedicated slide-away header with title, author, and cover image.
+- We can sort by title, author, create date, and modified date
+
 ### Fixed
 
 - Cover images weren't getting inserted into brand new notes

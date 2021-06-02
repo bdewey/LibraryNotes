@@ -196,7 +196,7 @@ extension QuotesViewController: UICollectionViewDelegate {
     backgroundView.frame = CGRect(origin: .zero, size: size)
     let renderer = UIGraphicsImageRenderer(size: backgroundView.bounds.size)
     let image = renderer.image { _ in
-        backgroundView.drawHierarchy(in: backgroundView.bounds, afterScreenUpdates: true)
+      backgroundView.drawHierarchy(in: backgroundView.bounds, afterScreenUpdates: true)
     }
 
     // TODO: copypasta

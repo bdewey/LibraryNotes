@@ -291,12 +291,20 @@ final class DocumentListViewController: UIViewController {
     reviewButton.accessibilityIdentifier = "study-button"
     reviewButton.isEnabled = itemsToReview > 0
 
+    let sortActions = DocumentTableController.SortOrder.allCases.map { sortOrder -> UIAction in
+      UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
+        self?.dataSource.currentSortOrder = sortOrder
+      }
+    }
+    let sortMenuItem = UIBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down.circle"), menu: UIMenu(children: sortActions))
+
     let countItem = UIBarButtonItem(customView: countLabel)
     var toolbarItems = [
       reviewButton,
       UIBarButtonItem.flexibleSpace(),
       countItem,
       UIBarButtonItem.flexibleSpace(),
+      sortMenuItem,
     ]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)

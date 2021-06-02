@@ -293,6 +293,30 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
+  public func bulkCreateNotes(_ notes: [Note]) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      let updateKey = try updateIdentifier(in: db)
+      for note in notes {
+        let identifier = UUID().uuidString
+        try note.save(identifier: identifier, updateKey: updateKey, to: db)
+      }
+      Logger.shared.info("Finished bulk import of \(notes.count) note(s)")
+    }
+  }
+
+  public func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws {
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+    try dbQueue.write { db in
+      let updateKey = try updateIdentifier(in: db)
+      try updateBlock(db, updateKey)
+    }
+  }
+
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
     guard let dbQueue = dbQueue else {
       throw Error.databaseIsNotOpen
