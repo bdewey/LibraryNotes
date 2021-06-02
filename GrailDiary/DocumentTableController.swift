@@ -573,9 +573,9 @@ private extension DocumentTableController {
           nameComponents.familyName = String(last)
           nameComponents.givenName = first.joined(separator: " ")
         }
-        author = nameComponents
+        self.author = nameComponents
       } else {
-        author = nil
+        self.author = nil
       }
     }
 

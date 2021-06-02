@@ -11,6 +11,7 @@ protocol BookImporterViewControllerDelegate: AnyObject {
   func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController)
 }
 
+/// Displays a form that lets the user pick a file with book data to import and set parameters for the import job.
 final class BookImporterViewController: UIViewController {
   init(database: NoteDatabase) {
     self.bookImporter = BookImporter(database: database, apiKey: ApiKey.googleBooks)

@@ -36,13 +36,6 @@ struct LibraryThingAuthor: Codable {
   var fl: String?
 }
 
-struct TypedData {
-  var data: Data
-  var type: UTType
-
-  let uuid = UUID().uuidString
-}
-
 extension Book {
   init(_ libraryThingBook: LibraryThingBook) {
     self.title = libraryThingBook.title
@@ -67,25 +60,5 @@ extension String {
     } else {
       return "#genre/" + coreGenre
     }
-  }
-}
-
-enum OpenLibrary {
-  static func coverImagePublisher(isbn: String) -> AnyPublisher<TypedData, Error> {
-    let url = URL(string: "https://covers.openlibrary.org/b/isbn/\(isbn)-M.jpg")!
-    return URLSession.shared.dataTaskPublisher(for: url)
-      .tryMap { data, response in
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-          throw URLError(.badServerResponse)
-        }
-        if let mimeType = httpResponse.mimeType, let type = UTType(mimeType: mimeType) {
-          return TypedData(data: data, type: type)
-        }
-        if let image = UIImage(data: data), let jpegData = image.jpegData(compressionQuality: 0.8) {
-          return TypedData(data: jpegData, type: .jpeg)
-        }
-        throw URLError(.cannotDecodeRawData)
-      }
-      .eraseToAnyPublisher()
   }
 }

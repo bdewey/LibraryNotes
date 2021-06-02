@@ -4,6 +4,7 @@ import Combine
 import Foundation
 import Logging
 
+/// An object that can download cover images from OpenLibrary and bulk-create notes for books.
 final class BookImporter {
   init(database: NoteDatabase, apiKey: String?) {
     self.database = database

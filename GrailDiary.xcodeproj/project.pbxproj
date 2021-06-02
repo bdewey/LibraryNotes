@@ -162,6 +162,8 @@
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F4EDC22665ABF4001289EC /* ScrollawayContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC12665ABF4001289EC /* ScrollawayContainerView.swift */; };
 		D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */; };
+		D3F4EDC62667BF98001289EC /* OpenLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC52667BF98001289EC /* OpenLibrary.swift */; };
+		D3F4EDC82667BFD3001289EC /* TypedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC72667BFD3001289EC /* TypedData.swift */; };
 		D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */; };
 		D3F90E6F2588883D00162CFC /* 20201213-deviceUUIDKey.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */; };
 		D3F90E702588883D00162CFC /* 20201214-noFlakeNote.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */; };
@@ -386,6 +388,8 @@
 		D3F4EDBF266515E1001289EC /* BookHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookHeader.swift; sourceTree = "<group>"; };
 		D3F4EDC12665ABF4001289EC /* ScrollawayContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollawayContainerView.swift; sourceTree = "<group>"; };
 		D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationMimeType.swift; sourceTree = "<group>"; };
+		D3F4EDC52667BF98001289EC /* OpenLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLibrary.swift; sourceTree = "<group>"; };
+		D3F4EDC72667BFD3001289EC /* TypedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedData.swift; sourceTree = "<group>"; };
 		D3F90E5F2587301F00162CFC /* MigrationIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationIdentifier.swift; sourceTree = "<group>"; };
 		D3F90E6D2588883D00162CFC /* 20201213-deviceUUIDKey.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201213-deviceUUIDKey.sql"; sourceTree = "<group>"; };
 		D3F90E6E2588883D00162CFC /* 20201214-noFlakeNote.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201214-noFlakeNote.sql"; sourceTree = "<group>"; };
@@ -466,6 +470,8 @@
 				D33145782662926C00B4687F /* DocumentPickerView.swift */,
 				D3F4EDBB2662A0DB001289EC /* LibraryThing.swift */,
 				D3F4EDBD2662F51C001289EC /* BookImporter.swift */,
+				D3F4EDC52667BF98001289EC /* OpenLibrary.swift */,
+				D3F4EDC72667BFD3001289EC /* TypedData.swift */,
 			);
 			path = BookImporter;
 			sourceTree = "<group>";
@@ -996,6 +1002,7 @@
 				D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */,
 				D30D6B512549C44800F5902D /* ParsingRule.swift in Sources */,
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
+				D3F4EDC82667BFD3001289EC /* TypedData.swift in Sources */,
 				D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */,
 				D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
@@ -1025,6 +1032,7 @@
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
+				D3F4EDC62667BF98001289EC /* OpenLibrary.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,

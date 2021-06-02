@@ -380,7 +380,7 @@ public final class TextEditViewController: UIViewController {
 
   var didPerformInitialLayout = false
 
-  public override func viewDidLayoutSubviews() {
+  override public func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     if !didPerformInitialLayout {
       scrollawayContainerView.showScrollawayHeader()

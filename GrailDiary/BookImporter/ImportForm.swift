@@ -3,6 +3,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// A form that lets the user input parameters for a book import job
 struct ImportForm: View {
   var importAction: ([URL], Bool, Bool) -> Void
   @State private var downloadCoverImages = false

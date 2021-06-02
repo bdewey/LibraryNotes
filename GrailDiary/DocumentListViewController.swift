@@ -304,7 +304,7 @@ final class DocumentListViewController: UIViewController {
       UIBarButtonItem.flexibleSpace(),
       countItem,
       UIBarButtonItem.flexibleSpace(),
-      sortMenuItem
+      sortMenuItem,
     ]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)

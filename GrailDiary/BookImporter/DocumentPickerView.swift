@@ -4,6 +4,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
+/// Exposes UIDocumentPickerViewController for SwiftUI
 struct DocumentPickerView: UIViewControllerRepresentable {
   var contentTypes: [UTType]
   var openAsCopy: Bool = true
