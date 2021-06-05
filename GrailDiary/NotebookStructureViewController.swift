@@ -461,7 +461,7 @@ private extension NotebookStructureViewController {
 
   private func documentActionMenu() -> UIBarButtonItem {
     let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
-    let importLibraryThing = UIAction(title: "Import LibraryThing", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
+    let importLibraryThing = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
       guard let self = self else { return }
       Logger.shared.info("Importing from LibraryThing")
       let bookImporterViewController = BookImporterViewController(database: self.database)

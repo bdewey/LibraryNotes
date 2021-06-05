@@ -5,6 +5,7 @@
 ### Added
 
 - Can export a book list in CSV format
+- Can import a Goodreads CSV file
 
 ## [0.48.0] - 2021-06-02
 

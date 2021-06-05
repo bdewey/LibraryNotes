@@ -27,6 +27,7 @@ final class BookImporter {
 
   func importBooks(
     books: [(book: Book, creationDate: Date)],
+    hashtags: String,
     dryRun: Bool,
     downloadImages: Bool,
     progressCallback: @escaping (Int, Int) -> Void,
@@ -58,19 +59,19 @@ final class BookImporter {
         }
       }
       group.notify(queue: .main, execute: {
-        self.saveBooksAndImages()
+        self.saveBooksAndImages(hashtags: hashtags)
         Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
         completion()
       })
     }
   }
 
-  private func saveBooksAndImages() {
+  private func saveBooksAndImages(hashtags: String) {
     do {
       try database.bulkUpdate(updateBlock: { db, updateIdentifier in
         for bookAndImage in booksAndImages {
           let identifier = UUID().uuidString
-          var note = Note(bookAndImage)
+          var note = Note(bookAndImage, hashtags: hashtags)
           note.creationTimestamp = bookAndImage.creationDate
           note.timestamp = bookAndImage.creationDate
           note.reference = .book(bookAndImage.book)
@@ -111,16 +112,18 @@ final class BookImporter {
 }
 
 extension Note {
-  init(_ bookAndImage: BookImporter.BookAndImage) {
+  init(_ bookAndImage: BookImporter.BookAndImage, hashtags: String) {
     let book = bookAndImage.book
     var markdown = ""
     if let review = book.review {
       markdown += "\(review)\n\n"
     }
-    if let rating = book.rating {
+    if let rating = book.rating, rating > 0 {
       markdown += "#rating/" + String(repeating: "⭐️", count: rating) + " "
     }
-    markdown += "#libarything\n\n"
+    if !hashtags.trimmingCharacters(in: .whitespaces).isEmpty {
+      markdown += "\(hashtags)\n\n"
+    }
     if let tags = book.tags {
       for tag in tags {
         markdown += "\(tag)\n"

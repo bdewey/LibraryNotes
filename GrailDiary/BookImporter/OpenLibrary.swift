@@ -7,7 +7,9 @@ import UniformTypeIdentifiers
 enum OpenLibrary {
   /// A Combine publisher that downloads a medium-sized cover image for a book from OpenLibrary.
   static func coverImagePublisher(isbn: String) -> AnyPublisher<TypedData, Error> {
-    let url = URL(string: "https://covers.openlibrary.org/b/isbn/\(isbn)-M.jpg")!
+    guard let url = URL(string: "https://covers.openlibrary.org/b/isbn/\(isbn)-M.jpg") else {
+      return Fail<TypedData, Error>(error: URLError(.badURL)).eraseToAnyPublisher()
+    }
     return URLSession.shared.dataTaskPublisher(for: url)
       .tryMap { data, response in
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
