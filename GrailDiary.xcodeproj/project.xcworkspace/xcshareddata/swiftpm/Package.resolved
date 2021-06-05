@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "CodableCSV",
+        "repositoryURL": "https://github.com/dehesa/CodableCSV",
+        "state": {
+          "branch": null,
+          "revision": "82ee81e7cdb0700f1d6574dbec314872dce5003e",
+          "version": "0.6.6"
+        }
+      },
+      {
         "package": "CombineExpectations",
         "repositoryURL": "https://github.com/groue/CombineExpectations.git",
         "state": {

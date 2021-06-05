@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
@@ -291,6 +292,8 @@ final class DocumentListViewController: UIViewController {
     reviewButton.accessibilityIdentifier = "study-button"
     reviewButton.isEnabled = itemsToReview > 0
 
+    let exportMenuItem = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(exportAndShare))
+
     let sortActions = DocumentTableController.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
         self?.dataSource.currentSortOrder = sortOrder
@@ -304,12 +307,49 @@ final class DocumentListViewController: UIViewController {
       UIBarButtonItem.flexibleSpace(),
       countItem,
       UIBarButtonItem.flexibleSpace(),
+      exportMenuItem,
       sortMenuItem,
     ]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
+  }
+
+  /// Exports the selection of books in a CSV format that roughly matches the Goodreads CSV format. Opens the share sheet to determine the final disposition of the file.
+  @objc private func exportAndShare(sender: UIBarButtonItem) {
+    let noteIdentifiers = dataSource.noteIdentifiers
+    Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
+    let listFormatter = ListFormatter()
+    do {
+      let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(title ?? "export").csv")
+      let writer = try CSVWriter(fileURL: exportURL) {
+        $0.headers = ["Title", "Authors", "ISBN", "ISBN13", "My Rating", "Number of Pages", "Year Published", "Original Publication Year", "Date Added", "Publisher", "Private Notes"]
+      }
+      for noteIdentifier in noteIdentifiers {
+        let note = try database.note(noteIdentifier: noteIdentifier)
+        guard let book = note.book else { continue }
+        try writer.write(field: book.title)
+        try listFormatter.string(from: book.authors).flatMap { try writer.write(field: $0) }
+        try writer.write(field: book.isbn ?? "")
+        try writer.write(field: book.isbn13 ?? "")
+        try writer.write(field: note.rating?.description ?? "")
+        try writer.write(field: book.numberOfPages?.description ?? "")
+        try writer.write(field: book.yearPublished?.description ?? "")
+        try writer.write(field: book.originalYearPublished?.description ?? "")
+        try writer.write(field: DayComponents(note.creationTimestamp).description)
+        try writer.write(field: book.publisher ?? "")
+        try writer.write(field: note.text ?? "")
+        try writer.endRow()
+      }
+      try writer.endEncoding()
+      let activityViewController = UIActivityViewController(activityItems: [exportURL], applicationActivities: nil)
+      let popover = activityViewController.popoverPresentationController
+      popover?.barButtonItem = sender
+      present(activityViewController, animated: true)
+    } catch {
+      Logger.shared.error("Error exporting to CSV: \(error)")
+    }
   }
 
   @objc private func performReview() {
@@ -460,5 +500,22 @@ private extension String {
       }
     }
     return nil
+  }
+}
+
+private extension Note {
+  var book: Book? {
+    if case .book(let book) = reference {
+      return book
+    } else {
+      return nil
+    }
+  }
+
+  var rating: Int? {
+    for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
+      return hashtag.count - 8
+    }
+    return 0
   }
 }

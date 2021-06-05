@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Can export a book list in CSV format
+
 ## [0.48.0] - 2021-06-02
 
 ### Added

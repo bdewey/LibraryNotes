@@ -119,6 +119,11 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  /// All note identifiers currently displayed in the table.
+  public var noteIdentifiers: [Note.Identifier] {
+    dataSource.snapshot().itemIdentifiers.compactMap { $0.noteIdentifier }
+  }
+
   private var needsPerformUpdates = false
   private var isPerformingUpdates = false
 
@@ -542,6 +547,15 @@ private extension DocumentTableController {
         return "Page \(viewProperties.pageKey)"
       case .reviewQuotes(count: let count):
         return "Quotes: \(count)"
+      }
+    }
+
+    /// The note identifier for the item, if it exists.
+    var noteIdentifier: Note.Identifier? {
+      if case .page(let viewProperties) = self {
+        return viewProperties.pageKey
+      } else {
+        return nil
       }
     }
   }

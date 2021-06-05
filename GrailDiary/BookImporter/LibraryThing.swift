@@ -16,6 +16,7 @@ struct LibraryThingBook: Codable {
   var isbn: [String: String]?
   var entrydate: DayComponents?
   var genre: [String]?
+  var pages: Int?
 
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -28,6 +29,9 @@ struct LibraryThingBook: Codable {
     self.isbn = try? container.decode([String: String].self, forKey: .isbn)
     self.entrydate = try? container.decode(DayComponents.self, forKey: .entrydate)
     self.genre = try? container.decode([String].self, forKey: .genre)
+    if let pageString = try? container.decode(String.self, forKey: .pages) {
+      self.pages = Int(pageString.trimmingCharacters(in: .whitespaces))
+    }
   }
 }
 
@@ -46,6 +50,7 @@ extension Book {
     self.review = libraryThingBook.review
     self.rating = libraryThingBook.rating
     self.tags = libraryThingBook.genre?.map { $0.asGenreTag() }.compactMap { $0 }
+    self.numberOfPages = libraryThingBook.pages
   }
 }
 
