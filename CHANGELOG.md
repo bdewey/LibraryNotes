@@ -7,6 +7,10 @@
 - Can export a book list in CSV format
 - Can import a Goodreads CSV file
 
+### Fixed
+
+- Bulleted & numbered lists are no longer in crazy-hard-to-read color.
+
 ## [0.48.0] - 2021-06-02
 
 ### Added

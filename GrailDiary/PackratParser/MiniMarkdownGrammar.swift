@@ -15,6 +15,7 @@ public extension SyntaxTreeNodeType {
   static let linkAltText: SyntaxTreeNodeType = "link_alt_text"
   static let linkTarget: SyntaxTreeNodeType = "link_target"
   static let list: SyntaxTreeNodeType = "list"
+  static let listDelimiter: SyntaxTreeNodeType = "list_delimiter"
   static let listItem: SyntaxTreeNodeType = "list_item"
   static let paragraph: SyntaxTreeNodeType = "paragraph"
   static let softTab: SyntaxTreeNodeType = "tab"
@@ -214,14 +215,14 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     whitespace.repeating(0...).as(.text).zeroOrOne(),
     Characters(["*", "-", "+"]).as(.unorderedListOpening),
     whitespace.repeating(1 ... 4).as(.softTab)
-  ).wrapping(in: .delimiter).memoize()
+  ).wrapping(in: .listDelimiter).memoize()
 
   lazy var orderedListOpening = InOrder(
     whitespace.repeating(0...).as(.text).zeroOrOne(),
     digit.repeating(1 ... 9).as(.orderedListNumber),
     Characters([".", ")"]).as(.orderedListTerminator),
     whitespace.repeating(1 ... 4).as(.softTab)
-  ).wrapping(in: .delimiter).memoize()
+  ).wrapping(in: .listDelimiter).memoize()
 
   func list(type: ListType, openingDelimiter: ParsingRule) -> ParsingRule {
     let listItem = InOrder(
