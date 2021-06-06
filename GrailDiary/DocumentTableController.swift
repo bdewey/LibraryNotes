@@ -182,7 +182,7 @@ public final class DocumentTableController: NSObject {
         Logger.shared.error("Unexpected error getting quotes: \(error)")
       }, receiveValue: { [weak self] quoteIdentifiers in
         self?.quoteIdentifiers = quoteIdentifiers
-        Logger.shared.info("Got \(quoteIdentifiers.count) quotes")
+        Logger.shared.debug("Got \(quoteIdentifiers.count) quotes")
       })
     }
   }

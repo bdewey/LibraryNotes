@@ -6,6 +6,7 @@
 
 - Can export a book list in CSV format
 - Can import a Goodreads CSV file
+- When the app detects that it needs to merge versions of the file, saves copies of both versions in a temporary directory first for debugging.
 
 ### Fixed
 

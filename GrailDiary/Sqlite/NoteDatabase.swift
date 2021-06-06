@@ -206,18 +206,20 @@ public final class NoteDatabase: UIDocument {
   override public func read(from url: URL) throws {
     // TODO: Optionally merge the changes from disk into memory?
     Logger.shared.info("UIDocument: Reading content from '\(url.path)'")
-    let dbQueue = try memoryDatabaseQueue(fileURL: url)
+    let diskDbQueue = try memoryDatabaseQueue(fileURL: url)
     DispatchQueue.main.async {
       if let inMemoryQueue = self.dbQueue {
-        if dbQueue.deviceVersionVector == inMemoryQueue.deviceVersionVector {
+        if diskDbQueue.deviceVersionVector == inMemoryQueue.deviceVersionVector {
           Logger.shared.info("UIDocument: On-disk content is the same as memory; ignoring")
-        } else if dbQueue.deviceVersionVector > inMemoryQueue.deviceVersionVector {
+        } else if diskDbQueue.deviceVersionVector > inMemoryQueue.deviceVersionVector {
           Logger.shared.info("UIDocument: On-disk data is strictly greater than in-memory; overwriting")
-          self.dbQueue = dbQueue
+          self.dbQueue = diskDbQueue
         } else {
-          Logger.shared.info("UIDocument: **Merging** disk contents with memory.\nDisk: \(dbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
+          Logger.shared.info("UIDocument: **Merging** disk contents with memory.\nDisk: \(diskDbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
+          // Make a backup of the two databases for future debugging if needed
+          Self.backupDatabases(inMemoryDb: inMemoryQueue, onDiskDb: diskDbQueue, parentURL: url)
           do {
-            let result = try inMemoryQueue.merge(remoteQueue: dbQueue)
+            let result = try inMemoryQueue.merge(remoteQueue: diskDbQueue)
             Logger.shared.info("UIDocument: Merged disk results \(result)")
             if !result.isEmpty {
               self.notesDidChangeSubject.send()
@@ -228,8 +230,27 @@ public final class NoteDatabase: UIDocument {
         }
       } else {
         Logger.shared.info("UIDocument: Nothing in memory, using the disk image")
-        self.dbQueue = dbQueue
+        self.dbQueue = diskDbQueue
       }
+    }
+  }
+
+  private static func backupDatabases(inMemoryDb: DatabaseQueue, onDiskDb: DatabaseQueue, parentURL: URL) {
+    let uniqifier = Int(round(Date().timeIntervalSince1970 * 1000))
+    let containerURL = parentURL.deletingLastPathComponent().appendingPathComponent("merge-\(uniqifier)")
+    do {
+      Logger.shared.info("Making a backup to \(containerURL)")
+      try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true)
+      let inMemoryURL = containerURL.appendingPathComponent("memory.sqlite")
+      try inMemoryDb.writeWithoutTransaction { db in
+        try db.execute(sql: "VACUUM INTO '\(inMemoryURL.path)'")
+      }
+      let onDiskURL = containerURL.appendingPathComponent("disk.sqlite")
+      try onDiskDb.writeWithoutTransaction({ db in
+        try db.execute(sql: "VACUUM INTO '\(onDiskURL.path)'")
+      })
+    } catch {
+      Logger.shared.error("Unexpected error making backup: \(error)")
     }
   }
 
@@ -242,7 +263,7 @@ public final class NoteDatabase: UIDocument {
     guard let dbQueue = dbQueue, hasUnsavedChanges else {
       return
     }
-    Logger.shared.info("UIDocument: Writing content to '\(url.path)'")
+    Logger.shared.info("UIDocument \(documentState): Writing content to '\(url.path)'")
     try dbQueue.writeWithoutTransaction { db in
       try db.execute(sql: "VACUUM INTO '\(url.path)'")
     }

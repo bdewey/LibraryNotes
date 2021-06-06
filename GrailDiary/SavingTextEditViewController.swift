@@ -99,7 +99,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     addChild(textEditViewController)
     textEditViewController.didMove(toParent: self)
     autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      if self?.hasUnsavedChanges ?? false { Logger.shared.info("SavingTextEditViewController: autosave") }
+      if self?.hasUnsavedChanges ?? false { Logger.shared.debug("SavingTextEditViewController: autosave") }
       self?.saveIfNeeded()
     })
     navigationItem.largeTitleDisplayMode = .never
