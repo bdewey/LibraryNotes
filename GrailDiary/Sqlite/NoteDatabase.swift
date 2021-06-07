@@ -183,6 +183,7 @@ public final class NoteDatabase: UIDocument {
         }
         let conflictQueue = try memoryDatabaseQueue(fileURL: tempURL)
         if let dbQueue = dbQueue {
+          Self.backupDatabases(inMemoryDb: dbQueue, onDiskDb: conflictQueue)
           let result = try dbQueue.merge(remoteQueue: conflictQueue)
           Logger.shared.info("UIDocument: Merged conflict version: \(result)")
           conflictMergeResults += result
@@ -217,7 +218,7 @@ public final class NoteDatabase: UIDocument {
         } else {
           Logger.shared.info("UIDocument: **Merging** disk contents with memory.\nDisk: \(diskDbQueue.deviceVersionVector)\nMemory: \(inMemoryQueue.deviceVersionVector)")
           // Make a backup of the two databases for future debugging if needed
-          Self.backupDatabases(inMemoryDb: inMemoryQueue, onDiskDb: diskDbQueue, parentURL: url)
+          Self.backupDatabases(inMemoryDb: inMemoryQueue, onDiskDb: diskDbQueue)
           do {
             let result = try inMemoryQueue.merge(remoteQueue: diskDbQueue)
             Logger.shared.info("UIDocument: Merged disk results \(result)")
@@ -235,9 +236,16 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  private static func backupDatabases(inMemoryDb: DatabaseQueue, onDiskDb: DatabaseQueue, parentURL: URL) {
-    let uniqifier = Int(round(Date().timeIntervalSince1970 * 1000))
-    let containerURL = parentURL.deletingLastPathComponent().appendingPathComponent("merge-\(uniqifier)")
+  private static func backupDatabases(inMemoryDb: DatabaseQueue, onDiskDb: DatabaseQueue) {
+    // swiftlint:disable:next force_try
+    let documentsDirectoryURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    let mergeDirectoryURL = documentsDirectoryURL.appendingPathComponent("merge-attempts")
+    let creationDate = Date()
+    let unwantedCharacters = CharacterSet(charactersIn: "-:")
+    var uniqifier = ISO8601DateFormatter().string(from: creationDate)
+    uniqifier.removeAll(where: { unwantedCharacters.contains($0.unicodeScalars.first!) })
+
+    let containerURL = mergeDirectoryURL.appendingPathComponent("merge-\(uniqifier)")
     do {
       Logger.shared.info("Making a backup to \(containerURL)")
       try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true)
