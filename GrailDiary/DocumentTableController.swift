@@ -4,6 +4,7 @@ import Combine
 import GRDB
 import GRDBCombine
 import Logging
+import TextMarkupKit
 import UIKit
 
 /// Knows how to perform key actions with the document

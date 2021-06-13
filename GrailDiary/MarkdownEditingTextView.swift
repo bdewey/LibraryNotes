@@ -3,6 +3,8 @@
 import Logging
 import MobileCoreServices
 import os
+import ParsedTextStorage
+import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 

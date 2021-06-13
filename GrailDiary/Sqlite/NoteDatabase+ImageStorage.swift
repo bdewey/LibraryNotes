@@ -2,6 +2,7 @@
 
 import Foundation
 import Logging
+import TextMarkupKit
 import UniformTypeIdentifiers
 
 /// A protocol that the text views use to store images on paste

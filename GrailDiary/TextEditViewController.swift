@@ -2,7 +2,9 @@
 
 import Logging
 import MobileCoreServices
+import ParsedTextStorage
 import SnapKit
+import TextMarkupKit
 import UIKit
 
 public protocol TextEditViewControllerDelegate: AnyObject {

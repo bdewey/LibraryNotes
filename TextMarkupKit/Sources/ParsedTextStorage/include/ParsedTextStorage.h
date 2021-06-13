@@ -32,4 +32,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface Heisenbug: NSObject
+
+@property (nonatomic, copy) NSString *payload;
+@property (nonatomic, strong) NSAttributedString *attributedString;
+@property (nonatomic, strong) ParsedAttributedString *parsedAttributedString;
+
+- (instancetype)initWithStorage:(ParsedAttributedString *)storage NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString;
+
+@end
+
 NS_ASSUME_NONNULL_END

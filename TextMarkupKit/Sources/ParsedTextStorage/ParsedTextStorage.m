@@ -15,7 +15,7 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-#import "GrailDiary-Swift.h"
+@import TextMarkupKit;
 #import "ParsedTextStorage.h"
 
 @interface ParsedTextStorage () <ParsedAttributedStringDelegate>

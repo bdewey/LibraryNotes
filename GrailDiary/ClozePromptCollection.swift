@@ -2,6 +2,7 @@
 
 import Foundation
 import Logging
+import TextMarkupKit
 import UIKit
 
 public extension PromptType {

@@ -1,7 +1,8 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
-import GrailDiary
+import ParsedTextStorage
+import TextMarkupKit
 import XCTest
 
 private func formatTab(
@@ -39,7 +40,11 @@ final class ParsedTextStorageTests: XCTestCase {
         .image: { _, _, _, _ in Array("\u{fffc}".utf16) },
       ]
     )
-    textStorage = ParsedTextStorage(storage: storage)
+//    textStorage = ParsedTextStorage(storage: storage)
+      let foo = Heisenbug(attributedString: NSAttributedString(string: "blah"))
+      foo.payload = "whaaatt?"
+      foo.attributedString = NSAttributedString(string: "blah")
+      foo.parsedAttributedString = storage
   }
 
   func testCanStoreAndRetrievePlainText() {

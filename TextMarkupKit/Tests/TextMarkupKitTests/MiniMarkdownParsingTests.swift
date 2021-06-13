@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
-import GrailDiary
+import TextMarkupKit
 import XCTest
 
 final class MiniMarkdownParsingTests: XCTestCase {
@@ -83,13 +83,13 @@ final class MiniMarkdownParsingTests: XCTestCase {
     - Item one
     - Item two
     """
-    parseText(markdown, expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text)) (list_item (delimiter unordered_list_opening tab) (paragraph text))))")
+    parseText(markdown, expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text)) (list_item (list_delimiter unordered_list_opening tab) (paragraph text))))")
   }
 
   func testListItemWithStyling() {
     parseText(
       "- This is a list item with **strong emphasis**",
-      expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text (strong_emphasis delimiter text delimiter)))))"
+      expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (strong_emphasis delimiter text delimiter)))))"
     )
   }
 
@@ -98,7 +98,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
     - Item *one
     - Item *two
     """
-    parseText(markdown, expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text)) (list_item (delimiter unordered_list_opening tab) (paragraph text))))")
+    parseText(markdown, expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text)) (list_item (list_delimiter unordered_list_opening tab) (paragraph text))))")
   }
 
   func testAllUnorderedListMarkers() {
@@ -108,7 +108,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
     * And so is this.
 
     """
-    let tree = parseText(example, expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text)) (list_item (delimiter unordered_list_opening tab) (paragraph text)) (list_item (delimiter unordered_list_opening tab) (paragraph text))))")
+    let tree = parseText(example, expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text)) (list_item (list_delimiter unordered_list_opening tab) (paragraph text)) (list_item (list_delimiter unordered_list_opening tab) (paragraph text))))")
     XCTAssertEqual(tree?.node(at: [0])?[ListTypeKey.self], .unordered)
   }
 
@@ -119,7 +119,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
     3) This is also legit.
 
     """
-    let tree = parseText(example, expectedStructure: "(document (list (list_item (delimiter ordered_list_number ordered_list_terminator tab) (paragraph text)) (list_item (delimiter ordered_list_number ordered_list_terminator tab) (paragraph text)) (list_item (delimiter ordered_list_number ordered_list_terminator tab) (paragraph text))))")
+    let tree = parseText(example, expectedStructure: "(document (list (list_item (list_delimiter ordered_list_number ordered_list_terminator tab) (paragraph text)) (list_item (list_delimiter ordered_list_number ordered_list_terminator tab) (paragraph text)) (list_item (list_delimiter ordered_list_number ordered_list_terminator tab) (paragraph text))))")
     XCTAssertEqual(tree?.node(at: [0])?[ListTypeKey.self], .ordered)
   }
 
@@ -194,7 +194,7 @@ final class MiniMarkdownParsingTests: XCTestCase {
   func testCloze() {
     parseText(
       "* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?",
-      expectedStructure: "(document (list (list_item (delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))"
+      expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))"
     )
   }
 

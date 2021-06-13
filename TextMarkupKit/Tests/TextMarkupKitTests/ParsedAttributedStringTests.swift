@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import GrailDiary
+import TextMarkupKit
 import XCTest
 
 private func formatTab(
@@ -62,7 +62,7 @@ final class ParsedAttributedStringTests: XCTestCase {
     let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
     noDelimiterTextStorage.append(NSAttributedString(string: markdown))
 
-    XCTAssertEqual(markdown.count - 8, noDelimiterTextStorage.count)
+    XCTAssertEqual(markdown.count - 8, noDelimiterTextStorage.length)
   }
 
   func testImageAndReplacements() {
@@ -76,7 +76,7 @@ final class ParsedAttributedStringTests: XCTestCase {
     let noDelimiterTextStorage = Self.makeNoDelimiterStorage()
     noDelimiterTextStorage.append(NSAttributedString(string: markdown))
     noDelimiterTextStorage.append(NSAttributedString(string: "\n\n#b"))
-    XCTAssertEqual(noDelimiterTextStorage.count, 93)
+    XCTAssertEqual(noDelimiterTextStorage.length, 93)
   }
 
   static func makeNoDelimiterStorage() -> ParsedAttributedString {

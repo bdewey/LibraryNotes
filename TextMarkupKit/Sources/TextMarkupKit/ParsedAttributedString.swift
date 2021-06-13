@@ -43,10 +43,17 @@ private extension Logging.Logger {
 /// The `string` property contains the contents **after**  applying replacements. The `rawString` property contains the contents **before** applying replacements. Importantly, the `rawString` is what gets *parsed* in order to determine `string`. However, when calling `replaceCharacters(in:with:)`, the range is relative to the characters in `string`. The methods `rawStringRange(forRange:)` and `range(forRawStringRange:)` convert ranges between `string` and `rawString`
 @objc public final class ParsedAttributedString: NSMutableAttributedString {
   public struct Settings {
-    var grammar: PackratGrammar
-    var defaultAttributes: AttributedStringAttributesDescriptor
-    var quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
-    var fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
+    public init(grammar: PackratGrammar, defaultAttributes: AttributedStringAttributesDescriptor, quickFormatFunctions: [SyntaxTreeNodeType : QuickFormatFunction], fullFormatFunctions: [SyntaxTreeNodeType : FullFormatFunction]) {
+      self.grammar = grammar
+      self.defaultAttributes = defaultAttributes
+      self.quickFormatFunctions = quickFormatFunctions
+      self.fullFormatFunctions = fullFormatFunctions
+    }
+
+    public var grammar: PackratGrammar
+    public var defaultAttributes: AttributedStringAttributesDescriptor
+    public var quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction]
+    public var fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]
   }
 
   public convenience init(string: String, settings: Settings) {
@@ -275,41 +282,6 @@ private extension ParsedAttributedString {
         applyReplacements(in: child, startingIndex: index, to: string)
       }
     }
-  }
-}
-
-// MARK: - Stylesheets
-
-// TODO: Move this to a separate file?
-
-public extension ParsedAttributedString.Settings {
-  static func plainText(
-    textStyle: UIFont.TextStyle,
-    textColor: UIColor = .label,
-    imageStorage: ImageStorage? = nil,
-    kern: CGFloat = 0,
-    fontDesign: UIFontDescriptor.SystemDesign = .default
-  ) -> ParsedAttributedString.Settings {
-    var formattingFunctions = [SyntaxTreeNodeType: QuickFormatFunction]()
-    var replacementFunctions = [SyntaxTreeNodeType: FullFormatFunction]()
-    formattingFunctions[.emphasis] = { $1.italic = true }
-    formattingFunctions[.strongEmphasis] = { $1.bold = true }
-    formattingFunctions[.code] = { $1.fontDesign = .monospaced }
-    replacementFunctions[.delimiter] = { _, _, _, _ in [] }
-    replacementFunctions[.clozeHint] = { _, _, _, _ in [] }
-    if let imageStorage = imageStorage {
-      replacementFunctions[.image] = imageStorage.imageReplacement
-    }
-    var defaultAttributes = AttributedStringAttributesDescriptor(textStyle: textStyle, color: textColor)
-    defaultAttributes.lineHeightMultiple = 1.2
-    defaultAttributes.kern = kern
-    defaultAttributes.fontDesign = fontDesign
-    return ParsedAttributedString.Settings(
-      grammar: MiniMarkdownGrammar.shared,
-      defaultAttributes: defaultAttributes,
-      quickFormatFunctions: formattingFunctions,
-      fullFormatFunctions: replacementFunctions
-    )
   }
 }
 
