@@ -1,10 +1,4 @@
-//
-//  ParsedAttributedString+PlainText.swift
-//  GrailDiary
-//
-//  Created by Brian Dewey on 6/13/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import TextMarkupKit
 import UIKit
@@ -39,4 +33,3 @@ public extension ParsedAttributedString.Settings {
     )
   }
 }
-

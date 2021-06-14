@@ -61,7 +61,7 @@ public final class TextEditViewController: UIViewController {
   }()
 
   public lazy var textStorage: ObjectiveCTextStorageWrapper = {
-    return ObjectiveCTextStorageWrapper(storage: parsedAttributedString)
+    ObjectiveCTextStorageWrapper(storage: parsedAttributedString)
   }()
 
   public weak var delegate: TextEditViewControllerDelegate?

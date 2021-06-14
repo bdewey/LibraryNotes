@@ -3,8 +3,8 @@
 import Foundation
 import Logging
 import TextMarkupKit
-import UniformTypeIdentifiers
 import UIKit
+import UniformTypeIdentifiers
 
 /// A protocol that the text views use to store images on paste
 public protocol ImageStorage {

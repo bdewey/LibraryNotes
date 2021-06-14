@@ -34,7 +34,7 @@ private extension Logging.Logger {
 /// The `string` property contains the contents **after**  applying replacements. The `rawString` property contains the contents **before** applying replacements. Importantly, the `rawString` is what gets *parsed* in order to determine `string`. However, when calling `replaceCharacters(in:with:)`, the range is relative to the characters in `string`. The methods `rawStringRange(forRange:)` and `range(forRawStringRange:)` convert ranges between `string` and `rawString`
 @objc public final class ParsedAttributedString: WrappableTextStorage {
   public struct Settings {
-    public init(grammar: PackratGrammar, defaultAttributes: AttributedStringAttributesDescriptor, quickFormatFunctions: [SyntaxTreeNodeType : QuickFormatFunction], fullFormatFunctions: [SyntaxTreeNodeType : FullFormatFunction]) {
+    public init(grammar: PackratGrammar, defaultAttributes: AttributedStringAttributesDescriptor, quickFormatFunctions: [SyntaxTreeNodeType: QuickFormatFunction], fullFormatFunctions: [SyntaxTreeNodeType: FullFormatFunction]) {
       self.grammar = grammar
       self.defaultAttributes = defaultAttributes
       self.quickFormatFunctions = quickFormatFunctions
