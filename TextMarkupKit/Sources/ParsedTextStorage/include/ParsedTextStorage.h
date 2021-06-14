@@ -17,29 +17,28 @@
 
 #import <UIKit/UIKit.h>
 
-@class ParsedAttributedString;
-
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ParsedAttributedStringDelegate
+- (void)attributedStringDidChangeWithOldRange:(NSRange)oldRange
+                               changeInLength:(NSInteger)changeInLength
+                       changedAttributesRange:(NSRange)changedAttributesRange;
+@end
+
+@interface NotifyingAttributedString: NSMutableAttributedString
+@property (nonatomic, weak) id<ParsedAttributedStringDelegate> delegate;
+@end
+
+@class ParsedAttributedString;
 
 /// An NSTextStorage implementation that uses a ParsedAttributedString as its underlying storage.
 @interface ParsedTextStorage : NSTextStorage
 
 /// The underlying ParsedAttributedString for this NSTextStorage instance. Exposed to provide access to things like the AST for the contents.
-@property (nonatomic, strong) ParsedAttributedString *storage;
+@property (nonatomic, strong) NotifyingAttributedString *storage;
 
 /// Initializes ParsedTextStorage that wraps and underlying `ParsedAttributedString`.
-- (instancetype)initWithStorage:(ParsedAttributedString *)storage NS_DESIGNATED_INITIALIZER;
-
-@end
-
-@interface Heisenbug: NSObject
-
-@property (nonatomic, copy) NSString *payload;
-@property (nonatomic, strong) NSAttributedString *attributedString;
-@property (nonatomic, strong) ParsedAttributedString *parsedAttributedString;
-
-- (instancetype)initWithStorage:(ParsedAttributedString *)storage NS_DESIGNATED_INITIALIZER;
-- (instancetype)initWithAttributedString:(NSAttributedString *)attributedString;
+- (instancetype)initWithStorage:(NotifyingAttributedString *)storage NS_DESIGNATED_INITIALIZER;
 
 @end
 

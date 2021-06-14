@@ -3,6 +3,7 @@
 import Foundation
 import Logging
 import os
+import ParsedTextStorage
 import UIKit
 
 private let log = OSLog(subsystem: "org.brians-brain.GrailDiary", category: "ParsedAttributedString")
@@ -22,16 +23,6 @@ private extension Logging.Logger {
   }()
 }
 
-@objc public protocol ParsedAttributedStringDelegate: AnyObject {
-  /// Notifies a delegate that the contents of the string changed.
-  ///
-  /// - Parameters:
-  ///   - oldRange: The extent of characters affected before the change took place.
-  ///   - changeInLength: Change in length of the total string because of this edit.
-  ///   - changedAttributesRange: Range of characters in `string` that have updated attributes. If `changedAttributesRange.location` is NSNotFound, then the attributes did not change.
-  func attributedStringDidChange(oldRange: NSRange, changeInLength: Int, changedAttributesRange: NSRange)
-}
-
 /// An NSMutableAttributedString subclass that:
 ///
 /// 1. Parses its contents based upon the rules of `grammar`
@@ -41,7 +32,7 @@ private extension Logging.Logger {
 /// `replacementFunctions` are a little more complicated. They give an opportunity to *alter the actual string* based upon the nodes of the abstract syntax tree. For example, you can use replacement functions to hide the delimiters in Markdown text, or to replace spaces with tabs.
 ///
 /// The `string` property contains the contents **after**  applying replacements. The `rawString` property contains the contents **before** applying replacements. Importantly, the `rawString` is what gets *parsed* in order to determine `string`. However, when calling `replaceCharacters(in:with:)`, the range is relative to the characters in `string`. The methods `rawStringRange(forRange:)` and `range(forRawStringRange:)` convert ranges between `string` and `rawString`
-@objc public final class ParsedAttributedString: NSMutableAttributedString {
+@objc public final class ParsedAttributedString: NotifyingAttributedString {
   public struct Settings {
     public init(grammar: PackratGrammar, defaultAttributes: AttributedStringAttributesDescriptor, quickFormatFunctions: [SyntaxTreeNodeType : QuickFormatFunction], fullFormatFunctions: [SyntaxTreeNodeType : FullFormatFunction]) {
       self.grammar = grammar
@@ -105,8 +96,6 @@ private extension Logging.Logger {
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-
-  @objc public weak var delegate: ParsedAttributedStringDelegate?
 
   // MARK: - Stored properties
 
@@ -191,7 +180,7 @@ private extension Logging.Logger {
     let changedAttributesRange = (try! attributesArray.rangeOfAttributeDifferences(from: newAttributes)) ?? NSRange(location: range.location, length: 0)
     attributesArray = newAttributes
     delegate?.attributedStringDidChange(
-      oldRange: range,
+      withOldRange: range,
       changeInLength: _string.length - lengthBeforeChanges,
       changedAttributesRange: changedAttributesRange
     )

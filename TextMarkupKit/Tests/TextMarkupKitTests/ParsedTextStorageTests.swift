@@ -40,11 +40,7 @@ final class ParsedTextStorageTests: XCTestCase {
         .image: { _, _, _, _ in Array("\u{fffc}".utf16) },
       ]
     )
-//    textStorage = ParsedTextStorage(storage: storage)
-      let foo = Heisenbug(attributedString: NSAttributedString(string: "blah"))
-      foo.payload = "whaaatt?"
-      foo.attributedString = NSAttributedString(string: "blah")
-      foo.parsedAttributedString = storage
+    textStorage = ParsedTextStorage(storage: storage)
   }
 
   func testCanStoreAndRetrievePlainText() {

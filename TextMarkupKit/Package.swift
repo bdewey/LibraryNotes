@@ -28,9 +28,10 @@ let package = Package(
             name: "TextMarkupKit",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
+                "ParsedTextStorage",
             ]
         ),
-        .target(name: "ParsedTextStorage", dependencies: ["TextMarkupKit"]),
+        .target(name: "ParsedTextStorage", dependencies: []),
         .testTarget(
             name: "TextMarkupKitTests",
             dependencies: [

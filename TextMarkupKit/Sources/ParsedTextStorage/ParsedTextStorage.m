@@ -15,10 +15,13 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-@import TextMarkupKit;
 #import "ParsedTextStorage.h"
 
 @interface ParsedTextStorage () <ParsedAttributedStringDelegate>
+
+@end
+
+@implementation NotifyingAttributedString
 
 @end
 
@@ -33,10 +36,10 @@
 }
 
 - (instancetype)init {
-  return [self initWithStorage:[[ParsedAttributedString alloc] init]];
+  return [self initWithStorage:[[NotifyingAttributedString alloc] init]];
 }
 
-- (instancetype)initWithStorage:(ParsedAttributedString *)storage {
+- (instancetype)initWithStorage:(NotifyingAttributedString *)storage {
   if ((self = [super init]) != nil) {
     _storage = storage;
     _storage.delegate = self;
@@ -46,7 +49,7 @@
 
 /// Provide O(1) access to the underlying character storage.
 - (NSString *)string {
-  return _storage._string;
+  return _storage.string;
 }
 
 - (NSDictionary<NSAttributedStringKey,id> *)attributesAtIndex:(NSUInteger)location effectiveRange:(NSRangePointer)range {

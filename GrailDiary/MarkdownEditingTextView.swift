@@ -10,14 +10,16 @@ import UniformTypeIdentifiers
 
 private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "TextView")
 
-/// Custom UITextView subclass that overrides "copy" to copy Markdown.
 // TODO: Move renderers, MiniMarkdown text storage management, etc. to this class.
+/// Custom UITextView subclass that overrides "copy" to copy Markdown.
 public final class MarkdownEditingTextView: UITextView {
   override public func copy(_ sender: Any?) {
-    // swiftlint:disable:next force_cast
-    let markdownTextStorage = textStorage as! ParsedTextStorage
-    let rawTextRange = markdownTextStorage.storage.rawStringRange(forRange: selectedRange)
-    let characters = markdownTextStorage.storage.rawString[rawTextRange]
+    guard let textStorage = textStorage as? ParsedTextStorage, let parsedAttributedString = textStorage.storage as? ParsedAttributedString else {
+      Logger.shared.error("Expected to get a ParsedAttributedString")
+      return
+    }
+    let rawTextRange = parsedAttributedString.rawStringRange(forRange: selectedRange)
+    let characters = parsedAttributedString.rawString[rawTextRange]
     UIPasteboard.general.string = String(utf16CodeUnits: characters, count: characters.count)
   }
 
