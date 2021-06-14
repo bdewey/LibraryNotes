@@ -2,7 +2,7 @@
 
 import Logging
 import MobileCoreServices
-import ParsedTextStorage
+import ObjectiveCTextStorageWrapper
 import SnapKit
 import TextMarkupKit
 import UIKit
@@ -60,8 +60,8 @@ public final class TextEditViewController: UIViewController {
     return storage
   }()
 
-  public lazy var textStorage: ParsedTextStorage = {
-    return ParsedTextStorage(storage: parsedAttributedString)
+  public lazy var textStorage: ObjectiveCTextStorageWrapper = {
+    return ObjectiveCTextStorageWrapper(storage: parsedAttributedString)
   }()
 
   public weak var delegate: TextEditViewControllerDelegate?

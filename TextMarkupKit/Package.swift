@@ -12,7 +12,7 @@ let package = Package(
             name: "TextMarkupKit",
             targets: [
                 "TextMarkupKit",
-                "ParsedTextStorage",
+                "ObjectiveCTextStorageWrapper",
             ]
         ),
     ],
@@ -28,14 +28,14 @@ let package = Package(
             name: "TextMarkupKit",
             dependencies: [
                 .product(name: "Logging", package: "swift-log"),
-                "ParsedTextStorage",
+                "ObjectiveCTextStorageWrapper",
             ]
         ),
-        .target(name: "ParsedTextStorage", dependencies: []),
+        .target(name: "ObjectiveCTextStorageWrapper", dependencies: []),
         .testTarget(
             name: "TextMarkupKitTests",
             dependencies: [
-                "ParsedTextStorage",
+                "ObjectiveCTextStorageWrapper",
                 "TextMarkupKit",
             ]
         ),

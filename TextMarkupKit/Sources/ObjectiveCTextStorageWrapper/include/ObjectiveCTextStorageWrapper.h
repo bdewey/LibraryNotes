@@ -19,26 +19,24 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ParsedAttributedStringDelegate
+@protocol WrappableTextStorageDelegate
 - (void)attributedStringDidChangeWithOldRange:(NSRange)oldRange
                                changeInLength:(NSInteger)changeInLength
                        changedAttributesRange:(NSRange)changedAttributesRange;
 @end
 
-@interface NotifyingAttributedString: NSMutableAttributedString
-@property (nonatomic, weak) id<ParsedAttributedStringDelegate> delegate;
+@interface WrappableTextStorage: NSMutableAttributedString
+@property (nonatomic, weak) id<WrappableTextStorageDelegate> delegate;
 @end
 
-@class ParsedAttributedString;
-
 /// An NSTextStorage implementation that uses a ParsedAttributedString as its underlying storage.
-@interface ParsedTextStorage : NSTextStorage
+@interface ObjectiveCTextStorageWrapper : NSTextStorage
 
 /// The underlying ParsedAttributedString for this NSTextStorage instance. Exposed to provide access to things like the AST for the contents.
-@property (nonatomic, strong) NotifyingAttributedString *storage;
+@property (nonatomic, strong) WrappableTextStorage *storage;
 
 /// Initializes ParsedTextStorage that wraps and underlying `ParsedAttributedString`.
-- (instancetype)initWithStorage:(NotifyingAttributedString *)storage NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithStorage:(WrappableTextStorage *)storage NS_DESIGNATED_INITIALIZER;
 
 @end
 

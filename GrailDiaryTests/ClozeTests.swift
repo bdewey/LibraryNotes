@@ -1,6 +1,8 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 @testable import GrailDiary
+import ObjectiveCTextStorageWrapper
+import TextMarkupKit
 import XCTest
 
 final class ClozeTests: XCTestCase {
@@ -68,7 +70,7 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
+    let textStorage = ObjectiveCTextStorageWrapper(storage: ParsedAttributedString(
       string: "",
       grammar: MiniMarkdownGrammar(),
       defaultAttributes: AttributedStringAttributesDescriptor(),

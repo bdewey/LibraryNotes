@@ -562,7 +562,6 @@
 				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
-				D3DD9B66256FF9A50019167E /* PackratParser */,
 				D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */,
 				D304D3EA25BC8A6000178590 /* PredefinedFolder.swift */,
 				D31AFA83229D61E800ED2B76 /* Prompt.swift */,
@@ -621,13 +620,6 @@
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 			);
 			path = GrailDiaryTests;
-			sourceTree = "<group>";
-		};
-		D3DD9B66256FF9A50019167E /* PackratParser */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = PackratParser;
 			sourceTree = "<group>";
 		};
 		D3E98F0421D470B2008445DA /* GrailDiaryUITests */ = {

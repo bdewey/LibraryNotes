@@ -2,8 +2,8 @@
 
 import Foundation
 import Logging
+import ObjectiveCTextStorageWrapper
 import SnapKit
-import ParsedTextStorage
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers

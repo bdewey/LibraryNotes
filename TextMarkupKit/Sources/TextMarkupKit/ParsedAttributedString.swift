@@ -2,8 +2,8 @@
 
 import Foundation
 import Logging
+import ObjectiveCTextStorageWrapper
 import os
-import ParsedTextStorage
 import UIKit
 
 private let log = OSLog(subsystem: "org.brians-brain.GrailDiary", category: "ParsedAttributedString")
@@ -32,7 +32,7 @@ private extension Logging.Logger {
 /// `replacementFunctions` are a little more complicated. They give an opportunity to *alter the actual string* based upon the nodes of the abstract syntax tree. For example, you can use replacement functions to hide the delimiters in Markdown text, or to replace spaces with tabs.
 ///
 /// The `string` property contains the contents **after**  applying replacements. The `rawString` property contains the contents **before** applying replacements. Importantly, the `rawString` is what gets *parsed* in order to determine `string`. However, when calling `replaceCharacters(in:with:)`, the range is relative to the characters in `string`. The methods `rawStringRange(forRange:)` and `range(forRawStringRange:)` convert ranges between `string` and `rawString`
-@objc public final class ParsedAttributedString: NotifyingAttributedString {
+@objc public final class ParsedAttributedString: WrappableTextStorage {
   public struct Settings {
     public init(grammar: PackratGrammar, defaultAttributes: AttributedStringAttributesDescriptor, quickFormatFunctions: [SyntaxTreeNodeType : QuickFormatFunction], fullFormatFunctions: [SyntaxTreeNodeType : FullFormatFunction]) {
       self.grammar = grammar

@@ -2,8 +2,8 @@
 
 import Logging
 import MobileCoreServices
+import ObjectiveCTextStorageWrapper
 import os
-import ParsedTextStorage
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
@@ -14,7 +14,7 @@ private let log = OSLog(subsystem: "org.brians-brain.ScrapPaper", category: "Tex
 /// Custom UITextView subclass that overrides "copy" to copy Markdown.
 public final class MarkdownEditingTextView: UITextView {
   override public func copy(_ sender: Any?) {
-    guard let textStorage = textStorage as? ParsedTextStorage, let parsedAttributedString = textStorage.storage as? ParsedAttributedString else {
+    guard let textStorage = textStorage as? ObjectiveCTextStorageWrapper, let parsedAttributedString = textStorage.storage as? ParsedAttributedString else {
       Logger.shared.error("Expected to get a ParsedAttributedString")
       return
     }

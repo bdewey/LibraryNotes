@@ -15,17 +15,17 @@
 //  specific language governing permissions and limitations
 //  under the License.
 
-#import "ParsedTextStorage.h"
+#import "ObjectiveCTextStorageWrapper.h"
 
-@interface ParsedTextStorage () <ParsedAttributedStringDelegate>
-
-@end
-
-@implementation NotifyingAttributedString
+@interface ObjectiveCTextStorageWrapper () <WrappableTextStorageDelegate>
 
 @end
 
-@implementation ParsedTextStorage {
+@implementation WrappableTextStorage
+
+@end
+
+@implementation ObjectiveCTextStorageWrapper {
   // _storage provides these values through its delegate callback, which we need to save and use.
   NSRange _oldRange;
   NSInteger _changeInLength;
@@ -36,10 +36,10 @@
 }
 
 - (instancetype)init {
-  return [self initWithStorage:[[NotifyingAttributedString alloc] init]];
+  return [self initWithStorage:[[WrappableTextStorage alloc] init]];
 }
 
-- (instancetype)initWithStorage:(NotifyingAttributedString *)storage {
+- (instancetype)initWithStorage:(WrappableTextStorage *)storage {
   if ((self = [super init]) != nil) {
     _storage = storage;
     _storage.delegate = self;
