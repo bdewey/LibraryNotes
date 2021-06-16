@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
-import ParsedTextStorage
+import ObjectiveCTextStorageWrapper
 import TextMarkupKit
 import XCTest
 
@@ -15,7 +15,7 @@ private func formatTab(
 }
 
 final class ParsedTextStorageTests: XCTestCase {
-  var textStorage: ParsedTextStorage!
+  var textStorage: ObjectiveCTextStorageWrapper!
 
   override func setUp() {
     super.setUp()
@@ -40,7 +40,7 @@ final class ParsedTextStorageTests: XCTestCase {
         .image: { _, _, _, _ in Array("\u{fffc}".utf16) },
       ]
     )
-    textStorage = ParsedTextStorage(storage: storage)
+    textStorage = ObjectiveCTextStorageWrapper(storage: storage)
   }
 
   func testCanStoreAndRetrievePlainText() {
@@ -139,7 +139,7 @@ private extension ParsedTextStorageTests {
     file: StaticString = #file,
     line: UInt = #line
   ) {
-    let textStorage = ParsedTextStorage(
+    let textStorage = ObjectiveCTextStorageWrapper(
       storage: ParsedAttributedString(
         grammar: MiniMarkdownGrammar(),
         defaultAttributes: AttributedStringAttributesDescriptor(fontSize: 12),

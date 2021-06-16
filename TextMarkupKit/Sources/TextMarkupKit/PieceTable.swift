@@ -22,12 +22,19 @@ public extension NSRange {
   }
 }
 
+/// An efficient implementation of a range-replaceable collection of UTF-16 values.
+///
 /// A piece table is a range-replaceable collection of UTF-16 values. At the storage layer, it uses two arrays to store the values:
 ///
 /// 1. Read-only *original contents*
 /// 2. Append-only *addedContents*
 ///
 /// It constructs a logical view of the contents from an array of slices of contents from the two arrays.
+///
+/// ## Topics
+/// ### Indexing into a PieceTable
+/// - ``findBound(_:forOriginalBound:)``
+/// - ``findOriginalBound(_:forBound:)``
 public struct PieceTable {
   /// The original, unedited contents
   private let originalContents: NSString
