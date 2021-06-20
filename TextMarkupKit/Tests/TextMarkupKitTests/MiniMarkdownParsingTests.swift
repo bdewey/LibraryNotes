@@ -2,10 +2,9 @@
 
 import Foundation
 import TextMarkupKit
-import TextMarkupTestBase
 import XCTest
 
-final class MiniMarkdownParsingTests: TextMarkupTestBase {
+final class MiniMarkdownParsingTests: XCTestCase {
   func testNothingButText() {
     parseText("Just text.", expectedStructure: "(document (paragraph text))")
   }
@@ -192,13 +191,6 @@ final class MiniMarkdownParsingTests: TextMarkupTestBase {
     )
   }
 
-  func testCloze() {
-    parseText(
-      "* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?",
-      expectedStructure: "(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))"
-    )
-  }
-
   func testQandA() {
     let example = """
     # Sample file
@@ -260,6 +252,50 @@ final class MiniMarkdownParsingTests: TextMarkupTestBase {
     } catch {
       XCTFail("Unexpected error: \(error)")
       print(TraceBuffer.shared)
+    }
+  }
+}
+
+private extension MiniMarkdownParsingTests {
+  /// Verify that parsed text matches expected structure.
+  @discardableResult
+  func parseText(
+    _ text: String,
+    expectedStructure: String,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) -> SyntaxTreeNode? {
+    let parsedString = ParsedString(text, grammar: MiniMarkdownGrammar.shared)
+    return verifyParsedStructure(of: parsedString, meets: expectedStructure, file: file, line: line)
+  }
+
+  @discardableResult
+  func verifyParsedStructure(
+    of text: ParsedString,
+    meets expectedStructure: String,
+    file: StaticString = #file,
+    line: UInt = #line
+  ) -> SyntaxTreeNode? {
+    do {
+      let tree = try text.result.get()
+      if tree.length != text.count {
+        let unparsedText = text[NSRange(location: tree.length, length: text.count - tree.length)]
+        XCTFail("Test case \(name): Unparsed text = '\(unparsedText.debugDescription)'", file: file, line: line)
+      }
+      if expectedStructure != tree.compactStructure {
+        print("### Failure: \(name)")
+        print("Got:      " + tree.compactStructure)
+        print("Expected: " + expectedStructure)
+        print("\n")
+        print(tree.debugDescription(withContentsFrom: text))
+        print("\n\n\n")
+        print(TraceBuffer.shared)
+      }
+      XCTAssertEqual(tree.compactStructure, expectedStructure, "Unexpected structure", file: file, line: line)
+      return tree
+    } catch {
+      XCTFail("Unexpected error: \(error)", file: file, line: line)
+      return nil
     }
   }
 }

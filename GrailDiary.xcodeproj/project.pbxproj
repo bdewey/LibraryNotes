@@ -75,6 +75,7 @@
 		D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookSearchViewController.swift */; };
 		D3558D7725D9741100746600 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7625D9741100746600 /* ImageCache.swift */; };
 		D3558D7A25DA130900746600 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7925DA130900746600 /* ApiKey.swift */; };
+		D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */; };
 		D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */; };
@@ -277,6 +278,7 @@
 		D3558D7625D9741100746600 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
 		D3558D7925DA130900746600 /* ApiKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
+		D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GrailDiaryGrammar.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
 		D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaveToGrailDiary.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -515,6 +517,7 @@
 		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXGroup;
 			children = (
+				D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */,
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
 				D3558D7925DA130900746600 /* ApiKey.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
@@ -719,6 +722,8 @@
 				D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */,
 			);
 			name = CommonplaceBookAppTests;
+			packageProductDependencies = (
+			);
 			productName = CommonplaceBookAppTests;
 			productReference = D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -987,6 +992,7 @@
 				D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */,
 				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
+				D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

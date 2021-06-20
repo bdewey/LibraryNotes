@@ -3,10 +3,20 @@
 @testable import GrailDiary
 import ObjectiveCTextStorageWrapper
 import TextMarkupKit
-//import TextMarkupTestBase
 import XCTest
 
 final class ClozeTests: XCTestCase {
+  func testCloze() {
+    do {
+      let parsedString = ParsedString("* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?", grammar: .grailDiary)
+      try parsedString.parsedResultsThatMatch("(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))")
+    } catch ParsedString.ValidationError.validationError(let message) {
+      XCTFail(message)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
   func testFindClozeInText() {
     let example = """
     # Mastering the verb "to be"

@@ -15,7 +15,6 @@ let package = Package(
         "ObjectiveCTextStorageWrapper",
       ]
     ),
-    .library(name: "TextMarkupTestBase", targets: ["TextMarkupTestBase"]),
   ],
   dependencies: [
     // Dependencies declare other packages that this package depends on.
@@ -32,14 +31,12 @@ let package = Package(
         "ObjectiveCTextStorageWrapper",
       ]
     ),
-    .target(name: "TextMarkupTestBase", dependencies: ["TextMarkupKit"]),
     .target(name: "ObjectiveCTextStorageWrapper", dependencies: []),
     .testTarget(
       name: "TextMarkupKitTests",
       dependencies: [
         "ObjectiveCTextStorageWrapper",
         "TextMarkupKit",
-        "TextMarkupTestBase",
       ]
     ),
   ]
