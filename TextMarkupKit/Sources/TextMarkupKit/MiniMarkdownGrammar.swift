@@ -46,10 +46,8 @@ public enum ListTypeKey: SyntaxTreeNodePropertyKey {
 /// This class is designed to be subclassed so you can extend the grammar. Subclasses can override:
 public final class MiniMarkdownGrammar: PackratGrammar {
   public init(
-    customInlineStyleRules: [ParsingRule] = [],
     trace: Bool = false
   ) {
-    self.customInlineStyleRules = customInlineStyleRules
     if trace {
       self.start = start.trace()
     }
@@ -160,7 +158,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   lazy var emoji = CharacterPredicate { $0.isEmoji }.repeating(1...).as(.emoji).memoize()
 
   /// Rules that define how to parse "inline styles" (bold, italic, code, etc). Designed to be overridden to add or replace the parsed inline styles.
-  lazy var inlineStyleRules: [ParsingRule] = [
+  private lazy var inlineStyleRules: [ParsingRule] = [
     bold,
     italic,
     underlineItalic,
@@ -170,13 +168,17 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     emoji,
   ]
 
-  let customInlineStyleRules: [ParsingRule]
+  public var customInlineStyleRules: [ParsingRule] = [] {
+    didSet {
+      var resolvedStyleRules = inlineStyleRules
+      resolvedStyleRules.append(contentsOf: customInlineStyleRules)
+      unmemoizedTextStyles.rules = resolvedStyleRules
+    }
+  }
 
-  lazy var textStyles: ParsingRule = {
-    var resolvedRules = inlineStyleRules
-    resolvedRules.append(contentsOf: customInlineStyleRules)
-    return Choice(resolvedRules).memoize()
-  }()
+  private lazy var unmemoizedTextStyles = Choice(inlineStyleRules)
+
+  private lazy var textStyles = unmemoizedTextStyles.memoize()
 
   lazy var styledText = InOrder(
     InOrder(paragraphTermination.assertInverse(), textStyles.assertInverse(), dot).repeating(0...).as(.text),

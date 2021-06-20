@@ -24,6 +24,10 @@ public final class GrailDiaryGrammar: PackratGrammar {
   public static let shared = GrailDiaryGrammar()
 
   public init() {
+    let coreGrammar = MiniMarkdownGrammar(
+      trace: false
+    )
+
     let cloze = InOrder(
       Literal("?[").as(.delimiter),
       Characters(CharacterSet(charactersIn: "\n]").inverted).repeating(0...).as(.clozeHint),
@@ -32,10 +36,7 @@ public final class GrailDiaryGrammar: PackratGrammar {
       Literal(")").as(.delimiter)
     ).wrapping(in: .cloze).memoize()
 
-    let coreGrammar = MiniMarkdownGrammar(
-      customInlineStyleRules: [cloze],
-      trace: false
-    )
+    coreGrammar.customInlineStyleRules = [cloze]
 
     /// My custom addition to markdown for handling questions-and-answers
     let questionAndAnswer = InOrder(
