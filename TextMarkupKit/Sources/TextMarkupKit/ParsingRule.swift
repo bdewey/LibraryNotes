@@ -104,7 +104,7 @@ open class ParsingRuleWrapper: ParsingRule {
 }
 
 open class ParsingRuleSequenceWrapper: ParsingRule {
-  public var rules: [ParsingRule]
+  public fileprivate(set) var rules: [ParsingRule]
 
   public init(_ rules: [ParsingRule]) {
     self.rules = rules
@@ -661,6 +661,20 @@ final class NotAssertionRule: ParsingRuleWrapper {
 public final class Choice: ParsingRuleSequenceWrapper {
   public override init(_ rules: [ParsingRule]) {
     super.init(rules)
+    updatePossibleCharacters(for: rules)
+  }
+
+  public override var rules: [ParsingRule] {
+    get {
+      super.rules
+    }
+    set {
+      super.rules = newValue
+      updatePossibleCharacters(for: rules)
+    }
+  }
+
+  private func updatePossibleCharacters(for rules: [ParsingRule]) {
     var characters = CharacterSet()
     for rule in rules {
       if let subruleCharacters = rule.possibleOpeningCharacters {

@@ -24,10 +24,6 @@ public extension SyntaxTreeNodeType {
   static let unorderedListOpening: SyntaxTreeNodeType = "unordered_list_opening"
   static let orderedListNumber: SyntaxTreeNodeType = "ordered_list_number"
   static let orderedListTerminator: SyntaxTreeNodeType = "ordered_list_terminator"
-  static let questionAndAnswer: SyntaxTreeNodeType = "question_and_answer"
-  static let qnaQuestion: SyntaxTreeNodeType = "qna_question"
-  static let qnaAnswer: SyntaxTreeNodeType = "qna_answer"
-  static let qnaDelimiter: SyntaxTreeNodeType = "qna_delimiter"
   static let summaryDelimiter: SyntaxTreeNodeType = "summary_delimiter"
   static let summaryBody: SyntaxTreeNodeType = "summary_body"
   static let summary: SyntaxTreeNodeType = "summary"
@@ -62,20 +58,37 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   /// Singleton for convenience.
   public static let shared = MiniMarkdownGrammar()
 
-  public private(set) lazy var start: ParsingRule = block
+  public private(set) lazy var start: ParsingRule = block.memoize()
     .repeating(0...)
     .wrapping(in: .document)
 
-  lazy var block = Choice(
+  private lazy var coreBlockRules = [
     blankLine,
     header,
     unorderedList,
     orderedList,
     blockquote,
-    questionAndAnswer,
     summary,
-    paragraph
-  ).memoize()
+  ]
+
+  public var customBlockRules: [ParsingRule] = [] {
+    didSet {
+      var resolvedRules = coreBlockRules
+      resolvedRules.append(contentsOf: customBlockRules)
+      // `paragraph` goes last because it matches everything. No rule after `paragraph` will ever run.
+      resolvedRules.append(paragraph)
+      block.rules = resolvedRules
+    }
+  }
+
+  private lazy var block: Choice = {
+    var resolvedRules = coreBlockRules
+    resolvedRules.append(contentsOf: customBlockRules)
+    // `paragraph` goes last because it matches everything. No rule after `paragraph` will ever run.
+    resolvedRules.append(paragraph)
+
+    return Choice(resolvedRules)
+  }()
 
   lazy var blankLine = InOrder(
     whitespace.repeating(0...),
@@ -87,15 +100,6 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     softTab,
     singleLineStyledText
   ).wrapping(in: .header).memoize()
-
-  /// My custom addition to markdown for handling questions-and-answers
-  lazy var questionAndAnswer = InOrder(
-    InOrder(Literal("Q:").as(.text), Literal(" ").as(.softTab)).wrapping(in: .qnaDelimiter),
-    singleLineStyledText.wrapping(in: .qnaQuestion),
-    InOrder(Literal("\nA:").as(.text), Literal(" ").as(.softTab)).wrapping(in: .qnaDelimiter),
-    singleLineStyledText.wrapping(in: .qnaAnswer),
-    paragraphTermination.zeroOrOne().wrapping(in: .text)
-  ).wrapping(in: .questionAndAnswer).memoize()
 
   lazy var summary = InOrder(
     Choice(
@@ -111,7 +115,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     paragraphTermination.zeroOrOne().wrapping(in: .text)
   ).wrapping(in: .paragraph).memoize()
 
-  lazy var paragraphTermination = InOrder(
+  public private(set) lazy var paragraphTermination = InOrder(
     newline,
     Choice(Characters(["#", "\n"]).assert(), unorderedListOpening.assert(), orderedListOpening.assert(), blockquoteOpening.assert())
   )
@@ -180,7 +184,7 @@ public final class MiniMarkdownGrammar: PackratGrammar {
   ).repeating(0...).memoize()
 
   /// A variant of `styledText` that terminates on the first newline
-  lazy var singleLineStyledText = InOrder(
+  public private(set) lazy var singleLineStyledText = InOrder(
     InOrder(Characters(["\n"]).assertInverse(), textStyles.assertInverse(), dot).repeating(0...).as(.text),
     textStyles.repeating(0...)
   ).repeating(0...).memoize()
