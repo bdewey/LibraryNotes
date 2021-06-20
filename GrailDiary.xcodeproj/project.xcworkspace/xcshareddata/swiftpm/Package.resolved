@@ -72,6 +72,15 @@
           "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
           "version": "0.0.1"
         }
+      },
+      {
+        "package": "TextMarkupKit",
+        "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
+        "state": {
+          "branch": null,
+          "revision": "c6ec243d1531dfc963ace766af80407787ed6762",
+          "version": "0.4.1"
+        }
       }
     ]
   },
