@@ -2,7 +2,9 @@
 
 import Foundation
 import Logging
+import ObjectiveCTextStorageWrapper
 import SnapKit
+import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -177,7 +179,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       completion?()
       return
     }
-    let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
+    let note = Note(parsedString: textEditViewController.parsedAttributedString.rawString)
     tryUpdateNote(note)
     hasUnsavedChanges = false
     completion?()
@@ -185,7 +187,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   /// Saves the current contents to the database, whether or not hasUnsavedChanges is true.
   private func forceSave() throws {
-    let note = Note(parsedString: textEditViewController.textStorage.storage.rawString)
+    let note = Note(parsedString: textEditViewController.parsedAttributedString.rawString)
     try updateNote(note)
     hasUnsavedChanges = false
   }
@@ -197,11 +199,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       let reference = try storeImageData(imageData, type: type, key: nil)
       let markdown = "\n\n![](\(reference))\n\n"
       let initialRange = textEditViewController.selectedRange
-      var rawRange = textEditViewController.textStorage.storage.rawStringRange(forRange: initialRange)
+      var rawRange = textEditViewController.parsedAttributedString.rawStringRange(forRange: initialRange)
       rawRange.location += markdown.utf16.count
       rawRange.length = 0
       textEditViewController.textStorage.replaceCharacters(in: initialRange, with: markdown)
-      textEditViewController.selectedRange = textEditViewController.textStorage.storage.range(forRawStringRange: rawRange)
+      textEditViewController.selectedRange = textEditViewController.parsedAttributedString.range(forRawStringRange: rawRange)
     } catch {
       Logger.shared.error("Could not save initial image: \(error)")
     }

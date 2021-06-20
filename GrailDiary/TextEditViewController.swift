@@ -2,7 +2,9 @@
 
 import Logging
 import MobileCoreServices
+import ObjectiveCTextStorageWrapper
 import SnapKit
+import TextMarkupKit
 import UIKit
 
 public protocol TextEditViewControllerDelegate: AnyObject {
@@ -43,7 +45,7 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  public lazy var textStorage: ParsedTextStorage = {
+  public lazy var parsedAttributedString: ParsedAttributedString = {
     let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
     let storage = ParsedAttributedString(
       grammar: MiniMarkdownGrammar.shared,
@@ -55,7 +57,11 @@ public final class TextEditViewController: UIViewController {
         .image: imageStorage.imageReplacement,
       ]
     )
-    return ParsedTextStorage(storage: storage)
+    return storage
+  }()
+
+  public lazy var textStorage: ObjectiveCTextStorageWrapper = {
+    ObjectiveCTextStorageWrapper(storage: parsedAttributedString)
   }()
 
   public weak var delegate: TextEditViewControllerDelegate?
@@ -63,7 +69,7 @@ public final class TextEditViewController: UIViewController {
   /// The markdown
   public var markdown: String {
     get {
-      return textStorage.storage.rawString as String
+      return parsedAttributedString.rawString as String
     }
     set {
       textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: newValue)
@@ -148,10 +154,10 @@ public final class TextEditViewController: UIViewController {
   public var selectedRawTextRange: NSRange {
     get {
       let selectedRange = textView.selectedRange
-      return textStorage.storage.rawStringRange(forRange: selectedRange)
+      return parsedAttributedString.rawStringRange(forRange: selectedRange)
     }
     set {
-      let visibleRange = textStorage.storage.range(forRawStringRange: newValue)
+      let visibleRange = parsedAttributedString.range(forRawStringRange: newValue)
       textView.selectedRange = visibleRange
     }
   }
@@ -278,23 +284,23 @@ public final class TextEditViewController: UIViewController {
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage] _ in
-      let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage, parsedAttributedString] _ in
+      let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
       if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
-        let quoteDelimiterVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
+        let quoteDelimiterVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
         textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
         textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
       } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
+        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
         textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, textStorage] _ in
-      let nodePath = textStorage.storage.path(to: textView.selectedRange.location)
+    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString, textStorage] _ in
+      let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
       if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = textStorage.storage.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
+        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
         textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
       } else {
@@ -303,8 +309,8 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage] _ in
-      let nodePath = textStorage.storage.path(to: max(0, textView.selectedRange.location - 1))
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage, parsedAttributedString] _ in
+      let nodePath = parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1))
       let existingSelectedLocation = textView.selectedRange.location
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
         textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
@@ -509,14 +515,14 @@ extension TextEditViewController: NSTextStorageDelegate {
 extension TextEditViewController: UICollectionViewDelegate {
   /// Handles selection for the typeahead accessory -- replaces the hashtag at the cursor with the selected hashtag.
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let nodePath = textStorage.storage.path(to: textView.selectedRange.location - 1)
+    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     guard
       let selectedHashtag = typeaheadAccessory?.dataSource.itemIdentifier(for: indexPath),
       let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag })
     else {
       return
     }
-    let hashtagVisibleRange = textStorage.storage.range(forRawStringRange: hashtagNode.range)
+    let hashtagVisibleRange = parsedAttributedString.range(forRawStringRange: hashtagNode.range)
     textView.textStorage.replaceCharacters(in: hashtagVisibleRange, with: selectedHashtag)
     textView.selectedRange = NSRange(location: hashtagVisibleRange.location + selectedHashtag.utf16.count, length: 0)
     typeaheadAccessory = nil
@@ -533,7 +539,7 @@ extension TextEditViewController: UITextViewDelegate {
 
   public func textViewDidChangeSelection(_ textView: UITextView) {
     // the cursor moved. If there's a hashtag view controller, see if we've strayed from its hashtag.
-    let nodePath = textStorage.storage.path(to: textView.selectedRange.location - 1)
+    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }),
        hashtagNode.range.location == typeaheadAccessory?.anchor
     {
@@ -545,12 +551,12 @@ extension TextEditViewController: UITextViewDelegate {
   }
 
   public func textViewDidChange(_ textView: UITextView) {
-    let nodePath = textStorage.storage.path(to: textView.selectedRange.location - 1)
+    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
-      let hashtag = String(utf16CodeUnits: textStorage.storage[hashtagNode.range], count: hashtagNode.range.length)
+      let hashtag = String(utf16CodeUnits: parsedAttributedString[hashtagNode.range], count: hashtagNode.range.length)
       let suggestions = delegate?.testEditViewController(self, hashtagSuggestionsFor: hashtag) ?? []
       if suggestions.isEmpty { typeaheadAccessory = nil }
-      let visibleRange = textStorage.storage.range(forRawStringRange: hashtagNode.range)
+      let visibleRange = parsedAttributedString.range(forRawStringRange: hashtagNode.range)
       let typeaheadInfo = makeTypeaheadAccessoryIfNecessary(anchoredAt: visibleRange.location)
       var snapshot = NSDiffableDataSourceSnapshot<String, String>()
       snapshot.appendSections(["main"])
@@ -572,14 +578,14 @@ extension TextEditViewController: UITextViewDelegate {
 
     // Right now we only do special processing when inserting a newline
     guard range.length == 0, text == "\n" else { return true }
-    let nodePath = textStorage.storage.path(to: range.location)
+    let nodePath = parsedAttributedString.path(to: range.location)
     if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
       if let paragraph = listItem.first(where: { $0.type == .paragraph }) {
-        let paragraphText = textStorage.storage[paragraph.range]
+        let paragraphText = parsedAttributedString[paragraph.range]
         if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
           // List termination! Someone's hitting return on a list item that contains nothing.
           // Erase this marker.
-          let visibleRange = textStorage.storage.range(forRawStringRange: listItem.range)
+          let visibleRange = parsedAttributedString.range(forRawStringRange: listItem.range)
           replaceCharacters(
             in: visibleRange,
             with: "\n"
@@ -600,7 +606,7 @@ extension TextEditViewController: UITextViewDelegate {
       case .ordered:
         let listNumber: Int
         if let listNumberNode = listItem.first(where: { $0.type == .orderedListNumber }) {
-          let chars = textStorage.storage[listNumberNode.range]
+          let chars = parsedAttributedString[listNumberNode.range]
           let string = String(utf16CodeUnits: chars, count: chars.count)
           listNumber = Int(string) ?? 0
         } else {

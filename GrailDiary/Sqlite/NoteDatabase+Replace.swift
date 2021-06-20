@@ -3,6 +3,7 @@
 import Foundation
 import GRDB
 import Logging
+import TextMarkupKit
 
 public extension NoteDatabase {
   /// Does a global replacement of `originalText` with `replacementText` across all notes in a single transaction.

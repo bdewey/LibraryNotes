@@ -1,9 +1,22 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 @testable import GrailDiary
+import ObjectiveCTextStorageWrapper
+import TextMarkupKit
 import XCTest
 
 final class ClozeTests: XCTestCase {
+  func testCloze() {
+    do {
+      let parsedString = ParsedString("* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?", grammar: GrailDiaryGrammar.shared)
+      try parsedString.parsedResultsThatMatch("(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))")
+    } catch ParsedString.ValidationError.validationError(let message) {
+      XCTFail(message)
+    } catch {
+      XCTFail("Unexpected error: \(error)")
+    }
+  }
+
   func testFindClozeInText() {
     let example = """
     # Mastering the verb "to be"
@@ -16,7 +29,7 @@ final class ClozeTests: XCTestCase {
        - La nieve ?[to be](es) blanca.
     4. *Estar* with an adjective shows a "change" or "condition."
     """
-    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar())
+    let buffer = ParsedString(example, grammar: GrailDiaryGrammar.shared)
     let templates = ClozePromptCollection.extract(from: buffer)
     XCTAssertEqual(templates.count, 1)
   }
@@ -25,7 +38,7 @@ final class ClozeTests: XCTestCase {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(example, grammar: GrailDiaryGrammar.shared)
     let clozeCards = ClozePromptCollection.extract(from: buffer).prompts as! [ClozePrompt] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
@@ -68,9 +81,9 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = ParsedTextStorage(storage: ParsedAttributedString(
+    let textStorage = ObjectiveCTextStorageWrapper(storage: ParsedAttributedString(
       string: "",
-      grammar: MiniMarkdownGrammar(),
+      grammar: GrailDiaryGrammar.shared,
       defaultAttributes: AttributedStringAttributesDescriptor(),
       quickFormatFunctions: [.cloze: { $1.bold = true }],
       fullFormatFunctions: [:]

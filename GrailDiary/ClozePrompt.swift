@@ -3,6 +3,7 @@
 import AVFoundation
 import Foundation
 import Logging
+import TextMarkupKit
 import UIKit
 
 /// A Card for remembering a sentence with a word/phrase removed and optionally replaced with

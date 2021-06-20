@@ -254,9 +254,9 @@ public final class NoteDatabase: UIDocument {
         try db.execute(sql: "VACUUM INTO '\(inMemoryURL.path)'")
       }
       let onDiskURL = containerURL.appendingPathComponent("disk.sqlite")
-      try onDiskDb.writeWithoutTransaction({ db in
+      try onDiskDb.writeWithoutTransaction { db in
         try db.execute(sql: "VACUUM INTO '\(onDiskURL.path)'")
-      })
+      }
     } catch {
       Logger.shared.error("Unexpected error making backup: \(error)")
     }

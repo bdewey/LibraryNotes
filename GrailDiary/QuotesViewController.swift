@@ -5,6 +5,7 @@ import GRDB
 import GRDBCombine
 import Logging
 import SnapKit
+import TextMarkupKit
 import UIKit
 
 private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {

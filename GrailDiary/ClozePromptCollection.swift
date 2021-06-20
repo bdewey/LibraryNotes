@@ -2,6 +2,7 @@
 
 import Foundation
 import Logging
+import TextMarkupKit
 import UIKit
 
 public extension PromptType {
@@ -14,7 +15,7 @@ public struct ClozePromptCollection: PromptCollection {
 
   public init?(rawValue: String) {
     self.markdown = rawValue
-    let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
+    let memoizationTable = MemoizationTable(grammar: GrailDiaryGrammar())
     guard let node = try? memoizationTable.parseBuffer(rawValue) else {
       return nil
     }

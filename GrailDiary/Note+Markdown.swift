@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
+import TextMarkupKit
 
 /// This struct provides a standard string encoding for all keys used for prompts: "prompt-{number}"
 public struct PromptCollectionKey: RawRepresentable {
@@ -51,7 +52,7 @@ public extension Note {
   }
 
   init(markdown: String) {
-    let buffer = ParsedString(markdown, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(markdown, grammar: GrailDiaryGrammar.shared)
     self.init(parsedString: buffer)
   }
 
