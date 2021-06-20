@@ -305,7 +305,7 @@ public final class Characters: ParsingRule {
 
   public let characters: CharacterSet
 
-  public override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+  override public func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     guard let character = buffer.character(at: index), character.unicodeScalars.count == 1, characters.contains(character.unicodeScalars.first!) else {
       return performanceCounters.recordResult(.fail)
     }
@@ -313,11 +313,11 @@ public final class Characters: ParsingRule {
     return performanceCounters.recordResult(ParsingResult(succeeded: true, length: count, examinedLength: count, node: nil))
   }
 
-  public override var description: String {
+  override public var description: String {
     "\(super.description) \(characters)"
   }
 
-  public override var possibleOpeningCharacters: CharacterSet {
+  override public var possibleOpeningCharacters: CharacterSet {
     return characters
   }
 }
@@ -659,12 +659,12 @@ final class NotAssertionRule: ParsingRuleWrapper {
 
 /// Returns the result of the first successful match, or .fail otherwise.
 public final class Choice: ParsingRuleSequenceWrapper {
-  public override init(_ rules: [ParsingRule]) {
+  override public init(_ rules: [ParsingRule]) {
     super.init(rules)
     updatePossibleCharacters(for: rules)
   }
 
-  public override var rules: [ParsingRule] {
+  override public var rules: [ParsingRule] {
     get {
       super.rules
     }
@@ -680,11 +680,11 @@ public final class Choice: ParsingRuleSequenceWrapper {
       if let subruleCharacters = rule.possibleOpeningCharacters {
         characters.formUnion(subruleCharacters)
       } else {
-        self._possibleCharacters = nil
+        _possibleCharacters = nil
         return
       }
     }
-    self._possibleCharacters = characters
+    _possibleCharacters = characters
   }
 
   public convenience init(_ rules: ParsingRule...) {

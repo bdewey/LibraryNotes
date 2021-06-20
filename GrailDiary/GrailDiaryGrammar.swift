@@ -1,10 +1,4 @@
-//
-//  GrailDiaryGrammar.swift
-//  GrailDiary
-//
-//  Created by Brian Dewey on 6/16/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import TextMarkupKit
@@ -62,12 +56,12 @@ public final class GrailDiaryGrammar: PackratGrammar {
     coreGrammar.customBlockRules = [questionAndAnswer, summary]
     self.coreGrammar = coreGrammar
   }
-  
+
   private let coreGrammar: MiniMarkdownGrammar
 
   public var start: ParsingRule { coreGrammar.start }
 }
 
-extension PackratGrammar where Self == GrailDiaryGrammar {
-  public static var grailDiary: GrailDiaryGrammar { GrailDiaryGrammar() }
+public extension PackratGrammar where Self == GrailDiaryGrammar {
+  static var grailDiary: GrailDiaryGrammar { GrailDiaryGrammar() }
 }

@@ -46,35 +46,33 @@ import Foundation
   }
 
   #if DEBUG
-  public enum ValidationError: Error {
-    case unparsedText(String)
-    case validationError(String)
-  }
-
-  @discardableResult
-  public func parsedResultsThatMatch(
-    _ expectedStructure: String
-  ) throws -> SyntaxTreeNode {
-    let tree = try result.get()
-    if tree.length != count {
-      let unparsedText = text[NSRange(location: tree.length, length: text.count - tree.length)]
-      throw ValidationError.unparsedText(String(utf16CodeUnits: unparsedText, count: unparsedText.count))
+    public enum ValidationError: Error {
+      case unparsedText(String)
+      case validationError(String)
     }
-    if expectedStructure != tree.compactStructure {
-      let errorMessage = """
-Got:      \(tree.compactStructure)
-Expected: \(expectedStructure)
 
-\(tree.debugDescription(withContentsFrom: text))
+    @discardableResult
+    public func parsedResultsThatMatch(
+      _ expectedStructure: String
+    ) throws -> SyntaxTreeNode {
+      let tree = try result.get()
+      if tree.length != count {
+        let unparsedText = text[NSRange(location: tree.length, length: text.count - tree.length)]
+        throw ValidationError.unparsedText(String(utf16CodeUnits: unparsedText, count: unparsedText.count))
+      }
+      if expectedStructure != tree.compactStructure {
+        let errorMessage = """
+        Got:      \(tree.compactStructure)
+        Expected: \(expectedStructure)
 
+        \(tree.debugDescription(withContentsFrom: text))
 
-
-\(TraceBuffer.shared)
-"""
-      throw ValidationError.validationError(errorMessage)
+        \(TraceBuffer.shared)
+        """
+        throw ValidationError.validationError(errorMessage)
+      }
+      return tree
     }
-    return tree
-  }
   #endif
 }
 
