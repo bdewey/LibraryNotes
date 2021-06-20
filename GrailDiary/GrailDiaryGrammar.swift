@@ -9,6 +9,12 @@
 import Foundation
 import TextMarkupKit
 
+public extension SyntaxTreeNodeType {
+  static let cloze: SyntaxTreeNodeType = "cloze"
+  static let clozeHint: SyntaxTreeNodeType = "cloze_hint"
+  static let clozeAnswer: SyntaxTreeNodeType = "cloze_answer"
+}
+
 public final class GrailDiaryGrammar: PackratGrammar {
   public static let shared = GrailDiaryGrammar()
   
