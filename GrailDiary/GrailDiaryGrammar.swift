@@ -18,6 +18,10 @@ public extension SyntaxTreeNodeType {
   static let qnaQuestion: SyntaxTreeNodeType = "qna_question"
   static let qnaAnswer: SyntaxTreeNodeType = "qna_answer"
   static let qnaDelimiter: SyntaxTreeNodeType = "qna_delimiter"
+
+  static let summaryDelimiter: SyntaxTreeNodeType = "summary_delimiter"
+  static let summaryBody: SyntaxTreeNodeType = "summary_body"
+  static let summary: SyntaxTreeNodeType = "summary"
 }
 
 public final class GrailDiaryGrammar: PackratGrammar {
@@ -47,7 +51,15 @@ public final class GrailDiaryGrammar: PackratGrammar {
       coreGrammar.paragraphTermination.zeroOrOne().wrapping(in: .text)
     ).wrapping(in: .questionAndAnswer).memoize()
 
-    coreGrammar.customBlockRules = [questionAndAnswer]
+    let summary = InOrder(
+      Choice(
+        InOrder(Literal("Summary: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
+        InOrder(Literal("tl;dr: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
+      ),
+      coreGrammar.singleLineStyledText.wrapping(in: .summaryBody)
+    ).wrapping(in: .summary).memoize()
+
+    coreGrammar.customBlockRules = [questionAndAnswer, summary]
     self.coreGrammar = coreGrammar
   }
   

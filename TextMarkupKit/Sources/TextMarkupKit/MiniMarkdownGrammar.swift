@@ -24,9 +24,6 @@ public extension SyntaxTreeNodeType {
   static let unorderedListOpening: SyntaxTreeNodeType = "unordered_list_opening"
   static let orderedListNumber: SyntaxTreeNodeType = "ordered_list_number"
   static let orderedListTerminator: SyntaxTreeNodeType = "ordered_list_terminator"
-  static let summaryDelimiter: SyntaxTreeNodeType = "summary_delimiter"
-  static let summaryBody: SyntaxTreeNodeType = "summary_body"
-  static let summary: SyntaxTreeNodeType = "summary"
   static let emoji: SyntaxTreeNodeType = "emoji"
 }
 
@@ -66,7 +63,6 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     unorderedList,
     orderedList,
     blockquote,
-    summary,
   ]
 
   public var customBlockRules: [ParsingRule] = [] {
@@ -98,14 +94,6 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     softTab,
     singleLineStyledText
   ).wrapping(in: .header).memoize()
-
-  lazy var summary = InOrder(
-    Choice(
-      InOrder(Literal("Summary: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
-      InOrder(Literal("tl;dr: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
-    ),
-    singleLineStyledText.wrapping(in: .summaryBody)
-  ).wrapping(in: .summary).memoize()
 
   lazy var paragraph = InOrder(
     nonDelimitedHashtag.zeroOrOne(),

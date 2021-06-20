@@ -133,6 +133,7 @@
 		D3DE3FB12676B3AD005C396D /* TextMarkupKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DE3FB02676B3AD005C396D /* TextMarkupKit */; };
 		D3E5E024256F13CD0062BDD4 /* NoteMetadataRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */; };
 		D3E7076C25A20C7F00127B1F /* 20210103-creationTimestamp.sql in Resources */ = {isa = PBXBuildFile; fileRef = D3E7076B25A20C7F00127B1F /* 20210103-creationTimestamp.sql */; };
+		D3E8069F267FED4F009AA588 /* SummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E8069E267FED4F009AA588 /* SummaryTests.swift */; };
 		D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */; };
 		D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */; };
 		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
@@ -337,6 +338,7 @@
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadataRecord.swift; sourceTree = "<group>"; };
 		D3E7076B25A20C7F00127B1F /* 20210103-creationTimestamp.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20210103-creationTimestamp.sql"; sourceTree = "<group>"; };
+		D3E8069E267FED4F009AA588 /* SummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryTests.swift; sourceTree = "<group>"; };
 		D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ICloudFileMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98EFD21D2F784008445DA /* DirectoryMetadataProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryMetadataProvider.swift; sourceTree = "<group>"; };
 		D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -621,6 +623,7 @@
 				D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */,
 				D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
+				D3E8069E267FED4F009AA588 /* SummaryTests.swift */,
 			);
 			path = GrailDiaryTests;
 			sourceTree = "<group>";
@@ -1013,6 +1016,7 @@
 				D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */,
 				D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */,
 				D32A7A7525A0CF8200950684 /* NoteSqliteStorageTestBase.swift in Sources */,
+				D3E8069F267FED4F009AA588 /* SummaryTests.swift in Sources */,
 				D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
