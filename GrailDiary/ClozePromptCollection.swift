@@ -15,7 +15,7 @@ public struct ClozePromptCollection: PromptCollection {
 
   public init?(rawValue: String) {
     self.markdown = rawValue
-    let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
+    let memoizationTable = MemoizationTable(grammar: .grailDiary)
     guard let node = try? memoizationTable.parseBuffer(rawValue) else {
       return nil
     }

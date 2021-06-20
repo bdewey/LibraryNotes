@@ -48,7 +48,10 @@ public enum ListTypeKey: SyntaxTreeNodePropertyKey {
   public static let key = "list_type"
 }
 
-public final class MiniMarkdownGrammar: PackratGrammar {
+/// Implements a subset of Markdown for common "plain text formatting" scenarios.
+///
+/// This class is designed to be subclassed so you can extend the grammar. Subclasses can override:
+open class MiniMarkdownGrammar: PackratGrammar {
   public init(trace: Bool = false) {
     if trace {
       self.start = start.trace()
@@ -149,26 +152,22 @@ public final class MiniMarkdownGrammar: PackratGrammar {
     Literal(")").as(.text)
   ).wrapping(in: .image).memoize()
 
-  lazy var cloze = InOrder(
-    Literal("?[").as(.delimiter),
-    Characters(CharacterSet(charactersIn: "\n]").inverted).repeating(0...).as(.clozeHint),
-    Literal("](").as(.delimiter),
-    Characters(CharacterSet(charactersIn: "\n)").inverted).repeating(0...).as(.clozeAnswer),
-    Literal(")").as(.delimiter)
-  ).wrapping(in: .cloze).memoize()
-
   lazy var emoji = CharacterPredicate { $0.isEmoji }.repeating(1...).as(.emoji).memoize()
 
-  lazy var textStyles = Choice(
-    bold,
-    italic,
-    underlineItalic,
-    code,
-    hashtag,
-    image,
-    cloze,
-    emoji
-  ).memoize()
+  /// Rules that define how to parse "inline styles" (bold, italic, code, etc). Designed to be overridden to add or replace the parsed inline styles.
+  open var inlineStyleRules: [ParsingRule] {
+    [
+      bold,
+      italic,
+      underlineItalic,
+      code,
+      hashtag,
+      image,
+      emoji,
+    ]
+  }
+
+  lazy var textStyles = Choice(inlineStyleRules).memoize()
 
   lazy var styledText = InOrder(
     InOrder(paragraphTermination.assertInverse(), textStyles.assertInverse(), dot).repeating(0...).as(.text),

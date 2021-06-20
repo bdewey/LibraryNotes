@@ -26,7 +26,7 @@ public extension ParsedAttributedString.Settings {
     defaultAttributes.kern = kern
     defaultAttributes.fontDesign = fontDesign
     return ParsedAttributedString.Settings(
-      grammar: MiniMarkdownGrammar.shared,
+      grammar: .grailDiary,
       defaultAttributes: defaultAttributes,
       quickFormatFunctions: formattingFunctions,
       fullFormatFunctions: replacementFunctions

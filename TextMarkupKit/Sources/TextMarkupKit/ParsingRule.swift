@@ -298,14 +298,14 @@ final class DotRule: ParsingRule {
 
 /// Matches single characters that belong to a character set. The result is not put into a syntax tree node and should get absorbed
 /// by another rule.
-final class Characters: ParsingRule {
-  init(_ characters: CharacterSet) {
+public final class Characters: ParsingRule {
+  public init(_ characters: CharacterSet) {
     self.characters = characters
   }
 
-  let characters: CharacterSet
+  public let characters: CharacterSet
 
-  override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
+  public override func parsingResult(from buffer: SafeUnicodeBuffer, at index: Int, memoizationTable: MemoizationTable) -> ParsingResult {
     guard let character = buffer.character(at: index), character.unicodeScalars.count == 1, characters.contains(character.unicodeScalars.first!) else {
       return performanceCounters.recordResult(.fail)
     }
@@ -313,11 +313,11 @@ final class Characters: ParsingRule {
     return performanceCounters.recordResult(ParsingResult(succeeded: true, length: count, examinedLength: count, node: nil))
   }
 
-  override var description: String {
+  public override var description: String {
     "\(super.description) \(characters)"
   }
 
-  override var possibleOpeningCharacters: CharacterSet {
+  public override var possibleOpeningCharacters: CharacterSet {
     return characters
   }
 }
@@ -339,15 +339,15 @@ final class CharacterPredicate: ParsingRule {
 }
 
 public final class Literal: ParsingRule {
-  init(_ string: String, compareOptions: String.CompareOptions = []) {
+  public init(_ string: String, compareOptions: String.CompareOptions = []) {
     self.literalString = string
     self.utfCount = string.utf16.count
     self.compareOptions = compareOptions
   }
 
-  let literalString: String
-  let utfCount: Int
-  let compareOptions: String.CompareOptions
+  public let literalString: String
+  public let utfCount: Int
+  public let compareOptions: String.CompareOptions
 
   override public var description: String {
     return "\(super.description) \(literalString)"
@@ -659,7 +659,7 @@ final class NotAssertionRule: ParsingRuleWrapper {
 
 /// Returns the result of the first successful match, or .fail otherwise.
 public final class Choice: ParsingRuleSequenceWrapper {
-  public init(_ rules: ParsingRule...) {
+  public override init(_ rules: [ParsingRule]) {
     super.init(rules)
     var characters = CharacterSet()
     for rule in rules {
@@ -671,6 +671,10 @@ public final class Choice: ParsingRuleSequenceWrapper {
       }
     }
     self._possibleCharacters = characters
+  }
+
+  public convenience init(_ rules: ParsingRule...) {
+    self.init(rules)
   }
 
   private var _possibleCharacters: CharacterSet?

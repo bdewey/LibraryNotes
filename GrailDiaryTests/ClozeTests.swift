@@ -3,6 +3,7 @@
 @testable import GrailDiary
 import ObjectiveCTextStorageWrapper
 import TextMarkupKit
+//import TextMarkupTestBase
 import XCTest
 
 final class ClozeTests: XCTestCase {
@@ -18,7 +19,7 @@ final class ClozeTests: XCTestCase {
        - La nieve ?[to be](es) blanca.
     4. *Estar* with an adjective shows a "change" or "condition."
     """
-    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar())
+    let buffer = ParsedString(example, grammar: .grailDiary)
     let templates = ClozePromptCollection.extract(from: buffer)
     XCTAssertEqual(templates.count, 1)
   }
@@ -27,7 +28,7 @@ final class ClozeTests: XCTestCase {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
-    let buffer = ParsedString(example, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(example, grammar: .grailDiary)
     let clozeCards = ClozePromptCollection.extract(from: buffer).prompts as! [ClozePrompt] // swiftlint:disable:this force_cast
     XCTAssertEqual(clozeCards.count, 2)
     XCTAssertEqual(
@@ -72,7 +73,7 @@ final class ClozeTests: XCTestCase {
     // Simple storage that will mark clozes as bold.
     let textStorage = ObjectiveCTextStorageWrapper(storage: ParsedAttributedString(
       string: "",
-      grammar: MiniMarkdownGrammar(),
+      grammar: .grailDiary,
       defaultAttributes: AttributedStringAttributesDescriptor(),
       quickFormatFunctions: [.cloze: { $1.bold = true }],
       fullFormatFunctions: [:]

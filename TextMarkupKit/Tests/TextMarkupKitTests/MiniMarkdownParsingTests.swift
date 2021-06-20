@@ -2,9 +2,10 @@
 
 import Foundation
 import TextMarkupKit
+import TextMarkupTestBase
 import XCTest
 
-final class MiniMarkdownParsingTests: XCTestCase {
+final class MiniMarkdownParsingTests: TextMarkupTestBase {
   func testNothingButText() {
     parseText("Just text.", expectedStructure: "(document (paragraph text))")
   }
@@ -259,37 +260,6 @@ final class MiniMarkdownParsingTests: XCTestCase {
     } catch {
       XCTFail("Unexpected error: \(error)")
       print(TraceBuffer.shared)
-    }
-  }
-}
-
-// MARK: - Private
-
-private extension MiniMarkdownParsingTests {
-  @discardableResult
-  func parseText(_ text: String, expectedStructure: String, file: StaticString = #file, line: UInt = #line) -> SyntaxTreeNode? {
-    do {
-      let pieceTable = PieceTable(text)
-      let memoizationTable = MemoizationTable(grammar: MiniMarkdownGrammar.shared)
-      let tree = try memoizationTable.parseBuffer(pieceTable)
-      if tree.length != pieceTable.count {
-        let unparsedText = pieceTable[NSRange(location: tree.length, length: pieceTable.count - tree.length)]
-        XCTFail("Test case \(name): Unparsed text = '\(unparsedText.debugDescription)'", file: file, line: line)
-      }
-      if expectedStructure != tree.compactStructure {
-        print("### Failure: \(name)")
-        print("Got:      " + tree.compactStructure)
-        print("Expected: " + expectedStructure)
-        print("\n")
-        print(tree.debugDescription(withContentsFrom: pieceTable))
-        print("\n\n\n")
-        print(TraceBuffer.shared)
-      }
-      XCTAssertEqual(tree.compactStructure, expectedStructure, "Unexpected structure", file: file, line: line)
-      return tree
-    } catch {
-      XCTFail("Unexpected error: \(error)", file: file, line: line)
-      return nil
     }
   }
 }
