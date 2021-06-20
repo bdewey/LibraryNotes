@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Use https://github.com/bdewey/TextMarkupKit for core parsing
+
 ### Added
 
 - Can export a book list in CSV format
