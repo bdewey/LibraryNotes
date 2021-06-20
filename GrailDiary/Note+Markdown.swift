@@ -52,7 +52,7 @@ public extension Note {
   }
 
   init(markdown: String) {
-    let buffer = ParsedString(markdown, grammar: MiniMarkdownGrammar.shared)
+    let buffer = ParsedString(markdown, grammar: GrailDiaryGrammar.shared)
     self.init(parsedString: buffer)
   }
 

@@ -9,12 +9,12 @@
 import Foundation
 import TextMarkupKit
 
-public final class GrailDiaryGrammar: MiniMarkdownGrammar {
-  public override var inlineStyleRules: [ParsingRule] {
-    var foo = super.inlineStyleRules
-    foo.append(contentsOf: [cloze])
-    return foo
-  }
+public final class GrailDiaryGrammar: PackratGrammar {
+  public static let shared = GrailDiaryGrammar()
+  
+  private lazy var customizedGrammar = MiniMarkdownGrammar(customInlineStyleRules: [cloze], trace: false)
+
+  public var start: ParsingRule { customizedGrammar.start }
 
   lazy var cloze = InOrder(
     Literal("?[").as(.delimiter),
