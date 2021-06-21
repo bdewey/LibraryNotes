@@ -6,15 +6,7 @@ import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
-/// A protocol that the text views use to store images on paste
-public protocol ImageStorage {
-  /// Store image data.
-  /// - parameter imageData: The image data to store
-  /// - parameter suffix: Image data suffix that identifies the data format (e.g., "jpeg", "png")
-  /// - parameter key: Optional pre-defined key to use for this image.
-  /// - returns: A string key that can locate this image later.
-  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String
-
+public protocol ImageStorage: MarkupFormattingTextViewImageStorage {
   /// Given the key returned from `markdownEditingTextView(_:store:suffix:)`, retrieve the corresponding image data.
   func retrieveImageDataForKey(_ key: String) throws -> Data
 }
@@ -60,7 +52,8 @@ public struct BoundNote {
 
 extension BoundNote: ImageStorage {
   public func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
-    return try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: type, key: key)
+    let imageKey = try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: type, key: key)
+    return "![](\(imageKey))"
   }
 
   public func retrieveImageDataForKey(_ key: String) throws -> Data {

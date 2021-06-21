@@ -81,18 +81,14 @@ final class ClozeTests: XCTestCase {
 
   func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
-    let textStorage = ObjectiveCTextStorageWrapper(storage: ParsedAttributedString(
+    let string = ParsedAttributedString(
       string: "",
       grammar: GrailDiaryGrammar.shared,
       defaultAttributes: AttributedStringAttributesDescriptor(),
       quickFormatFunctions: [.cloze: { $1.bold = true }],
       fullFormatFunctions: [:]
-    ))
-    let layoutManager = NSLayoutManager()
-    textStorage.addLayoutManager(layoutManager)
-    let textContainer = NSTextContainer()
-    layoutManager.addTextContainer(textContainer)
-    let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
+    )
+    let textView = MarkupFormattingTextView(parsedAttributedString: string)
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
 
     textView.insertText("Testing")
@@ -107,7 +103,7 @@ final class ClozeTests: XCTestCase {
 
     var testRange = NSRange(location: NSNotFound, length: 0)
     // swiftlint:disable:next force_cast
-    let actualFont = textStorage.attributes(at: 0, effectiveRange: &testRange)[.font] as! UIFont
+    let actualFont = string.attributes(at: 0, effectiveRange: &testRange)[.font] as! UIFont
     XCTAssert(actualFont.fontDescriptor.symbolicTraits.contains(.traitBold))
     XCTAssertEqual(testRange, NSRange(location: 0, length: 12))
   }

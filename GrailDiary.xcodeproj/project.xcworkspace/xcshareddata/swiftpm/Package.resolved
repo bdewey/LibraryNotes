@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
         "state": {
           "branch": null,
-          "revision": "c6ec243d1531dfc963ace766af80407787ed6762",
-          "version": "0.4.1"
+          "revision": "92a41f877fec32b7ff45880d1995e476852fe534",
+          "version": "0.5.0"
         }
       }
     ]

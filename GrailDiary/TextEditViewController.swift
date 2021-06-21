@@ -20,7 +20,7 @@ public final class TextEditViewController: UIViewController {
   public init(imageStorage: ImageStorage) {
     self.imageStorage = imageStorage
     super.init(nibName: nil, bundle: nil)
-    textStorage.delegate = self
+    textView.textStorage.delegate = self
     textView.imageStorage = imageStorage
     NotificationCenter.default.addObserver(
       self,
@@ -60,10 +60,6 @@ public final class TextEditViewController: UIViewController {
     return storage
   }()
 
-  public lazy var textStorage: ObjectiveCTextStorageWrapper = {
-    ObjectiveCTextStorageWrapper(storage: parsedAttributedString)
-  }()
-
   public weak var delegate: TextEditViewControllerDelegate?
 
   /// The markdown
@@ -72,7 +68,7 @@ public final class TextEditViewController: UIViewController {
       return parsedAttributedString.rawString as String
     }
     set {
-      textStorage.replaceCharacters(in: NSRange(location: 0, length: textStorage.length), with: newValue)
+      textView.textStorage.replaceCharacters(in: NSRange(location: 0, length: textView.textStorage.length), with: newValue)
     }
   }
 
@@ -123,23 +119,11 @@ public final class TextEditViewController: UIViewController {
     return formatters
   }()
 
-  private lazy var textView: MarkdownEditingTextView = {
-    let layoutManager = LayoutManager()
-    textStorage.addLayoutManager(layoutManager)
-    let textContainer = NSTextContainer()
-    layoutManager.addTextContainer(textContainer)
-    let textView = MarkdownEditingTextView(frame: .zero, textContainer: textContainer)
-    textView.backgroundColor = .grailBackground
-    textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-    textView.pasteConfiguration = UIPasteConfiguration(
-      acceptableTypeIdentifiers: [
-        kUTTypeJPEG as String,
-        kUTTypePNG as String,
-        kUTTypeImage as String,
-        kUTTypePlainText as String,
-      ]
-    )
-    return textView
+  public private(set) lazy var textView: MarkupFormattingTextView = {
+    let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
+    view.backgroundColor = .grailBackground
+    view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    return view
   }()
 
   public var selectedRange: NSRange {
@@ -284,40 +268,40 @@ public final class TextEditViewController: UIViewController {
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, textStorage, parsedAttributedString] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
       let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
       if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
         let quoteDelimiterVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
-        textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
+        textView.textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
         textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
       } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
         let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
+        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString, textStorage] _ in
+    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString] _ in
       let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
       if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
         let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
+        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
       } else {
-        textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
+        textView.textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
         textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, textStorage, parsedAttributedString] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
       let nodePath = parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1))
       let existingSelectedLocation = textView.selectedRange.location
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
-        textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
+        textView.textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
         textView.selectedRange = NSRange(location: existingSelectedLocation - 2, length: textView.selectedRange.length)
       } else {
         let lineRange = self.lineRange(at: existingSelectedLocation)
-        textStorage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: "* ")
+        textView.textStorage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: "* ")
         textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
       }
     }))
@@ -533,7 +517,7 @@ extension TextEditViewController: UICollectionViewDelegate {
 
 extension TextEditViewController: UITextViewDelegate {
   func replaceCharacters(in range: NSRange, with str: String) {
-    textStorage.replaceCharacters(in: range, with: str)
+    textView.textStorage.replaceCharacters(in: range, with: str)
     textView.selectedRange = NSRange(location: range.location + str.count, length: 0)
   }
 
@@ -633,13 +617,13 @@ extension TextEditViewController: UITextViewDelegate {
 
   /// Gets the line of text that contains a given location.
   private func line(at location: Int) -> String {
-    let nsstring = textStorage.string as NSString
+    let nsstring = textView.textStorage.string as NSString
     let lineRange = nsstring.lineRange(for: NSRange(location: location, length: 0))
     return nsstring.substring(with: lineRange)
   }
 
   private func lineRange(at location: Int) -> NSRange {
-    (textStorage.string as NSString).lineRange(for: NSRange(location: location, length: 0))
+    (textView.textStorage.string as NSString).lineRange(for: NSRange(location: location, length: 0))
   }
 
   public func scrollViewDidScroll(_ scrollView: UIScrollView) {

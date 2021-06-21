@@ -202,7 +202,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       var rawRange = textEditViewController.parsedAttributedString.rawStringRange(forRange: initialRange)
       rawRange.location += markdown.utf16.count
       rawRange.length = 0
-      textEditViewController.textStorage.replaceCharacters(in: initialRange, with: markdown)
+      textEditViewController.textView.textStorage.replaceCharacters(in: initialRange, with: markdown)
       textEditViewController.selectedRange = textEditViewController.parsedAttributedString.range(forRawStringRange: rawRange)
     } catch {
       Logger.shared.error("Could not save initial image: \(error)")
@@ -266,7 +266,8 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 extension SavingTextEditViewController: ImageStorage {
   func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
     try forceSave()
-    return try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type, key: key)
+    let imageKey = try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type, key: key)
+    return "![](\(imageKey))"
   }
 
   func retrieveImageDataForKey(_ key: String) throws -> Data {
