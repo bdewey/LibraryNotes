@@ -45,6 +45,7 @@
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31AFAF2229D620B00ED2B76 /* DayComponentsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */; };
 		D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D7CDF2598CCC70083AB05 /* WebViewController.swift */; };
+		D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */; };
 		D329BF6023CB8BD5008D59CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D329BF5F23CB8BD5008D59CF /* GRDB */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
 		D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */; };
@@ -247,6 +248,7 @@
 		D31AFAE8229D620B00ED2B76 /* DayComponentsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayComponentsTests.swift; sourceTree = "<group>"; };
 		D31D7CDF2598CCC70083AB05 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		D326464526820D83002C42A6 /* TextMarkupKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TextMarkupKit; path = ../Documents/GitHub/TextMarkupKit; sourceTree = "<group>"; };
+		D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GrailDiaryGrammar+Styles.swift"; sourceTree = "<group>"; };
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
@@ -548,6 +550,7 @@
 				D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */,
 				D348A97921C6C586005CA937 /* FileNameGenerator.swift */,
 				D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */,
+				D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */,
 				D3E98EFB21D2F725008445DA /* ICloudFileMetadataProvider.swift */,
 				D3558D7625D9741100746600 /* ImageCache.swift */,
 				D3DC5ED020EC9B0200F0B74B /* Info.plist */,
@@ -892,6 +895,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */,
 				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
 				D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */,
 				D311778A25AA384E00E473FD /* SceneDelegate.swift in Sources */,

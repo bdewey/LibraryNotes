@@ -46,13 +46,8 @@ public final class TextEditViewController: UIViewController {
   // Init-time state.
 
   public lazy var parsedAttributedString: ParsedAttributedString = {
-    let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
-    let settings = ParsedAttributedString.Style(
-      grammar: GrailDiaryGrammar.shared,
-      defaultAttributes: defaultAttributes,
-      formatters: formatters
-    ).renderingImages(from: imageStorage)
-    let storage = ParsedAttributedString(string: "", style: settings)
+    let style = GrailDiaryGrammar.defaultEditingStyle().renderingImages(from: imageStorage)
+    let storage = ParsedAttributedString(string: "", style: style)
     return storage
   }()
 
@@ -67,35 +62,6 @@ public final class TextEditViewController: UIViewController {
       textView.textStorage.replaceCharacters(in: NSRange(location: 0, length: textView.textStorage.length), with: newValue)
     }
   }
-
-  private let formatters: [SyntaxTreeNodeType: AnyParsedAttributedStringFormatter] = [
-    .header: AnyParsedAttributedStringFormatter(HeaderFormatter()),
-    .list: .incrementListLevel,
-    .delimiter: .color(.quaternaryLabel),
-    .questionAndAnswer: .incrementListLevel,
-    .qnaDelimiter: .toggleBold,
-    .strongEmphasis: .toggleBold,
-    .emphasis: .toggleItalic,
-    .code: .fontDesign(.monospaced),
-    .cloze: .backgroundColor(.systemYellow.withAlphaComponent(0.3)),
-    .clozeHint: .color(.secondaryLabel),
-    .hashtag: .backgroundColor(.grailSecondaryBackground),
-    .summaryDelimiter: .toggleBold,
-    .summary: AnyParsedAttributedStringFormatter {
-      $0.blockquoteBorderColor = UIColor.systemOrange
-      $0.italic = true
-    },
-    .blockquote: AnyParsedAttributedStringFormatter {
-      $0.italic = true
-      $0.blockquoteBorderColor = UIColor.systemOrange
-      $0.listLevel += 1
-    },
-    .emoji: AnyParsedAttributedStringFormatter {
-      $0.familyName = "Apple Color Emoji"
-    },
-    .softTab: .substitute("\t"),
-    .unorderedListOpening: .substitute("\u{2022}"),
-  ]
 
   public private(set) lazy var textView: MarkupFormattingTextView = {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
@@ -663,30 +629,5 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
     dismiss(animated: true, completion: nil)
-  }
-}
-
-private struct HeaderFormatter: ParsedAttributedStringFormatter {
-  func formatNode(
-    _ node: SyntaxTreeNode,
-    in buffer: SafeUnicodeBuffer,
-    at offset: Int,
-    currentAttributes: AttributedStringAttributesDescriptor
-  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
-    guard let headingLevel = node.children.first?.length else {
-      assertionFailure()
-      return (currentAttributes, nil)
-    }
-    var attributes = currentAttributes
-    switch headingLevel {
-    case 1:
-      attributes.textStyle = .title2
-    case 2:
-      attributes.textStyle = .title3
-    default:
-      attributes.textStyle = .title3
-    }
-    attributes.listLevel = 1
-    return (attributes, nil)
   }
 }
