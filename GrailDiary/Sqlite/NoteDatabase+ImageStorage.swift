@@ -11,29 +11,35 @@ public protocol ImageStorage: MarkupFormattingTextViewImageStorage {
   func retrieveImageDataForKey(_ key: String) throws -> Data
 }
 
-extension ImageStorage {
-  /// A replacement function that will replace an `.image` node with a text attachment containing the image (200px max dimension)
-  func imageReplacement(
-    node: SyntaxTreeNode,
-    startIndex: Int,
-    buffer: SafeUnicodeBuffer,
-    attributes: inout AttributedStringAttributesDescriptor
-  ) -> [unichar]? {
-    let anchoredNode = AnchoredNode(node: node, startIndex: startIndex)
+public struct ImageReplacementFormatter: ParsedAttributedStringFormatter {
+  public init(_ imageStorage: ImageStorage) {
+    self.imageStorage = imageStorage
+  }
+
+  let imageStorage: ImageStorage
+
+  public func formatNode(
+    _ node: SyntaxTreeNode,
+    in buffer: SafeUnicodeBuffer,
+    at offset: Int,
+    currentAttributes: AttributedStringAttributesDescriptor
+  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
+    var attributes = currentAttributes
+    let anchoredNode = AnchoredNode(node: node, startIndex: offset)
     guard let targetNode = anchoredNode.first(where: { $0.type == .linkTarget }) else {
       attributes.color = .quaternaryLabel
-      return nil
+      return (attributes, nil)
     }
     let targetChars = buffer[targetNode.range]
     let target = String(utf16CodeUnits: targetChars, count: targetChars.count)
     do {
-      let imageData = try retrieveImageDataForKey(target)
+      let imageData = try imageStorage.retrieveImageDataForKey(target)
       // TODO: What's the right image width?
       if let image = imageData.image(maxSize: 200) {
         let attachment = NSTextAttachment()
         attachment.image = image
         attributes.attachment = attachment
-        return Array("\u{fffc}".utf16) // "object replacement character"
+        return (attributes, Array("\u{fffc}".utf16))
       }
     } catch {
       Logger.shared.error("Unexpected error getting image data: \(error)")
@@ -41,7 +47,7 @@ extension ImageStorage {
 
     // fallback -- show the markdown code instead of the image
     attributes.color = .quaternaryLabel
-    return nil
+    return (attributes, nil)
   }
 }
 
@@ -64,7 +70,7 @@ extension BoundNote: ImageStorage {
 public extension ParsedAttributedString.Settings {
   func renderingImages(from imageStorage: ImageStorage) -> Self {
     var copy = self
-    copy.fullFormatFunctions[.image] = imageStorage.imageReplacement
+    copy.formatters[.image] = AnyParsedAttributedStringFormatter(ImageReplacementFormatter(imageStorage))
     return copy
   }
 }

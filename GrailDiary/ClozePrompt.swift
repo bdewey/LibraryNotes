@@ -69,63 +69,86 @@ extension ClozePrompt: Prompt {
   }
 }
 
+final class HidingClozeFormatter: ParsedAttributedStringFormatter {
+  init(index: Int) {
+    self.index = index
+  }
+
+  let index: Int
+  var replaceClozeCount = 0
+
+  func formatNode(
+    _ node: SyntaxTreeNode,
+    in buffer: SafeUnicodeBuffer,
+    at offset: Int,
+    currentAttributes: AttributedStringAttributesDescriptor
+  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
+    var attributes = currentAttributes
+    let shouldHide = replaceClozeCount == index
+    replaceClozeCount += 1
+    if shouldHide {
+      attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
+      let hintNode = AnchoredNode(node: node, startIndex: offset).first(where: { $0.type == .clozeHint })
+      let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
+      let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
+      if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
+        // There is no hint. We're going to show a blank.
+        // The only question is: How big is the blank? Try to make it the size of the answer.
+        attributes.color = .clear
+        if let answerNode = AnchoredNode(node: node, startIndex: offset).first(where: { $0.type == .clozeAnswer }) {
+          return (attributes, buffer[answerNode.range])
+        } else {
+          return (attributes, nil)
+        }
+      } else {
+        attributes.color = .secondaryLabel
+        return (attributes, Array(hint.utf16))
+      }
+    } else {
+      if let answerNode = AnchoredNode(node: node, startIndex: offset).first(where: { $0.type == .clozeAnswer }) {
+        return (attributes, buffer[answerNode.range])
+      } else {
+        assertionFailure()
+        return (attributes, [])
+      }
+    }
+  }
+}
+
+final class HighlightingClozeFormatter: ParsedAttributedStringFormatter {
+  let index: Int
+  var formatClozeCount = 0
+
+  init(index: Int) { self.index = index }
+
+  func formatNode(
+    _ node: SyntaxTreeNode,
+    in buffer: SafeUnicodeBuffer,
+    at offset: Int,
+    currentAttributes: AttributedStringAttributesDescriptor
+  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
+    let shouldHighlight = formatClozeCount == index
+    formatClozeCount += 1
+    if shouldHighlight {
+      var attributes = currentAttributes
+      attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
+      return (attributes, nil)
+    } else {
+      return (currentAttributes, nil)
+    }
+  }
+}
+
 extension ParsedAttributedString.Settings {
   func hidingCloze(at index: Int) -> Self {
     var settings = self
-    var replaceClozeCount = 0
-    settings.fullFormatFunctions[.cloze] = { node, startIndex, buffer, attributes in
-      let shouldHide = replaceClozeCount == index
-      replaceClozeCount += 1
-      if shouldHide {
-        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
-        let hintNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeHint })
-        let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
-        let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
-        if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
-          // There is no hint. We're going to show a blank.
-          // The only question is: How big is the blank? Try to make it the size of the answer.
-          attributes.color = .clear
-          if let answerNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeAnswer }) {
-            return buffer[answerNode.range]
-          } else {
-            return nil
-          }
-        } else {
-          attributes.color = .secondaryLabel
-          return Array(hint.utf16)
-        }
-      } else {
-        if let answerNode = AnchoredNode(node: node, startIndex: startIndex).first(where: { $0.type == .clozeAnswer }) {
-          return buffer[answerNode.range]
-        } else {
-          assertionFailure()
-          return []
-        }
-      }
-    }
-
-    var formatClozeCount = 0
-    settings.quickFormatFunctions[.cloze] = { _, attributes in
-      let shouldHighlight = formatClozeCount == index
-      formatClozeCount += 1
-      if shouldHighlight {
-        attributes.color = .secondaryLabel
-        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
-      }
-    }
+    settings.formatters[.cloze] = AnyParsedAttributedStringFormatter(HidingClozeFormatter(index: index))
     return settings
   }
 
   func highlightingCloze(at index: Int) -> Self {
     var settings = self
-    var formatClozeCount = 0
-    settings.quickFormatFunctions[.cloze] = { _, attributes in
-      let shouldHighlight = formatClozeCount == index
-      formatClozeCount += 1
-      if shouldHighlight {
-        attributes.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3)
-      }
-    }
+    settings.formatters[.cloze] = AnyParsedAttributedStringFormatter(HighlightingClozeFormatter(index: index))
     return settings
   }
 }

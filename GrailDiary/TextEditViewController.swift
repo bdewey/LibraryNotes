@@ -47,16 +47,12 @@ public final class TextEditViewController: UIViewController {
 
   public lazy var parsedAttributedString: ParsedAttributedString = {
     let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
-    let storage = ParsedAttributedString(
-      grammar: MiniMarkdownGrammar.shared,
+    let settings = ParsedAttributedString.Settings(
+      grammar: GrailDiaryGrammar.shared,
       defaultAttributes: defaultAttributes,
-      quickFormatFunctions: formatters,
-      fullFormatFunctions: [
-        .softTab: { _, _, _, _ in Array("\t".utf16) },
-        .unorderedListOpening: { _, _, _, _ in Array("\u{2022}".utf16) },
-        .image: imageStorage.imageReplacement,
-      ]
-    )
+      formatters: formatters
+    ).renderingImages(from: imageStorage)
+    let storage = ParsedAttributedString(string: "", settings: settings)
     return storage
   }()
 
@@ -72,52 +68,34 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  private lazy var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = {
-    var formatters: [SyntaxTreeNodeType: QuickFormatFunction] = [:]
-    formatters[.header] = {
-      let headingLevel = $0.children.first!.length
-      switch headingLevel {
-      case 1:
-        $1.textStyle = .title2
-      case 2:
-        $1.textStyle = .title3
-      default:
-        $1.textStyle = .title3
-      }
-      $1.listLevel = 1
-    }
-    formatters[.list] = { $1.listLevel += 1 }
-    formatters[.delimiter] = { _, attributes in
-      attributes.color = .quaternaryLabel
-    }
-    formatters[.questionAndAnswer] = { $1.listLevel = 1 }
-    formatters[.qnaDelimiter] = { $1.bold = true }
-    formatters[.strongEmphasis] = { $1.bold = true }
-    formatters[.emphasis] = { $1.italic.toggle() }
-
-    formatters[.code] = { $1.familyName = "Menlo" }
-    formatters[.cloze] = { $1.backgroundColor = UIColor.systemYellow.withAlphaComponent(0.3) }
-    formatters[.clozeHint] = {
-      $1.color = UIColor.secondaryLabel
-    }
-    formatters[.hashtag] = { $1.backgroundColor = UIColor.grailSecondaryBackground }
-
-    formatters[.summaryDelimiter] = { $1.bold = true }
-    formatters[.summary] = {
-      $1.blockquoteBorderColor = UIColor.systemOrange
-      $1.italic = true
-    }
-
-    formatters[.blockquote] = {
-      $1.italic = true
-      $1.blockquoteBorderColor = UIColor.systemOrange
-      $1.listLevel += 1
-    }
-    formatters[.emoji] = {
-      $1.familyName = "Apple Color Emoji"
-    }
-    return formatters
-  }()
+  private let formatters: [SyntaxTreeNodeType: AnyParsedAttributedStringFormatter] = [
+    .header: AnyParsedAttributedStringFormatter(HeaderFormatter()),
+    .list: .incrementListLevel,
+    .delimiter: .color(.quaternaryLabel),
+    .questionAndAnswer: .incrementListLevel,
+    .qnaDelimiter: .toggleBold,
+    .strongEmphasis: .toggleBold,
+    .emphasis: .toggleItalic,
+    .code: .fontDesign(.monospaced),
+    .cloze: .backgroundColor(.systemYellow.withAlphaComponent(0.3)),
+    .clozeHint: .color(.secondaryLabel),
+    .hashtag: .backgroundColor(.grailSecondaryBackground),
+    .summaryDelimiter: .toggleBold,
+    .summary: AnyParsedAttributedStringFormatter {
+      $0.blockquoteBorderColor = UIColor.systemOrange
+      $0.italic = true
+    },
+    .blockquote: AnyParsedAttributedStringFormatter {
+      $0.italic = true
+      $0.blockquoteBorderColor = UIColor.systemOrange
+      $0.listLevel += 1
+    },
+    .emoji: AnyParsedAttributedStringFormatter {
+      $0.familyName = "Apple Color Emoji"
+    },
+    .softTab: .substitute("\t"),
+    .unorderedListOpening: .substitute("\u{2022}"),
+  ]
 
   public private(set) lazy var textView: MarkupFormattingTextView = {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
@@ -685,5 +663,30 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+private struct HeaderFormatter: ParsedAttributedStringFormatter {
+  func formatNode(
+    _ node: SyntaxTreeNode,
+    in buffer: SafeUnicodeBuffer,
+    at offset: Int,
+    currentAttributes: AttributedStringAttributesDescriptor
+  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
+    guard let headingLevel = node.children.first?.length else {
+      assertionFailure()
+      return (currentAttributes, nil)
+    }
+    var attributes = currentAttributes
+    switch headingLevel {
+    case 1:
+      attributes.textStyle = .title2
+    case 2:
+      attributes.textStyle = .title3
+    default:
+      attributes.textStyle = .title3
+    }
+    attributes.listLevel = 1
+    return (attributes, nil)
   }
 }

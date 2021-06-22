@@ -85,8 +85,7 @@ final class ClozeTests: XCTestCase {
       string: "",
       grammar: GrailDiaryGrammar.shared,
       defaultAttributes: AttributedStringAttributesDescriptor(),
-      quickFormatFunctions: [.cloze: { $1.bold = true }],
-      fullFormatFunctions: [:]
+      formatters: [.cloze: .toggleBold]
     )
     let textView = MarkupFormattingTextView(parsedAttributedString: string)
     textView.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
