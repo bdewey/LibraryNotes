@@ -34,16 +34,16 @@ extension ClozePrompt: Prompt {
   ) -> PromptView {
     let cardView = TwoSidedCardView(frame: .zero)
     cardView.context = context()
-    let baseSettings = ParsedAttributedString.Settings.plainText(textStyle: .body)
+    let baseSettings = ParsedAttributedString.Style.plainText(textStyle: .body)
       .renderingImages(from: BoundNote(identifier: properties.documentName, database: database))
     let (front, chapterAndVerse) = ParsedAttributedString(
       string: markdown,
-      settings: baseSettings.hidingCloze(at: clozeIndex)
+      style: baseSettings.hidingCloze(at: clozeIndex)
     ).decomposedChapterAndVerseAnnotation
     cardView.front = front.trimmingTrailingWhitespace()
     let back = NSMutableAttributedString()
     back.append(
-      ParsedAttributedString(string: markdown, settings: baseSettings.highlightingCloze(at: clozeIndex))
+      ParsedAttributedString(string: markdown, style: baseSettings.highlightingCloze(at: clozeIndex))
         .removingChapterAndVerseAnnotation()
         .trimmingTrailingWhitespace()
     )
@@ -51,7 +51,7 @@ extension ClozePrompt: Prompt {
       back.append(NSAttributedString(string: "\n\n"))
       let attribution = ParsedAttributedString(
         string: "—" + properties.attributionMarkdown + " " + chapterAndVerse,
-        settings: .plainText(textStyle: .caption1)
+        style: .plainText(textStyle: .caption1)
       )
       back.append(attribution.trimmingTrailingWhitespace())
     }
@@ -139,7 +139,7 @@ final class HighlightingClozeFormatter: ParsedAttributedStringFormatter {
   }
 }
 
-extension ParsedAttributedString.Settings {
+extension ParsedAttributedString.Style {
   func hidingCloze(at index: Int) -> Self {
     var settings = self
     settings.formatters[.cloze] = AnyParsedAttributedStringFormatter(HidingClozeFormatter(index: index))

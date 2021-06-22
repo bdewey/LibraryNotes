@@ -60,7 +60,7 @@ public final class DocumentTableController: NSObject {
     let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item else { return }
       var configuration = cell.defaultContentConfiguration()
-      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, settings: .plainText(textStyle: .headline))
+      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, style: .plainText(textStyle: .headline))
       configuration.attributedText = title
       let secondaryComponents: [String?] = [
         viewProperties.noteProperties.summary,

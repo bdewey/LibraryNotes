@@ -3,14 +3,14 @@
 import TextMarkupKit
 import UIKit
 
-public extension ParsedAttributedString.Settings {
+public extension ParsedAttributedString.Style {
   static func plainText(
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
     imageStorage: ImageStorage? = nil,
     kern: CGFloat = 0,
     fontDesign: UIFontDescriptor.SystemDesign = .default
-  ) -> ParsedAttributedString.Settings {
+  ) -> ParsedAttributedString.Style {
     var formatters: [SyntaxTreeNodeType: AnyParsedAttributedStringFormatter] = [
       .emphasis: .toggleItalic,
       .strongEmphasis: .toggleBold,
@@ -25,7 +25,7 @@ public extension ParsedAttributedString.Settings {
     defaultAttributes.lineHeightMultiple = 1.2
     defaultAttributes.kern = kern
     defaultAttributes.fontDesign = fontDesign
-    return ParsedAttributedString.Settings(
+    return ParsedAttributedString.Style(
       grammar: GrailDiaryGrammar(),
       defaultAttributes: defaultAttributes,
       formatters: formatters

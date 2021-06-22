@@ -42,10 +42,10 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
 extension QuestionAndAnswerPrompt: Prompt {
   public func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
     let view = TwoSidedCardView(frame: .zero)
-    view.context = ParsedAttributedString(string: properties.attributionMarkdown, settings: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, kern: 2.0))
+    view.context = ParsedAttributedString(string: properties.attributionMarkdown, style: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, kern: 2.0))
     let formattedString = ParsedAttributedString(
       string: markdown,
-      settings: .plainText(textStyle: .body, imageStorage: BoundNote(identifier: properties.documentName, database: database))
+      style: .plainText(textStyle: .body, imageStorage: BoundNote(identifier: properties.documentName, database: database))
     )
     if let node = try? formattedString.rawString.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)

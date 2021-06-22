@@ -67,7 +67,7 @@ extension BoundNote: ImageStorage {
   }
 }
 
-public extension ParsedAttributedString.Settings {
+public extension ParsedAttributedString.Style {
   func renderingImages(from imageStorage: ImageStorage) -> Self {
     var copy = self
     copy.formatters[.image] = AnyParsedAttributedStringFormatter(ImageReplacementFormatter(imageStorage))

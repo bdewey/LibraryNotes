@@ -47,12 +47,12 @@ public final class TextEditViewController: UIViewController {
 
   public lazy var parsedAttributedString: ParsedAttributedString = {
     let defaultAttributes = AttributedStringAttributesDescriptor(textStyle: .body, color: .label, headIndent: 28, firstLineHeadIndent: 28)
-    let settings = ParsedAttributedString.Settings(
+    let settings = ParsedAttributedString.Style(
       grammar: GrailDiaryGrammar.shared,
       defaultAttributes: defaultAttributes,
       formatters: formatters
     ).renderingImages(from: imageStorage)
-    let storage = ParsedAttributedString(string: "", settings: settings)
+    let storage = ParsedAttributedString(string: "", style: settings)
     return storage
   }()
 

@@ -76,7 +76,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   internal func setTitleMarkdown(_ markdown: String) {
     guard chromeStyle == .splitViewController else { return }
-    navigationItem.title = ParsedAttributedString(string: markdown, settings: .plainText(textStyle: .body)).string
+    navigationItem.title = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .body)).string
   }
 
   override var isEditing: Bool {

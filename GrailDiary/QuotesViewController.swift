@@ -203,7 +203,7 @@ extension QuotesViewController: UICollectionViewDelegate {
     // TODO: copypasta
     let (formattedQuote, _) = ParsedAttributedString(
       string: String(quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
-      settings: .plainText(textStyle: .body, fontDesign: .serif)
+      style: .plainText(textStyle: .body, fontDesign: .serif)
     ).decomposedChapterAndVerseAnnotation
 
     let activityViewController = UIActivityViewController(activityItems: [image, formattedQuote.string], applicationActivities: nil)
@@ -300,7 +300,7 @@ private final class QuoteView: UIView, UIContentView {
     }
     let (formattedQuote, attributionFragment) = ParsedAttributedString(
       string: String(quoteContentConfiguration.quote.text.withTypographySubstitutions.strippingLeadingAndTrailingWhitespace),
-      settings: .plainText(textStyle: .body, fontDesign: .serif)
+      style: .plainText(textStyle: .body, fontDesign: .serif)
     ).decomposedChapterAndVerseAnnotation
     quoteLabel.attributedText = formattedQuote
 
@@ -323,13 +323,13 @@ private final class QuoteView: UIView, UIContentView {
       .dropLast()
     if trimmedFragment.split(separator: " ").count > 1 {
       // It looks like the attribution fragment is more than one word. Use that exclusively as the attribution.
-      attributionLabel.attributedText = ParsedAttributedString(string: String(trimmedFragment), settings: .plainText(textStyle: .caption1))
+      attributionLabel.attributedText = ParsedAttributedString(string: String(trimmedFragment), style: .plainText(textStyle: .caption1))
     } else {
       let attributionMarkdown = [
         String(quoteContentConfiguration.quote.note.title.strippingLeadingAndTrailingWhitespace),
         String(trimmedFragment),
       ].filter { !$0.isEmpty }.joined(separator: ", ")
-      attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, settings: .plainText(textStyle: .caption1))
+      attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, style: .plainText(textStyle: .caption1))
     }
 
     if let imageData = quoteContentConfiguration.quote.thumbnailImage.first, let image = imageData.blob.image(maxSize: 320) {
