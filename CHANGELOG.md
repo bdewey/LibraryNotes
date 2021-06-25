@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
+- Improper use of cell registration (Thanks, Xcode 13!)
+
+## [0.49.0] - 2021-06-25
+
 ### Changed
 
 - Use https://github.com/bdewey/TextMarkupKit for core parsing
