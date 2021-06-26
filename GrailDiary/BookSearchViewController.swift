@@ -1,8 +1,17 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Combine
 import Logging
 import UIKit
+
+private extension Logger {
+  static let bookSearch: Logger = {
+    var bookSearch = Logger(label: "org.brians-brain.BookSearch")
+    bookSearch.logLevel = .debug
+    return bookSearch
+  }()
+}
 
 private struct ViewModel: Hashable, Identifiable {
   var id = UUID()
@@ -10,7 +19,7 @@ private struct ViewModel: Hashable, Identifiable {
   var coverImage: UIImage?
   var coverImageURL: URL?
 
-  init?(_ item: BookSearchViewController.GoogleBooksItem) {
+  init?(_ item: GoogleBooks.Item) {
     guard let book = Book(item) else { return nil }
     self.book = book
     self.coverImage = nil
@@ -50,7 +59,6 @@ public final class BookSearchViewController: UIViewController {
 
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
-    searchController.searchResultsUpdater = self
     searchController.searchBar.delegate = self
     searchController.showsSearchResultsController = true
     searchController.searchBar.searchTextField.clearButtonMode = .whileEditing
@@ -91,8 +99,6 @@ public final class BookSearchViewController: UIViewController {
     }
   }()
 
-  private let currentSearchTerm = CurrentValueSubject<String, Never>("")
-  private var currentSearch: AnyCancellable?
   private let imageCache = ImageCache()
   private var viewModels = [ViewModel]()
   private lazy var decoder: JSONDecoder = {
@@ -100,6 +106,8 @@ public final class BookSearchViewController: UIViewController {
     decoder.dateDecodingStrategy = .iso8601
     return decoder
   }()
+
+  private let activityView = UIActivityIndicatorView(style: .large)
 
   private func updateViewModels(_ viewModels: [ViewModel]) {
     assert(Thread.isMainThread)
@@ -135,12 +143,18 @@ public final class BookSearchViewController: UIViewController {
     dataSource.apply(snapshot, animatingDifferences: true)
   }
 
-  override public func loadView() {
-    view = collectionView
-  }
-
   override public func viewDidLoad() {
     super.viewDidLoad()
+    [
+      collectionView,
+      activityView,
+    ].forEach(view.addSubview)
+    collectionView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
+    activityView.snp.makeConstraints { make in
+      make.center.equalToSuperview()
+    }
     view.tintColor = .grailTint
     view.backgroundColor = .grailBackground
     let cancelButton = UIBarButtonItem(systemItem: .cancel)
@@ -150,43 +164,6 @@ public final class BookSearchViewController: UIViewController {
     }
     navigationItem.leftBarButtonItem = cancelButton
     navigationItem.searchController = searchController
-
-    currentSearch = currentSearchTerm
-      .filter { !$0.isEmpty }
-      .debounce(for: 0.5, scheduler: RunLoop.main)
-      .map { [apiKey] queryValue -> URL in
-        var urlComponents = URLComponents(string: "https://www.googleapis.com/books/v1/volumes")!
-        urlComponents.queryItems = [
-          URLQueryItem(name: "q", value: queryValue),
-          URLQueryItem(name: "key", value: apiKey),
-        ]
-        return urlComponents.url!
-      }
-      .flatMap { url -> URLSession.DataTaskPublisher in
-        Logger.shared.debug("Querying: \(url)")
-        return URLSession.shared.dataTaskPublisher(for: url)
-      }
-      .tryMap { data, response in
-        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-          Logger.shared.error("Unexpected response")
-          throw Error.invalidServerResponse
-        }
-        Logger.shared.debug("Got valid data")
-        return data
-      }
-      .decode(type: GoogleBooksResponse.self, decoder: decoder)
-      .sink { completion in
-        switch completion {
-        case .failure(let error):
-          Logger.shared.error("Unexpected error searching for term': \(error)")
-        case .finished:
-          Logger.shared.info("Search for finished")
-        }
-      } receiveValue: { [weak self] data in
-        DispatchQueue.main.async {
-          self?.updateViewModels(data.items.compactMap { ViewModel($0) })
-        }
-      }
   }
 
   override public func viewDidAppear(_ animated: Bool) {
@@ -203,81 +180,22 @@ extension BookSearchViewController: UICollectionViewDelegate {
 
 // MARK: - Private
 
-private extension BookSearchViewController {
-  struct GoogleBooksResponse: Codable {
-    var totalItems: Int
-    var items: [GoogleBooksItem]
-  }
-
-  struct GoogleBooksItem: Codable {
-    var id: String
-    var volumeInfo: VolumeInfo
-  }
-
-  enum IndustryIdentifierType: String, Codable {
-    case isbn10 = "ISBN_10"
-    case isbn13 = "ISBN_13"
-    case issn = "ISSN"
-    case other = "OTHER"
-  }
-
-  struct IndustryIdentifier: Codable {
-    var type: IndustryIdentifierType
-    var identifier: String
-  }
-
-  struct VolumeInfo: Codable {
-    var title: String?
-    var subtitle: String?
-    var authors: [String]?
-    var publishedDate: String?
-    var imageLinks: ImageLink?
-    var industryIdentifiers: [IndustryIdentifier]?
-    var pageCount: Int?
-    var publisher: String?
-  }
-
-  struct ImageLink: Codable {
-    var smallThumbnail: String?
-    var thumbnail: String?
-  }
-}
-
-private extension Book {
-  /// Construct a Book model from a Google Books search result.
-  init?(_ item: BookSearchViewController.GoogleBooksItem) {
-    guard let title = item.volumeInfo.title else {
-      Logger.shared.info("Item without title: \(item)")
-      return nil
-    }
-    self.title = title
-    self.authors = item.volumeInfo.authors ?? []
-    self.numberOfPages = item.volumeInfo.pageCount
-    self.publisher = item.volumeInfo.publisher
-    if let datePrefix = item.volumeInfo.publishedDate?.prefix(4) {
-      self.yearPublished = Int(datePrefix)
-    }
-    for identifier in item.volumeInfo.industryIdentifiers ?? [] {
-      switch identifier.type {
-      case .isbn10:
-        self.isbn = identifier.identifier
-      case .isbn13:
-        self.isbn13 = identifier.identifier
-      case .issn, .other:
-        // ignore
-        break
+extension BookSearchViewController: UISearchBarDelegate {
+  public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+    guard let searchTerm = searchBar.text, let apiKey = ApiKey.googleBooks else { return }
+    activityView.startAnimating()
+    _ = GoogleBooks.search(for: searchTerm, apiKey: apiKey) { [activityView, weak self] response in
+      activityView.stopAnimating()
+      switch response {
+      case .failure(let error):
+        Logger.bookSearch.error("Unexpected error querying for \(searchTerm): \(error)")
+      case .success(let response):
+        let viewModels = response.items.compactMap { ViewModel($0) }
+        self?.updateViewModels(viewModels)
       }
     }
   }
 }
-
-extension BookSearchViewController: UISearchResultsUpdating {
-  public func updateSearchResults(for searchController: UISearchController) {
-    currentSearchTerm.send(searchController.searchBar.text ?? "")
-  }
-}
-
-extension BookSearchViewController: UISearchBarDelegate {}
 
 private extension Array where Element: Hashable {
   func removingDuplicates() -> Self {

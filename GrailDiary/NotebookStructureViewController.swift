@@ -172,7 +172,6 @@ final class NotebookStructureViewController: UIViewController {
     footerView.contentConfiguration = footerConfiguration
   }
 
-
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
     let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
       var contentConfiguration = cell.defaultContentConfiguration()

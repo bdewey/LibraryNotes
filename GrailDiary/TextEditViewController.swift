@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Logging
 import MobileCoreServices
 import ObjectiveCTextStorageWrapper
@@ -623,7 +624,7 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
       }
     }
     delegate?.textEditViewController(self, didAttach: book)
-    scrollawayHeaderView = BookHeader(book: book, coverImage: coverImage)
+    scrollawayHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 

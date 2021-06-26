@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "BookKit",
+        "repositoryURL": "https://github.com/bdewey/BookKit",
+        "state": {
+          "branch": null,
+          "revision": "bc5f1336f2125fc6a977522f475811528218e6f5",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "CodableCSV",
         "repositoryURL": "https://github.com/dehesa/CodableCSV",
         "state": {
@@ -20,7 +29,7 @@
         }
       },
       {
-        "package": "GRDB",
+        "package": "GRDB.swift",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": null,

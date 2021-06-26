@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Combine
 import Foundation
 import Logging
@@ -15,8 +16,7 @@ final class BookImporter {
   let apiKey: String?
 
   struct BookAndImage {
-    var book: Book
-    var creationDate: Date
+    var book: AugmentedBook
     var image: TypedData?
   }
 
@@ -26,7 +26,7 @@ final class BookImporter {
   private var currentRequests = Set<AnyCancellable>()
 
   func importBooks(
-    books: [(book: Book, creationDate: Date)],
+    books: [AugmentedBook],
     hashtags: String,
     dryRun: Bool,
     downloadImages: Bool,
@@ -53,7 +53,7 @@ final class BookImporter {
           self.currentRequests.insert(request)
         } else {
           DispatchQueue.main.async {
-            self.booksAndImages.append(BookAndImage(book: bookInfo.book, creationDate: bookInfo.creationDate, image: nil))
+            self.booksAndImages.append(BookAndImage(book: bookInfo, image: nil))
             progressCallback(self.booksAndImages.count, books.count)
           }
         }
@@ -72,9 +72,10 @@ final class BookImporter {
         for bookAndImage in booksAndImages {
           let identifier = UUID().uuidString
           var note = Note(bookAndImage, hashtags: hashtags)
-          note.creationTimestamp = bookAndImage.creationDate
-          note.timestamp = bookAndImage.creationDate
-          note.reference = .book(bookAndImage.book)
+          let noteTimestamp = bookAndImage.book.dateAdded ?? Date()
+          note.creationTimestamp = noteTimestamp
+          note.timestamp = noteTimestamp
+          note.reference = .book(bookAndImage.book.book)
           try note.save(identifier: identifier, updateKey: updateIdentifier, to: db)
           if let typedData = bookAndImage.image {
             let binaryRecord = BinaryContentRecord(
@@ -100,12 +101,12 @@ final class BookImporter {
     case cannotDecodeImage
   }
 
-  private func openLibraryCoverPublisher(for bookInfo: (Book, Date), isbn: String) -> AnyPublisher<BookAndImage, Never> {
+  private func openLibraryCoverPublisher(for bookInfo: AugmentedBook, isbn: String) -> AnyPublisher<BookAndImage, Never> {
     return OpenLibrary.coverImagePublisher(isbn: isbn)
-      .map { BookAndImage(book: bookInfo.0, creationDate: bookInfo.1, image: $0) }
+      .map { BookAndImage(book: bookInfo, image: $0) }
       .catch { error -> Just<BookImporter.BookAndImage> in
         Logger.shared.error("Error getting image for book \(isbn): \(error)")
-        return Just(BookAndImage(book: bookInfo.0, creationDate: bookInfo.1, image: nil))
+        return Just(BookAndImage(book: bookInfo, image: nil))
       }
       .eraseToAnyPublisher()
   }

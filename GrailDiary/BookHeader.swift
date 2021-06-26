@@ -1,10 +1,11 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import UIKit
 
 /// Displays information about a book, intended to be used as a scrollaway header when looking at book notes.
 final class BookHeader: UIView {
-  init(book: Book, coverImage: UIImage? = nil) {
+  init(book: AugmentedBook, coverImage: UIImage? = nil) {
     if let coverImage = coverImage {
       let imageView = UIImageView(image: coverImage)
       coverImageView = imageView
