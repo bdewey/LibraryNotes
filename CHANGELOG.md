@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
+- Book-related utility code has been moved to a stand-alone library, [BookKit](https://github.com/bdewey/BookKit).
+
 ### Fixed
 
 - Improper use of cell registration (Thanks, Xcode 13!)
