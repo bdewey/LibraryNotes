@@ -5,9 +5,9 @@
         "package": "BookKit",
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
-          "branch": null,
-          "revision": "bc5f1336f2125fc6a977522f475811528218e6f5",
-          "version": "0.1.0"
+          "branch": "xcode13",
+          "revision": "11728e8d8fde65402a8c462b10f2e3bfe2fb074c",
+          "version": null
         }
       },
       {
@@ -59,18 +59,9 @@
         "package": "SpacedRepetitionScheduler",
         "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
         "state": {
-          "branch": null,
-          "revision": "66f41014d05ec4bb9760aa3804651b3bbefd403f",
-          "version": "0.2.0"
-        }
-      },
-      {
-        "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log",
-        "state": {
-          "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
+          "branch": "xcode13",
+          "revision": "e79c015fc160c2725eae95eae4b26fa59e57f5f0",
+          "version": null
         }
       },
       {
@@ -86,9 +77,9 @@
         "package": "TextMarkupKit",
         "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
         "state": {
-          "branch": null,
-          "revision": "43488436ba5105e2d2465dab856b4b0ea3c06b1d",
-          "version": "0.7.0"
+          "branch": "xcode13",
+          "revision": "1afd83c670591ee156b21e08a35e682aa68eea43",
+          "version": null
         }
       }
     ]

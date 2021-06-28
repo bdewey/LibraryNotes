@@ -1057,7 +1057,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
@@ -1083,7 +1083,7 @@
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -1231,7 +1231,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
@@ -1258,7 +1258,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 73;
+				CURRENT_PROJECT_VERSION = 74;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
@@ -1440,16 +1440,16 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/BookKit";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
+				branch = xcode13;
+				kind = branch;
 			};
 		};
 		D37B0DB723CD476C00F01D29 /* XCRemoteSwiftPackageReference "SpacedRepetitionScheduler" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/SpacedRepetitionScheduler.git";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.0;
+				branch = xcode13;
+				kind = branch;
 			};
 		};
 		D3AD01CF23BEB137004BB7DF /* XCRemoteSwiftPackageReference "GRDBCombine" */ = {
@@ -1480,8 +1480,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/TextMarkupKit";
 			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.4.0;
+				branch = xcode13;
+				kind = branch;
 			};
 		};
 		D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */ = {
