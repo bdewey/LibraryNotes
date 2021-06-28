@@ -303,7 +303,6 @@
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
 		D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
-		D38ECF9C268901C700842A8A /* SpacedRepetitionScheduler */ = {isa = PBXFileReference; lastKnownFileType = folder; name = SpacedRepetitionScheduler; path = ../Documents/GitHub/SpacedRepetitionScheduler; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* DeviceRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRecord.swift; sourceTree = "<group>"; };
 		D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryRecord.swift; sourceTree = "<group>"; };
@@ -478,7 +477,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D38ECF9C268901C700842A8A /* SpacedRepetitionScheduler */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
@@ -1451,7 +1449,7 @@
 			repositoryURL = "https://github.com/bdewey/SpacedRepetitionScheduler.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
+				minimumVersion = 0.2.0;
 			};
 		};
 		D3AD01CF23BEB137004BB7DF /* XCRemoteSwiftPackageReference "GRDBCombine" */ = {

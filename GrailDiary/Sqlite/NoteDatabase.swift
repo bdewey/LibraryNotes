@@ -884,7 +884,7 @@ private extension PromptRecord {
       let interval = due.timeIntervalSince(lastReview)
       assert(interval > 0)
       return PromptSchedulingMetadata(
-        learningState: .review,
+        mode: .review,
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? .day,
@@ -894,7 +894,7 @@ private extension PromptRecord {
       // Create an item that's *just about to graduate* if we've never seen it before.
       // That's because we make new items due "last learning interval" after creation
       return PromptSchedulingMetadata(
-        learningState: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
+        mode: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,
