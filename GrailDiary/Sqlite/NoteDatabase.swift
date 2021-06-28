@@ -52,8 +52,8 @@ public final class NoteDatabase: UIDocument {
   private var deviceRecord: DeviceRecord!
 
   /// Our scheduler.
-  public static let scheduler: SpacedRepetitionScheduler = {
-    SpacedRepetitionScheduler(
+  public static let scheduler: SchedulingParameters = {
+    SchedulingParameters(
       learningIntervals: [.day, 4 * .day],
       goodGraduatingInterval: 7 * .day
     )
@@ -880,31 +880,31 @@ internal extension NoteDatabase {
 }
 
 private extension PromptRecord {
-  var item: SpacedRepetitionScheduler.PromptSchedulingMetadata {
+  var item: PromptSchedulingMetadata {
     if let due = due, let lastReview = lastReview {
       let interval = due.timeIntervalSince(lastReview)
       assert(interval > 0)
-      return SpacedRepetitionScheduler.PromptSchedulingMetadata(
+      return PromptSchedulingMetadata(
         learningState: .review,
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? .day,
-        factor: spacedRepetitionFactor
+        reviewSpacingFactor: spacedRepetitionFactor
       )
     } else {
       // Create an item that's *just about to graduate* if we've never seen it before.
       // That's because we make new items due "last learning interval" after creation
-      return SpacedRepetitionScheduler.PromptSchedulingMetadata(
+      return PromptSchedulingMetadata(
         learningState: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,
-        factor: spacedRepetitionFactor
+        reviewSpacingFactor: spacedRepetitionFactor
       )
     }
   }
 
-  mutating func applyItem(_ item: SpacedRepetitionScheduler.PromptSchedulingMetadata, on date: Date, updateKey: UpdateIdentifier) {
+  mutating func applyItem(_ item: PromptSchedulingMetadata, on date: Date, updateKey: UpdateIdentifier) {
     reviewCount = item.reviewCount
     lapseCount = item.lapseCount
     spacedRepetitionFactor = item.reviewSpacingFactor
