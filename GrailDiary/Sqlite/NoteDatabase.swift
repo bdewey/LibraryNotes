@@ -493,8 +493,7 @@ public final class NoteDatabase: UIDocument {
     } else {
       delay = 0
     }
-    let schedulingOptions = Self.scheduler.nextPromptSchedulingMetadataOptions(after: prompt.item, timeIntervalSincePastReview: delay)
-    let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
+    let outcome = try prompt.item.updating(with: Self.scheduler, recallEase: entry.cardAnswer, timeIntervalSincePriorReview: delay)
 
     prompt.applyItem(outcome, on: entry.timestamp, updateKey: updateKey)
     prompt.totalCorrect += entry.correct
