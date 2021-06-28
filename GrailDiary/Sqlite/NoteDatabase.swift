@@ -493,7 +493,7 @@ public final class NoteDatabase: UIDocument {
     } else {
       delay = 0
     }
-    let schedulingOptions = Self.scheduler.scheduleItem(prompt.item, afterDelay: delay)
+    let schedulingOptions = Self.scheduler.nextPromptSchedulingMetadataOptions(after: prompt.item, timeIntervalSincePastReview: delay)
     let outcome = schedulingOptions[entry.cardAnswer] ?? schedulingOptions[.again]!
 
     prompt.applyItem(outcome, on: entry.timestamp, updateKey: updateKey)
@@ -880,11 +880,11 @@ internal extension NoteDatabase {
 }
 
 private extension PromptRecord {
-  var item: SpacedRepetitionScheduler.Item {
+  var item: SpacedRepetitionScheduler.PromptSchedulingMetadata {
     if let due = due, let lastReview = lastReview {
       let interval = due.timeIntervalSince(lastReview)
       assert(interval > 0)
-      return SpacedRepetitionScheduler.Item(
+      return SpacedRepetitionScheduler.PromptSchedulingMetadata(
         learningState: .review,
         reviewCount: reviewCount,
         lapseCount: lapseCount,
@@ -894,7 +894,7 @@ private extension PromptRecord {
     } else {
       // Create an item that's *just about to graduate* if we've never seen it before.
       // That's because we make new items due "last learning interval" after creation
-      return SpacedRepetitionScheduler.Item(
+      return SpacedRepetitionScheduler.PromptSchedulingMetadata(
         learningState: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
@@ -904,10 +904,10 @@ private extension PromptRecord {
     }
   }
 
-  mutating func applyItem(_ item: SpacedRepetitionScheduler.Item, on date: Date, updateKey: UpdateIdentifier) {
+  mutating func applyItem(_ item: SpacedRepetitionScheduler.PromptSchedulingMetadata, on date: Date, updateKey: UpdateIdentifier) {
     reviewCount = item.reviewCount
     lapseCount = item.lapseCount
-    spacedRepetitionFactor = item.factor
+    spacedRepetitionFactor = item.reviewSpacingFactor
     lastReview = date
     idealInterval = item.interval
     due = date.addingTimeInterval(item.interval.fuzzed())
@@ -918,7 +918,7 @@ private extension PromptRecord {
 }
 
 private extension StudyLogEntryRecord {
-  var cardAnswer: CardAnswer {
+  var cardAnswer: RecallEase {
     if correct > 0, incorrect == 0 {
       return .good
     }
