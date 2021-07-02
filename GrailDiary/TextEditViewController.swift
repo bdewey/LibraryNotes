@@ -91,11 +91,42 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  /// An optional view that will appear at the top of the textView and scroll away as the content scrolls.
-  var scrollawayHeaderView: UIView? {
-    get { scrollawayContainerView.scrollawayHeaderView }
-    set { scrollawayContainerView.scrollawayHeaderView = newValue }
+  /// An optional view that will appear at the top of the textView and look like an extension of the navigation bar when scrolled to the top.
+  var extendedNavigationHeaderView: UIView? {
+    willSet {
+      extendedNavigationHeaderView?.removeFromSuperview()
+    }
+    didSet {
+      guard let extendedNavigationHeaderView = extendedNavigationHeaderView else {
+        return
+      }
+      textView.addSubview(extendedNavigationHeaderView)
+      let navigationBorderView = UIView(frame: .zero)
+      navigationBorderView.backgroundColor = .tertiaryLabel
+      textView.addSubview(navigationBorderView)
+      self.navigationBorderView = navigationBorderView
+    }
   }
+
+  /// The border between `extendedNavigationHeaderView` and the text content.
+  private var navigationBorderView: UIView?
+
+  /// Position `navigationBorderView` between the header & text. Note this depends on scroll position since it will pin to the top, so call
+  /// this on each scrollViewDidScroll.
+  private func layoutNavigationBorderView() {
+    guard let navigationBorderView = navigationBorderView else {
+      return
+    }
+    let yPosition = max(0, textView.contentOffset.y + textView.adjustedContentInset.top - textView.contentInset.top)
+    navigationBorderView.frame = CGRect(
+      origin: CGPoint(x: 0, y: yPosition),
+      size: CGSize(width: textView.frame.width, height: 1 / UIScreen.main.scale)
+    )
+  }
+
+  // TODO: This class should probably own the creation of this view, not just its alpha.
+  /// The navigationItem.titleView used for this view in a navigation stack. Exposed here so we can adjust its alpha on scroll.
+  var navigationTitleView: UIView?
 
   /// All of the related data for our typeahead accessory.
   private struct TypeaheadAccessory {
@@ -176,16 +207,13 @@ public final class TextEditViewController: UIViewController {
 
   // MARK: - Lifecycle
 
-  private lazy var scrollawayContainerView = ScrollawayContainerView(frame: .zero)
-
-  override public func loadView() {
-    view = scrollawayContainerView
-  }
-
   override public func viewDidLoad() {
     super.viewDidLoad()
-    scrollawayContainerView.scrollView = textView
     view.accessibilityIdentifier = "edit-document-view"
+    view.addSubview(textView)
+    textView.snp.makeConstraints { make in
+      make.edges.equalToSuperview()
+    }
     textView.delegate = self
 
     var inputBarItems = [UIBarButtonItem]()
@@ -291,25 +319,32 @@ public final class TextEditViewController: UIViewController {
 
   override public func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(animated)
-    textView.contentOffset = CGPoint(x: 0, y: -1 * textView.adjustedContentInset.top)
     if autoFirstResponder {
       textView.becomeFirstResponder()
       // We only do this behavior on first appearance.
       autoFirstResponder = false
     }
     adjustMargins()
-    scrollawayContainerView.showScrollawayHeader()
     let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
     UIMenuController.shared.menuItems = [highlightMenuItem]
+    navigationController?.navigationBar.standardAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
+    if extendedNavigationHeaderView != nil {
+      navigationController?.navigationBar.standardAppearance.shadowColor = nil
+    }
   }
 
   override public func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
     delegate?.textEditViewControllerDidClose(self)
+    layoutNavigationBorderView()
   }
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
+    if let extendedNavigationHeaderView = extendedNavigationHeaderView {
+      let height = extendedNavigationHeaderView.systemLayoutSizeFitting(CGSize(width: view.frame.width, height: .greatestFiniteMagnitude)).height
+      extendedNavigationHeaderView.frame = CGRect(origin: CGPoint(x: 0, y: -height), size: CGSize(width: view.frame.width, height: height))
+    }
     adjustMargins()
   }
 
@@ -318,17 +353,18 @@ public final class TextEditViewController: UIViewController {
   override public func viewDidLayoutSubviews() {
     super.viewDidLayoutSubviews()
     if !didPerformInitialLayout {
-      scrollawayContainerView.showScrollawayHeader()
       didPerformInitialLayout = true
+      textView.contentOffset.y = -textView.adjustedContentInset.top
     }
   }
 
   private func adjustMargins() {
     // I wish I could use autolayout to set the insets.
-    let scrollawayHeight: CGFloat = scrollawayContainerView.scrollawayHeaderView?.frame.height ?? 0
+    let extendedNavigationHeight: CGFloat = extendedNavigationHeaderView?.frame.height ?? 0
+    textView.contentInset.top = extendedNavigationHeight
     let readableContentGuide = view.readableContentGuide
     textView.textContainerInset = UIEdgeInsets(
-      top: scrollawayHeight + 8,
+      top: 8,
       left: readableContentGuide.layoutFrame.minX,
       bottom: 8,
       right: view.bounds.maxX - readableContentGuide.layoutFrame.maxX
@@ -572,7 +608,15 @@ extension TextEditViewController: UITextViewDelegate {
   }
 
   public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    scrollawayContainerView.scrollViewDidScroll()
+    let systemContentInset = scrollView.adjustedContentInset.top - scrollView.contentInset.top
+    let visibleOffsetY = scrollView.contentOffset.y + systemContentInset
+    if let headerHeight = extendedNavigationHeaderView?.frame.height, visibleOffsetY < 0 {
+      let alpha = 1 - (-visibleOffsetY / headerHeight)
+      navigationTitleView?.alpha = alpha
+    } else {
+      navigationTitleView?.alpha = 1
+    }
+    layoutNavigationBorderView()
   }
 }
 
@@ -624,7 +668,7 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
       }
     }
     delegate?.textEditViewController(self, didAttach: book)
-    scrollawayHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
+    extendedNavigationHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 

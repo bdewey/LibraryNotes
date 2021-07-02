@@ -4,7 +4,9 @@
 
 ### Changed
 
+- Changed the appearance of the book headers
 - Book-related utility code has been moved to a stand-alone library, [BookKit](https://github.com/bdewey/BookKit).
+- Updated to Version 0.2 of [SpacedRepetitionScheduler](https://github.com/bdewey/SpacedRepetitionScheduler).
 
 ### Fixed
 

@@ -77,7 +77,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   internal func setTitleMarkdown(_ markdown: String) {
     guard chromeStyle == .splitViewController else { return }
-    navigationItem.title = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .body)).string
+    let label = UILabel(frame: .zero)
+    label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
+    navigationItem.titleView = label
+    textEditViewController.navigationTitleView = label
   }
 
   override var isEditing: Bool {
@@ -90,7 +93,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   override func viewDidLoad() {
     super.viewDidLoad()
     if case .book(let book) = note.reference {
-      textEditViewController.scrollawayHeaderView = BookHeader(
+      textEditViewController.extendedNavigationHeaderView = BookHeader(
         book: AugmentedBook(book),
         coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
       )
