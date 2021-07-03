@@ -11,6 +11,7 @@
 ### Fixed
 
 - Improper use of cell registration (Thanks, Xcode 13!)
+- Broken formatting when I moved to TextMarkupKit
 
 ## [0.49.0] - 2021-06-25
 

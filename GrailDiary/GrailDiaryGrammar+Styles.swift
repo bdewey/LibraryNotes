@@ -17,7 +17,9 @@ extension GrailDiaryGrammar {
         $0.blockquoteBorderColor = UIColor.systemOrange
         $0.italic = true
       },
+      .hashtag: .backgroundColor(.grailSecondaryBackground),
     ]
+    baseStyle.grammar = GrailDiaryGrammar.shared
     baseStyle.formatters.merge(formatters, uniquingKeysWith: { _, newValue in newValue })
     return baseStyle
   }
