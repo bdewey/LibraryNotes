@@ -94,7 +94,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     super.viewDidLoad()
     if case .book(let book) = note.reference {
       textEditViewController.extendedNavigationHeaderView = BookHeader(
-        book: AugmentedBook(book),
+        book: book,
         coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
       )
     }
@@ -239,7 +239,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
     Logger.shared.info("Attaching book: \(book.title)")
-    note.reference = .book(book)
+    note.reference = .book(AugmentedBook(book))
     note.timestamp = Date()
     tryUpdateNote(note)
   }

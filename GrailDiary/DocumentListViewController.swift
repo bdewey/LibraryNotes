@@ -505,7 +505,7 @@ private extension String {
 }
 
 private extension Note {
-  var book: Book? {
+  var book: AugmentedBook? {
     if case .book(let book) = reference {
       return book
     } else {

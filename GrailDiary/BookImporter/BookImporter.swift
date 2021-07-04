@@ -75,7 +75,7 @@ final class BookImporter {
           let noteTimestamp = bookAndImage.book.dateAdded ?? Date()
           note.creationTimestamp = noteTimestamp
           note.timestamp = noteTimestamp
-          note.reference = .book(bookAndImage.book.book)
+          note.reference = .book(bookAndImage.book)
           try note.save(identifier: identifier, updateKey: updateIdentifier, to: db)
           if let typedData = bookAndImage.image {
             let binaryRecord = BinaryContentRecord(

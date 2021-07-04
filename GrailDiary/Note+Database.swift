@@ -198,7 +198,7 @@ private extension Database {
       }
     case .book:
       let bookData = record.text.data(using: .utf8)!
-      let book = try JSONDecoder().decode(Book.self, from: bookData)
+      let book = try JSONDecoder().decode(AugmentedBook.self, from: bookData)
       return .book(book)
     }
   }
