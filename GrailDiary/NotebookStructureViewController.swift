@@ -96,9 +96,11 @@ final class NotebookStructureViewController: UIViewController {
             required: NoteRecord.noteHashtags
               .filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))
           )
-        return NoteMetadataRecord.request(baseRequest: hashtagRequest).filter(NoteRecord.Columns.folder == nil)
+        return NoteMetadataRecord.request(baseRequest: hashtagRequest)
+          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
       } else {
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
+        return NoteMetadataRecord.request()
+          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
       }
     }
   }
