@@ -12,9 +12,14 @@ private extension Logger {
   }()
 }
 
+protocol BookHeaderDelegate: AnyObject {
+  func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook)
+}
+
 /// Displays information about a book, intended to be used as a scrollaway header when looking at book notes.
 final class BookHeader: UIView {
   init(book: AugmentedBook, coverImage: UIImage? = nil) {
+    self.book = book
     self.coverImageView = UIImageView(image: coverImage)
     super.init(frame: .zero)
     preservesSuperviewLayoutMargins = true
@@ -38,7 +43,10 @@ final class BookHeader: UIView {
       // TODO: Find a better way to get the value 28 from the formatters
       make.left.equalTo(readableContentGuide).inset(28)
     }
+    configureReadingHistoryButton()
   }
+
+  weak var delegate: BookHeaderDelegate?
 
   @available(*, unavailable)
   required init?(coder: NSCoder) {
@@ -46,6 +54,12 @@ final class BookHeader: UIView {
   }
 
   private let coverImageView: UIImageView
+  private var book: AugmentedBook {
+    didSet {
+      configureReadingHistoryButton()
+      delegate?.bookHeader(self, didUpdate: book)
+    }
+  }
 
   private let titleLabel: UILabel = {
     let label = UILabel()
@@ -62,14 +76,61 @@ final class BookHeader: UIView {
     return label
   }()
 
-  private lazy var contentStack: UIStackView = {
+  private lazy var readingHistoryButton: UIButton = {
+    let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
+      guard let self = self else { return }
+      if self.book.readingHistory?.isCurrentlyReading ?? false {
+        self.finishReading()
+      } else {
+        self.startReading()
+      }
+    }))
+    return button
+  }()
+
+  private func configureReadingHistoryButton() {
+    if book.readingHistory?.isCurrentlyReading ?? false {
+      readingHistoryButton.setTitle("Finish reading", for: .normal)
+    } else {
+      readingHistoryButton.setTitle("Start reading", for: .normal)
+    }
+  }
+
+  private func startReading() {
+    let now = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+    if self.book.readingHistory != nil {
+      self.book.readingHistory!.startReading(startDate: now)
+    } else {
+      var readingHistory = ReadingHistory()
+      readingHistory.startReading(startDate: now)
+      self.book.readingHistory = readingHistory
+    }
+  }
+
+  private func finishReading() {
+    let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+    if self.book.readingHistory != nil {
+      self.book.readingHistory!.finishReading(finishDate: today)
+    } else {
+      var readingHistory = ReadingHistory()
+      readingHistory.finishReading(finishDate: today)
+      self.book.readingHistory = readingHistory
+    }
+  }
+
+  private lazy var labelStack: UIStackView = {
     let emptySpace = UIView()
     emptySpace.setContentHuggingPriority(.defaultLow, for: .vertical)
-    let labelStack = UIStackView(arrangedSubviews: [titleLabel, authorLabel, emptySpace])
-    labelStack.axis = .vertical
-    labelStack.distribution = .fill
-    labelStack.spacing = padding
 
+    let stackView = UIStackView(arrangedSubviews: [titleLabel, authorLabel, emptySpace, readingHistoryButton])
+    stackView.axis = .vertical
+    stackView.distribution = .fill
+    stackView.alignment = .leading
+    stackView.spacing = padding
+    return stackView
+  }()
+
+  private lazy var contentStack: UIStackView = {
     let stack = UIStackView(arrangedSubviews: [coverImageView, labelStack])
     stack.axis = .horizontal
     stack.spacing = padding
