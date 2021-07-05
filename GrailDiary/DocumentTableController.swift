@@ -133,13 +133,8 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public var noteCount: Int {
-    let snapshot = dataSource.snapshot()
-    if snapshot.indexOfSection(.documents) != nil {
-      return snapshot.numberOfItems(inSection: .documents)
-    } else {
-      return 0
-    }
+  public var bookCount: Int {
+    dataSource.snapshot(for: .documents).bookCount
   }
 
   /// All note identifiers currently displayed in the table.
@@ -808,6 +803,21 @@ private extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType =
       }
     }
     return results
+  }
+
+  var bookCount: Int {
+    var bookCount = 0
+    for item in rootItems {
+      switch item {
+      case .bookCategory(_, let count):
+        bookCount += count
+      case .page:
+        bookCount += 1
+      case .webPage, .reviewQuotes:
+        break
+      }
+    }
+    return bookCount
   }
 
   mutating func expandCategories(_ expandedCategories: [DocumentTableController.BookCategory]) {
