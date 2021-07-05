@@ -435,17 +435,27 @@ extension DocumentTableController {
 // MARK: - Manage selection / keyboard
 
 public extension DocumentTableController {
-  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) -> Bool {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
     switch item {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
+      return true
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
+      return true
     case .reviewQuotes:
       delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
+      return true
     case .bookCategory:
-      assertionFailure()
+      var bookSection = dataSource.snapshot(for: .documents)
+      if bookSection.isExpanded(item) {
+        bookSection.collapse([item])
+      } else {
+        bookSection.expand([item])
+      }
+      dataSource.apply(bookSection, to: .documents)
+      return false
     }
   }
 
@@ -485,7 +495,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: nextIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
+      _ = selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
     }
   }
 
@@ -506,7 +516,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: previousIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
+      _ = selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
     }
   }
 }
@@ -515,7 +525,9 @@ public extension DocumentTableController {
 
 extension DocumentTableController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    selectItemAtIndexPath(indexPath, shiftFocus: true)
+    if !selectItemAtIndexPath(indexPath, shiftFocus: true) {
+      collectionView.deselectItem(at: indexPath, animated: false)
+    }
   }
 
   public func collectionView(
