@@ -267,12 +267,18 @@ public final class DocumentTableController: NSObject {
       sortOrder: currentSortOrder
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
+    let existingDocumentSnapshot = dataSource.snapshot(for: .documents)
+    let expandedRootItems = !existingDocumentSnapshot.items.isEmpty
+      ? existingDocumentSnapshot.expandedCategories
+      : [.currentlyReading]
 
     isPerformingUpdates = true
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    dataSource.apply(makeBookSectionSnapshot(), to: .documents)
+    var newDocumentSnapshot = makeBookSectionSnapshot()
+    newDocumentSnapshot.expandCategories(expandedRootItems)
+    dataSource.apply(newDocumentSnapshot, to: .documents)
     delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
   }
 
@@ -789,6 +795,28 @@ private extension DocumentTableController {
     }
     bookSection.append(uncategorizedItems)
     return bookSection
+  }
+}
+
+private extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == DocumentTableController.Item {
+  var expandedCategories: [DocumentTableController.BookCategory] {
+    var results = [DocumentTableController.BookCategory]()
+    for item in rootItems {
+      guard case .bookCategory(let category, _) = item else { continue }
+      if isExpanded(item) {
+        results.append(category)
+      }
+    }
+    return results
+  }
+
+  mutating func expandCategories(_ expandedCategories: [DocumentTableController.BookCategory]) {
+    for item in rootItems {
+      guard case .bookCategory(let category, _) = item else { continue }
+      if expandedCategories.contains(category) {
+        expand([item])
+      }
+    }
   }
 }
 
