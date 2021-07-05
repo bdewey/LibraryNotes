@@ -58,7 +58,7 @@ final class NotebookStructureViewController: UIViewController {
       case .trash: return "Trash"
       case .wantToRead: return "Want to read"
       case .currentlyReading: return "Currently reading"
-      case .read: return "Read"
+      case .read: return "My Books"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
       }
     }
@@ -68,7 +68,7 @@ final class NotebookStructureViewController: UIViewController {
       case .trash: return "Trash"
       case .wantToRead: return "Want to read"
       case .currentlyReading: return "Currently reading"
-      case .read: return "Read"
+      case .read: return "My Books"
       case .hashtag(let hashtag): return hashtag
       }
     }
@@ -98,8 +98,7 @@ final class NotebookStructureViewController: UIViewController {
           )
         return NoteMetadataRecord.request(baseRequest: hashtagRequest).filter(NoteRecord.Columns.folder == nil)
       } else {
-        let folderValue = predefinedFolder?.rawValue
-        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder == folderValue)
+        return NoteMetadataRecord.request().filter(NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
       }
     }
   }
@@ -485,8 +484,6 @@ private extension NotebookStructureViewController {
     let isNotesExpanded = existingNoteSnapshot.index(of: .read) == nil || existingNoteSnapshot.isExpanded(.read)
     let selectedItem = collectionView.indexPathsForSelectedItems?.first.flatMap { dataSource.itemIdentifier(for: $0) }
     var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-    snapshot.appendSections([.notePrefix])
-    snapshot.appendItems([.wantToRead, .currentlyReading])
     snapshot.appendSections([.notes, .noteSuffix])
     snapshot.appendItems([.trash])
     dataSource.apply(snapshot)
