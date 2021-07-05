@@ -82,6 +82,21 @@ public final class DocumentTableController: NSObject {
       cell.contentConfiguration = configuration
     }
 
+    let bookCategoryRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .bookCategory(let category) = item else { return }
+      var configuration = cell.defaultContentConfiguration()
+      switch category {
+      case .wantToRead:
+        configuration.text = "Want to read"
+      case .currentlyReading:
+        configuration.text = "Currently reading"
+      case .read:
+        configuration.text = "Read"
+      }
+      cell.contentConfiguration = configuration
+      cell.accessories = [.outlineDisclosure()]
+    }
+
     self.dataSource = UICollectionViewDiffableDataSource<DocumentSection, Item>(
       collectionView: collectionView,
       cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
@@ -92,6 +107,8 @@ public final class DocumentTableController: NSObject {
           return collectionView.dequeueConfiguredReusableCell(using: viewQuotesRegistration, for: indexPath, item: item)
         case .page:
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+        case .bookCategory:
+          return collectionView.dequeueConfiguredReusableCell(using: bookCategoryRegistration, for: indexPath, item: item)
         }
       }
     )
@@ -237,7 +254,7 @@ public final class DocumentTableController: NSObject {
   }
 
   public func performUpdates(animated: Bool) {
-    let snapshot = DocumentTableController.snapshot(
+    let (snapshot, bookSection) = DocumentTableController.snapshot(
       for: observableRecords?.records ?? [:],
       cardsPerDocument: cardsPerDocument,
       filteredPageIdentifiers: filteredPageIdentifiers,
@@ -251,6 +268,7 @@ public final class DocumentTableController: NSObject {
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
+    dataSource.apply(bookSection, to: .documents)
     delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
   }
 
@@ -297,7 +315,7 @@ extension DocumentTableController {
     case .page(let properties):
       let actions = availableItemActionConfigurations(properties).reversed().map { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
-    case .webPage, .reviewQuotes:
+    case .webPage, .reviewQuotes, .bookCategory:
       return nil
     }
   }
@@ -422,6 +440,8 @@ public extension DocumentTableController {
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
     case .reviewQuotes:
       delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
+    case .bookCategory:
+      assertionFailure()
     }
   }
 
@@ -536,10 +556,17 @@ private extension DocumentTableController {
     case documents
   }
 
+  enum BookCategory {
+    case wantToRead
+    case currentlyReading
+    case read
+  }
+
   enum Item: Hashable, CustomStringConvertible {
     case webPage(URL)
     case page(ViewProperties)
     case reviewQuotes(count: Int)
+    case bookCategory(BookCategory)
 
     var description: String {
       switch self {
@@ -549,6 +576,8 @@ private extension DocumentTableController {
         return "Page \(viewProperties.pageKey)"
       case .reviewQuotes(count: let count):
         return "Quotes: \(count)"
+      case .bookCategory(let category):
+        return "\(category)"
       }
     }
 
@@ -556,6 +585,15 @@ private extension DocumentTableController {
     var noteIdentifier: Note.Identifier? {
       if case .page(let viewProperties) = self {
         return viewProperties.pageKey
+      } else {
+        return nil
+      }
+    }
+
+    /// If the receiver is a page, returns the category for that page, else nil.
+    var bookCategory: BookCategory? {
+      if case .page(let properties) = self {
+        return properties.bookCategory
       } else {
         return nil
       }
@@ -575,11 +613,27 @@ private extension DocumentTableController {
 
     let author: PersonNameComponents?
 
+    let bookCategory: BookCategory?
+
     init(pageKey: Note.Identifier, noteProperties: NoteMetadataRecord, cardCount: Int, hasLink: Bool) {
       self.pageKey = pageKey
       self.noteProperties = noteProperties
       self.cardCount = cardCount
       self.hasLink = hasLink
+
+      if let book = noteProperties.book {
+        if let readingHistory = book.readingHistory {
+          if readingHistory.isCurrentlyReading {
+            self.bookCategory = .currentlyReading
+          } else {
+            self.bookCategory = .read
+          }
+        } else {
+          self.bookCategory = .wantToRead
+        }
+      } else {
+        self.bookCategory = nil
+      }
 
       if let book = noteProperties.book, let rawAuthorString = book.authors.first {
         let splitRawAuthor = rawAuthorString.split(separator: " ")
@@ -655,7 +709,7 @@ private extension DocumentTableController {
     webURL: URL?,
     quoteCount: Int,
     sortOrder: SortOrder = .author
-  ) -> Snapshot {
+  ) -> (Snapshot, NSDiffableDataSourceSectionSnapshot<Item>) {
     var snapshot = Snapshot()
 
     if let webURL = webURL {
@@ -669,6 +723,8 @@ private extension DocumentTableController {
     }
 
     snapshot.appendSections([.documents])
+
+    var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
 
     let viewProperties = records
       .filter {
@@ -684,14 +740,19 @@ private extension DocumentTableController {
         )
       }
 
+    let categories: [BookCategory] = [.wantToRead, .currentlyReading, .read]
+    bookSection.append(categories.map { Item.bookCategory($0) })
+
     let items = viewProperties
       .sorted(by: sortOrder.sortFunction)
       .map {
         Item.page($0)
       }
-    snapshot.appendItems(items)
+    for item in items {
+      bookSection.append([item], to: item.bookCategory.flatMap({ Item.bookCategory($0) }))
+    }
     Logger.shared.debug("Generating snapshot with \(items.count) entries")
-    return snapshot
+    return (snapshot, bookSection)
   }
 }
 

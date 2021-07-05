@@ -31,10 +31,10 @@ public struct NoteMetadataRecord: Decodable, FetchableRecord {
 }
 
 public extension NoteMetadataRecord {
-  var book: Book? {
+  var book: AugmentedBook? {
     guard
       let bookContent = contents.first(where: { $0.mimeType == ApplicationMimeType.book.rawValue }),
-      let book = try? JSONDecoder().decode(Book.self, from: bookContent.text.data(using: .utf8)!)
+      let book = try? JSONDecoder().decode(AugmentedBook.self, from: bookContent.text.data(using: .utf8)!)
     else {
       return nil
     }
