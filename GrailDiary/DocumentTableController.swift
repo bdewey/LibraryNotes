@@ -83,16 +83,20 @@ public final class DocumentTableController: NSObject {
     }
 
     let bookCategoryRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
-      guard case .bookCategory(let category) = item else { return }
-      var configuration = cell.defaultContentConfiguration()
+      guard case .bookCategory(let category, let count) = item else { return }
+      var configuration = UIListContentConfiguration.valueCell()
       switch category {
       case .wantToRead:
         configuration.text = "Want to read"
+        configuration.image = UIImage(systemName: "list.star")
       case .currentlyReading:
         configuration.text = "Currently reading"
+        configuration.image = UIImage(systemName: "book")
       case .read:
         configuration.text = "Read"
+        configuration.image = UIImage(systemName: "books.vertical")
       }
+      configuration.secondaryText = "\(count)"
       cell.contentConfiguration = configuration
       cell.accessories = [.outlineDisclosure()]
     }
@@ -254,7 +258,7 @@ public final class DocumentTableController: NSObject {
   }
 
   public func performUpdates(animated: Bool) {
-    let (snapshot, bookSection) = DocumentTableController.snapshot(
+    let snapshot = DocumentTableController.snapshot(
       for: observableRecords?.records ?? [:],
       cardsPerDocument: cardsPerDocument,
       filteredPageIdentifiers: filteredPageIdentifiers,
@@ -268,7 +272,7 @@ public final class DocumentTableController: NSObject {
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    dataSource.apply(bookSection, to: .documents)
+    dataSource.apply(makeBookSectionSnapshot(), to: .documents)
     delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
   }
 
@@ -566,7 +570,7 @@ private extension DocumentTableController {
     case webPage(URL)
     case page(ViewProperties)
     case reviewQuotes(count: Int)
-    case bookCategory(BookCategory)
+    case bookCategory(BookCategory, Int)
 
     var description: String {
       switch self {
@@ -576,8 +580,8 @@ private extension DocumentTableController {
         return "Page \(viewProperties.pageKey)"
       case .reviewQuotes(count: let count):
         return "Quotes: \(count)"
-      case .bookCategory(let category):
-        return "\(category)"
+      case .bookCategory(let category, let count):
+        return "\(category) (\(count))"
       }
     }
 
@@ -709,7 +713,7 @@ private extension DocumentTableController {
     webURL: URL?,
     quoteCount: Int,
     sortOrder: SortOrder = .author
-  ) -> (Snapshot, NSDiffableDataSourceSectionSnapshot<Item>) {
+  ) -> Snapshot {
     var snapshot = Snapshot()
 
     if let webURL = webURL {
@@ -723,8 +727,15 @@ private extension DocumentTableController {
     }
 
     snapshot.appendSections([.documents])
+    return snapshot
+  }
 
+  private func makeBookSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
     var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
+
+    guard let records = observableRecords?.records else {
+      return bookSection
+    }
 
     let viewProperties = records
       .filter {
@@ -740,19 +751,32 @@ private extension DocumentTableController {
         )
       }
 
-    let categories: [BookCategory] = [.wantToRead, .currentlyReading, .read]
-    bookSection.append(categories.map { Item.bookCategory($0) })
+    var categorizedItems: [BookCategory: [Item]] = [:]
+    var uncategorizedItems: [Item] = []
 
     let items = viewProperties
-      .sorted(by: sortOrder.sortFunction)
+      .sorted(by: currentSortOrder.sortFunction)
       .map {
         Item.page($0)
       }
     for item in items {
-      bookSection.append([item], to: item.bookCategory.flatMap({ Item.bookCategory($0) }))
+      switch item.bookCategory {
+      case .none:
+        uncategorizedItems.append(item)
+      case .some(let category):
+        categorizedItems[category, default: []].append(item)
+      }
     }
-    Logger.shared.debug("Generating snapshot with \(items.count) entries")
-    return (snapshot, bookSection)
+
+    let categories: [BookCategory] = [.wantToRead, .currentlyReading, .read]
+    for category in categories where !categorizedItems[category].isEmpty {
+      let items = categorizedItems[category]!
+      let headerItem = Item.bookCategory(category, items.count)
+      bookSection.append([headerItem])
+      bookSection.append(items, to: headerItem)
+    }
+    bookSection.append(uncategorizedItems)
+    return bookSection
   }
 }
 
