@@ -781,7 +781,7 @@ private extension DocumentTableController {
       }
     }
 
-    let categories: [BookCategory] = [.wantToRead, .currentlyReading, .read]
+    let categories: [BookCategory] = [.currentlyReading, .wantToRead, .read]
     for category in categories where !categorizedItems[category].isEmpty {
       let items = categorizedItems[category]!
       let headerItem = Item.bookCategory(category, items.count)
