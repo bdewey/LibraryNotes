@@ -76,6 +76,13 @@ final class BookHeader: UIView {
     return label
   }()
 
+  private let readingStatusLabel: UILabel = {
+    let label = UILabel()
+    label.font = .preferredFont(forTextStyle: .caption1)
+    label.textColor = .secondaryLabel
+    return label
+  }()
+
   private lazy var readingHistoryButton: UIButton = {
     let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
       guard let self = self else { return }
@@ -91,9 +98,12 @@ final class BookHeader: UIView {
   private func configureReadingHistoryButton() {
     if book.readingHistory?.isCurrentlyReading ?? false {
       readingHistoryButton.setTitle("Finish reading", for: .normal)
-    } else {
+    } else if book.readingHistory?.entries.isEmpty ?? true {
       readingHistoryButton.setTitle("Start reading", for: .normal)
+    } else {
+      readingHistoryButton.setTitle("Start rereading", for: .normal)
     }
+    readingStatusLabel.text = book.readingHistory?.currentReadingStatus
   }
 
   private func startReading() {
@@ -122,7 +132,7 @@ final class BookHeader: UIView {
     let emptySpace = UIView()
     emptySpace.setContentHuggingPriority(.defaultLow, for: .vertical)
 
-    let stackView = UIStackView(arrangedSubviews: [titleLabel, authorLabel, emptySpace, readingHistoryButton])
+    let stackView = UIStackView(arrangedSubviews: [titleLabel, authorLabel, emptySpace, readingStatusLabel, readingHistoryButton])
     stackView.axis = .vertical
     stackView.distribution = .fill
     stackView.alignment = .leading
@@ -146,5 +156,24 @@ final class BookHeader: UIView {
     let stackSize = contentStack.systemLayoutSizeFitting(targetSize)
     Logger.bookHeader.debug("systemLayoutSize: Super = \(superSize), stack = \(stackSize)")
     return CGSize(width: max(superSize.width, stackSize.width), height: max(superSize.height, stackSize.height))
+  }
+}
+
+private extension ReadingHistory {
+  var currentReadingStatus: String? {
+    guard let entries = entries else { return nil }
+    var yearRead: Int?
+    for entry in entries {
+      if let finishDateComponents = entry.finish {
+        yearRead = [yearRead, finishDateComponents.year].compactMap({ $0 }).max()
+      } else {
+        return "Currently reading"
+      }
+    }
+    if let yearRead = yearRead {
+      return "Read in \(yearRead)"
+    } else {
+      return nil
+    }
   }
 }
