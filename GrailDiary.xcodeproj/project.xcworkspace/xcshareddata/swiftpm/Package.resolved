@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
           "branch": "xcode13",
-          "revision": "11728e8d8fde65402a8c462b10f2e3bfe2fb074c",
+          "revision": "94a09ba6261d0bcaed2a9427bafeba091765fc22",
           "version": null
         }
       },
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/groue/CombineExpectations.git",
         "state": {
           "branch": null,
-          "revision": "96d5604151c94b21fbca6877b237e80af9e821dd",
-          "version": "0.5.0"
+          "revision": "5118f805bdeac7e81dc8e92c78b7ce475201dec8",
+          "version": "0.9.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/crspybits/swift-log-file",
         "state": {
           "branch": null,
-          "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
-          "version": "0.0.1"
+          "revision": "aa94b38bf88c7d9cbc87ceafcdffadaffbc2bffa",
+          "version": "0.1.0"
         }
       },
       {
@@ -80,6 +80,15 @@
           "branch": "xcode13",
           "revision": "1afd83c670591ee156b21e08a35e682aa68eea43",
           "version": null
+        }
+      },
+      {
+        "package": "XCGLogger",
+        "repositoryURL": "https://github.com/DaveWoodCom/XCGLogger.git",
+        "state": {
+          "branch": null,
+          "revision": "a9c4667b247928a29bdd41be2ec2c8d304215a54",
+          "version": "7.0.1"
         }
       }
     ]
