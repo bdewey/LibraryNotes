@@ -4,6 +4,7 @@
 
 ### Changed
 
+- **Major** The app can now track your reading history with individual books, and it uses that information to update whether the book is "want to read" / "currently reading" / "read." These categories are also now groupings in the document list rather than different folders.
 - Changed the appearance of the book headers
 - Book-related utility code has been moved to a stand-alone library, [BookKit](https://github.com/bdewey/BookKit).
 - Updated to Version 0.2 of [SpacedRepetitionScheduler](https://github.com/bdewey/SpacedRepetitionScheduler).
