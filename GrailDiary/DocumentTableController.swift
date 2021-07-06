@@ -82,6 +82,25 @@ public final class DocumentTableController: NSObject {
       cell.contentConfiguration = configuration
     }
 
+    let bookCategoryRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .bookCategory(let category, let count) = item else { return }
+      var configuration = UIListContentConfiguration.valueCell()
+      switch category {
+      case .wantToRead:
+        configuration.text = "Want to read"
+        configuration.image = UIImage(systemName: "list.star")
+      case .currentlyReading:
+        configuration.text = "Currently reading"
+        configuration.image = UIImage(systemName: "book")
+      case .read:
+        configuration.text = "Read"
+        configuration.image = UIImage(systemName: "books.vertical")
+      }
+      configuration.secondaryText = "\(count)"
+      cell.contentConfiguration = configuration
+      cell.accessories = [.outlineDisclosure()]
+    }
+
     self.dataSource = UICollectionViewDiffableDataSource<DocumentSection, Item>(
       collectionView: collectionView,
       cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
@@ -92,6 +111,8 @@ public final class DocumentTableController: NSObject {
           return collectionView.dequeueConfiguredReusableCell(using: viewQuotesRegistration, for: indexPath, item: item)
         case .page:
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+        case .bookCategory:
+          return collectionView.dequeueConfiguredReusableCell(using: bookCategoryRegistration, for: indexPath, item: item)
         }
       }
     )
@@ -112,13 +133,8 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public var noteCount: Int {
-    let snapshot = dataSource.snapshot()
-    if snapshot.indexOfSection(.documents) != nil {
-      return snapshot.numberOfItems(inSection: .documents)
-    } else {
-      return 0
-    }
+  public var bookCount: Int {
+    dataSource.snapshot(for: .documents).bookCount
   }
 
   /// All note identifiers currently displayed in the table.
@@ -246,11 +262,18 @@ public final class DocumentTableController: NSObject {
       sortOrder: currentSortOrder
     )
     let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
+    let existingDocumentSnapshot = dataSource.snapshot(for: .documents)
+    let expandedRootItems = !existingDocumentSnapshot.items.isEmpty
+      ? existingDocumentSnapshot.expandedCategories
+      : [.currentlyReading]
 
     isPerformingUpdates = true
     dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
+    var newDocumentSnapshot = makeBookSectionSnapshot()
+    newDocumentSnapshot.expandCategories(expandedRootItems)
+    dataSource.apply(newDocumentSnapshot, to: .documents)
     delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
   }
 
@@ -297,7 +320,7 @@ extension DocumentTableController {
     case .page(let properties):
       let actions = availableItemActionConfigurations(properties).reversed().map { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
-    case .webPage, .reviewQuotes:
+    case .webPage, .reviewQuotes, .bookCategory:
       return nil
     }
   }
@@ -413,15 +436,27 @@ extension DocumentTableController {
 // MARK: - Manage selection / keyboard
 
 public extension DocumentTableController {
-  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) {
-    guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+  func selectItemAtIndexPath(_ indexPath: IndexPath, shiftFocus: Bool) -> Bool {
+    guard let item = dataSource.itemIdentifier(for: indexPath) else { return false }
     switch item {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
+      return true
     case .webPage(let url):
       delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
+      return true
     case .reviewQuotes:
       delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
+      return true
+    case .bookCategory:
+      var bookSection = dataSource.snapshot(for: .documents)
+      if bookSection.isExpanded(item) {
+        bookSection.collapse([item])
+      } else {
+        bookSection.expand([item])
+      }
+      dataSource.apply(bookSection, to: .documents)
+      return false
     }
   }
 
@@ -461,7 +496,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: nextIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
+      _ = selectItemAtIndexPath(nextIndexPath, shiftFocus: false)
     }
   }
 
@@ -482,7 +517,7 @@ public extension DocumentTableController {
       if let cell = collectionView.cellForItem(at: previousIndexPath) {
         collectionView.scrollRectToVisible(cell.frame, animated: true)
       }
-      selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
+      _ = selectItemAtIndexPath(previousIndexPath, shiftFocus: false)
     }
   }
 }
@@ -491,7 +526,9 @@ public extension DocumentTableController {
 
 extension DocumentTableController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    selectItemAtIndexPath(indexPath, shiftFocus: true)
+    if !selectItemAtIndexPath(indexPath, shiftFocus: true) {
+      collectionView.deselectItem(at: indexPath, animated: false)
+    }
   }
 
   public func collectionView(
@@ -536,10 +573,17 @@ private extension DocumentTableController {
     case documents
   }
 
+  enum BookCategory {
+    case wantToRead
+    case currentlyReading
+    case read
+  }
+
   enum Item: Hashable, CustomStringConvertible {
     case webPage(URL)
     case page(ViewProperties)
     case reviewQuotes(count: Int)
+    case bookCategory(BookCategory, Int)
 
     var description: String {
       switch self {
@@ -549,6 +593,8 @@ private extension DocumentTableController {
         return "Page \(viewProperties.pageKey)"
       case .reviewQuotes(count: let count):
         return "Quotes: \(count)"
+      case .bookCategory(let category, let count):
+        return "\(category) (\(count))"
       }
     }
 
@@ -556,6 +602,15 @@ private extension DocumentTableController {
     var noteIdentifier: Note.Identifier? {
       if case .page(let viewProperties) = self {
         return viewProperties.pageKey
+      } else {
+        return nil
+      }
+    }
+
+    /// If the receiver is a page, returns the category for that page, else nil.
+    var bookCategory: BookCategory? {
+      if case .page(let properties) = self {
+        return properties.bookCategory
       } else {
         return nil
       }
@@ -575,11 +630,27 @@ private extension DocumentTableController {
 
     let author: PersonNameComponents?
 
+    let bookCategory: BookCategory?
+
     init(pageKey: Note.Identifier, noteProperties: NoteMetadataRecord, cardCount: Int, hasLink: Bool) {
       self.pageKey = pageKey
       self.noteProperties = noteProperties
       self.cardCount = cardCount
       self.hasLink = hasLink
+
+      if let book = noteProperties.book {
+        if let readingHistory = book.readingHistory {
+          if readingHistory.isCurrentlyReading {
+            self.bookCategory = .currentlyReading
+          } else {
+            self.bookCategory = .read
+          }
+        } else {
+          self.bookCategory = .wantToRead
+        }
+      } else {
+        self.bookCategory = nil
+      }
 
       if let book = noteProperties.book, let rawAuthorString = book.authors.first {
         let splitRawAuthor = rawAuthorString.split(separator: " ")
@@ -669,6 +740,15 @@ private extension DocumentTableController {
     }
 
     snapshot.appendSections([.documents])
+    return snapshot
+  }
+
+  private func makeBookSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
+    var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
+
+    guard let records = observableRecords?.records else {
+      return bookSection
+    }
 
     let viewProperties = records
       .filter {
@@ -684,14 +764,69 @@ private extension DocumentTableController {
         )
       }
 
+    var categorizedItems: [BookCategory: [Item]] = [:]
+    var uncategorizedItems: [Item] = []
+
     let items = viewProperties
-      .sorted(by: sortOrder.sortFunction)
+      .sorted(by: currentSortOrder.sortFunction)
       .map {
         Item.page($0)
       }
-    snapshot.appendItems(items)
-    Logger.shared.debug("Generating snapshot with \(items.count) entries")
-    return snapshot
+    for item in items {
+      switch item.bookCategory {
+      case .none:
+        uncategorizedItems.append(item)
+      case .some(let category):
+        categorizedItems[category, default: []].append(item)
+      }
+    }
+
+    let categories: [BookCategory] = [.currentlyReading, .wantToRead, .read]
+    for category in categories where !categorizedItems[category].isEmpty {
+      let items = categorizedItems[category]!
+      let headerItem = Item.bookCategory(category, items.count)
+      bookSection.append([headerItem])
+      bookSection.append(items, to: headerItem)
+    }
+    bookSection.append(uncategorizedItems)
+    return bookSection
+  }
+}
+
+private extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == DocumentTableController.Item {
+  var expandedCategories: [DocumentTableController.BookCategory] {
+    var results = [DocumentTableController.BookCategory]()
+    for item in rootItems {
+      guard case .bookCategory(let category, _) = item else { continue }
+      if isExpanded(item) {
+        results.append(category)
+      }
+    }
+    return results
+  }
+
+  var bookCount: Int {
+    var bookCount = 0
+    for item in rootItems {
+      switch item {
+      case .bookCategory(_, let count):
+        bookCount += count
+      case .page:
+        bookCount += 1
+      case .webPage, .reviewQuotes:
+        break
+      }
+    }
+    return bookCount
+  }
+
+  mutating func expandCategories(_ expandedCategories: [DocumentTableController.BookCategory]) {
+    for item in rootItems {
+      guard case .bookCategory(let category, _) = item else { continue }
+      if expandedCategories.contains(category) {
+        expand([item])
+      }
+    }
   }
 }
 

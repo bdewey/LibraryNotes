@@ -93,10 +93,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   override func viewDidLoad() {
     super.viewDidLoad()
     if case .book(let book) = note.reference {
-      textEditViewController.extendedNavigationHeaderView = BookHeader(
-        book: AugmentedBook(book),
+      let bookHeader = BookHeader(
+        book: book,
         coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
       )
+      bookHeader.delegate = self
+      textEditViewController.extendedNavigationHeaderView = bookHeader
     }
     view.addSubview(textEditViewController.view)
     textEditViewController.view.snp.makeConstraints { make in
@@ -239,7 +241,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
     Logger.shared.info("Attaching book: \(book.title)")
-    note.reference = .book(book)
+    note.reference = .book(AugmentedBook(book))
     note.timestamp = Date()
     tryUpdateNote(note)
   }
@@ -276,5 +278,14 @@ extension SavingTextEditViewController: ImageStorage {
 
   func retrieveImageDataForKey(_ key: String) throws -> Data {
     return try noteStorage.readAssociatedData(from: noteIdentifier, key: key)
+  }
+}
+
+extension SavingTextEditViewController: BookHeaderDelegate {
+  func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook) {
+    Logger.shared.info("Updating book: \(book.title)")
+    note.reference = .book(book)
+    note.timestamp = Date()
+    tryUpdateNote(note)
   }
 }

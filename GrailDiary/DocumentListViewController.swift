@@ -283,8 +283,8 @@ final class DocumentListViewController: UIViewController {
 
   private func updateToolbar() {
     let countLabel = UILabel(frame: .zero)
-    let noteCount = dataSource.noteCount
-    countLabel.text = noteCount == 1 ? "1 note" : "\(noteCount) notes"
+    let bookCount = dataSource.bookCount
+    countLabel.text = bookCount == 1 ? "1 book" : "\(bookCount) books"
     countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
     countLabel.sizeToFit()
 
@@ -505,7 +505,7 @@ private extension String {
 }
 
 private extension Note {
-  var book: Book? {
+  var book: AugmentedBook? {
     if case .book(let book) = reference {
       return book
     } else {

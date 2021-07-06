@@ -52,7 +52,7 @@ public struct Note: Equatable {
 
   /// What this note is "about."
   public enum Reference: Equatable {
-    case book(Book)
+    case book(AugmentedBook)
     case webPage(URL)
   }
 
