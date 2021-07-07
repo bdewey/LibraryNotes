@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Combine
 import GRDB
 import Logging
@@ -470,15 +471,72 @@ private extension NotebookStructureViewController {
       bookImporterViewController.delegate = self
       self.present(bookImporterViewController, animated: true)
     }
+    let inferReadingHistory = UIAction(title: "Infer reading history") { [weak self] _ in
+      self?.inferReadingHistory()
+    }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
       menu: UIMenu(
         children: [
           openCommand,
           importLibraryThing,
+          inferReadingHistory,
         ]
       )
     )
+  }
+
+  private func inferReadingHistory() {
+    Logger.shared.info("Inferring reading history")
+    do {
+      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
+        let readBooksRecords = try NoteMetadataRecord.request()
+          .filter(NoteRecord.Columns.folder == nil)
+          .fetchAll(db)
+        for metadataRecord in readBooksRecords {
+          guard var book = metadataRecord.book, book.readingHistory == nil else {
+            continue
+          }
+          var history = ReadingHistory()
+          history.finishReading(finishDate: DateComponents(year: metadataRecord.guessYearRead))
+          book.readingHistory = history
+          let bookData = try JSONEncoder().encode(book)
+          let bookString = String(data: bookData, encoding: .utf8)!
+          let record = ContentRecord(
+            text: bookString,
+            noteId: metadataRecord.id,
+            key: ContentRole.reference.rawValue,
+            role: ContentRole.reference.rawValue,
+            mimeType: ApplicationMimeType.book.rawValue
+          )
+          try record.save(db)
+        }
+
+        let wantToReadRecords = try NoteMetadataRecord.request()
+          .filter(NoteRecord.Columns.folder == PredefinedFolder.currentlyReading.rawValue)
+          .fetchAll(db)
+        for metadataRecord in wantToReadRecords {
+          guard var book = metadataRecord.book, book.readingHistory == nil else {
+            continue
+          }
+          var history = ReadingHistory()
+          history.startReading(startDate: nil)
+          book.readingHistory = history
+          let bookData = try JSONEncoder().encode(book)
+          let bookString = String(data: bookData, encoding: .utf8)!
+          let record = ContentRecord(
+            text: bookString,
+            noteId: metadataRecord.id,
+            key: ContentRole.reference.rawValue,
+            role: ContentRole.reference.rawValue,
+            mimeType: ApplicationMimeType.book.rawValue
+          )
+          try record.save(db)
+        }
+      })
+    } catch {
+      Logger.shared.error("Unexpected error inferring reading history: \(error)")
+    }
   }
 
   func updateSnapshot() {
@@ -548,5 +606,15 @@ extension NotebookStructureViewController: BookImporterViewControllerDelegate {
 
   func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
     progressView = nil
+  }
+}
+
+private extension NoteMetadataRecord {
+  var guessYearRead: Int? {
+    for link in noteLinks where link.targetTitle.hasPrefix("#books/") {
+      let yearString = link.targetTitle.dropFirst(7)
+      return Int(yearString)
+    }
+    return nil
   }
 }
