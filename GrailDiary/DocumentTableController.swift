@@ -40,6 +40,7 @@ public final class DocumentTableController: NSObject {
     database: NoteDatabase,
     delegate: DocumentTableControllerDelegate
   ) {
+    self.collectionView = collectionView
     self.database = database
     self.delegate = delegate
 
@@ -73,6 +74,7 @@ public final class DocumentTableController: NSObject {
         configuration.image = UIImage(systemName: "link")
       }
       if let imageData = viewProperties.noteProperties.thumbnailImage.first {
+        // TODO: Make an image cache -- this is a performance bottleneck
         configuration.image = imageData.blob.image(maxSize: 100)
       }
 
@@ -215,6 +217,7 @@ public final class DocumentTableController: NSObject {
   /// Delegate.
   private(set) weak var delegate: DocumentTableControllerDelegate?
 
+  private let collectionView: UICollectionView
   private let database: NoteDatabase
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
@@ -252,60 +255,40 @@ public final class DocumentTableController: NSObject {
     }
   }
 
+  private var snapshotParameters: SnapshotParameters?
+
   public func performUpdates(animated: Bool) {
-    let snapshot = DocumentTableController.snapshot(
-      for: observableRecords?.records ?? [:],
+    let filteredRecordIdentifiers = observableRecords?.records
+      .map { $0.key }
+      .filter { filteredPageIdentifiers?.contains($0) ?? true }
+    let newSnapshotParameters = SnapshotParameters(
+      records: Set(filteredRecordIdentifiers ?? []),
       cardsPerDocument: cardsPerDocument,
-      filteredPageIdentifiers: filteredPageIdentifiers,
       webURL: webURL,
       quoteCount: quoteIdentifiers.count,
       sortOrder: currentSortOrder
     )
-    let reallyAnimate = animated && DocumentTableController.majorSnapshotDifferences(between: dataSource.snapshot(), and: snapshot)
+    let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
+    let reallyAnimate = animated && (newSnapshotParameters != snapshotParameters)
     let existingDocumentSnapshot = dataSource.snapshot(for: .documents)
     let expandedRootItems = !existingDocumentSnapshot.items.isEmpty
       ? existingDocumentSnapshot.expandedCategories
       : [.currentlyReading]
 
     isPerformingUpdates = true
-    dataSource.apply(snapshot, animatingDifferences: reallyAnimate) {
+    dataSource.apply(newSnapshotParameters.snapshot(), animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    var newDocumentSnapshot = makeBookSectionSnapshot()
+    var newDocumentSnapshot = newSnapshotParameters.bookSectionSnapshot(metadataRecords: observableRecords?.records ?? [:])
     newDocumentSnapshot.expandCategories(expandedRootItems)
-    dataSource.apply(newDocumentSnapshot, to: .documents)
-    delegate?.documentTableController(self, didUpdateWithNoteCount: snapshot.numberOfItems(inSection: .documents))
-  }
 
-  /// Compares lhs & rhs to see if the differences are worth animating.
-  private static func majorSnapshotDifferences(between lhs: Snapshot, and rhs: Snapshot) -> Bool {
-    if lhs.numberOfItems != rhs.numberOfItems {
-      return true
+    dataSource.apply(newDocumentSnapshot, to: .documents, animatingDifferences: reallyAnimate)
+    selectedItems?.forEach { item in
+      guard let indexPath = dataSource.indexPath(for: item) else { return }
+      collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
-    // The only way to get through this loop and return false is if every item in the left hand
-    // side and the right hand side, in order, have matching page identifiers.
-    // In that case, whatever difference that exists between the snapshots is "minor"
-    // (e.g., other page properties differ)
-    let itemsToCompare = zip(lhs.itemIdentifiers, rhs.itemIdentifiers)
-    for (lhsItem, rhsItem) in itemsToCompare {
-      switch (lhsItem, rhsItem) {
-      case (.page(let lhsPage), .page(let rhsPage)):
-        if lhsPage.pageKey != rhsPage.pageKey {
-          return true
-        }
-        // If the page transitions from image to non image, or vice versa, animate the change.
-        if lhsPage.noteProperties.thumbnailImage.isEmpty != rhsPage.noteProperties.thumbnailImage.isEmpty {
-          return true
-        }
-      case (.webPage, .webPage):
-        continue
-      case (.reviewQuotes, .reviewQuotes):
-        continue
-      default:
-        return true
-      }
-    }
-    return false
+    delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers?.count ?? 0)
+    snapshotParameters = newSnapshotParameters
   }
 }
 
@@ -719,77 +702,74 @@ private extension DocumentTableController {
     }
   }
 
-  static func snapshot(
-    for records: [Note.Identifier: NoteMetadataRecord],
-    cardsPerDocument: [Note.Identifier: Int],
-    filteredPageIdentifiers: Set<Note.Identifier>?,
-    webURL: URL?,
-    quoteCount: Int,
-    sortOrder: SortOrder = .author
-  ) -> Snapshot {
-    var snapshot = Snapshot()
+  private struct SnapshotParameters: Equatable {
+    var records: Set<Note.Identifier>
+    var cardsPerDocument: [Note.Identifier: Int]
+    var webURL: URL?
+    var quoteCount: Int
+    var sortOrder: SortOrder = .author
 
-    if let webURL = webURL {
-      snapshot.appendSections([.webNavigation])
-      snapshot.appendItems([.webPage(webURL)])
+    func snapshot() -> Snapshot {
+      var snapshot = Snapshot()
+
+      if let webURL = webURL {
+        snapshot.appendSections([.webNavigation])
+        snapshot.appendItems([.webPage(webURL)])
+      }
+
+      if quoteCount > 0 {
+        snapshot.appendSections([.actions])
+        snapshot.appendItems([.reviewQuotes(count: quoteCount)])
+      }
+
+      snapshot.appendSections([.documents])
+      return snapshot
     }
 
-    if quoteCount > 0 {
-      snapshot.appendSections([.actions])
-      snapshot.appendItems([.reviewQuotes(count: quoteCount)])
-    }
+    func bookSectionSnapshot(metadataRecords: [Note.Identifier: NoteMetadataRecord]) -> NSDiffableDataSourceSectionSnapshot<Item> {
+      var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
 
-    snapshot.appendSections([.documents])
-    return snapshot
-  }
+      let viewProperties = records
+        .compactMap { identifier -> ViewProperties? in
+          guard let metadataRecord = metadataRecords[identifier] else {
+            return nil
+          }
+          return ViewProperties(
+            pageKey: identifier,
+            noteProperties: metadataRecord,
+            cardCount: cardsPerDocument[identifier, default: 0],
+            hasLink: !metadataRecord.contents.isEmpty
+          )
+        }
 
-  private func makeBookSectionSnapshot() -> NSDiffableDataSourceSectionSnapshot<Item> {
-    var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
+      var categorizedItems: [BookCategory: [Item]] = [:]
+      var uncategorizedItems: [Item] = []
 
-    guard let records = observableRecords?.records else {
+      let items = viewProperties
+        .sorted(by: sortOrder.sortFunction)
+        .map {
+          Item.page($0)
+        }
+      for item in items {
+        switch item.bookCategory {
+        case .none:
+          uncategorizedItems.append(item)
+        case .some(let category):
+          categorizedItems[category, default: []].append(item)
+        }
+      }
+
+      let categories: [BookCategory] = [.currentlyReading, .wantToRead, .read]
+      for category in categories where !categorizedItems[category].isEmpty {
+        let items = categorizedItems[category]!
+        let headerItem = Item.bookCategory(category, items.count)
+        bookSection.append([headerItem])
+        bookSection.append(items, to: headerItem)
+      }
+      bookSection.append(uncategorizedItems)
       return bookSection
     }
 
-    let viewProperties = records
-      .filter {
-        guard let filteredPageIdentifiers = filteredPageIdentifiers else { return true }
-        return filteredPageIdentifiers.contains($0.key)
-      }
-      .compactMap { tuple in
-        ViewProperties(
-          pageKey: tuple.key,
-          noteProperties: tuple.value,
-          cardCount: cardsPerDocument[tuple.key, default: 0],
-          hasLink: !tuple.value.contents.isEmpty
-        )
-      }
-
-    var categorizedItems: [BookCategory: [Item]] = [:]
-    var uncategorizedItems: [Item] = []
-
-    let items = viewProperties
-      .sorted(by: currentSortOrder.sortFunction)
-      .map {
-        Item.page($0)
-      }
-    for item in items {
-      switch item.bookCategory {
-      case .none:
-        uncategorizedItems.append(item)
-      case .some(let category):
-        categorizedItems[category, default: []].append(item)
-      }
-    }
-
-    let categories: [BookCategory] = [.currentlyReading, .wantToRead, .read]
-    for category in categories where !categorizedItems[category].isEmpty {
-      let items = categorizedItems[category]!
-      let headerItem = Item.bookCategory(category, items.count)
-      bookSection.append([headerItem])
-      bookSection.append(items, to: headerItem)
-    }
-    bookSection.append(uncategorizedItems)
-    return bookSection
   }
 }
 
