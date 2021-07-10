@@ -14,6 +14,7 @@
 - Improper use of cell registration (Thanks, Xcode 13!)
 - Broken formatting when I moved to TextMarkupKit
 - List-flashing-while-typing
+- Performance: Added an image cache for document thumbnails
 
 ## [0.49.0] - 2021-06-25
 

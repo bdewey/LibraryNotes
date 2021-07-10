@@ -59,6 +59,8 @@ public final class DocumentTableController: NSObject {
       cell.accessories = [.disclosureIndicator()]
     }
 
+    let imageCache = NSCache<NSString, UIImage>()
+
     let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item else { return }
       var configuration = cell.defaultContentConfiguration()
@@ -74,8 +76,17 @@ public final class DocumentTableController: NSObject {
         configuration.image = UIImage(systemName: "link")
       }
       if let imageData = viewProperties.noteProperties.thumbnailImage.first {
-        // TODO: Make an image cache -- this is a performance bottleneck
-        configuration.image = imageData.blob.image(maxSize: 100)
+        let key = viewProperties.pageKey as NSString
+        if let image = imageCache.object(forKey: key) {
+          configuration.image = image
+        } else {
+          if let image = imageData.blob.image(maxSize: 100) {
+            configuration.image = image
+            imageCache.setObject(image, forKey: key)
+          } else {
+            configuration.image = nil
+          }
+        }
       }
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
