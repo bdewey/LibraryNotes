@@ -780,7 +780,6 @@ private extension DocumentTableController {
       bookSection.append(uncategorizedItems)
       return bookSection
     }
-
   }
 }
 

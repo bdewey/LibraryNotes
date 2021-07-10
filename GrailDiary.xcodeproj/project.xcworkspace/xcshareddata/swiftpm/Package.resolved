@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
           "branch": "xcode13",
-          "revision": "94a09ba6261d0bcaed2a9427bafeba091765fc22",
+          "revision": "2a0ccd048006280ec2deb6289a26edc54f5a807a",
           "version": null
         }
       },
@@ -62,6 +62,15 @@
           "branch": "xcode13",
           "revision": "e79c015fc160c2725eae95eae4b26fa59e57f5f0",
           "version": null
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log",
+        "state": {
+          "branch": null,
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
         }
       },
       {

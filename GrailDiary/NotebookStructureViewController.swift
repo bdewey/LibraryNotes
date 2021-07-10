@@ -489,7 +489,7 @@ private extension NotebookStructureViewController {
   private func inferReadingHistory() {
     Logger.shared.info("Inferring reading history")
     do {
-      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
+      try database.bulkUpdate(updateBlock: { db, _ in
         let readBooksRecords = try NoteMetadataRecord.request()
           .filter(NoteRecord.Columns.folder == nil)
           .fetchAll(db)

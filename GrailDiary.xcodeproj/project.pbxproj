@@ -214,7 +214,6 @@
 		D311774925A4B67600E473FD /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		D311778925AA384E00E473FD /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		D311787D25ACA14500E473FD /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
-		D313132226957EC6004BBDBD /* BookKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BookKit; path = ../BookKit; sourceTree = "<group>"; };
 		D3198DA623D8859B0098A9D9 /* NoteRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteRecord.swift; sourceTree = "<group>"; };
 		D3198DA823D888BC0098A9D9 /* Database+Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Database+Migrations.swift"; sourceTree = "<group>"; };
 		D3198DAA23D9DDB50098A9D9 /* ContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentRecord.swift; sourceTree = "<group>"; };
@@ -476,7 +475,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D313132226957EC6004BBDBD /* BookKit */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,

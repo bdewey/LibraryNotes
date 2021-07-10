@@ -108,23 +108,23 @@ final class BookHeader: UIView {
 
   private func startReading() {
     let now = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-    if self.book.readingHistory != nil {
-      self.book.readingHistory!.startReading(startDate: now)
+    if book.readingHistory != nil {
+      book.readingHistory!.startReading(startDate: now)
     } else {
       var readingHistory = ReadingHistory()
       readingHistory.startReading(startDate: now)
-      self.book.readingHistory = readingHistory
+      book.readingHistory = readingHistory
     }
   }
 
   private func finishReading() {
     let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-    if self.book.readingHistory != nil {
-      self.book.readingHistory!.finishReading(finishDate: today)
+    if book.readingHistory != nil {
+      book.readingHistory!.finishReading(finishDate: today)
     } else {
       var readingHistory = ReadingHistory()
       readingHistory.finishReading(finishDate: today)
-      self.book.readingHistory = readingHistory
+      book.readingHistory = readingHistory
     }
   }
 
@@ -165,7 +165,7 @@ private extension ReadingHistory {
     var yearRead: Int?
     for entry in entries {
       if let finishDateComponents = entry.finish {
-        yearRead = [yearRead, finishDateComponents.year].compactMap({ $0 }).max()
+        yearRead = [yearRead, finishDateComponents.year].compactMap { $0 }.max()
       } else {
         return "Currently reading"
       }
