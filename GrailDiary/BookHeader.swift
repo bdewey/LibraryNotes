@@ -76,6 +76,13 @@ final class BookHeader: UIView {
     return label
   }()
 
+  private lazy var starRatingView: StarRatingView = {
+    let view = StarRatingView(frame: .zero)
+    view.rating = book.rating ?? 0
+    view.delegate = self
+    return view
+  }()
+
   private let readingStatusLabel: UILabel = {
     let label = UILabel()
     label.font = .preferredFont(forTextStyle: .caption1)
@@ -132,7 +139,14 @@ final class BookHeader: UIView {
     let emptySpace = UIView()
     emptySpace.setContentHuggingPriority(.defaultLow, for: .vertical)
 
-    let stackView = UIStackView(arrangedSubviews: [titleLabel, authorLabel, emptySpace, readingStatusLabel, readingHistoryButton])
+    let stackView = UIStackView(arrangedSubviews: [
+      titleLabel,
+      authorLabel,
+      starRatingView,
+      emptySpace,
+      readingStatusLabel,
+      readingHistoryButton,
+    ])
     stackView.axis = .vertical
     stackView.distribution = .fill
     stackView.alignment = .leading
@@ -159,7 +173,13 @@ final class BookHeader: UIView {
   }
 }
 
-private extension ReadingHistory {
+extension BookHeader: StarRatingViewDelegate {
+  func starRatingView(_ view: StarRatingView, didChangeRating rating: Int) {
+    book.rating = rating
+  }
+}
+
+internal extension ReadingHistory {
   var currentReadingStatus: String? {
     guard let entries = entries else { return nil }
     var yearRead: Int?

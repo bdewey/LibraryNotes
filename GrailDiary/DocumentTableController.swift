@@ -61,6 +61,28 @@ public final class DocumentTableController: NSObject {
 
     let imageCache = NSCache<NSString, UIImage>()
 
+    let bookRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
+      guard case .page(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
+      let coverImage: UIImage?
+      if let imageData = viewProperties.noteProperties.thumbnailImage.first {
+        let key = viewProperties.pageKey as NSString
+        if let image = imageCache.object(forKey: key) {
+          coverImage = image
+        } else {
+          if let image = imageData.blob.image(maxSize: 100) {
+            coverImage = image
+            imageCache.setObject(image, forKey: key)
+          } else {
+            coverImage = nil
+          }
+        }
+      } else {
+        coverImage = nil
+      }
+      let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
+      cell.contentConfiguration = configuration
+    }
+
     let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item else { return }
       var configuration = cell.defaultContentConfiguration()
@@ -122,8 +144,12 @@ public final class DocumentTableController: NSObject {
           return collectionView.dequeueConfiguredReusableCell(using: openWebPageRegistration, for: indexPath, item: item)
         case .reviewQuotes:
           return collectionView.dequeueConfiguredReusableCell(using: viewQuotesRegistration, for: indexPath, item: item)
-        case .page:
-          return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+        case .page(let viewProperties):
+          if viewProperties.noteProperties.book != nil {
+            return collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: item)
+          } else {
+            return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
+          }
         case .bookCategory:
           return collectionView.dequeueConfiguredReusableCell(using: bookCategoryRegistration, for: indexPath, item: item)
         }
@@ -251,6 +277,7 @@ public final class DocumentTableController: NSObject {
     case title = "Title"
     case creationTimestamp = "Created Date"
     case modificationTimestap = "Modified Date"
+    case rating = "Rating"
 
     fileprivate var sortFunction: (ViewProperties, ViewProperties) -> Bool {
       switch self {
@@ -262,6 +289,8 @@ public final class DocumentTableController: NSObject {
         return { ViewProperties.lessThanPriorityCreation(lhs: $1, rhs: $0) }
       case .modificationTimestap:
         return { ViewProperties.lessThanPriorityModified(lhs: $1, rhs: $0) }
+      case .rating:
+        return { ViewProperties.lessThanPriorityRating(lhs: $1, rhs: $0) }
       }
     }
   }
@@ -692,6 +721,14 @@ private extension DocumentTableController {
       return
         (lhs.noteProperties.modifiedTimestamp, lhs.author, lhs.noteProperties.title, lhs.noteProperties.creationTimestamp) <
         (rhs.noteProperties.modifiedTimestamp, rhs.author, rhs.noteProperties.title, rhs.noteProperties.creationTimestamp)
+    }
+
+    static func lessThanPriorityRating(lhs: ViewProperties, rhs: ViewProperties) -> Bool {
+      let lhsRating = lhs.noteProperties.book?.rating ?? 0
+      let rhsRating = rhs.noteProperties.book?.rating ?? 0
+      return
+        (lhsRating, lhs.noteProperties.creationTimestamp, lhs.author, lhs.noteProperties.title, lhs.noteProperties.modifiedTimestamp) <
+        (rhsRating, rhs.noteProperties.creationTimestamp, rhs.author, rhs.noteProperties.title, rhs.noteProperties.modifiedTimestamp)
     }
   }
 
