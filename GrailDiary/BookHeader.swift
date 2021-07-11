@@ -147,7 +147,7 @@ final class BookHeader: UIView {
     // TODO: Compute this for real
     let frames = makeLayoutFrames(bounds: CGRect(origin: .zero, size: size))
     var result = size
-    result.height -= frames.remainder.height
+    result.height = max(frames.imageColumnHeight, frames.infoColumnHeight)
     return result
   }
 
@@ -158,7 +158,8 @@ final class BookHeader: UIView {
     var starRatingView: CGRect = .zero
     var readingHistoryButton: CGRect = .zero
     var readingStatusLabel: CGRect = .zero
-    var remainder: CGRect = .zero
+    var imageColumnHeight: CGFloat = 0
+    var infoColumnHeight: CGFloat = 0
   }
 
   var minimumTextX: CGFloat = 0 {
@@ -204,7 +205,10 @@ final class BookHeader: UIView {
 
     let readLabelSize = readingStatusLabel.sizeThatFits(layoutArea.size)
     (frames.readingStatusLabel, layoutArea) = layoutArea.divided(atDistance: readLabelSize.height, from: .maxYEdge)
-    frames.remainder = layoutArea.inset(by: .bottom(padding))
+    layoutArea = layoutArea.inset(by: .bottom(padding))
+
+    frames.imageColumnHeight = frames.coverImageView.maxY + padding
+    frames.infoColumnHeight = (frames.readingHistoryButton.maxY - layoutArea.height) + padding
 
     return frames
   }
