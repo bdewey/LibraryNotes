@@ -341,8 +341,11 @@ public final class TextEditViewController: UIViewController {
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
+    if let bookHeader = extendedNavigationHeaderView as? BookHeader {
+      bookHeader.minimumTextX = view.readableContentGuide.layoutFrame.minX + 28
+    }
     if let extendedNavigationHeaderView = extendedNavigationHeaderView {
-      let height = extendedNavigationHeaderView.systemLayoutSizeFitting(CGSize(width: view.frame.width, height: .greatestFiniteMagnitude)).height
+      let height = extendedNavigationHeaderView.sizeThatFits(CGSize(width: view.frame.width, height: UIView.layoutFittingExpandedSize.height)).height
       extendedNavigationHeaderView.frame = CGRect(origin: CGPoint(x: 0, y: -height), size: CGSize(width: view.frame.width, height: height))
     }
     adjustMargins()

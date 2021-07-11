@@ -21,28 +21,21 @@ final class BookHeader: UIView {
   init(book: AugmentedBook, coverImage: UIImage? = nil) {
     self.book = book
     self.coverImageView = UIImageView(image: coverImage)
-    super.init(frame: .zero)
+    coverImageView.contentMode = .scaleAspectFit
+    super.init(frame: UIScreen.main.bounds)
     preservesSuperviewLayoutMargins = true
     backgroundColor = .grailBackground
     titleLabel.text = book.title
     authorLabel.text = book.authors.joined(separator: ", ")
 
     [
-      contentStack,
-    ].compactMap { $0 }.forEach(addSubview)
-
-    if let coverImage = coverImage, coverImage.size.height != 0 {
-      coverImageView.snp.makeConstraints { make in
-        make.width.equalTo(coverImageView.snp.height).multipliedBy(coverImage.size.width / coverImage.size.height)
-      }
-    }
-
-    contentStack.snp.makeConstraints { make in
-      make.top.bottom.equalToSuperview().inset(padding)
-      make.right.equalTo(readableContentGuide)
-      // TODO: Find a better way to get the value 28 from the formatters
-      make.left.equalTo(readableContentGuide).inset(28)
-    }
+      titleLabel,
+      authorLabel,
+      starRatingView,
+      readingStatusLabel,
+      readingHistoryButton,
+      coverImageView,
+    ].forEach(addSubview)
     configureReadingHistoryButton()
   }
 
@@ -135,41 +128,89 @@ final class BookHeader: UIView {
     }
   }
 
-  private lazy var labelStack: UIStackView = {
-    let emptySpace = UIView()
-    emptySpace.setContentHuggingPriority(.defaultLow, for: .vertical)
-
-    let stackView = UIStackView(arrangedSubviews: [
-      titleLabel,
-      authorLabel,
-      starRatingView,
-      emptySpace,
-      readingStatusLabel,
-      readingHistoryButton,
-    ])
-    stackView.axis = .vertical
-    stackView.distribution = .fill
-    stackView.alignment = .leading
-    stackView.spacing = padding
-    return stackView
-  }()
-
-  private lazy var contentStack: UIStackView = {
-    let stack = UIStackView(arrangedSubviews: [coverImageView, labelStack])
-    stack.axis = .horizontal
-    stack.spacing = padding
-
-    coverImageView.setContentHuggingPriority(.required, for: .horizontal)
-    return stack
-  }()
-
   private lazy var padding: CGFloat = ceil(authorLabel.font.lineHeight * 0.5)
 
-  override func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize {
-    let superSize = super.systemLayoutSizeFitting(targetSize)
-    let stackSize = contentStack.systemLayoutSizeFitting(targetSize)
-    Logger.bookHeader.debug("systemLayoutSize: Super = \(superSize), stack = \(stackSize)")
-    return CGSize(width: max(superSize.width, stackSize.width), height: max(superSize.height, stackSize.height))
+  private let imageWidthFraction = 0.25
+
+  override func layoutSubviews() {
+    super.layoutSubviews()
+    let frames = makeLayoutFrames(bounds: bounds)
+    coverImageView.frame = frames.coverImageView
+    titleLabel.frame = frames.titleLabel
+    authorLabel.frame = frames.authorLabel
+    starRatingView.frame = frames.starRatingView
+    readingHistoryButton.frame = frames.readingHistoryButton
+    readingStatusLabel.frame = frames.readingStatusLabel
+  }
+
+  override func sizeThatFits(_ size: CGSize) -> CGSize {
+    // TODO: Compute this for real
+    let frames = makeLayoutFrames(bounds: CGRect(origin: .zero, size: size))
+    var result = size
+    result.height -= frames.remainder.height
+    return result
+  }
+
+  private struct LayoutFrames {
+    var coverImageView: CGRect = .zero
+    var titleLabel: CGRect = .zero
+    var authorLabel: CGRect = .zero
+    var starRatingView: CGRect = .zero
+    var readingHistoryButton: CGRect = .zero
+    var readingStatusLabel: CGRect = .zero
+    var remainder: CGRect = .zero
+  }
+
+  var minimumTextX: CGFloat = 0 {
+    didSet {
+      setNeedsLayout()
+    }
+  }
+
+  private func makeLayoutFrames(bounds: CGRect) -> LayoutFrames {
+    var layoutArea = bounds
+    var frames = LayoutFrames()
+    layoutArea.origin.y += padding
+    layoutArea.size.height -= 2 * padding
+
+    // Trim the layout area horizontally to fit in the readableContentGuide
+    layoutArea.origin.x = max(layoutArea.origin.x, readableContentGuide.layoutFrame.origin.x)
+    layoutArea.size.width = min(layoutArea.size.width, readableContentGuide.layoutFrame.size.width)
+
+    if let imageSize = coverImageView.image?.size, imageSize.width > 0, imageSize.height > 0 {
+      let imageWidth = ceil(layoutArea.width * imageWidthFraction)
+      (frames.coverImageView, layoutArea) = layoutArea.divided(atDistance: imageWidth, from: .minXEdge)
+      frames.coverImageView.size.height = imageWidth * (imageSize.height / imageSize.width)
+      let originAdjustment = titleLabel.font.ascender - titleLabel.font.capHeight
+      frames.coverImageView.origin.y += originAdjustment
+      layoutArea = layoutArea.inset(by: .left(padding))
+    }
+    layoutArea = layoutArea.inset(by: .left(max(0, minimumTextX - layoutArea.minX)))
+    let titleSize = titleLabel.sizeThatFits(layoutArea.size)
+    (frames.titleLabel, layoutArea) = layoutArea.divided(atDistance: titleSize.height, from: .minYEdge)
+    layoutArea = layoutArea.inset(by: .top(padding))
+    let authorSize = authorLabel.sizeThatFits(layoutArea.size)
+    (frames.authorLabel, layoutArea) = layoutArea.divided(atDistance: authorSize.height, from: .minYEdge)
+    layoutArea = layoutArea.inset(by: .top(padding))
+    let starSize = starRatingView.systemLayoutSizeFitting(layoutArea.size)
+    (frames.starRatingView, layoutArea) = layoutArea.divided(atDistance: starSize.height, from: .minYEdge)
+    frames.starRatingView.size.width = starSize.width
+
+    // Now go from the bottom
+    let buttonSize = readingHistoryButton.sizeThatFits(layoutArea.size)
+    (frames.readingHistoryButton, layoutArea) = layoutArea.divided(atDistance: buttonSize.height, from: .maxYEdge)
+    frames.readingHistoryButton.size.width = buttonSize.width
+    layoutArea = layoutArea.inset(by: .bottom(padding))
+
+    let readLabelSize = readingStatusLabel.sizeThatFits(layoutArea.size)
+    (frames.readingStatusLabel, layoutArea) = layoutArea.divided(atDistance: readLabelSize.height, from: .maxYEdge)
+    frames.remainder = layoutArea.inset(by: .bottom(padding))
+
+    return frames
+  }
+
+  override func layoutMarginsDidChange() {
+    setNeedsLayout()
   }
 }
 
@@ -195,5 +236,19 @@ internal extension ReadingHistory {
     } else {
       return nil
     }
+  }
+}
+
+private extension UIEdgeInsets {
+  static func top(_ value: CGFloat) -> UIEdgeInsets {
+    UIEdgeInsets(top: value, left: 0, bottom: 0, right: 0)
+  }
+
+  static func bottom(_ value: CGFloat) -> UIEdgeInsets {
+    UIEdgeInsets(top: 0, left: 0, bottom: value, right: 0)
+  }
+
+  static func left(_ value: CGFloat) -> UIEdgeInsets {
+    UIEdgeInsets(top: 0, left: value, bottom: 0, right: 0)
   }
 }
