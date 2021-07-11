@@ -474,6 +474,9 @@ private extension NotebookStructureViewController {
     let inferReadingHistory = UIAction(title: "Infer reading history") { [weak self] _ in
       self?.inferReadingHistory()
     }
+    let migrateRatings = UIAction(title: "Migrate ratings") { [weak self] _ in
+      self?.migrateRatings()
+    }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
       menu: UIMenu(
@@ -481,9 +484,49 @@ private extension NotebookStructureViewController {
           openCommand,
           importLibraryThing,
           inferReadingHistory,
+          migrateRatings,
         ]
       )
     )
+  }
+
+  private func migrateRatings() {
+    Logger.shared.info("Migrating ratings")
+    do {
+      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
+        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
+        for metadataRecord in metadataRecords {
+          guard var book = metadataRecord.book else { continue }
+          var didUpdateBook = false
+          let hashtags = metadataRecord.noteLinks.map { $0.targetTitle }
+          for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
+            let rating = hashtag.count - 8
+            book.rating = rating
+            didUpdateBook = true
+          }
+          if didUpdateBook {
+            let bookData = try JSONEncoder().encode(book)
+            let bookString = String(data: bookData, encoding: .utf8)!
+            let record = ContentRecord(
+              text: bookString,
+              noteId: metadataRecord.id,
+              key: ContentRole.reference.rawValue,
+              role: ContentRole.reference.rawValue,
+              mimeType: ApplicationMimeType.book.rawValue
+            )
+            try record.save(db)
+            try NoteRecord
+              .filter(key: metadataRecord.id)
+              .updateAll(db, [
+                NoteRecord.Columns.modifiedDevice <- updateIdentifier.deviceID,
+                NoteRecord.Columns.updateSequenceNumber <- updateIdentifier.updateSequenceNumber,
+              ])
+          }
+        }
+      })
+    } catch {
+      Logger.shared.error("Error migrating ratings: \(error)")
+    }
   }
 
   private func inferReadingHistory() {
