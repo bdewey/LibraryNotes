@@ -25,7 +25,7 @@ public final class BookView: UIView, UIContentView {
 
   public init(configuration: BookViewContentConfiguration) {
     self.configuration = configuration
-    super.init(frame: .zero)
+    super.init(frame: UIScreen.main.bounds)
     addSubview(contentStack)
     contentStack.snp.makeConstraints { make in
       make.edges.equalToSuperview().inset(10)
@@ -37,6 +37,14 @@ public final class BookView: UIView, UIContentView {
   @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+
+  override public func systemLayoutSizeFitting(_ targetSize: CGSize) -> CGSize {
+    super.systemLayoutSizeFitting(targetSize)
+  }
+
+  override public func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
+    super.systemLayoutSizeFitting(targetSize, withHorizontalFittingPriority: horizontalFittingPriority, verticalFittingPriority: verticalFittingPriority)
   }
 
   private let coverImageView = UIImageView(frame: .zero)
@@ -70,14 +78,10 @@ public final class BookView: UIView, UIContentView {
   }()
 
   private lazy var labelStack: UIStackView = {
-    let emptySpace = UIView()
-    emptySpace.setContentHuggingPriority(.defaultLow, for: .vertical)
-
     let stackView = UIStackView(arrangedSubviews: [
       titleLabel,
       authorLabel,
       starRatingView,
-      emptySpace,
       readingStatusLabel,
     ])
     stackView.axis = .vertical
@@ -91,6 +95,7 @@ public final class BookView: UIView, UIContentView {
     let stack = UIStackView(arrangedSubviews: [coverImageView, labelStack])
     stack.axis = .horizontal
     stack.spacing = padding
+    stack.alignment = .top
 
     coverImageView.setContentHuggingPriority(.required, for: .horizontal)
     return stack
@@ -104,13 +109,16 @@ public final class BookView: UIView, UIContentView {
     }
     if let image = configuration.coverImage {
       coverImageView.image = image
-      coverImageView.isHidden = false
       coverImageView.snp.remakeConstraints { make in
         make.width.equalTo(100)
         make.height.equalTo(coverImageView.snp.width).multipliedBy(image.size.height / image.size.width)
       }
     } else {
-      coverImageView.isHidden = true
+      coverImageView.image = nil
+      coverImageView.snp.remakeConstraints { make in
+        make.width.equalTo(100)
+        make.height.equalTo(0)
+      }
     }
     titleLabel.text = configuration.book?.title
     if let year = configuration.book?.originalYearPublished ?? configuration.book?.yearPublished {
