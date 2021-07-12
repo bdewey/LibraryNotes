@@ -22,7 +22,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     note: Note = Note(markdown: "# \n"),
     database: NoteDatabase,
     initialSelectedRange: NSRange? = nil,
-    initialImage: UIImage? = nil,
     autoFirstResponder: Bool = false
   ) {
     self.noteIdentifier = noteIdentifier
@@ -33,11 +32,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier)
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(note.title)
-    if let initialImage = initialImage,
-       let convertedData = initialImage.jpegData(compressionQuality: 0.8)
-    {
-      insertImageData(convertedData, type: .jpeg)
-    }
   }
 
   @available(*, unavailable)
@@ -203,7 +197,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     do {
       try forceSave()
       let reference = try storeImageData(imageData, type: type, key: nil)
-      let markdown = "\n\n![](\(reference))\n\n"
+      let markdown = "\n\n\(reference)\n\n"
       let initialRange = textEditViewController.selectedRange
       var rawRange = textEditViewController.parsedAttributedString.rawStringRange(forRange: initialRange)
       rawRange.location += markdown.utf16.count

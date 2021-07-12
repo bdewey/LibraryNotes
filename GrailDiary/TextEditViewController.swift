@@ -637,7 +637,7 @@ private extension TextEditViewController {
   }
 
   func insertBookDetails(apiKey: String) {
-    let bookViewController = BookSearchViewController(apiKey: apiKey)
+    let bookViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Insert Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
@@ -673,6 +673,10 @@ extension TextEditViewController: BookSearchViewControllerDelegate {
     delegate?.textEditViewController(self, didAttach: book)
     extendedNavigationHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
     dismiss(animated: true, completion: nil)
+  }
+
+  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+    // NOTHING
   }
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {

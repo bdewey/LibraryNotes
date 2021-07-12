@@ -220,34 +220,22 @@ public final class NotebookViewController: UIViewController {
   }
 
   public func makeNewNoteButtonItem() -> UIBarButtonItem {
-    var extraActions = [UIAction]()
+    let primaryAction: UIAction
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
-      let bookNoteAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        let bookSearchViewController = BookSearchViewController(apiKey: apiKey)
+      primaryAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
+        let bookSearchViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: true)
         bookSearchViewController.delegate = self
-        bookSearchViewController.title = "New Note About Book"
+        bookSearchViewController.title = "Add Book Details"
         let navigationController = UINavigationController(rootViewController: bookSearchViewController)
         navigationController.navigationBar.tintColor = .grailTint
         self?.present(navigationController, animated: true)
       })
-      extraActions.append(bookNoteAction)
+    } else {
+      primaryAction = UIAction { [weak self] _ in
+        self?.makeNewNote()
+      }
     }
-    let webImporters = WebImporterConfiguration.shared.map { config -> UIAction in
-      UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
-        guard let self = self else { return }
-        let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
-        webViewController.delegate = self
-        let navigationController = UINavigationController(rootViewController: webViewController)
-        navigationController.navigationBar.tintColor = .grailTint
-        self.present(navigationController, animated: true, completion: nil)
-      })
-    }
-    extraActions.append(contentsOf: webImporters)
-    let menu: UIMenu? = extraActions.isEmpty ? nil : UIMenu(options: [.displayInline], children: extraActions)
-    let primaryAction = UIAction { [weak self] _ in
-      self?.makeNewNote()
-    }
-    let button = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction, menu: menu)
+    let button = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction)
     button.accessibilityIdentifier = "new-document"
     return button
   }
@@ -391,18 +379,30 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 extension NotebookViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
     dismiss(animated: true, completion: nil)
-    let (text, offset) = Note.makeBlankNoteText(title: book.markdownTitle, hashtag: focusedNotebookStructure.hashtag)
-    var note = Note(markdown: text)
-    note.folder = focusedNotebookStructure.predefinedFolder?.rawValue
-    let viewController = SavingTextEditViewController(
-      note: note,
-      database: database,
-      initialSelectedRange: NSRange(location: offset, length: 0),
-      initialImage: coverImage,
-      autoFirstResponder: true
-    )
-    setSecondaryViewController(viewController, pushIfCollapsed: true)
-    Logger.shared.info("Created a new view controller for a book!")
+    let markdown = focusedNotebookStructure.hashtag.flatMap({ $0 + "\n\n" }) ?? ""
+    var note = Note(markdown: markdown)
+    note.reference = .book(AugmentedBook(book))
+    do {
+      let identifier = try database.createNote(note)
+      if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+        _ = try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: .jpeg, key: Note.coverImageKey)
+      }
+      let viewController = SavingTextEditViewController(
+        noteIdentifier: identifier,
+        note: note,
+        database: database,
+        autoFirstResponder: true
+      )
+      setSecondaryViewController(viewController, pushIfCollapsed: true)
+      Logger.shared.info("Created a new view controller for a book!")
+    } catch {
+      Logger.shared.error("Unexpected error creating note for book \(book): \(error)")
+    }
+  }
+
+  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
+    makeNewNote()
   }
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {

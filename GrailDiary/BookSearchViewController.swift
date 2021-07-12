@@ -36,12 +36,16 @@ public protocol BookSearchViewControllerDelegate: AnyObject {
   /// The person canceled without selecting a book.
   /// (Note this is not guaranteed to be called with the pull-down presentation style)
   func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController)
+
+  /// The person skipped adding book details to a new note.
+  func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController)
 }
 
 /// Searches Google for information about a book.
 public final class BookSearchViewController: UIViewController {
-  public init(apiKey: String) {
+  public init(apiKey: String, showSkipButton: Bool) {
     self.apiKey = apiKey
+    self.showSkipButton = showSkipButton
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -52,6 +56,7 @@ public final class BookSearchViewController: UIViewController {
 
   public weak var delegate: BookSearchViewControllerDelegate?
   private let apiKey: String
+  private let showSkipButton: Bool
 
   public enum Error: Swift.Error {
     case invalidServerResponse
@@ -163,11 +168,15 @@ public final class BookSearchViewController: UIViewController {
       self.delegate?.bookSearchViewControllerDidCancel(self)
     }
     navigationItem.leftBarButtonItem = cancelButton
-    navigationItem.searchController = searchController
-  }
 
-  override public func viewDidAppear(_ animated: Bool) {
-    searchController.isActive = true
+    if showSkipButton {
+      let skipButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
+        guard let self = self else { return }
+        self.delegate?.bookSearchViewControllerDidSkip(self)
+      })
+      navigationItem.rightBarButtonItem = skipButton
+    }
+    navigationItem.searchController = searchController
   }
 }
 
