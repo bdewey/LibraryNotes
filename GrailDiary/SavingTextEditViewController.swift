@@ -39,14 +39,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     fatalError("init(coder:) has not been implemented")
   }
 
-  public enum ChromeStyle {
-    case modal
-    case splitViewController
-  }
-
-  /// Controls configuration of toolbars & navigation items
-  public var chromeStyle = ChromeStyle.splitViewController
-
   private var note: Note
   private let noteStorage: NoteDatabase
   private let restorationState: RestorationState
@@ -70,7 +62,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   let noteIdentifier: Note.Identifier
 
   internal func setTitleMarkdown(_ markdown: String) {
-    guard chromeStyle == .splitViewController else { return }
     let label = UILabel(frame: .zero)
     label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
     navigationItem.titleView = label
@@ -121,22 +112,16 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   private func configureToolbar() {
-    switch chromeStyle {
-    case .modal:
-      let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeModal))
-      navigationItem.rightBarButtonItem = closeButton
-    case .splitViewController:
-      if splitViewController?.isCollapsed ?? false {
-        navigationItem.rightBarButtonItem = nil
-        navigationController?.isToolbarHidden = false
-        if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
-          toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
-        }
-      } else {
-        navigationItem.rightBarButtonItem = notebookViewController?.makeNewNoteButtonItem()
-        navigationController?.isToolbarHidden = true
-        toolbarItems = []
+    if splitViewController?.isCollapsed ?? false {
+      navigationItem.rightBarButtonItem = nil
+      navigationController?.isToolbarHidden = false
+      if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
+        toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
       }
+    } else {
+      navigationItem.rightBarButtonItem = notebookViewController?.makeNewNoteButtonItem()
+      navigationController?.isToolbarHidden = true
+      toolbarItems = []
     }
   }
 
