@@ -77,6 +77,7 @@ public final class BookSearchViewController: UIViewController {
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
     collectionView.delegate = self
+    collectionView.backgroundColor = .grailBackground
     return collectionView
   }()
 
