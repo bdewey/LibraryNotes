@@ -105,6 +105,7 @@ public final class TextEditViewController: UIViewController {
       navigationBorderView.backgroundColor = .tertiaryLabel
       textView.addSubview(navigationBorderView)
       self.navigationBorderView = navigationBorderView
+      view.setNeedsLayout()
     }
   }
 
@@ -279,7 +280,7 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
-    var importActions = WebImporterConfiguration.shared.map { config in
+    let importActions = WebImporterConfiguration.shared.map { config in
       UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
         guard let self = self else { return }
         let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
@@ -288,11 +289,6 @@ public final class TextEditViewController: UIViewController {
         navigationController.navigationBar.tintColor = .grailTint
         self.present(navigationController, animated: true, completion: nil)
       })
-    }
-    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
-      importActions.append(UIAction(title: "Search Google Books", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        self?.insertBookDetails(apiKey: apiKey)
-      }))
     }
 
     if !importActions.isEmpty {
@@ -635,15 +631,6 @@ private extension TextEditViewController {
     textView.insertText("?[](")
     textView.selectedRange = NSRange(location: range.upperBound + 4, length: 0)
   }
-
-  func insertBookDetails(apiKey: String) {
-    let bookViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: false)
-    bookViewController.delegate = self
-    bookViewController.title = "Insert Book Details"
-    let navigationController = UINavigationController(rootViewController: bookViewController)
-    navigationController.navigationBar.tintColor = .grailTint
-    present(navigationController, animated: true, completion: nil)
-  }
 }
 
 // MARK: - WebScrapingViewControllerDelegate
@@ -655,31 +642,6 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
   }
 
   public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
-    dismiss(animated: true, completion: nil)
-  }
-}
-
-// MARK: - BookSearchViewControllerDelegate
-
-extension TextEditViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
-    if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
-      do {
-        _ = try imageStorage.storeImageData(imageData, type: .jpeg, key: Note.coverImageKey)
-      } catch {
-        Logger.shared.error("Unexpected error saving image data: \(error)")
-      }
-    }
-    delegate?.textEditViewController(self, didAttach: book)
-    extendedNavigationHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
-    dismiss(animated: true, completion: nil)
-  }
-
-  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
-    // NOTHING
-  }
-
-  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
     dismiss(animated: true, completion: nil)
   }
 }

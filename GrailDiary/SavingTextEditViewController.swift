@@ -111,15 +111,37 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     dismiss(animated: true, completion: nil)
   }
 
+  func insertBookDetails(apiKey: String) {
+    let bookViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: false)
+    bookViewController.delegate = self
+    bookViewController.title = "Insert Book Details"
+    let navigationController = UINavigationController(rootViewController: bookViewController)
+    navigationController.navigationBar.tintColor = .grailTint
+    present(navigationController, animated: true, completion: nil)
+  }
+
+  func makeInsertBookDetailsButton() -> UIBarButtonItem? {
+    guard let apiKey = ApiKey.googleBooks else {
+      return nil
+    }
+    if case .book = note.reference {
+      return nil
+    }
+    return UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
+      self?.insertBookDetails(apiKey: apiKey)
+    })
+  }
+
   private func configureToolbar() {
     if splitViewController?.isCollapsed ?? false {
-      navigationItem.rightBarButtonItem = nil
+      navigationItem.rightBarButtonItem = makeInsertBookDetailsButton()
       navigationController?.isToolbarHidden = false
       if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
         toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
       }
     } else {
-      navigationItem.rightBarButtonItem = notebookViewController?.makeNewNoteButtonItem()
+      navigationItem.rightBarButtonItems = [makeInsertBookDetailsButton(), notebookViewController?.makeNewNoteButtonItem()]
+        .compactMap({ $0 })
       navigationController?.isToolbarHidden = true
       toolbarItems = []
     }
@@ -266,5 +288,28 @@ extension SavingTextEditViewController: BookHeaderDelegate {
     note.reference = .book(book)
     note.timestamp = Date()
     tryUpdateNote(note)
+  }
+}
+
+extension SavingTextEditViewController: BookSearchViewControllerDelegate {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
+    if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+      do {
+        _ = try storeImageData(imageData, type: .jpeg, key: Note.coverImageKey)
+      } catch {
+        Logger.shared.error("Unexpected error saving image data: \(error)")
+      }
+    }
+    textEditViewController(textEditViewController, didAttach: book)
+    textEditViewController.extendedNavigationHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
+    dismiss(animated: true, completion: nil)
+  }
+
+  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+    // NOTHING
+  }
+
+  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
   }
 }

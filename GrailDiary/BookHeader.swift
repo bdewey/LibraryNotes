@@ -91,6 +91,7 @@ final class BookHeader: UIView {
       } else {
         self.startReading()
       }
+      self.setNeedsLayout()
     }))
     return button
   }()
