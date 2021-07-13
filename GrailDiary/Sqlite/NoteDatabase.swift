@@ -384,17 +384,22 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
     _ = try dbQueue.write { db in
-      guard var note = try NoteRecord.filter(key: noteIdentifier).fetchOne(db) else {
-        return
-      }
       let updateKey = try self.updateIdentifier(in: db)
-      try note.contentRecords.deleteAll(db)
-      note.deleted = true
-      note.modifiedDevice = updateKey.deviceID
-      note.modifiedTimestamp = Date()
-      note.updateSequenceNumber = updateKey.updateSequenceNumber
-      try note.update(db)
+      try deleteNote(noteIdentifier: noteIdentifier, updateKey: updateKey, database: db)
     }
+  }
+
+  public func deleteNote(noteIdentifier: Note.Identifier, updateKey: UpdateIdentifier, database db: Database) throws {
+    guard var note = try NoteRecord.filter(key: noteIdentifier).fetchOne(db) else {
+      return
+    }
+    let updateKey = try self.updateIdentifier(in: db)
+    try note.contentRecords.deleteAll(db)
+    note.deleted = true
+    note.modifiedDevice = updateKey.deviceID
+    note.modifiedTimestamp = Date()
+    note.updateSequenceNumber = updateKey.updateSequenceNumber
+    try note.update(db)
   }
 
   public func eligiblePromptIdentifiers(

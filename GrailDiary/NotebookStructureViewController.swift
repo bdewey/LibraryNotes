@@ -477,6 +477,9 @@ private extension NotebookStructureViewController {
     let migrateRatings = UIAction(title: "Migrate ratings") { [weak self] _ in
       self?.migrateRatings()
     }
+    let purgeNotes = UIAction(title: "Purge non-book notes") { [weak self] _ in
+      self?.purgeUncategorizedNotes()
+    }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
       menu: UIMenu(
@@ -485,9 +488,25 @@ private extension NotebookStructureViewController {
           importLibraryThing,
           inferReadingHistory,
           migrateRatings,
+          purgeNotes,
         ]
       )
     )
+  }
+
+  private func purgeUncategorizedNotes() {
+    Logger.shared.info("Purging uncategorized notes")
+    do {
+      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
+        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
+        let identifiersWithoutBooks = metadataRecords.filter({ $0.book == nil }).map({ $0.id })
+        for noteIdentifier in identifiersWithoutBooks {
+          try database.deleteNote(noteIdentifier: noteIdentifier, updateKey: updateIdentifier, database: db)
+        }
+      })
+    } catch {
+      Logger.shared.error("Error purging notes: \(error)")
+    }
   }
 
   private func migrateRatings() {
