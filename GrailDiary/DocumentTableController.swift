@@ -341,7 +341,7 @@ extension DocumentTableController {
     }
     switch item {
     case .page(let properties):
-      let actions = availableItemActionConfigurations(properties).reversed().map { $0.asContextualAction() }
+      let actions = availableItemActionConfigurations(properties).reversed().compactMap { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
     case .webPage, .reviewQuotes, .bookCategory:
       return nil
@@ -364,9 +364,11 @@ extension DocumentTableController {
     var image: UIImage?
     var backgroundColor: UIColor?
     var destructive: Bool = false
+    var availableAsSwipeAction = true
     var handler: () throws -> Void
 
-    func asContextualAction() -> UIContextualAction {
+    func asContextualAction() -> UIContextualAction? {
+      guard availableAsSwipeAction else { return nil }
       let action = UIContextualAction(style: destructive ? .destructive : .normal, title: title) { _, _, completion in
         do {
           try handler()
@@ -406,11 +408,20 @@ extension DocumentTableController {
     }
 
     static func moveItemToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == nil { return nil }
-      return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint) {
+      guard viewProperties.bookCategory != .read else {
+        return nil
+      }
+      return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = nil
+          if case .book(var book) = note.reference {
+            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            if book.readingHistory == nil {
+              book.readingHistory = ReadingHistory()
+            }
+            book.readingHistory!.finishReading(finishDate: today)
+            note.reference = .book(book)
+          }
           return note
         })
         Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
@@ -418,11 +429,20 @@ extension DocumentTableController {
     }
 
     static func moveItemToCurrentlyReading(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolder.currentlyReading.rawValue { return nil }
-      return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint) {
+      guard viewProperties.bookCategory != .currentlyReading else {
+        return nil
+      }
+      return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolder.currentlyReading.rawValue
+          if case .book(var book) = note.reference {
+            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
+            if book.readingHistory == nil {
+              book.readingHistory = ReadingHistory()
+            }
+            book.readingHistory!.startReading(startDate: today)
+            note.reference = .book(book)
+          }
           return note
         })
         Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
@@ -430,11 +450,16 @@ extension DocumentTableController {
     }
 
     static func moveItemToWantToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      if viewProperties.noteProperties.folder == PredefinedFolder.wantToRead.rawValue { return nil }
-      return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo) {
+      guard viewProperties.bookCategory != .wantToRead else {
+        return nil
+      }
+      return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          note.folder = PredefinedFolder.wantToRead.rawValue
+          if case .book(var book) = note.reference {
+            book.readingHistory = nil
+            note.reference = .book(book)
+          }
           return note
         })
         Logger.shared.info("Moved \(viewProperties.pageKey) to 'want to read'")
