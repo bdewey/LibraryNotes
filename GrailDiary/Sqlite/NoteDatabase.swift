@@ -3,9 +3,11 @@
 import Combine
 import Foundation
 import GRDB
+import KeyValueCRDT
 import Logging
 import SpacedRepetitionScheduler
 import UIKit
+import SwiftUI
 
 // swiftlint:disable file_length
 
@@ -82,7 +84,7 @@ public final class NoteDatabase: UIDocument {
     case cannotDecodePromptCollection = "Cannot decode the prompt collection."
     case databaseAlreadyOpen = "The database is already open."
     case databaseIsNotOpen = "The database is not open."
-    case noDeviceUUID = "Could note get the device UUID."
+    case noDeviceUUID = "Could not get the device UUID."
     case noSuchAsset = "The specified asset does not exist."
     case noSuchPrompt = "The specified prompt does not exist."
     case noSuchNote = "The specified note does not exist."
@@ -152,7 +154,23 @@ public final class NoteDatabase: UIDocument {
   }
 
   public func exportToKVCRDT(_ fileURL: URL?) throws {
-    
+    guard let author = Author(UIDevice.current) else {
+      throw Error.noDeviceUUID
+    }
+    guard let dbQueue = dbQueue else {
+      throw Error.databaseIsNotOpen
+    }
+
+    let crdt = try KeyValueCRDT(fileURL: fileURL, author: author)
+    let contentRecords = try dbQueue.read { db in
+      try ContentRecord.fetchAll(db)
+    }
+    let tuples = contentRecords.compactMap { record -> (ScopedKey, String)? in
+      if record.role != ContentRole.primary.rawValue { return nil }
+      return (ScopedKey(scope: record.noteId, key: "noteText"), record.text)
+    }
+    let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
+    try crdt.bulkWrite(map)
   }
 
   /// Merges new content from another storage container into this storage container.
