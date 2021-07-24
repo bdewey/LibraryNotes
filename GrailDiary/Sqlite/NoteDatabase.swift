@@ -182,6 +182,14 @@ public final class NoteDatabase: UIDocument {
       return (ScopedKey(scope: record.noteId, key: "book"), .json(record.text))
     }
     try crdt.bulkWrite(Dictionary(bookTuples, uniquingKeysWith: { value, _ in value }))
+
+    let binaryContentRecords = try dbQueue.read { db in
+      try BinaryContentRecord.fetchAll(db)
+    }
+    let imageTuples = binaryContentRecords.compactMap { record -> (ScopedKey, Value) in
+      return (ScopedKey(scope: record.noteId, key: record.key), .blob(mimeType: record.mimeType, blob: record.blob))
+    }
+    try crdt.bulkWrite(Dictionary(imageTuples, uniquingKeysWith: { value, _ in value }))
   }
 
   /// Merges new content from another storage container into this storage container.
