@@ -3,7 +3,6 @@
 import Combine
 import Foundation
 import GRDB
-import GRDBCombine
 import Logging
 import SpacedRepetitionScheduler
 import UIKit
@@ -515,7 +514,11 @@ public final class NoteDatabase: UIDocument {
         .filter(PromptRecord.Columns.noteId == identifier.noteId && PromptRecord.Columns.promptKey == identifier.promptKey &&
           (PromptRecord.Columns.due == nil || PromptRecord.Columns.due < minimumDue)
         )
-        .updateAll(db, PromptRecord.Columns.due <- minimumDue, PromptRecord.Columns.modifiedDevice <- updateKey.deviceID, PromptRecord.Columns.updateSequenceNumber <- updateKey.updateSequenceNumber)
+        .updateAll(db, [
+          PromptRecord.Columns.due.set(to: minimumDue),
+          PromptRecord.Columns.modifiedDevice.set(to: updateKey.deviceID),
+          PromptRecord.Columns.updateSequenceNumber.set(to: updateKey.updateSequenceNumber),
+        ])
       Logger.shared.info("Buried \(updates) prompts(s)")
     }
   }
@@ -880,10 +883,10 @@ internal extension NoteDatabase {
       })
     })
 
-    let priorMigrations = try migrator.appliedMigrations(in: databaseQueue)
+    let priorMigrations = try databaseQueue.read(migrator.appliedMigrations)
     try migrator.migrate(databaseQueue)
-    let postMigrations = try migrator.appliedMigrations(in: databaseQueue)
-    return priorMigrations != postMigrations
+    let postMigrations = try databaseQueue.read(migrator.appliedMigrations)
+    return Set(priorMigrations) != Set(postMigrations)
   }
 }
 
@@ -962,9 +965,14 @@ private extension Database {
 
 private extension DatabaseQueue {
   var deviceVersionVector: VersionVector {
-    read { db in
-      let devices = (try? DeviceRecord.fetchAll(db)) ?? []
-      return VersionVector(devices)
+    do {
+      return try read { db in
+        let devices = (try? DeviceRecord.fetchAll(db)) ?? []
+        return VersionVector(devices)
+      }
+    } catch {
+      Logger.shared.error("Unexpected error getting device version vector: \(error)")
+      return VersionVector([])
     }
   }
 
@@ -1043,7 +1051,7 @@ private extension DatabaseMigrator {
     else {
       throw NoteDatabase.Error.missingMigrationScript
     }
-    registerMigrationWithDeferredForeignKeyCheck(migration.rawValue) { database in
+    registerMigration(migration.rawValue) { database in
       try database.execute(sql: script)
       try additionalSteps?(database)
     }

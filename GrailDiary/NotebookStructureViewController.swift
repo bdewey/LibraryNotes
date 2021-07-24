@@ -555,8 +555,8 @@ private extension NotebookStructureViewController {
             try NoteRecord
               .filter(key: metadataRecord.id)
               .updateAll(db, [
-                NoteRecord.Columns.modifiedDevice <- updateIdentifier.deviceID,
-                NoteRecord.Columns.updateSequenceNumber <- updateIdentifier.updateSequenceNumber,
+                NoteRecord.Columns.modifiedDevice.set(to: updateIdentifier.deviceID),
+                NoteRecord.Columns.updateSequenceNumber.set(to: updateIdentifier.updateSequenceNumber),
               ])
           }
         }
