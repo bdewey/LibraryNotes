@@ -183,6 +183,13 @@ public final class NoteDatabase: UIDocument {
     }
     try crdt.bulkWrite(Dictionary(bookTuples, uniquingKeysWith: { value, _ in value }))
 
+    let promptTuples = contentRecords.compactMap { record -> (ScopedKey, Value)? in
+      if !record.role.hasPrefix("prompt=") { return nil }
+      let key = [record.role, record.key].joined(separator: ";")
+      return (ScopedKey(scope: record.noteId, key: key), .text(record.text))
+    }
+    try crdt.bulkWrite(Dictionary(promptTuples, uniquingKeysWith: { value, _ in value }))
+
     let binaryContentRecords = try dbQueue.read { db in
       try BinaryContentRecord.fetchAll(db)
     }
