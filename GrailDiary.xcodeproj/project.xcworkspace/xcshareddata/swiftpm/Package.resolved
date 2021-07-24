@@ -23,9 +23,9 @@
         "package": "GRDB.swift",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
-          "branch": null,
-          "revision": "91d712ae4872f81c60ad3b741ec585eb8e8fdae1",
-          "version": "5.8.1"
+          "branch": "xcode13",
+          "revision": "a796aa920f4a24c2e5d4934e4fb7eec64104f1d0",
+          "version": null
         }
       },
       {
@@ -47,12 +47,12 @@
         }
       },
       {
-        "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log",
+        "package": "swift-argument-parser",
+        "repositoryURL": "https://github.com/apple/swift-argument-parser",
         "state": {
           "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
+          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
+          "version": "0.4.3"
         }
       },
       {

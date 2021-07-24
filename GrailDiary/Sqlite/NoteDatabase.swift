@@ -161,6 +161,9 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
 
+    if let fileURL = fileURL {
+      try? FileManager.default.removeItem(at: fileURL)
+    }
     let crdt = try KeyValueCRDT(fileURL: fileURL, author: author)
     let contentRecords = try dbQueue.read { db in
       try ContentRecord.fetchAll(db)
@@ -171,6 +174,14 @@ public final class NoteDatabase: UIDocument {
     }
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
+
+    let bookTuples = contentRecords.compactMap { record -> (ScopedKey, Value)? in
+      if record.role != ContentRole.reference.rawValue || record.mimeType != ApplicationMimeType.book.rawValue {
+        return nil
+      }
+      return (ScopedKey(scope: record.noteId, key: "book"), .json(record.text))
+    }
+    try crdt.bulkWrite(Dictionary(bookTuples, uniquingKeysWith: { value, _ in value }))
   }
 
   /// Merges new content from another storage container into this storage container.
