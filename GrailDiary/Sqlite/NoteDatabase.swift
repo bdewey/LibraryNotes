@@ -152,6 +152,10 @@ public final class NoteDatabase: UIDocument {
     Logger.shared.info("Found \(count) saved URLs")
   }
 
+  public func exportToKVCRDT(_ fileURL: URL?) throws {
+    
+  }
+
   /// Merges new content from another storage container into this storage container.
   public func merge(other: NoteDatabase) throws -> MergeResult {
     guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {

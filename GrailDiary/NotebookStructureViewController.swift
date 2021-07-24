@@ -480,6 +480,9 @@ private extension NotebookStructureViewController {
     let purgeNotes = UIAction(title: "Purge non-book notes") { [weak self] _ in
       self?.purgeUncategorizedNotes()
     }
+    let export = UIAction(title: "Export") { [weak self] _ in
+      self?.exportToKVCRDT()
+    }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
       menu: UIMenu(
@@ -489,9 +492,24 @@ private extension NotebookStructureViewController {
           inferReadingHistory,
           migrateRatings,
           purgeNotes,
+          export,
         ]
       )
     )
+  }
+
+  private func exportToKVCRDT() {
+    let exportedURL = database.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt")
+    Logger.shared.info("Exporting to \(exportedURL.path)")
+    do {
+      try database.exportToKVCRDT(exportedURL)
+      let alert = UIAlertController(title: "Export Complete", message: "Export was successful", preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default)
+      alert.addAction(okAction)
+      present(alert, animated: true)
+    } catch {
+      Logger.shared.error("Unexpected error exporting data: \(error)")
+    }
   }
 
   private func purgeUncategorizedNotes() {
