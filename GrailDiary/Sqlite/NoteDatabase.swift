@@ -8,6 +8,7 @@ import Logging
 import SpacedRepetitionScheduler
 import UIKit
 import SwiftUI
+import BookKit
 
 // swiftlint:disable file_length
 
@@ -175,6 +176,20 @@ public final class NoteDatabase: UIDocument {
     var spacedRepetitionFactor: Double = 2.5
   }
 
+  struct NoteMetadata: Codable {
+    var id: Note.Identifier
+    var title: String
+    var creationTimestamp: Date
+    var tags: [String] = []
+    var book: AugmentedBook?
+
+    init(_ noteRecord: NoteRecord) {
+      self.id = noteRecord.id
+      self.title = noteRecord.title
+      self.creationTimestamp = noteRecord.creationTimestamp
+    }
+  }
+
   /// This is an experimental struct to encode information currently stored in a ContentRecord (the `PromptCollection`) and in related `PromptRecords`
   /// (stats on individual prompts).
   struct PromptCollectionInfo: Codable {
@@ -217,13 +232,31 @@ public final class NoteDatabase: UIDocument {
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
 
-    let bookTuples = contentRecords.compactMap { record -> (ScopedKey, Value)? in
-      if record.role != ContentRole.reference.rawValue || record.mimeType != ApplicationMimeType.book.rawValue {
-        return nil
-      }
-      return (ScopedKey(scope: record.noteId, key: "book"), .json(record.text))
+    let noteMetadataEntries = try dbQueue.read { db in
+      try NoteRecord.filter(NoteRecord.Columns.deleted == false).fetchAll(db).map(NoteMetadata.init)
     }
-    try crdt.bulkWrite(Dictionary(bookTuples, uniquingKeysWith: { value, _ in value }))
+    var noteMetadata = Dictionary(uniqueKeysWithValues: noteMetadataEntries.map({ ($0.id, $0) }))
+    try contentRecords
+      .filter({ record in record.role == ContentRole.reference.rawValue && record.mimeType == ApplicationMimeType.book.rawValue })
+      .forEach { bookRecord in
+        let data = bookRecord.text.data(using: .utf8)!
+        let book = try JSONDecoder().decode(AugmentedBook.self, from: data)
+        noteMetadata[bookRecord.noteId]?.book = book
+      }
+    try dbQueue.read { db in
+      let records = try NoteLinkRecord.fetchAll(db)
+      let tags = Dictionary(grouping: records, by: { $0.noteId })
+      for (noteId, tagArray) in tags {
+        noteMetadata[noteId]?.tags = tagArray.map { $0.targetTitle }
+      }
+    }
+
+    let bulkMetadata = try noteMetadata.map { (noteId, metadata) -> (ScopedKey, Value) in
+      let data = try encoder.encode(metadata)
+      let json = String(data: data, encoding: .utf8)!
+      return (ScopedKey(scope: noteId, key: ".metadata"), .json(json))
+    }
+    try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkMetadata))
 
     let promptRecords = try dbQueue.read { db in
       try PromptRecord.fetchAll(db)
