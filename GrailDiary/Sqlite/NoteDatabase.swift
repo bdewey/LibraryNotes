@@ -153,6 +153,46 @@ public final class NoteDatabase: UIDocument {
     Logger.shared.info("Found \(count) saved URLs")
   }
 
+  struct PromptStatistics: Codable {
+    internal init(_ promptRecord: PromptRecord) {
+      self.reviewCount = promptRecord.reviewCount
+      self.lapseCount = promptRecord.lapseCount
+      self.totalCorrect = promptRecord.totalCorrect
+      self.totalIncorrect = promptRecord.totalIncorrect
+      self.lastReview = promptRecord.lastReview
+      self.idealInterval = promptRecord.idealInterval
+      self.due = promptRecord.due
+      self.spacedRepetitionFactor = promptRecord.spacedRepetitionFactor
+    }
+
+    var reviewCount: Int = 0
+    var lapseCount: Int = 0
+    var totalCorrect: Int = 0
+    var totalIncorrect: Int = 0
+    var lastReview: Date?
+    var idealInterval: Double?
+    var due: Date?
+    var spacedRepetitionFactor: Double = 2.5
+  }
+
+  /// This is an experimental struct to encode information currently stored in a ContentRecord (the `PromptCollection`) and in related `PromptRecords`
+  /// (stats on individual prompts).
+  struct PromptCollectionInfo: Codable {
+    var type: String
+    var rawValue: String
+    var promptStatistics: [PromptStatistics]
+
+    init(contentRecord: ContentRecord, promptRecords: [PromptRecord]) {
+      self.type = contentRecord.role
+      self.rawValue = contentRecord.text
+      let sortedRecords = promptRecords.sorted(by: { $0.promptIndex < $1.promptIndex })
+      for index in sortedRecords.indices {
+        assert(sortedRecords[index].promptIndex == index)
+      }
+      self.promptStatistics = sortedRecords.map(PromptStatistics.init)
+    }
+  }
+
   public func exportToKVCRDT(_ fileURL: URL?) throws {
     guard let author = Author(UIDevice.current) else {
       throw Error.noDeviceUUID
@@ -164,6 +204,8 @@ public final class NoteDatabase: UIDocument {
     if let fileURL = fileURL {
       try? FileManager.default.removeItem(at: fileURL)
     }
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .iso8601
     let crdt = try KeyValueCRDT(fileURL: fileURL, author: author)
     let contentRecords = try dbQueue.read { db in
       try ContentRecord.fetchAll(db)
@@ -183,10 +225,18 @@ public final class NoteDatabase: UIDocument {
     }
     try crdt.bulkWrite(Dictionary(bookTuples, uniquingKeysWith: { value, _ in value }))
 
-    let promptTuples = contentRecords.compactMap { record -> (ScopedKey, Value)? in
+    let promptRecords = try dbQueue.read { db in
+      try PromptRecord.fetchAll(db)
+    }
+    let groupedPromptRecords = Dictionary(grouping: promptRecords, by: { [$0.noteId, $0.promptKey].joined(separator: ".") })
+
+    let promptTuples = try contentRecords.compactMap { record -> (ScopedKey, Value)? in
       if !record.role.hasPrefix("prompt=") { return nil }
       let key = [record.role, record.key].joined(separator: ";")
-      return (ScopedKey(scope: record.noteId, key: key), .text(record.text))
+      let promptRecordKey = [record.noteId, record.key].joined(separator: ".")
+      let info = PromptCollectionInfo(contentRecord: record, promptRecords: groupedPromptRecords[promptRecordKey]!)
+      let json = String(data: try encoder.encode(info), encoding: .utf8)!
+      return (ScopedKey(scope: record.noteId, key: key), .json(json))
     }
     try crdt.bulkWrite(Dictionary(promptTuples, uniquingKeysWith: { value, _ in value }))
 
