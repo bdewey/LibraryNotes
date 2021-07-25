@@ -208,6 +208,20 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
+  struct StudyLogEntry: Codable {
+    var timestamp: Date
+    var correct: Int
+    var incorrect: Int
+    var promptIndex: Int
+
+    init(_ studyLogEntry: StudyLogEntryRecord) {
+      self.timestamp = studyLogEntry.timestamp
+      self.correct = studyLogEntry.correct
+      self.incorrect = studyLogEntry.incorrect
+      self.promptIndex = studyLogEntry.promptIndex
+    }
+  }
+
   public func exportToKVCRDT(_ fileURL: URL?) throws {
     guard let author = Author(UIDevice.current) else {
       throw Error.noDeviceUUID
@@ -280,6 +294,20 @@ public final class NoteDatabase: UIDocument {
       return (ScopedKey(scope: record.noteId, key: record.key), .blob(mimeType: record.mimeType, blob: record.blob))
     }
     try crdt.bulkWrite(Dictionary(imageTuples, uniquingKeysWith: { value, _ in value }))
+
+    let studyLogEntries = try dbQueue.read { db in
+      try StudyLogEntryRecord.fetchAll(db)
+    }
+    let bulkEntries = try studyLogEntries.map { entry -> (ScopedKey, Value) in
+      let scope = "note=\(entry.noteId).prompt=\(entry.promptKey)"
+      let formattedTime = ISO8601DateFormatter().string(from: entry.timestamp)
+      let key = "\(formattedTime).\(UUID().uuidString)"
+      let sle = StudyLogEntry(entry)
+      let data = try encoder.encode(sle)
+      let json = String(data: data, encoding: .utf8)!
+      return (ScopedKey(scope: scope, key: key), .json(json))
+    }
+    try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkEntries))
   }
 
   /// Merges new content from another storage container into this storage container.
