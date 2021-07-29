@@ -222,7 +222,7 @@ public final class NoteDatabase: UIDocument {
     }
   }
 
-  public func exportToKVCRDT(_ fileURL: URL?) throws {
+  public func exportToKVCRDT(_ fileURL: URL) throws {
     guard let author = Author(UIDevice.current) else {
       throw Error.noDeviceUUID
     }
@@ -230,12 +230,11 @@ public final class NoteDatabase: UIDocument {
       throw Error.databaseIsNotOpen
     }
 
-    if let fileURL = fileURL {
-      try? FileManager.default.removeItem(at: fileURL)
-    }
+    try? FileManager.default.removeItem(at: fileURL)
     let encoder = JSONEncoder()
     encoder.dateEncodingStrategy = .iso8601
-    let crdt = try KeyValueCRDT(fileURL: fileURL, author: author)
+    let crdtDocument = try UIKeyValueDocument(fileURL: fileURL, author: author)
+    let crdt = crdtDocument.keyValueCRDT
     let contentRecords = try dbQueue.read { db in
       try ContentRecord.fetchAll(db)
     }
@@ -308,6 +307,7 @@ public final class NoteDatabase: UIDocument {
       return (ScopedKey(scope: scope, key: key), .json(json))
     }
     try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkEntries))
+    crdtDocument.save(to: fileURL, for: .forCreating, completionHandler: nil)
   }
 
   /// Merges new content from another storage container into this storage container.
