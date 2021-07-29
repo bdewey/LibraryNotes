@@ -5,14 +5,14 @@ import GRDB
 import Logging
 import TextMarkupKit
 
-public extension NoteDatabase {
+public extension LegacyNoteDatabase {
   /// Does a global replacement of `originalText` with `replacementText` across all notes in a single transaction.
   func replaceText(
     _ originalText: String,
     with replacementText: String,
     filter: (NoteMetadataRecord) -> Bool = { _ in true }
   ) throws {
-    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+    guard let dbQueue = dbQueue else { throw NoteDatabaseError.databaseIsNotOpen }
     try dbQueue.write { database in
       let updateKey = try updateIdentifier(in: database)
       let allMetadata = try Self.fetchAllMetadata(from: database)
@@ -32,7 +32,7 @@ public extension NoteDatabase {
     to newHashtag: String,
     filter: (NoteMetadataRecord) -> Bool = { _ in true }
   ) throws {
-    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+    guard let dbQueue = dbQueue else { throw NoteDatabaseError.databaseIsNotOpen }
     try dbQueue.write { database in
       let updateKey = try updateIdentifier(in: database)
       let allMetadata = try Self.fetchAllMetadata(from: database)
@@ -62,7 +62,7 @@ public extension NoteDatabase {
   }
 
   func moveNotesTaggedWithHashtag(_ hashtag: String, to folder: String?) throws {
-    guard let dbQueue = dbQueue else { throw Error.databaseIsNotOpen }
+    guard let dbQueue = dbQueue else { throw NoteDatabaseError.databaseIsNotOpen }
     try dbQueue.write { database in
       let updateKey = try updateIdentifier(in: database)
       let records = try NoteRecord

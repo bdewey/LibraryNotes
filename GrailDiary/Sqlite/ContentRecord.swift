@@ -50,10 +50,10 @@ struct ContentRecord: Codable, FetchableRecord, PersistableRecord {
   /// Converts the receiver to an object conforming to PromptCollection, if possible.
   func asPromptCollection() throws -> PromptCollection {
     guard let klass = PromptType.classMap[role] else {
-      throw NoteDatabase.Error.unknownPromptType
+      throw NoteDatabaseError.unknownPromptType
     }
     guard let promptCollection = klass.init(rawValue: text) else {
-      throw NoteDatabase.Error.cannotDecodePromptCollection
+      throw NoteDatabaseError.cannotDecodePromptCollection
     }
     return promptCollection
   }

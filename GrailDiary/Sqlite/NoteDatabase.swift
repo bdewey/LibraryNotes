@@ -9,6 +9,7 @@ import SpacedRepetitionScheduler
 import UIKit
 import SwiftUI
 import BookKit
+import UniformTypeIdentifiers
 
 // swiftlint:disable file_length
 
@@ -32,11 +33,86 @@ public struct UpdateIdentifier {
   let updateSequenceNumber: Int64
 }
 
+/// Errors specific to this class.
+public enum NoteDatabaseError: String, Swift.Error {
+  case cannotDecodePromptCollection = "Cannot decode the prompt collection."
+  case databaseAlreadyOpen = "The database is already open."
+  case databaseIsNotOpen = "The database is not open."
+  case noDeviceUUID = "Could not get the device UUID."
+  case noSuchAsset = "The specified asset does not exist."
+  case noSuchPrompt = "The specified prompt does not exist."
+  case noSuchNote = "The specified note does not exist."
+  case notWriteable = "The database is not currently writeable."
+  case unknownPromptCollection = "The prompt collection does not exist."
+  case unknownPromptType = "The prompt uses an unknown type."
+  case missingMigrationScript = "Could not find a required migration script."
+}
+
+public protocol NoteDatabase {
+  typealias IOCompletionHandler = (Bool) -> Void
+
+  var fileURL: URL { get }
+  var documentState: UIDocument.State { get }
+
+  func open(completionHandler: IOCompletionHandler?)
+  func close(completionHandler: IOCompletionHandler?)
+  func refresh(completionHandler: IOCompletionHandler?)
+  func flush() throws
+
+  func createNote(_ note: Note) throws -> Note.Identifier
+  func note(noteIdentifier: Note.Identifier) throws -> Note
+  func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws
+  func deleteNote(noteIdentifier: Note.Identifier) throws
+  func deleteNote(noteIdentifier: Note.Identifier, updateKey: UpdateIdentifier, database db: Database) throws
+
+  var hashtags: [String] { get }
+
+  func writeAssociatedData(
+    _ data: Data,
+    noteIdentifier: Note.Identifier,
+    role: String,
+    type: UTType,
+    key: String?
+  ) throws -> String
+  func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data
+
+  func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws
+
+  func renameHashtag(
+    _ originalHashtag: String,
+    to newHashtag: String,
+    filter: (NoteMetadataRecord) -> Bool
+  ) throws
+
+  func search(for searchPattern: String) throws -> [Note.Identifier]
+
+  func studySession(
+    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?,
+    date: Date,
+    completion: @escaping (StudySession) -> Void
+  )
+  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws
+  func prompt(
+    promptIdentifier: PromptIdentifier
+  ) throws -> Prompt
+
+  var notesDidChange: AnyPublisher<Void, Never> { get }
+  func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords
+  func queryPublisher<T: FetchableRecord>(
+    for query: QueryInterfaceRequest<T>
+  ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error>
+
+
+  func exportToKVCRDT(_ fileURL: URL) throws
+}
+
+extension LegacyNoteDatabase: NoteDatabase {}
+
 /// Implementation of the NoteSqliteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
 // TODO: Figure out how to break this apart
 // swiftlint:disable:next type_body_length
-public final class NoteDatabase: UIDocument {
+public final class LegacyNoteDatabase: UIDocument {
   /// Designated initializer.
   public init(
     fileURL: URL,
@@ -79,21 +155,6 @@ public final class NoteDatabase: UIDocument {
 
   /// Pipeline for monitoring for unsaved changes to the in-memory database.
   private var hasUnsavedChangesPipeline: AnyCancellable?
-
-  /// Errors specific to this class.
-  public enum Error: String, Swift.Error {
-    case cannotDecodePromptCollection = "Cannot decode the prompt collection."
-    case databaseAlreadyOpen = "The database is already open."
-    case databaseIsNotOpen = "The database is not open."
-    case noDeviceUUID = "Could not get the device UUID."
-    case noSuchAsset = "The specified asset does not exist."
-    case noSuchPrompt = "The specified prompt does not exist."
-    case noSuchNote = "The specified note does not exist."
-    case notWriteable = "The database is not currently writeable."
-    case unknownPromptCollection = "The prompt collection does not exist."
-    case unknownPromptType = "The prompt uses an unknown type."
-    case missingMigrationScript = "Could not find a required migration script."
-  }
 
   public typealias IOCompletionHandler = (Bool) -> Void
 
@@ -224,10 +285,10 @@ public final class NoteDatabase: UIDocument {
 
   public func exportToKVCRDT(_ fileURL: URL) throws {
     guard let author = Author(UIDevice.current) else {
-      throw Error.noDeviceUUID
+      throw NoteDatabaseError.noDeviceUUID
     }
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
 
     try? FileManager.default.removeItem(at: fileURL)
@@ -311,9 +372,9 @@ public final class NoteDatabase: UIDocument {
   }
 
   /// Merges new content from another storage container into this storage container.
-  public func merge(other: NoteDatabase) throws -> MergeResult {
+  public func merge(other: LegacyNoteDatabase) throws -> MergeResult {
     guard let localQueue = dbQueue, let remoteQueue = other.dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     let result = try localQueue.merge(remoteQueue: remoteQueue)
     if !result.isEmpty {
@@ -454,7 +515,7 @@ public final class NoteDatabase: UIDocument {
   /// Creates a new note.
   public func createNote(_ note: Note) throws -> Note.Identifier {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     let identifier = UUID().uuidString
     try dbQueue.write { db in
@@ -470,7 +531,7 @@ public final class NoteDatabase: UIDocument {
   /// - parameter updateBlock: A block that receives the current value of the note and returns the updated value.
   public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     try dbQueue.write { db in
       let existingNote = (try? Note(identifier: noteIdentifier, database: db)) ?? Note(markdown: "")
@@ -482,7 +543,7 @@ public final class NoteDatabase: UIDocument {
 
   public func bulkCreateNotes(_ notes: [Note]) throws {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     try dbQueue.write { db in
       let updateKey = try updateIdentifier(in: db)
@@ -496,7 +557,7 @@ public final class NoteDatabase: UIDocument {
 
   public func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     try dbQueue.write { db in
       let updateKey = try updateIdentifier(in: db)
@@ -506,7 +567,7 @@ public final class NoteDatabase: UIDocument {
 
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       if !searchPattern.trimmingCharacters(in: .whitespaces).isEmpty {
@@ -530,7 +591,7 @@ public final class NoteDatabase: UIDocument {
   /// Gets a note with a specific identifier.
   public func note(noteIdentifier: Note.Identifier) throws -> Note {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db -> Note in
       try Note(identifier: noteIdentifier, database: db)
@@ -539,7 +600,7 @@ public final class NoteDatabase: UIDocument {
 
   public func deleteNote(noteIdentifier: Note.Identifier) throws {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     _ = try dbQueue.write { db in
       let updateKey = try self.updateIdentifier(in: db)
@@ -565,13 +626,13 @@ public final class NoteDatabase: UIDocument {
     limitedTo noteIdentifier: Note.Identifier?
   ) throws -> [PromptIdentifier] {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       let promptStatisticsRequest: QueryInterfaceRequest<PromptRecord>
       if let noteIdentifier = noteIdentifier {
         guard let note = try NoteRecord.fetchOne(db, key: noteIdentifier) else {
-          throw Error.noSuchNote
+          throw NoteDatabaseError.noSuchNote
         }
         promptStatisticsRequest = note.promptStatistics
       } else {
@@ -590,7 +651,7 @@ public final class NoteDatabase: UIDocument {
     promptIdentifier: PromptIdentifier
   ) throws -> Prompt {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       let identifier = ContentIdentifier(noteId: promptIdentifier.noteId, key: promptIdentifier.promptKey)
@@ -601,7 +662,7 @@ public final class NoteDatabase: UIDocument {
 
   internal func countOfContentRecords() throws -> Int {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       try ContentRecord.fetchCount(db)
@@ -610,11 +671,11 @@ public final class NoteDatabase: UIDocument {
 
   public func data<S>(for fileWrapperKey: S) throws -> Data? where S: StringProtocol {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       guard let asset = try AssetRecord.fetchOne(db, key: String(fileWrapperKey)) else {
-        throw Error.noSuchAsset
+        throw NoteDatabaseError.noSuchAsset
       }
       return asset.data
     }
@@ -622,7 +683,7 @@ public final class NoteDatabase: UIDocument {
 
   public func recordStudyEntry(_ entry: StudyLog.Entry, buryRelatedPrompts: Bool) throws {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     try dbQueue.write { db in
       var record = StudyLogEntryRecord(
@@ -682,7 +743,7 @@ public final class NoteDatabase: UIDocument {
     var log = StudyLog()
     do {
       guard let dbQueue = dbQueue else {
-        throw Error.databaseIsNotOpen
+        throw NoteDatabaseError.databaseIsNotOpen
       }
       let entries = try dbQueue.read { db -> [StudyLogEntryInfo] in
         let request = StudyLogEntryRecord
@@ -757,7 +818,7 @@ public final class NoteDatabase: UIDocument {
   ///
   /// - parameter studySession: The completed study session.
   /// - parameter date: The date the study session took place.
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let entries = studySession.results.map { tuple -> StudyLog.Entry in
       StudyLog.Entry(timestamp: date, identifier: tuple.key, statistics: tuple.value)
     }
@@ -787,70 +848,19 @@ public final class NoteDatabase: UIDocument {
     return Array(folders).sorted()
   }
 
-  /// This class holds `records`, a mapping between `Note.Identifier` and `NoteMetadataRecords` that is the result of an arbitrary query for records in the database.
-  /// The mapping will update as the contents of the database change, and you can subscribe to changes via `recordsDidChange`.
-  public class ObservableRecords {
-    fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
-      self.records = try dbQueue.read { db in
-        try Self.fetchAllRecords(query: query, from: db)
-      }
-      self.recordsDidChange = recordsDidChangeSubject.eraseToAnyPublisher()
-      self.subscription = DatabaseRegionObservation(tracking: [
-        NoteRecord.all(),
-      ]).publisher(in: dbQueue)
-        .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
-        .sink(
-          receiveCompletion: { completion in
-            switch completion {
-            case .failure(let error):
-              Logger.shared.error("Unexpected error monitoring database: \(error)")
-            case .finished:
-              Logger.shared.info("Monitoring pipeline shutting down")
-            }
-          },
-          receiveValue: { [weak self] allMetadata in
-            self?.records = allMetadata
-          }
-        )
-    }
-
-    private var subscription: AnyCancellable?
-    public private(set) var records: [Note.Identifier: NoteMetadataRecord] {
-      didSet {
-        recordsDidChangeSubject.send()
-      }
-    }
-
-    public let recordsDidChange: AnyPublisher<Void, Never>
-    private let recordsDidChangeSubject = PassthroughSubject<Void, Never>()
-
-    private static func fetchAllRecords(
-      query: QueryInterfaceRequest<NoteMetadataRecord>,
-      from db: Database
-    ) throws -> [Note.Identifier: NoteMetadataRecord] {
-      let metadata = try query.fetchAll(db)
-      let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
-        (key: metadataItem.id, value: metadataItem)
-      }
-      // Some of my queries return duplicate rows in the results. There's probably some careful sql work that
-      // will prevent that, but in the meanwhile I'm being defensive.
-      return Dictionary(tuples, uniquingKeysWith: { value, _ in value })
-    }
-  }
-
-  func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords {
+  public func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try ObservableRecords(query: query, dbQueue: dbQueue)
   }
 
   /// Returns a publisher for a given query.
-  func queryPublisher<T: FetchableRecord>(
+  public func queryPublisher<T: FetchableRecord>(
     for query: QueryInterfaceRequest<T>
   ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error> {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return ValueObservation.tracking { db in
       try query.fetchAll(db)
@@ -860,7 +870,7 @@ public final class NoteDatabase: UIDocument {
 
 // MARK: - Internal (to enable dividing into extensions)
 
-internal extension NoteDatabase {
+internal extension LegacyNoteDatabase {
   /// Watch this db queue for changes.
   func monitorDatabaseQueue(_ dbQueue: DatabaseQueue) throws {
     if try runMigrations(on: dbQueue) {
@@ -955,7 +965,7 @@ internal extension NoteDatabase {
   /// Makes sure there is a device record for the current device in this database.
   func currentDeviceRecord() throws -> DeviceRecord {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.write { db in
       try currentDeviceRecord(in: db)
@@ -965,7 +975,7 @@ internal extension NoteDatabase {
   /// Given an open database connection, returns the device record for the current device.
   func currentDeviceRecord(in db: Database) throws -> DeviceRecord {
     guard let uuid = device.identifierForVendor?.uuidString else {
-      throw Error.noDeviceUUID
+      throw NoteDatabaseError.noDeviceUUID
     }
     if var existingRecord = try DeviceRecord.fetchOne(db, key: ["uuid": uuid]) {
       try existingRecord.updateChanges(db, with: { deviceRecord in
@@ -981,7 +991,7 @@ internal extension NoteDatabase {
 
   func createInitialDeviceIdentifier(in db: Database) throws -> Int64 {
     guard let uuid = device.identifierForVendor?.uuidString else {
-      throw Error.noDeviceUUID
+      throw NoteDatabaseError.noDeviceUUID
     }
     try db.execute(sql: "INSERT INTO device (uuid, name) VALUES (?, ?)", arguments: [uuid, device.name])
     return db.lastInsertedRowID
@@ -1006,7 +1016,7 @@ internal extension NoteDatabase {
 
   static func promptCollection(identifier: ContentIdentifier, database: Database) throws -> PromptCollection {
     guard let record = try ContentRecord.fetchOne(database, key: [ContentRecord.Columns.noteId.rawValue: identifier.noteId, ContentRecord.Columns.key.rawValue: identifier.key]) else {
-      throw Error.unknownPromptCollection
+      throw NoteDatabaseError.unknownPromptCollection
     }
     return try record.asPromptCollection()
   }
@@ -1061,7 +1071,7 @@ private extension PromptRecord {
       // Create an item that's *just about to graduate* if we've never seen it before.
       // That's because we make new items due "last learning interval" after creation
       return PromptSchedulingMetadata(
-        mode: .learning(step: NoteDatabase.scheduler.learningIntervals.count),
+        mode: .learning(step: SchedulingParameters.standard.learningIntervals.count),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,
@@ -1199,12 +1209,12 @@ private extension DatabaseMigrator {
     _ migration: MigrationIdentifier,
     additionalSteps: ((Database) throws -> Void)? = nil
   ) throws {
-    let bundle = Bundle(for: NoteDatabase.self)
+    let bundle = Bundle(for: LegacyNoteDatabase.self)
     guard
       let scriptURL = bundle.url(forResource: migration.rawValue, withExtension: "sql"),
       let script = try? String(contentsOf: scriptURL)
     else {
-      throw NoteDatabase.Error.missingMigrationScript
+      throw NoteDatabaseError.missingMigrationScript
     }
     registerMigration(migration.rawValue) { database in
       try database.execute(sql: script)
@@ -1212,3 +1222,62 @@ private extension DatabaseMigrator {
     }
   }
 }
+
+/// This class holds `records`, a mapping between `Note.Identifier` and `NoteMetadataRecords` that is the result of an arbitrary query for records in the database.
+/// The mapping will update as the contents of the database change, and you can subscribe to changes via `recordsDidChange`.
+public class ObservableRecords {
+  fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
+    self.records = try dbQueue.read { db in
+      try Self.fetchAllRecords(query: query, from: db)
+    }
+    self.recordsDidChange = recordsDidChangeSubject.eraseToAnyPublisher()
+    self.subscription = DatabaseRegionObservation(tracking: [
+      NoteRecord.all(),
+    ]).publisher(in: dbQueue)
+      .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
+      .sink(
+        receiveCompletion: { completion in
+          switch completion {
+          case .failure(let error):
+            Logger.shared.error("Unexpected error monitoring database: \(error)")
+          case .finished:
+            Logger.shared.info("Monitoring pipeline shutting down")
+          }
+        },
+        receiveValue: { [weak self] allMetadata in
+          self?.records = allMetadata
+        }
+      )
+  }
+
+  private var subscription: AnyCancellable?
+  public private(set) var records: [Note.Identifier: NoteMetadataRecord] {
+    didSet {
+      recordsDidChangeSubject.send()
+    }
+  }
+
+  public let recordsDidChange: AnyPublisher<Void, Never>
+  private let recordsDidChangeSubject = PassthroughSubject<Void, Never>()
+
+  private static func fetchAllRecords(
+    query: QueryInterfaceRequest<NoteMetadataRecord>,
+    from db: Database
+  ) throws -> [Note.Identifier: NoteMetadataRecord] {
+    let metadata = try query.fetchAll(db)
+    let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
+      (key: metadataItem.id, value: metadataItem)
+    }
+    // Some of my queries return duplicate rows in the results. There's probably some careful sql work that
+    // will prevent that, but in the meanwhile I'm being defensive.
+    return Dictionary(tuples, uniquingKeysWith: { value, _ in value })
+  }
+}
+
+extension SchedulingParameters {
+  public static let standard = SchedulingParameters(
+    learningIntervals: [.day, 4 * .day],
+    goodGraduatingInterval: 7 * .day
+  )
+}
+

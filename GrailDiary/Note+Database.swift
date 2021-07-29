@@ -13,7 +13,7 @@ public extension Note {
       let sqliteNote = try NoteRecord.fetchOne(db, key: identifier),
       !sqliteNote.deleted
     else {
-      throw NoteDatabase.Error.noSuchNote
+      throw NoteDatabaseError.noSuchNote
     }
     let hashtagRecords = try NoteLinkRecord.filter(NoteLinkRecord.Columns.noteId == identifier).fetchAll(db)
     let hashtags = hashtagRecords.map { $0.targetTitle }

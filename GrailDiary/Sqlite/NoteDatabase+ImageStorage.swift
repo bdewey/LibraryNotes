@@ -75,7 +75,7 @@ public extension ParsedAttributedString.Style {
   }
 }
 
-public extension NoteDatabase {
+public extension LegacyNoteDatabase {
   // TODO: Remove AssetRecord from the schema
   /// Stores arbitrary data in the database.
   /// - Parameters:
@@ -86,7 +86,7 @@ public extension NoteDatabase {
   @available(*, deprecated, message: "Use writeAssociatedData: instead")
   func storeAssetData(_ data: Data, key: String) throws -> String {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.write { db in
       let asset = AssetRecord(id: key, data: data)
@@ -101,12 +101,12 @@ public extension NoteDatabase {
   /// - Returns: The data corresponding with `key`
   func retrieveAssetDataForKey(_ key: String) throws -> Data {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     guard let record = try dbQueue.read({ db in
       try AssetRecord.filter(key: key).fetchOne(db)
     }) else {
-      throw Error.noSuchAsset
+      throw NoteDatabaseError.noSuchAsset
     }
     return record.data
   }
@@ -116,10 +116,10 @@ public extension NoteDatabase {
     noteIdentifier: Note.Identifier,
     role: String,
     type: UTType,
-    key: String? = nil
+    key: String?
   ) throws -> String {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     let actualKey = key ?? ["./" + data.sha1Digest(), type.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
     let binaryRecord = BinaryContentRecord(
@@ -137,14 +137,14 @@ public extension NoteDatabase {
 
   func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
     guard let dbQueue = dbQueue else {
-      throw Error.databaseIsNotOpen
+      throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
       guard let record = try BinaryContentRecord.fetchOne(
         db,
         key: [BinaryContentRecord.Columns.noteId.rawValue: noteIdentifier, BinaryContentRecord.Columns.key.rawValue: key]
       ) else {
-        throw Error.noSuchAsset
+        throw NoteDatabaseError.noSuchAsset
       }
       return record.blob
     }

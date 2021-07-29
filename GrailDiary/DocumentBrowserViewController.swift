@@ -83,7 +83,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
     if url.pathExtension == "grail" {
-      database = NoteDatabase(fileURL: url)
+      database = LegacyNoteDatabase(fileURL: url)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
@@ -130,7 +130,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = NoteDatabase(fileURL: url)
+    let document = LegacyNoteDatabase(fileURL: url)
     Logger.shared.info("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {

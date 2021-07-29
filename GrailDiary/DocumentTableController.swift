@@ -204,7 +204,7 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public var observableRecords: NoteDatabase.ObservableRecords? {
+  public var observableRecords: ObservableRecords? {
     willSet {
       recordsSubscription?.cancel()
       recordsSubscription = nil
