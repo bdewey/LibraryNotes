@@ -466,8 +466,10 @@ private extension NotebookStructureViewController {
     let purgeNotes = UIAction(title: "Purge non-book notes") { [weak self] _ in
       self?.purgeUncategorizedNotes()
     }
-    let export = UIAction(title: "Export") { [weak self] _ in
-      self?.exportToKVCRDT()
+    let export = (database as? LegacyNoteDatabase).flatMap { legacyNoteDatabase -> UIAction in
+      UIAction(title: "Export") { [weak self] _ in
+        self?.exportToKVCRDT(legacyNoteDatabase: legacyNoteDatabase)
+      }
     }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
@@ -479,16 +481,16 @@ private extension NotebookStructureViewController {
           migrateRatings,
           purgeNotes,
           export,
-        ]
+        ].compactMap { $0 }
       )
     )
   }
 
-  private func exportToKVCRDT() {
-    let exportedURL = database.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt")
+  private func exportToKVCRDT(legacyNoteDatabase: LegacyNoteDatabase) {
+    let exportedURL = legacyNoteDatabase.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt")
     Logger.shared.info("Exporting to \(exportedURL.path)")
     do {
-      try database.exportToKVCRDT(exportedURL)
+      try legacyNoteDatabase.exportToKVCRDT(exportedURL)
       let alert = UIAlertController(title: "Export Complete", message: "Export was successful", preferredStyle: .alert)
       let okAction = UIAlertAction(title: "OK", style: .default)
       alert.addAction(okAction)

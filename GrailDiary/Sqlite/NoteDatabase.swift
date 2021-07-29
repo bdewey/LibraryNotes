@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Combine
 import Foundation
 import GRDB
@@ -7,8 +8,6 @@ import KeyValueCRDT
 import Logging
 import SpacedRepetitionScheduler
 import UIKit
-import SwiftUI
-import BookKit
 import UniformTypeIdentifiers
 
 // swiftlint:disable file_length
@@ -101,9 +100,6 @@ public protocol NoteDatabase {
   func queryPublisher<T: FetchableRecord>(
     for query: QueryInterfaceRequest<T>
   ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error>
-
-
-  func exportToKVCRDT(_ fileURL: URL) throws
 }
 
 extension LegacyNoteDatabase: NoteDatabase {}
