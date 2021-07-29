@@ -89,6 +89,7 @@
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
 		D35EF05926876A2700F39E8E /* Book+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35EF05826876A2700F39E8E /* Book+Markdown.swift */; };
 		D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36214652334F607008C8FF4 /* LayoutManager.swift */; };
+		D362999226B3236300AF8F23 /* BookNoteMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362999126B3236300AF8F23 /* BookNoteMetadata.swift */; };
 		D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362CC2E25431C6E00462683 /* NotebookViewController.swift */; };
 		D3677C772652A45F00307EEA /* NotebookSecondaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */; };
 		D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */; };
@@ -290,6 +291,7 @@
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
 		D35EF05826876A2700F39E8E /* Book+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Book+Markdown.swift"; sourceTree = "<group>"; };
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
+		D362999126B3236300AF8F23 /* BookNoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNoteMetadata.swift; sourceTree = "<group>"; };
 		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
 		D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSecondaryViewController.swift; sourceTree = "<group>"; };
 		D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanTranslationClassifier.swift; sourceTree = "<group>"; };
@@ -477,6 +479,14 @@
 			path = Shared;
 			sourceTree = "<group>";
 		};
+		D362999026B3234B00AF8F23 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D362999126B3236300AF8F23 /* BookNoteMetadata.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
@@ -510,6 +520,7 @@
 		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXGroup;
 			children = (
+				D362999026B3234B00AF8F23 /* Models */,
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
 				D3558D7925DA130900746600 /* ApiKey.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
@@ -894,6 +905,7 @@
 				D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */,
 				D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */,
 				D30D6B4E2549C44800F5902D /* CharacterSet+Extensions.swift in Sources */,
+				D362999226B3236300AF8F23 /* BookNoteMetadata.swift in Sources */,
 				D31AFACB229D61EE00ED2B76 /* PromptCollection.swift in Sources */,
 				D3C0B5DA2650172C00A33CCA /* NoteDatabase+Content.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,

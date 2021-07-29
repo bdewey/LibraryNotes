@@ -233,20 +233,6 @@ public final class LegacyNoteDatabase: UIDocument {
     var spacedRepetitionFactor: Double = 2.5
   }
 
-  struct NoteMetadata: Codable {
-    var id: Note.Identifier
-    var title: String
-    var creationTimestamp: Date
-    var tags: [String] = []
-    var book: AugmentedBook?
-
-    init(_ noteRecord: NoteRecord) {
-      self.id = noteRecord.id
-      self.title = noteRecord.title
-      self.creationTimestamp = noteRecord.creationTimestamp
-    }
-  }
-
   /// This is an experimental struct to encode information currently stored in a ContentRecord (the `PromptCollection`) and in related `PromptRecords`
   /// (stats on individual prompts).
   struct PromptCollectionInfo: Codable {
@@ -302,10 +288,10 @@ public final class LegacyNoteDatabase: UIDocument {
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
 
-    let noteMetadataEntries = try dbQueue.read { db in
-      try NoteRecord.filter(NoteRecord.Columns.deleted == false).fetchAll(db).map(NoteMetadata.init)
+    var noteMetadata = try dbQueue.read { db in
+      try NoteRecord.filter(NoteRecord.Columns.deleted == false).fetchAll(db)
+        .dictionaryMap { (key: $0.id, value: BookNoteMetadata($0)) }
     }
-    var noteMetadata = Dictionary(uniqueKeysWithValues: noteMetadataEntries.map({ ($0.id, $0) }))
     try contentRecords
       .filter({ record in record.role == ContentRole.reference.rawValue && record.mimeType == ApplicationMimeType.book.rawValue })
       .forEach { bookRecord in
@@ -1277,3 +1263,17 @@ extension SchedulingParameters {
   )
 }
 
+extension Sequence {
+  /// Returns an dictionary containing the results of mapping the given closure over the sequence’s elements.
+  ///
+  /// - parameter mapping: A closure that maps an `Element` into a (`Key`, `Value`) pair.
+  /// - parameter uniqingKeysWith: If `mapping` returns two items with the same key, this closure determines which one to keep in the dictionary.
+  /// - returns: A dictionary mapping keys to values.
+  func dictionaryMap<Key: Hashable, Value: Any>(
+    mapping: (Element) -> (key: Key, value: Value),
+    uniquingKeysWith: (Value, Value) -> Value = { _, value in value }
+  ) -> Dictionary<Key, Value> {
+    let tuples = map(mapping)
+    return Dictionary(tuples, uniquingKeysWith: uniquingKeysWith)
+  }
+}
