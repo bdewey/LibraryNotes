@@ -76,15 +76,18 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  private var metadataPipeline: AnyCancellable?
+
   private func monitorDatabaseForFocusedStructure() {
-    do {
-      title = focusedStructure.longDescription
-      dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
-      updateStudySession()
-      updateQuoteList()
-    } catch {
-      Logger.shared.error("Unexpected error changing focus: \(error)")
-    }
+    title = focusedStructure.longDescription
+    metadataPipeline = database.bookMetadataPublisher()
+      .catch { error -> Just<[String: BookNoteMetadata]> in
+        Logger.shared.error("Unexpected error getting metadata: \(error)")
+        return Just([String: BookNoteMetadata]())
+      }
+      .assign(to: \.bookNoteMetadata, on: dataSource)
+    updateStudySession()
+    updateQuoteList()
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -263,7 +266,7 @@ final class DocumentListViewController: UIViewController {
   private var studySessionGeneration = 0
 
   private func updateStudySession() {
-    let records = dataSource.observableRecords?.records ?? [:]
+    let records = dataSource.bookNoteMetadata
     let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = { identifier, _ in records[identifier] != nil }
     studySessionGeneration += 1
     let currentStudySessionGeneration = studySessionGeneration

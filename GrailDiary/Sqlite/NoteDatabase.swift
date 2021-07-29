@@ -58,6 +58,15 @@ public protocol NoteDatabase {
   func refresh(completionHandler: IOCompletionHandler?)
   func flush() throws
 
+  /// All ``BookNoteMetadata`` values in the database.
+  var bookMetadata: [String: BookNoteMetadata] { get throws }
+
+  /// A publisher that emits a new value whenever book metadata changes.
+  func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error>
+
+  /// Gets the cover image associated with a book.
+  func coverImage(bookID: String) -> UIImage?
+
   func createNote(_ note: Note) throws -> Note.Identifier
   func note(noteIdentifier: Note.Identifier) throws -> Note
   func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws
@@ -96,7 +105,6 @@ public protocol NoteDatabase {
   ) throws -> Prompt
 
   var notesDidChange: AnyPublisher<Void, Never> { get }
-  func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords
   func queryPublisher<T: FetchableRecord>(
     for query: QueryInterfaceRequest<T>
   ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error>
@@ -288,23 +296,10 @@ public final class LegacyNoteDatabase: UIDocument {
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
 
-    var noteMetadata = try dbQueue.read { db in
-      try NoteRecord.filter(NoteRecord.Columns.deleted == false).fetchAll(db)
+    let noteMetadata = try dbQueue.read { db in
+      try NoteMetadataRecord.request()
+        .fetchAll(db)
         .dictionaryMap { (key: $0.id, value: BookNoteMetadata($0)) }
-    }
-    try contentRecords
-      .filter({ record in record.role == ContentRole.reference.rawValue && record.mimeType == ApplicationMimeType.book.rawValue })
-      .forEach { bookRecord in
-        let data = bookRecord.text.data(using: .utf8)!
-        let book = try JSONDecoder().decode(AugmentedBook.self, from: data)
-        noteMetadata[bookRecord.noteId]?.book = book
-      }
-    try dbQueue.read { db in
-      let records = try NoteLinkRecord.fetchAll(db)
-      let tags = Dictionary(grouping: records, by: { $0.noteId })
-      for (noteId, tagArray) in tags {
-        noteMetadata[noteId]?.tags = tagArray.map { $0.targetTitle }
-      }
     }
 
     let bulkMetadata = try noteMetadata.map { (noteId, metadata) -> (ScopedKey, Value) in
@@ -830,13 +825,6 @@ public final class LegacyNoteDatabase: UIDocument {
     return Array(folders).sorted()
   }
 
-  public func observableRecordsForQuery(_ query: QueryInterfaceRequest<NoteMetadataRecord>) throws -> ObservableRecords {
-    guard let dbQueue = dbQueue else {
-      throw NoteDatabaseError.databaseIsNotOpen
-    }
-    return try ObservableRecords(query: query, dbQueue: dbQueue)
-  }
-
   /// Returns a publisher for a given query.
   public func queryPublisher<T: FetchableRecord>(
     for query: QueryInterfaceRequest<T>
@@ -847,6 +835,38 @@ public final class LegacyNoteDatabase: UIDocument {
     return ValueObservation.tracking { db in
       try query.fetchAll(db)
     }.publisher(in: dbQueue).eraseToAnyPublisher()
+  }
+
+  public var bookMetadata: [String : BookNoteMetadata] {
+    get throws {
+      guard let dbQueue = dbQueue else {
+        throw NoteDatabaseError.databaseIsNotOpen
+      }
+      return try dbQueue.read { db in
+        try NoteMetadataRecord.request().fetchAll(db)
+          .dictionaryMap { (key: $0.id, value: BookNoteMetadata($0)) }
+      }
+    }
+  }
+
+  public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
+    return ValueObservation.tracking { db in
+      try NoteMetadataRecord.request().fetchAll(db)
+    }
+    .publisher(in: dbQueue!)
+    .map { records in
+      records.dictionaryMap { (key: $0.id, value: BookNoteMetadata($0)) }
+    }
+    .eraseToAnyPublisher()
+  }
+
+  public func coverImage(bookID: String) -> UIImage? {
+    return try? dbQueue?.read({ db in
+      let record = try BinaryContentRecord
+        .filter(key: [BinaryContentRecord.Columns.noteId.rawValue: bookID, BinaryContentRecord.Columns.key.rawValue: "coverImage"])
+        .fetchOne(db)
+      return record?.blob.image(maxSize: 100)
+    })
   }
 }
 
@@ -1205,57 +1225,6 @@ private extension DatabaseMigrator {
   }
 }
 
-/// This class holds `records`, a mapping between `Note.Identifier` and `NoteMetadataRecords` that is the result of an arbitrary query for records in the database.
-/// The mapping will update as the contents of the database change, and you can subscribe to changes via `recordsDidChange`.
-public class ObservableRecords {
-  fileprivate init(query: QueryInterfaceRequest<NoteMetadataRecord>, dbQueue: DatabaseQueue) throws {
-    self.records = try dbQueue.read { db in
-      try Self.fetchAllRecords(query: query, from: db)
-    }
-    self.recordsDidChange = recordsDidChangeSubject.eraseToAnyPublisher()
-    self.subscription = DatabaseRegionObservation(tracking: [
-      NoteRecord.all(),
-    ]).publisher(in: dbQueue)
-      .tryMap { db in try Self.fetchAllRecords(query: query, from: db) }
-      .sink(
-        receiveCompletion: { completion in
-          switch completion {
-          case .failure(let error):
-            Logger.shared.error("Unexpected error monitoring database: \(error)")
-          case .finished:
-            Logger.shared.info("Monitoring pipeline shutting down")
-          }
-        },
-        receiveValue: { [weak self] allMetadata in
-          self?.records = allMetadata
-        }
-      )
-  }
-
-  private var subscription: AnyCancellable?
-  public private(set) var records: [Note.Identifier: NoteMetadataRecord] {
-    didSet {
-      recordsDidChangeSubject.send()
-    }
-  }
-
-  public let recordsDidChange: AnyPublisher<Void, Never>
-  private let recordsDidChangeSubject = PassthroughSubject<Void, Never>()
-
-  private static func fetchAllRecords(
-    query: QueryInterfaceRequest<NoteMetadataRecord>,
-    from db: Database
-  ) throws -> [Note.Identifier: NoteMetadataRecord] {
-    let metadata = try query.fetchAll(db)
-    let tuples = metadata.map { metadataItem -> (key: Note.Identifier, value: NoteMetadataRecord) in
-      (key: metadataItem.id, value: metadataItem)
-    }
-    // Some of my queries return duplicate rows in the results. There's probably some careful sql work that
-    // will prevent that, but in the meanwhile I'm being defensive.
-    return Dictionary(tuples, uniquingKeysWith: { value, _ in value })
-  }
-}
-
 extension SchedulingParameters {
   public static let standard = SchedulingParameters(
     learningIntervals: [.day, 4 * .day],
@@ -1272,7 +1241,7 @@ extension Sequence {
   func dictionaryMap<Key: Hashable, Value: Any>(
     mapping: (Element) -> (key: Key, value: Value),
     uniquingKeysWith: (Value, Value) -> Value = { _, value in value }
-  ) -> Dictionary<Key, Value> {
+  ) -> [Key: Value] {
     let tuples = map(mapping)
     return Dictionary(tuples, uniquingKeysWith: uniquingKeysWith)
   }
