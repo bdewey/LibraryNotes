@@ -39,14 +39,11 @@ public extension Note {
     for (index, promptCollection) in prompts.enumerated() {
       keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
     }
+    let metadata = BookNoteMetadata(title: String(parsedString.title.split(separator: "\n").first ?? ""), summary: parsedString.summary, creationTimestamp: Date(), modifiedTimestamp: Date(), tags: parsedString.hashtags, folder: nil, book: nil)
     self.init(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: parsedString.hashtags,
+      metadata: metadata,
       referencedImageKeys: parsedString.referencedImageKeys,
-      title: String(parsedString.title.split(separator: "\n").first ?? ""),
       text: parsedString.string,
-      summary: parsedString.summary,
       promptCollections: keyedCollection
     )
   }
@@ -72,8 +69,8 @@ public extension Note {
 
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
-    newNote.creationTimestamp = creationTimestamp
-    newNote.folder = folder
+    newNote.metadata.creationTimestamp = metadata.creationTimestamp
+    newNote.metadata.folder = metadata.folder
     newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }

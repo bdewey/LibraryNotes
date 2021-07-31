@@ -341,7 +341,7 @@ final class DocumentListViewController: UIViewController {
         try writer.write(field: book.numberOfPages?.description ?? "")
         try writer.write(field: book.yearPublished?.description ?? "")
         try writer.write(field: book.originalYearPublished?.description ?? "")
-        try writer.write(field: DayComponents(note.creationTimestamp).description)
+        try writer.write(field: DayComponents(note.metadata.creationTimestamp).description)
         try writer.write(field: book.publisher ?? "")
         try writer.write(field: note.text ?? "")
         try writer.endRow()
@@ -365,22 +365,6 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showWebPage(url: URL, shiftFocus: Bool) {
-    Logger.shared.info("Will navigate to web page at \(url)")
-    let placeholderNote = Note(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: [],
-      referencedImageKeys: [],
-      title: "",
-      text: "This is a test note",
-      reference: .webPage(url),
-      promptCollections: [:]
-    )
-    assertionFailure()
-//    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
-  }
-
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
     let quotesVC = QuotesViewController(database: database)
     quotesVC.quoteIdentifiers = quotes
@@ -509,15 +493,11 @@ private extension String {
 
 private extension Note {
   var book: AugmentedBook? {
-    if case .book(let book) = reference {
-      return book
-    } else {
-      return nil
-    }
+    return metadata.book
   }
 
   var rating: Int? {
-    for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
+    for hashtag in metadata.tags where hashtag.hasPrefix("#rating/") {
       return hashtag.count - 8
     }
     return 0

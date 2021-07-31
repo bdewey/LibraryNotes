@@ -31,7 +31,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.autoFirstResponder = autoFirstResponder
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier)
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(note.title)
+    setTitleMarkdown(note.metadata.title)
   }
 
   @available(*, unavailable)
@@ -77,7 +77,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    if case .book(let book) = note.reference {
+    if let book = note.metadata.book {
       let bookHeader = BookHeader(
         book: book,
         coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
@@ -124,7 +124,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     guard let apiKey = ApiKey.googleBooks else {
       return nil
     }
-    if case .book = note.reference {
+    if note.metadata.book != nil {
       return nil
     }
     return UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
@@ -154,15 +154,15 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
-    note.folder = self.note.folder
-    note.reference = self.note.reference
-    note.creationTimestamp = self.note.creationTimestamp
-    setTitleMarkdown(note.title)
+    note.metadata.folder = self.note.metadata.folder
+    note.metadata.book = self.note.metadata.book
+    note.metadata.creationTimestamp = self.note.metadata.creationTimestamp
+    setTitleMarkdown(note.metadata.title)
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)
-      mergedNote.folder = note.folder
+      mergedNote.metadata.folder = note.metadata.folder
       return mergedNote
     })
   }
@@ -242,8 +242,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
     Logger.shared.info("Attaching book: \(book.title)")
-    note.reference = .book(AugmentedBook(book))
-    note.timestamp = Date()
+    note.metadata.book = AugmentedBook(book)
+    note.metadata.modifiedTimestamp = Date()
     tryUpdateNote(note)
   }
 }
@@ -285,8 +285,8 @@ extension SavingTextEditViewController: ImageStorage {
 extension SavingTextEditViewController: BookHeaderDelegate {
   func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook) {
     Logger.shared.info("Updating book: \(book.title)")
-    note.reference = .book(book)
-    note.timestamp = Date()
+    note.metadata.book = book
+    note.metadata.modifiedTimestamp = Date()
     tryUpdateNote(note)
   }
 }

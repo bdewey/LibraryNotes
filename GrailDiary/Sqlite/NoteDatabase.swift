@@ -58,12 +58,17 @@ public protocol NoteDatabase {
   func refresh(completionHandler: IOCompletionHandler?)
   func flush() throws
 
+  /// A publisher that sends a notification for any change anywhere in the database.
+  var notesDidChange: AnyPublisher<Void, Never> { get }
+
   /// All ``BookNoteMetadata`` values in the database.
   var bookMetadata: [String: BookNoteMetadata] { get throws }
 
   /// A publisher that emits a new value whenever book metadata changes.
   func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error>
 
+  // TODO: Figure out how to cache these.
+  // TODO: Should ``bookMetadata`` become [String: (BookNoteMetadata, UIImage)]?
   /// Gets the cover image associated with a book.
   func coverImage(bookID: String) -> UIImage?
 
@@ -104,7 +109,6 @@ public protocol NoteDatabase {
     promptIdentifier: PromptIdentifier
   ) throws -> Prompt
 
-  var notesDidChange: AnyPublisher<Void, Never> { get }
   func queryPublisher<T: FetchableRecord>(
     for query: QueryInterfaceRequest<T>
   ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error>
@@ -166,9 +170,7 @@ public final class LegacyNoteDatabase: UIDocument {
     super.open { success in
       Logger.shared.info("UIDocument: Opened '\(self.fileURL.path)' -- success = \(success) state = \(self.documentState)")
       NotificationCenter.default.addObserver(self, selector: #selector(self.handleDocumentStateChanged), name: UIDocument.stateChangedNotification, object: self)
-      NotificationCenter.default.addObserver(self, selector: #selector(self.handleWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
       self.handleDocumentStateChanged()
-      try? self.lookForPendingSavedURLs()
       completionHandler?(success)
     }
   }
@@ -200,23 +202,6 @@ public final class LegacyNoteDatabase: UIDocument {
       Logger.shared.error("UIDocument: Error initiating download: \(error)")
       completionHandler?(false)
     }
-  }
-
-  public func lookForPendingSavedURLs() throws {
-    guard let sharedDefaults = UserDefaults(suiteName: appGroupName) else {
-      assertionFailure("Couldn't access shared defaults")
-      return
-    }
-    var count = 0
-    for savedURL in sharedDefaults.pendingSavedURLs {
-      var note = Note(markdown: savedURL.message)
-      note.reference = .webPage(savedURL.url)
-      note.folder = PredefinedFolder.wantToRead.rawValue
-      _ = try createNote(note)
-      count += 1
-    }
-    sharedDefaults.pendingSavedURLs = []
-    Logger.shared.info("Found \(count) saved URLs")
   }
 
   struct PromptStatistics: Codable {
@@ -358,10 +343,6 @@ public final class LegacyNoteDatabase: UIDocument {
       notesDidChangeSubject.send()
     }
     return result
-  }
-
-  @objc private func handleWillEnterForeground() {
-    try? lookForPendingSavedURLs()
   }
 
   @objc private func handleDocumentStateChanged() {

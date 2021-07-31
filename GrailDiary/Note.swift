@@ -3,27 +3,16 @@
 import BookKit
 import Foundation
 
-public struct Note: Equatable {
+public struct Note {
   public init(
-    creationTimestamp: Date,
-    timestamp: Date,
-    hashtags: [String],
+    metadata: BookNoteMetadata,
     referencedImageKeys: [String],
-    title: String, text: String? = nil,
-    reference: Note.Reference? = nil,
-    folder: String? = nil,
-    summary: String? = nil,
+    text: String? = nil,
     promptCollections: [Note.ContentKey: PromptCollection]
   ) {
-    self.creationTimestamp = creationTimestamp
-    self.timestamp = timestamp
-    self.hashtags = hashtags
+    self.metadata = metadata
     self.referencedImageKeys = referencedImageKeys
-    self.title = title
     self.text = text
-    self.reference = reference
-    self.folder = folder
-    self.summary = summary
     self.promptCollections = promptCollections
   }
 
@@ -33,57 +22,27 @@ public struct Note: Equatable {
   /// Identifies content within a note (currently, just prompts, but can be extended to other things)
   public typealias ContentKey = String
 
-  public var creationTimestamp: Date
-
-  /// Last modified time of the page.
-  public var timestamp: Date
-
-  /// Hashtags present in the page.
-  /// - note: Need to keep sorted to make comparisons canonical. Can't be a Set or serialization isn't canonical :-(
-  public var hashtags: [String]
+  public var metadata: BookNoteMetadata
 
   /// Images referenced by this note.
   public var referencedImageKeys: [String]
 
   public static let coverImageKey: String = "coverImage"
 
-  /// Title of the page. May include Markdown formatting.
-  public var title: String
-
   /// What this note is "about."
   public enum Reference: Equatable {
     case book(AugmentedBook)
     case webPage(URL)
-  }
 
-  public var text: String?
-  public var reference: Reference? {
-    didSet {
-      if case .book(let book) = reference {
-        var newTitle = "_\(book.title)_"
-        let authors = book.authors.joined(separator: ", ").trimmingCharacters(in: .whitespacesAndNewlines)
-        if !authors.isEmpty {
-          newTitle += ": \(authors)"
-        }
-        title = newTitle
+    var book: AugmentedBook? {
+      if case let .book(book) = self {
+        return book
+      } else {
+        return nil
       }
     }
   }
 
-  public var folder: String?
-
-  /// A short summary of the contents of this note. This shows up in the note list.
-  public var summary: String?
+  public var text: String?
   public var promptCollections: [ContentKey: PromptCollection]
-
-  public static func == (lhs: Note, rhs: Note) -> Bool {
-    return
-      abs(lhs.timestamp.timeIntervalSince1970 - rhs.timestamp.timeIntervalSince1970) < 0.001 &&
-      lhs.hashtags == rhs.hashtags &&
-      lhs.title == rhs.title &&
-      lhs.text == rhs.text &&
-      lhs.reference == rhs.reference &&
-      lhs.folder == rhs.folder &&
-      Set(lhs.promptCollections.keys) == Set(rhs.promptCollections.keys)
-  }
 }

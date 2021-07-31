@@ -14,7 +14,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
-  func showWebPage(url: URL, shiftFocus: Bool)
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
@@ -355,7 +354,7 @@ extension DocumentTableController {
         } else {
           try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in
             var note = note
-            note.folder = PredefinedFolder.recentlyDeleted.rawValue
+            note.metadata.folder = PredefinedFolder.recentlyDeleted.rawValue
             return note
           })
         }
@@ -369,13 +368,13 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             if book.readingHistory == nil {
               book.readingHistory = ReadingHistory()
             }
             book.readingHistory!.finishReading(finishDate: today)
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -390,13 +389,13 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             if book.readingHistory == nil {
               book.readingHistory = ReadingHistory()
             }
             book.readingHistory!.startReading(startDate: today)
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -411,9 +410,9 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             book.readingHistory = nil
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -445,9 +444,8 @@ public extension DocumentTableController {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
       return true
-    case .webPage(let url):
-      delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
-      return true
+    case .webPage:
+      return false
     case .reviewQuotes:
       delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
       return true

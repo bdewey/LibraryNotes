@@ -30,16 +30,14 @@ public extension Note {
       .filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue)
       .fetchAll(db)
 
+    let reference = try db.reference(for: identifier)
+
+    let metadata = BookNoteMetadata(title: sqliteNote.title, summary: sqliteNote.summary, creationTimestamp: sqliteNote.creationTimestamp, modifiedTimestamp: sqliteNote.modifiedTimestamp, tags: hashtags, folder: sqliteNote.folder, book: reference?.book)
+
     self.init(
-      creationTimestamp: sqliteNote.creationTimestamp,
-      timestamp: sqliteNote.modifiedTimestamp,
-      hashtags: hashtags,
+      metadata: metadata,
       referencedImageKeys: imageKeys.map { $0.key },
-      title: sqliteNote.title,
       text: noteText,
-      reference: try db.reference(for: identifier),
-      folder: sqliteNote.folder,
-      summary: sqliteNote.summary,
       promptCollections: promptCollections
     )
   }
@@ -49,20 +47,20 @@ public extension Note {
   func save(identifier: Note.Identifier, updateKey: UpdateIdentifier, to db: Database) throws {
     let sqliteNote = NoteRecord(
       id: identifier,
-      title: title,
-      creationTimestamp: creationTimestamp,
-      modifiedTimestamp: timestamp,
+      title: metadata.title,
+      creationTimestamp: metadata.creationTimestamp,
+      modifiedTimestamp: metadata.modifiedTimestamp,
       modifiedDevice: updateKey.deviceID,
       deleted: false,
       updateSequenceNumber: updateKey.updateSequenceNumber,
-      folder: folder,
-      summary: summary
+      folder: metadata.folder,
+      summary: metadata.summary
     )
     try sqliteNote.save(db)
 
     try savePrimaryText(noteIdentifier: identifier, database: db)
     try saveReference(noteIdentifier: identifier, database: db)
-    let inMemoryHashtags = Set(hashtags)
+    let inMemoryHashtags = Set(metadata.tags)
     let onDiskHashtags = ((try? sqliteNote.hashtags.fetchAll(db)) ?? [])
       .asSet()
     for newHashtag in inMemoryHashtags.subtracting(onDiskHashtags) {
@@ -115,7 +113,7 @@ public extension Note {
           promptIndex: Int64(index),
           due: today.addingTimeInterval(promptCollection.newPromptDelay.fuzzed()),
           modifiedDevice: updateKey.deviceID,
-          timestamp: timestamp,
+          timestamp: metadata.modifiedTimestamp,
           updateSequenceNumber: updateKey.updateSequenceNumber
         )
         try promptStatistics.insert(db)
@@ -149,28 +147,16 @@ public extension Note {
   }
 
   private func saveReference(noteIdentifier: Note.Identifier, database: Database) throws {
-    guard let reference = reference else { return }
-    let record: ContentRecord
-    switch reference {
-    case .webPage(let url):
-      record = ContentRecord(
-        text: url.absoluteString,
-        noteId: noteIdentifier,
-        key: ContentRole.reference.rawValue,
-        role: ContentRole.reference.rawValue,
-        mimeType: ApplicationMimeType.url.rawValue
-      )
-    case .book(let book):
-      let bookData = try JSONEncoder().encode(book)
-      let bookString = String(data: bookData, encoding: .utf8)!
-      record = ContentRecord(
-        text: bookString,
-        noteId: noteIdentifier,
-        key: ContentRole.reference.rawValue,
-        role: ContentRole.reference.rawValue,
-        mimeType: ApplicationMimeType.book.rawValue
-      )
-    }
+    guard let book = metadata.book else { return }
+    let bookData = try JSONEncoder().encode(book)
+    let bookString = String(data: bookData, encoding: .utf8)!
+    let record = ContentRecord(
+      text: bookString,
+      noteId: noteIdentifier,
+      key: ContentRole.reference.rawValue,
+      role: ContentRole.reference.rawValue,
+      mimeType: ApplicationMimeType.book.rawValue
+    )
     try record.save(database)
   }
 }

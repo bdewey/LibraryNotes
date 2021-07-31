@@ -5,11 +5,6 @@ import Logging
 import SnapKit
 import UIKit
 
-/// Protocol for any UIViewController that displays "reference" material for which we can also show related notes
-protocol ReferenceViewController: UIViewController {
-  var relatedNotesViewController: UIViewController? { get set }
-}
-
 public extension UIViewController {
   /// Walks up parent view controllers to find one that is a NotebookViewController.
   var notebookViewController: NotebookViewController? {
@@ -213,7 +208,7 @@ public final class NotebookViewController: UIViewController {
     let folder = focusedNotebookStructure.predefinedFolder
     let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
     var note = Note(markdown: text)
-    note.folder = folder?.rawValue
+    note.metadata.folder = folder?.rawValue
     let viewController = SavingTextEditViewController(note: note, database: database, initialSelectedRange: NSRange(location: offset, length: 0), autoFirstResponder: true)
     setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a blank document")
@@ -357,7 +352,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
     Logger.shared.info("Creating a new page with markdown: \(markdown)")
     let (text, offset) = Note.makeBlankNoteText(title: markdown, hashtag: focusedNotebookStructure.hashtag)
     var note = Note(markdown: text)
-    note.folder = focusedNotebookStructure.predefinedFolder?.rawValue
+    note.metadata.folder = focusedNotebookStructure.predefinedFolder?.rawValue
     // TODO: I'm abusing the "title" parameter here
     let viewController = SavingTextEditViewController(
       note: note,
@@ -381,7 +376,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     dismiss(animated: true, completion: nil)
     let markdown = focusedNotebookStructure.hashtag.flatMap({ $0 + "\n\n" }) ?? ""
     var note = Note(markdown: markdown)
-    note.reference = .book(AugmentedBook(book))
+    note.metadata.book = AugmentedBook(book)
     do {
       let identifier = try database.createNote(note)
       if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
@@ -428,14 +423,6 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
 extension NotebookViewController {
   func documentListViewControllerDidRequestChangeFocus(_ viewController: DocumentListViewController) {
     tagsBecomeFirstResponder()
-  }
-
-  private func referenceViewController(for note: Note) -> ReferenceViewController? {
-    switch note.reference {
-    case .none, .book: return nil
-    case .some(.webPage(let url)):
-      return WebViewController(url: url)
-    }
   }
 }
 
