@@ -36,6 +36,17 @@ public struct BookNoteMetadata: Codable, Equatable {
   public var book: AugmentedBook?
 }
 
+public extension Sequence where Element == BookNoteMetadata {
+  var hashtags: [String] {
+    let hashtags = self
+      .filter { $0.folder == nil }
+      .reduce(into: Set<String>()) { hashtags, metadata in
+        hashtags.formUnion(metadata.tags)
+      }
+    return Array(hashtags).sorted()
+  }
+}
+
 internal extension BookNoteMetadata {
   init(_ noteMetadataRecord: NoteMetadataRecord) {
     self.title = noteMetadataRecord.title

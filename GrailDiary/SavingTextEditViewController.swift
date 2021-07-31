@@ -230,7 +230,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String] {
-    let existingHashtags = noteStorage.hashtags.filter { $0.hasPrefix(hashtag) }
+    let hashtags = (try? noteStorage.bookMetadata.values.hashtags) ?? []
+    let existingHashtags = hashtags.filter { $0.hasPrefix(hashtag) }
 
     // Make sure that "hashtag" is in the suggested results
     if existingHashtags.first == hashtag {

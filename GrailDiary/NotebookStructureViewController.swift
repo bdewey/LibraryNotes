@@ -629,7 +629,8 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.read
-    root.hasChildren = !database.hashtags.isEmpty
+    let hashtags = (try? database.bookMetadata.values.hashtags) ?? []
+    root.hasChildren = !hashtags.isEmpty
     snapshot.append([root])
 
     // Enumerate every hashtag and make sure there is an entry for the hashtag *and all prefixes*.
@@ -639,7 +640,7 @@ private extension NotebookStructureViewController {
     // string. E.g., things work if we process `#books` then `#books/2020`, but will break if we process `#books/2020` before
     // `#books`.
     var stringToItem = [String: Item]()
-    for hashtag in database.hashtags {
+    for hashtag in hashtags {
       for (index, character) in hashtag.enumerated() where character == "/" {
         let prefix = String(hashtag.prefix(index))
         stringToItem[prefix] = Item(structureIdentifier: .hashtag(prefix), hasChildren: true)

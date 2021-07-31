@@ -78,8 +78,6 @@ public protocol NoteDatabase {
   func deleteNote(noteIdentifier: Note.Identifier) throws
   func deleteNote(noteIdentifier: Note.Identifier, updateKey: UpdateIdentifier, database db: Database) throws
 
-  var hashtags: [String] { get }
-
   func writeAssociatedData(
     _ data: Data,
     noteIdentifier: Note.Identifier,
@@ -818,7 +816,7 @@ public final class LegacyNoteDatabase: UIDocument {
     }.publisher(in: dbQueue).eraseToAnyPublisher()
   }
 
-  public var bookMetadata: [String : BookNoteMetadata] {
+  public var bookMetadata: [String: BookNoteMetadata] {
     get throws {
       guard let dbQueue = dbQueue else {
         throw NoteDatabaseError.databaseIsNotOpen
