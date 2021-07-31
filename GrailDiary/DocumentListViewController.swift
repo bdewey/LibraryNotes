@@ -278,11 +278,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateQuoteList() {
-    do {
-      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.allQuoteIdentifiersQuery)
-    } catch {
-      Logger.shared.error("Unexpected error getting quotes: \(error)")
-    }
+    dataSource.quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
   }
 
   private func updateToolbar() {

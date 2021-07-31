@@ -107,9 +107,10 @@ public protocol NoteDatabase {
     promptIdentifier: PromptIdentifier
   ) throws -> Prompt
 
-  func queryPublisher<T: FetchableRecord>(
-    for query: QueryInterfaceRequest<T>
-  ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error>
+  func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Swift.Error>
+
+  // TODO: Create something general-purpose for the kvcrdt data implementation
+  func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote]
 }
 
 extension LegacyNoteDatabase: NoteDatabase {}
@@ -804,16 +805,33 @@ public final class LegacyNoteDatabase: UIDocument {
     return Array(folders).sorted()
   }
 
-  /// Returns a publisher for a given query.
-  public func queryPublisher<T: FetchableRecord>(
-    for query: QueryInterfaceRequest<T>
-  ) throws -> AnyPublisher<[QueryInterfaceRequest<T>.RowDecoder], Swift.Error> {
+  public func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
+    guard let dbQueue = dbQueue else {
+      return Fail<[ContentIdentifier], Swift.Error>(error: NoteDatabaseError.databaseIsNotOpen).eraseToAnyPublisher()
+    }
+    return ValueObservation.tracking { db -> [ContentIdentifier] in
+      var baseRequest = ContentRecord
+        .filter(ContentRecord.Columns.role == "prompt=quote")
+        .joining(required: ContentRecord.note.filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue))
+      if let tag = tag {
+        baseRequest = baseRequest
+          .joining(required: ContentRecord.note.including(required: NoteRecord.noteHashtags.filter(NoteLinkRecord.Columns.targetTitle.like("\(tag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(tag)"))))
+      }
+      return try baseRequest.asRequest(of: ContentIdentifier.self).fetchAll(db)
+    }.publisher(in: dbQueue).eraseToAnyPublisher()
+  }
+
+  public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
     guard let dbQueue = dbQueue else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
-    return ValueObservation.tracking { db in
-      try query.fetchAll(db)
-    }.publisher(in: dbQueue).eraseToAnyPublisher()
+    return try dbQueue.read { db in
+      return try ContentRecord
+        .filter(keys: contentIdentifiers.map { $0.keyArray })
+        .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
+        .asRequest(of: AttributedQuote.self)
+        .fetchAll(db)
+    }
   }
 
   public var bookMetadata: [String: BookNoteMetadata] {

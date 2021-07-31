@@ -102,6 +102,7 @@ private extension PromptCollection {
     let diff = rawValue.difference(from: other.rawValue)
     return diff.count < rawValue.count
   }
+  
 }
 
 extension Array {

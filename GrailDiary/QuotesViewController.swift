@@ -7,8 +7,8 @@ import SnapKit
 import TextMarkupKit
 import UIKit
 
-private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {
-  var id: String { "\(noteId):\(key)" }
+public struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {
+  public var id: String { "\(noteId):\(key)" }
   var noteId: String
   var key: String
   var text: String
@@ -64,12 +64,7 @@ public final class QuotesViewController: UIViewController {
     }
     didSet {
       do {
-        quoteSubscription = try database.queryPublisher(for: AttributedQuote.query(quoteIdentifiers: visibleQuoteIdentifiers))
-          .sink(receiveCompletion: { error in
-            Logger.shared.error("Received error completion from quotes query: \(error)")
-          }, receiveValue: { [weak self] quotes in
-            self?.updateSnapshot(with: quotes)
-          })
+        try updateSnapshot(with: database.attributedQuotes(for: visibleQuoteIdentifiers))
       } catch {
         Logger.shared.error("Unexpected error fetching quotes: \(error)")
       }
