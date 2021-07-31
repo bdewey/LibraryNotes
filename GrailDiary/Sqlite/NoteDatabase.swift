@@ -86,7 +86,7 @@ public protocol NoteDatabase {
   ) throws -> String
   func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data
 
-  func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws
+  func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws
 
   func renameHashtag(
     _ originalHashtag: String,
@@ -511,7 +511,31 @@ public final class LegacyNoteDatabase: UIDocument {
     }
   }
 
-  public func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws {
+  public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
+    try bulkUpdate(updateBlock: { db, updateIdentifier in
+      for bookAndImage in booksAndImages {
+        let identifier = UUID().uuidString
+        var note = Note(bookAndImage, hashtags: hashtags)
+        let noteTimestamp = bookAndImage.book.dateAdded ?? Date()
+        note.metadata.creationTimestamp = noteTimestamp
+        note.metadata.modifiedTimestamp = noteTimestamp
+        note.metadata.book = bookAndImage.book
+        try note.save(identifier: identifier, updateKey: updateIdentifier, to: db)
+        if let typedData = bookAndImage.image {
+          let binaryRecord = BinaryContentRecord(
+            blob: typedData.data,
+            noteId: identifier,
+            key: Note.coverImageKey,
+            role: "embeddedImage",
+            mimeType: typedData.type.preferredMIMEType ?? "application/octet-stream"
+          )
+          try binaryRecord.save(db)
+        }
+      }
+    })
+  }
+
+  private func bulkUpdate(updateBlock: (Database, UpdateIdentifier) throws -> Void) throws {
     guard let dbQueue = dbQueue else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
