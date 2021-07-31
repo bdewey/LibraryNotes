@@ -470,12 +470,6 @@ private extension NotebookStructureViewController {
       bookImporterViewController.delegate = self
       self.present(bookImporterViewController, animated: true)
     }
-    let inferReadingHistory = UIAction(title: "Infer reading history") { [weak self] _ in
-      self?.inferReadingHistory()
-    }
-    let migrateRatings = UIAction(title: "Migrate ratings") { [weak self] _ in
-      self?.migrateRatings()
-    }
     let export = (database as? LegacyNoteDatabase).flatMap { legacyNoteDatabase -> UIAction in
       UIAction(title: "Export") { [weak self] _ in
         self?.exportToKVCRDT(legacyNoteDatabase: legacyNoteDatabase)
@@ -487,8 +481,6 @@ private extension NotebookStructureViewController {
         children: [
           openCommand,
           importLibraryThing,
-          inferReadingHistory,
-          migrateRatings,
           export,
         ].compactMap { $0 }
       )
@@ -506,98 +498,6 @@ private extension NotebookStructureViewController {
       present(alert, animated: true)
     } catch {
       Logger.shared.error("Unexpected error exporting data: \(error)")
-    }
-  }
-
-  private func migrateRatings() {
-    Logger.shared.info("Migrating ratings")
-    do {
-      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
-        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
-        for metadataRecord in metadataRecords {
-          guard var book = metadataRecord.book else { continue }
-          var didUpdateBook = false
-          let hashtags = metadataRecord.noteLinks.map { $0.targetTitle }
-          for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
-            let rating = hashtag.count - 8
-            book.rating = rating
-            didUpdateBook = true
-          }
-          if didUpdateBook {
-            let bookData = try JSONEncoder().encode(book)
-            let bookString = String(data: bookData, encoding: .utf8)!
-            let record = ContentRecord(
-              text: bookString,
-              noteId: metadataRecord.id,
-              key: ContentRole.reference.rawValue,
-              role: ContentRole.reference.rawValue,
-              mimeType: ApplicationMimeType.book.rawValue
-            )
-            try record.save(db)
-            try NoteRecord
-              .filter(key: metadataRecord.id)
-              .updateAll(db, [
-                NoteRecord.Columns.modifiedDevice.set(to: updateIdentifier.deviceID),
-                NoteRecord.Columns.updateSequenceNumber.set(to: updateIdentifier.updateSequenceNumber),
-              ])
-          }
-        }
-      })
-    } catch {
-      Logger.shared.error("Error migrating ratings: \(error)")
-    }
-  }
-
-  private func inferReadingHistory() {
-    Logger.shared.info("Inferring reading history")
-    do {
-      try database.bulkUpdate(updateBlock: { db, _ in
-        let readBooksRecords = try NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == nil)
-          .fetchAll(db)
-        for metadataRecord in readBooksRecords {
-          guard var book = metadataRecord.book, book.readingHistory == nil else {
-            continue
-          }
-          var history = ReadingHistory()
-          history.finishReading(finishDate: DateComponents(year: metadataRecord.guessYearRead))
-          book.readingHistory = history
-          let bookData = try JSONEncoder().encode(book)
-          let bookString = String(data: bookData, encoding: .utf8)!
-          let record = ContentRecord(
-            text: bookString,
-            noteId: metadataRecord.id,
-            key: ContentRole.reference.rawValue,
-            role: ContentRole.reference.rawValue,
-            mimeType: ApplicationMimeType.book.rawValue
-          )
-          try record.save(db)
-        }
-
-        let wantToReadRecords = try NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == PredefinedFolder.currentlyReading.rawValue)
-          .fetchAll(db)
-        for metadataRecord in wantToReadRecords {
-          guard var book = metadataRecord.book, book.readingHistory == nil else {
-            continue
-          }
-          var history = ReadingHistory()
-          history.startReading(startDate: nil)
-          book.readingHistory = history
-          let bookData = try JSONEncoder().encode(book)
-          let bookString = String(data: bookData, encoding: .utf8)!
-          let record = ContentRecord(
-            text: bookString,
-            noteId: metadataRecord.id,
-            key: ContentRole.reference.rawValue,
-            role: ContentRole.reference.rawValue,
-            mimeType: ApplicationMimeType.book.rawValue
-          )
-          try record.save(db)
-        }
-      })
-    } catch {
-      Logger.shared.error("Unexpected error inferring reading history: \(error)")
     }
   }
 
