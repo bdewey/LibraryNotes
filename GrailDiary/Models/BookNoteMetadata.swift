@@ -39,7 +39,7 @@ public struct BookNoteMetadata: Codable, Equatable {
 public extension Sequence where Element == BookNoteMetadata {
   var hashtags: [String] {
     let hashtags = self
-      .filter { $0.folder == nil }
+      .filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
       .reduce(into: Set<String>()) { hashtags, metadata in
         hashtags.formUnion(metadata.tags)
       }

@@ -104,6 +104,19 @@ final class NotebookStructureViewController: UIViewController {
           .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
       }
     }
+
+    /// A filter function that returns true if `metadata` is included in this structure.
+    func filterBookNoteMetadata(tuple: (key: String, value: BookNoteMetadata)) -> Bool {
+      let metadata = tuple.value
+      switch self {
+      case .hashtag(let hashtag):
+        return metadata.tags.contains(hashtag)
+      case .trash:
+        return metadata.folder == PredefinedFolder.recentlyDeleted.rawValue
+      default:
+        return true
+      }
+    }
   }
 
   /// Sections of our list.

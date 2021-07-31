@@ -85,6 +85,7 @@ final class DocumentListViewController: UIViewController {
         Logger.shared.error("Unexpected error getting metadata: \(error)")
         return Just([String: BookNoteMetadata]())
       }
+      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
       .assign(to: \.bookNoteMetadata, on: dataSource)
     updateStudySession()
     updateQuoteList()

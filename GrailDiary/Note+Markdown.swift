@@ -39,7 +39,15 @@ public extension Note {
     for (index, promptCollection) in prompts.enumerated() {
       keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
     }
-    let metadata = BookNoteMetadata(title: String(parsedString.title.split(separator: "\n").first ?? ""), summary: parsedString.summary, creationTimestamp: Date(), modifiedTimestamp: Date(), tags: parsedString.hashtags, folder: nil, book: nil)
+    let metadata = BookNoteMetadata(
+      title: String(parsedString.title.split(separator: "\n").first ?? ""),
+      summary: parsedString.summary,
+      creationTimestamp: Date(),
+      modifiedTimestamp: Date(),
+      tags: parsedString.hashtags,
+      folder: nil,
+      book: nil
+    )
     self.init(
       metadata: metadata,
       referencedImageKeys: parsedString.referencedImageKeys,
