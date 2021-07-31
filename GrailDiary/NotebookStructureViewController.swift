@@ -476,9 +476,6 @@ private extension NotebookStructureViewController {
     let migrateRatings = UIAction(title: "Migrate ratings") { [weak self] _ in
       self?.migrateRatings()
     }
-    let purgeNotes = UIAction(title: "Purge non-book notes") { [weak self] _ in
-      self?.purgeUncategorizedNotes()
-    }
     let export = (database as? LegacyNoteDatabase).flatMap { legacyNoteDatabase -> UIAction in
       UIAction(title: "Export") { [weak self] _ in
         self?.exportToKVCRDT(legacyNoteDatabase: legacyNoteDatabase)
@@ -492,7 +489,6 @@ private extension NotebookStructureViewController {
           importLibraryThing,
           inferReadingHistory,
           migrateRatings,
-          purgeNotes,
           export,
         ].compactMap { $0 }
       )
@@ -510,21 +506,6 @@ private extension NotebookStructureViewController {
       present(alert, animated: true)
     } catch {
       Logger.shared.error("Unexpected error exporting data: \(error)")
-    }
-  }
-
-  private func purgeUncategorizedNotes() {
-    Logger.shared.info("Purging uncategorized notes")
-    do {
-      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
-        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
-        let identifiersWithoutBooks = metadataRecords.filter({ $0.book == nil }).map({ $0.id })
-        for noteIdentifier in identifiersWithoutBooks {
-          try database.deleteNote(noteIdentifier: noteIdentifier, updateKey: updateIdentifier, database: db)
-        }
-      })
-    } catch {
-      Logger.shared.error("Error purging notes: \(error)")
     }
   }
 

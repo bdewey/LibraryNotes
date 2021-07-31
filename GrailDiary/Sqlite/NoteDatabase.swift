@@ -76,7 +76,6 @@ public protocol NoteDatabase {
   func note(noteIdentifier: Note.Identifier) throws -> Note
   func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws
   func deleteNote(noteIdentifier: Note.Identifier) throws
-  func deleteNote(noteIdentifier: Note.Identifier, updateKey: UpdateIdentifier, database db: Database) throws
 
   func writeAssociatedData(
     _ data: Data,
