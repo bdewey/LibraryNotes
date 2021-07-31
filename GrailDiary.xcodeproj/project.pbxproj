@@ -102,10 +102,11 @@
 		D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */; };
 		D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */; };
 		D37C887526B5C72600EC30C8 /* BookAndImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887426B5C72600EC30C8 /* BookAndImage.swift */; };
+		D37C887726B5C91700EC30C8 /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887626B5C91700EC30C8 /* NoteDatabase.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
-		D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */; };
+		D38862BB23BE4C2B00A44F1C /* LegacyNoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */; };
 		D393F2BE24143CC100A6DABB /* DeviceRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* DeviceRecord.swift */; };
 		D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */; };
 		D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */; };
@@ -306,10 +307,11 @@
 		D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChallengeTemplateMatcher.swift; sourceTree = "<group>"; };
 		D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Set.swift"; sourceTree = "<group>"; };
 		D37C887426B5C72600EC30C8 /* BookAndImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAndImage.swift; sourceTree = "<group>"; };
+		D37C887626B5C91700EC30C8 /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
-		D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
+		D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyNoteDatabase.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* DeviceRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRecord.swift; sourceTree = "<group>"; };
 		D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryRecord.swift; sourceTree = "<group>"; };
@@ -447,7 +449,7 @@
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D3F90E5E2587301300162CFC /* Migrations */,
-				D38862BA23BE4C2B00A44F1C /* NoteDatabase.swift */,
+				D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */,
 				D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */,
 				D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteLinkRecord.swift */,
@@ -607,6 +609,7 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D37C887626B5C91700EC30C8 /* NoteDatabase.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -930,6 +933,7 @@
 				D3A58F13240B2BDE00CE3251 /* MergeableRecord.swift in Sources */,
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
+				D37C887726B5C91700EC30C8 /* NoteDatabase.swift in Sources */,
 				D331457426628DAC00B4687F /* BookImporterViewController.swift in Sources */,
 				D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */,
 				D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */,
@@ -961,7 +965,7 @@
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
-				D38862BB23BE4C2B00A44F1C /* NoteDatabase.swift in Sources */,
+				D38862BB23BE4C2B00A44F1C /* LegacyNoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */,
