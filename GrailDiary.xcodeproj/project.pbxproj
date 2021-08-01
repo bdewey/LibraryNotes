@@ -103,6 +103,8 @@
 		D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */; };
 		D37C887526B5C72600EC30C8 /* BookAndImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887426B5C72600EC30C8 /* BookAndImage.swift */; };
 		D37C887726B5C91700EC30C8 /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887626B5C91700EC30C8 /* NoteDatabase.swift */; };
+		D37C887A26B5C9E900EC30C8 /* KeyValueNoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887926B5C9E900EC30C8 /* KeyValueNoteDatabase.swift */; };
+		D37C887C26B5DA3D00EC30C8 /* Resolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887B26B5DA3D00EC30C8 /* Resolver.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
@@ -308,6 +310,8 @@
 		D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+Set.swift"; sourceTree = "<group>"; };
 		D37C887426B5C72600EC30C8 /* BookAndImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAndImage.swift; sourceTree = "<group>"; };
 		D37C887626B5C91700EC30C8 /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
+		D37C887926B5C9E900EC30C8 /* KeyValueNoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueNoteDatabase.swift; sourceTree = "<group>"; };
+		D37C887B26B5DA3D00EC30C8 /* Resolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resolver.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
@@ -492,6 +496,15 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		D37C887826B5C99D00EC30C8 /* KVCRDT */ = {
+			isa = PBXGroup;
+			children = (
+				D37C887926B5C9E900EC30C8 /* KeyValueNoteDatabase.swift */,
+				D37C887B26B5DA3D00EC30C8 /* Resolver.swift */,
+			);
+			path = KVCRDT;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
@@ -525,6 +538,7 @@
 		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXGroup;
 			children = (
+				D37C887826B5C99D00EC30C8 /* KVCRDT */,
 				D362999026B3234B00AF8F23 /* Models */,
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
 				D3558D7925DA130900746600 /* ApiKey.swift */,
@@ -965,6 +979,7 @@
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
+				D37C887A26B5C9E900EC30C8 /* KeyValueNoteDatabase.swift in Sources */,
 				D38862BB23BE4C2B00A44F1C /* LegacyNoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
@@ -977,6 +992,7 @@
 				D3E98EFC21D2F725008445DA /* ICloudFileMetadataProvider.swift in Sources */,
 				D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */,
 				D3198DB123DBCA0F0098A9D9 /* PromptRecord.swift in Sources */,
+				D37C887C26B5DA3D00EC30C8 /* Resolver.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,

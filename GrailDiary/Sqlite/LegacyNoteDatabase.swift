@@ -194,7 +194,7 @@ public final class LegacyNoteDatabase: UIDocument {
     }
     let tuples = contentRecords.compactMap { record -> (ScopedKey, String)? in
       if record.role != ContentRole.primary.rawValue { return nil }
-      return (ScopedKey(scope: record.noteId, key: "noteText"), record.text)
+      return (ScopedKey(scope: record.noteId, key: NoteDatabaseKey.noteText), record.text)
     }
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
@@ -208,7 +208,7 @@ public final class LegacyNoteDatabase: UIDocument {
     let bulkMetadata = try noteMetadata.map { (noteId, metadata) -> (ScopedKey, Value) in
       let data = try encoder.encode(metadata)
       let json = String(data: data, encoding: .utf8)!
-      return (ScopedKey(scope: noteId, key: ".metadata"), .json(json))
+      return (ScopedKey(scope: noteId, key: NoteDatabaseKey.metadata), .json(json))
     }
     try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkMetadata))
 
@@ -1179,10 +1179,23 @@ extension Sequence {
   /// - parameter uniqingKeysWith: If `mapping` returns two items with the same key, this closure determines which one to keep in the dictionary.
   /// - returns: A dictionary mapping keys to values.
   func dictionaryMap<Key: Hashable, Value: Any>(
-    mapping: (Element) -> (key: Key, value: Value),
+    mapping: (Element) throws -> (key: Key, value: Value),
     uniquingKeysWith: (Value, Value) -> Value = { _, value in value }
-  ) -> [Key: Value] {
-    let tuples = map(mapping)
+  ) rethrows -> [Key: Value] {
+    let tuples = try map(mapping)
+    return Dictionary(tuples, uniquingKeysWith: uniquingKeysWith)
+  }
+
+  /// Returns an dictionary containing the results of mapping the given closure over the sequence’s elements.
+  ///
+  /// - parameter mapping: A closure that maps an `Element` into a (`Key`, `Value`) pair.
+  /// - parameter uniqingKeysWith: If `mapping` returns two items with the same key, this closure determines which one to keep in the dictionary.
+  /// - returns: A dictionary mapping keys to values.
+  func dictionaryCompactMap<Key: Hashable, Value: Any>(
+    mapping: (Element) throws -> (key: Key, value: Value)?,
+    uniquingKeysWith: (Value, Value) -> Value = { _, value in value }
+  ) rethrows -> [Key: Value] {
+    let tuples = try compactMap(mapping)
     return Dictionary(tuples, uniquingKeysWith: uniquingKeysWith)
   }
 }

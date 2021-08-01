@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import KeyValueCRDT
 import Logging
 import UIKit
 import UniformTypeIdentifiers
@@ -84,6 +85,11 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     let database: NoteDatabase
     if url.pathExtension == "grail" {
       database = LegacyNoteDatabase(fileURL: url)
+    } else if url.pathExtension == "kvcrdt" {
+      guard let author = Author(.current) else {
+        throw NoteDatabaseError.noDeviceUUID
+      }
+      database = try KeyValueNoteDatabase(fileURL: url, author: author)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
