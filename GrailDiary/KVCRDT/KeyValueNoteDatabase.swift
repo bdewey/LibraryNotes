@@ -64,7 +64,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   func flush() throws {
-    Logger.keyValueNoteDatabase.debug("\(#function) not implemented")
+    keyValueDocument.save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
   var notesDidChange: AnyPublisher<Void, Never> {
