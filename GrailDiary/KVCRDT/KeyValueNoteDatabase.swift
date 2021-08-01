@@ -92,9 +92,9 @@ final class KeyValueNoteDatabase: NoteDatabase {
       .eraseToAnyPublisher()
   }
 
-  func coverImage(bookID: String) -> UIImage? {
+  func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
     let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage, scope: bookID).resolved(with: .lastWriterWins)?.blob
-    if let data = data, let image = UIImage(data: data) {
+    if let data = data, let image = data.image(maxSize: maxSize) {
       return image
     } else {
       return nil

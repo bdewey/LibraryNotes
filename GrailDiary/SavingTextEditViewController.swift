@@ -80,7 +80,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     if let book = note.metadata.book {
       let bookHeader = BookHeader(
         book: book,
-        coverImage: (try? noteStorage.readAssociatedData(from: noteIdentifier, key: Note.coverImageKey))?.image(maxSize: 250)
+        coverImage: noteStorage.coverImage(bookID: noteIdentifier, maxSize: 250)
       )
       bookHeader.delegate = self
       textEditViewController.extendedNavigationHeaderView = bookHeader

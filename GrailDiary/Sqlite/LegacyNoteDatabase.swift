@@ -800,12 +800,12 @@ public final class LegacyNoteDatabase: UIDocument {
     .eraseToAnyPublisher()
   }
 
-  public func coverImage(bookID: String) -> UIImage? {
+  public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
     return try? dbQueue?.read({ db in
       let record = try BinaryContentRecord
         .filter(key: [BinaryContentRecord.Columns.noteId.rawValue: bookID, BinaryContentRecord.Columns.key.rawValue: "coverImage"])
         .fetchOne(db)
-      return record?.blob.image(maxSize: 100)
+      return record?.blob.image(maxSize: maxSize)
     })
   }
 }

@@ -41,7 +41,7 @@ public protocol NoteDatabase {
   // TODO: Figure out how to cache these.
   // TODO: Should ``bookMetadata`` become [String: (BookNoteMetadata, UIImage)]?
   /// Gets the cover image associated with a book.
-  func coverImage(bookID: String) -> UIImage?
+  func coverImage(bookID: String, maxSize: CGFloat) -> UIImage?
 
   func createNote(_ note: Note) throws -> Note.Identifier
   func note(noteIdentifier: Note.Identifier) throws -> Note

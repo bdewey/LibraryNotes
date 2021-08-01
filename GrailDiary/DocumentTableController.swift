@@ -59,7 +59,7 @@ public final class DocumentTableController: NSObject {
 
     let bookRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
-      let coverImage = database.coverImage(bookID: viewProperties.pageKey)
+      let coverImage = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
       let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
       cell.contentConfiguration = configuration
     }
@@ -75,7 +75,7 @@ public final class DocumentTableController: NSObject {
       ]
       configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
-      configuration.image = database.coverImage(bookID: viewProperties.pageKey)
+      configuration.image = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
