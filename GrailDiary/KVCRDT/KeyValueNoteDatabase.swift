@@ -35,6 +35,32 @@ enum NoteDatabaseKey {
   static let noteText = "noteText"
 }
 
+struct PromptCollectionIdentifier: RawRepresentable {
+  init(promptType: PromptType, count: Int, id: String) {
+    self.promptType = promptType
+    self.count = count
+    self.id = id
+  }
+
+  let promptType: PromptType
+  let count: Int
+  let id: String
+
+  var rawValue: String {
+    "prompt=\(promptType.rawValue);count=\(count);id=\(id)"
+  }
+
+  init?(rawValue: String) {
+    let segments = rawValue.split(separator: ";")
+    guard segments[0].hasPrefix("prompt=") else { return nil }
+    self.promptType = PromptType(rawValue: String(segments[0].dropFirst(7)))
+    guard segments[1].hasPrefix("count="), let count = Int(String(segments[1].dropFirst(6))) else { return nil }
+    self.count = count
+    guard segments[2].hasPrefix("id=") else { return nil }
+    self.id = String(segments[3].dropFirst(3))
+  }
+}
+
 enum KeyValueNoteDatabaseError: Error {
   case notImplemented
 }
@@ -155,6 +181,51 @@ final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   func studySession(filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
+    DispatchQueue.global(qos: .userInteractive).async {
+      let studySession = self.studySession(filter: filter, date: date)
+      DispatchQueue.main.async {
+        completion(studySession)
+      }
+    }
+  }
+
+  private func studySession(filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?, date: Date) -> StudySession {
+    let results: [ScopedKey: [Version]]
+    do {
+      results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
+        key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata
+      })
+    } catch {
+      Logger.keyValueNoteDatabase.error("Could not read prompt keys: \(error)")
+      return StudySession()
+    }
+    var studySession = StudySession()
+    for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
+      guard let json = versions.resolved(with: .lastWriterWins)?.json, let data = json.data(using: .utf8) else {
+        continue
+      }
+      do {
+        let promptInfo = try JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: data)
+        var promptIdentifiers = [PromptIdentifier]()
+        for (index, prompt) in promptInfo.promptStatistics.enumerated() where (prompt.due ?? .distantPast) <= date {
+          promptIdentifiers.append(PromptIdentifier(noteId: scopedKey.scope, promptKey: scopedKey.key, promptIndex: index))
+        }
+        if !promptIdentifiers.isEmpty {
+          let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata)]?.metadata
+          let innerStudySession = StudySession(
+            promptIdentifiers,
+            properties: CardDocumentProperties(
+              documentName: scopedKey.scope,
+              attributionMarkdown: metadata?.title ?? ""
+            )
+          )
+          studySession += innerStudySession
+        }
+      } catch {
+        Logger.keyValueNoteDatabase.error("Could not decode prompt info: \(error)")
+      }
+    }
+    return studySession
   }
 
   func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
@@ -162,7 +233,14 @@ final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   func prompt(promptIdentifier: PromptIdentifier) throws -> Prompt {
-    throw KeyValueNoteDatabaseError.notImplemented
+    guard let json = try keyValueDocument.keyValueCRDT.read(key: promptIdentifier.promptKey, scope: promptIdentifier.noteId).resolved(with: .lastWriterWins)?.json else {
+      throw NoteDatabaseError.unknownPromptCollection
+    }
+    let promptInfo = try JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
+    guard let klass = PromptType.classMap[promptInfo.type], let collection = klass.init(rawValue: promptInfo.rawValue) else {
+      throw NoteDatabaseError.unknownPromptType
+    }
+    return collection.prompts[promptIdentifier.promptIndex]
   }
 
   func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
@@ -206,5 +284,12 @@ private extension Dictionary where Key == ScopedKey, Value == [Version] {
         return nil
       }
     }
+  }
+}
+
+private extension Array where Element == Version {
+  var metadata: BookNoteMetadata? {
+    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
+    return try? JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)
   }
 }

@@ -105,6 +105,8 @@
 		D37C887726B5C91700EC30C8 /* NoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887626B5C91700EC30C8 /* NoteDatabase.swift */; };
 		D37C887A26B5C9E900EC30C8 /* KeyValueNoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887926B5C9E900EC30C8 /* KeyValueNoteDatabase.swift */; };
 		D37C887C26B5DA3D00EC30C8 /* Resolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887B26B5DA3D00EC30C8 /* Resolver.swift */; };
+		D37C887E26B79E6200EC30C8 /* PromptCollectionInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887D26B79E6200EC30C8 /* PromptCollectionInfo.swift */; };
+		D37C888026B79E7E00EC30C8 /* PromptStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
@@ -312,6 +314,8 @@
 		D37C887626B5C91700EC30C8 /* NoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabase.swift; sourceTree = "<group>"; };
 		D37C887926B5C9E900EC30C8 /* KeyValueNoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyValueNoteDatabase.swift; sourceTree = "<group>"; };
 		D37C887B26B5DA3D00EC30C8 /* Resolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resolver.swift; sourceTree = "<group>"; };
+		D37C887D26B79E6200EC30C8 /* PromptCollectionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptCollectionInfo.swift; sourceTree = "<group>"; };
+		D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStatistics.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
@@ -492,6 +496,8 @@
 			children = (
 				D362999126B3236300AF8F23 /* BookNoteMetadata.swift */,
 				D37C887426B5C72600EC30C8 /* BookAndImage.swift */,
+				D37C887D26B79E6200EC30C8 /* PromptCollectionInfo.swift */,
+				D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -956,6 +962,7 @@
 				D31AFAB6229D61EE00ED2B76 /* CardDocumentProperties.swift in Sources */,
 				D3131324269A1996004BBDBD /* StarRatingView.swift in Sources */,
 				D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */,
+				D37C888026B79E7E00EC30C8 /* PromptStatistics.swift in Sources */,
 				D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */,
 				D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */,
 				D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */,
@@ -1022,6 +1029,7 @@
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
 				D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */,
 				D30B0243229E513C00F3B459 /* StudyLog.swift in Sources */,
+				D37C887E26B79E6200EC30C8 /* PromptCollectionInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

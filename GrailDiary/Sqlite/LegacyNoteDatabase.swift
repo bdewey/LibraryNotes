@@ -122,46 +122,6 @@ public final class LegacyNoteDatabase: UIDocument {
     }
   }
 
-  struct PromptStatistics: Codable {
-    internal init(_ promptRecord: PromptRecord) {
-      self.reviewCount = promptRecord.reviewCount
-      self.lapseCount = promptRecord.lapseCount
-      self.totalCorrect = promptRecord.totalCorrect
-      self.totalIncorrect = promptRecord.totalIncorrect
-      self.lastReview = promptRecord.lastReview
-      self.idealInterval = promptRecord.idealInterval
-      self.due = promptRecord.due
-      self.spacedRepetitionFactor = promptRecord.spacedRepetitionFactor
-    }
-
-    var reviewCount: Int = 0
-    var lapseCount: Int = 0
-    var totalCorrect: Int = 0
-    var totalIncorrect: Int = 0
-    var lastReview: Date?
-    var idealInterval: Double?
-    var due: Date?
-    var spacedRepetitionFactor: Double = 2.5
-  }
-
-  /// This is an experimental struct to encode information currently stored in a ContentRecord (the `PromptCollection`) and in related `PromptRecords`
-  /// (stats on individual prompts).
-  struct PromptCollectionInfo: Codable {
-    var type: String
-    var rawValue: String
-    var promptStatistics: [PromptStatistics]
-
-    init(contentRecord: ContentRecord, promptRecords: [PromptRecord]) {
-      self.type = contentRecord.role
-      self.rawValue = contentRecord.text
-      let sortedRecords = promptRecords.sorted(by: { $0.promptIndex < $1.promptIndex })
-      for index in sortedRecords.indices {
-        assert(sortedRecords[index].promptIndex == index)
-      }
-      self.promptStatistics = sortedRecords.map(PromptStatistics.init)
-    }
-  }
-
   struct StudyLogEntry: Codable {
     var timestamp: Date
     var correct: Int
@@ -219,11 +179,12 @@ public final class LegacyNoteDatabase: UIDocument {
 
     let promptTuples = try contentRecords.compactMap { record -> (ScopedKey, Value)? in
       if !record.role.hasPrefix("prompt=") { return nil }
-      let key = [record.role, record.key].joined(separator: ";")
+      let promptType = PromptType(rawValue: String(record.role.dropFirst(7)))
       let promptRecordKey = [record.noteId, record.key].joined(separator: ".")
+      let newKey = PromptCollectionIdentifier(promptType: promptType, count: groupedPromptRecords[promptRecordKey]?.count ?? 0, id: record.key)
       let info = PromptCollectionInfo(contentRecord: record, promptRecords: groupedPromptRecords[promptRecordKey]!)
       let json = String(data: try encoder.encode(info), encoding: .utf8)!
-      return (ScopedKey(scope: record.noteId, key: key), .json(json))
+      return (ScopedKey(scope: record.noteId, key: newKey.rawValue), .json(json))
     }
     try crdt.bulkWrite(Dictionary(promptTuples, uniquingKeysWith: { value, _ in value }))
 
