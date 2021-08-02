@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import SpacedRepetitionScheduler
 
 public struct PromptStatistics: Codable {
   public init(reviewCount: Int = 0, lapseCount: Int = 0, totalCorrect: Int = 0, totalIncorrect: Int = 0, lastReview: Date? = nil, idealInterval: Double? = nil, due: Date? = nil, spacedRepetitionFactor: Double = 2.5) {
@@ -28,6 +29,43 @@ public struct PromptStatistics: Codable {
   public var idealInterval: Double?
   public var due: Date?
   public var spacedRepetitionFactor: Double = 2.5
+}
+
+// MARK: - Spaced repetition support
+
+public extension PromptStatistics {
+  var schedulingItem: PromptSchedulingMetadata {
+    if let due = due, let lastReview = lastReview {
+      let interval = due.timeIntervalSince(lastReview)
+      assert(interval > 0)
+      return PromptSchedulingMetadata(
+        mode: .review,
+        reviewCount: reviewCount,
+        lapseCount: lapseCount,
+        interval: idealInterval ?? .day,
+        reviewSpacingFactor: spacedRepetitionFactor
+      )
+    } else {
+      // Create an item that's *just about to graduate* if we've never seen it before.
+      // That's because we make new items due "last learning interval" after creation
+      return PromptSchedulingMetadata(
+        mode: .learning(step: SchedulingParameters.standard.learningIntervals.count),
+        reviewCount: reviewCount,
+        lapseCount: lapseCount,
+        interval: idealInterval ?? 0,
+        reviewSpacingFactor: spacedRepetitionFactor
+      )
+    }
+  }
+
+  mutating func applySchedulingItem(_ item: PromptSchedulingMetadata, on date: Date) {
+    reviewCount = item.reviewCount
+    lapseCount = item.lapseCount
+    spacedRepetitionFactor = item.reviewSpacingFactor
+    lastReview = date
+    idealInterval = item.interval
+    due = date.addingTimeInterval(item.interval.fuzzed())
+  }
 }
 
 extension PromptStatistics {

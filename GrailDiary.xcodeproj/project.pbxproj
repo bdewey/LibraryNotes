@@ -92,6 +92,7 @@
 		D362999226B3236300AF8F23 /* BookNoteMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362999126B3236300AF8F23 /* BookNoteMetadata.swift */; };
 		D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D362CC2E25431C6E00462683 /* NotebookViewController.swift */; };
 		D3677C772652A45F00307EEA /* NotebookSecondaryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */; };
+		D369182126B8275F001EB512 /* StudyLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D369182026B8275F001EB512 /* StudyLogEntry.swift */; };
 		D36ECC942426C25E0028D808 /* PanTranslationClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */; };
 		D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */; };
 		D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374AB55229380E500F54561 /* TemporaryFile.swift */; };
@@ -300,6 +301,7 @@
 		D362999126B3236300AF8F23 /* BookNoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNoteMetadata.swift; sourceTree = "<group>"; };
 		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
 		D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSecondaryViewController.swift; sourceTree = "<group>"; };
+		D369182026B8275F001EB512 /* StudyLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntry.swift; sourceTree = "<group>"; };
 		D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanTranslationClassifier.swift; sourceTree = "<group>"; };
 		D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGVector+Extensions.swift"; sourceTree = "<group>"; };
 		D374AB55229380E500F54561 /* TemporaryFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryFile.swift; sourceTree = "<group>"; };
@@ -498,6 +500,7 @@
 				D37C887426B5C72600EC30C8 /* BookAndImage.swift */,
 				D37C887D26B79E6200EC30C8 /* PromptCollectionInfo.swift */,
 				D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */,
+				D369182026B8275F001EB512 /* StudyLogEntry.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1010,6 +1013,7 @@
 				D37C887526B5C72600EC30C8 /* BookAndImage.swift in Sources */,
 				D3131326269A2AD7004BBDBD /* BookView.swift in Sources */,
 				D3A5255B241E65350044F8A2 /* AssetRecord.swift in Sources */,
+				D369182126B8275F001EB512 /* StudyLogEntry.swift in Sources */,
 				D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */,
 				D331457726628EA000B4687F /* ImportForm.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,

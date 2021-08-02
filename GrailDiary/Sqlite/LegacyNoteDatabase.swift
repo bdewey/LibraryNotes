@@ -122,20 +122,6 @@ public final class LegacyNoteDatabase: UIDocument {
     }
   }
 
-  struct StudyLogEntry: Codable {
-    var timestamp: Date
-    var correct: Int
-    var incorrect: Int
-    var promptIndex: Int
-
-    init(_ studyLogEntry: StudyLogEntryRecord) {
-      self.timestamp = studyLogEntry.timestamp
-      self.correct = studyLogEntry.correct
-      self.incorrect = studyLogEntry.incorrect
-      self.promptIndex = studyLogEntry.promptIndex
-    }
-  }
-
   public func exportToKVCRDT(_ fileURL: URL) throws {
     guard let author = Author(UIDevice.current) else {
       throw NoteDatabaseError.noDeviceUUID

@@ -2,6 +2,7 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import Logging
+import SpacedRepetitionScheduler
 import UIKit
 import UniformTypeIdentifiers
 
@@ -229,7 +230,55 @@ final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
-    throw KeyValueNoteDatabaseError.notImplemented
+    let scopedKeysToFetch = studySession.results.keys.map { ScopedKey(scope: $0.noteId, key: $0.promptKey) }
+    let promptInfo = try keyValueDocument.keyValueCRDT
+      .bulkRead(keys: scopedKeysToFetch.map({ $0.key }))
+      .dictionaryCompactMap(mapping: { scopedKey, versions -> (key: ScopedKey, value: PromptCollectionInfo)? in
+        guard let info = versions.promptCollectionInfo else { return nil }
+        return (key: scopedKey, value: info)
+      })
+    Logger.keyValueNoteDatabase.debug("Fetched \(promptInfo.count) collections for update")
+
+    var updates: [ScopedKey: Value] = [:]
+    for (promptIdentifier, answerStatistics) in studySession.results {
+      // 1. Generate a StudyLogEntry. Currently this is write-only; I never read these back. In theory one could reconstruct
+      // the prompt scheduling information from them.
+      let entry = StudyLogEntry(
+        timestamp: date,
+        correct: answerStatistics.correct,
+        incorrect: answerStatistics.incorrect,
+        promptIndex: promptIdentifier.promptIndex
+      )
+      let formattedTime = ISO8601DateFormatter().string(from: date)
+      // Each key is globally unique so there should never be collisions.
+      let key = "\(formattedTime).\(UUID().uuidString)"
+      let jsonData = try JSONEncoder.databaseEncoder.encode(entry)
+      // The scope is what ties this entry to its corresponding scope & key.
+      let entryKey = ScopedKey(scope: "note=\(promptIdentifier.noteId);\(promptIdentifier.promptKey)", key: key)
+      updates[entryKey] = .json(String(data: jsonData, encoding: .utf8)!)
+
+      // 2. Update the corresponding prompt info.
+      let scopedKey = ScopedKey(scope: promptIdentifier.noteId, key: promptIdentifier.promptKey)
+      if var info = promptInfo[scopedKey], promptIdentifier.promptIndex < info.promptStatistics.endIndex {
+        var schedulingItem = info.promptStatistics[promptIdentifier.promptIndex].schedulingItem
+
+        let delay: TimeInterval
+        if let lastReview = info.promptStatistics[promptIdentifier.promptIndex].lastReview, let idealInterval = info.promptStatistics[promptIdentifier.promptIndex].idealInterval {
+          let idealDate = lastReview.addingTimeInterval(idealInterval)
+          delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
+        } else {
+          delay = 0
+        }
+
+        try schedulingItem.update(with: .standard, recallEase: entry.recallEase, timeIntervalSincePriorReview: delay)
+        info.promptStatistics[promptIdentifier.promptIndex].applySchedulingItem(schedulingItem, on: date)
+        updates[scopedKey] = try Value(info)
+      } else {
+        Logger.keyValueNoteDatabase.error("Could not find info or index for \(scopedKey)")
+        assertionFailure()
+      }
+    }
+    try keyValueDocument.keyValueCRDT.bulkWrite(updates)
   }
 
   func prompt(promptIdentifier: PromptIdentifier) throws -> Prompt {
@@ -287,9 +336,33 @@ private extension Dictionary where Key == ScopedKey, Value == [Version] {
   }
 }
 
+private extension StudyLogEntry {
+  var recallEase: RecallEase {
+    if correct > 0, incorrect == 0 {
+      return .good
+    }
+    if correct > 0, incorrect == 1 {
+      return .hard
+    }
+    return .again
+  }
+}
+
+private extension Value {
+  init(_ promptCollectionInfo: PromptCollectionInfo) throws {
+    let jsonData = try JSONEncoder.databaseEncoder.encode(promptCollectionInfo)
+    self = .json(String(data: jsonData, encoding: .utf8)!)
+  }
+}
+
 private extension Array where Element == Version {
   var metadata: BookNoteMetadata? {
     guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
     return try? JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)
+  }
+
+  var promptCollectionInfo: PromptCollectionInfo? {
+    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
+    return try? JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
   }
 }
