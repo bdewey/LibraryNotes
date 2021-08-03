@@ -22,6 +22,22 @@ public struct PromptCollectionInfo: Codable {
   public var promptStatistics: [PromptStatistics]
 }
 
+public extension PromptCollectionInfo {
+  /// Initialize a new ``PromptCollectionInfo`` from a ``PromptCollection``
+  init(_ promptCollection: PromptCollection) {
+    self.type = promptCollection.type.rawValue
+    self.rawValue = promptCollection.rawValue
+    self.promptStatistics = Array(repeating: PromptStatistics(), count: promptCollection.prompts.count)
+  }
+
+  func asPromptCollection() throws -> PromptCollection {
+    guard let klass = PromptType.classMap[type], let collection = klass.init(rawValue: rawValue) else {
+      throw NoteDatabaseError.unknownPromptType
+    }
+    return collection
+  }
+}
+
 extension PromptCollectionInfo {
   init(contentRecord: ContentRecord, promptRecords: [PromptRecord]) {
     self.type = contentRecord.role

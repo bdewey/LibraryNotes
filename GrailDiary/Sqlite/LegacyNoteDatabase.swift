@@ -140,7 +140,7 @@ public final class LegacyNoteDatabase: UIDocument {
     }
     let tuples = contentRecords.compactMap { record -> (ScopedKey, String)? in
       if record.role != ContentRole.primary.rawValue { return nil }
-      return (ScopedKey(scope: record.noteId, key: NoteDatabaseKey.noteText), record.text)
+      return (ScopedKey(scope: record.noteId, key: NoteDatabaseKey.noteText.rawValue), record.text)
     }
     let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
     try crdt.bulkWrite(map)
@@ -154,7 +154,7 @@ public final class LegacyNoteDatabase: UIDocument {
     let bulkMetadata = try noteMetadata.map { (noteId, metadata) -> (ScopedKey, Value) in
       let data = try encoder.encode(metadata)
       let json = String(data: data, encoding: .utf8)!
-      return (ScopedKey(scope: noteId, key: NoteDatabaseKey.metadata), .json(json))
+      return (ScopedKey(scope: noteId, key: NoteDatabaseKey.metadata.rawValue), .json(json))
     }
     try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkMetadata))
 
@@ -167,7 +167,7 @@ public final class LegacyNoteDatabase: UIDocument {
       if !record.role.hasPrefix("prompt=") { return nil }
       let promptType = PromptType(rawValue: String(record.role.dropFirst(7)))
       let promptRecordKey = [record.noteId, record.key].joined(separator: ".")
-      let newKey = PromptCollectionIdentifier(promptType: promptType, count: groupedPromptRecords[promptRecordKey]?.count ?? 0, id: record.key)
+      let newKey = NoteDatabaseKey.promptCollection(promptType: promptType, count: groupedPromptRecords[promptRecordKey]?.count ?? 0, id: record.key)
       let info = PromptCollectionInfo(contentRecord: record, promptRecords: groupedPromptRecords[promptRecordKey]!)
       let json = String(data: try encoder.encode(info), encoding: .utf8)!
       return (ScopedKey(scope: record.noteId, key: newKey.rawValue), .json(json))

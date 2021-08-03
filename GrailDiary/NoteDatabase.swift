@@ -16,6 +16,7 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unknownPromptCollection = "The prompt collection does not exist."
   case unknownPromptType = "The prompt uses an unknown type."
   case missingMigrationScript = "Could not find a required migration script."
+  case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
 public protocol NoteDatabase {

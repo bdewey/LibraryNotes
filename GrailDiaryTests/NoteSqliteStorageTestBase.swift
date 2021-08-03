@@ -7,7 +7,7 @@ import XCTest
 class NoteSqliteStorageTestBase: XCTestCase {
   func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = NoteDatabase(fileURL: fileURL)
+    let database = LegacyNoteDatabase(fileURL: fileURL)
     let completionExpectation = expectation(description: "Expected to call completion routine")
     database.open { success in
       if success {

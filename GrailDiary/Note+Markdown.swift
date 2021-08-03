@@ -36,8 +36,9 @@ public extension Note {
     prompts.append(contentsOf: QuotePrompt.extract(from: parsedString))
     prompts.append(contentsOf: QuestionAndAnswerPrompt.extract(from: parsedString))
     var keyedCollection = [Note.ContentKey: PromptCollection]()
-    for (index, promptCollection) in prompts.enumerated() {
-      keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
+    for promptCollection in prompts {
+      let key = NoteDatabaseKey.promptCollection(promptType: promptCollection.type, count: promptCollection.prompts.count, id: promptCollection.rawValue.sha1Digest())
+      keyedCollection[key.rawValue] = promptCollection
     }
     let metadata = BookNoteMetadata(
       title: String(parsedString.title.split(separator: "\n").first ?? ""),

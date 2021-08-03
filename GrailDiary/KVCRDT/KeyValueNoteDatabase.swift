@@ -30,35 +30,30 @@ private extension JSONDecoder {
   }()
 }
 
-enum NoteDatabaseKey {
-  static let metadata = ".metadata"
-  static let coverImage = "coverImage"
-  static let noteText = "noteText"
-}
+struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
+  let rawValue: String
 
-struct PromptCollectionIdentifier: RawRepresentable {
-  init(promptType: PromptType, count: Int, id: String) {
-    self.promptType = promptType
-    self.count = count
-    self.id = id
+  init(rawValue: String) {
+    self.rawValue = rawValue
   }
 
-  let promptType: PromptType
-  let count: Int
-  let id: String
-
-  var rawValue: String {
-    "prompt=\(promptType.rawValue);count=\(count);id=\(id)"
+  init(stringLiteral: String) {
+    self.rawValue = stringLiteral
   }
 
-  init?(rawValue: String) {
-    let segments = rawValue.split(separator: ";")
-    guard segments[0].hasPrefix("prompt=") else { return nil }
-    self.promptType = PromptType(rawValue: String(segments[0].dropFirst(7)))
-    guard segments[1].hasPrefix("count="), let count = Int(String(segments[1].dropFirst(6))) else { return nil }
-    self.count = count
-    guard segments[2].hasPrefix("id=") else { return nil }
-    self.id = String(segments[3].dropFirst(3))
+  static let metadata: NoteDatabaseKey = ".metadata"
+  static let coverImage: NoteDatabaseKey = "coverImage"
+  static let noteText: NoteDatabaseKey = "noteText"
+  static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
+    NoteDatabaseKey(rawValue: "prompt=\(promptType.rawValue);count=\(count);id=\(id)")
+  }
+
+  var isPrompt: Bool {
+    rawValue.hasPrefix("prompt=")
+  }
+
+  var isWellKnown: Bool {
+    [".metadata", "coverImage", "noteText"].contains(rawValue)
   }
 }
 
@@ -104,7 +99,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   var bookMetadata: [String: BookNoteMetadata] {
     do {
-      let results = try keyValueDocument.keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata)
+      let results = try keyValueDocument.keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
       return try results.asBookNoteMetadata()
     } catch {
       Logger.keyValueNoteDatabase.critical("Could not read book metadata: \(error)")
@@ -114,13 +109,13 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
     keyValueDocument.keyValueCRDT
-      .readPublisher(key: NoteDatabaseKey.metadata)
+      .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .tryMap({ try $0.asBookNoteMetadata() })
       .eraseToAnyPublisher()
   }
 
   func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
-    let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage, scope: bookID).resolved(with: .lastWriterWins)?.blob
+    let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage.rawValue, scope: bookID).resolved(with: .lastWriterWins)?.blob
     if let data = data, let image = data.image(maxSize: maxSize) {
       return image
     } else {
@@ -130,28 +125,26 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   func createNote(_ note: Note) throws -> Note.Identifier {
     let noteID = UUID().uuidString
-    try saveBookNote(note, identifier: noteID)
+    let existingContent = NoteUpdatePayload(noteIdentifier: noteID)
+    try saveBookNote(note, existingContent: existingContent)
     return noteID
   }
 
   func note(noteIdentifier: Note.Identifier) throws -> Note {
-    guard let json = try keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.metadata, scope: noteIdentifier).resolved(with: .lastWriterWins)?.json else {
+    let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
+    guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let note = try payload.asNote() else {
       throw NoteDatabaseError.noSuchNote
     }
-    let metadata = try JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)
-    let text = try keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.noteText, scope: noteIdentifier).resolved(with: .lastWriterWins)?.text
-    return Note(
-      metadata: metadata,
-      referencedImageKeys: [],
-      text: text,
-      promptCollections: [:]
-    )
+    return note
   }
 
   func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
-    let initialNote = try note(noteIdentifier: noteIdentifier)
+    let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
+    guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let initialNote = try payload.asNote() else {
+      throw NoteDatabaseError.noSuchNote
+    }
     let updatedNote = updateBlock(initialNote)
-    try saveBookNote(updatedNote, identifier: noteIdentifier)
+    try saveBookNote(updatedNote, existingContent: payload)
   }
 
   func deleteNote(noteIdentifier: Note.Identifier) throws {
@@ -194,7 +187,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
-        key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata
+        key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
       })
     } catch {
       Logger.keyValueNoteDatabase.error("Could not read prompt keys: \(error)")
@@ -203,7 +196,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     var studySession = StudySession()
     for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
       guard
-        let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata)]?.metadata,
+        let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata.rawValue)]?.metadata,
         filter?(scopedKey.scope, metadata) ?? true
       else {
         continue
@@ -307,14 +300,94 @@ final class KeyValueNoteDatabase: NoteDatabase {
 }
 
 private extension KeyValueNoteDatabase {
-  func saveBookNote(_ note: Note, identifier: Note.Identifier) throws {
-    let encodedMetadata = try JSONEncoder.databaseEncoder.encode(note.metadata)
-    try keyValueDocument.keyValueCRDT.writeJson(String(data: encodedMetadata, encoding: .utf8)!, to: NoteDatabaseKey.metadata, scope: identifier)
-    if let text = note.text {
-      try keyValueDocument.keyValueCRDT.writeText(text, to: NoteDatabaseKey.noteText, scope: identifier)
-    } else {
-      try keyValueDocument.keyValueCRDT.delete(key: NoteDatabaseKey.noteText, scope: identifier)
+  func saveBookNote(_ note: Note, existingContent: NoteUpdatePayload) throws {
+    var existingContent = existingContent
+    try existingContent.update(with: note)
+    try keyValueDocument.keyValueCRDT.bulkWrite(existingContent.asKeyValueCRDTUpdates())
+  }
+}
+
+struct NoteUpdatePayload {
+  init(noteIdentifier: String) {
+    self.noteIdentifier = noteIdentifier
+  }
+
+  /// Creates a payload with the on-disk contents of a single note.
+  /// - precondition: The `scope` of each `ScopedKey` must be the same, and must be note identifier.
+  /// - throws `NoteDatabaseError.unexpectedNoteContent` if the scopes do not match.
+  init?(onDiskContents: [ScopedKey: [Version]]) throws {
+    var noteIdentifier: String?
+    for (scopedKey, versions) in onDiskContents {
+      if noteIdentifier == nil {
+        noteIdentifier = scopedKey.scope
+      } else if noteIdentifier != scopedKey.scope {
+        throw NoteDatabaseError.unexpectedNoteContent
+      }
+      updates[NoteDatabaseKey(rawValue: scopedKey.key)] = versions.resolved(with: .lastWriterWins)
     }
+    if let noteIdentifier = noteIdentifier {
+      self.noteIdentifier = noteIdentifier
+    } else {
+      return nil
+    }
+  }
+
+  let noteIdentifier: String
+  private var updates: [NoteDatabaseKey: Value] = [:]
+
+  mutating func insert(key: NoteDatabaseKey, value: Value) {
+    updates[key] = value
+  }
+
+  mutating func update(with note: Note) throws {
+    updates[.metadata] = try Value(note.metadata)
+    updates[.noteText] = Value(note.text)
+    let unusedPromptKeys = Set(updates.keys.filter({ $0.isPrompt }).map({ $0.rawValue })).subtracting(note.promptCollections.keys)
+    Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
+    for (promptKey, promptCollection) in note.promptCollections {
+      Logger.keyValueNoteDatabase.debug("Updating prompt collection with key \(promptKey)")
+      let key = NoteDatabaseKey(rawValue: promptKey)
+      assert(key.isPrompt)
+      if let promptCollectionValue = updates[key], var promptCollectionInfo = promptCollectionValue.promptCollectionInfo {
+        promptCollectionInfo.rawValue = promptCollection.rawValue
+        updates[key] = try Value(promptCollectionInfo)
+      } else {
+        updates[key] = try Value(PromptCollectionInfo(promptCollection))
+      }
+    }
+    for unusedKey in unusedPromptKeys {
+      let key = NoteDatabaseKey(rawValue: unusedKey)
+      assert(key.isPrompt)
+      updates[key] = .null
+    }
+  }
+
+  func asKeyValueCRDTUpdates() -> [ScopedKey: Value] {
+    updates
+      .map { (key: ScopedKey(scope: noteIdentifier, key: $0.key.rawValue), value: $0.value) }
+      .dictionaryMap { $0 }
+  }
+
+  func asNote() throws -> Note? {
+    guard let metadata = updates[.metadata]?.bookNoteMetadata else {
+      return nil
+    }
+    var imageKeys: [String] = []
+    var promptCollections: [String: PromptCollection] = [:]
+    for key in updates.keys {
+      if key.isWellKnown { continue }
+      if key.isPrompt {
+        promptCollections[key.rawValue] = try updates[key]?.promptCollectionInfo?.asPromptCollection()
+      } else {
+        imageKeys.append(key.rawValue)
+      }
+    }
+    return Note(
+      metadata: metadata,
+      referencedImageKeys: imageKeys,
+      text: updates[.noteText]?.text,
+      promptCollections: promptCollections
+    )
   }
 }
 
@@ -357,6 +430,38 @@ private extension Value {
   init(_ promptCollectionInfo: PromptCollectionInfo) throws {
     let jsonData = try JSONEncoder.databaseEncoder.encode(promptCollectionInfo)
     self = .json(String(data: jsonData, encoding: .utf8)!)
+  }
+
+  init(_ metadata: BookNoteMetadata) throws {
+    let encodedMetadata = try JSONEncoder.databaseEncoder.encode(metadata)
+    self = .json(String(data: encodedMetadata, encoding: .utf8)!)
+  }
+
+  init(_ text: String?) {
+    if let text = text {
+      self = .text(text)
+    } else {
+      self = .null
+    }
+  }
+
+  var bookNoteMetadata: BookNoteMetadata? {
+    decodeJSON(BookNoteMetadata.self)
+  }
+
+  var promptCollectionInfo: PromptCollectionInfo? {
+    decodeJSON(PromptCollectionInfo.self)
+  }
+
+  func decodeJSON<T: Decodable>(_ type: T.Type) -> T? {
+    guard
+      let json = self.json,
+      let data = json.data(using: .utf8),
+      let decodedItem = try? JSONDecoder.databaseDecoder.decode(type, from: data)
+    else {
+      return nil
+    }
+    return decodedItem
   }
 }
 
