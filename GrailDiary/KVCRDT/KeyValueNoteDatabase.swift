@@ -181,7 +181,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func studySession(filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
+  func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
     DispatchQueue.global(qos: .userInteractive).async {
       let studySession = self.studySession(filter: filter, date: date)
       DispatchQueue.main.async {
@@ -190,7 +190,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     }
   }
 
-  private func studySession(filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?, date: Date) -> StudySession {
+  private func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) -> StudySession {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
@@ -202,6 +202,12 @@ final class KeyValueNoteDatabase: NoteDatabase {
     }
     var studySession = StudySession()
     for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
+      guard
+        let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata)]?.metadata,
+        filter?(scopedKey.scope, metadata) ?? true
+      else {
+        continue
+      }
       guard let json = versions.resolved(with: .lastWriterWins)?.json, let data = json.data(using: .utf8) else {
         continue
       }
@@ -212,12 +218,11 @@ final class KeyValueNoteDatabase: NoteDatabase {
           promptIdentifiers.append(PromptIdentifier(noteId: scopedKey.scope, promptKey: scopedKey.key, promptIndex: index))
         }
         if !promptIdentifiers.isEmpty {
-          let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata)]?.metadata
           let innerStudySession = StudySession(
             promptIdentifiers,
             properties: CardDocumentProperties(
               documentName: scopedKey.scope,
-              attributionMarkdown: metadata?.title ?? ""
+              attributionMarkdown: metadata.title
             )
           )
           studySession += innerStudySession

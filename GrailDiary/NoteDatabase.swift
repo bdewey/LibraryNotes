@@ -68,7 +68,7 @@ public protocol NoteDatabase {
   func search(for searchPattern: String) throws -> [Note.Identifier]
 
   func studySession(
-    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)?,
+    filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?,
     date: Date,
     completion: @escaping (StudySession) -> Void
   )

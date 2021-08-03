@@ -627,7 +627,7 @@ public final class LegacyNoteDatabase: UIDocument {
   /// - parameter date: An optional date for determining prompt eligibility. If nil, will be today's date.
   /// - parameter completion: A completion routine to get the StudySession. Will be called on the main thread.
   public func studySession(
-    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)? = nil,
+    filter: ((Note.Identifier, BookNoteMetadata) -> Bool)? = nil,
     date: Date = Date(),
     completion: @escaping (StudySession) -> Void
   ) {
@@ -642,12 +642,12 @@ public final class LegacyNoteDatabase: UIDocument {
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
   internal func synchronousStudySession(
-    filter: ((Note.Identifier, NoteMetadataRecord) -> Bool)? = nil,
+    filter: ((Note.Identifier, BookNoteMetadata) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     return allMetadata
-      .filter { filter($0.key, $0.value) }
+      .filter { filter($0.key, BookNoteMetadata($0.value)) }
       .map { (name, reviewProperties) -> StudySession in
         let promptIdentifiers = try? eligiblePromptIdentifiers(before: date, limitedTo: name)
         return StudySession(

@@ -55,12 +55,6 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
-    self.databaseSubscription = database.notesDidChange
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] in
-        self?.updateStudySession()
-        self?.updateQuoteList()
-      }
   }
 
   @available(*, unavailable)
@@ -86,9 +80,11 @@ final class DocumentListViewController: UIViewController {
         return Just([String: BookNoteMetadata]())
       }
       .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
-      .assign(to: \.bookNoteMetadata, on: dataSource)
-    updateStudySession()
-    updateQuoteList()
+      .sink(receiveValue: { [weak self] filteredBookMetadata in
+        self?.dataSource.bookNoteMetadata = filteredBookMetadata
+        self?.updateStudySession()
+        self?.updateQuoteList()
+      })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -268,7 +264,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateStudySession() {
     let records = dataSource.bookNoteMetadata
-    let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = { identifier, _ in records[identifier] != nil }
+    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
     studySessionGeneration += 1
     let currentStudySessionGeneration = studySessionGeneration
     database.studySession(filter: filter, date: dueDate) {
