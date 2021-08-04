@@ -250,7 +250,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
         var schedulingItem = info.promptStatistics[promptIdentifier.promptIndex].schedulingItem
 
         let delay: TimeInterval
-        if let lastReview = info.promptStatistics[promptIdentifier.promptIndex].lastReview, let idealInterval = info.promptStatistics[promptIdentifier.promptIndex].idealInterval {
+        if let lastReview = info.promptStatistics[promptIdentifier.promptIndex].lastReview,
+            let idealInterval = info.promptStatistics[promptIdentifier.promptIndex].idealInterval {
           let idealDate = lastReview.addingTimeInterval(idealInterval)
           delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
         } else {
@@ -259,6 +260,18 @@ public final class KeyValueNoteDatabase: NoteDatabase {
 
         try schedulingItem.update(with: .standard, recallEase: entry.recallEase, timeIntervalSincePriorReview: delay)
         info.promptStatistics[promptIdentifier.promptIndex].applySchedulingItem(schedulingItem, on: date)
+
+        if buryRelatedPrompts {
+          // All *other* prompts in this collection need to be scheduled out at least one day.
+          let minimumDue = date.addingTimeInterval(.day)
+          for index in info.promptStatistics.indices where index != promptIdentifier.promptIndex {
+            if let existingDue = info.promptStatistics[index].due {
+              info.promptStatistics[index].due = max(minimumDue, existingDue)
+            } else {
+              info.promptStatistics[index].due = minimumDue
+            }
+          }
+        }
         updates[scopedKey] = try Value(info)
       } else {
         Logger.keyValueNoteDatabase.error("Could not find info or index for \(scopedKey)")
