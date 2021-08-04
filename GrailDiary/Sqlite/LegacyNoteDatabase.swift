@@ -186,13 +186,10 @@ public final class LegacyNoteDatabase: UIDocument {
       try StudyLogEntryRecord.fetchAll(db)
     }
     let bulkEntries = try studyLogEntries.map { entry -> (ScopedKey, Value) in
-      let scope = "note=\(entry.noteId).prompt=\(entry.promptKey)"
-      let formattedTime = ISO8601DateFormatter().string(from: entry.timestamp)
-      let key = "\(formattedTime).\(UUID().uuidString)"
-      let sle = StudyLogEntry(entry)
-      let data = try encoder.encode(sle)
-      let json = String(data: data, encoding: .utf8)!
-      return (ScopedKey(scope: scope, key: key), .json(json))
+      let scope = KeyValueNoteDatabaseScope.studyLog
+      let sle = StudyLog.Entry(entry)
+      let key = NoteDatabaseKey.studyLogEntry(date: entry.timestamp, promptIdentifier: sle.identifier, author: author)
+      return (ScopedKey(scope: scope.rawValue, key: key.rawValue), try Value(sle))
     }
     try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkEntries))
     crdtDocument.save(to: fileURL, for: .forCreating, completionHandler: nil)

@@ -4,9 +4,11 @@ import Foundation
 import Logging
 
 public struct StudyLog {
-  public init() {}
+  public init(entries: [Entry] = []) {
+    self.entries = entries
+  }
 
-  public struct Entry: Hashable, Comparable {
+  public struct Entry: Hashable, Comparable, Codable {
     public var timestamp: Date
     public var identifier: PromptIdentifier
     public var statistics: AnswerStatistics
@@ -95,6 +97,14 @@ public struct StudyLog {
         suppressionDates[entry.identifier] = (currentDate: entry.timestamp, nextDate: entry.timestamp.addingTimeInterval(.day))
       }
     }.mapValues { $0.nextDate }
+  }
+}
+
+extension StudyLog.Entry {
+  init(_ record: StudyLogEntryRecord) {
+    self.timestamp = record.timestamp
+    self.identifier = PromptIdentifier(noteId: record.noteId, promptKey: record.promptKey, promptIndex: record.promptIndex)
+    self.statistics = AnswerStatistics(correct: record.correct, incorrect: record.incorrect)
   }
 }
 

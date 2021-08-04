@@ -14,51 +14,12 @@ private extension Logger {
   }()
 }
 
-private extension JSONEncoder {
-  static let databaseEncoder: JSONEncoder = {
-    var encoder = JSONEncoder()
-    encoder.dateEncodingStrategy = .iso8601
-    return encoder
-  }()
-}
-
-private extension JSONDecoder {
-  static let databaseDecoder: JSONDecoder = {
-    var decoder = JSONDecoder()
-    decoder.dateDecodingStrategy = .iso8601
-    return decoder
-  }()
-}
-
-struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
-  let rawValue: String
-
-  init(rawValue: String) {
-    self.rawValue = rawValue
-  }
-
-  init(stringLiteral: String) {
-    self.rawValue = stringLiteral
-  }
-
-  static let metadata: NoteDatabaseKey = ".metadata"
-  static let coverImage: NoteDatabaseKey = "coverImage"
-  static let noteText: NoteDatabaseKey = "noteText"
-  static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
-    NoteDatabaseKey(rawValue: "prompt=\(promptType.rawValue);count=\(count);id=\(id)")
-  }
-
-  var isPrompt: Bool {
-    rawValue.hasPrefix("prompt=")
-  }
-
-  var isWellKnown: Bool {
-    [".metadata", "coverImage", "noteText"].contains(rawValue)
-  }
-}
-
 enum KeyValueNoteDatabaseError: Error {
   case notImplemented
+}
+
+enum KeyValueNoteDatabaseScope: String {
+  case studyLog = ".studyLog"
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
@@ -271,21 +232,15 @@ public final class KeyValueNoteDatabase: NoteDatabase {
 
     var updates: [ScopedKey: Value] = [:]
     for (promptIdentifier, answerStatistics) in studySession.results {
-      // 1. Generate a StudyLogEntry. Currently this is write-only; I never read these back. In theory one could reconstruct
+      // 1. Generate a StudyLog.Entry. Currently this is write-only; I never read these back. In theory one could reconstruct
       // the prompt scheduling information from them.
-      let entry = StudyLogEntry(
-        timestamp: date,
-        correct: answerStatistics.correct,
-        incorrect: answerStatistics.incorrect,
-        promptIndex: promptIdentifier.promptIndex
-      )
-      let formattedTime = ISO8601DateFormatter().string(from: date)
-      // Each key is globally unique so there should never be collisions.
-      let key = "\(formattedTime).\(UUID().uuidString)"
-      let jsonData = try JSONEncoder.databaseEncoder.encode(entry)
+      let entry = StudyLog.Entry(timestamp: date, identifier: promptIdentifier, statistics: answerStatistics)
       // The scope is what ties this entry to its corresponding scope & key.
-      let entryKey = ScopedKey(scope: "note=\(promptIdentifier.noteId);\(promptIdentifier.promptKey)", key: key)
-      updates[entryKey] = .json(String(data: jsonData, encoding: .utf8)!)
+      let entryKey = ScopedKey(
+        scope: KeyValueNoteDatabaseScope.studyLog.rawValue,
+        key: NoteDatabaseKey.studyLogEntry(date: date, promptIdentifier: promptIdentifier, author: keyValueDocument.author).rawValue
+      )
+      updates[entryKey] = try Value(entry)
 
       // 2. Update the corresponding prompt info.
       let scopedKey = ScopedKey(scope: promptIdentifier.noteId, key: promptIdentifier.promptKey)
@@ -335,7 +290,21 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public var studyLog: StudyLog {
-    return StudyLog()
+    do {
+      let records = try keyValueDocument.keyValueCRDT.bulkRead(scope: KeyValueNoteDatabaseScope.studyLog.rawValue)
+      let entries = records.values.compactMap { versions -> StudyLog.Entry? in
+        do {
+          return try versions.studyLogEntry
+        } catch {
+          Logger.keyValueNoteDatabase.error("Unexpected error extracting a study log entry: \(error)")
+          return nil
+        }
+      }
+      return StudyLog(entries: entries)
+    } catch {
+      Logger.keyValueNoteDatabase.error("Unexpected error getting studyLog: \(error)")
+      return StudyLog()
+    }
   }
 }
 
@@ -454,65 +423,14 @@ private extension Dictionary where Key == ScopedKey, Value == [Version] {
   }
 }
 
-private extension StudyLogEntry {
+private extension StudyLog.Entry {
   var recallEase: RecallEase {
-    if correct > 0, incorrect == 0 {
+    if statistics.correct > 0, statistics.incorrect == 0 {
       return .good
     }
-    if correct > 0, incorrect == 1 {
+    if statistics.correct > 0, statistics.incorrect == 1 {
       return .hard
     }
     return .again
-  }
-}
-
-private extension Value {
-  init(_ promptCollectionInfo: PromptCollectionInfo) throws {
-    let jsonData = try JSONEncoder.databaseEncoder.encode(promptCollectionInfo)
-    self = .json(String(data: jsonData, encoding: .utf8)!)
-  }
-
-  init(_ metadata: BookNoteMetadata) throws {
-    let encodedMetadata = try JSONEncoder.databaseEncoder.encode(metadata)
-    self = .json(String(data: encodedMetadata, encoding: .utf8)!)
-  }
-
-  init(_ text: String?) {
-    if let text = text {
-      self = .text(text)
-    } else {
-      self = .null
-    }
-  }
-
-  var bookNoteMetadata: BookNoteMetadata? {
-    decodeJSON(BookNoteMetadata.self)
-  }
-
-  var promptCollectionInfo: PromptCollectionInfo? {
-    decodeJSON(PromptCollectionInfo.self)
-  }
-
-  func decodeJSON<T: Decodable>(_ type: T.Type) -> T? {
-    guard
-      let json = self.json,
-      let data = json.data(using: .utf8),
-      let decodedItem = try? JSONDecoder.databaseDecoder.decode(type, from: data)
-    else {
-      return nil
-    }
-    return decodedItem
-  }
-}
-
-private extension Array where Element == Version {
-  var metadata: BookNoteMetadata? {
-    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
-    return try? JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)
-  }
-
-  var promptCollectionInfo: PromptCollectionInfo? {
-    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
-    return try? JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
   }
 }

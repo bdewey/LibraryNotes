@@ -8,7 +8,7 @@ import XCTest
 class NoteSqliteStorageTestBase: XCTestCase {
   func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
     do {
-//      makeAndOpenEmptyLegacyDatabase(completion: completion)
+      makeAndOpenEmptyLegacyDatabase(completion: completion)
       try makeAndOpenEmptyKeyValueDatabase(completion: completion)
     } catch {
       XCTFail("Unexpected error: \(error)")
