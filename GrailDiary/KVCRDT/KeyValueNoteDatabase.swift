@@ -62,36 +62,36 @@ enum KeyValueNoteDatabaseError: Error {
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
-final class KeyValueNoteDatabase: NoteDatabase {
-  init(fileURL: URL, author: Author) throws {
+public final class KeyValueNoteDatabase: NoteDatabase {
+  public init(fileURL: URL, author: Author) throws {
     self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, author: author)
   }
 
   private let keyValueDocument: UIKeyValueDocument
 
-  var fileURL: URL { keyValueDocument.fileURL }
+  public var fileURL: URL { keyValueDocument.fileURL }
 
-  var documentState: UIDocument.State { keyValueDocument.documentState }
+  public var documentState: UIDocument.State { keyValueDocument.documentState }
 
-  var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
+  public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
 
-  func open(completionHandler: IOCompletionHandler?) {
+  public func open(completionHandler: IOCompletionHandler?) {
     keyValueDocument.open(completionHandler: completionHandler)
   }
 
-  func close(completionHandler: IOCompletionHandler?) {
+  public func close(completionHandler: IOCompletionHandler?) {
     keyValueDocument.close(completionHandler: completionHandler)
   }
 
-  func refresh(completionHandler: IOCompletionHandler?) {
+  public func refresh(completionHandler: IOCompletionHandler?) {
     Logger.keyValueNoteDatabase.debug("\(#function) not implemented")
   }
 
-  func flush() throws {
+  public func flush() throws {
     keyValueDocument.save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
-  var notesDidChange: AnyPublisher<Void, Never> {
+  public var notesDidChange: AnyPublisher<Void, Never> {
     keyValueDocument.keyValueCRDT
       .didChangePublisher()
       .map { _ in () } // turn any value to a Void
@@ -99,7 +99,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
       .eraseToAnyPublisher()
   }
 
-  var bookMetadata: [String: BookNoteMetadata] {
+  public var bookMetadata: [String: BookNoteMetadata] {
     do {
       let results = try keyValueDocument.keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
       return try results.asBookNoteMetadata()
@@ -109,14 +109,14 @@ final class KeyValueNoteDatabase: NoteDatabase {
     }
   }
 
-  func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
+  public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
     keyValueDocument.keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .tryMap({ try $0.asBookNoteMetadata() })
       .eraseToAnyPublisher()
   }
 
-  func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
+  public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
     let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage.rawValue, scope: bookID).resolved(with: .lastWriterWins)?.blob
     if let data = data, let image = data.image(maxSize: maxSize) {
       return image
@@ -125,14 +125,14 @@ final class KeyValueNoteDatabase: NoteDatabase {
     }
   }
 
-  func createNote(_ note: Note) throws -> Note.Identifier {
+  public func createNote(_ note: Note) throws -> Note.Identifier {
     let noteID = UUID().uuidString
     let existingContent = NoteUpdatePayload(noteIdentifier: noteID)
     try saveBookNote(note, existingContent: existingContent)
     return noteID
   }
 
-  func note(noteIdentifier: Note.Identifier) throws -> Note {
+  public func note(noteIdentifier: Note.Identifier) throws -> Note {
     let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
     guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let note = try payload.asNote() else {
       throw NoteDatabaseError.noSuchNote
@@ -140,7 +140,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     return note
   }
 
-  func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
+  public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
     let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
     guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let initialNote = try payload.asNote() else {
       throw NoteDatabaseError.noSuchNote
@@ -149,34 +149,34 @@ final class KeyValueNoteDatabase: NoteDatabase {
     try saveBookNote(updatedNote, existingContent: payload)
   }
 
-  func deleteNote(noteIdentifier: Note.Identifier) throws {
+  public func deleteNote(noteIdentifier: Note.Identifier) throws {
     let updates = try keyValueDocument.keyValueCRDT.keys(scope: noteIdentifier).dictionaryMap {
       (key: $0, value: Value.null)
     }
     try keyValueDocument.keyValueCRDT.bulkWrite(updates)
   }
 
-  func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
+  public func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
+  public func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
+  public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func renameHashtag(_ originalHashtag: String, to newHashtag: String, filter: (NoteMetadataRecord) -> Bool) throws {
+  public func renameHashtag(_ originalHashtag: String, to newHashtag: String, filter: (NoteMetadataRecord) -> Bool) throws {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func search(for searchPattern: String) throws -> [Note.Identifier] {
+  public func search(for searchPattern: String) throws -> [Note.Identifier] {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
+  public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
     DispatchQueue.global(qos: .userInteractive).async {
       let studySession = self.synchronousStudySession(filter: filter, date: date)
       DispatchQueue.main.async {
@@ -259,7 +259,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     return promptIdentifiers
   }
 
-  func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
+  public func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let scopedKeysToFetch = studySession.results.keys.map { ScopedKey(scope: $0.noteId, key: $0.promptKey) }
     let promptInfo = try keyValueDocument.keyValueCRDT
       .bulkRead(keys: scopedKeysToFetch.map({ $0.key }))
@@ -311,7 +311,7 @@ final class KeyValueNoteDatabase: NoteDatabase {
     try keyValueDocument.keyValueCRDT.bulkWrite(updates)
   }
 
-  func prompt(promptIdentifier: PromptIdentifier) throws -> Prompt {
+  public func prompt(promptIdentifier: PromptIdentifier) throws -> Prompt {
     guard let json = try keyValueDocument.keyValueCRDT.read(key: promptIdentifier.promptKey, scope: promptIdentifier.noteId).resolved(with: .lastWriterWins)?.json else {
       throw NoteDatabaseError.unknownPromptCollection
     }
@@ -322,19 +322,19 @@ final class KeyValueNoteDatabase: NoteDatabase {
     return collection.prompts[promptIdentifier.promptIndex]
   }
 
-  func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
+  public func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
     return Fail<[ContentIdentifier], Error>(error: KeyValueNoteDatabaseError.notImplemented).eraseToAnyPublisher()
   }
 
-  func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
+  public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  func replaceText(_ originalText: String, with replacementText: String, filter: (NoteMetadataRecord) -> Bool) throws {
+  public func replaceText(_ originalText: String, with replacementText: String, filter: (NoteMetadataRecord) -> Bool) throws {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  var studyLog: StudyLog {
+  public var studyLog: StudyLog {
     return StudyLog()
   }
 }

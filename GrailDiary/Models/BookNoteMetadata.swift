@@ -38,8 +38,8 @@ public struct BookNoteMetadata: Codable, Equatable {
   public static func == (lhs: BookNoteMetadata, rhs: BookNoteMetadata) -> Bool {
     lhs.title == rhs.title &&
     lhs.summary == rhs.summary &&
-    lhs.creationTimestamp.withinInterval(0.001, of: rhs.creationTimestamp) &&
-    lhs.modifiedTimestamp.withinInterval(0.001, of: rhs.modifiedTimestamp) &&
+    lhs.creationTimestamp.withinInterval(1, of: rhs.creationTimestamp) &&
+    lhs.modifiedTimestamp.withinInterval(1, of: rhs.modifiedTimestamp) &&
     lhs.tags == rhs.tags &&
     lhs.book == rhs.book
   }
