@@ -16,6 +16,30 @@ public struct Note {
     self.promptCollections = promptCollections
   }
 
+  @available(*, deprecated)
+  public init(
+    creationTimestamp: Date,
+    timestamp: Date,
+    hashtags: [String],
+    referencedImageKeys: [String],
+    title: String, text: String? = nil,
+    reference: Note.Reference? = nil,
+    folder: String? = nil,
+    summary: String? = nil,
+    promptCollections: [Note.ContentKey: PromptCollection]
+  ) {
+    let metadata = BookNoteMetadata(
+      title: title,
+      summary: summary,
+      creationTimestamp: creationTimestamp,
+      modifiedTimestamp: timestamp,
+      tags: hashtags,
+      folder: folder,
+      book: nil
+    )
+    self.init(metadata: metadata, referencedImageKeys: referencedImageKeys, text: text, promptCollections: promptCollections)
+  }
+
   /// Identifies a note.
   public typealias Identifier = String
 
@@ -45,4 +69,31 @@ public struct Note {
 
   public var text: String?
   public var promptCollections: [ContentKey: PromptCollection]
+
+  @available(*, deprecated)
+  public var timestamp: Date {
+    get { metadata.modifiedTimestamp }
+    set { metadata.modifiedTimestamp = newValue }
+  }
+
+  @available(*, deprecated)
+  public var hashtags: [String] {
+    get { metadata.tags }
+    set { metadata.tags = newValue }
+  }
+
+  @available(*, deprecated)
+  public var title: String {
+    get { metadata.title }
+    set { metadata.title = newValue }
+  }
+}
+
+extension Note: Equatable {
+  public static func == (lhs: Note, rhs: Note) -> Bool {
+    lhs.metadata == rhs.metadata &&
+    lhs.referencedImageKeys == rhs.referencedImageKeys &&
+    lhs.text == rhs.text &&
+    lhs.promptCollections.mapValues({ $0.rawValue }) == rhs.promptCollections.mapValues({ $0.rawValue })
+  }
 }

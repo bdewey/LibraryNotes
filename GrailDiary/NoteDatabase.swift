@@ -24,6 +24,7 @@ public protocol NoteDatabase {
 
   var fileURL: URL { get }
   var documentState: UIDocument.State { get }
+  var hasUnsavedChanges: Bool { get }
 
   func open(completionHandler: IOCompletionHandler?)
   func close(completionHandler: IOCompletionHandler?)
@@ -82,5 +83,24 @@ public protocol NoteDatabase {
 
   // TODO: Create something general-purpose for the kvcrdt data implementation
   func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote]
+
+  // MARK: - Testing hooks
+  func eligiblePromptIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [PromptIdentifier]
+
+  func synchronousStudySession(
+    filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?,
+    date: Date
+  ) -> StudySession
+
+  func replaceText(
+    _ originalText: String,
+    with replacementText: String,
+    filter: (NoteMetadataRecord) -> Bool
+  ) throws
+
+  var studyLog: StudyLog { get }
 }
 

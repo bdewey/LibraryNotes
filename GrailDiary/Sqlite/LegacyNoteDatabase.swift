@@ -641,7 +641,7 @@ public final class LegacyNoteDatabase: UIDocument {
 
   /// Blocking function that gets the study session. Safe to call from background threads. Only `internal` and not `private` so tests can call it.
   // TODO: On debug builds, this is *really* slow. Worth optimizing.
-  internal func synchronousStudySession(
+  public func synchronousStudySession(
     filter: ((Note.Identifier, BookNoteMetadata) -> Bool)? = nil,
     date: Date = Date()
   ) -> StudySession {

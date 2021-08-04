@@ -34,6 +34,15 @@ public struct BookNoteMetadata: Codable, Equatable {
 
   /// The book that this note is about.
   public var book: AugmentedBook?
+
+  public static func == (lhs: BookNoteMetadata, rhs: BookNoteMetadata) -> Bool {
+    lhs.title == rhs.title &&
+    lhs.summary == rhs.summary &&
+    lhs.creationTimestamp.withinInterval(0.001, of: rhs.creationTimestamp) &&
+    lhs.modifiedTimestamp.withinInterval(0.001, of: rhs.modifiedTimestamp) &&
+    lhs.tags == rhs.tags &&
+    lhs.book == rhs.book
+  }
 }
 
 public extension Sequence where Element == BookNoteMetadata {

@@ -73,6 +73,8 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   var documentState: UIDocument.State { keyValueDocument.documentState }
 
+  var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
+
   func open(completionHandler: IOCompletionHandler?) {
     keyValueDocument.open(completionHandler: completionHandler)
   }
@@ -176,14 +178,14 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
     DispatchQueue.global(qos: .userInteractive).async {
-      let studySession = self.studySession(filter: filter, date: date)
+      let studySession = self.synchronousStudySession(filter: filter, date: date)
       DispatchQueue.main.async {
         completion(studySession)
       }
     }
   }
 
-  private func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) -> StudySession {
+  public func synchronousStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) -> StudySession {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
@@ -225,6 +227,36 @@ final class KeyValueNoteDatabase: NoteDatabase {
       }
     }
     return studySession
+  }
+
+  public func eligiblePromptIdentifiers(
+    before date: Date,
+    limitedTo noteIdentifier: Note.Identifier?
+  ) throws -> [PromptIdentifier] {
+    let results: [ScopedKey: [Version]]
+    do {
+      results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { scope, key -> Bool in
+        if let noteIdentifier = noteIdentifier {
+          if noteIdentifier != scope { return false }
+        }
+        return key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
+      })
+    } catch {
+      Logger.keyValueNoteDatabase.error("Could not read prompt keys: \(error)")
+      return []
+    }
+    var promptIdentifiers: [PromptIdentifier] = []
+    for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
+      guard
+        let promptInfo = versions.resolved(with: .lastWriterWins)?.promptCollectionInfo
+      else {
+        continue
+      }
+      for (index, prompt) in promptInfo.promptStatistics.enumerated() where (prompt.due ?? .distantPast) <= date {
+        promptIdentifiers.append(PromptIdentifier(noteId: scopedKey.scope, promptKey: scopedKey.key, promptIndex: index))
+      }
+    }
+    return promptIdentifiers
   }
 
   func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
@@ -296,6 +328,14 @@ final class KeyValueNoteDatabase: NoteDatabase {
 
   func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
     throw KeyValueNoteDatabaseError.notImplemented
+  }
+
+  func replaceText(_ originalText: String, with replacementText: String, filter: (NoteMetadataRecord) -> Bool) throws {
+    throw KeyValueNoteDatabaseError.notImplemented
+  }
+
+  var studyLog: StudyLog {
+    return StudyLog()
   }
 }
 
