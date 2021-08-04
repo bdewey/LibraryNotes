@@ -1,10 +1,4 @@
-//
-//  Version+NoteModels.swift
-//  Version+NoteModels
-//
-//  Created by Brian Dewey on 8/4/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import KeyValueCRDT
@@ -15,12 +9,12 @@ enum VersionError: String, Error {
 
 extension Array where Element == Version {
   var metadata: BookNoteMetadata? {
-    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
+    guard let json = resolved(with: .lastWriterWins)?.json else { return nil }
     return try? JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)
   }
 
   var promptCollectionInfo: PromptCollectionInfo? {
-    guard let json = self.resolved(with: .lastWriterWins)?.json else { return nil }
+    guard let json = resolved(with: .lastWriterWins)?.json else { return nil }
     return try? JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
   }
 

@@ -46,7 +46,7 @@ public extension Note {
 
     for temporaryKey in temporaryKeys {
       assert(remappedTemplates[temporaryKey] == nil)
-      remappedTemplates[temporaryKey] =  promptCollections[temporaryKey]
+      remappedTemplates[temporaryKey] = promptCollections[temporaryKey]
     }
 
     // Done. Validate.
@@ -96,7 +96,6 @@ private extension PromptCollection {
     let diff = rawValue.difference(from: other.rawValue)
     return diff.count < rawValue.count
   }
-  
 }
 
 extension Array {

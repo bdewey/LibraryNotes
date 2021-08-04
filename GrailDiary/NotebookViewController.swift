@@ -374,7 +374,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 extension NotebookViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
     dismiss(animated: true, completion: nil)
-    let markdown = focusedNotebookStructure.hashtag.flatMap({ $0 + "\n\n" }) ?? ""
+    let markdown = focusedNotebookStructure.hashtag.flatMap { $0 + "\n\n" } ?? ""
     var note = Note(markdown: markdown)
     note.metadata.book = AugmentedBook(book)
     do {

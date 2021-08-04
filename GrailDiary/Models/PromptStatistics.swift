@@ -1,10 +1,4 @@
-//
-//  PromptStatistics.swift
-//  PromptStatistics
-//
-//  Created by Brian Dewey on 8/1/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import SpacedRepetitionScheduler
@@ -69,7 +63,7 @@ public extension PromptStatistics {
 }
 
 extension PromptStatistics {
-  internal init(_ promptRecord: PromptRecord) {
+  init(_ promptRecord: PromptRecord) {
     self.reviewCount = promptRecord.reviewCount
     self.lapseCount = promptRecord.lapseCount
     self.totalCorrect = promptRecord.totalCorrect

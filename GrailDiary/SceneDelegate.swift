@@ -6,7 +6,7 @@ import UniformTypeIdentifiers
 
 extension UTType {
   static let grailDiary = UTType("org.brians-brain.graildiary")!
-  static let kvcrdt     = UTType("org.brians-brain.kvcrdt")!
+  static let kvcrdt = UTType("org.brians-brain.kvcrdt")!
 }
 
 @objc final class SceneDelegate: UIResponder, UIWindowSceneDelegate {

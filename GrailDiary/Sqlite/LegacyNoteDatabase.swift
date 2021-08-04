@@ -142,7 +142,7 @@ public final class LegacyNoteDatabase: UIDocument {
       if record.role != ContentRole.primary.rawValue { return nil }
       return (ScopedKey(scope: record.noteId, key: NoteDatabaseKey.noteText.rawValue), record.text)
     }
-    let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues({ Value.text($0) })
+    let map = Dictionary(tuples, uniquingKeysWith: { value, _ in value }).mapValues { Value.text($0) }
     try crdt.bulkWrite(map)
 
     let noteMetadata = try dbQueue.read { db in
@@ -178,7 +178,7 @@ public final class LegacyNoteDatabase: UIDocument {
       try BinaryContentRecord.fetchAll(db)
     }
     let imageTuples = binaryContentRecords.compactMap { record -> (ScopedKey, Value) in
-      return (ScopedKey(scope: record.noteId, key: record.key), .blob(mimeType: record.mimeType, blob: record.blob))
+      (ScopedKey(scope: record.noteId, key: record.key), .blob(mimeType: record.mimeType, blob: record.blob))
     }
     try crdt.bulkWrite(Dictionary(imageTuples, uniquingKeysWith: { value, _ in value }))
 
@@ -456,7 +456,7 @@ public final class LegacyNoteDatabase: UIDocument {
     guard var note = try NoteRecord.filter(key: noteIdentifier).fetchOne(db) else {
       return
     }
-    let updateKey = try self.updateIdentifier(in: db)
+    let updateKey = try updateIdentifier(in: db)
     try note.contentRecords.deleteAll(db)
     note.deleted = true
     note.modifiedDevice = updateKey.deviceID
@@ -713,7 +713,7 @@ public final class LegacyNoteDatabase: UIDocument {
       throw NoteDatabaseError.databaseIsNotOpen
     }
     return try dbQueue.read { db in
-      return try ContentRecord
+      try ContentRecord
         .filter(keys: contentIdentifiers.map { $0.keyArray })
         .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
         .asRequest(of: AttributedQuote.self)
@@ -745,12 +745,12 @@ public final class LegacyNoteDatabase: UIDocument {
   }
 
   public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
-    return try? dbQueue?.read({ db in
+    return try? dbQueue?.read { db in
       let record = try BinaryContentRecord
         .filter(key: [BinaryContentRecord.Columns.noteId.rawValue: bookID, BinaryContentRecord.Columns.key.rawValue: "coverImage"])
         .fetchOne(db)
       return record?.blob.image(maxSize: maxSize)
-    })
+    }
   }
 }
 
@@ -1109,8 +1109,8 @@ private extension DatabaseMigrator {
   }
 }
 
-extension SchedulingParameters {
-  public static let standard = SchedulingParameters(
+public extension SchedulingParameters {
+  static let standard = SchedulingParameters(
     learningIntervals: [.day, 4 * .day],
     goodGraduatingInterval: 7 * .day
   )

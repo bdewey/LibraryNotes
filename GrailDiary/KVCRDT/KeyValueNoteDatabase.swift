@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import Combine
 import Foundation
 import KeyValueCRDT
@@ -56,7 +58,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     keyValueDocument.keyValueCRDT
       .didChangePublisher()
       .map { _ in () } // turn any value to a Void
-      .catch { _ in Just<Void>(Void()) }
+      .catch { _ in Just<Void>(()) }
       .eraseToAnyPublisher()
   }
 
@@ -73,7 +75,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
     keyValueDocument.keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
-      .tryMap({ try $0.asBookNoteMetadata() })
+      .tryMap { try $0.asBookNoteMetadata() }
       .eraseToAnyPublisher()
   }
 
@@ -223,7 +225,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let scopedKeysToFetch = studySession.results.keys.map { ScopedKey(scope: $0.noteId, key: $0.promptKey) }
     let promptInfo = try keyValueDocument.keyValueCRDT
-      .bulkRead(keys: scopedKeysToFetch.map({ $0.key }))
+      .bulkRead(keys: scopedKeysToFetch.map { $0.key })
       .dictionaryCompactMap(mapping: { scopedKey, versions -> (key: ScopedKey, value: PromptCollectionInfo)? in
         guard let info = versions.promptCollectionInfo else { return nil }
         return (key: scopedKey, value: info)
@@ -351,7 +353,7 @@ struct NoteUpdatePayload {
   mutating func update(with note: Note) throws {
     updates[.metadata] = try Value(note.metadata)
     updates[.noteText] = Value(note.text)
-    let unusedPromptKeys = Set(updates.keys.filter({ $0.isPrompt }).map({ $0.rawValue })).subtracting(note.promptCollections.keys)
+    let unusedPromptKeys = Set(updates.keys.filter { $0.isPrompt }.map { $0.rawValue }).subtracting(note.promptCollections.keys)
     Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
     for (promptKey, promptCollection) in note.promptCollections {
       Logger.keyValueNoteDatabase.debug("Updating prompt collection with key \(promptKey)")
@@ -402,7 +404,7 @@ struct NoteUpdatePayload {
 
 private extension Dictionary where Key == ScopedKey, Value == [Version] {
   func asBookNoteMetadata() throws -> [String: BookNoteMetadata] {
-    self.map { scopedKey, versions -> (key: String, value: KeyValueCRDT.Value?) in
+    map { scopedKey, versions -> (key: String, value: KeyValueCRDT.Value?) in
       let tuple = (key: scopedKey.scope, value: versions.resolved(with: .lastWriterWins))
       return tuple
     }

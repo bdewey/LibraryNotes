@@ -1,5 +1,7 @@
-import KeyValueCRDT
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import Foundation
+import KeyValueCRDT
 
 public protocol Resolver {
   /// Given a non-empty array of versions, returns the "winning" value according to some algorithm.

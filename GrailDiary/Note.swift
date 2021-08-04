@@ -59,7 +59,7 @@ public struct Note {
     case webPage(URL)
 
     var book: AugmentedBook? {
-      if case let .book(book) = self {
+      if case .book(let book) = self {
         return book
       } else {
         return nil
@@ -92,8 +92,8 @@ public struct Note {
 extension Note: Equatable {
   public static func == (lhs: Note, rhs: Note) -> Bool {
     lhs.metadata == rhs.metadata &&
-    lhs.referencedImageKeys == rhs.referencedImageKeys &&
-    lhs.text == rhs.text &&
-    lhs.promptCollections.mapValues({ $0.rawValue }) == rhs.promptCollections.mapValues({ $0.rawValue })
+      lhs.referencedImageKeys == rhs.referencedImageKeys &&
+      lhs.text == rhs.text &&
+      lhs.promptCollections.mapValues { $0.rawValue } == rhs.promptCollections.mapValues { $0.rawValue }
   }
 }

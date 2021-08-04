@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import Combine
 import Foundation
 import UIKit
@@ -85,6 +87,7 @@ public protocol NoteDatabase {
   func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote]
 
   // MARK: - Testing hooks
+
   func eligiblePromptIdentifiers(
     before date: Date,
     limitedTo noteIdentifier: Note.Identifier?
@@ -103,4 +106,3 @@ public protocol NoteDatabase {
 
   var studyLog: StudyLog { get }
 }
-

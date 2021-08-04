@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import BookKit
 import Foundation
 
@@ -37,18 +39,17 @@ public struct BookNoteMetadata: Codable, Equatable {
 
   public static func == (lhs: BookNoteMetadata, rhs: BookNoteMetadata) -> Bool {
     lhs.title == rhs.title &&
-    lhs.summary == rhs.summary &&
-    lhs.creationTimestamp.withinInterval(1, of: rhs.creationTimestamp) &&
-    lhs.modifiedTimestamp.withinInterval(1, of: rhs.modifiedTimestamp) &&
-    lhs.tags == rhs.tags &&
-    lhs.book == rhs.book
+      lhs.summary == rhs.summary &&
+      lhs.creationTimestamp.withinInterval(1, of: rhs.creationTimestamp) &&
+      lhs.modifiedTimestamp.withinInterval(1, of: rhs.modifiedTimestamp) &&
+      lhs.tags == rhs.tags &&
+      lhs.book == rhs.book
   }
 }
 
 public extension Sequence where Element == BookNoteMetadata {
   var hashtags: [String] {
-    let hashtags = self
-      .filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
+    let hashtags = filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
       .reduce(into: Set<String>()) { hashtags, metadata in
         hashtags.formUnion(metadata.tags)
       }
