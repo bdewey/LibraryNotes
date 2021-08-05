@@ -111,9 +111,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
 
   public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
     let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
-    guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let initialNote = try payload.asNote() else {
-      throw NoteDatabaseError.noSuchNote
-    }
+    let payload = try NoteUpdatePayload(onDiskContents: onDiskContents) ?? NoteUpdatePayload(noteIdentifier: noteIdentifier)
+    let initialNote = try payload.asNote() ?? Note(markdown: "")
     let updatedNote = updateBlock(initialNote)
     try saveBookNote(updatedNote, existingContent: payload)
   }
@@ -126,11 +125,22 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
-    throw KeyValueNoteDatabaseError.notImplemented
+    let actualKey = NoteDatabaseKey.asset(assetKey: key ?? data.sha1Digest(), assetType: type)
+    try keyValueDocument.keyValueCRDT.writeBlob(
+      data,
+      to: actualKey.rawValue,
+      scope: noteIdentifier,
+      mimeType: type.preferredMIMEType ?? "application/octet-stream",
+      timestamp: Date()
+    )
+    return actualKey.rawValue
   }
 
   public func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
-    throw KeyValueNoteDatabaseError.notImplemented
+    guard let data = try keyValueDocument.keyValueCRDT.read(key: key, scope: noteIdentifier).resolved(with: .lastWriterWins)?.blob else {
+      throw NoteDatabaseError.noSuchAsset
+    }
+    return data
   }
 
   public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {

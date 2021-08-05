@@ -2,6 +2,7 @@
 
 import Foundation
 import KeyValueCRDT
+import UniformTypeIdentifiers
 
 struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   let rawValue: String
@@ -19,6 +20,11 @@ struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   static let noteText: NoteDatabaseKey = "noteText"
   static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
     NoteDatabaseKey(rawValue: "prompt=\(promptType.rawValue);count=\(count);id=\(id)")
+  }
+
+  static func asset(assetKey: String, assetType: UTType) -> NoteDatabaseKey {
+    let filename = [assetKey, assetType.preferredFilenameExtension].compactMap({ $0 }).joined(separator: ".")
+    return NoteDatabaseKey(rawValue: "assets/\(filename)")
   }
 
   static func studyLogEntry(date: Date, promptIdentifier: PromptIdentifier, author: Author) -> NoteDatabaseKey {

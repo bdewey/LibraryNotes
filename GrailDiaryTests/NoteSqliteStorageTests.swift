@@ -20,6 +20,20 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
+  func testUpdateNonExistantNoteCreatesNote() {
+    makeAndOpenEmptyDatabase { database in
+      var note = Note.simpleTest
+      let identifier = UUID().uuidString
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in
+        note
+      })
+      note.text = "Version 2.0 text"
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in note })
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(note, roundTripNote)
+    }
+  }
+
   func testUpdateSimpleNote() {
     makeAndOpenEmptyDatabase { database in
       var note = Note.simpleTest
