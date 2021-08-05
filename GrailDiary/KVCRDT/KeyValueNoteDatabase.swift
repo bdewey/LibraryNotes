@@ -54,6 +54,10 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     keyValueDocument.save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
+  public func merge(other: KeyValueNoteDatabase) throws {
+    try keyValueDocument.keyValueCRDT.merge(source: other.keyValueDocument.keyValueCRDT)
+  }
+
   public var notesDidChange: AnyPublisher<Void, Never> {
     keyValueDocument.keyValueCRDT
       .didChangePublisher()
@@ -92,11 +96,13 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     let noteID = UUID().uuidString
     let existingContent = NoteUpdatePayload(noteIdentifier: noteID)
     try saveBookNote(note, existingContent: existingContent)
+    Logger.keyValueNoteDatabase.info("Created note \(noteID)")
     return noteID
   }
 
   public func note(noteIdentifier: Note.Identifier) throws -> Note {
     let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
+    Logger.keyValueNoteDatabase.info("Trying to read note \(noteIdentifier). Found \(onDiskContents.count) records.")
     guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let note = try payload.asNote() else {
       throw NoteDatabaseError.noSuchNote
     }
