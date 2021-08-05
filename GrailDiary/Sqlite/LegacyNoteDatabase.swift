@@ -158,6 +158,12 @@ public final class LegacyNoteDatabase: UIDocument {
     }
     try crdt.bulkWrite(Dictionary(uniqueKeysWithValues: bulkMetadata))
 
+    let bulkBookIndexes = noteMetadata.dictionaryCompactMap { (noteId, metadata) -> (ScopedKey, Value)? in
+      guard let indexedContents = metadata.indexedContents else { return nil }
+      return (ScopedKey(scope: noteId, key: NoteDatabaseKey.bookIndex.rawValue), .text(indexedContents))
+    }
+    try crdt.bulkWrite(bulkBookIndexes)
+
     let promptRecords = try dbQueue.read { db in
       try PromptRecord.fetchAll(db)
     }
@@ -178,7 +184,8 @@ public final class LegacyNoteDatabase: UIDocument {
       try BinaryContentRecord.fetchAll(db)
     }
     let imageTuples = binaryContentRecords.compactMap { record -> (ScopedKey, Value) in
-      (ScopedKey(scope: record.noteId, key: record.key), .blob(mimeType: record.mimeType, blob: record.blob))
+      let key = (record.key == Note.coverImageKey) ? NoteDatabaseKey.coverImage.rawValue : record.key
+      return (ScopedKey(scope: record.noteId, key: key), .blob(mimeType: record.mimeType, blob: record.blob))
     }
     try crdt.bulkWrite(Dictionary(imageTuples, uniquingKeysWith: { value, _ in value }))
 

@@ -16,8 +16,9 @@ struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   }
 
   static let metadata: NoteDatabaseKey = ".metadata"
-  static let coverImage: NoteDatabaseKey = "coverImage"
-  static let noteText: NoteDatabaseKey = "noteText"
+  static let coverImage: NoteDatabaseKey = ".coverImage"
+  static let noteText: NoteDatabaseKey = ".noteText"
+  static let bookIndex: NoteDatabaseKey = ".bookIndex"
   static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
     NoteDatabaseKey(rawValue: "prompt=\(promptType.rawValue);count=\(count);id=\(id)")
   }
@@ -39,6 +40,6 @@ struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   }
 
   var isWellKnown: Bool {
-    [".metadata", "coverImage", "noteText"].contains(rawValue)
+    [".metadata", ".coverImage", ".noteText", ".bookIndex"].contains(rawValue)
   }
 }

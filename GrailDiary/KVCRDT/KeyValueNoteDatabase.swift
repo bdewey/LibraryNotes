@@ -153,7 +153,10 @@ public final class KeyValueNoteDatabase: NoteDatabase {
 
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
     let scopedKeys = try keyValueDocument.keyValueCRDT.searchText(for: searchPattern)
-    return scopedKeys.map { $0.scope }
+    let uniqueIdentifiers = scopedKeys
+      .map { $0.scope }
+      .asSet()
+    return Array(uniqueIdentifiers)
   }
 
   public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
@@ -383,6 +386,7 @@ struct NoteUpdatePayload {
   mutating func update(with note: Note) throws {
     updates[.metadata] = try Value(note.metadata)
     updates[.noteText] = Value(note.text)
+    updates[.bookIndex] = Value(note.metadata.indexedContents)
     let unusedPromptKeys = Set(updates.keys.filter { $0.isPrompt }.map { $0.rawValue }).subtracting(note.promptCollections.keys)
     Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
     for (promptKey, promptCollection) in note.promptCollections {

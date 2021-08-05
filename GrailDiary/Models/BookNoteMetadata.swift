@@ -37,6 +37,12 @@ public struct BookNoteMetadata: Codable, Equatable {
   /// The book that this note is about.
   public var book: AugmentedBook?
 
+  /// Information in this metadata structure that's worth putting in a full-text index for metadata surces.
+  public var indexedContents: String? {
+    guard let book = book else { return nil }
+    return [book.title, book.authors.joined(separator: " ")].joined(separator: " ")
+  }
+
   public static func == (lhs: BookNoteMetadata, rhs: BookNoteMetadata) -> Bool {
     lhs.title == rhs.title &&
       lhs.summary == rhs.summary &&
