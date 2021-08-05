@@ -152,7 +152,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
-    throw KeyValueNoteDatabaseError.notImplemented
+    let scopedKeys = try keyValueDocument.keyValueCRDT.searchText(for: searchPattern)
+    return scopedKeys.map { $0.scope }
   }
 
   public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
