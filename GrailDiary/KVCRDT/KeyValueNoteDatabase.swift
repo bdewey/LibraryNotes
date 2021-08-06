@@ -338,11 +338,46 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
-    return Fail<[ContentIdentifier], Error>(error: KeyValueNoteDatabaseError.notImplemented).eraseToAnyPublisher()
+    keyValueDocument.keyValueCRDT.readPublisher(keyPrefix: NoteDatabaseKey.promptPrefix(for: promptType))
+      .map { results in
+        results.map { scopedKey, _ in
+          ContentIdentifier(noteId: scopedKey.scope, key: scopedKey.key)
+        }
+      }
+      .eraseToAnyPublisher()
   }
 
   public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
-    throw KeyValueNoteDatabaseError.notImplemented
+    let candidateNotes = contentIdentifiers.map({ $0.noteId }).asSet()
+    let candidateKeys = contentIdentifiers.map({ $0.key }).asSet()
+    let results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { scope, key in
+      if candidateNotes.contains(scope), [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.coverImage.rawValue].contains(key) {
+        return true
+      }
+      return candidateKeys.contains(key)
+    })
+    return contentIdentifiers.compactMap { contentIdentifier -> AttributedQuote? in
+      guard
+        let versions = results[ScopedKey(scope: contentIdentifier.noteId, key: contentIdentifier.key)],
+        let promptCollectionInfo = versions.resolved(with: .lastWriterWins)?.promptCollectionInfo,
+        let quoteCollection = try? promptCollectionInfo.asPromptCollection()
+      else {
+        return nil
+      }
+      let metadata = results[ScopedKey(scope: contentIdentifier.noteId, key: NoteDatabaseKey.metadata.rawValue)]?
+        .resolved(with: .lastWriterWins)?
+        .bookNoteMetadata
+      let thumbnailImage = results[ScopedKey(scope: contentIdentifier.noteId, key: NoteDatabaseKey.coverImage.rawValue)]?
+        .resolved(with: .lastWriterWins)?
+        .blob
+      return AttributedQuote(
+        noteId: contentIdentifier.noteId,
+        key: contentIdentifier.key,
+        text: quoteCollection.rawValue,
+        title: metadata?.book?.title ?? metadata?.title ?? "",
+        thumbnailImage: thumbnailImage
+      )
+    }
   }
 
   public func replaceText(_ originalText: String, with replacementText: String, filter: (BookNoteMetadata) -> Bool) throws {

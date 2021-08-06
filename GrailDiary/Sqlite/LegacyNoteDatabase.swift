@@ -719,12 +719,15 @@ public final class LegacyNoteDatabase: UIDocument {
     guard let dbQueue = dbQueue else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
-    return try dbQueue.read { db in
+    let records = try dbQueue.read { db in
       try ContentRecord
         .filter(keys: contentIdentifiers.map { $0.keyArray })
         .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
-        .asRequest(of: AttributedQuote.self)
+        .asRequest(of: AttributedQuoteRecord.self)
         .fetchAll(db)
+    }
+    return records.map { record -> AttributedQuote in
+      AttributedQuote(noteId: record.noteId, key: record.key, text: record.text, title: record.note.title, thumbnailImage: record.thumbnailImage.first?.blob)
     }
   }
 
@@ -1148,5 +1151,25 @@ extension Sequence {
   ) rethrows -> [Key: Value] {
     let tuples = try compactMap(mapping)
     return Dictionary(tuples, uniquingKeysWith: uniquingKeysWith)
+  }
+}
+
+private struct AttributedQuoteRecord: Decodable, FetchableRecord {
+  public var id: String { "\(noteId):\(key)" }
+  var noteId: String
+  var key: String
+  var text: String
+  var role: String
+  var note: NoteRecord
+  var thumbnailImage: [BinaryContentRecord]
+
+  var noteIdentifier: Note.Identifier { note.id }
+
+  /// Turns a set of queries for quote IDs into a content query.
+  static func query(quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<AttributedQuoteRecord> {
+    ContentRecord
+      .filter(keys: quoteIdentifiers.map { $0.keyArray })
+      .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
+      .asRequest(of: AttributedQuoteRecord.self)
   }
 }

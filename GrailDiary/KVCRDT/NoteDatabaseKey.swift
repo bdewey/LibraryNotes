@@ -20,7 +20,11 @@ struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   static let noteText: NoteDatabaseKey = ".noteText"
   static let bookIndex: NoteDatabaseKey = ".bookIndex"
   static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
-    NoteDatabaseKey(rawValue: "prompt=\(promptType.rawValue);count=\(count);id=\(id)")
+    NoteDatabaseKey(rawValue: "\(promptType.rawValue);count=\(count);id=\(id)")
+  }
+
+  static func promptPrefix(for promptType: PromptType) -> String {
+    "\(promptType.rawValue);"
   }
 
   static func asset(assetKey: String, assetType: UTType) -> NoteDatabaseKey {
