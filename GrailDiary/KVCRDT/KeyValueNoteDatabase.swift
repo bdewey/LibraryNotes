@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
@@ -8,7 +9,6 @@ import SpacedRepetitionScheduler
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
-import BookKit
 
 private extension Logger {
   static let keyValueNoteDatabase: Logger = {
@@ -16,10 +16,6 @@ private extension Logger {
     logger.logLevel = .debug
     return logger
   }()
-}
-
-enum KeyValueNoteDatabaseError: Error {
-  case notImplemented
 }
 
 enum KeyValueNoteDatabaseScope: String {
