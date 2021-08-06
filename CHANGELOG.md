@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
+- **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. Currently the app will work with both `.grail` and `.kvcrdt` files. The plan will be to drop support for the `.grail` format.
+
+## [0.50.0] - 2021-07-13
+
 ### Changed
 
 - **Major** The app can now track your reading history with individual books, and it uses that information to update whether the book is "want to read" / "currently reading" / "read." These categories are also now groupings in the document list rather than different folders.

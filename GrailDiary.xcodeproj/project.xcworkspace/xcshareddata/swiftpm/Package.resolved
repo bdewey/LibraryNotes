@@ -11,11 +11,29 @@
         }
       },
       {
-        "package": "GRDB.swift",
+        "package": "CodableCSV",
+        "repositoryURL": "https://github.com/dehesa/CodableCSV",
+        "state": {
+          "branch": null,
+          "revision": "82ee81e7cdb0700f1d6574dbec314872dce5003e",
+          "version": "0.6.6"
+        }
+      },
+      {
+        "package": "GRDB",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": "xcode13",
           "revision": "a796aa920f4a24c2e5d4934e4fb7eec64104f1d0",
+          "version": null
+        }
+      },
+      {
+        "package": "KeyValueCRDT",
+        "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
+        "state": {
+          "branch": "main",
+          "revision": "72cd3541a8ce8a122fc1c75f4b4cc30cb34d9bf9",
           "version": null
         }
       },
@@ -38,12 +56,12 @@
         }
       },
       {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "986d191f94cec88f6350056da59c2e59e83d1229",
-          "version": "0.4.3"
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
         }
       },
       {

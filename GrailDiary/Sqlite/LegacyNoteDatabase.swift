@@ -171,7 +171,7 @@ public final class LegacyNoteDatabase: UIDocument {
 
     let promptTuples = try contentRecords.compactMap { record -> (ScopedKey, Value)? in
       if !record.role.hasPrefix("prompt=") { return nil }
-      let promptType = PromptType(rawValue: String(record.role.dropFirst(7)))
+      let promptType = PromptType(rawValue: record.role)
       let promptRecordKey = [record.noteId, record.key].joined(separator: ".")
       let newKey = NoteDatabaseKey.promptCollection(promptType: promptType, count: groupedPromptRecords[promptRecordKey]?.count ?? 0, id: record.key)
       let info = PromptCollectionInfo(contentRecord: record, promptRecords: groupedPromptRecords[promptRecordKey]!)
