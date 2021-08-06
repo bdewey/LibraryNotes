@@ -292,7 +292,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
 
         let delay: TimeInterval
         if let lastReview = info.promptStatistics[promptIdentifier.promptIndex].lastReview,
-            let idealInterval = info.promptStatistics[promptIdentifier.promptIndex].idealInterval {
+           let idealInterval = info.promptStatistics[promptIdentifier.promptIndex].idealInterval
+        {
           let idealDate = lastReview.addingTimeInterval(idealInterval)
           delay = max(entry.timestamp.timeIntervalSince(idealDate), 0)
         } else {
@@ -344,8 +345,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
-    let candidateNotes = contentIdentifiers.map({ $0.noteId }).asSet()
-    let candidateKeys = contentIdentifiers.map({ $0.key }).asSet()
+    let candidateNotes = contentIdentifiers.map { $0.noteId }.asSet()
+    let candidateKeys = contentIdentifiers.map { $0.key }.asSet()
     let results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { scope, key in
       if candidateNotes.contains(scope), [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.coverImage.rawValue].contains(key) {
         return true

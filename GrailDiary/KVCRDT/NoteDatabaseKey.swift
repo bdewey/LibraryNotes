@@ -28,7 +28,7 @@ struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
   }
 
   static func asset(assetKey: String, assetType: UTType) -> NoteDatabaseKey {
-    let filename = [assetKey, assetType.preferredFilenameExtension].compactMap({ $0 }).joined(separator: ".")
+    let filename = [assetKey, assetType.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
     return NoteDatabaseKey(rawValue: "assets/\(filename)")
   }
 
