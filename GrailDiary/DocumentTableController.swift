@@ -3,7 +3,6 @@
 import BookKit
 import Combine
 import GRDB
-import GRDBCombine
 import Logging
 import TextMarkupKit
 import UIKit
@@ -15,7 +14,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier)
   func showAlert(_ alertMessage: String)
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
-  func showWebPage(url: URL, shiftFocus: Bool)
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
@@ -59,26 +57,9 @@ public final class DocumentTableController: NSObject {
       cell.accessories = [.disclosureIndicator()]
     }
 
-    let imageCache = NSCache<NSString, UIImage>()
-
     let bookRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
-      let coverImage: UIImage?
-      if let imageData = viewProperties.noteProperties.thumbnailImage.first {
-        let key = viewProperties.pageKey as NSString
-        if let image = imageCache.object(forKey: key) {
-          coverImage = image
-        } else {
-          if let image = imageData.blob.image(maxSize: 100) {
-            coverImage = image
-            imageCache.setObject(image, forKey: key)
-          } else {
-            coverImage = nil
-          }
-        }
-      } else {
-        coverImage = nil
-      }
+      let coverImage = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
       let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
       cell.contentConfiguration = configuration
     }
@@ -90,26 +71,11 @@ public final class DocumentTableController: NSObject {
       configuration.attributedText = title
       let secondaryComponents: [String?] = [
         viewProperties.noteProperties.summary,
-        viewProperties.noteProperties.noteLinks.map { $0.targetTitle }.joined(separator: ", "),
+        viewProperties.noteProperties.tags.joined(separator: ", "),
       ]
       configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
-      if viewProperties.hasLink {
-        configuration.image = UIImage(systemName: "link")
-      }
-      if let imageData = viewProperties.noteProperties.thumbnailImage.first {
-        let key = viewProperties.pageKey as NSString
-        if let image = imageCache.object(forKey: key) {
-          configuration.image = image
-        } else {
-          if let image = imageData.blob.image(maxSize: 100) {
-            configuration.image = image
-            imageCache.setObject(image, forKey: key)
-          } else {
-            configuration.image = nil
-          }
-        }
-      }
+      configuration.image = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
@@ -205,18 +171,8 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public var observableRecords: NoteDatabase.ObservableRecords? {
-    willSet {
-      recordsSubscription?.cancel()
-      recordsSubscription = nil
-    }
+  public var bookNoteMetadata: [String: BookNoteMetadata] = [:] {
     didSet {
-      guard let observableRecords = observableRecords else { return }
-      recordsSubscription = observableRecords.recordsDidChange
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] in
-          self?.updateCardsPerDocument()
-        }
       updateCardsPerDocument()
       needsPerformUpdates = true
     }
@@ -264,8 +220,6 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: UICollectionViewDiffableDataSource<DocumentSection, Item>
 
-  private var recordsSubscription: AnyCancellable?
-
   var currentSortOrder = SortOrder.creationTimestamp {
     didSet {
       needsPerformUpdates = true
@@ -298,11 +252,11 @@ public final class DocumentTableController: NSObject {
   private var snapshotParameters: SnapshotParameters?
 
   public func performUpdates(animated: Bool) {
-    let filteredRecordIdentifiers = observableRecords?.records
+    let filteredRecordIdentifiers = bookNoteMetadata
       .map { $0.key }
       .filter { filteredPageIdentifiers?.contains($0) ?? true }
     let newSnapshotParameters = SnapshotParameters(
-      records: Set(filteredRecordIdentifiers ?? []),
+      records: Set(filteredRecordIdentifiers),
       cardsPerDocument: cardsPerDocument,
       webURL: webURL,
       quoteCount: quoteIdentifiers.count,
@@ -319,7 +273,7 @@ public final class DocumentTableController: NSObject {
     dataSource.apply(newSnapshotParameters.snapshot(), animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    var newDocumentSnapshot = newSnapshotParameters.bookSectionSnapshot(metadataRecords: observableRecords?.records ?? [:])
+    var newDocumentSnapshot = newSnapshotParameters.bookSectionSnapshot(metadataRecords: bookNoteMetadata)
     newDocumentSnapshot.expandCategories(expandedRootItems)
 
     dataSource.apply(newDocumentSnapshot, to: .documents, animatingDifferences: reallyAnimate)
@@ -327,7 +281,7 @@ public final class DocumentTableController: NSObject {
       guard let indexPath = dataSource.indexPath(for: item) else { return }
       collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
-    delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers?.count ?? 0)
+    delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers.count)
     snapshotParameters = newSnapshotParameters
   }
 }
@@ -400,7 +354,7 @@ extension DocumentTableController {
         } else {
           try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in
             var note = note
-            note.folder = PredefinedFolder.recentlyDeleted.rawValue
+            note.metadata.folder = PredefinedFolder.recentlyDeleted.rawValue
             return note
           })
         }
@@ -414,13 +368,13 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             if book.readingHistory == nil {
               book.readingHistory = ReadingHistory()
             }
             book.readingHistory!.finishReading(finishDate: today)
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -435,13 +389,13 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
             if book.readingHistory == nil {
               book.readingHistory = ReadingHistory()
             }
             book.readingHistory!.startReading(startDate: today)
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -456,9 +410,9 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
           var note = note
-          if case .book(var book) = note.reference {
+          if var book = note.metadata.book {
             book.readingHistory = nil
-            note.reference = .book(book)
+            note.metadata.book = book
           }
           return note
         })
@@ -490,9 +444,8 @@ public extension DocumentTableController {
     case .page(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
       return true
-    case .webPage(let url):
-      delegate?.showWebPage(url: url, shiftFocus: shiftFocus)
-      return true
+    case .webPage:
+      return false
     case .reviewQuotes:
       delegate?.showQuotes(quotes: quoteIdentifiers, shiftFocus: shiftFocus)
       return true
@@ -670,21 +623,18 @@ private extension DocumentTableController {
     /// UUID for this page
     let pageKey: Note.Identifier
     /// Page properties (serialized into the document)
-    let noteProperties: NoteMetadataRecord
+    let noteProperties: BookNoteMetadata
     /// How many cards are eligible for study in this page (dynamic and not serialized)
     var cardCount: Int
-    /// Does this note have an associated link?
-    let hasLink: Bool
 
     let author: PersonNameComponents?
 
     let bookCategory: BookCategory?
 
-    init(pageKey: Note.Identifier, noteProperties: NoteMetadataRecord, cardCount: Int, hasLink: Bool) {
+    init(pageKey: Note.Identifier, noteProperties: BookNoteMetadata, cardCount: Int) {
       self.pageKey = pageKey
       self.noteProperties = noteProperties
       self.cardCount = cardCount
-      self.hasLink = hasLink
 
       if let book = noteProperties.book {
         if let readingHistory = book.readingHistory {
@@ -799,7 +749,7 @@ private extension DocumentTableController {
       return snapshot
     }
 
-    func bookSectionSnapshot(metadataRecords: [Note.Identifier: NoteMetadataRecord]) -> NSDiffableDataSourceSectionSnapshot<Item> {
+    func bookSectionSnapshot(metadataRecords: [String: BookNoteMetadata]) -> NSDiffableDataSourceSectionSnapshot<Item> {
       var bookSection = NSDiffableDataSourceSectionSnapshot<Item>()
 
       let viewProperties = records
@@ -810,8 +760,7 @@ private extension DocumentTableController {
           return ViewProperties(
             pageKey: identifier,
             noteProperties: metadataRecord,
-            cardCount: cardsPerDocument[identifier, default: 0],
-            hasLink: !metadataRecord.contents.isEmpty
+            cardCount: cardsPerDocument[identifier, default: 0]
           )
         }
 

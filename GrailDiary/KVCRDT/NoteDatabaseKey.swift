@@ -1,0 +1,49 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
+import Foundation
+import KeyValueCRDT
+import UniformTypeIdentifiers
+
+struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
+  let rawValue: String
+
+  init(rawValue: String) {
+    self.rawValue = rawValue
+  }
+
+  init(stringLiteral: String) {
+    self.rawValue = stringLiteral
+  }
+
+  static let metadata: NoteDatabaseKey = ".metadata"
+  static let coverImage: NoteDatabaseKey = ".coverImage"
+  static let noteText: NoteDatabaseKey = ".noteText"
+  static let bookIndex: NoteDatabaseKey = ".bookIndex"
+  static func promptCollection(promptType: PromptType, count: Int, id: String) -> NoteDatabaseKey {
+    NoteDatabaseKey(rawValue: "\(promptType.rawValue);count=\(count);id=\(id)")
+  }
+
+  static func promptPrefix(for promptType: PromptType) -> String {
+    "\(promptType.rawValue);"
+  }
+
+  static func asset(assetKey: String, assetType: UTType) -> NoteDatabaseKey {
+    let filename = [assetKey, assetType.preferredFilenameExtension].compactMap { $0 }.joined(separator: ".")
+    return NoteDatabaseKey(rawValue: "assets/\(filename)")
+  }
+
+  static func studyLogEntry(date: Date, promptIdentifier: PromptIdentifier, author: Author) -> NoteDatabaseKey {
+    let formattedTime = ISO8601DateFormatter().string(from: date)
+    // Each key is globally unique so there should never be collisions.
+    let key = "\(formattedTime);note=\(promptIdentifier.noteId);promptId=\(promptIdentifier.promptKey);author=\(author.id.uuidString)"
+    return NoteDatabaseKey(rawValue: key)
+  }
+
+  var isPrompt: Bool {
+    rawValue.hasPrefix("prompt=")
+  }
+
+  var isWellKnown: Bool {
+    [".metadata", ".coverImage", ".noteText", ".bookIndex"].contains(rawValue)
+  }
+}

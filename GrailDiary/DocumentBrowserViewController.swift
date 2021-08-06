@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import KeyValueCRDT
 import Logging
 import UIKit
 import UniformTypeIdentifiers
@@ -83,7 +84,12 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
     if url.pathExtension == "grail" {
-      database = NoteDatabase(fileURL: url)
+      database = LegacyNoteDatabase(fileURL: url)
+    } else if url.pathExtension == "kvcrdt" {
+      guard let author = Author(.current) else {
+        throw NoteDatabaseError.noDeviceUUID
+      }
+      database = try KeyValueNoteDatabase(fileURL: url, author: author)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
@@ -130,7 +136,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       importHandler(nil, .none)
     }
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = NoteDatabase(fileURL: url)
+    let document = LegacyNoteDatabase(fileURL: url)
     Logger.shared.info("Attempting to create a document at \(url.path)")
     document.open { openSuccess in
       guard openSuccess else {

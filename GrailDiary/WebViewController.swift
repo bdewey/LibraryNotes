@@ -12,7 +12,7 @@ extension Logger {
   }()
 }
 
-public final class WebViewController: UIViewController, ReferenceViewController {
+public final class WebViewController: UIViewController {
   public init(url: URL) {
     self.initialURL = url
     super.init(nibName: nil, bundle: nil)

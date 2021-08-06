@@ -20,6 +20,20 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
+  func testUpdateNonExistantNoteCreatesNote() {
+    makeAndOpenEmptyDatabase { database in
+      var note = Note.simpleTest
+      let identifier = UUID().uuidString
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in
+        note
+      })
+      note.text = "Version 2.0 text"
+      try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in note })
+      let roundTripNote = try database.note(noteIdentifier: identifier)
+      XCTAssertEqual(note, roundTripNote)
+    }
+  }
+
   func testUpdateSimpleNote() {
     makeAndOpenEmptyDatabase { database in
       var note = Note.simpleTest
@@ -98,8 +112,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
   func testNotesShowUpInAllMetadata() {
     makeAndOpenEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
-      XCTAssertEqual(1, database.allMetadata.count)
-      XCTAssertEqual(database.allMetadata[identifier]?.title, Note.withHashtags.title)
+      XCTAssertEqual(1, try database.bookMetadata.count)
+      XCTAssertEqual(try database.bookMetadata[identifier]?.title, Note.withHashtags.title)
     }
   }
 
@@ -118,22 +132,11 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       let identifier = try database.createNote(Note.withHashtags)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withHashtags, roundTripNote)
-      XCTAssertEqual(1, database.allMetadata.count)
+      XCTAssertEqual(1, try database.bookMetadata.count)
       try database.deleteNote(noteIdentifier: identifier)
       XCTAssertTrue(database.hasUnsavedChanges)
       XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
-      XCTAssertEqual(0, try database.countOfContentRecords())
-      XCTAssertEqual(0, database.allMetadata.count)
-    }
-  }
-
-  func testStoreData() {
-    makeAndOpenEmptyDatabase { database in
-      let data = "Hello, world!".data(using: .utf8)!
-      let key = try database.storeAssetData(data, key: "test.txt")
-      XCTAssertTrue(database.hasUnsavedChanges)
-      let roundTrip = try database.data(for: key)
-      XCTAssertEqual(data, roundTrip)
+      XCTAssertEqual(0, try database.bookMetadata.count)
     }
   }
 
@@ -142,7 +145,7 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       _ = try database.createNote(Note.withChallenges)
       // New items aren't eligible for at 3-5 days.
       let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = database.synchronousStudySession(date: future)
+      var studySession = database.synchronousStudySession(filter: nil, date: future)
       XCTAssertEqual(3, studySession.count)
       while studySession.currentPrompt != nil {
         studySession.recordAnswer(correct: true)
@@ -236,7 +239,7 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       _ = try database.createNote(Note.multipleClozes)
       // New items aren't eligible for at 3-5 days.
       let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = database.synchronousStudySession(date: future)
+      var studySession = database.synchronousStudySession(filter: nil, date: future)
       XCTAssertEqual(studySession.count, 2)
       studySession.ensureUniquePromptCollections()
       XCTAssertEqual(studySession.count, 1)
@@ -244,9 +247,9 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
         studySession.recordAnswer(correct: true)
       }
       try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-      studySession = database.synchronousStudySession(date: future)
+      studySession = database.synchronousStudySession(filter: nil, date: future)
       XCTAssertEqual(studySession.count, 0)
-      studySession = database.synchronousStudySession(date: future.addingTimeInterval(24 * .hour))
+      studySession = database.synchronousStudySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
       XCTAssertEqual(studySession.count, 1)
     }
   }

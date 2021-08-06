@@ -2,6 +2,7 @@
 
 import Combine
 @testable import GrailDiary
+import KeyValueCRDT
 import XCTest
 
 /// Specific test cases around merging database content.
@@ -70,7 +71,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: noteIdentifier), withoutHashtagNote)
-        XCTAssertEqual(storage.allMetadata.count, 1)
+        XCTAssertEqual(try storage.bookMetadata.count, 1)
       }
       .run(self)
   }
@@ -83,7 +84,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .performRemoteModification { storage in
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = storage.synchronousStudySession(date: future)
+        var studySession = storage.synchronousStudySession(filter: nil, date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -95,7 +96,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = storage.synchronousStudySession(date: future)
+        let studySession = storage.synchronousStudySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
       }
       .run(self)
@@ -107,7 +108,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         _ = try storage.createNote(.withChallenges)
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = storage.synchronousStudySession(date: future)
+        var studySession = storage.synchronousStudySession(filter: nil, date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -119,10 +120,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = storage.synchronousStudySession(date: future)
+        let studySession = storage.synchronousStudySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
-        XCTAssertEqual(1, storage.allMetadata.count)
-        let futureStudySession = storage.synchronousStudySession(date: future.addingTimeInterval(30 * 24 * 60 * 60))
+        XCTAssertEqual(1, try storage.bookMetadata.count)
+        let futureStudySession = storage.synchronousStudySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
         XCTAssertEqual(3, futureStudySession.count)
       }
       .run(self)
@@ -142,7 +143,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
-        XCTAssertEqual(storage.allMetadata.count, 1)
+        XCTAssertEqual(try storage.bookMetadata.count, 1)
       }
       .run(self)
   }
@@ -231,7 +232,10 @@ private struct MergeTestCase {
   }
 
   func run(_ runner: NoteSqliteStorageMergeTests) {
+    print("\n\n\n**** Starting legacy test case ****\n\n\n")
     runner.runTestCase(self)
+    print("\n\n\n**** Starting key/value test case ****\n\n\n")
+    runner.runKeyValueTestCase(self)
   }
 }
 
@@ -239,9 +243,9 @@ private extension NoteSqliteStorageMergeTests {
   static func openDatabase(
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-  ) -> Future<NoteDatabase, Error> {
-    return Future<NoteDatabase, Error> { promise in
-      let database = NoteDatabase(
+  ) -> Future<LegacyNoteDatabase, Error> {
+    return Future<LegacyNoteDatabase, Error> { promise in
+      let database = LegacyNoteDatabase(
         fileURL: fileURL,
         device: device
       )
@@ -286,11 +290,84 @@ private extension NoteSqliteStorageMergeTests {
     cancelable.cancel()
   }
 
+  static func openKeyValueDatabase(
+    device: TestDevice,
+    fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+  ) -> Future<KeyValueNoteDatabase, Error> {
+    return Future<KeyValueNoteDatabase, Error> { promise in
+      do {
+        let database = try KeyValueNoteDatabase(
+          fileURL: fileURL,
+          author: Author(id: device.identifierForVendor!, name: device.name)
+        )
+        database.open { _ in
+          promise(.success(database))
+        }
+      } catch {
+        promise(.failure(error))
+      }
+    }
+  }
+
+  func runKeyValueTestCase(_ testCase: MergeTestCase) {
+    let pipelineRan = expectation(description: "pipeline ran")
+    let cancelable = makeKeyValueFile(device: .local, modificationBlock: testCase.initialLocalStorageBlock)
+      .tryMap { localURL -> (URL, URL) in
+        let remoteURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.copyItem(at: localURL, to: remoteURL)
+        return (localURL, remoteURL)
+      }
+      .flatMap { tuple in
+        Self.openKeyValueDatabase(device: .local, fileURL: tuple.0).map { ($0, tuple.1) }
+      }
+      .flatMap { tuple in
+        Self.openKeyValueDatabase(device: .remote, fileURL: tuple.1).map { (tuple.0, $0) }
+      }
+      .tryMap { localStorage, remoteStorage -> Bool in
+        try testCase.localModificationBlock?(localStorage)
+        try testCase.remoteModificationBlock?(remoteStorage)
+        _ = try localStorage.merge(other: remoteStorage)
+        try testCase.validationBlock?(localStorage)
+        return true
+      }
+      .sink(receiveCompletion: { completion in
+        switch completion {
+        case .finished:
+          break
+        case .failure(let error):
+          XCTFail("Unexpected error: \(error)")
+        }
+        pipelineRan.fulfill()
+      }, receiveValue: { _ in })
+    waitForExpectations(timeout: 300, handler: nil)
+    // cancel() should be a no-op
+    cancelable.cancel()
+  }
+
   func makeFile(
     device: TestDevice,
     modificationBlock: MergeTestCase.StorageModificationBlock?
   ) -> AnyPublisher<URL, Error> {
     Self.openDatabase(device: device)
+      .tryMap { database -> NoteDatabase in
+        try modificationBlock?(database)
+        return database
+      }
+      .flatMap { database -> Future<URL, Error> in
+        Future { promise in
+          database.close { _ in
+            promise(.success(database.fileURL))
+          }
+        }
+      }
+      .eraseToAnyPublisher()
+  }
+
+  func makeKeyValueFile(
+    device: TestDevice,
+    modificationBlock: MergeTestCase.StorageModificationBlock?
+  ) -> AnyPublisher<URL, Error> {
+    Self.openKeyValueDatabase(device: device)
       .tryMap { database -> NoteDatabase in
         try modificationBlock?(database)
         return database

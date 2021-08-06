@@ -104,6 +104,19 @@ final class NotebookStructureViewController: UIViewController {
           .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
       }
     }
+
+    /// A filter function that returns true if `metadata` is included in this structure.
+    func filterBookNoteMetadata(tuple: (key: String, value: BookNoteMetadata)) -> Bool {
+      let metadata = tuple.value
+      switch self {
+      case .hashtag(let hashtag):
+        return metadata.tags.contains(hashtag)
+      case .trash:
+        return metadata.folder == PredefinedFolder.recentlyDeleted.rawValue
+      default:
+        return true
+      }
+    }
   }
 
   /// Sections of our list.
@@ -410,7 +423,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
             try database.renameHashtag(
               hashtag,
               to: newHashtag,
-              filter: { $0.noteLinks.anySatisfy { noteLink in hashtag.isPathPrefix(of: noteLink.targetTitle) } }
+              filter: { $0.tags.anySatisfy { noteLink in hashtag.isPathPrefix(of: noteLink) } }
             )
           } catch {
             Logger.shared.error("Error renaming hashtag: \(error)")
@@ -420,21 +433,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
         alert.view.tintColor = .grailTint
         self.present(alert, animated: true, completion: nil)
       }
-      let moveToInboxAction = UIAction(title: "Want to Read", image: UIImage(systemName: "list.star")) { _ in
-        do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.wantToRead.rawValue)
-        } catch {
-          Logger.shared.error("Error moving notes tagged \(hashtag) to inbox: \(error)")
-        }
-      }
-      let moveToTrashAction = UIAction(title: "Delete", image: UIImage(systemName: "trash")) { _ in
-        do {
-          try database.moveNotesTaggedWithHashtag(hashtag, to: PredefinedFolder.recentlyDeleted.rawValue)
-        } catch {
-          Logger.shared.error("Error moving notes tagged \(hashtag) to inbox: \(error)")
-        }
-      }
-      return UIMenu(title: "", children: [rename, moveToInboxAction, moveToTrashAction])
+      return UIMenu(title: "", children: [rename])
     }
   }
 }
@@ -471,14 +470,10 @@ private extension NotebookStructureViewController {
       bookImporterViewController.delegate = self
       self.present(bookImporterViewController, animated: true)
     }
-    let inferReadingHistory = UIAction(title: "Infer reading history") { [weak self] _ in
-      self?.inferReadingHistory()
-    }
-    let migrateRatings = UIAction(title: "Migrate ratings") { [weak self] _ in
-      self?.migrateRatings()
-    }
-    let purgeNotes = UIAction(title: "Purge non-book notes") { [weak self] _ in
-      self?.purgeUncategorizedNotes()
+    let export = (database as? LegacyNoteDatabase).flatMap { legacyNoteDatabase -> UIAction in
+      UIAction(title: "Export") { [weak self] _ in
+        self?.exportToKVCRDT(legacyNoteDatabase: legacyNoteDatabase)
+      }
     }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
@@ -486,118 +481,23 @@ private extension NotebookStructureViewController {
         children: [
           openCommand,
           importLibraryThing,
-          inferReadingHistory,
-          migrateRatings,
-          purgeNotes,
-        ]
+          export,
+        ].compactMap { $0 }
       )
     )
   }
 
-  private func purgeUncategorizedNotes() {
-    Logger.shared.info("Purging uncategorized notes")
+  private func exportToKVCRDT(legacyNoteDatabase: LegacyNoteDatabase) {
+    let exportedURL = legacyNoteDatabase.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt")
+    Logger.shared.info("Exporting to \(exportedURL.path)")
     do {
-      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
-        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
-        let identifiersWithoutBooks = metadataRecords.filter({ $0.book == nil }).map({ $0.id })
-        for noteIdentifier in identifiersWithoutBooks {
-          try database.deleteNote(noteIdentifier: noteIdentifier, updateKey: updateIdentifier, database: db)
-        }
-      })
+      try legacyNoteDatabase.exportToKVCRDT(exportedURL)
+      let alert = UIAlertController(title: "Export Complete", message: "Export was successful", preferredStyle: .alert)
+      let okAction = UIAlertAction(title: "OK", style: .default)
+      alert.addAction(okAction)
+      present(alert, animated: true)
     } catch {
-      Logger.shared.error("Error purging notes: \(error)")
-    }
-  }
-
-  private func migrateRatings() {
-    Logger.shared.info("Migrating ratings")
-    do {
-      try database.bulkUpdate(updateBlock: { db, updateIdentifier in
-        let metadataRecords = try NoteMetadataRecord.request().fetchAll(db)
-        for metadataRecord in metadataRecords {
-          guard var book = metadataRecord.book else { continue }
-          var didUpdateBook = false
-          let hashtags = metadataRecord.noteLinks.map { $0.targetTitle }
-          for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
-            let rating = hashtag.count - 8
-            book.rating = rating
-            didUpdateBook = true
-          }
-          if didUpdateBook {
-            let bookData = try JSONEncoder().encode(book)
-            let bookString = String(data: bookData, encoding: .utf8)!
-            let record = ContentRecord(
-              text: bookString,
-              noteId: metadataRecord.id,
-              key: ContentRole.reference.rawValue,
-              role: ContentRole.reference.rawValue,
-              mimeType: ApplicationMimeType.book.rawValue
-            )
-            try record.save(db)
-            try NoteRecord
-              .filter(key: metadataRecord.id)
-              .updateAll(db, [
-                NoteRecord.Columns.modifiedDevice <- updateIdentifier.deviceID,
-                NoteRecord.Columns.updateSequenceNumber <- updateIdentifier.updateSequenceNumber,
-              ])
-          }
-        }
-      })
-    } catch {
-      Logger.shared.error("Error migrating ratings: \(error)")
-    }
-  }
-
-  private func inferReadingHistory() {
-    Logger.shared.info("Inferring reading history")
-    do {
-      try database.bulkUpdate(updateBlock: { db, _ in
-        let readBooksRecords = try NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == nil)
-          .fetchAll(db)
-        for metadataRecord in readBooksRecords {
-          guard var book = metadataRecord.book, book.readingHistory == nil else {
-            continue
-          }
-          var history = ReadingHistory()
-          history.finishReading(finishDate: DateComponents(year: metadataRecord.guessYearRead))
-          book.readingHistory = history
-          let bookData = try JSONEncoder().encode(book)
-          let bookString = String(data: bookData, encoding: .utf8)!
-          let record = ContentRecord(
-            text: bookString,
-            noteId: metadataRecord.id,
-            key: ContentRole.reference.rawValue,
-            role: ContentRole.reference.rawValue,
-            mimeType: ApplicationMimeType.book.rawValue
-          )
-          try record.save(db)
-        }
-
-        let wantToReadRecords = try NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == PredefinedFolder.currentlyReading.rawValue)
-          .fetchAll(db)
-        for metadataRecord in wantToReadRecords {
-          guard var book = metadataRecord.book, book.readingHistory == nil else {
-            continue
-          }
-          var history = ReadingHistory()
-          history.startReading(startDate: nil)
-          book.readingHistory = history
-          let bookData = try JSONEncoder().encode(book)
-          let bookString = String(data: bookData, encoding: .utf8)!
-          let record = ContentRecord(
-            text: bookString,
-            noteId: metadataRecord.id,
-            key: ContentRole.reference.rawValue,
-            role: ContentRole.reference.rawValue,
-            mimeType: ApplicationMimeType.book.rawValue
-          )
-          try record.save(db)
-        }
-      })
-    } catch {
-      Logger.shared.error("Unexpected error inferring reading history: \(error)")
+      Logger.shared.error("Unexpected error exporting data: \(error)")
     }
   }
 
@@ -623,7 +523,8 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.read
-    root.hasChildren = !database.hashtags.isEmpty
+    let hashtags = (try? database.bookMetadata.values.hashtags) ?? []
+    root.hasChildren = !hashtags.isEmpty
     snapshot.append([root])
 
     // Enumerate every hashtag and make sure there is an entry for the hashtag *and all prefixes*.
@@ -633,7 +534,7 @@ private extension NotebookStructureViewController {
     // string. E.g., things work if we process `#books` then `#books/2020`, but will break if we process `#books/2020` before
     // `#books`.
     var stringToItem = [String: Item]()
-    for hashtag in database.hashtags {
+    for hashtag in hashtags {
       for (index, character) in hashtag.enumerated() where character == "/" {
         let prefix = String(hashtag.prefix(index))
         stringToItem[prefix] = Item(structureIdentifier: .hashtag(prefix), hasChildren: true)

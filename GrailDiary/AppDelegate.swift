@@ -5,10 +5,6 @@ import FileLogging
 import Logging
 import UIKit
 
-extension UTType {
-  static let grailDiary = UTType("org.brians-brain.graildiary")!
-}
-
 public extension Logger {
   static let shared: Logger = {
     var logger = Logger(label: "org.brians-brain.grail-diary")

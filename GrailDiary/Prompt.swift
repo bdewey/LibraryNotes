@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 /// Uniquely identifies a prompt.
-public struct PromptIdentifier: Hashable {
+public struct PromptIdentifier: Hashable, Codable {
   public var noteId: String
   public var promptKey: String
   public var promptIndex: Int

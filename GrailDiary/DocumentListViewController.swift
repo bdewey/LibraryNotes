@@ -55,12 +55,6 @@ final class DocumentListViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
-    self.databaseSubscription = database.notesDidChange
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] in
-        self?.updateStudySession()
-        self?.updateQuoteList()
-      }
   }
 
   @available(*, unavailable)
@@ -76,15 +70,21 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  private var metadataPipeline: AnyCancellable?
+
   private func monitorDatabaseForFocusedStructure() {
-    do {
-      title = focusedStructure.longDescription
-      dataSource.observableRecords = try database.observableRecordsForQuery(focusedStructure.query)
-      updateStudySession()
-      updateQuoteList()
-    } catch {
-      Logger.shared.error("Unexpected error changing focus: \(error)")
-    }
+    title = focusedStructure.longDescription
+    metadataPipeline = database.bookMetadataPublisher()
+      .catch { error -> Just<[String: BookNoteMetadata]> in
+        Logger.shared.error("Unexpected error getting metadata: \(error)")
+        return Just([String: BookNoteMetadata]())
+      }
+      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
+      .sink(receiveValue: { [weak self] filteredBookMetadata in
+        self?.dataSource.bookNoteMetadata = filteredBookMetadata
+        self?.updateStudySession()
+        self?.updateQuoteList()
+      })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -263,8 +263,8 @@ final class DocumentListViewController: UIViewController {
   private var studySessionGeneration = 0
 
   private func updateStudySession() {
-    let records = dataSource.observableRecords?.records ?? [:]
-    let filter: (Note.Identifier, NoteMetadataRecord) -> Bool = { identifier, _ in records[identifier] != nil }
+    let records = dataSource.bookNoteMetadata
+    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
     studySessionGeneration += 1
     let currentStudySessionGeneration = studySessionGeneration
     database.studySession(filter: filter, date: dueDate) {
@@ -274,11 +274,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateQuoteList() {
-    do {
-      dataSource.quotesPublisher = try database.queryPublisher(for: focusedStructure.allQuoteIdentifiersQuery)
-    } catch {
-      Logger.shared.error("Unexpected error getting quotes: \(error)")
-    }
+    dataSource.quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
   }
 
   private func updateToolbar() {
@@ -338,7 +334,7 @@ final class DocumentListViewController: UIViewController {
         try writer.write(field: book.numberOfPages?.description ?? "")
         try writer.write(field: book.yearPublished?.description ?? "")
         try writer.write(field: book.originalYearPublished?.description ?? "")
-        try writer.write(field: DayComponents(note.creationTimestamp).description)
+        try writer.write(field: DayComponents(note.metadata.creationTimestamp).description)
         try writer.write(field: book.publisher ?? "")
         try writer.write(field: note.text ?? "")
         try writer.endRow()
@@ -362,22 +358,6 @@ final class DocumentListViewController: UIViewController {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func showWebPage(url: URL, shiftFocus: Bool) {
-    Logger.shared.info("Will navigate to web page at \(url)")
-    let placeholderNote = Note(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: [],
-      referencedImageKeys: [],
-      title: "",
-      text: "This is a test note",
-      reference: .webPage(url),
-      promptCollections: [:]
-    )
-    assertionFailure()
-//    delegate?.documentListViewController(self, didRequestShowNote: placeholderNote, noteIdentifier: nil, shiftFocus: shiftFocus)
-  }
-
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
     let quotesVC = QuotesViewController(database: database)
     quotesVC.quoteIdentifiers = quotes
@@ -506,15 +486,11 @@ private extension String {
 
 private extension Note {
   var book: AugmentedBook? {
-    if case .book(let book) = reference {
-      return book
-    } else {
-      return nil
-    }
+    return metadata.book
   }
 
   var rating: Int? {
-    for hashtag in hashtags where hashtag.hasPrefix("#rating/") {
+    for hashtag in metadata.tags where hashtag.hasPrefix("#rating/") {
       return hashtag.count - 8
     }
     return 0

@@ -36,17 +36,23 @@ public extension Note {
     prompts.append(contentsOf: QuotePrompt.extract(from: parsedString))
     prompts.append(contentsOf: QuestionAndAnswerPrompt.extract(from: parsedString))
     var keyedCollection = [Note.ContentKey: PromptCollection]()
-    for (index, promptCollection) in prompts.enumerated() {
-      keyedCollection[PromptCollectionKey(numericIndex: index).rawValue] = promptCollection
+    for promptCollection in prompts {
+      let key = NoteDatabaseKey.promptCollection(promptType: promptCollection.type, count: promptCollection.prompts.count, id: promptCollection.rawValue.sha1Digest())
+      keyedCollection[key.rawValue] = promptCollection
     }
-    self.init(
-      creationTimestamp: Date(),
-      timestamp: Date(),
-      hashtags: parsedString.hashtags,
-      referencedImageKeys: parsedString.referencedImageKeys,
+    let metadata = BookNoteMetadata(
       title: String(parsedString.title.split(separator: "\n").first ?? ""),
-      text: parsedString.string,
       summary: parsedString.summary,
+      creationTimestamp: Date(),
+      modifiedTimestamp: Date(),
+      tags: parsedString.hashtags,
+      folder: nil,
+      book: nil
+    )
+    self.init(
+      metadata: metadata,
+      referencedImageKeys: parsedString.referencedImageKeys,
+      text: parsedString.string,
       promptCollections: keyedCollection
     )
   }
@@ -72,8 +78,8 @@ public extension Note {
 
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
-    newNote.creationTimestamp = creationTimestamp
-    newNote.folder = folder
+    newNote.metadata.creationTimestamp = metadata.creationTimestamp
+    newNote.metadata.folder = metadata.folder
     newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote
   }

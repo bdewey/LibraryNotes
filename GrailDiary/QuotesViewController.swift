@@ -2,20 +2,18 @@
 
 import Combine
 import GRDB
-import GRDBCombine
 import Logging
 import SnapKit
 import TextMarkupKit
 import UIKit
 
-private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashable {
-  var id: String { "\(noteId):\(key)" }
-  var noteId: String
-  var key: String
-  var text: String
-  var role: String
-  var note: NoteRecord
-  var thumbnailImage: [BinaryContentRecord]
+public struct AttributedQuote: Identifiable, Hashable {
+  public var id: String { "\(noteId):\(key)" }
+  public var noteId: String
+  public var key: String
+  public var text: String
+  public var title: String
+  public var thumbnailImage: Data?
 
   public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
     return lhs.id == rhs.id
@@ -23,16 +21,6 @@ private struct AttributedQuote: Decodable, FetchableRecord, Identifiable, Hashab
 
   public func hash(into hasher: inout Hasher) {
     hasher.combine(id)
-  }
-
-  var noteIdentifier: Note.Identifier { note.id }
-
-  /// Turns a set of queries for quote IDs into a content query.
-  static func query(quoteIdentifiers: [ContentIdentifier]) -> QueryInterfaceRequest<AttributedQuote> {
-    ContentRecord
-      .filter(keys: quoteIdentifiers.map { $0.keyArray })
-      .including(required: ContentRecord.note.including(all: NoteRecord.binaryContentRecords.filter(BinaryContentRecord.Columns.role == ContentRole.embeddedImage.rawValue).forKey("thumbnailImage")))
-      .asRequest(of: AttributedQuote.self)
   }
 }
 
@@ -65,12 +53,7 @@ public final class QuotesViewController: UIViewController {
     }
     didSet {
       do {
-        quoteSubscription = try database.queryPublisher(for: AttributedQuote.query(quoteIdentifiers: visibleQuoteIdentifiers))
-          .sink(receiveCompletion: { error in
-            Logger.shared.error("Received error completion from quotes query: \(error)")
-          }, receiveValue: { [weak self] quotes in
-            self?.updateSnapshot(with: quotes)
-          })
+        try updateSnapshot(with: database.attributedQuotes(for: visibleQuoteIdentifiers))
       } catch {
         Logger.shared.error("Unexpected error fetching quotes: \(error)")
       }
@@ -173,7 +156,7 @@ extension QuotesViewController: UICollectionViewDelegate {
     guard let content = dataSource.itemIdentifier(for: indexPath) else { return nil }
     let cellFrame = collectionView.cellForItem(at: indexPath)?.frame ?? CGRect(origin: point, size: .zero)
     let viewNoteAction = UIAction(title: "View Book", image: UIImage(systemName: "book")) { [notebookViewController] _ in
-      notebookViewController?.pushNote(with: content.note.id, selectedText: content.text, autoFirstResponder: true)
+      notebookViewController?.pushNote(with: content.noteId, selectedText: content.text, autoFirstResponder: true)
     }
     let shareQuoteAction = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
       self?.shareQuote(quote: content, sourceFrame: cellFrame)
@@ -326,13 +309,13 @@ private final class QuoteView: UIView, UIContentView {
       attributionLabel.attributedText = ParsedAttributedString(string: String(trimmedFragment), style: .plainText(textStyle: .caption1))
     } else {
       let attributionMarkdown = [
-        String(quoteContentConfiguration.quote.note.title.strippingLeadingAndTrailingWhitespace),
+        String(quoteContentConfiguration.quote.title.strippingLeadingAndTrailingWhitespace),
         String(trimmedFragment),
       ].filter { !$0.isEmpty }.joined(separator: ", ")
       attributionLabel.attributedText = ParsedAttributedString(string: attributionMarkdown, style: .plainText(textStyle: .caption1))
     }
 
-    if let imageData = quoteContentConfiguration.quote.thumbnailImage.first, let image = imageData.blob.image(maxSize: 320) {
+    if let imageData = quoteContentConfiguration.quote.thumbnailImage, let image = imageData.image(maxSize: 320) {
       coverImageView.isHidden = false
       coverImageView.image = image
       coverImageView.snp.remakeConstraints { make in
