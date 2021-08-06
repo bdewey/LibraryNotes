@@ -5,6 +5,7 @@ import Foundation
 import KeyValueCRDT
 import Logging
 import SpacedRepetitionScheduler
+import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
@@ -144,10 +145,6 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
-    throw KeyValueNoteDatabaseError.notImplemented
-  }
-
-  public func renameHashtag(_ originalHashtag: String, to newHashtag: String, filter: (NoteMetadataRecord) -> Bool) throws {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
@@ -320,8 +317,72 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     throw KeyValueNoteDatabaseError.notImplemented
   }
 
-  public func replaceText(_ originalText: String, with replacementText: String, filter: (NoteMetadataRecord) -> Bool) throws {
-    throw KeyValueNoteDatabaseError.notImplemented
+  public func replaceText(_ originalText: String, with replacementText: String, filter: (BookNoteMetadata) -> Bool) throws {
+    try keyValueDocument.keyValueCRDT.write { db in
+      let metadataAndText = try keyValueDocument.keyValueCRDT.bulkRead(database: db, isIncluded: {
+        [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.noteText.rawValue].contains($1)
+      })
+      for (scopedKey, versions) in metadataAndText where scopedKey.key == NoteDatabaseKey.metadata.rawValue {
+        guard
+          let metadata = versions.resolved(with: .lastWriterWins)?.bookNoteMetadata,
+          filter(metadata),
+          let text = metadataAndText[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.noteText.rawValue)]?.resolved(with: .lastWriterWins)?.text
+        else {
+          continue
+        }
+        let updatedText = text.replacingOccurrences(of: originalText, with: replacementText)
+        if updatedText != text {
+          let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(database: db, scope: scopedKey.scope)
+          var payload = try NoteUpdatePayload(onDiskContents: onDiskContents)!
+          if var note = try payload.asNote() {
+            note.updateMarkdown(updatedText)
+            try payload.update(with: note)
+            try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+          }
+        }
+      }
+    }
+  }
+
+  public func renameHashtag(_ originalHashtag: String, to newHashtag: String, filter: (BookNoteMetadata) -> Bool) throws {
+    try keyValueDocument.keyValueCRDT.write { db in
+      let metadataAndText = try keyValueDocument.keyValueCRDT.bulkRead(database: db, isIncluded: {
+        [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.noteText.rawValue].contains($1)
+      })
+      for (scopedKey, versions) in metadataAndText where scopedKey.key == NoteDatabaseKey.metadata.rawValue {
+        guard
+          let metadata = versions.resolved(with: .lastWriterWins)?.bookNoteMetadata,
+          filter(metadata),
+          let text = metadataAndText[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.noteText.rawValue)]?.resolved(with: .lastWriterWins)?.text
+        else {
+          continue
+        }
+
+        let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar.shared)
+        guard let root = try? parsedText.result.get() else { continue }
+        var replacementLocations = [Int]()
+        root.forEach { node, startIndex, _ in
+          guard node.type == .hashtag else { return }
+          let range = NSRange(location: startIndex, length: node.length)
+          let hashtag = String(utf16CodeUnits: parsedText[range], count: range.length)
+          if originalHashtag.isPathPrefix(of: hashtag) {
+            replacementLocations.append(startIndex)
+          }
+        }
+        let originalHashtagLength = originalHashtag.utf16.count
+        for location in replacementLocations.reversed() {
+          parsedText.replaceCharacters(in: NSRange(location: location, length: originalHashtagLength), with: newHashtag)
+        }
+
+        let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(database: db, scope: scopedKey.scope)
+        var payload = try NoteUpdatePayload(onDiskContents: onDiskContents)!
+        if var note = try payload.asNote() {
+          note.updateMarkdown(parsedText.string)
+          try payload.update(with: note)
+          try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+        }
+      }
+    }
   }
 
   public var studyLog: StudyLog {

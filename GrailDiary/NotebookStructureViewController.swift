@@ -423,7 +423,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
             try database.renameHashtag(
               hashtag,
               to: newHashtag,
-              filter: { $0.noteLinks.anySatisfy { noteLink in hashtag.isPathPrefix(of: noteLink.targetTitle) } }
+              filter: { $0.tags.anySatisfy { noteLink in hashtag.isPathPrefix(of: noteLink) } }
             )
           } catch {
             Logger.shared.error("Error renaming hashtag: \(error)")

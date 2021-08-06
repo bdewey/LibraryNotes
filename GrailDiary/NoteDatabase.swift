@@ -66,7 +66,7 @@ public protocol NoteDatabase {
   func renameHashtag(
     _ originalHashtag: String,
     to newHashtag: String,
-    filter: (NoteMetadataRecord) -> Bool
+    filter: (BookNoteMetadata) -> Bool
   ) throws
 
   func search(for searchPattern: String) throws -> [Note.Identifier]
@@ -101,7 +101,7 @@ public protocol NoteDatabase {
   func replaceText(
     _ originalText: String,
     with replacementText: String,
-    filter: (NoteMetadataRecord) -> Bool
+    filter: (BookNoteMetadata) -> Bool
   ) throws
 
   var studyLog: StudyLog { get }

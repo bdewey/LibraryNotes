@@ -10,13 +10,13 @@ public extension LegacyNoteDatabase {
   func replaceText(
     _ originalText: String,
     with replacementText: String,
-    filter: (NoteMetadataRecord) -> Bool = { _ in true }
+    filter: (BookNoteMetadata) -> Bool = { _ in true }
   ) throws {
     guard let dbQueue = dbQueue else { throw NoteDatabaseError.databaseIsNotOpen }
     try dbQueue.write { database in
       let updateKey = try updateIdentifier(in: database)
       let allMetadata = try Self.fetchAllMetadata(from: database)
-      for (identifier, metadata) in allMetadata where filter(metadata) {
+      for (identifier, metadata) in allMetadata where filter(BookNoteMetadata(metadata)) {
         var note = try Note(identifier: identifier, database: database)
         if let text = note.text {
           note.updateMarkdown(text.replacingOccurrences(of: originalText, with: replacementText))
@@ -30,13 +30,13 @@ public extension LegacyNoteDatabase {
   func renameHashtag(
     _ originalHashtag: String,
     to newHashtag: String,
-    filter: (NoteMetadataRecord) -> Bool = { _ in true }
+    filter: (BookNoteMetadata) -> Bool = { _ in true }
   ) throws {
     guard let dbQueue = dbQueue else { throw NoteDatabaseError.databaseIsNotOpen }
     try dbQueue.write { database in
       let updateKey = try updateIdentifier(in: database)
       let allMetadata = try Self.fetchAllMetadata(from: database)
-      for (identifier, metadata) in allMetadata where filter(metadata) {
+      for (identifier, metadata) in allMetadata where filter(BookNoteMetadata(metadata)) {
         var note = try Note(identifier: identifier, database: database)
         if let text = note.text {
           let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar.shared)
