@@ -8,6 +8,7 @@ import SpacedRepetitionScheduler
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
+import BookKit
 
 private extension Logger {
   static let keyValueNoteDatabase: Logger = {
@@ -145,7 +146,34 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
-    throw KeyValueNoteDatabaseError.notImplemented
+    try keyValueDocument.keyValueCRDT.write { db in
+      for bookAndImage in booksAndImages {
+        var payload = NoteUpdatePayload(noteIdentifier: UUID().uuidString)
+        let bookAddedDate = bookAndImage.book.dateAdded ?? Date()
+        var metadata = BookNoteMetadata(
+          title: bookAndImage.book.title,
+          creationTimestamp: bookAddedDate,
+          modifiedTimestamp: bookAddedDate
+        )
+        metadata.book = bookAndImage.book
+        if let dateAdded = bookAndImage.book.dateAdded {
+          // Assume we read the book
+          let components = Calendar.current.dateComponents([.year, .month, .day], from: dateAdded)
+          var readingHistory = ReadingHistory()
+          readingHistory.finishReading(finishDate: components)
+          metadata.book?.readingHistory = readingHistory
+        }
+        metadata.tags = hashtags.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        payload.insert(key: .metadata, value: try Value(metadata))
+        if let review = bookAndImage.book.review {
+          payload.insert(key: .noteText, value: .text(review))
+        }
+        if let imageData = bookAndImage.image {
+          payload.insert(key: .coverImage, value: .blob(mimeType: imageData.type.preferredMIMEType ?? "application/octet-stream", blob: imageData.data))
+        }
+        try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+      }
+    }
   }
 
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
