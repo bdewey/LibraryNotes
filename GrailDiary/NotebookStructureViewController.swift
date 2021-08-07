@@ -488,9 +488,11 @@ private extension NotebookStructureViewController {
   }
 
   private func exportToKVCRDT(legacyNoteDatabase: LegacyNoteDatabase) {
-    let exportedURL = legacyNoteDatabase.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt")
-    Logger.shared.info("Exporting to \(exportedURL.path)")
     do {
+      let exportedFile = legacyNoteDatabase.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt").lastPathComponent
+      let documentsDirectoryURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+      let exportedURL = documentsDirectoryURL.appendingPathComponent(exportedFile)
+      Logger.shared.info("Exporting to \(exportedURL.path)")
       try legacyNoteDatabase.exportToKVCRDT(exportedURL)
       let alert = UIAlertController(title: "Export Complete", message: "Export was successful", preferredStyle: .alert)
       let okAction = UIAlertAction(title: "OK", style: .default)
