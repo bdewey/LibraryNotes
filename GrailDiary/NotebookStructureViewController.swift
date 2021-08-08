@@ -114,7 +114,7 @@ final class NotebookStructureViewController: UIViewController {
       case .trash:
         return metadata.folder == PredefinedFolder.recentlyDeleted.rawValue
       default:
-        return true
+        return metadata.folder == nil
       }
     }
   }
