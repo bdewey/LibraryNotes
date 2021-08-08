@@ -31,7 +31,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.autoFirstResponder = autoFirstResponder
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier)
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(note.metadata.title)
+    setTitleMarkdown(note.metadata.preferredTitle)
   }
 
   @available(*, unavailable)
@@ -157,7 +157,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     note.metadata.folder = self.note.metadata.folder
     note.metadata.book = self.note.metadata.book
     note.metadata.creationTimestamp = self.note.metadata.creationTimestamp
-    setTitleMarkdown(note.metadata.title)
+    setTitleMarkdown(note.metadata.preferredTitle)
     Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note

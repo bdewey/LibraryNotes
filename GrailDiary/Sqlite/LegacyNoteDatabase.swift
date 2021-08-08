@@ -651,14 +651,15 @@ public final class LegacyNoteDatabase: UIDocument {
   ) -> StudySession {
     let filter = filter ?? { _, _ in true }
     return allMetadata
-      .filter { filter($0.key, BookNoteMetadata($0.value)) }
+      .mapValues { BookNoteMetadata($0) }
+      .filter { filter($0.key, $0.value) }
       .map { (name, reviewProperties) -> StudySession in
         let promptIdentifiers = try? eligiblePromptIdentifiers(before: date, limitedTo: name)
         return StudySession(
           promptIdentifiers ?? [],
           properties: CardDocumentProperties(
             documentName: name,
-            attributionMarkdown: reviewProperties.title
+            attributionMarkdown: reviewProperties.preferredTitle
           )
         )
       }
