@@ -1532,8 +1532,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/TextMarkupKit";
 			requirement = {
-				branch = xcode13;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.7.2;
 			};
 		};
 		D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */ = {
