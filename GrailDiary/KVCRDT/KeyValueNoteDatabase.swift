@@ -26,6 +26,7 @@ enum KeyValueNoteDatabaseScope: String {
 public final class KeyValueNoteDatabase: NoteDatabase {
   public init(fileURL: URL, author: Author) throws {
     self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, author: author)
+    keyValueDocument.delegate = self
   }
 
   private let keyValueDocument: UIKeyValueDocument
@@ -460,6 +461,29 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     } catch {
       Logger.keyValueNoteDatabase.error("Unexpected error getting studyLog: \(error)")
       return StudyLog()
+    }
+  }
+}
+
+extension KeyValueNoteDatabase: UIKeyValueDocumentDelegate {
+  public func keyValueDocument(_ document: UIKeyValueDocument, willMergeCRDT sourceCRDT: KeyValueDatabase, into destinationCRDT: KeyValueDatabase) {
+    do {
+      let documentsDirectoryURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+      let mergeDirectoryURL = documentsDirectoryURL.appendingPathComponent("merge-attempts")
+      let creationDate = Date()
+      let unwantedCharacters = CharacterSet(charactersIn: "-:")
+      var uniqifier = ISO8601DateFormatter().string(from: creationDate)
+      uniqifier.removeAll(where: { unwantedCharacters.contains($0.unicodeScalars.first!) })
+
+      let containerURL = mergeDirectoryURL.appendingPathComponent("merge-\(uniqifier)")
+      Logger.shared.info("Making a backup to \(containerURL)")
+      try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true)
+      let inMemoryURL = containerURL.appendingPathComponent("memory.sqlite")
+      try destinationCRDT.save(to: inMemoryURL)
+      let onDiskURL = containerURL.appendingPathComponent("disk.sqlite")
+      try sourceCRDT.save(to: onDiskURL)
+    } catch {
+      Logger.shared.error("Unexpected error making backup: \(error)")
     }
   }
 }
