@@ -77,9 +77,9 @@
         "package": "TextMarkupKit",
         "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
         "state": {
-          "branch": "xcode13",
-          "revision": "1afd83c670591ee156b21e08a35e682aa68eea43",
-          "version": null
+          "branch": null,
+          "revision": "b39b539eb81acb4316b4397f9da29b4c615a7464",
+          "version": "0.7.2"
         }
       },
       {

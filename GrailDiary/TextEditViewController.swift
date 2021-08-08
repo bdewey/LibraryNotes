@@ -502,6 +502,11 @@ extension TextEditViewController: UITextViewDelegate {
   }
 
   public func textViewDidChangeSelection(_ textView: UITextView) {
+    if textView.selectedRange.location == 0 {
+      // If we're at the beginning of the text, make sure there's no typeahead accessory.
+      typeaheadAccessory = nil
+      return
+    }
     // the cursor moved. If there's a hashtag view controller, see if we've strayed from its hashtag.
     let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }),
@@ -515,6 +520,7 @@ extension TextEditViewController: UITextViewDelegate {
   }
 
   public func textViewDidChange(_ textView: UITextView) {
+    guard textView.selectedRange.location > 0 else { return }
     let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
       let hashtag = String(utf16CodeUnits: parsedAttributedString[hashtagNode.range], count: hashtagNode.range.length)
