@@ -19,6 +19,25 @@ public struct BookNoteMetadata: Codable, Equatable {
   /// Title of the note.
   public var title: String
 
+  /// The "preferred title" of this note. If this note is about a specific book, the preferred title is derived from the book metadata. Otherwise, returns the `title`
+  public var preferredTitle: String {
+    if let book = book {
+      var title = "_\(book.title)_"
+      if !book.authors.isEmpty {
+        let authors = book.authors.joined(separator: ", ")
+        title += ": \(authors)"
+      }
+      if let publishedDate = book.yearPublished {
+        title += " (\(publishedDate))"
+      }
+      return title
+    } else {
+      return title
+    }
+    // TODO: This isn't compiling on Xcode 13 and it should.
+//    book?.markdownTitle ?? title
+  }
+
   /// A short summary of the book -- displayed in the list view
   public var summary: String?
 

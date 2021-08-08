@@ -222,7 +222,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
             promptIdentifiers,
             properties: CardDocumentProperties(
               documentName: scopedKey.scope,
-              attributionMarkdown: metadata.title
+              attributionMarkdown: metadata.preferredTitle
             )
           )
           studySession += innerStudySession
