@@ -29,6 +29,8 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     keyValueDocument.delegate = self
   }
 
+  public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
+
   private let keyValueDocument: UIKeyValueDocument
 
   public var fileURL: URL { keyValueDocument.fileURL }
@@ -124,7 +126,9 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 
   public func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
-    let actualKey = NoteDatabaseKey.asset(assetKey: key ?? data.sha1Digest(), assetType: type)
+    let actualKey = (key == NoteDatabaseKey.coverImage.rawValue)
+    ? NoteDatabaseKey.coverImage
+    : NoteDatabaseKey.asset(assetKey: key ?? data.sha1Digest(), assetType: type)
     try keyValueDocument.keyValueCRDT.writeBlob(
       data,
       to: actualKey.rawValue,

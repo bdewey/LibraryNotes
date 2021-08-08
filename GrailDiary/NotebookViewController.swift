@@ -380,7 +380,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     do {
       let identifier = try database.createNote(note)
       if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
-        _ = try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: .jpeg, key: Note.coverImageKey)
+        _ = try database.writeAssociatedData(imageData, noteIdentifier: identifier, role: "embeddedImage", type: .jpeg, key: type(of: database).coverImageKey)
       }
       let viewController = SavingTextEditViewController(
         noteIdentifier: identifier,

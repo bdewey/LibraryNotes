@@ -51,8 +51,6 @@ public struct Note {
   /// Images referenced by this note.
   public var referencedImageKeys: [String]
 
-  public static let coverImageKey: String = "coverImage"
-
   /// What this note is "about."
   public enum Reference: Equatable {
     case book(AugmentedBook)

@@ -296,7 +296,7 @@ extension SavingTextEditViewController: BookSearchViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
     if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
-        _ = try storeImageData(imageData, type: .jpeg, key: Note.coverImageKey)
+        _ = try storeImageData(imageData, type: .jpeg, key: type(of: noteStorage).coverImageKey)
       } catch {
         Logger.shared.error("Unexpected error saving image data: \(error)")
       }

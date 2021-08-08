@@ -80,7 +80,7 @@ public extension Note {
       .asSet()
     var obsoleteImages = onDiskImageKeys.subtracting(referencedImageKeys)
     // An image with the special key "coverImage" is always considered referenced; never remove it.
-    obsoleteImages.remove(Note.coverImageKey)
+    obsoleteImages.remove(LegacyNoteDatabase.coverImageKey)
     try obsoleteImages.forEach { imageKey in
       try BinaryContentRecord.deleteOne(db, key: ["noteId": identifier, "key": imageKey])
     }

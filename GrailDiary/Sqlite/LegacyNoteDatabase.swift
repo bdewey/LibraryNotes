@@ -32,7 +32,9 @@ public struct UpdateIdentifier {
   let updateSequenceNumber: Int64
 }
 
-extension LegacyNoteDatabase: NoteDatabase {}
+extension LegacyNoteDatabase: NoteDatabase {
+  public static var coverImageKey: String { "coverImage" }
+}
 
 /// Implementation of the NoteSqliteStorage protocol that stores all of the notes in a single sqlite database.
 /// It loads the entire database into memory and uses NSFileCoordinator to be compatible with iCloud Document storage.
@@ -184,7 +186,7 @@ public final class LegacyNoteDatabase: UIDocument {
       try BinaryContentRecord.fetchAll(db)
     }
     let imageTuples = binaryContentRecords.compactMap { record -> (ScopedKey, Value) in
-      let key = (record.key == Note.coverImageKey) ? NoteDatabaseKey.coverImage.rawValue : record.key
+      let key = (record.key == Self.coverImageKey) ? NoteDatabaseKey.coverImage.rawValue : record.key
       return (ScopedKey(scope: record.noteId, key: key), .blob(mimeType: record.mimeType, blob: record.blob))
     }
     try crdt.bulkWrite(Dictionary(imageTuples, uniquingKeysWith: { value, _ in value }))
@@ -396,7 +398,7 @@ public final class LegacyNoteDatabase: UIDocument {
           let binaryRecord = BinaryContentRecord(
             blob: typedData.data,
             noteId: identifier,
-            key: Note.coverImageKey,
+            key: Self.coverImageKey,
             role: "embeddedImage",
             mimeType: typedData.type.preferredMIMEType ?? "application/octet-stream"
           )

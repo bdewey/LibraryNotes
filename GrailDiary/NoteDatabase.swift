@@ -33,6 +33,10 @@ public protocol NoteDatabase {
   func refresh(completionHandler: IOCompletionHandler?)
   func flush() throws
 
+  // TODO: Remove this once I have sane APIs
+
+  static var coverImageKey: String { get }
+
   /// A publisher that sends a notification for any change anywhere in the database.
   var notesDidChange: AnyPublisher<Void, Never> { get }
 
