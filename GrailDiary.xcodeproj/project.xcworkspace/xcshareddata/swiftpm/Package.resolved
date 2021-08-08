@@ -6,8 +6,8 @@
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
           "branch": null,
-          "revision": "bc5f1336f2125fc6a977522f475811528218e6f5",
-          "version": "0.1.0"
+          "revision": "63b7b126b76b4325a296a621a23998b4f679b01d",
+          "version": "0.2.1"
         }
       },
       {
@@ -24,12 +24,12 @@
         "repositoryURL": "https://github.com/groue/CombineExpectations.git",
         "state": {
           "branch": null,
-          "revision": "96d5604151c94b21fbca6877b237e80af9e821dd",
-          "version": "0.5.0"
+          "revision": "5118f805bdeac7e81dc8e92c78b7ce475201dec8",
+          "version": "0.9.0"
         }
       },
       {
-        "package": "GRDB.swift",
+        "package": "GRDB",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": null,
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
         "state": {
           "branch": null,
-          "revision": "66f41014d05ec4bb9760aa3804651b3bbefd403f",
-          "version": "0.2.0"
+          "revision": "7e5281cf210e6bbf67b85e2973a2629e6f700b60",
+          "version": "0.2.1"
         }
       },
       {
@@ -78,8 +78,8 @@
         "repositoryURL": "https://github.com/crspybits/swift-log-file",
         "state": {
           "branch": null,
-          "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
-          "version": "0.0.1"
+          "revision": "aa94b38bf88c7d9cbc87ceafcdffadaffbc2bffa",
+          "version": "0.1.0"
         }
       },
       {
@@ -87,8 +87,17 @@
         "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
         "state": {
           "branch": null,
-          "revision": "43488436ba5105e2d2465dab856b4b0ea3c06b1d",
-          "version": "0.7.0"
+          "revision": "b39b539eb81acb4316b4397f9da29b4c615a7464",
+          "version": "0.7.2"
+        }
+      },
+      {
+        "package": "XCGLogger",
+        "repositoryURL": "https://github.com/DaveWoodCom/XCGLogger.git",
+        "state": {
+          "branch": null,
+          "revision": "a9c4667b247928a29bdd41be2ec2c8d304215a54",
+          "version": "7.0.1"
         }
       }
     ]
