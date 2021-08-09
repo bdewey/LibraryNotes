@@ -6,6 +6,10 @@
 
 - **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. Currently the app will work with both `.grail` and `.kvcrdt` files. The plan will be to drop support for the `.grail` format.
 
+### Changed
+
+- When launching into collapsed environments (e.g., an iPhone), we no longer show a single blank note as the opening screen. Instead, we will show the document list.
+
 ### Fixed
 
 - Deleting all text no longer crashes

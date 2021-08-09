@@ -108,7 +108,7 @@ public final class NotebookViewController: UIViewController {
     splitViewController.setViewController(primaryNavigationController, for: .primary)
     splitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
     splitViewController.setViewController(
-      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database)),
+      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, containsOnlyDefaultContent: true)),
       for: .secondary
     )
     splitViewController.setViewController(compactNavigationController, for: .compact)
@@ -209,7 +209,7 @@ public final class NotebookViewController: UIViewController {
     let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
     var note = Note(markdown: text)
     note.metadata.folder = folder?.rawValue
-    let viewController = SavingTextEditViewController(note: note, database: database, initialSelectedRange: NSRange(location: offset, length: 0), autoFirstResponder: true)
+    let viewController = SavingTextEditViewController(note: note, database: database, containsOnlyDefaultContent: true, initialSelectedRange: NSRange(location: offset, length: 0), autoFirstResponder: true)
     setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a blank document")
   }
@@ -237,7 +237,7 @@ public final class NotebookViewController: UIViewController {
 
   func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
-    let noteViewController = SavingTextEditViewController(noteIdentifier: actualNoteIdentifier, note: note, database: database)
+    let noteViewController = SavingTextEditViewController(noteIdentifier: actualNoteIdentifier, note: note, database: database, containsOnlyDefaultContent: false)
     setSecondaryViewController(noteViewController, pushIfCollapsed: shiftFocus)
   }
 
@@ -331,6 +331,7 @@ public extension NotebookViewController {
         noteIdentifier: noteIdentifier,
         note: note,
         database: database,
+        containsOnlyDefaultContent: false,
         initialSelectedRange: initialRange,
         autoFirstResponder: autoFirstResponder
       )
@@ -357,6 +358,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
     let viewController = SavingTextEditViewController(
       note: note,
       database: database,
+      containsOnlyDefaultContent: false,
       initialSelectedRange: NSRange(location: offset, length: 0),
       autoFirstResponder: true
     )
@@ -386,6 +388,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
         noteIdentifier: identifier,
         note: note,
         database: database,
+        containsOnlyDefaultContent: false,
         autoFirstResponder: true
       )
       setSecondaryViewController(viewController, pushIfCollapsed: true)
@@ -429,7 +432,7 @@ extension NotebookViewController {
 private extension UINavigationController {
   /// Creates a UINavigationController with the expected configuration for being a notebook navigation controller.
   static func notebookNavigationController(rootViewController: UIViewController, prefersLargeTitles: Bool = false) -> UINavigationController {
-    let navigationController = HackNavigationController(
+    let navigationController = UINavigationController(
       rootViewController: rootViewController
     )
     navigationController.navigationBar.prefersLargeTitles = prefersLargeTitles
@@ -472,7 +475,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     compactNavigationController.popToRootViewController(animated: false)
     compactNavigationController.pushViewController(compactDocumentList, animated: false)
 
-    if let secondaryViewController = self.secondaryViewController(forCollaped: false) {
+    if let secondaryViewController = self.secondaryViewController(forCollaped: false), secondaryViewController.shouldShowWhenCollapsed {
       do {
         let activityData = try secondaryViewController.userActivityData()
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
@@ -486,14 +489,5 @@ extension NotebookViewController: UISplitViewControllerDelegate {
       }
     }
     return .compact
-  }
-}
-
-private final class HackNavigationController: UINavigationController {
-  override func pushViewController(_ viewController: UIViewController, animated: Bool) {
-    if viewController is UINavigationController {
-      Logger.shared.error("What are you doing bro?")
-    }
-    super.pushViewController(viewController, animated: animated)
   }
 }

@@ -128,6 +128,8 @@ extension QuotesViewController: NotebookSecondaryViewController {
 
   public static var notebookDetailType: String { "QuotesViewController" }
 
+  public var shouldShowWhenCollapsed: Bool { true }
+
   private var currentViewControllerState: ViewControllerState {
     ViewControllerState(title: title, quoteIdentifiers: quoteIdentifiers)
   }

@@ -15,12 +15,28 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// Holds configuration settings for the view controller.
   private struct RestorationState: Codable {
     var noteIdentifier: String
+
+    /// If true, the initial contents are some sort of placeholder, with no real user value.
+    ///
+    /// This value determines if this view controller is initially visible in compact environments.
+    /// As soon as the user edits anything in this view controller, this will be set to false.
+    var containsOnlyDefaultContent: Bool
   }
 
+  /// Designated initializer.
+  ///
+  /// - Parameters:
+  ///   - noteIdentifier: The note identifier we are editing. Defaults to a new UUID.
+  ///   - note: The note to edit. Defaults to a new, single-heading Markdown note.
+  ///   - database: The database that the note is in.
+  ///   - containsOnlyDefaultContent: If true, the initial contents are some sort of placeholder, with no real user value. This value determines if this view controller is initially visible in compact environments.
+  ///   - initialSelectedRange: Initial range of selected text. Defaults to nil.
+  ///   - autoFirstResponder: If true, this view will become the first responder upon appearing.
   init(
     noteIdentifier: Note.Identifier = UUID().uuidString,
     note: Note = Note(markdown: "# \n"),
     database: NoteDatabase,
+    containsOnlyDefaultContent: Bool,
     initialSelectedRange: NSRange? = nil,
     autoFirstResponder: Bool = false
   ) {
@@ -29,7 +45,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.noteStorage = database
     self.initialSelectedRange = initialSelectedRange
     self.autoFirstResponder = autoFirstResponder
-    self.restorationState = RestorationState(noteIdentifier: noteIdentifier)
+    self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(note.metadata.preferredTitle)
   }
@@ -41,7 +57,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var note: Note
   private let noteStorage: NoteDatabase
-  private let restorationState: RestorationState
+  private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
@@ -218,6 +234,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController) {
     hasUnsavedChanges = true
+    restorationState.containsOnlyDefaultContent = false
   }
 
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
@@ -256,6 +273,8 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
     return try JSONEncoder().encode(restorationState)
   }
 
+  var shouldShowWhenCollapsed: Bool { !restorationState.containsOnlyDefaultContent }
+
   static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> SavingTextEditViewController {
     let restorationState = try JSONDecoder().decode(RestorationState.self, from: data)
     let note: Note
@@ -267,7 +286,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
       note = Note(markdown: text)
     }
 
-    return SavingTextEditViewController(noteIdentifier: restorationState.noteIdentifier, note: note, database: database)
+    return SavingTextEditViewController(noteIdentifier: restorationState.noteIdentifier, note: note, database: database, containsOnlyDefaultContent: restorationState.containsOnlyDefaultContent)
   }
 }
 

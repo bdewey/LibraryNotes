@@ -8,6 +8,10 @@ public protocol NotebookSecondaryViewController: UIViewController {
   static var notebookDetailType: String { get }
 
   func userActivityData() throws -> Data
+
+  /// If true, this view controller should be pushed on the view hierarchy for the "collapsed" split view state. Otherwise, the supplementary view controller will
+  /// be the visible view controller after collapsing.
+  var shouldShowWhenCollapsed: Bool { get }
   static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> Self
 }
 
