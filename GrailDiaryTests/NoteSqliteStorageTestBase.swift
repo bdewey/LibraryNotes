@@ -16,7 +16,7 @@ class NoteSqliteStorageTestBase: XCTestCase {
 
   func makeAndOpenEmptyKeyValueDatabase(completion: @escaping (NoteDatabase) throws -> Void) throws {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = try KeyValueNoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
+    let database = try NoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
     let completionExpectation = expectation(description: "Expected to call completion routine")
     database.open { success in
       if success {

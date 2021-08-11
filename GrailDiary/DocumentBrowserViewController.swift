@@ -87,7 +87,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       guard let author = Author(.current) else {
         throw NoteDatabaseError.noDeviceUUID
       }
-      database = try KeyValueNoteDatabase(fileURL: url, author: author)
+      database = try NoteDatabase(fileURL: url, author: author)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
@@ -136,7 +136,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     do {
       let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
       let author = Author(UIDevice.current)!
-      let document = try KeyValueNoteDatabase(fileURL: url, author: author)
+      let document = try NoteDatabase(fileURL: url, author: author)
       Logger.shared.info("Attempting to create a document at \(url.path)")
       document.open { openSuccess in
         guard openSuccess else {

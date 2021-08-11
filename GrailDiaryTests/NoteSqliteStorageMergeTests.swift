@@ -240,10 +240,10 @@ private extension NoteSqliteStorageMergeTests {
   static func openKeyValueDatabase(
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-  ) -> Future<KeyValueNoteDatabase, Error> {
-    return Future<KeyValueNoteDatabase, Error> { promise in
+  ) -> Future<NoteDatabase, Error> {
+    return Future<NoteDatabase, Error> { promise in
       do {
-        let database = try KeyValueNoteDatabase(
+        let database = try NoteDatabase(
           fileURL: fileURL,
           author: Author(id: device.identifierForVendor!, name: device.name)
         )

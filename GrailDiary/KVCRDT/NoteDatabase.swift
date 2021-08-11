@@ -22,8 +22,25 @@ enum KeyValueNoteDatabaseScope: String {
   case studyLog = ".studyLog"
 }
 
+/// Errors specific to the ``NoteDatabase`` protocol.
+public enum NoteDatabaseError: String, Swift.Error {
+  case cannotDecodePromptCollection = "Cannot decode the prompt collection."
+  case databaseAlreadyOpen = "The database is already open."
+  case databaseIsNotOpen = "The database is not open."
+  case noDeviceUUID = "Could not get the device UUID."
+  case noSuchAsset = "The specified asset does not exist."
+  case noSuchPrompt = "The specified prompt does not exist."
+  case noSuchNote = "The specified note does not exist."
+  case notWriteable = "The database is not currently writeable."
+  case unknownPromptCollection = "The prompt collection does not exist."
+  case unknownPromptType = "The prompt uses an unknown type."
+  case missingMigrationScript = "Could not find a required migration script."
+  case unexpectedNoteContent = "Note keys did not match the expected structure."
+}
+
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
-public final class KeyValueNoteDatabase: NoteDatabase {
+public final class NoteDatabase {
+  public typealias IOCompletionHandler = (Bool) -> Void
   public init(fileURL: URL, author: Author) throws {
     self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, author: author)
     keyValueDocument.delegate = self
@@ -59,7 +76,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     keyValueDocument.save(to: fileURL, for: .forOverwriting, completionHandler: nil)
   }
 
-  public func merge(other: KeyValueNoteDatabase) throws {
+  public func merge(other: NoteDatabase) throws {
     try keyValueDocument.keyValueCRDT.merge(source: other.keyValueDocument.keyValueCRDT)
   }
 
@@ -473,7 +490,7 @@ public final class KeyValueNoteDatabase: NoteDatabase {
   }
 }
 
-extension KeyValueNoteDatabase: UIKeyValueDocumentDelegate {
+extension NoteDatabase: UIKeyValueDocumentDelegate {
   public func keyValueDocument(_ document: UIKeyValueDocument, willMergeCRDT sourceCRDT: KeyValueDatabase, into destinationCRDT: KeyValueDatabase) {
     do {
       let documentsDirectoryURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -496,7 +513,7 @@ extension KeyValueNoteDatabase: UIKeyValueDocumentDelegate {
   }
 }
 
-private extension KeyValueNoteDatabase {
+private extension NoteDatabase {
   func saveBookNote(_ note: Note, existingContent: NoteUpdatePayload) throws {
     var existingContent = existingContent
     try existingContent.update(with: note)
