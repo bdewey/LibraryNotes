@@ -4,7 +4,7 @@
 
 ### Added
 
-- **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. Currently the app will work with both `.grail` and `.kvcrdt` files. The plan will be to drop support for the `.grail` format.
+- **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. 
 
 ### Changed
 
