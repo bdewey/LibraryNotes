@@ -15,6 +15,10 @@
 - Deleting all text no longer crashes
 - Note titles are derived from Books, if present, otherwise from the first line of Markdown.
 
+### Removed
+
+- The share extension.
+
 ## [0.50.0] - 2021-07-13
 
 ### Changed

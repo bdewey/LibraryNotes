@@ -67,11 +67,6 @@
 		D358CC422688DC6D00C991DB /* BookKit in Frameworks */ = {isa = PBXBuildFile; productRef = D358CC412688DC6D00C991DB /* BookKit */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
 		D35C8B93259AF6F000A92CEB /* UIViewController+NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */; };
-		D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */; };
-		D35C8BBC259E4BF200A92CEB /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */; };
-		D35C8BC0259E4BF200A92CEB /* SaveToGrailDiary.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		D35C8BCA259E831600A92CEB /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */; };
-		D35C8BCF259E844700A92CEB /* SharedUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */; };
 		D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */; };
 		D35DB41525D3748A00F558D8 /* Data+Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35DB41425D3748A00F558D8 /* Data+Image.swift */; };
 		D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */; };
@@ -112,7 +107,6 @@
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
-		D3D867B3259EA262008254DF /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B2259EA262008254DF /* Logging */; };
 		D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B8259F9FB8008254DF /* FileLogging */; };
 		D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DA1B862569E8AB009DC866 /* SnapKit */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
@@ -136,13 +130,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D35C8BBE259E4BF200A92CEB /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D35C8BB5259E4BF200A92CEB;
-			remoteInfo = SaveToGrailDiary;
-		};
 		D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
@@ -176,7 +163,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				D35C8BC0259E4BF200A92CEB /* SaveToGrailDiary.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -247,12 +233,6 @@
 		D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GrailDiaryGrammar.swift; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
-		D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SaveToGrailDiary.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
-		D35C8BBB259E4BF200A92CEB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
-		D35C8BBD259E4BF200A92CEB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D35C8BC1259E4BF200A92CEB /* SaveToGrailDiary.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SaveToGrailDiary.entitlements; sourceTree = "<group>"; };
-		D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedUserDefaults.swift; sourceTree = "<group>"; };
 		D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageMergeTests.swift; sourceTree = "<group>"; };
 		D35DB41425D3748A00F558D8 /* Data+Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Image.swift"; sourceTree = "<group>"; };
 		D35E90C8230C755D00A46B3F /* UIApplication+Environment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Environment.swift"; sourceTree = "<group>"; };
@@ -318,14 +298,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		D35C8BB3259E4BF200A92CEB /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D3D867B3259EA262008254DF /* Logging in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		D3DC5EBC20EC9B0100F0B74B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -391,21 +363,9 @@
 			path = BookImporter;
 			sourceTree = "<group>";
 		};
-		D35C8BB7259E4BF200A92CEB /* SaveToGrailDiary */ = {
-			isa = PBXGroup;
-			children = (
-				D35C8BC1259E4BF200A92CEB /* SaveToGrailDiary.entitlements */,
-				D35C8BB8259E4BF200A92CEB /* ShareViewController.swift */,
-				D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */,
-				D35C8BBD259E4BF200A92CEB /* Info.plist */,
-			);
-			path = SaveToGrailDiary;
-			sourceTree = "<group>";
-		};
 		D35C8BCE259E842E00A92CEB /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				D35C8BC9259E831600A92CEB /* SharedUserDefaults.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -443,7 +403,6 @@
 				D3DC5EC120EC9B0100F0B74B /* GrailDiary */,
 				D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */,
 				D3E98F0421D470B2008445DA /* GrailDiaryUITests */,
-				D35C8BB7259E4BF200A92CEB /* SaveToGrailDiary */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
@@ -457,7 +416,6 @@
 				D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
-				D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -589,26 +547,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D35C8BC5259E4BF200A92CEB /* Build configuration list for PBXNativeTarget "SaveToGrailDiary" */;
-			buildPhases = (
-				D35C8BB2259E4BF200A92CEB /* Sources */,
-				D35C8BB3259E4BF200A92CEB /* Frameworks */,
-				D35C8BB4259E4BF200A92CEB /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = SaveToGrailDiary;
-			packageProductDependencies = (
-				D3D867B2259EA262008254DF /* Logging */,
-			);
-			productName = SaveToGrailDiary;
-			productReference = D35C8BB6259E4BF200A92CEB /* SaveToGrailDiary.appex */;
-			productType = "com.apple.product-type.app-extension";
-		};
 		D3DC5EBE20EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "GrailDiary" */;
@@ -623,7 +561,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				D35C8BBF259E4BF200A92CEB /* PBXTargetDependency */,
 			);
 			name = GrailDiary;
 			packageProductDependencies = (
@@ -688,9 +625,6 @@
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Brian's Brain";
 				TargetAttributes = {
-					D35C8BB5259E4BF200A92CEB = {
-						CreatedOnToolsVersion = 12.3;
-					};
 					D3DC5EBE20EC9B0100F0B74B = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1210;
@@ -740,20 +674,11 @@
 				D3DC5EBE20EC9B0100F0B74B /* GrailDiary */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
-				D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		D35C8BB4259E4BF200A92CEB /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D35C8BBC259E4BF200A92CEB /* MainInterface.storyboard in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		D3DC5EBD20EC9B0100F0B74B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -799,15 +724,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		D35C8BB2259E4BF200A92CEB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D35C8BB9259E4BF200A92CEB /* ShareViewController.swift in Sources */,
-				D35C8BCF259E844700A92CEB /* SharedUserDefaults.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		D3DC5EBB20EC9B0100F0B74B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -833,7 +749,6 @@
 				D37B0DBB23CDF79800F01D29 /* ChallengeTemplateMatcher.swift in Sources */,
 				D348A97A21C6C586005CA937 /* FileNameGenerator.swift in Sources */,
 				D3677C772652A45F00307EEA /* NotebookSecondaryViewController.swift in Sources */,
-				D35C8BCA259E831600A92CEB /* SharedUserDefaults.swift in Sources */,
 				D36214662334F607008C8FF4 /* LayoutManager.swift in Sources */,
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */,
@@ -939,11 +854,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		D35C8BBF259E4BF200A92CEB /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D35C8BB5259E4BF200A92CEB /* SaveToGrailDiary */;
-			targetProxy = D35C8BBE259E4BF200A92CEB /* PBXContainerItemProxy */;
-		};
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D3DC5EBE20EC9B0100F0B74B /* GrailDiary */;
@@ -957,14 +867,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		D35C8BBA259E4BF200A92CEB /* MainInterface.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D35C8BBB259E4BF200A92CEB /* Base */,
-			);
-			name = MainInterface.storyboard;
-			sourceTree = "<group>";
-		};
 		D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -976,57 +878,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		D35C8BC3259E4BF200A92CEB /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
-				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 0.51.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		D35C8BC4259E4BF200A92CEB /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = SaveToGrailDiary/SaveToGrailDiary.entitlements;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 80;
-				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = SaveToGrailDiary/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				MARKETING_VERSION = 0.51.0;
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.SaveToGrailDiary";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 		D3DC5EDC20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
@@ -1150,7 +1001,6 @@
 		D3DC5EDF20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
@@ -1177,7 +1027,6 @@
 		D3DC5EE020EC9B0200F0B74B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = GrailDiary/CommonplaceBookApp.entitlements;
@@ -1297,15 +1146,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D35C8BC5259E4BF200A92CEB /* Build configuration list for PBXNativeTarget "SaveToGrailDiary" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D35C8BC3259E4BF200A92CEB /* Debug */,
-				D35C8BC4259E4BF200A92CEB /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "GrailDiary" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1431,11 +1271,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */;
 			productName = KeyValueCRDT;
-		};
-		D3D867B2259EA262008254DF /* Logging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */;
-			productName = Logging;
 		};
 		D3D867B8259F9FB8008254DF /* FileLogging */ = {
 			isa = XCSwiftPackageProductDependency;
