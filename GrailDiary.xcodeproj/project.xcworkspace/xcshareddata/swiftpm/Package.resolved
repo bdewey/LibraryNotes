@@ -12,11 +12,11 @@
       },
       {
         "package": "CodableCSV",
-        "repositoryURL": "https://github.com/dehesa/CodableCSV",
+        "repositoryURL": "https://github.com/bdewey/CodableCSV",
         "state": {
-          "branch": null,
-          "revision": "82ee81e7cdb0700f1d6574dbec314872dce5003e",
-          "version": "0.6.6"
+          "branch": "xcode13",
+          "revision": "7954e4ffdc7b700372a4f43944840d5b6da09e54",
+          "version": null
         }
       },
       {
@@ -24,7 +24,7 @@
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": "xcode13",
-          "revision": "a796aa920f4a24c2e5d4934e4fb7eec64104f1d0",
+          "revision": "d8718bd7a41f96698bcc6ce353d48a9a3b003cea",
           "version": null
         }
       },
