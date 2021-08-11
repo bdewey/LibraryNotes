@@ -61,16 +61,3 @@ public extension PromptStatistics {
     due = date.addingTimeInterval(item.interval.fuzzed())
   }
 }
-
-extension PromptStatistics {
-  init(_ promptRecord: PromptRecord) {
-    self.reviewCount = promptRecord.reviewCount
-    self.lapseCount = promptRecord.lapseCount
-    self.totalCorrect = promptRecord.totalCorrect
-    self.totalIncorrect = promptRecord.totalIncorrect
-    self.lastReview = promptRecord.lastReview
-    self.idealInterval = promptRecord.idealInterval
-    self.due = promptRecord.due
-    self.spacedRepetitionFactor = promptRecord.spacedRepetitionFactor
-  }
-}

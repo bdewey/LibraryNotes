@@ -100,14 +100,6 @@ public struct StudyLog {
   }
 }
 
-extension StudyLog.Entry {
-  init(_ record: StudyLogEntryRecord) {
-    self.timestamp = record.timestamp
-    self.identifier = PromptIdentifier(noteId: record.noteId, promptKey: record.promptKey, promptIndex: record.promptIndex)
-    self.statistics = AnswerStatistics(correct: record.correct, incorrect: record.incorrect)
-  }
-}
-
 extension StudyLog: BidirectionalCollection {
   public var startIndex: Int { return entries.startIndex }
   public var endIndex: Int { return entries.endIndex }

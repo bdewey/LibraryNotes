@@ -90,21 +90,6 @@ final class NotebookStructureViewController: UIViewController {
       return hashtag
     }
 
-    var query: QueryInterfaceRequest<NoteMetadataRecord> {
-      if case .hashtag(let hashtag) = self {
-        let hashtagRequest = NoteRecord
-          .joining(
-            required: NoteRecord.noteHashtags
-              .filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))
-          )
-        return NoteMetadataRecord.request(baseRequest: hashtagRequest)
-          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
-      } else {
-        return NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
-      }
-    }
-
     /// A filter function that returns true if `metadata` is included in this structure.
     func filterBookNoteMetadata(tuple: (key: String, value: BookNoteMetadata)) -> Bool {
       let metadata = tuple.value
@@ -549,15 +534,5 @@ extension NotebookStructureViewController: BookImporterViewControllerDelegate {
 
   func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
     progressView = nil
-  }
-}
-
-private extension NoteMetadataRecord {
-  var guessYearRead: Int? {
-    for link in noteLinks where link.targetTitle.hasPrefix("#books/") {
-      let yearString = link.targetTitle.dropFirst(7)
-      return Int(yearString)
-    }
-    return nil
   }
 }

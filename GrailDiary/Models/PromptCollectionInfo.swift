@@ -31,15 +31,3 @@ public extension PromptCollectionInfo {
     return collection
   }
 }
-
-extension PromptCollectionInfo {
-  init(contentRecord: ContentRecord, promptRecords: [PromptRecord]) {
-    self.type = contentRecord.role
-    self.rawValue = contentRecord.text
-    let sortedRecords = promptRecords.sorted(by: { $0.promptIndex < $1.promptIndex })
-    for index in sortedRecords.indices {
-      assert(sortedRecords[index].promptIndex == index)
-    }
-    self.promptStatistics = sortedRecords.map(PromptStatistics.init)
-  }
-}
