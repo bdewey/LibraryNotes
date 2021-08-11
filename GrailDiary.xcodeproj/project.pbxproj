@@ -130,7 +130,6 @@
 		D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBD2662F51C001289EC /* BookImporter.swift */; };
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */; };
-		D3F5BBF226AC6B22000E0800 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D3F5BBF126AC6B22000E0800 /* GRDB */; };
 		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 		D541A9A021B0C07C0048182A /* FileMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D541A99F21B0C07C0048182A /* FileMetadataTests.swift */; };
 		D59349FA21B1F0F50013A0C3 /* FileMetadataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D59349F921B1F0F50013A0C3 /* FileMetadataProvider.swift */; };
@@ -331,7 +330,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D3F5BBF226AC6B22000E0800 /* GRDB in Frameworks */,
 				D3E9B5952564FD4900E47375 /* Logging in Frameworks */,
 				D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
@@ -635,7 +633,6 @@
 				D3D867B8259F9FB8008254DF /* FileLogging */,
 				D3E806A1267FF900009AA588 /* TextMarkupKit */,
 				D358CC412688DC6D00C991DB /* BookKit */,
-				D3F5BBF126AC6B22000E0800 /* GRDB */,
 				D37FF2B626BDE2A500E06747 /* KeyValueCRDT */,
 				D32215EC26C40585000BA772 /* CodableCSV */,
 			);
@@ -733,7 +730,6 @@
 				D3D867B7259F9FB8008254DF /* XCRemoteSwiftPackageReference "swift-log-file" */,
 				D3E806A0267FF900009AA588 /* XCRemoteSwiftPackageReference "TextMarkupKit" */,
 				D358CC402688DC6D00C991DB /* XCRemoteSwiftPackageReference "BookKit" */,
-				D3F5BBF026AC6B22000E0800 /* XCRemoteSwiftPackageReference "GRDB" */,
 				D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */,
 				D32215EB26C40585000BA772 /* XCRemoteSwiftPackageReference "CodableCSV" */,
 			);
@@ -1413,14 +1409,6 @@
 				minimumVersion = 1.4.0;
 			};
 		};
-		D3F5BBF026AC6B22000E0800 /* XCRemoteSwiftPackageReference "GRDB" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bdewey/GRDB.swift";
-			requirement = {
-				branch = xcode13;
-				kind = branch;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1468,11 +1456,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */;
 			productName = Logging;
-		};
-		D3F5BBF126AC6B22000E0800 /* GRDB */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3F5BBF026AC6B22000E0800 /* XCRemoteSwiftPackageReference "GRDB" */;
-			productName = GRDB;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
