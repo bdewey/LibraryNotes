@@ -81,15 +81,3 @@ public extension Sequence where Element == BookNoteMetadata {
     return Array(hashtags).sorted()
   }
 }
-
-internal extension BookNoteMetadata {
-  init(_ noteMetadataRecord: NoteMetadataRecord) {
-    self.title = noteMetadataRecord.title
-    self.summary = noteMetadataRecord.summary
-    self.creationTimestamp = noteMetadataRecord.creationTimestamp
-    self.modifiedTimestamp = noteMetadataRecord.modifiedTimestamp
-    self.tags = noteMetadataRecord.noteLinks.map { $0.targetTitle }
-    self.folder = noteMetadataRecord.folder
-    self.book = noteMetadataRecord.book
-  }
-}

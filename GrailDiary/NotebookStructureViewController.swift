@@ -2,7 +2,6 @@
 
 import BookKit
 import Combine
-import GRDB
 import Logging
 import SnapKit
 import UIKit
@@ -88,21 +87,6 @@ final class NotebookStructureViewController: UIViewController {
         return nil
       }
       return hashtag
-    }
-
-    var query: QueryInterfaceRequest<NoteMetadataRecord> {
-      if case .hashtag(let hashtag) = self {
-        let hashtagRequest = NoteRecord
-          .joining(
-            required: NoteRecord.noteHashtags
-              .filter(NoteLinkRecord.Columns.targetTitle.like("\(hashtag)/%") || NoteLinkRecord.Columns.targetTitle.like("\(hashtag)"))
-          )
-        return NoteMetadataRecord.request(baseRequest: hashtagRequest)
-          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
-      } else {
-        return NoteMetadataRecord.request()
-          .filter(NoteRecord.Columns.folder == nil || NoteRecord.Columns.folder != PredefinedFolder.recentlyDeleted.rawValue)
-      }
     }
 
     /// A filter function that returns true if `metadata` is included in this structure.
@@ -470,37 +454,15 @@ private extension NotebookStructureViewController {
       bookImporterViewController.delegate = self
       self.present(bookImporterViewController, animated: true)
     }
-    let export = (database as? LegacyNoteDatabase).flatMap { legacyNoteDatabase -> UIAction in
-      UIAction(title: "Export") { [weak self] _ in
-        self?.exportToKVCRDT(legacyNoteDatabase: legacyNoteDatabase)
-      }
-    }
     return UIBarButtonItem(
       image: UIImage(systemName: "ellipsis.circle"),
       menu: UIMenu(
         children: [
           openCommand,
           importLibraryThing,
-          export,
-        ].compactMap { $0 }
+        ]
       )
     )
-  }
-
-  private func exportToKVCRDT(legacyNoteDatabase: LegacyNoteDatabase) {
-    do {
-      let exportedFile = legacyNoteDatabase.fileURL.deletingPathExtension().appendingPathExtension("kvcrdt").lastPathComponent
-      let documentsDirectoryURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-      let exportedURL = documentsDirectoryURL.appendingPathComponent(exportedFile)
-      Logger.shared.info("Exporting to \(exportedURL.path)")
-      try legacyNoteDatabase.exportToKVCRDT(exportedURL)
-      let alert = UIAlertController(title: "Export Complete", message: "Export was successful", preferredStyle: .alert)
-      let okAction = UIAlertAction(title: "OK", style: .default)
-      alert.addAction(okAction)
-      present(alert, animated: true)
-    } catch {
-      Logger.shared.error("Unexpected error exporting data: \(error)")
-    }
   }
 
   func updateSnapshot() {
@@ -571,15 +533,5 @@ extension NotebookStructureViewController: BookImporterViewControllerDelegate {
 
   func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
     progressView = nil
-  }
-}
-
-private extension NoteMetadataRecord {
-  var guessYearRead: Int? {
-    for link in noteLinks where link.targetTitle.hasPrefix("#books/") {
-      let yearString = link.targetTitle.dropFirst(7)
-      return Int(yearString)
-    }
-    return nil
   }
 }
