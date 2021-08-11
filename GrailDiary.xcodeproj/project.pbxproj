@@ -46,9 +46,10 @@
 		D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */; };
 		D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D7CDF2598CCC70083AB05 /* WebViewController.swift */; };
 		D32215ED26C40585000BA772 /* CodableCSV in Frameworks */ = {isa = PBXBuildFile; productRef = D32215EC26C40585000BA772 /* CodableCSV */; };
+		D32215EF26C41108000BA772 /* SchedulingParameters+Standard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */; };
+		D32215F126C41215000BA772 /* Sequence+DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */; };
 		D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
-		D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */; };
 		D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */; };
 		D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */; };
 		D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */; };
@@ -57,7 +58,6 @@
 		D32B16BB2599438000766D55 /* 20201227-binaryContent.sql in Resources */ = {isa = PBXBuildFile; fileRef = D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */; };
 		D32B16BF259943B800766D55 /* BinaryContentRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16BE259943B800766D55 /* BinaryContentRecord.swift */; };
 		D32B16C52599457A00766D55 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C42599457A00766D55 /* ContentIdentifier.swift */; };
-		D32B16C925994BAE00766D55 /* Note+Database.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32B16C825994BAE00766D55 /* Note+Database.swift */; };
 		D331457426628DAC00B4687F /* BookImporterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331457326628DAC00B4687F /* BookImporterViewController.swift */; };
 		D331457726628EA000B4687F /* ImportForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331457626628EA000B4687F /* ImportForm.swift */; };
 		D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33145782662926C00B4687F /* DocumentPickerView.swift */; };
@@ -114,7 +114,6 @@
 		D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */ = {isa = PBXBuildFile; productRef = D37FF2B626BDE2A500E06747 /* KeyValueCRDT */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
-		D38862BB23BE4C2B00A44F1C /* LegacyNoteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */; };
 		D393F2BE24143CC100A6DABB /* DeviceRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D393F2BD24143CC100A6DABB /* DeviceRecord.swift */; };
 		D3A4199D25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */; };
 		D3A52559241E64AB0044F8A2 /* StudyLogEntryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */; };
@@ -254,11 +253,12 @@
 		D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+TypographyTests.swift"; sourceTree = "<group>"; };
 		D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClozeTests.swift; sourceTree = "<group>"; };
 		D31D7CDF2598CCC70083AB05 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchedulingParameters+Standard.swift"; sourceTree = "<group>"; };
+		D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+DictionaryExtensions.swift"; sourceTree = "<group>"; };
 		D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GrailDiaryGrammar+Styles.swift"; sourceTree = "<group>"; };
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D32A1BAE229D8B1F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DiffMatchPatch.framework; path = "../../../Library/Developer/Xcode/DerivedData/CommonplaceBookApp-gpcujrqasfqkxnevrymugbeznyst/Build/Products/Debug-iphoneos/DiffMatchPatch.framework"; sourceTree = "<group>"; };
-		D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+Replace.swift"; sourceTree = "<group>"; };
 		D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+Hashtag.swift"; sourceTree = "<group>"; };
 		D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+HashtagTests.swift"; sourceTree = "<group>"; };
 		D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+AnySatisfy.swift"; sourceTree = "<group>"; };
@@ -267,7 +267,6 @@
 		D32B16BA2599438000766D55 /* 20201227-binaryContent.sql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "20201227-binaryContent.sql"; sourceTree = "<group>"; };
 		D32B16BE259943B800766D55 /* BinaryContentRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BinaryContentRecord.swift; sourceTree = "<group>"; };
 		D32B16C42599457A00766D55 /* ContentIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
-		D32B16C825994BAE00766D55 /* Note+Database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Database.swift"; sourceTree = "<group>"; };
 		D331457326628DAC00B4687F /* BookImporterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporterViewController.swift; sourceTree = "<group>"; };
 		D331457626628EA000B4687F /* ImportForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportForm.swift; sourceTree = "<group>"; };
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
@@ -325,7 +324,6 @@
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
-		D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyNoteDatabase.swift; sourceTree = "<group>"; };
 		D393F2BD24143CC100A6DABB /* DeviceRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRecord.swift; sourceTree = "<group>"; };
 		D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D3A52558241E64AB0044F8A2 /* StudyLogEntryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyLogEntryRecord.swift; sourceTree = "<group>"; };
@@ -462,9 +460,7 @@
 				D393F2BD24143CC100A6DABB /* DeviceRecord.swift */,
 				D3A58F12240B2BDE00CE3251 /* MergeableRecord.swift */,
 				D3F90E5E2587301300162CFC /* Migrations */,
-				D38862BA23BE4C2B00A44F1C /* LegacyNoteDatabase.swift */,
 				D3A4199C25D10A4800BD5175 /* NoteDatabase+ImageStorage.swift */,
-				D32A7A5225A041A900950684 /* NoteDatabase+Replace.swift */,
 				D3198DAC23DB3E1B0098A9D9 /* NoteLinkRecord.swift */,
 				D3E5E023256F13CD0062BDD4 /* NoteMetadataRecord.swift */,
 				D3198DA623D8859B0098A9D9 /* NoteRecord.swift */,
@@ -594,7 +590,6 @@
 				D31AFA89229D61E900ED2B76 /* LoadingViewController.swift */,
 				D31AFA9B229D61EC00ED2B76 /* MetadataQuery.swift */,
 				D38862B323BB94FA00A44F1C /* Note.swift */,
-				D32B16C825994BAE00766D55 /* Note+Database.swift */,
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
 				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
@@ -637,6 +632,8 @@
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 				D37C887626B5C91700EC30C8 /* NoteDatabase.swift */,
+				D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */,
+				D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */,
 			);
 			path = GrailDiary;
 			sourceTree = "<group>";
@@ -943,6 +940,7 @@
 				D31AFACB229D61EE00ED2B76 /* PromptCollection.swift in Sources */,
 				D3C0B5DA2650172C00A33CCA /* NoteDatabase+Content.swift in Sources */,
 				D3E98EFE21D2F784008445DA /* DirectoryMetadataProvider.swift in Sources */,
+				D32215EF26C41108000BA772 /* SchedulingParameters+Standard.swift in Sources */,
 				D3F90E602587301F00162CFC /* MigrationIdentifier.swift in Sources */,
 				D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */,
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
@@ -991,17 +989,14 @@
 				D31AFAB7229D61EE00ED2B76 /* Prompt.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
-				D32B16C925994BAE00766D55 /* Note+Database.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
 				D3198DA923D888BC0098A9D9 /* Database+Migrations.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D369182926BAD1E9001EB512 /* NoteDatabaseKey.swift in Sources */,
 				D37C887A26B5C9E900EC30C8 /* KeyValueNoteDatabase.swift in Sources */,
-				D38862BB23BE4C2B00A44F1C /* LegacyNoteDatabase.swift in Sources */,
 				D31AFABD229D61EE00ED2B76 /* LoadingViewController.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
-				D32A7A5325A041A900950684 /* NoteDatabase+Replace.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
@@ -1025,6 +1020,7 @@
 				D331457726628EA000B4687F /* ImportForm.swift in Sources */,
 				D3198DA723D8859B0098A9D9 /* NoteRecord.swift in Sources */,
 				D31AFACF229D61EE00ED2B76 /* MetadataQuery.swift in Sources */,
+				D32215F126C41215000BA772 /* Sequence+DictionaryExtensions.swift in Sources */,
 				D31A02B82676A33D00A60525 /* ParsedAttributedString+PlainText.swift in Sources */,
 				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,

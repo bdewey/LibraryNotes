@@ -47,6 +47,10 @@ public final class KeyValueNoteDatabase: NoteDatabase {
     keyValueDocument.close(completionHandler: completionHandler)
   }
 
+  public func save(to url: URL, for saveOperation: UIDocument.SaveOperation, completionHandler: IOCompletionHandler?) {
+    keyValueDocument.save(to: url, for: saveOperation, completionHandler: completionHandler)
+  }
+
   public func refresh(completionHandler: IOCompletionHandler?) {
     Logger.keyValueNoteDatabase.debug("\(#function) not implemented")
   }

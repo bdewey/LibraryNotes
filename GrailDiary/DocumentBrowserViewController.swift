@@ -83,9 +83,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   ) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
-    if url.pathExtension == "grail" {
-      database = LegacyNoteDatabase(fileURL: url)
-    } else if url.pathExtension == "kvcrdt" {
+    if url.pathExtension == "kvcrdt" {
       guard let author = Author(.current) else {
         throw NoteDatabaseError.noDeviceUUID
       }
@@ -135,24 +133,29 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       Logger.shared.error("Unable to create temporary directory at \(directoryURL.path): \(error)")
       importHandler(nil, .none)
     }
-    let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("grail")
-    let document = LegacyNoteDatabase(fileURL: url)
-    Logger.shared.info("Attempting to create a document at \(url.path)")
-    document.open { openSuccess in
-      guard openSuccess else {
-        Logger.shared.error("Could not open document")
-        importHandler(nil, .none)
-        return
-      }
-      document.tryCreatingWelcomeContent()
-      document.save(to: url, for: .forCreating) { saveSuccess in
-        if saveSuccess {
-          importHandler(url, .move)
-        } else {
-          Logger.shared.error("Could not create document")
+    do {
+      let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
+      let author = Author(UIDevice.current)!
+      let document = try KeyValueNoteDatabase(fileURL: url, author: author)
+      Logger.shared.info("Attempting to create a document at \(url.path)")
+      document.open { openSuccess in
+        guard openSuccess else {
+          Logger.shared.error("Could not open document")
           importHandler(nil, .none)
+          return
+        }
+        document.tryCreatingWelcomeContent()
+        document.save(to: url, for: .forCreating) { saveSuccess in
+          if saveSuccess {
+            importHandler(url, .move)
+          } else {
+            Logger.shared.error("Could not create document")
+            importHandler(nil, .none)
+          }
         }
       }
+    } catch {
+      Logger.shared.error("Unexpected error creating document: \(error)")
     }
   }
 

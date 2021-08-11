@@ -5,7 +5,6 @@ import UIKit
 import UniformTypeIdentifiers
 
 extension UTType {
-  static let grailDiary = UTType("org.brians-brain.graildiary")!
   static let kvcrdt = UTType("org.brians-brain.kvcrdt")!
 }
 
@@ -29,7 +28,7 @@ extension UTType {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
 
-    let browser = DocumentBrowserViewController(forOpening: [.grailDiary, .kvcrdt])
+    let browser = DocumentBrowserViewController(forOpening: [.kvcrdt])
 
     window.rootViewController = browser
     window.makeKeyAndVisible()
