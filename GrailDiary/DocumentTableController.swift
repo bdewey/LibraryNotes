@@ -426,9 +426,10 @@ extension DocumentTableController {
     ) -> ActionConfiguration? {
       if viewProperties.cardCount == 0 { return nil }
       return ActionConfiguration(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
-        database.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date(), completion: {
-          delegate?.presentStudySessionViewController(for: $0)
-        })
+        Task {
+          let studySession = try await database.makeStudySession(filter: { name, _ in name == viewProperties.pageKey}, date: Date())
+          delegate?.presentStudySessionViewController(for: studySession)
+        }
       }
     }
   }
@@ -713,8 +714,9 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    database.studySession(filter: nil, date: dueDate) { studySession in
-      self.cardsPerDocument = studySession
+    Task {
+      let studySession = try await database.makeStudySession(filter: nil, date: dueDate)
+      cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
         }

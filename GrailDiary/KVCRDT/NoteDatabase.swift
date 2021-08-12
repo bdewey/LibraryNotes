@@ -214,16 +214,14 @@ public final class NoteDatabase {
     return Array(uniqueIdentifiers)
   }
 
-  public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date, completion: @escaping (StudySession) -> Void) {
-    DispatchQueue.global(qos: .userInteractive).async {
-      let studySession = self.synchronousStudySession(filter: filter, date: date)
-      DispatchQueue.main.async {
-        completion(studySession)
-      }
+  public func makeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) async throws -> StudySession {
+    let task = Task {
+      try makeStudySession(filter: filter, date: date)
     }
+    return try await task.value
   }
 
-  public func synchronousStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) -> StudySession {
+  public func makeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
@@ -235,6 +233,12 @@ public final class NoteDatabase {
     }
     var studySession = StudySession()
     for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
+      do {
+        try Task.checkCancellation()
+      } catch {
+        Logger.keyValueNoteDatabase.info("Canceling study session generation")
+        throw error
+      }
       guard
         let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata.rawValue)]?.metadata,
         filter?(scopedKey.scope, metadata) ?? true

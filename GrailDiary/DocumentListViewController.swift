@@ -158,8 +158,8 @@ final class DocumentListViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    database.studySession(filter: nil, date: Date()) { [weak self] in
-      self?.studySession = $0
+    Task {
+      self.studySession = try await database.makeStudySession(filter: nil, date: Date())
     }
     dataSource.performUpdates(animated: false)
 
@@ -261,14 +261,22 @@ final class DocumentListViewController: UIViewController {
 
   private var studySessionGeneration = 0
 
+  private var currentStudySessionTask: Task<(), Error>? {
+    willSet {
+      currentStudySessionTask?.cancel()
+    }
+  }
+
   private func updateStudySession() {
     let records = dataSource.bookNoteMetadata
     let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
     studySessionGeneration += 1
     let currentStudySessionGeneration = studySessionGeneration
-    database.studySession(filter: filter, date: dueDate) {
-      guard currentStudySessionGeneration == self.studySessionGeneration else { return }
-      self.studySession = $0
+    currentStudySessionTask = Task {
+      let studySession = try await database.makeStudySession(filter: filter, date: dueDate)
+      if currentStudySessionGeneration == studySessionGeneration {
+        self.studySession = studySession
+      }
     }
   }
 

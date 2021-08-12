@@ -145,7 +145,7 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       _ = try database.createNote(Note.withChallenges)
       // New items aren't eligible for at 3-5 days.
       let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = database.synchronousStudySession(filter: nil, date: future)
+      var studySession = database.makeStudySession(filter: nil, date: future)
       XCTAssertEqual(3, studySession.count)
       while studySession.currentPrompt != nil {
         studySession.recordAnswer(correct: true)
@@ -239,7 +239,7 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
       _ = try database.createNote(Note.multipleClozes)
       // New items aren't eligible for at 3-5 days.
       let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = database.synchronousStudySession(filter: nil, date: future)
+      var studySession = database.makeStudySession(filter: nil, date: future)
       XCTAssertEqual(studySession.count, 2)
       studySession.ensureUniquePromptCollections()
       XCTAssertEqual(studySession.count, 1)
@@ -247,9 +247,9 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
         studySession.recordAnswer(correct: true)
       }
       try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-      studySession = database.synchronousStudySession(filter: nil, date: future)
+      studySession = database.makeStudySession(filter: nil, date: future)
       XCTAssertEqual(studySession.count, 0)
-      studySession = database.synchronousStudySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
+      studySession = database.makeStudySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
       XCTAssertEqual(studySession.count, 1)
     }
   }
