@@ -27,11 +27,13 @@ final class BookHeader: UIView {
     backgroundColor = .grailBackground
     titleLabel.text = book.title
     authorLabel.text = book.authors.joined(separator: ", ")
+    tagsLabel.text = book.tags?.joined(separator: ", ")
 
     [
       titleLabel,
       authorLabel,
       starRatingView,
+      tagsLabel,
       readingStatusLabel,
       readingHistoryButton,
       coverImageView,
@@ -74,6 +76,13 @@ final class BookHeader: UIView {
     view.rating = book.rating ?? 0
     view.delegate = self
     return view
+  }()
+
+  private let tagsLabel: UILabel = {
+    let label = UILabel()
+    label.font = .preferredFont(forTextStyle: .caption1)
+    label.textColor = .secondaryLabel
+    return label
   }()
 
   private let readingStatusLabel: UILabel = {
@@ -142,6 +151,7 @@ final class BookHeader: UIView {
     starRatingView.frame = frames.starRatingView
     readingHistoryButton.frame = frames.readingHistoryButton
     readingStatusLabel.frame = frames.readingStatusLabel
+    tagsLabel.frame = frames.tagsLabel
   }
 
   override func sizeThatFits(_ size: CGSize) -> CGSize {
@@ -159,6 +169,7 @@ final class BookHeader: UIView {
     var starRatingView: CGRect = .zero
     var readingHistoryButton: CGRect = .zero
     var readingStatusLabel: CGRect = .zero
+    var tagsLabel: CGRect = .zero
     var imageColumnHeight: CGFloat = 0
     var infoColumnHeight: CGFloat = 0
   }
@@ -206,6 +217,10 @@ final class BookHeader: UIView {
 
     let readLabelSize = readingStatusLabel.sizeThatFits(layoutArea.size)
     (frames.readingStatusLabel, layoutArea) = layoutArea.divided(atDistance: readLabelSize.height, from: .maxYEdge)
+    layoutArea = layoutArea.inset(by: .bottom(padding))
+
+    let tagsLabelSize = tagsLabel.sizeThatFits(layoutArea.size)
+    (frames.tagsLabel, layoutArea) = layoutArea.divided(atDistance: tagsLabelSize.height, from: .maxYEdge)
     layoutArea = layoutArea.inset(by: .bottom(padding))
 
     frames.imageColumnHeight = frames.coverImageView.maxY + padding

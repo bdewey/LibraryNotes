@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
           "branch": "xcode13",
-          "revision": "2a0ccd048006280ec2deb6289a26edc54f5a807a",
+          "revision": "6f4733507ed0971b4267a42cea402a15c94bbf2e",
           "version": null
         }
       },
@@ -20,7 +20,7 @@
         }
       },
       {
-        "package": "GRDB",
+        "package": "GRDB.swift",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": "xcode13",

@@ -94,7 +94,7 @@ final class NotebookStructureViewController: UIViewController {
       let metadata = tuple.value
       switch self {
       case .hashtag(let hashtag):
-        return metadata.tags.contains(hashtag)
+        return metadata.tags.contains(hashtag) || (metadata.book?.tags?.contains(hashtag) ?? false)
       case .trash:
         return metadata.folder == PredefinedFolder.recentlyDeleted.rawValue
       default:
@@ -487,7 +487,7 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.read
-    let hashtags = (try? database.bookMetadata.values.hashtags) ?? []
+    let hashtags = database.bookMetadata.values.hashtags
     root.hasChildren = !hashtags.isEmpty
     snapshot.append([root])
 

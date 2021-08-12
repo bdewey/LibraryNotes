@@ -427,7 +427,7 @@ extension DocumentTableController {
       if viewProperties.cardCount == 0 { return nil }
       return ActionConfiguration(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
         Task {
-          let studySession = try await database.makeStudySession(filter: { name, _ in name == viewProperties.pageKey}, date: Date())
+          let studySession = try await database.makeStudySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
           delegate?.presentStudySessionViewController(for: studySession)
         }
       }

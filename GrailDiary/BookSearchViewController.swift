@@ -193,16 +193,27 @@ extension BookSearchViewController: UICollectionViewDelegate {
 extension BookSearchViewController: UISearchBarDelegate {
   public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     guard let searchTerm = searchBar.text, let apiKey = ApiKey.googleBooks else { return }
-    activityView.startAnimating()
-    _ = GoogleBooks.search(for: searchTerm, apiKey: apiKey) { [activityView, weak self] response in
-      activityView.stopAnimating()
-      switch response {
-      case .failure(let error):
-        Logger.bookSearch.error("Unexpected error querying for \(searchTerm): \(error)")
-      case .success(let response):
-        let viewModels = response.items.compactMap { ViewModel($0) }
-        self?.updateViewModels(viewModels)
+    Task {
+      do {
+        try await searchGoogleBooks(for: searchTerm, apiKey: apiKey)
+      } catch {
+        Logger.shared.error("Unexpected error searching Google Books: \(error)")
       }
+    }
+  }
+
+  @MainActor
+  private func searchGoogleBooks(for searchTerm: String, apiKey: String) async throws {
+    // TODO: Xcode 13 Beta 3 doesn't recognize "defer" blocks as being in the global actor
+    do {
+      activityView.startAnimating()
+      let response = try await GoogleBooks.search(for: searchTerm, apiKey: apiKey)
+      activityView.stopAnimating()
+      let viewModels = response.items.compactMap { ViewModel($0) }
+      updateViewModels(viewModels)
+    } catch {
+      activityView.stopAnimating()
+      throw error
     }
   }
 }

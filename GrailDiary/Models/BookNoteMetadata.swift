@@ -77,6 +77,7 @@ public extension Sequence where Element == BookNoteMetadata {
     let hashtags = filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
       .reduce(into: Set<String>()) { hashtags, metadata in
         hashtags.formUnion(metadata.tags)
+        hashtags.formUnion(metadata.book?.tags ?? [])
       }
     return Array(hashtags).sorted()
   }
