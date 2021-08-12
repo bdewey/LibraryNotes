@@ -68,6 +68,10 @@ public final class NoteDatabase {
     keyValueDocument.close(completionHandler: completionHandler)
   }
 
+  public func close() async -> Bool {
+    await keyValueDocument.close()
+  }
+
   public func save(to url: URL, for saveOperation: UIDocument.SaveOperation, completionHandler: IOCompletionHandler?) {
     keyValueDocument.save(to: url, for: saveOperation, completionHandler: completionHandler)
   }

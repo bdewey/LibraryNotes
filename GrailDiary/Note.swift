@@ -68,7 +68,7 @@ public struct Note {
   public var text: String?
   public var promptCollections: [ContentKey: PromptCollection]
 
-  @available(*, deprecated)
+  @available(*, deprecated, message: "Use metadata.modifiedTimestamp")
   public var timestamp: Date {
     get { metadata.modifiedTimestamp }
     set { metadata.modifiedTimestamp = newValue }

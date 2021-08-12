@@ -1,6 +1,5 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Combine
 @testable import GrailDiary
 import KeyValueCRDT
 import XCTest
@@ -8,9 +7,9 @@ import XCTest
 /// Specific test cases around merging database content.
 final class NoteSqliteStorageMergeTests: XCTestCase {
   /// If you copy a file, then try to merge it in, nothing happens.
-  func testNoopMerge() {
+  func testNoopMerge() async throws {
     var noteIdentifier: Note.Identifier!
-    MergeTestCase()
+    try await MergeTestCase()
       .withInitialState { storage in
         noteIdentifier = try storage.createNote(.withChallenges)
       }
@@ -21,11 +20,11 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteCreationGetsIntegrated() {
+  func testRemoteCreationGetsIntegrated() async throws {
     var simpleIdentifier: Note.Identifier!
     var challengeIdentifier: Note.Identifier!
 
-    MergeTestCase()
+    try await MergeTestCase()
       .withInitialState { storage in
         simpleIdentifier = try storage.createNote(.simpleTest)
       }
@@ -40,7 +39,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteHashtagGetsDeleted() {
+  func testRemoteHashtagGetsDeleted() async throws {
     let initialText = """
     # Test content
 
@@ -57,7 +56,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
     """
     var noteIdentifier: Note.Identifier!
     let withoutHashtagNote = Note(markdown: withoutHashtagText)
-    MergeTestCase()
+    try await MergeTestCase()
       .withInitialState { storage in
         noteIdentifier = try storage.createNote(Note(markdown: initialText))
       }
@@ -71,13 +70,13 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: noteIdentifier), withoutHashtagNote)
-        XCTAssertEqual(try storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.bookMetadata.count, 1)
       }
       .run(self)
   }
 
-  func testRemoteStudyOfLocalPageGetsIncorporated() {
-    MergeTestCase()
+  func testRemoteStudyOfLocalPageGetsIncorporated() async throws {
+    try await MergeTestCase()
       .withInitialState { storage in
         _ = try storage.createNote(.withChallenges)
       }
@@ -102,8 +101,8 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteStudyOfRemotePageGetsIncorporated() {
-    MergeTestCase()
+  func testRemoteStudyOfRemotePageGetsIncorporated() async throws {
+    try await MergeTestCase()
       .performRemoteModification { storage in
         _ = try storage.createNote(.withChallenges)
         // New items aren't eligible for at 3-5 days.
@@ -122,18 +121,18 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         let studySession = try storage.syncMakeStudySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
-        XCTAssertEqual(1, try storage.bookMetadata.count)
+        XCTAssertEqual(1, storage.bookMetadata.count)
         let futureStudySession = try storage.syncMakeStudySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
         XCTAssertEqual(3, futureStudySession.count)
       }
       .run(self)
   }
 
-  func testLocalChangeIsPreserved() {
+  func testLocalChangeIsPreserved() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.timestamp = Date().addingTimeInterval(60)
-    MergeTestCase()
+    modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
+    try await MergeTestCase()
       .withInitialState { storage in
         simpleIdentifier = try storage.createNote(.simpleTest)
       }
@@ -143,17 +142,17 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
-        XCTAssertEqual(try storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.bookMetadata.count, 1)
       }
       .run(self)
   }
 
-  func testRemoteChangeGetsCopied() {
+  func testRemoteChangeGetsCopied() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.timestamp = Date().addingTimeInterval(60)
+    modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
 
-    MergeTestCase()
+    try await MergeTestCase()
       .withInitialState { storage in
         simpleIdentifier = try storage.createNote(.simpleTest)
       }
@@ -167,14 +166,14 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testLastWriterWins() {
+  func testLastWriterWins() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
-    modifiedNote.timestamp = Date().addingTimeInterval(60)
+    modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
     var conflictingNote = Note(markdown: "I'm going to win! #winning")
-    conflictingNote.timestamp = Date().addingTimeInterval(120)
+    conflictingNote.metadata.modifiedTimestamp = Date().addingTimeInterval(120)
 
-    MergeTestCase()
+    try await MergeTestCase()
       .withInitialState { storage in
         simpleIdentifier = try storage.createNote(.simpleTest)
       }
@@ -231,8 +230,8 @@ private struct MergeTestCase {
     return copy
   }
 
-  func run(_ runner: NoteSqliteStorageMergeTests) {
-    runner.runKeyValueTestCase(self)
+  func run(_ runner: NoteSqliteStorageMergeTests) async throws {
+    try await runner.runKeyValueTestCase(self)
   }
 }
 
@@ -240,73 +239,43 @@ private extension NoteSqliteStorageMergeTests {
   static func openKeyValueDatabase(
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-  ) -> Future<NoteDatabase, Error> {
-    return Future<NoteDatabase, Error> { promise in
-      do {
-        let database = try NoteDatabase(
-          fileURL: fileURL,
-          author: Author(id: device.identifierForVendor!, name: device.name)
-        )
-        database.open { _ in
-          promise(.success(database))
-        }
-      } catch {
-        promise(.failure(error))
-      }
+  ) async throws -> NoteDatabase {
+    let database = try NoteDatabase(
+      fileURL: fileURL,
+      author: Author(id: device.identifierForVendor!, name: device.name)
+    )
+    if await !database.open() {
+      throw TestError.couldNotOpenDatabase
     }
+    return database
   }
 
-  func runKeyValueTestCase(_ testCase: MergeTestCase) {
-    let pipelineRan = expectation(description: "pipeline ran")
-    let cancelable = makeKeyValueFile(device: .local, modificationBlock: testCase.initialLocalStorageBlock)
-      .tryMap { localURL -> (URL, URL) in
-        let remoteURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        try FileManager.default.copyItem(at: localURL, to: remoteURL)
-        return (localURL, remoteURL)
-      }
-      .flatMap { tuple in
-        Self.openKeyValueDatabase(device: .local, fileURL: tuple.0).map { ($0, tuple.1) }
-      }
-      .flatMap { tuple in
-        Self.openKeyValueDatabase(device: .remote, fileURL: tuple.1).map { (tuple.0, $0) }
-      }
-      .tryMap { localStorage, remoteStorage -> Bool in
-        try testCase.localModificationBlock?(localStorage)
-        try testCase.remoteModificationBlock?(remoteStorage)
-        _ = try localStorage.merge(other: remoteStorage)
-        try testCase.validationBlock?(localStorage)
-        return true
-      }
-      .sink(receiveCompletion: { completion in
-        switch completion {
-        case .finished:
-          break
-        case .failure(let error):
-          XCTFail("Unexpected error: \(error)")
-        }
-        pipelineRan.fulfill()
-      }, receiveValue: { _ in })
-    waitForExpectations(timeout: 300, handler: nil)
-    // cancel() should be a no-op
-    cancelable.cancel()
+  func runKeyValueTestCase(_ testCase: MergeTestCase) async throws {
+    let localURL = try await makeKeyValueFile(device: .local, modificationBlock: testCase.initialLocalStorageBlock)
+    let remoteURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.copyItem(at: localURL, to: remoteURL)
+    let localStorage = try await Self.openKeyValueDatabase(device: .local, fileURL: localURL)
+    let remoteStorage = try await Self.openKeyValueDatabase(device: .remote, fileURL: remoteURL)
+    try testCase.localModificationBlock?(localStorage)
+    try testCase.remoteModificationBlock?(remoteStorage)
+    _ = try localStorage.merge(other: remoteStorage)
+    try testCase.validationBlock?(localStorage)
   }
 
   func makeKeyValueFile(
     device: TestDevice,
     modificationBlock: MergeTestCase.StorageModificationBlock?
-  ) -> AnyPublisher<URL, Error> {
-    Self.openKeyValueDatabase(device: device)
-      .tryMap { database -> NoteDatabase in
-        try modificationBlock?(database)
-        return database
-      }
-      .flatMap { database -> Future<URL, Error> in
-        Future { promise in
-          database.close { _ in
-            promise(.success(database.fileURL))
-          }
-        }
-      }
-      .eraseToAnyPublisher()
+  ) async throws -> URL {
+    let database = try await Self.openKeyValueDatabase(device: device)
+    try modificationBlock?(database)
+    if await !database.close() {
+      throw TestError.couldNotCloseDatabase
+    }
+    return database.fileURL
   }
+}
+
+private enum TestError: Error {
+  case couldNotOpenDatabase
+  case couldNotCloseDatabase
 }
