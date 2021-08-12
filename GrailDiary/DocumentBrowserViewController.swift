@@ -125,38 +125,31 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     _ controller: UIDocumentBrowserViewController,
     didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
   ) {
-    let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    do {
-      try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-      Logger.shared.info("Created directory at \(directoryURL)")
-    } catch {
-      Logger.shared.error("Unable to create temporary directory at \(directoryURL.path): \(error)")
-      importHandler(nil, .none)
-    }
-    do {
-      let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
-      let author = Author(UIDevice.current)!
-      let document = try NoteDatabase(fileURL: url, author: author)
-      Logger.shared.info("Attempting to create a document at \(url.path)")
-      document.open { openSuccess in
-        guard openSuccess else {
-          Logger.shared.error("Could not open document")
-          importHandler(nil, .none)
-          return
-        }
-        document.tryCreatingWelcomeContent()
-        document.save(to: url, for: .forCreating) { saveSuccess in
-          if saveSuccess {
-            importHandler(url, .move)
-          } else {
-            Logger.shared.error("Could not create document")
-            importHandler(nil, .none)
-          }
-        }
+    Task {
+      do {
+        let url = try await makeNewDocument()
+        importHandler(url, .move)
+      } catch {
+        importHandler(nil, .none)
       }
-    } catch {
-      Logger.shared.error("Unexpected error creating document: \(error)")
     }
+  }
+
+  private func makeNewDocument() async throws -> URL? {
+    let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
+    let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
+    let author = Author(UIDevice.current)!
+    let document = try NoteDatabase(fileURL: url, author: author)
+    Logger.shared.info("Attempting to create a document at \(url.path)")
+    guard await document.open() else {
+      return nil
+    }
+    document.tryCreatingWelcomeContent()
+    guard await document.save(to: url, for: .forCreating) else {
+      return nil
+    }
+    return url
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {

@@ -60,12 +60,20 @@ public final class NoteDatabase {
     keyValueDocument.open(completionHandler: completionHandler)
   }
 
+  public func open() async -> Bool {
+    await keyValueDocument.open()
+  }
+
   public func close(completionHandler: IOCompletionHandler?) {
     keyValueDocument.close(completionHandler: completionHandler)
   }
 
   public func save(to url: URL, for saveOperation: UIDocument.SaveOperation, completionHandler: IOCompletionHandler?) {
     keyValueDocument.save(to: url, for: saveOperation, completionHandler: completionHandler)
+  }
+
+  public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
+    await keyValueDocument.save(to: url, for: saveOperation)
   }
 
   public func refresh(completionHandler: IOCompletionHandler?) {
@@ -558,7 +566,9 @@ struct NoteUpdatePayload {
     updates[.noteText] = Value(note.text)
     updates[.bookIndex] = Value(note.metadata.indexedContents)
     let unusedPromptKeys = Set(updates.keys.filter { $0.isPrompt }.map { $0.rawValue }).subtracting(note.promptCollections.keys)
-    Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
+    if !unusedPromptKeys.isEmpty {
+      Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
+    }
     for (promptKey, promptCollection) in note.promptCollections {
       Logger.keyValueNoteDatabase.debug("Updating prompt collection with key \(promptKey)")
       let key = NoteDatabaseKey(rawValue: promptKey)
