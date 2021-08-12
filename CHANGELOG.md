@@ -2,13 +2,15 @@
 
 ## Unreleased
 
+### Changed
+
+- **Major** iOS 15 only
+- When launching into collapsed environments (e.g., an iPhone), we no longer show a single blank note as the opening screen. Instead, we will show the document list.
+
 ### Added
 
 - **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. 
-
-### Changed
-
-- When launching into collapsed environments (e.g., an iPhone), we no longer show a single blank note as the opening screen. Instead, we will show the document list.
+- Catpure text from camera on phones that support it
 
 ### Fixed
 

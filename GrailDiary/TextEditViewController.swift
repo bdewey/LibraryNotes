@@ -280,6 +280,10 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
+    if textView.canPerformAction(#selector(UIResponder.captureTextFromCamera), withSender: nil) {
+      inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "camera"), primaryAction: UIAction.captureTextFromCamera(responder: textView, identifier: nil)))
+    }
+
     let importActions = WebImporterConfiguration.shared.map { config in
       UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
         guard let self = self else { return }

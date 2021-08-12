@@ -363,13 +363,6 @@
 			path = BookImporter;
 			sourceTree = "<group>";
 		};
-		D35C8BCE259E842E00A92CEB /* Shared */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Shared;
-			sourceTree = "<group>";
-		};
 		D362999026B3234B00AF8F23 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -399,7 +392,6 @@
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
-				D35C8BCE259E842E00A92CEB /* Shared */,
 				D3DC5EC120EC9B0100F0B74B /* GrailDiary */,
 				D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */,
 				D3E98F0421D470B2008445DA /* GrailDiaryUITests */,
