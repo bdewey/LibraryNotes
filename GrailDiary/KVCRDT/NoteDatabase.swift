@@ -216,12 +216,12 @@ public final class NoteDatabase {
 
   public func makeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) async throws -> StudySession {
     let task = Task {
-      try makeStudySession(filter: filter, date: date)
+      try syncMakeStudySession(filter: filter, date: date)
     }
     return try await task.value
   }
 
-  public func makeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
+  public func syncMakeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
