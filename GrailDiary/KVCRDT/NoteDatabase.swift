@@ -84,8 +84,8 @@ public final class NoteDatabase {
     Logger.keyValueNoteDatabase.debug("\(#function) not implemented")
   }
 
-  public func flush() throws {
-    keyValueDocument.save(to: fileURL, for: .forOverwriting, completionHandler: nil)
+  public func flush() async throws {
+    await keyValueDocument.save(to: fileURL, for: .forOverwriting)
   }
 
   public func merge(other: NoteDatabase) throws {
@@ -138,6 +138,7 @@ public final class NoteDatabase {
     let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
     Logger.keyValueNoteDatabase.info("Trying to read note \(noteIdentifier). Found \(onDiskContents.count) records.")
     guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let note = try payload.asNote() else {
+      Logger.keyValueNoteDatabase.error("Could not convert on-disk contents into a note")
       throw NoteDatabaseError.noSuchNote
     }
     return note

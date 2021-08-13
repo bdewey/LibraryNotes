@@ -196,16 +196,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   /// If there is updated markdown, creates a new Note in the background then saves it to storage.
   /// - parameter completion: A block to call after processing changes.
-  private func saveIfNeeded(completion: (() -> Void)? = nil) {
+  private func saveIfNeeded() {
     assert(Thread.isMainThread)
     guard hasUnsavedChanges else {
-      completion?()
       return
     }
     let note = Note(parsedString: textEditViewController.parsedAttributedString.rawString)
     tryUpdateNote(note)
     hasUnsavedChanges = false
-    completion?()
   }
 
   /// Saves the current contents to the database, whether or not hasUnsavedChanges is true.
@@ -238,11 +236,16 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
-    saveIfNeeded {
-      Logger.shared.info("SavingTextEditViewController: Flushing and canceling timer")
-      try? self.noteStorage.flush()
-      self.autosaveTimer?.invalidate()
-      self.autosaveTimer = nil
+    saveIfNeeded()
+    Logger.shared.info("SavingTextEditViewController: Flushing and canceling timer")
+    Task {
+      do {
+        try await noteStorage.flush()
+      } catch {
+        Logger.shared.error("Error saving changes: \(error)")
+      }
+      autosaveTimer?.invalidate()
+      autosaveTimer = nil
     }
   }
 
