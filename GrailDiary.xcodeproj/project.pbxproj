@@ -240,7 +240,6 @@
 		D36214652334F607008C8FF4 /* LayoutManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayoutManager.swift; sourceTree = "<group>"; };
 		D362999126B3236300AF8F23 /* BookNoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookNoteMetadata.swift; sourceTree = "<group>"; };
 		D362CC2E25431C6E00462683 /* NotebookViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookViewController.swift; sourceTree = "<group>"; };
-		D365384026C6E96500B0D841 /* KeyValueCRDT */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KeyValueCRDT; path = ../KeyValueCRDT; sourceTree = "<group>"; };
 		D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookSecondaryViewController.swift; sourceTree = "<group>"; };
 		D369182226BAD09F001EB512 /* Value+NoteModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Value+NoteModels.swift"; sourceTree = "<group>"; };
 		D369182426BAD0E9001EB512 /* JSONEncoders.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONEncoders.swift; sourceTree = "<group>"; };
@@ -390,7 +389,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D365384026C6E96500B0D841 /* KeyValueCRDT */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,

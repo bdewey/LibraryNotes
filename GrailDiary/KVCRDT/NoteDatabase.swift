@@ -124,7 +124,6 @@ public final class NoteDatabase {
       .readPublisher(scope: noteIdentifier, key: key.rawValue)
       .map { scopedKeyDictionary in
         assert(scopedKeyDictionary.count < 2)
-        Logger.keyValueNoteDatabase.debug("Found updated values for \(scopedKeyDictionary.keys)")
         return scopedKeyDictionary.dictionaryMap(mapping: { (NoteDatabaseKey(rawValue: $0.key.key), $0.value) })
       }
       .eraseToAnyPublisher()
