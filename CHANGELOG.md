@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.51.2-beta] - 2021-08-14
+
+### Fixed
+
+- Linked a new version of TextMarkupKit to resolve memory leaks
+- Brought back the version string in the structure view controller
+
 ## [0.51.0-beta] - 2021-08-14
 
 ### Changed

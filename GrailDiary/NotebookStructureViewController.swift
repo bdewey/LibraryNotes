@@ -105,8 +105,6 @@ final class NotebookStructureViewController: UIViewController {
 
   /// Sections of our list.
   private enum Section: CaseIterable {
-    // Section that holds "Inbox"
-    case notePrefix
     // Section that holds "Notes"
     case notes
     // Holds Archive & Trash
