@@ -1,7 +1,9 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
+import Combine
 import Foundation
+import KeyValueCRDT
 import Logging
 import ObjectiveCTextStorageWrapper
 import SnapKit
@@ -48,6 +50,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(note.metadata.preferredTitle)
+    noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
+      .sink(receiveCompletion: { _ in
+        Logger.shared.info("No longer getting updates for \(noteIdentifier)")
+      }, receiveValue: { [weak self] versions in
+        self?.updateVersionIfNeeded(versions)
+      })
   }
 
   @available(*, unavailable)
@@ -73,6 +81,20 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?
+
+  private var noteTextVersionCancellable: AnyCancellable?
+  private func updateVersionIfNeeded(_ versions: [NoteDatabaseKey: [Version]]) {
+    guard
+      let versionArray = versions[.noteText],
+      let winningVersion = versionArray.max(by: { $0.timestamp < $1.timestamp }),
+      winningVersion.authorID != noteStorage.author.id
+    else {
+      return
+    }
+    Logger.shared.info("Found an updated version of note text. Winning author = \(winningVersion.authorID.uuidString), text = \(winningVersion.value.text ?? "nil")")
+    textEditViewController.markdown = winningVersion.value.text ?? ""
+    hasUnsavedChanges = false
+  }
 
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
   let noteIdentifier: Note.Identifier
