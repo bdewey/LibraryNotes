@@ -267,7 +267,8 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self, textView, parsedAttributedString] _ in
+      guard let self = self else { return }
       let nodePath = parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1))
       let existingSelectedLocation = textView.selectedRange.location
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {

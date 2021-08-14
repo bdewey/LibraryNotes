@@ -16,6 +16,7 @@
 
 - Deleting all text no longer crashes
 - Note titles are derived from Books, if present, otherwise from the first line of Markdown.
+- Memory leaks of `SavingTextEditViewController` and `TextEditViewController`
 
 ### Removed
 

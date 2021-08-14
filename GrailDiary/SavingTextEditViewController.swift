@@ -61,7 +61,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = TextEditViewController(imageStorage: self)
+    let viewController = TextEditViewController(imageStorage: WeakReferenceImageStorage(self))
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange = initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
@@ -290,6 +290,32 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
     }
 
     return SavingTextEditViewController(noteIdentifier: restorationState.noteIdentifier, note: note, database: database, containsOnlyDefaultContent: restorationState.containsOnlyDefaultContent)
+  }
+}
+
+struct WeakReferenceImageStorage: ImageStorage {
+  weak var viewController: SavingTextEditViewController?
+
+  init(_ viewController: SavingTextEditViewController) {
+    self.viewController = viewController
+  }
+
+  enum Error: Swift.Error {
+    case storageNoLongerValid
+  }
+
+  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
+    guard let viewController = viewController else {
+      throw Error.storageNoLongerValid
+    }
+    return try viewController.storeImageData(imageData, type: type, key: key)
+  }
+
+  func retrieveImageDataForKey(_ key: String) throws -> Data {
+    guard let viewController = viewController else {
+      throw Error.storageNoLongerValid
+    }
+    return try viewController.retrieveImageDataForKey(key)
   }
 }
 
