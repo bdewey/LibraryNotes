@@ -40,9 +40,6 @@ public actor SessionGenerator {
   public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
     let signpostID = OSSignpostID(log: .studySession)
     os_signpost(.begin, log: .studySession, name: "makeStudySession", signpostID: signpostID)
-    defer {
-      os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
-    }
     var studySession = StudySession()
     for entry in entries {
       guard let metadata = self.metadata[entry.identifier] else {
@@ -60,6 +57,7 @@ public actor SessionGenerator {
         properties: CardDocumentProperties(documentName: entry.identifier, attributionMarkdown: metadata.preferredTitle)
       )
     }
+    os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
     return studySession
   }
 
@@ -72,9 +70,6 @@ public actor SessionGenerator {
   private func processValue(scopedKey: ScopedKey, versions: [Version]) {
     let signpostID = OSSignpostID(log: .studySession)
     os_signpost(.begin, log: .studySession, name: "processValue", signpostID: signpostID)
-    defer {
-      os_signpost(.end, log: .studySession, name: "processValue", signpostID: signpostID)
-    }
     if scopedKey.key == NoteDatabaseKey.metadata.rawValue {
       self.metadata[scopedKey.scope] = versions.resolved(with: .lastWriterWins)?.bookNoteMetadata
     } else if NoteDatabaseKey(rawValue: scopedKey.key).isPrompt {
@@ -86,6 +81,7 @@ public actor SessionGenerator {
         }
       }
     }
+    os_signpost(.end, log: .studySession, name: "processValue", signpostID: signpostID)
   }
 }
 

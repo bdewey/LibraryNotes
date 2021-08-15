@@ -40,6 +40,8 @@ public final class DocumentTableController: NSObject {
   ) {
     self.collectionView = collectionView
     self.database = database
+    let coverImageCache = CoverImageCache(database: database)
+    self.coverImageCache = coverImageCache
     self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
@@ -60,7 +62,7 @@ public final class DocumentTableController: NSObject {
 
     let bookRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
       guard case .page(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
-      let coverImage = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
+      let coverImage = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
       let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
       cell.contentConfiguration = configuration
     }
@@ -76,7 +78,7 @@ public final class DocumentTableController: NSObject {
       ]
       configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
-      configuration.image = database.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
+      configuration.image = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
@@ -213,6 +215,7 @@ public final class DocumentTableController: NSObject {
 
   private let collectionView: UICollectionView
   private let database: NoteDatabase
+  private let coverImageCache: CoverImageCache
   private let sessionGenerator: SessionGenerator
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {

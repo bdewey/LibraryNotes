@@ -5,6 +5,7 @@
 ### Fixed
 
 - Study session generation is no longer a CPU hotspot
+- Generating cover images is no longer a CPU hotspot
 
 ## [0.51.2-beta] - 2021-08-14
 

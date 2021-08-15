@@ -65,6 +65,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var note: Note
   private let noteStorage: NoteDatabase
+  private lazy var coverImageCache = CoverImageCache(database: noteStorage)
   private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
@@ -118,7 +119,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     if let book = note.metadata.book {
       let bookHeader = BookHeader(
         book: book,
-        coverImage: noteStorage.coverImage(bookID: noteIdentifier, maxSize: 250)
+        coverImage: coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
       )
       bookHeader.delegate = self
       textEditViewController.extendedNavigationHeaderView = bookHeader

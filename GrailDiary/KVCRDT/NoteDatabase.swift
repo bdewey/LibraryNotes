@@ -135,15 +135,6 @@ public final class NoteDatabase {
     keyValueDocument.keyValueCRDT.updatedValuesPublisher
   }
 
-  public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
-    let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage.rawValue, scope: bookID).resolved(with: .lastWriterWins)?.blob
-    if let data = data, let image = data.image(maxSize: maxSize) {
-      return image
-    } else {
-      return nil
-    }
-  }
-
   public func createNote(_ note: Note) throws -> Note.Identifier {
     let noteID = UUID().uuidString
     let existingContent = NoteUpdatePayload(noteIdentifier: noteID)
@@ -191,11 +182,21 @@ public final class NoteDatabase {
     return actualKey.rawValue
   }
 
+  @available(*, deprecated, message: "Use read(noteIdentifier:key:) instead")
   public func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
     guard let data = try keyValueDocument.keyValueCRDT.read(key: key, scope: noteIdentifier).resolved(with: .lastWriterWins)?.blob else {
       throw NoteDatabaseError.noSuchAsset
     }
     return data
+  }
+
+  /// Reads a value from the database.
+  /// - Parameters:
+  ///   - noteIdentifier: The note holding the value.
+  ///   - key: The key associated with the value.
+  /// - Returns: An array of value versions. Normally this will have zero or one value. However, if there are update conflicts from multiple authors, the result array may have more than one value.
+  public func read(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) throws -> [Version] {
+    try keyValueDocument.keyValueCRDT.read(key: key.rawValue, scope: noteIdentifier)
   }
 
   /// Bulk read of keys from the database.
