@@ -35,10 +35,12 @@ public final class DocumentTableController: NSObject {
   public init(
     collectionView: UICollectionView,
     database: NoteDatabase,
+    sessionGenerator: SessionGenerator,
     delegate: DocumentTableControllerDelegate
   ) {
     self.collectionView = collectionView
     self.database = database
+    self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
     let openWebPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
@@ -211,6 +213,7 @@ public final class DocumentTableController: NSObject {
 
   private let collectionView: UICollectionView
   private let database: NoteDatabase
+  private let sessionGenerator: SessionGenerator
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       needsPerformUpdates = true
@@ -303,7 +306,7 @@ extension DocumentTableController {
 
   fileprivate func availableItemActionConfigurations(_ viewProperties: ViewProperties) -> [ActionConfiguration] {
     let actions: [ActionConfiguration?] = [
-      .studyItem(viewProperties, in: database, delegate: delegate),
+      .studyItem(viewProperties, sessionGenerator: sessionGenerator, delegate: delegate),
       .moveItemToWantToRead(viewProperties, in: database),
       .moveItemToCurrentlyReading(viewProperties, in: database),
       .moveItemToRead(viewProperties, in: database),
@@ -421,13 +424,13 @@ extension DocumentTableController {
 
     static func studyItem(
       _ viewProperties: ViewProperties,
-      in database: NoteDatabase,
+      sessionGenerator: SessionGenerator,
       delegate: DocumentTableControllerDelegate?
     ) -> ActionConfiguration? {
       if viewProperties.cardCount == 0 { return nil }
       return ActionConfiguration(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
         Task {
-          let studySession = try await database.makeStudySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
+          let studySession = try await sessionGenerator.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
           delegate?.presentStudySessionViewController(for: studySession)
         }
       }
@@ -715,7 +718,7 @@ private extension DocumentTableController {
 
   func updateCardsPerDocument() {
     Task {
-      let studySession = try await database.makeStudySession(filter: nil, date: dueDate)
+      let studySession = try await sessionGenerator.studySession(filter: nil, date: dueDate)
       cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1

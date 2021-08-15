@@ -5,13 +5,14 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import Logging
+import os
 import SpacedRepetitionScheduler
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
-private extension Logger {
-  static let keyValueNoteDatabase: Logger = {
+private extension Logging.Logger {
+  static let keyValueNoteDatabase: Logging.Logger = {
     var logger = Logger(label: "org.brians-brain.KeyValueNoteDatabase")
     logger.logLevel = .debug
     return logger
@@ -129,6 +130,11 @@ public final class NoteDatabase {
       .eraseToAnyPublisher()
   }
 
+  /// Publishes individual key/value updates to the database.
+  public var updatedValuesPublisher: AnyPublisher<(ScopedKey, [Version]), Never> {
+    keyValueDocument.keyValueCRDT.updatedValuesPublisher
+  }
+
   public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
     let data = try? keyValueDocument.keyValueCRDT.read(key: NoteDatabaseKey.coverImage.rawValue, scope: bookID).resolved(with: .lastWriterWins)?.blob
     if let data = data, let image = data.image(maxSize: maxSize) {
@@ -192,6 +198,13 @@ public final class NoteDatabase {
     return data
   }
 
+  /// Bulk read of keys from the database.
+  /// - parameter isIncluded: A closure that determines if the value is included in the results.
+  /// - returns: A mapping of `ScopedKey` to `[Version]`, where each entry in `[Version]` is a value written by a single author to that key.
+  public func bulkRead(isIncluded: (String, String) -> Bool) throws -> [ScopedKey: [Version]] {
+    try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: isIncluded)
+  }
+
   public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
     try keyValueDocument.keyValueCRDT.write { db in
       for bookAndImage in booksAndImages {
@@ -229,63 +242,6 @@ public final class NoteDatabase {
       .map { $0.scope }
       .asSet()
     return Array(uniqueIdentifiers)
-  }
-
-  public func makeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) async throws -> StudySession {
-    let task = Task {
-      try syncMakeStudySession(filter: filter, date: date)
-    }
-    return try await task.value
-  }
-
-  public func syncMakeStudySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
-    let results: [ScopedKey: [Version]]
-    do {
-      results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { _, key in
-        key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
-      })
-    } catch {
-      Logger.keyValueNoteDatabase.error("Could not read prompt keys: \(error)")
-      return StudySession()
-    }
-    var studySession = StudySession()
-    for (scopedKey, versions) in results where scopedKey.key.starts(with: "prompt=") {
-      do {
-        try Task.checkCancellation()
-      } catch {
-        Logger.keyValueNoteDatabase.info("Canceling study session generation")
-        throw error
-      }
-      guard
-        let metadata = results[ScopedKey(scope: scopedKey.scope, key: NoteDatabaseKey.metadata.rawValue)]?.metadata,
-        filter?(scopedKey.scope, metadata) ?? true
-      else {
-        continue
-      }
-      guard let json = versions.resolved(with: .lastWriterWins)?.json, let data = json.data(using: .utf8) else {
-        continue
-      }
-      do {
-        let promptInfo = try JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: data)
-        var promptIdentifiers = [PromptIdentifier]()
-        for (index, prompt) in promptInfo.promptStatistics.enumerated() where (prompt.due ?? .distantPast) <= date {
-          promptIdentifiers.append(PromptIdentifier(noteId: scopedKey.scope, promptKey: scopedKey.key, promptIndex: index))
-        }
-        if !promptIdentifiers.isEmpty {
-          let innerStudySession = StudySession(
-            promptIdentifiers,
-            properties: CardDocumentProperties(
-              documentName: scopedKey.scope,
-              attributionMarkdown: metadata.preferredTitle
-            )
-          )
-          studySession += innerStudySession
-        }
-      } catch {
-        Logger.keyValueNoteDatabase.error("Could not decode prompt info: \(error)")
-      }
-    }
-    return studySession
   }
 
   public func eligiblePromptIdentifiers(

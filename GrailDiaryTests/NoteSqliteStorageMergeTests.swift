@@ -83,7 +83,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .performRemoteModification { storage in
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = try storage.syncMakeStudySession(filter: nil, date: future)
+        var studySession = try await storage.studySession(filter: nil, date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -95,7 +95,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = try storage.syncMakeStudySession(filter: nil, date: future)
+        let studySession = try await storage.studySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
       }
       .run(self)
@@ -107,7 +107,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         _ = try storage.createNote(.withChallenges)
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = try storage.syncMakeStudySession(filter: nil, date: future)
+        var studySession = try await storage.studySession(filter: nil, date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -119,10 +119,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = try storage.syncMakeStudySession(filter: nil, date: future)
+        let studySession = try await storage.studySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
         XCTAssertEqual(1, storage.bookMetadata.count)
-        let futureStudySession = try storage.syncMakeStudySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
+        let futureStudySession = try await storage.studySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
         XCTAssertEqual(3, futureStudySession.count)
       }
       .run(self)
@@ -200,7 +200,7 @@ private struct TestDevice {
 }
 
 private struct MergeTestCase {
-  typealias StorageModificationBlock = (NoteDatabase) throws -> Void
+  typealias StorageModificationBlock = (NoteDatabase) async throws -> Void
   var initialLocalStorageBlock: StorageModificationBlock?
   var localModificationBlock: StorageModificationBlock?
   var remoteModificationBlock: StorageModificationBlock?
@@ -256,10 +256,10 @@ private extension NoteSqliteStorageMergeTests {
     try FileManager.default.copyItem(at: localURL, to: remoteURL)
     let localStorage = try await Self.openKeyValueDatabase(device: .local, fileURL: localURL)
     let remoteStorage = try await Self.openKeyValueDatabase(device: .remote, fileURL: remoteURL)
-    try testCase.localModificationBlock?(localStorage)
-    try testCase.remoteModificationBlock?(remoteStorage)
+    try await testCase.localModificationBlock?(localStorage)
+    try await testCase.remoteModificationBlock?(remoteStorage)
     _ = try localStorage.merge(other: remoteStorage)
-    try testCase.validationBlock?(localStorage)
+    try await testCase.validationBlock?(localStorage)
   }
 
   func makeKeyValueFile(
@@ -267,7 +267,7 @@ private extension NoteSqliteStorageMergeTests {
     modificationBlock: MergeTestCase.StorageModificationBlock?
   ) async throws -> URL {
     let database = try await Self.openKeyValueDatabase(device: device)
-    try modificationBlock?(database)
+    try await modificationBlock?(database)
     if await !database.close() {
       throw TestError.couldNotCloseDatabase
     }
@@ -275,7 +275,10 @@ private extension NoteSqliteStorageMergeTests {
   }
 }
 
-private enum TestError: Error {
-  case couldNotOpenDatabase
-  case couldNotCloseDatabase
+extension NoteDatabase {
+  func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) async throws -> StudySession {
+    let sessionGenerator = SessionGenerator(database: self)
+    try await sessionGenerator.startMonitoringDatabase()
+    return try await sessionGenerator.studySession(filter: filter, date: date)
+  }
 }

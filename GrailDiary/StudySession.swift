@@ -60,6 +60,15 @@ public struct StudySession {
     self.currentIndex = 0
   }
 
+  public mutating func append(promptIdentifier: PromptIdentifier, properties: CardDocumentProperties) {
+    let sessionPromptIdentifier = SessionPromptIdentifier(
+      noteIdentifier: properties.documentName,
+      noteTitle: properties.attributionMarkdown,
+      promptIdentifier: promptIdentifier
+    )
+    sessionPromptIdentifiers.append(sessionPromptIdentifier)
+  }
+
   /// The current card to study. Nil if we're done.
   public var currentPrompt: SessionPromptIdentifier? {
     guard currentIndex < sessionPromptIdentifiers.endIndex else { return nil }
