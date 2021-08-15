@@ -140,20 +140,23 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testStudyLog() {
-    makeAndOpenEmptyDatabase { database in
-      _ = try database.createNote(Note.withChallenges)
-      // New items aren't eligible for at 3-5 days.
-      let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = try database.syncMakeStudySession(filter: nil, date: future)
-      XCTAssertEqual(3, studySession.count)
-      while studySession.currentPrompt != nil {
-        studySession.recordAnswer(correct: true)
-      }
-      try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
-      XCTAssertTrue(database.hasUnsavedChanges)
-      XCTAssertEqual(database.studyLog.count, studySession.count)
+  func testStudyLog() async throws {
+    let database = try await makeAndOpenEmptyKeyValueDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
     }
+    _ = try database.createNote(Note.withChallenges)
+    // New items aren't eligible for at 3-5 days.
+    let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
+    var studySession = try await database.studySession(filter: nil, date: future)
+    XCTAssertEqual(3, studySession.count)
+    while studySession.currentPrompt != nil {
+      studySession.recordAnswer(correct: true)
+    }
+    try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
+    XCTAssertTrue(database.hasUnsavedChanges)
+    XCTAssertEqual(database.studyLog.count, studySession.count)
+    _ = try await database.close()
   }
 
   func testChallengeStabilityAcrossUnrelatedEdits() {
@@ -234,23 +237,26 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testBuryRelatedChallenges() {
-    makeAndOpenEmptyDatabase { database in
-      _ = try database.createNote(Note.multipleClozes)
-      // New items aren't eligible for at 3-5 days.
-      let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-      var studySession = try database.syncMakeStudySession(filter: nil, date: future)
-      XCTAssertEqual(studySession.count, 2)
-      studySession.ensureUniquePromptCollections()
-      XCTAssertEqual(studySession.count, 1)
-      while studySession.currentPrompt != nil {
-        studySession.recordAnswer(correct: true)
-      }
-      try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-      studySession = try database.syncMakeStudySession(filter: nil, date: future)
-      XCTAssertEqual(studySession.count, 0)
-      studySession = try database.syncMakeStudySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
-      XCTAssertEqual(studySession.count, 1)
+  func testBuryRelatedChallenges() async throws {
+    let database = try await makeAndOpenEmptyKeyValueDatabase()
+    defer {
+      try? FileManager.default.removeItem(at: database.fileURL)
     }
+    _ = try database.createNote(Note.multipleClozes)
+    // New items aren't eligible for at 3-5 days.
+    let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
+    var studySession = try await database.studySession(filter: nil, date: future)
+    XCTAssertEqual(studySession.count, 2)
+    studySession.ensureUniquePromptCollections()
+    XCTAssertEqual(studySession.count, 1)
+    while studySession.currentPrompt != nil {
+      studySession.recordAnswer(correct: true)
+    }
+    try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
+    studySession = try await database.studySession(filter: nil, date: future)
+    XCTAssertEqual(studySession.count, 0)
+    studySession = try await database.studySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
+    XCTAssertEqual(studySession.count, 1)
+    _ = await database.close()
   }
 }

@@ -50,7 +50,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(note.metadata.preferredTitle)
-    noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
+    self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
         Logger.shared.info("No longer getting updates for \(noteIdentifier)")
       }, receiveValue: { [weak self] versions in

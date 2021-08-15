@@ -4,6 +4,11 @@ import GrailDiary
 import KeyValueCRDT
 import XCTest
 
+enum TestError: Error {
+  case couldNotOpenDatabase
+  case couldNotCloseDatabase
+}
+
 /// Base class for tests that work with the note database -- provides key helper routines.
 class NoteSqliteStorageTestBase: XCTestCase {
   func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
@@ -37,5 +42,15 @@ class NoteSqliteStorageTestBase: XCTestCase {
       closedExpectation.fulfill()
     }
     waitForExpectations(timeout: 3, handler: nil)
+  }
+
+  func makeAndOpenEmptyKeyValueDatabase() async throws -> NoteDatabase {
+    let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+    let database = try NoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
+    let success = await database.open()
+    if !success {
+      throw TestError.couldNotOpenDatabase
+    }
+    return database
   }
 }

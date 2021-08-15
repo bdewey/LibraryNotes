@@ -51,9 +51,13 @@ final class DocumentListViewController: UIViewController {
     database: NoteDatabase
   ) {
     self.database = database
+    self.sessionGenerator = SessionGenerator(database: database)
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
+    Task {
+      try await sessionGenerator.startMonitoringDatabase()
+    }
   }
 
   @available(*, unavailable)
@@ -62,6 +66,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
+  public let sessionGenerator: SessionGenerator
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
@@ -90,6 +95,7 @@ final class DocumentListViewController: UIViewController {
     DocumentTableController(
       collectionView: collectionView,
       database: database,
+      sessionGenerator: sessionGenerator,
       delegate: self
     )
   }()
@@ -159,7 +165,7 @@ final class DocumentListViewController: UIViewController {
       make.top.bottom.left.right.equalToSuperview()
     }
     Task {
-      self.studySession = try await database.makeStudySession(filter: nil, date: Date())
+      self.studySession = try await sessionGenerator.studySession(filter: nil, date: Date())
     }
     dataSource.performUpdates(animated: false)
 
@@ -261,7 +267,7 @@ final class DocumentListViewController: UIViewController {
 
   private var studySessionGeneration = 0
 
-  private var currentStudySessionTask: Task<(), Error>? {
+  private var currentStudySessionTask: Task<Void, Error>? {
     willSet {
       currentStudySessionTask?.cancel()
     }
@@ -273,7 +279,7 @@ final class DocumentListViewController: UIViewController {
     studySessionGeneration += 1
     let currentStudySessionGeneration = studySessionGeneration
     currentStudySessionTask = Task {
-      let studySession = try await database.makeStudySession(filter: filter, date: dueDate)
+      let studySession = try await sessionGenerator.studySession(filter: filter, date: dueDate)
       if currentStudySessionGeneration == studySessionGeneration {
         self.studySession = studySession
       }

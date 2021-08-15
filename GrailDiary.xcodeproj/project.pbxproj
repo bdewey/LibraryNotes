@@ -96,6 +96,7 @@
 		D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */ = {isa = PBXBuildFile; productRef = D37FF2B626BDE2A500E06747 /* KeyValueCRDT */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
+		D390C91926C955DF008E2A74 /* SessionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D390C91826C955DF008E2A74 /* SessionGenerator.swift */; };
 		D3A6EFAD20EE500D00AC428D /* FileMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
 		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
@@ -262,6 +263,7 @@
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
+		D390C91826C955DF008E2A74 /* SessionGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionGenerator.swift; sourceTree = "<group>"; };
 		D3A6EFAC20EE500D00AC428D /* FileMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileMetadata.swift; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
 		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
@@ -482,6 +484,7 @@
 				D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */,
 				D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */,
 				D37B0DBC23CE227900F01D29 /* Sequence+Set.swift */,
+				D390C91826C955DF008E2A74 /* SessionGenerator.swift */,
 				D3B8514D22AC0794004F3B95 /* Settings.bundle */,
 				D3131323269A1996004BBDBD /* StarRatingView.swift */,
 				D33F647822999138008C3A92 /* String+ParsingHelpers.swift */,
@@ -760,6 +763,7 @@
 				D369182726BAD10A001EB512 /* Version+NoteModels.swift in Sources */,
 				D35DB41525D3748A00F558D8 /* Data+Image.swift in Sources */,
 				D32215F326C41379000BA772 /* NoteDatabase+ImageStorage.swift in Sources */,
+				D390C91926C955DF008E2A74 /* SessionGenerator.swift in Sources */,
 				D31AFAB9229D61EE00ED2B76 /* ClosedRange+SwiftFlash.swift in Sources */,
 				D377818325DC0ADD004DD38F /* WebScrapingViewController.swift in Sources */,
 				D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */,
