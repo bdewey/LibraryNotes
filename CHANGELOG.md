@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.51.3-beta] - 2021-08-15
 
 ### Fixed
 
