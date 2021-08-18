@@ -47,7 +47,6 @@
 		D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */; };
 		D32A7A6825A0C02C00950684 /* Sequence+AnySatisfy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */; };
 		D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */; };
-		D32A7A7525A0CF8200950684 /* NoteSqliteStorageTestBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */; };
 		D331457426628DAC00B4687F /* BookImporterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331457326628DAC00B4687F /* BookImporterViewController.swift */; };
 		D331457726628EA000B4687F /* ImportForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331457626628EA000B4687F /* ImportForm.swift */; };
 		D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33145782662926C00B4687F /* DocumentPickerView.swift */; };
@@ -119,6 +118,7 @@
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */; };
 		D3FA025026C985FE001A5A4C /* CoverImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA024F26C985FE001A5A4C /* CoverImageCache.swift */; };
+		D3FA025226CCDD9F001A5A4C /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA025126CCDD9F001A5A4C /* TestError.swift */; };
 		D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */; };
 /* End PBXBuildFile section */
 
@@ -206,7 +206,6 @@
 		D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+HashtagTests.swift"; sourceTree = "<group>"; };
 		D32A7A6725A0C02C00950684 /* Sequence+AnySatisfy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+AnySatisfy.swift"; sourceTree = "<group>"; };
 		D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+RenameTests.swift"; sourceTree = "<group>"; };
-		D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTestBase.swift; sourceTree = "<group>"; };
 		D331457326628DAC00B4687F /* BookImporterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporterViewController.swift; sourceTree = "<group>"; };
 		D331457626628EA000B4687F /* ImportForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportForm.swift; sourceTree = "<group>"; };
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
@@ -280,6 +279,7 @@
 		D3F4EDBF266515E1001289EC /* BookHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookHeader.swift; sourceTree = "<group>"; };
 		D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationMimeType.swift; sourceTree = "<group>"; };
 		D3FA024F26C985FE001A5A4C /* CoverImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverImageCache.swift; sourceTree = "<group>"; };
+		D3FA025126CCDD9F001A5A4C /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestError.swift; sourceTree = "<group>"; };
 		D3FBC62D241D4DF6005DA8C2 /* SemanticColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemanticColor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -494,7 +494,6 @@
 				D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */,
 				D3446D3F23FAF20400BC269A /* Note+TestContent.swift */,
 				D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */,
-				D32A7A7425A0CF8200950684 /* NoteSqliteStorageTestBase.swift */,
 				D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */,
 				D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */,
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
@@ -502,6 +501,7 @@
 				D32A7A5F25A0B99900950684 /* StringProtocol+HashtagTests.swift */,
 				D3E8069E267FED4F009AA588 /* SummaryTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
+				D3FA025126CCDD9F001A5A4C /* TestError.swift */,
 			);
 			path = GrailDiaryTests;
 			sourceTree = "<group>";
@@ -792,6 +792,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3FA025226CCDD9F001A5A4C /* TestError.swift in Sources */,
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
@@ -801,7 +802,6 @@
 				D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */,
 				D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */,
 				D31AFAEF229D620B00ED2B76 /* ClozeTests.swift in Sources */,
-				D32A7A7525A0CF8200950684 /* NoteSqliteStorageTestBase.swift in Sources */,
 				D3E8069F267FED4F009AA588 /* SummaryTests.swift in Sources */,
 				D31AFAEB229D620B00ED2B76 /* String+TypographyTests.swift in Sources */,
 			);
