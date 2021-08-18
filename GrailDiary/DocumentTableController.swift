@@ -127,7 +127,9 @@ public final class DocumentTableController: NSObject {
 
     super.init()
     collectionView.delegate = self
-    collectionView.refreshControl = refreshControl
+    if FileManager.default.isUbiquitousItem(at: database.fileURL) {
+      collectionView.refreshControl = refreshControl
+    }
     let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
       self?.updateDataSourceIfNeeded()
     }
@@ -714,8 +716,14 @@ private extension DocumentTableController {
   }
 
   @objc func handleRefreshControl() {
-    database.refresh { _ in
-      self.refreshControl.endRefreshing()
+    do {
+      try database.refresh()
+    } catch {
+      Logger.shared.error("Unexpected error refreshing file: \(error)")
+    }
+    Task {
+      await Task.sleep(1_000_000_000)
+      await refreshControl.endRefreshing()
     }
   }
 

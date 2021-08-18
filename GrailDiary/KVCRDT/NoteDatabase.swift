@@ -83,8 +83,8 @@ public final class NoteDatabase {
     await keyValueDocument.save(to: url, for: saveOperation)
   }
 
-  public func refresh(completionHandler: IOCompletionHandler?) {
-    Logger.keyValueNoteDatabase.debug("\(#function) not implemented")
+  public func refresh() throws {
+    try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
   }
 
   public func flush() async throws {

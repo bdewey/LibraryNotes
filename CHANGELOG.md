@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Pull-to-refresh does something again.
+
 ## [0.51.4-beta] - 2021-08-17
 
 ### Fixed
