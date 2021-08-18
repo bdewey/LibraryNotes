@@ -11,37 +11,13 @@ enum TestError: Error {
 
 /// Base class for tests that work with the note database -- provides key helper routines.
 class NoteSqliteStorageTestBase: XCTestCase {
-  func makeAndOpenEmptyDatabase(completion: @escaping (NoteDatabase) throws -> Void) {
+  func withEmptyDatabase(testCase: @escaping (NoteDatabase) throws -> Void) async throws {
+    let database = try await makeAndOpenEmptyKeyValueDatabase()
     do {
-      try makeAndOpenEmptyKeyValueDatabase(completion: completion)
-    } catch {
-      XCTFail("Unexpected error: \(error)")
+      try testCase(database)
     }
-  }
-
-  func makeAndOpenEmptyKeyValueDatabase(completion: @escaping (NoteDatabase) throws -> Void) throws {
-    let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = try NoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
-    let completionExpectation = expectation(description: "Expected to call completion routine")
-    database.open { success in
-      if success {
-        do {
-          try completion(database)
-        } catch {
-          XCTFail("Unexpected error: \(error)")
-        }
-      } else {
-        XCTFail("Could not open database")
-      }
-      completionExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 5, handler: nil)
-    let closedExpectation = expectation(description: "Can close")
-    database.close { _ in
-      try? FileManager.default.removeItem(at: database.fileURL)
-      closedExpectation.fulfill()
-    }
-    waitForExpectations(timeout: 3, handler: nil)
+    _ = await database.close()
+    try FileManager.default.removeItem(at: database.fileURL)
   }
 
   func makeAndOpenEmptyKeyValueDatabase() async throws -> NoteDatabase {

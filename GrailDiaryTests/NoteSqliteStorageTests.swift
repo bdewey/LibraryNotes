@@ -5,14 +5,14 @@ import Combine
 import XCTest
 
 final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
-  func testCanOpenNonexistantFile() {
-    makeAndOpenEmptyDatabase { _ in
+  func testCanOpenNonexistantFile() async throws {
+    try await withEmptyDatabase { _ in
       // NOTHING
     }
   }
 
-  func testRoundTripSimpleNoteContents() {
-    makeAndOpenEmptyDatabase { database in
+  func testRoundTripSimpleNoteContents() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.simpleTest)
       XCTAssertTrue(database.hasUnsavedChanges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
@@ -20,8 +20,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testUpdateNonExistantNoteCreatesNote() {
-    makeAndOpenEmptyDatabase { database in
+  func testUpdateNonExistantNoteCreatesNote() async throws {
+    try await withEmptyDatabase { database in
       var note = Note.simpleTest
       let identifier = UUID().uuidString
       try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in
@@ -34,8 +34,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testUpdateSimpleNote() {
-    makeAndOpenEmptyDatabase { database in
+  func testUpdateSimpleNote() async throws {
+    try await withEmptyDatabase { database in
       var note = Note.simpleTest
       let identifier = try database.createNote(note)
       note.text = "Version 2.0 text"
@@ -45,24 +45,24 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testRoundTripHashtagNoteContents() {
-    makeAndOpenEmptyDatabase { database in
+  func testRoundTripHashtagNoteContents() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withHashtags, roundTripNote)
     }
   }
 
-  func testRoundTripReferenceWebPage() {
-    makeAndOpenEmptyDatabase { database in
+  func testRoundTripReferenceWebPage() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(.withReferenceWebPage)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withReferenceWebPage, roundTripNote)
     }
   }
 
-  func testUpdateHashtags() {
-    makeAndOpenEmptyDatabase { database in
+  func testUpdateHashtags() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
       try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
         var note = oldNote
@@ -77,8 +77,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testUpdateNoteWithChallenges() {
-    makeAndOpenEmptyDatabase { database in
+  func testUpdateNoteWithChallenges() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withChallenges)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withChallenges, roundTripNote)
@@ -86,13 +86,13 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testPartialQuoteDoesntFail() {
+  func testPartialQuoteDoesntFail() async throws {
     let note = Note(markdown: """
     # Title
     >
 
     """)
-    makeAndOpenEmptyDatabase { database in
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(note)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(note, roundTripNote)
@@ -100,8 +100,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testRemoveChallengesFromNote() {
-    makeAndOpenEmptyDatabase { database in
+  func testRemoveChallengesFromNote() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withChallenges)
       try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in Note.simpleTest })
       let roundTripNote = try database.note(noteIdentifier: identifier)
@@ -109,16 +109,16 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testNotesShowUpInAllMetadata() {
-    makeAndOpenEmptyDatabase { database in
+  func testNotesShowUpInAllMetadata() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
       XCTAssertEqual(1, try database.bookMetadata.count)
       XCTAssertEqual(try database.bookMetadata[identifier]?.title, Note.withHashtags.title)
     }
   }
 
-  func testCreatingNoteSendsNotification() {
-    makeAndOpenEmptyDatabase { database in
+  func testCreatingNoteSendsNotification() async throws {
+    try await withEmptyDatabase { database in
       var didGetNotification = false
       let cancellable = database.notesDidChange.sink { didGetNotification = true }
       _ = try database.createNote(Note.simpleTest)
@@ -127,8 +127,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testDeleteNote() {
-    makeAndOpenEmptyDatabase { database in
+  func testDeleteNote() async throws {
+    try await withEmptyDatabase { database in
       let identifier = try database.createNote(Note.withHashtags)
       let roundTripNote = try database.note(noteIdentifier: identifier)
       XCTAssertEqual(Note.withHashtags, roundTripNote)
@@ -159,8 +159,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     _ = try await database.close()
   }
 
-  func testChallengeStabilityAcrossUnrelatedEdits() {
-    makeAndOpenEmptyDatabase { database in
+  func testChallengeStabilityAcrossUnrelatedEdits() async throws {
+    try await withEmptyDatabase { database in
       let originalText = """
       # Shakespeare quotes
 
@@ -184,8 +184,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testChallengeStabilityWithTemplateEdits() {
-    makeAndOpenEmptyDatabase { database in
+  func testChallengeStabilityWithTemplateEdits() async throws {
+    try await withEmptyDatabase { database in
       let originalText = """
       # Shakespeare quotes
 
@@ -208,8 +208,8 @@ final class NoteSqliteStorageTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testSubstantialEditGetsNewKey() {
-    makeAndOpenEmptyDatabase { database in
+  func testSubstantialEditGetsNewKey() async throws {
+    try await withEmptyDatabase { database in
       let originalText = """
       # Shakespeare quotes
 

@@ -59,24 +59,12 @@ public final class NoteDatabase {
 
   public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
 
-  public func open(completionHandler: IOCompletionHandler?) {
-    keyValueDocument.open(completionHandler: completionHandler)
-  }
-
   public func open() async -> Bool {
     await keyValueDocument.open()
   }
 
-  public func close(completionHandler: IOCompletionHandler?) {
-    keyValueDocument.close(completionHandler: completionHandler)
-  }
-
   public func close() async -> Bool {
     await keyValueDocument.close()
-  }
-
-  public func save(to url: URL, for saveOperation: UIDocument.SaveOperation, completionHandler: IOCompletionHandler?) {
-    keyValueDocument.save(to: url, for: saveOperation, completionHandler: completionHandler)
   }
 
   public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {

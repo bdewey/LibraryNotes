@@ -4,8 +4,8 @@ import GrailDiary
 import XCTest
 
 final class NoteRenameTests: NoteSqliteStorageTestBase {
-  func testRenamePreservesPromptHistory() {
-    makeAndOpenEmptyDatabase { database in
+  func testRenamePreservesPromptHistory() async throws {
+    try await withEmptyDatabase { database in
       do {
         let identifier = try database.createNote(.withChallenges)
         XCTAssertTrue(try database.note(noteIdentifier: identifier).hashtags.contains("#test"))
@@ -22,8 +22,8 @@ final class NoteRenameTests: NoteSqliteStorageTestBase {
     }
   }
 
-  func testRenameHashtagAsAtomicToken() {
-    makeAndOpenEmptyDatabase { database in
+  func testRenameHashtagAsAtomicToken() async throws {
+    try await withEmptyDatabase { database in
       do {
         let note1 = try database.createNote(Note(markdown: "First note #book"))
         let note2 = try database.createNote(Note(markdown: "Second note #books"))
