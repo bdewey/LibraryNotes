@@ -4,9 +4,9 @@ import UIKit
 
 extension UIColor {
   static let grailTint = UIColor.systemOrange
-  static let grailBackground = UIColor(named: "grailBackground")
-  static let grailSecondaryBackground = UIColor(named: "grailSecondaryBackground")
+  static let grailBackground = UIColor(named: "grailBackground")!
+  static let grailSecondaryBackground = UIColor(named: "grailSecondaryBackground")!
 
-  static let grailGroupedBackground = UIColor(named: "grailSecondaryBackground")
-  static let grailSecondaryGroupedBackground = UIColor(named: "grailBackground")
+  static let grailGroupedBackground = UIColor(named: "grailSecondaryBackground")!
+  static let grailSecondaryGroupedBackground = UIColor(named: "grailBackground")!
 }
