@@ -22,9 +22,6 @@ public final class CoverImageCache {
   /// - Returns: The cover image, if one exists.
   public func coverImage(bookID: String, maxSize: CGFloat) -> UIImage? {
     let cacheKey = CacheKey(noteIdentifier: bookID, maxSize: maxSize)
-    let cacheKey2 = CacheKey(noteIdentifier: bookID, maxSize: maxSize)
-    assert(cacheKey == cacheKey2)
-    assert(cacheKey.hashValue == cacheKey2.hashValue)
     if let image = cache.object(forKey: cacheKey) {
       return image
     }
@@ -37,6 +34,11 @@ public final class CoverImageCache {
     cache.setObject(thumbnail, forKey: cacheKey)
     assert(cache.object(forKey: cacheKey) != nil)
     return thumbnail
+  }
+
+  /// Invalidates the cache.
+  public func invalidate() {
+    cache.removeAllObjects()
   }
 }
 

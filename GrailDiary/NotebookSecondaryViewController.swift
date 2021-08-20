@@ -12,7 +12,7 @@ public protocol NotebookSecondaryViewController: UIViewController {
   /// If true, this view controller should be pushed on the view hierarchy for the "collapsed" split view state. Otherwise, the supplementary view controller will
   /// be the visible view controller after collapsing.
   var shouldShowWhenCollapsed: Bool { get }
-  static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> Self
+  static func makeFromUserActivityData(data: Data, database: NoteDatabase, coverImageCache: CoverImageCache) throws -> Self
 }
 
 /// Maintains a mapping between secondary view controller "type strings" and actual types.
@@ -34,10 +34,15 @@ public struct NotebookSecondaryViewControllerRegistry {
   ])
 
   /// Builds a secondary view controller give its serialized data.
-  public func reconstruct(type typeName: String, data: Data, database: NoteDatabase) throws -> NotebookSecondaryViewController {
+  public func reconstruct(
+    type typeName: String,
+    data: Data,
+    database: NoteDatabase,
+    coverImageCache: CoverImageCache
+  ) throws -> NotebookSecondaryViewController {
     guard let type = typeMapping[typeName] else {
       throw CocoaError.error(.coderValueNotFound)
     }
-    return try type.makeFromUserActivityData(data: data, database: database)
+    return try type.makeFromUserActivityData(data: data, database: database, coverImageCache: coverImageCache)
   }
 }

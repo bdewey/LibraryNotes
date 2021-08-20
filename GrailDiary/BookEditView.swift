@@ -1,45 +1,111 @@
 import BookKit
 import SwiftUI
 
+/// Holds a book and its cover image so it can be edited.
+///
+/// For convenience with `TextField` views, this model provides a methods that create `String` bindings for non-string `AugmentedBook` fields.
+final class BookEditViewModel: ObservableObject {
+  @Published var book: AugmentedBook
+  @Published var coverImage: UIImage?
+
+  init(book: AugmentedBook, coverImage: UIImage?) {
+    self.book = book
+    self.coverImage = coverImage
+  }
+
+  func binding(keyPath: WritableKeyPath<AugmentedBook, [String]>) -> Binding<String> {
+    Binding(
+      get: { self.book[keyPath: keyPath].joined(separator: ", ") },
+      set: { self.book[keyPath: keyPath] = $0.split(separator: ",").map(String.init) }
+    )
+  }
+
+  func binding(keyPath: WritableKeyPath<AugmentedBook, Int?>) -> Binding<String> {
+    Binding(
+      get: { self.book[keyPath: keyPath].flatMap(String.init(describing:)) ?? "" },
+      set: { self.book[keyPath: keyPath] = Int($0) }
+    )
+  }
+
+  func binding(keyPath: WritableKeyPath<AugmentedBook, String?>) -> Binding<String> {
+    Binding(
+      get: { self.book[keyPath: keyPath] ?? "" },
+      set: { self.book[keyPath: keyPath] = $0 }
+    )
+  }
+}
+
+/// A form that allows editing the metadata of its book and its cover image.
 struct BookEditView: View {
-  @Binding var book: AugmentedBook
+  @ObservedObject var model: BookEditViewModel
+
   var body: some View {
     Form {
+      Section(header: Text("Cover Image")) {
+        coverImageView
+          .contextMenu {
+            Button("Paste") {
+              withAnimation {
+                model.coverImage = UIPasteboard.general.image
+              }
+            }.disabled(!UIPasteboard.general.hasImages)
+            Button("Delete", role: .destructive) {
+              withAnimation {
+                model.coverImage = nil
+              }
+            }.disabled(model.coverImage == nil)
+          }
+      }
       Section(header: Text("Book Details")) {
-        TextField("Title", text: $book.title)
-        TextField("Author", text: Binding(
-          get: { book.authors.joined(separator: ",") },
-          set: { book.authors = $0.split(separator: ",").map(String.init) }
-        ))
-        TextField("Year Published", text: Binding(
-          get: { book.yearPublished.flatMap(String.init(describing:)) ?? "" },
-          set: { book.yearPublished = Int($0) }
-        ))
-        TextField("Original Year Published", text: Binding(
-          get: { book.originalYearPublished.flatMap(String.init(describing:)) ?? "" },
-          set: { book.originalYearPublished = Int($0) }
-        ))
-        TextField("ISBN", text: Binding(
-          get: { book.isbn ?? "" },
-          set: { book.isbn = $0 }
-        ))
-        TextField("ISBN-13", text: Binding(
-          get: { book.isbn13 ?? "" },
-          set: { book.isbn13 = $0 }
-        ))
+        CaptionedRow(caption: "Title", text: $model.book.title)
+        CaptionedRow(caption: "Author", text: model.binding(keyPath: \.authors))
+        CaptionedRow(caption: "Year Published", text: model.binding(keyPath: \.yearPublished))
+        CaptionedRow(caption: "Original Year Published", text: model.binding(keyPath: \.originalYearPublished))
+        CaptionedRow(caption: "ISBN", text: model.binding(keyPath: \.isbn))
+        CaptionedRow(caption: "ISBN-13", text: model.binding(keyPath: \.isbn13))
       }
     }
+  }
+
+  @ViewBuilder var coverImageView: some View {
+    if let coverImage = model.coverImage {
+      Image(uiImage: coverImage)
+    } else {
+      Text("No cover image")
+        .font(.caption)
+        .foregroundColor(.secondary)
+    }
+  }
+}
+
+/// Show a floating caption over a text row
+///
+/// See https://medium.com/swlh/simpler-better-floating-label-textfields-in-swiftui-24f7d06da8b8
+struct CaptionedRow: View {
+  let caption: String
+  @Binding var text: String
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      Text(caption).font(.caption).foregroundColor(.secondary)
+        .opacity(text.isEmpty ? 0 : 1)
+        .offset(y: text.isEmpty ? 20 : 0)
+      TextField(caption, text: $text.animation())
+    }.animation(.default, value: text)
   }
 }
 
 struct BookEditView_Previews: PreviewProvider {
   static var previews: some View {
-    BookEditView(book: .constant(AugmentedBook(
-      title: "Dune",
-      authors: ["Frank Herbert"],
-      review: "This is a review",
-      rating: 4,
-      dateAdded: nil
-    )))
+    BookEditView(model: BookEditViewModel(
+      book: AugmentedBook(
+        title: "Dune",
+        authors: ["Frank Herbert"],
+        review: "This is a review",
+        rating: 4,
+        dateAdded: nil
+      ),
+      coverImage: nil
+    ))
   }
 }

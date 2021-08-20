@@ -6,13 +6,16 @@ import UIKit
 
 public protocol BookEditDetailsViewControllerDelegate: AnyObject {
   func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController)
-  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook)
+  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook, coverImage: UIImage?)
 }
 
 /// A view controller that edits a `BookKit.AugmentedBook` structure.
 public final class BookEditDetailsViewController: UIViewController {
-  public init(book: AugmentedBook) {
-    self.book = book
+  public init(book: AugmentedBook, coverImage: UIImage?) {
+    self.model = BookEditViewModel(
+      book: book,
+      coverImage: coverImage
+    )
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -20,15 +23,13 @@ public final class BookEditDetailsViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public private(set) var book: AugmentedBook
+  private var model: BookEditViewModel
+
   public weak var delegate: BookEditDetailsViewControllerDelegate?
 
   public override func viewDidLoad() {
     super.viewDidLoad()
-    let hostingViewController = UIHostingController(rootView: BookEditView(book: Binding(
-      get: { [weak self] in self?.book ?? AugmentedBook(title: "", authors: []) },
-      set: { [weak self] in self?.book = $0 }
-    )))
+    let hostingViewController = UIHostingController(rootView: BookEditView(model: model))
     view.addSubview(hostingViewController.view)
     hostingViewController.view.snp.makeConstraints { make in
       make.edges.equalToSuperview()
@@ -45,6 +46,6 @@ public final class BookEditDetailsViewController: UIViewController {
   }
 
   @objc private func handleDone() {
-    delegate?.bookEditDetailsViewController(self, didFinishEditing: book)
+    delegate?.bookEditDetailsViewController(self, didFinishEditing: model.book, coverImage: model.coverImage)
   }
 }

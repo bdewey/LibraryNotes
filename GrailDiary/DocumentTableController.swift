@@ -35,12 +35,13 @@ public final class DocumentTableController: NSObject {
   public init(
     collectionView: UICollectionView,
     database: NoteDatabase,
+    coverImageCache: CoverImageCache,
     sessionGenerator: SessionGenerator,
     delegate: DocumentTableControllerDelegate
   ) {
     self.collectionView = collectionView
     self.database = database
-    let coverImageCache = CoverImageCache(database: database)
+    let coverImageCache = coverImageCache
     self.coverImageCache = coverImageCache
     self.sessionGenerator = sessionGenerator
     self.delegate = delegate

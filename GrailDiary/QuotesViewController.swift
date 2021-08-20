@@ -137,7 +137,7 @@ extension QuotesViewController: NotebookSecondaryViewController {
     try JSONEncoder().encode(currentViewControllerState)
   }
 
-  public static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> QuotesViewController {
+  public static func makeFromUserActivityData(data: Data, database: NoteDatabase, coverImageCache: CoverImageCache) throws -> QuotesViewController {
     let quoteVC = QuotesViewController(database: database)
     let viewControllerState = try JSONDecoder().decode(ViewControllerState.self, from: data)
     quoteVC.quoteIdentifiers = viewControllerState.quoteIdentifiers
