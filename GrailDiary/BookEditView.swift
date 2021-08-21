@@ -16,7 +16,20 @@ final class BookEditViewModel: ObservableObject {
   func binding(keyPath: WritableKeyPath<AugmentedBook, [String]>) -> Binding<String> {
     Binding(
       get: { self.book[keyPath: keyPath].joined(separator: ", ") },
-      set: { self.book[keyPath: keyPath] = $0.split(separator: ",").map(String.init) }
+      set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
+        .map(String.init)
+        .map({ $0.trimmingCharacters(in: .whitespaces) })
+      }
+    )
+  }
+
+  func binding(keyPath: WritableKeyPath<AugmentedBook, [String]?>) -> Binding<String> {
+    Binding(
+      get: { self.book[keyPath: keyPath]?.joined(separator: ", ") ?? "" },
+      set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
+        .map(String.init)
+        .map({ $0.trimmingCharacters(in: .whitespaces) })
+      }
     )
   }
 
@@ -41,24 +54,34 @@ struct BookEditView: View {
 
   var body: some View {
     Form {
-      Section(header: Text("Cover Image")) {
+      Section(header: Text("Cover Image"), footer: Text("Long-press to paste a new image")) {
         coverImageView
+
           .contextMenu {
-            Button("Paste") {
+            Button {
               withAnimation {
-                model.coverImage = UIPasteboard.general.image
+                if let image = UIPasteboard.general.image {
+                  model.coverImage = image
+                }
               }
-            }.disabled(!UIPasteboard.general.hasImages)
-            Button("Delete", role: .destructive) {
+            } label: {
+              Label("Paste", systemImage: "doc.on.clipboard")
+            }
+
+            Button(role: .destructive) {
               withAnimation {
                 model.coverImage = nil
               }
+            } label: {
+              Label("Delete", systemImage: "trash")
             }.disabled(model.coverImage == nil)
           }
       }
       Section(header: Text("Book Details")) {
         CaptionedRow(caption: "Title", text: $model.book.title)
         CaptionedRow(caption: "Author", text: model.binding(keyPath: \.authors))
+        CaptionedRow(caption: "Tags (comma separated)", text: model.binding(keyPath: \.tags))
+        CaptionedRow(caption: "Publisher", text: model.binding(keyPath: \.publisher))
         CaptionedRow(caption: "Year Published", text: model.binding(keyPath: \.yearPublished))
         CaptionedRow(caption: "Original Year Published", text: model.binding(keyPath: \.originalYearPublished))
         CaptionedRow(caption: "ISBN", text: model.binding(keyPath: \.isbn))
@@ -69,11 +92,9 @@ struct BookEditView: View {
 
   @ViewBuilder var coverImageView: some View {
     if let coverImage = model.coverImage {
-      Image(uiImage: coverImage)
+      Image(uiImage: coverImage).resizable().scaledToFit().frame(maxHeight: 200)
     } else {
-      Text("No cover image")
-        .font(.caption)
-        .foregroundColor(.secondary)
+      Image(systemName: "square.slash").resizable().scaledToFit().frame(maxHeight: 200)
     }
   }
 }
