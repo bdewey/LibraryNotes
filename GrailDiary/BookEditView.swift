@@ -77,6 +77,8 @@ struct BookEditView: View {
             }.disabled(model.coverImage == nil)
           }
       }
+      .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
+
       Section(header: Text("Book Details")) {
         CaptionedRow(caption: "Title", text: $model.book.title)
         CaptionedRow(caption: "Author", text: model.binding(keyPath: \.authors))
@@ -87,6 +89,7 @@ struct BookEditView: View {
         CaptionedRow(caption: "ISBN", text: model.binding(keyPath: \.isbn))
         CaptionedRow(caption: "ISBN-13", text: model.binding(keyPath: \.isbn13))
       }
+      .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
     }
   }
 

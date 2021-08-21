@@ -44,6 +44,7 @@ extension UTType {
       try! browser.openDocument(at: temporaryURL, createWelcomeContent: false, animated: false)
     }
     self.window = window
+    UITableView.appearance().backgroundColor = .grailGroupedBackground
   }
 
   func sceneWillResignActive(_ scene: UIScene) {
