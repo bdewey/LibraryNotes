@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- Ability to edit book details
+
 ### Fixed
 
 - Pull-to-refresh does something again.
