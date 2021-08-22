@@ -90,7 +90,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       coverImageCache.invalidate()
     }
   }
-  
+
   private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool

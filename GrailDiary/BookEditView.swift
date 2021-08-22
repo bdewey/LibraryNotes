@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import BookKit
 import SwiftUI
 
@@ -18,7 +20,7 @@ final class BookEditViewModel: ObservableObject {
       get: { self.book[keyPath: keyPath].joined(separator: ", ") },
       set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
         .map(String.init)
-        .map({ $0.trimmingCharacters(in: .whitespaces) })
+        .map { $0.trimmingCharacters(in: .whitespaces) }
       }
     )
   }
@@ -28,7 +30,7 @@ final class BookEditViewModel: ObservableObject {
       get: { self.book[keyPath: keyPath]?.joined(separator: ", ") ?? "" },
       set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
         .map(String.init)
-        .map({ $0.trimmingCharacters(in: .whitespaces) })
+        .map { $0.trimmingCharacters(in: .whitespaces) }
       }
     )
   }

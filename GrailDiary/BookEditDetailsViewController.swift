@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import BookKit
 import Foundation
 import SnapKit
@@ -19,6 +21,7 @@ public final class BookEditDetailsViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
   }
 
+  @available(*, unavailable)
   required init?(coder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
@@ -27,7 +30,7 @@ public final class BookEditDetailsViewController: UIViewController {
 
   public weak var delegate: BookEditDetailsViewControllerDelegate?
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     let hostingViewController = UIHostingController(rootView: BookEditView(model: model))
     view.addSubview(hostingViewController.view)
