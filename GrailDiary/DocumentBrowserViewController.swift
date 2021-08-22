@@ -92,8 +92,8 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
     Logger.shared.info("Using document at \(database.fileURL)")
-    database.open(completionHandler: { [weak self] success in
-      guard let self = self else { return }
+    Task {
+      let success = await database.open()
       let properties: [String: String] = [
         "Success": success.description,
         "documentState": String(describing: database.documentState),
@@ -111,7 +111,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       self.present(viewController, animated: animated, completion: nil)
       self.topLevelViewController = viewController
       completion?(success)
-    })
+    }
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {

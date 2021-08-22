@@ -35,12 +35,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     .questionAndAnswer,
   ]
 
-  private lazy var loadingViewController: LoadingViewController = {
-    let loadingViewController = LoadingViewController()
-    loadingViewController.title = AppDelegate.appName
-    return loadingViewController
-  }()
-
   /// The currently open database
   var database: NoteDatabase?
   /// The top-level UISplitViewController that is showing the note contents.
