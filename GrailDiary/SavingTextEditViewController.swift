@@ -38,6 +38,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     noteIdentifier: Note.Identifier = UUID().uuidString,
     note: Note = Note(markdown: "# \n"),
     database: NoteDatabase,
+    coverImageCache: CoverImageCache,
     containsOnlyDefaultContent: Bool,
     initialSelectedRange: NSRange? = nil,
     autoFirstResponder: Bool = false
@@ -45,6 +46,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.noteIdentifier = noteIdentifier
     self.note = note
     self.noteStorage = database
+    self.coverImageCache = coverImageCache
     self.initialSelectedRange = initialSelectedRange
     self.autoFirstResponder = autoFirstResponder
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
@@ -65,7 +67,30 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private var note: Note
   private let noteStorage: NoteDatabase
-  private lazy var coverImageCache = CoverImageCache(database: noteStorage)
+  private let coverImageCache: CoverImageCache
+
+  private var coverImage: UIImage? {
+    get {
+      coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
+    }
+    set {
+      if let imageData = newValue?.jpegData(compressionQuality: 0.8) {
+        try? noteStorage.writeValue(
+          .blob(mimeType: UTType.jpeg.preferredMIMEType!, blob: imageData),
+          noteIdentifier: noteIdentifier,
+          key: .coverImage
+        )
+      } else {
+        try? noteStorage.writeValue(
+          .null,
+          noteIdentifier: noteIdentifier,
+          key: .coverImage
+        )
+      }
+      coverImageCache.invalidate()
+    }
+  }
+
   private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
@@ -150,6 +175,15 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     dismiss(animated: true, completion: nil)
   }
 
+  func editBookDetails(book: AugmentedBook) {
+    let bookViewController = BookEditDetailsViewController(book: book, coverImage: coverImage)
+    bookViewController.delegate = self
+    bookViewController.title = "Edit Book Details"
+    let navigationController = UINavigationController(rootViewController: bookViewController)
+    navigationController.navigationBar.tintColor = .grailTint
+    present(navigationController, animated: true, completion: nil)
+  }
+
   func insertBookDetails(apiKey: String) {
     let bookViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: false)
     bookViewController.delegate = self
@@ -160,15 +194,17 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func makeInsertBookDetailsButton() -> UIBarButtonItem? {
-    guard let apiKey = ApiKey.googleBooks else {
-      return nil
-    }
-    if note.metadata.book != nil {
-      return nil
-    }
     return UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
-      self?.insertBookDetails(apiKey: apiKey)
+      self?.editOrInsertBookDetails()
     })
+  }
+
+  private func editOrInsertBookDetails() {
+    if let book = note.metadata.book {
+      editBookDetails(book: book)
+    } else if let apiKey = ApiKey.googleBooks {
+      insertBookDetails(apiKey: apiKey)
+    }
   }
 
   private func configureToolbar() {
@@ -301,7 +337,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 
   var shouldShowWhenCollapsed: Bool { !restorationState.containsOnlyDefaultContent }
 
-  static func makeFromUserActivityData(data: Data, database: NoteDatabase) throws -> SavingTextEditViewController {
+  static func makeFromUserActivityData(data: Data, database: NoteDatabase, coverImageCache: CoverImageCache) throws -> SavingTextEditViewController {
     let restorationState = try JSONDecoder().decode(RestorationState.self, from: data)
     let note: Note
     do {
@@ -312,7 +348,13 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
       note = Note(markdown: text)
     }
 
-    return SavingTextEditViewController(noteIdentifier: restorationState.noteIdentifier, note: note, database: database, containsOnlyDefaultContent: restorationState.containsOnlyDefaultContent)
+    return SavingTextEditViewController(
+      noteIdentifier: restorationState.noteIdentifier,
+      note: note,
+      database: database,
+      coverImageCache: coverImageCache,
+      containsOnlyDefaultContent: restorationState.containsOnlyDefaultContent
+    )
   }
 }
 
@@ -382,6 +424,23 @@ extension SavingTextEditViewController: BookSearchViewControllerDelegate {
   }
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+    dismiss(animated: true, completion: nil)
+  }
+}
+
+extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
+  func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
+    dismiss(animated: true, completion: nil)
+  }
+
+  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook, coverImage: UIImage?) {
+    Logger.shared.info("Attaching book: \(book.title)")
+    self.coverImage = coverImage
+    note.metadata.book = book
+    note.metadata.modifiedTimestamp = Date()
+    tryUpdateNote(note)
+    let coverImage = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
+    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 }

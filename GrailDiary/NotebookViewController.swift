@@ -31,6 +31,7 @@ public extension UIViewController {
 public final class NotebookViewController: UIViewController {
   init(database: NoteDatabase) {
     self.database = database
+    self.coverImageCache = CoverImageCache(database: database)
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -42,6 +43,9 @@ public final class NotebookViewController: UIViewController {
   /// The notebook we are viewing
   private let database: NoteDatabase
 
+  /// Global cache
+  private let coverImageCache: CoverImageCache
+
   public var fileURL: URL { database.fileURL }
 
   /// What are we viewing in the current structure?
@@ -50,7 +54,7 @@ public final class NotebookViewController: UIViewController {
     didSet {
       documentListViewController.focusedStructure = focusedNotebookStructure
       if notebookSplitViewController.isCollapsed {
-        let compactListViewController = DocumentListViewController(database: database)
+        let compactListViewController = DocumentListViewController(database: database, coverImageCache: coverImageCache)
         compactListViewController.focusedStructure = focusedNotebookStructure
         compactNavigationController.pushViewController(compactListViewController, animated: true)
       }
@@ -94,7 +98,7 @@ public final class NotebookViewController: UIViewController {
 
   /// A list of notes inside the notebook, displayed in the supplementary column
   private lazy var documentListViewController: DocumentListViewController = {
-    let documentListViewController = DocumentListViewController(database: database)
+    let documentListViewController = DocumentListViewController(database: database, coverImageCache: coverImageCache)
     return documentListViewController
   }()
 
@@ -108,7 +112,7 @@ public final class NotebookViewController: UIViewController {
     splitViewController.setViewController(primaryNavigationController, for: .primary)
     splitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
     splitViewController.setViewController(
-      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, containsOnlyDefaultContent: true)),
+      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, coverImageCache: coverImageCache, containsOnlyDefaultContent: true)),
       for: .secondary
     )
     splitViewController.setViewController(compactNavigationController, for: .compact)
@@ -209,7 +213,14 @@ public final class NotebookViewController: UIViewController {
     let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
     var note = Note(markdown: text)
     note.metadata.folder = folder?.rawValue
-    let viewController = SavingTextEditViewController(note: note, database: database, containsOnlyDefaultContent: true, initialSelectedRange: NSRange(location: offset, length: 0), autoFirstResponder: true)
+    let viewController = SavingTextEditViewController(
+      note: note,
+      database: database,
+      coverImageCache: coverImageCache,
+      containsOnlyDefaultContent: true,
+      initialSelectedRange: NSRange(location: offset, length: 0),
+      autoFirstResponder: true
+    )
     setSecondaryViewController(viewController, pushIfCollapsed: true)
     Logger.shared.info("Created a new view controller for a blank document")
   }
@@ -237,7 +248,13 @@ public final class NotebookViewController: UIViewController {
 
   func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
     let actualNoteIdentifier = noteIdentifier ?? UUID().uuidString
-    let noteViewController = SavingTextEditViewController(noteIdentifier: actualNoteIdentifier, note: note, database: database, containsOnlyDefaultContent: false)
+    let noteViewController = SavingTextEditViewController(
+      noteIdentifier: actualNoteIdentifier,
+      note: note,
+      database: database,
+      coverImageCache: coverImageCache,
+      containsOnlyDefaultContent: false
+    )
     setSecondaryViewController(noteViewController, pushIfCollapsed: shiftFocus)
   }
 
@@ -310,7 +327,8 @@ public final class NotebookViewController: UIViewController {
         let secondaryViewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
           type: secondaryViewControllerType,
           data: secondaryViewControllerData,
-          database: database
+          database: database,
+          coverImageCache: coverImageCache
         )
         setSecondaryViewController(secondaryViewController, pushIfCollapsed: true)
       } catch {
@@ -331,6 +349,7 @@ public extension NotebookViewController {
         noteIdentifier: noteIdentifier,
         note: note,
         database: database,
+        coverImageCache: coverImageCache,
         containsOnlyDefaultContent: false,
         initialSelectedRange: initialRange,
         autoFirstResponder: autoFirstResponder
@@ -358,6 +377,7 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
     let viewController = SavingTextEditViewController(
       note: note,
       database: database,
+      coverImageCache: coverImageCache,
       containsOnlyDefaultContent: false,
       initialSelectedRange: NSRange(location: offset, length: 0),
       autoFirstResponder: true
@@ -387,6 +407,7 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
         noteIdentifier: identifier,
         note: note,
         database: database,
+        coverImageCache: coverImageCache,
         containsOnlyDefaultContent: false,
         autoFirstResponder: true
       )
@@ -453,7 +474,8 @@ extension NotebookViewController: UISplitViewControllerDelegate {
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
           type: type(of: secondaryViewController).notebookDetailType,
           data: activityData,
-          database: database
+          database: database,
+          coverImageCache: coverImageCache
         )
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
           self.setSecondaryViewController(viewController, pushIfCollapsed: false)
@@ -469,7 +491,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     _ svc: UISplitViewController,
     topColumnForCollapsingToProposedTopColumn proposedTopColumn: UISplitViewController.Column
   ) -> UISplitViewController.Column {
-    let compactDocumentList = DocumentListViewController(database: database)
+    let compactDocumentList = DocumentListViewController(database: database, coverImageCache: coverImageCache)
     compactDocumentList.focusedStructure = focusedNotebookStructure
     compactNavigationController.popToRootViewController(animated: false)
     compactNavigationController.pushViewController(compactDocumentList, animated: false)
@@ -480,7 +502,8 @@ extension NotebookViewController: UISplitViewControllerDelegate {
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
           type: type(of: secondaryViewController).notebookDetailType,
           data: activityData,
-          database: database
+          database: database,
+          coverImageCache: coverImageCache
         )
         compactNavigationController.pushViewController(viewController, animated: false)
       } catch {

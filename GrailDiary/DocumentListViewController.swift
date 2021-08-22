@@ -48,9 +48,11 @@ final class DocumentListViewController: UIViewController {
   ///
   /// - parameter stylesheet: Controls the styling of UI elements.
   init(
-    database: NoteDatabase
+    database: NoteDatabase,
+    coverImageCache: CoverImageCache
   ) {
     self.database = database
+    self.coverImageCache = coverImageCache
     self.sessionGenerator = SessionGenerator(database: database)
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
@@ -66,6 +68,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   public let database: NoteDatabase
+  private let coverImageCache: CoverImageCache
   public let sessionGenerator: SessionGenerator
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
@@ -95,6 +98,7 @@ final class DocumentListViewController: UIViewController {
     DocumentTableController(
       collectionView: collectionView,
       database: database,
+      coverImageCache: coverImageCache,
       sessionGenerator: sessionGenerator,
       delegate: self
     )

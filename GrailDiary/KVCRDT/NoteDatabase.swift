@@ -187,6 +187,15 @@ public final class NoteDatabase {
     try keyValueDocument.keyValueCRDT.read(key: key.rawValue, scope: noteIdentifier)
   }
 
+  /// Writes a value to the database.
+  /// - Parameters:
+  ///   - value: The value to write.
+  ///   - noteIdentifier: The note holding the value.
+  ///   - key: The key associated with the value.
+  public func writeValue(_ value: Value, noteIdentifier: Note.Identifier, key: NoteDatabaseKey) throws {
+    try keyValueDocument.keyValueCRDT.bulkWrite([ScopedKey(scope: noteIdentifier, key: key.rawValue): value])
+  }
+
   /// Bulk read of keys from the database.
   /// - parameter isIncluded: A closure that determines if the value is included in the results.
   /// - returns: A mapping of `ScopedKey` to `[Version]`, where each entry in `[Version]` is a value written by a single author to that key.
