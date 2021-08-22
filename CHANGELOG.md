@@ -5,11 +5,6 @@
 ### Fixed
 
 - Pull-to-refresh does something again.
-
-## [0.51.4-beta] - 2021-08-17
-
-### Fixed
-
 - Items that were in a non-default folder (e.g., "currently reading") were no longer showing up in the document list.
 
 ## [0.51.3-beta] - 2021-08-15
