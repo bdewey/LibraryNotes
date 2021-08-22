@@ -17,13 +17,13 @@ struct ImportForm: View {
         Section(header: Text("Download")) {
           Toggle("Cover Images", isOn: $downloadCoverImages)
           Toggle("Dry Run", isOn: $dryRun)
-        }
+        }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
         Section(header: Text("Hashtags (Optional)"), footer: Text("Enter #hashtags for all imported books. Example: #goodreads")) {
           TextField("#hashtag", text: $hashtags)
-        }
+        }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
         Button("Select File") {
           showDocumentPicker = true
-        }
+        }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
       }
       .navigationTitle("Import Books")
     }
