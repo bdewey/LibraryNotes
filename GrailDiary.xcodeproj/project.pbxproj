@@ -89,6 +89,9 @@
 		D37C888026B79E7E00EC30C8 /* PromptStatistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */; };
 		D37E6D38228DBC88006CD0FA /* CommonCrypto+Swift.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */; };
 		D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */ = {isa = PBXBuildFile; productRef = D37FF2B626BDE2A500E06747 /* KeyValueCRDT */; };
+		D380C98926D28CF200451943 /* BarcodeScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98826D28CF200451943 /* BarcodeScannerViewController.swift */; };
+		D380C98C26D28D4100451943 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98B26D28D4100451943 /* CameraCaptureView.swift */; };
+		D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98D26D28D5F00451943 /* CaptureSessionManager.swift */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
 		D390C91926C955DF008E2A74 /* SessionGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = D390C91826C955DF008E2A74 /* SessionGenerator.swift */; };
@@ -250,6 +253,9 @@
 		D37C887D26B79E6200EC30C8 /* PromptCollectionInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptCollectionInfo.swift; sourceTree = "<group>"; };
 		D37C887F26B79E7E00EC30C8 /* PromptStatistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PromptStatistics.swift; sourceTree = "<group>"; };
 		D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CommonCrypto+Swift.swift"; sourceTree = "<group>"; };
+		D380C98826D28CF200451943 /* BarcodeScannerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerViewController.swift; sourceTree = "<group>"; };
+		D380C98B26D28D4100451943 /* CameraCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraCaptureView.swift; sourceTree = "<group>"; };
+		D380C98D26D28D5F00451943 /* CaptureSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureSessionManager.swift; sourceTree = "<group>"; };
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
 		D390C91826C955DF008E2A74 /* SessionGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionGenerator.swift; sourceTree = "<group>"; };
@@ -376,6 +382,16 @@
 			path = KVCRDT;
 			sourceTree = "<group>";
 		};
+		D380C98A26D28D2200451943 /* BarcodeScanner */ = {
+			isa = PBXGroup;
+			children = (
+				D380C98826D28CF200451943 /* BarcodeScannerViewController.swift */,
+				D380C98B26D28D4100451943 /* CameraCaptureView.swift */,
+				D380C98D26D28D5F00451943 /* CaptureSessionManager.swift */,
+			);
+			path = BarcodeScanner;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
@@ -405,6 +421,7 @@
 		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
 			isa = PBXGroup;
 			children = (
+				D380C98A26D28D2200451943 /* BarcodeScanner */,
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
 				D3558D7925DA130900746600 /* ApiKey.swift */,
 				D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */,
@@ -753,7 +770,9 @@
 				D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */,
 				D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */,
 				D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */,
+				D380C98C26D28D4100451943 /* CameraCaptureView.swift in Sources */,
 				D31AFAB7229D61EE00ED2B76 /* Prompt.swift in Sources */,
+				D380C98926D28CF200451943 /* BarcodeScannerViewController.swift in Sources */,
 				D30BD4FC22A0B8C2007E1F31 /* Optional+Collection.swift in Sources */,
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
@@ -772,6 +791,7 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
+				D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
 				D369182526BAD0E9001EB512 /* JSONEncoders.swift in Sources */,

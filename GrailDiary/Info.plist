@@ -63,6 +63,8 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Grail Diary uses the camera to scan barcodes for book search.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Grail Diary can save your quotes to your Photos Libary.</string>
 	<key>NSUbiquitousContainers</key>

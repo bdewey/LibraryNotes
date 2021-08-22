@@ -5,6 +5,7 @@
 ### Added
 
 - Ability to edit book details
+- Barcode scanner for book search
 
 ### Fixed
 
