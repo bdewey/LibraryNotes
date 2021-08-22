@@ -3,6 +3,7 @@
 import BookKit
 import Combine
 import Logging
+import SnapKit
 import UIKit
 
 private extension Logger {
@@ -65,6 +66,8 @@ public final class BookSearchViewController: UIViewController {
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
     searchController.searchBar.delegate = self
+    searchController.searchBar.showsBookmarkButton = CaptureSessionManager.defaultVideoDevice != nil
+    searchController.searchBar.setImage(UIImage(systemName: "barcode.viewfinder"), for: .bookmark, state: .normal)
     searchController.showsSearchResultsController = true
     searchController.searchBar.searchTextField.clearButtonMode = .whileEditing
     searchController.obscuresBackgroundDuringPresentation = false
@@ -79,6 +82,12 @@ public final class BookSearchViewController: UIViewController {
     collectionView.delegate = self
     collectionView.backgroundColor = .grailBackground
     return collectionView
+  }()
+
+  private lazy var barcodeScannerViewController: BarcodeScannerViewController = {
+    let viewController = BarcodeScannerViewController(nibName: nil, bundle: nil)
+    viewController.delegate = self
+    return viewController
   }()
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ViewModel> = {
@@ -149,14 +158,56 @@ public final class BookSearchViewController: UIViewController {
     dataSource.apply(snapshot, animatingDifferences: true)
   }
 
+  private var isShowingBarcodeScanner = false
+
+  @MainActor
+  private func startScanning() async {
+    guard !isShowingBarcodeScanner else { return }
+    do {
+      guard try await barcodeScannerViewController.startScanning() else {
+        Logger.bookSearch.info("Cannot start scanning: No permission")
+        return
+      }
+      isShowingBarcodeScanner = true
+      UIView.animate(withDuration: 0.2) {
+        self.updateBarcodeScannerConstraints(shouldShowBarcodeScanner: true)
+        self.view.layoutIfNeeded()
+      }
+    } catch {
+      Logger.bookSearch.error("Unexpected error scanning barcodes: \(error)")
+    }
+  }
+
+  private func stopScanning() {
+    guard isShowingBarcodeScanner else { return }
+    isShowingBarcodeScanner = false
+    UIView.animate(withDuration: 0.2) {
+      self.updateBarcodeScannerConstraints(shouldShowBarcodeScanner: false)
+      self.view.layoutIfNeeded()
+    }
+  }
+
+  private func updateBarcodeScannerConstraints(shouldShowBarcodeScanner: Bool) {
+    let newHeight = shouldShowBarcodeScanner ? 200 : 0
+    barcodeScannerViewController.view.snp.remakeConstraints { make in
+      make.top.left.right.equalTo(view.safeAreaLayoutGuide)
+      make.height.equalTo(newHeight)
+    }
+  }
+
   override public func viewDidLoad() {
     super.viewDidLoad()
+    addChild(barcodeScannerViewController)
+    barcodeScannerViewController.didMove(toParent: self)
     [
+      barcodeScannerViewController.view,
       collectionView,
       activityView,
     ].forEach(view.addSubview)
+    updateBarcodeScannerConstraints(shouldShowBarcodeScanner: false)
     collectionView.snp.makeConstraints { make in
-      make.edges.equalToSuperview()
+      make.top.equalTo(barcodeScannerViewController.view.snp.bottom)
+      make.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
     }
     activityView.snp.makeConstraints { make in
       make.center.equalToSuperview()
@@ -188,7 +239,7 @@ extension BookSearchViewController: UICollectionViewDelegate {
   }
 }
 
-// MARK: - Private
+// MARK: - UISearchBarDelegate
 
 extension BookSearchViewController: UISearchBarDelegate {
   public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
@@ -198,6 +249,16 @@ extension BookSearchViewController: UISearchBarDelegate {
         try await searchGoogleBooks(for: searchTerm, apiKey: apiKey)
       } catch {
         Logger.shared.error("Unexpected error searching Google Books: \(error)")
+      }
+    }
+  }
+
+  public func searchBarBookmarkButtonClicked(_ searchBar: UISearchBar) {
+    if isShowingBarcodeScanner {
+      stopScanning()
+    } else {
+      Task {
+        await startScanning()
       }
     }
   }
@@ -214,6 +275,19 @@ extension BookSearchViewController: UISearchBarDelegate {
     } catch {
       activityView.stopAnimating()
       throw error
+    }
+  }
+}
+
+// MARK: - BarcodeScannerViewControllerDelegate
+
+extension BookSearchViewController: BarcodeScannerViewControllerDelegate {
+  public func barcodeScannerViewController(_ viewController: BarcodeScannerViewController, didUpdateRecognizedBarcodes barcodes: Set<String>) {
+    Logger.bookSearch.info("Found barcodes: \(barcodes)")
+    if let barcode = barcodes.first {
+      searchController.searchBar.text = barcode
+      stopScanning()
+      searchBarTextDidEndEditing(searchController.searchBar)
     }
   }
 }
