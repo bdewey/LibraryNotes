@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.52.1-beta] - 2021-08-24
+
+### Fixed
+
+- Barcode scanner orientation
+
 ## [0.52.0-beta] - 2021-08-22
 
 ### Added

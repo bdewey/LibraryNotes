@@ -56,10 +56,24 @@ public final class BarcodeScannerViewController: UIViewController {
       cameraCaptureView.session = captureSessionManager.session
       try await captureSessionManager.configureSession(metadataDelegate: self, metadataQueue: .main)
       await captureSessionManager.startRunning()
+      updateSessionOrientation()
       return true
     }
     self.startScanningTask = startScanningTask
     return try await startScanningTask.value
+  }
+
+  public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+    super.viewWillTransition(to: size, with: coordinator)
+    updateSessionOrientation()
+  }
+
+  @MainActor
+  private func updateSessionOrientation() {
+    let deviceOrientation = UIDevice.current.orientation
+    let videoOrientation = AVCaptureVideoOrientation(deviceOrientation)
+    Logger.barcodeScanner.debug("Device orientation = \(deviceOrientation), video orientation = \(videoOrientation)")
+    cameraCaptureView.session?.connections.first?.videoOrientation = videoOrientation
   }
 
   private func checkCapturePermission() async -> Bool {
@@ -101,6 +115,68 @@ extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
         continue
       }
       insertBarcode(barcode)
+    }
+  }
+}
+
+extension AVCaptureVideoOrientation: CustomStringConvertible {
+  // Note per Apple docs, "device orientation" and "interface orientation" flip the landscape values
+  fileprivate init(_ deviceOrientation: UIDeviceOrientation) {
+    switch deviceOrientation {
+    case .unknown:
+      self = .portrait
+    case .portrait:
+      self = .portrait
+    case .portraitUpsideDown:
+      self = .portraitUpsideDown
+    case .landscapeLeft:
+      self = .landscapeRight
+    case .landscapeRight:
+      self = .landscapeLeft
+    case .faceUp:
+      self = .portrait
+    case .faceDown:
+      self = .portrait
+    @unknown default:
+      self = .portrait
+    }
+  }
+
+  public var description: String {
+    switch self {
+    case .portrait:
+      return "portrait"
+    case .portraitUpsideDown:
+      return "portraitUpsideDown"
+    case .landscapeRight:
+      return "landscapeRight"
+    case .landscapeLeft:
+      return "landscapeLeft"
+    @unknown default:
+      return "unknown"
+    }
+  }
+}
+
+extension UIDeviceOrientation: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case .unknown:
+      return "unknown"
+    case .portrait:
+      return "portrait"
+    case .portraitUpsideDown:
+      return "portraitUpsideDown"
+    case .landscapeLeft:
+      return "landscapeLeft"
+    case .landscapeRight:
+      return "landscapeRight"
+    case .faceUp:
+      return "faceUp"
+    case .faceDown:
+      return "faceDown"
+    @unknown default:
+      return "unknown"
     }
   }
 }
