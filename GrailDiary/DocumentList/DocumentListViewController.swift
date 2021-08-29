@@ -10,43 +10,9 @@ import SafariServices
 import SnapKit
 import UIKit
 
-private extension NSComparisonPredicate {
-  convenience init(conformingToUTI uti: String) {
-    self.init(
-      leftExpression: NSExpression(forKeyPath: "kMDItemContentTypeTree"),
-      rightExpression: NSExpression(forConstantValue: uti),
-      modifier: .any,
-      type: .like,
-      options: []
-    )
-  }
-}
-
-extension UIResponder {
-  func printResponderChain() {
-    var responder: UIResponder? = self
-    while let currentResponder = responder {
-      print(currentResponder)
-      responder = currentResponder.next
-    }
-  }
-
-  func responderChain() -> String {
-    var responderStrings = [String]()
-    var responder: UIResponder? = self
-    while let currentResponder = responder {
-      responderStrings.append(String(describing: currentResponder))
-      responder = currentResponder.next
-    }
-    return responderStrings.joined(separator: "\n")
-  }
-}
-
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
   /// Designated initializer.
-  ///
-  /// - parameter stylesheet: Controls the styling of UI elements.
   init(
     database: NoteDatabase,
     coverImageCache: CoverImageCache
@@ -128,15 +94,16 @@ final class DocumentListViewController: UIViewController {
   }()
 
   private lazy var collectionView: UICollectionView = {
-    var listConfiguration = UICollectionLayoutListConfiguration(appearance: .plain)
-    listConfiguration.backgroundColor = .grailBackground
+    var listConfiguration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+    listConfiguration.backgroundColor = .grailSecondaryBackground
+    listConfiguration.headerMode = .firstItemInSection
     listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
       guard let self = self else { return nil }
       return self.dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-    view.backgroundColor = .grailBackground
+//    view.backgroundColor = .grailBackground
     return view
   }()
 
@@ -290,8 +257,37 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  private var quotesSubscription: AnyCancellable?
+  private var quoteIdentifiers: [ContentIdentifier] = [] {
+    didSet {
+      updateToolbar()
+    }
+  }
+
+  public var quotesPublisher: AnyPublisher<[ContentIdentifier], Error>? {
+    willSet {
+      quotesSubscription?.cancel()
+      quotesSubscription = nil
+    }
+    didSet {
+      quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
+        Logger.shared.error("Unexpected error getting quotes: \(error)")
+      }, receiveValue: { [weak self] quoteIdentifiers in
+        self?.quoteIdentifiers = quoteIdentifiers
+        Logger.shared.debug("Got \(quoteIdentifiers.count) quotes")
+      })
+    }
+  }
+
   private func updateQuoteList() {
-    dataSource.quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
+    Logger.shared.info("Updating quote list for hashtag \(focusedStructure.hashtag ?? "nil")")
+    quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
+  }
+
+  private var progressView: UIProgressView? {
+    didSet {
+      updateToolbar()
+    }
   }
 
   private func updateToolbar() {
@@ -302,36 +298,72 @@ final class DocumentListViewController: UIViewController {
     countLabel.sizeToFit()
 
     let itemsToReview = studySession?.count ?? 0
-    let reviewButton = UIBarButtonItem(title: "Review (\(itemsToReview))", style: .plain, target: self, action: #selector(performReview))
-    reviewButton.accessibilityIdentifier = "study-button"
-    reviewButton.isEnabled = itemsToReview > 0
+    let reviewAction = UIAction(title: "Review (\(itemsToReview))", image: UIImage(systemName: "sparkles.rectangle.stack")) { [weak self] _ in
+      self?.performReview()
+    }
+    if itemsToReview == 0 {
+      reviewAction.attributes.insert(.disabled)
+    }
 
-    let exportMenuItem = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.up"), style: .plain, target: self, action: #selector(exportAndShare))
+    let quotesAction = UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
+      guard let self = self else { return }
+      self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
+    }
 
     let sortActions = DocumentTableController.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
         self?.dataSource.currentSortOrder = sortOrder
       }
     }
-    let sortMenuItem = UIBarButtonItem(image: UIImage(systemName: "arrow.up.arrow.down.circle"), menu: UIMenu(children: sortActions))
 
-    let countItem = UIBarButtonItem(customView: countLabel)
+    let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
+    let importLibraryThing = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
+      guard let self = self else { return }
+      Logger.shared.info("Importing from LibraryThing")
+      let bookImporterViewController = BookImporterViewController(database: self.database)
+      bookImporterViewController.delegate = self
+      self.present(bookImporterViewController, animated: true)
+    }
+
+    let displayItem: UIBarButtonItem
+    if let progressView = progressView {
+      displayItem = UIBarButtonItem(customView: progressView)
+      Logger.shared.debug("Inserting a progress view into the toolbar")
+    } else {
+      displayItem = UIBarButtonItem(customView: countLabel)
+      Logger.shared.debug("No progress view for toolbar")
+    }
+
     var toolbarItems = [
-      reviewButton,
       UIBarButtonItem.flexibleSpace(),
-      countItem,
+      displayItem,
       UIBarButtonItem.flexibleSpace(),
-      exportMenuItem,
-      sortMenuItem,
     ]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
+
+    let sortMenu = UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
+    let shareAction = UIAction(title: "Export", image: UIImage(systemName: "arrow.up.forward.app")) { [weak self] _ in
+      self?.exportAndShare()
+    }
+    let actionsMenu = UIMenu(title: "", options: .displayInline, children: [
+      openCommand,
+      reviewAction,
+      quotesAction,
+      shareAction,
+      importLibraryThing,
+    ])
+    let navButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: UIMenu(children: [
+      actionsMenu,
+      sortMenu,
+    ]))
+    navigationItem.rightBarButtonItem = navButton
   }
 
   /// Exports the selection of books in a CSV format that roughly matches the Goodreads CSV format. Opens the share sheet to determine the final disposition of the file.
-  @objc private func exportAndShare(sender: UIBarButtonItem) {
+  @objc private func exportAndShare() {
     let noteIdentifiers = dataSource.noteIdentifiers
     Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
     let listFormatter = ListFormatter()
@@ -359,7 +391,7 @@ final class DocumentListViewController: UIViewController {
       try writer.endEncoding()
       let activityViewController = UIActivityViewController(activityItems: [exportURL], applicationActivities: nil)
       let popover = activityViewController.popoverPresentationController
-      popover?.barButtonItem = sender
+      popover?.barButtonItem = navigationItem.rightBarButtonItem
       present(activityViewController, animated: true)
     } catch {
       Logger.shared.error("Error exporting to CSV: \(error)")
@@ -447,7 +479,6 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
     }
     let pattern = searchController.searchBar.text ?? ""
     Logger.shared.info("Issuing query: \(pattern)")
-    dataSource.webURL = pattern.asWebURL
     do {
       let allIdentifiers = try database.search(for: pattern)
       dataSource.filteredPageIdentifiers = Set(allIdentifiers)
@@ -483,24 +514,6 @@ extension DocumentListViewController: StudyViewControllerDelegate {
   }
 }
 
-private extension String {
-  /// Non-nil if this string is a valid web URL.
-  var asWebURL: URL? {
-    guard let urlDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else {
-      assertionFailure()
-      return nil
-    }
-    let fullStringRange = NSRange(startIndex..., in: self)
-    let matches = urlDetector.matches(in: self, options: [], range: fullStringRange)
-    for match in matches {
-      if match.range(at: 0) == fullStringRange {
-        return match.url
-      }
-    }
-    return nil
-  }
-}
-
 private extension Note {
   var book: AugmentedBook? {
     return metadata.book
@@ -511,5 +524,23 @@ private extension Note {
       return hashtag.count - 8
     }
     return 0
+  }
+}
+
+extension DocumentListViewController: BookImporterViewControllerDelegate {
+  func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int) {
+    let progressView = UIProgressView(progressViewStyle: .bar)
+    progressView.progress = 0
+    self.progressView = progressView
+  }
+
+  func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int) {
+    let newProgress = Float(partialCount) / Float(totalCount)
+    progressView?.progress = newProgress
+    Logger.shared.debug("toolbar progress = \(newProgress)")
+  }
+
+  func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
+    progressView = nil
   }
 }

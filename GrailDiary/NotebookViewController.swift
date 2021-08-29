@@ -106,7 +106,7 @@ public final class NotebookViewController: UIViewController {
 
   /// The split view we are managing.
   private lazy var notebookSplitViewController: UISplitViewController = {
-    let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController)
+    let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController, prefersLargeTitles: true)
 
     let splitViewController = UISplitViewController(style: .tripleColumn)
     splitViewController.setViewController(primaryNavigationController, for: .primary)

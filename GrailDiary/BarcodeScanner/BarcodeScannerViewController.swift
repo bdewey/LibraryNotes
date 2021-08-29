@@ -63,7 +63,7 @@ public final class BarcodeScannerViewController: UIViewController {
     return try await startScanningTask.value
   }
 
-  public override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+  override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
     super.viewWillTransition(to: size, with: coordinator)
     updateSessionOrientation()
   }
