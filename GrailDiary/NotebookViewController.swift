@@ -229,9 +229,9 @@ public final class NotebookViewController: UIViewController {
     let primaryAction: UIAction
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
       primaryAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        let bookSearchViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: true)
+        let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
         bookSearchViewController.delegate = self
-        bookSearchViewController.title = "Add Book Details"
+        bookSearchViewController.title = "Add Book"
         let navigationController = UINavigationController(rootViewController: bookSearchViewController)
         navigationController.navigationBar.tintColor = .grailTint
         self?.present(navigationController, animated: true)
@@ -393,11 +393,11 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 
 // MARK: - BookSearchViewControllerDelegate
 
-extension NotebookViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
+extension NotebookViewController: BookEditDetailsViewControllerDelegate {
+  public func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
     dismiss(animated: true, completion: nil)
     var note = Note(markdown: "")
-    note.metadata.book = AugmentedBook(book)
+    note.metadata.book = book
     do {
       let identifier = try database.createNote(note)
       if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
@@ -418,12 +418,12 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     }
   }
 
-  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
     makeNewNote()
   }
 
-  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
   }
 }

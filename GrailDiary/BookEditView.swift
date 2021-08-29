@@ -15,6 +15,13 @@ final class BookEditViewModel: ObservableObject {
     self.coverImage = coverImage
   }
 
+  /// True if this model contains a valid book.
+  ///
+  /// At the moment the only "invalid" book is one without a title.
+  var isValid: Bool {
+    !book.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+  }
+
   func binding(keyPath: WritableKeyPath<AugmentedBook, [String]>) -> Binding<String> {
     Binding(
       get: { self.book[keyPath: keyPath].joined(separator: ", ") },

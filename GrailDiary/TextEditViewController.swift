@@ -12,7 +12,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String]
-  func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book)
+  func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook)
 }
 
 /// Allows editing of a single text file.

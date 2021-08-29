@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Unified interface for searching for books and editing book details
+
 ## [0.53.0-beta] - 2021-08-29
 
 ### Added
