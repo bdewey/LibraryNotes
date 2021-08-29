@@ -65,7 +65,7 @@
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
 		D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3446D3F23FAF20400BC269A /* Note+TestContent.swift */; };
-		D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookSearchViewController.swift */; };
+		D3558D7525D87F3000746600 /* BookEditDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */; };
 		D3558D7725D9741100746600 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7625D9741100746600 /* ImageCache.swift */; };
 		D3558D7A25DA130900746600 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7925DA130900746600 /* ApiKey.swift */; };
 		D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */; };
@@ -238,7 +238,7 @@
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
-		D3558D7425D87F3000746600 /* BookSearchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookSearchViewController.swift; sourceTree = "<group>"; };
+		D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookEditDetailsViewController.swift; sourceTree = "<group>"; };
 		D3558D7625D9741100746600 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
 		D3558D7925DA130900746600 /* ApiKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
@@ -466,7 +466,7 @@
 				D3FA025526CDDD58001A5A4C /* BookEditView.swift */,
 				D3F4EDBF266515E1001289EC /* BookHeader.swift */,
 				D331457526628DCE00B4687F /* BookImporter */,
-				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
+				D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */,
 				D3131325269A2AD7004BBDBD /* BookView.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
 				D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */,
@@ -827,7 +827,7 @@
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,
 				D3558D7725D9741100746600 /* ImageCache.swift in Sources */,
-				D3558D7525D87F3000746600 /* BookSearchViewController.swift in Sources */,
+				D3558D7525D87F3000746600 /* BookEditDetailsViewController.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3378CE426DBC645006750EC /* BookSection.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,

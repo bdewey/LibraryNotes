@@ -15,32 +15,16 @@ private extension Logger {
   }()
 }
 
-private struct ViewModel: Hashable, Identifiable {
-  var id = UUID()
-  var book: Book
-  var coverImage: UIImage?
-  var coverImageURL: URL?
-
-  init?(_ item: GoogleBooks.Item) {
-    guard let book = Book(item) else { return nil }
-    self.book = book
-    self.coverImage = nil
-    if let urlString = item.volumeInfo.imageLinks?.smallThumbnail ?? item.volumeInfo.imageLinks?.thumbnail {
-      self.coverImageURL = URL(string: urlString)
-    }
-  }
-}
-
-public protocol BookSearchViewControllerDelegate: AnyObject {
+public protocol BookEditDetailsViewControllerDelegate: AnyObject {
   /// The person selected a book.
-  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: AugmentedBook, coverImage: UIImage?)
+  func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?)
 
   /// The person canceled without selecting a book.
   /// (Note this is not guaranteed to be called with the pull-down presentation style)
-  func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController)
+  func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController)
 
   /// The person skipped adding book details to a new note.
-  func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController)
+  func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController)
 }
 
 public extension AugmentedBook {
@@ -48,8 +32,11 @@ public extension AugmentedBook {
   static let blank = AugmentedBook(title: "", authors: [])
 }
 
+/// This view controller allows editing of book details and cover images.
+///
+/// In addition to manually editing fields, this view controller lets you search Google Books for book information.
 @MainActor
-public final class BookSearchViewController: UIViewController {
+public final class BookEditDetailsViewController: UIViewController {
   public init(apiKey: String, book: AugmentedBook = .blank, coverImage: UIImage? = nil, showSkipButton: Bool) {
     self.apiKey = apiKey
     self.showSkipButton = showSkipButton
@@ -62,7 +49,7 @@ public final class BookSearchViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  public weak var delegate: BookSearchViewControllerDelegate?
+  public weak var delegate: BookEditDetailsViewControllerDelegate?
   private let apiKey: String
   private let showSkipButton: Bool
 
@@ -98,8 +85,8 @@ public final class BookSearchViewController: UIViewController {
     return viewController
   }()
 
-  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, ViewModel> = {
-    let bookRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, ViewModel> { cell, _, viewModel in
+  private lazy var dataSource: UICollectionViewDiffableDataSource<Int, SearchResultsViewModel> = {
+    let bookRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SearchResultsViewModel> { cell, _, viewModel in
       var configuration = cell.defaultContentConfiguration()
       if let year = viewModel.book.yearPublished {
         configuration.text = "\(viewModel.book.title) (\(year))"
@@ -117,13 +104,13 @@ public final class BookSearchViewController: UIViewController {
       cell.backgroundConfiguration = backgroundConfiguration
     }
 
-    return UICollectionViewDiffableDataSource<Int, ViewModel>(collectionView: collectionView) { collectionView, indexPath, book in
+    return UICollectionViewDiffableDataSource<Int, SearchResultsViewModel>(collectionView: collectionView) { collectionView, indexPath, book in
       collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: book)
     }
   }()
 
   private let imageCache = ImageCache()
-  private var viewModels = [ViewModel]()
+  private var searchResultsViewModels = [SearchResultsViewModel]()
   private var model = BookEditViewModel(book: AugmentedBook(title: "", authors: []), coverImage: nil)
   private lazy var decoder: JSONDecoder = {
     let decoder = JSONDecoder()
@@ -133,10 +120,10 @@ public final class BookSearchViewController: UIViewController {
 
   private let activityView = UIActivityIndicatorView(style: .large)
 
-  private func updateViewModels(_ viewModels: [ViewModel]) {
+  private func updateViewModels(_ viewModels: [SearchResultsViewModel]) {
     assert(Thread.isMainThread)
     isBatchUpdating = true
-    self.viewModels = viewModels
+    self.searchResultsViewModels = viewModels
     for viewModel in viewModels {
       if let url = viewModel.coverImageURL {
         imageCache.image(for: url) { result in
@@ -151,24 +138,28 @@ public final class BookSearchViewController: UIViewController {
 
   private func setViewModelImage(_ image: UIImage, key: UUID) {
     assert(Thread.isMainThread)
-    guard let index = viewModels.firstIndex(where: { $0.id == key }) else { return }
-    viewModels[index].coverImage = image
+    guard let index = searchResultsViewModels.firstIndex(where: { $0.id == key }) else { return }
+    searchResultsViewModels[index].coverImage = image
     updateSnapshot()
   }
 
+  /// A flag to avoid unnecessary collection view snapshot generation when populating the initial views & images.
   private var isBatchUpdating = false
 
+  /// Updates the collection view snapshot based upon the current view models.
   private func updateSnapshot() {
     assert(Thread.isMainThread)
     guard !isBatchUpdating else { return }
-    var snapshot = NSDiffableDataSourceSnapshot<Int, ViewModel>()
+    var snapshot = NSDiffableDataSourceSnapshot<Int, SearchResultsViewModel>()
     snapshot.appendSections([0])
-    snapshot.appendItems(viewModels.removingDuplicates())
+    snapshot.appendItems(searchResultsViewModels.removingDuplicates())
     dataSource.apply(snapshot, animatingDifferences: true)
   }
 
+  /// Flag indicating if the barcode scanner UI is currently on the screen.
   private var isShowingBarcodeScanner = false
 
+  /// Hides the search results so you can see the editing surface.
   private func hideSearchResults() {
     Logger.bookSearch.info("Hiding search results")
     UIView.animate(withDuration: 0.2) { [collectionView, barcodeScannerViewController] in
@@ -179,6 +170,7 @@ public final class BookSearchViewController: UIViewController {
     }
   }
 
+  /// Shows the search results, obscuring the editing surface.
   private func showSearchResults() {
     Logger.bookSearch.info("Showing search results")
     UIView.animate(withDuration: 0.2) { [collectionView, barcodeScannerViewController] in
@@ -187,7 +179,7 @@ public final class BookSearchViewController: UIViewController {
     }
   }
 
-  @MainActor
+  /// Start showing the barcode scanner UI.
   private func startScanning() async {
     guard !isShowingBarcodeScanner else { return }
     do {
@@ -205,6 +197,7 @@ public final class BookSearchViewController: UIViewController {
     }
   }
 
+  /// Stop showing the barcode scanner UI.
   private func stopScanning() {
     guard isShowingBarcodeScanner else { return }
     isShowingBarcodeScanner = false
@@ -280,33 +273,36 @@ public final class BookSearchViewController: UIViewController {
     }
     navigationItem.leftBarButtonItem = cancelButton
 
-    let skipButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
-      guard let self = self else { return }
-      if self.model.isValid {
-        self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
-      } else {
-        self.delegate?.bookSearchViewControllerDidSkip(self)
-      }
-    })
-    navigationItem.rightBarButtonItem = skipButton
     navigationItem.searchController = searchController
+    monitorModelAndUpdateRightBarButtonItem()
+  }
+
+  private var modelSubscription: AnyCancellable?
+
+  /// Set to `true` to trigger an update of the right bar button item at the next tick of the run loop.
+  private var rightBarButtonItemNeedsUpdate = true
+
+  /// Sets up the code needed for keeping the right bar button item up-to-date.
+  ///
+  /// * Sets up the run loop observer that monitors `rightBarButtonItemNeedsUpdate`
+  /// * Monitors `model` and sets `rightBarButtonItemNeedsUpdate` to `true` when the model will change
+  private func monitorModelAndUpdateRightBarButtonItem() {
     let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
       self?.updateRightBarButtonItemIfNeeded()
     }
     CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
     modelSubscription = model.objectWillChange.sink { [weak self] _ in
       Logger.bookSearch.debug("Setting nextButtonNeedsUpdate to true. Model valid? \(self?.model.isValid ?? false)")
-      self?.nextButtonNeedsUpdate = true
+      self?.rightBarButtonItemNeedsUpdate = true
     }
     updateRightBarButtonItemIfNeeded()
   }
 
-  private var modelSubscription: AnyCancellable?
-  private var nextButtonNeedsUpdate = true
-
+  /// If `rightBarButtonItemNeedsUpdate` is true, configures `navigationItem.rightBarButtonItem` to the proper value given the current state
+  /// of the view controller.
   private func updateRightBarButtonItemIfNeeded() {
-    guard nextButtonNeedsUpdate else { return }
-    nextButtonNeedsUpdate = false
+    guard rightBarButtonItemNeedsUpdate else { return }
+    rightBarButtonItemNeedsUpdate = false
     Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(model.isValid)")
     if model.isValid {
       navigationItem.rightBarButtonItem = nextButton
@@ -322,7 +318,7 @@ public final class BookSearchViewController: UIViewController {
   }
 }
 
-extension BookSearchViewController: UICollectionViewDelegate {
+extension BookEditDetailsViewController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     Logger.bookSearch.debug("Selected item at \(indexPath)")
     guard let viewModel = dataSource.itemIdentifier(for: indexPath) else { return }
@@ -332,15 +328,15 @@ extension BookSearchViewController: UICollectionViewDelegate {
   }
 }
 
-extension BookSearchViewController: UISearchControllerDelegate {
+extension BookEditDetailsViewController: UISearchControllerDelegate {
   public func didDismissSearchController(_ searchController: UISearchController) {
-    Logger.bookSearch.debug("Did dismiss seaarch controller")
+    Logger.bookSearch.debug("Did dismiss search controller")
   }
 }
 
 // MARK: - UISearchBarDelegate
 
-extension BookSearchViewController: UISearchBarDelegate {
+extension BookEditDetailsViewController: UISearchBarDelegate {
   public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
     guard let searchTerm = searchBar.text, let apiKey = ApiKey.googleBooks else { return }
     Task {
@@ -370,7 +366,7 @@ extension BookSearchViewController: UISearchBarDelegate {
       activityView.startAnimating()
       let response = try await GoogleBooks.search(for: searchTerm, apiKey: apiKey)
       activityView.stopAnimating()
-      let viewModels = response.items.compactMap { ViewModel($0) }
+      let viewModels = response.items.compactMap { SearchResultsViewModel($0) }
       updateViewModels(viewModels)
       showSearchResults()
       searchController.isActive = false
@@ -383,13 +379,29 @@ extension BookSearchViewController: UISearchBarDelegate {
 
 // MARK: - BarcodeScannerViewControllerDelegate
 
-extension BookSearchViewController: BarcodeScannerViewControllerDelegate {
+extension BookEditDetailsViewController: BarcodeScannerViewControllerDelegate {
   public func barcodeScannerViewController(_ viewController: BarcodeScannerViewController, didUpdateRecognizedBarcodes barcodes: Set<String>) {
     Logger.bookSearch.info("Found barcodes: \(barcodes)")
     if let barcode = barcodes.first {
       searchController.searchBar.text = barcode
       stopScanning()
       searchBarTextDidEndEditing(searchController.searchBar)
+    }
+  }
+}
+
+private struct SearchResultsViewModel: Hashable, Identifiable {
+  var id = UUID()
+  var book: Book
+  var coverImage: UIImage?
+  var coverImageURL: URL?
+
+  init?(_ item: GoogleBooks.Item) {
+    guard let book = Book(item) else { return nil }
+    self.book = book
+    self.coverImage = nil
+    if let urlString = item.volumeInfo.imageLinks?.smallThumbnail ?? item.volumeInfo.imageLinks?.thumbnail {
+      self.coverImageURL = URL(string: urlString)
     }
   }
 }

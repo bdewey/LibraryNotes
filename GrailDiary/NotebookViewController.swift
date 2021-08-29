@@ -229,7 +229,7 @@ public final class NotebookViewController: UIViewController {
     let primaryAction: UIAction
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
       primaryAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        let bookSearchViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: true)
+        let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
         bookSearchViewController.delegate = self
         bookSearchViewController.title = "Add Book"
         let navigationController = UINavigationController(rootViewController: bookSearchViewController)
@@ -393,8 +393,8 @@ extension NotebookViewController: WebScrapingViewControllerDelegate {
 
 // MARK: - BookSearchViewControllerDelegate
 
-extension NotebookViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
+extension NotebookViewController: BookEditDetailsViewControllerDelegate {
+  public func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
     dismiss(animated: true, completion: nil)
     var note = Note(markdown: "")
     note.metadata.book = book
@@ -418,12 +418,12 @@ extension NotebookViewController: BookSearchViewControllerDelegate {
     }
   }
 
-  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
     makeNewNote()
   }
 
-  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
   }
 }

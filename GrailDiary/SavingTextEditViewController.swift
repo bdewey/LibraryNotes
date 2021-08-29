@@ -177,7 +177,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func editBookDetails(book: AugmentedBook) {
     guard let apiKey = ApiKey.googleBooks else { return }
-    let bookViewController = BookSearchViewController(apiKey: apiKey, book: book, coverImage: coverImage, showSkipButton: false)
+    let bookViewController = BookEditDetailsViewController(apiKey: apiKey, book: book, coverImage: coverImage, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Edit Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
@@ -186,7 +186,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func insertBookDetails(apiKey: String) {
-    let bookViewController = BookSearchViewController(apiKey: apiKey, showSkipButton: false)
+    let bookViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Insert Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
@@ -406,8 +406,8 @@ extension SavingTextEditViewController: BookHeaderDelegate {
   }
 }
 
-extension SavingTextEditViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
+extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
+  public func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
     if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
         _ = try storeImageData(imageData, type: .jpeg, key: type(of: noteStorage).coverImageKey)
@@ -420,11 +420,11 @@ extension SavingTextEditViewController: BookSearchViewControllerDelegate {
     dismiss(animated: true, completion: nil)
   }
 
-  public func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController) {
     // NOTHING
   }
 
-  public func bookSearchViewControllerDidCancel(_ viewController: BookSearchViewController) {
+  public func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
   }
 }
