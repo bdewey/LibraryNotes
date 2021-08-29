@@ -307,60 +307,6 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
-
-  /// A `UIAction` for importing books from LibraryThing or Goodreads
-  private lazy var importLibraryThingAction = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
-    guard let self = self else { return }
-    Logger.shared.info("Importing from LibraryThing")
-    let bookImporterViewController = BookImporterViewController(database: self.database)
-    bookImporterViewController.delegate = self
-    self.present(bookImporterViewController, animated: true)
-  }
-
-  /// A `UIAction` for showing randomly selected quotes.
-  private lazy var quotesAction = UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
-    guard let self = self else { return }
-    self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
-  }
-
-  /// A `UIAction` for reviewing items in the library.
-  private var reviewAction: UIAction {
-    let itemsToReview = studySession?.count ?? 0
-    let reviewAction = UIAction(title: "Review (\(itemsToReview))", image: UIImage(systemName: "sparkles.rectangle.stack")) { [weak self] _ in
-      self?.performReview()
-    }
-    if itemsToReview == 0 {
-      reviewAction.attributes.insert(.disabled)
-    }
-    return reviewAction
-  }
-
-  /// A `UIAction` for exporting the current view of the library.
-  private lazy var shareAction = UIAction(title: "Export", image: UIImage(systemName: "arrow.up.forward.app")) { [weak self] _ in
-    self?.exportAndShare()
-  }
-
-  /// A menu that shows all of the available actions.
-  private var actionsMenu: UIMenu {
-    UIMenu(title: "", options: .displayInline, children: [
-      openCommand,
-      reviewAction,
-      quotesAction,
-      shareAction,
-      importLibraryThingAction,
-    ])
-  }
-
-  private var sortMenu: UIMenu {
-    let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
-      UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
-        self?.dataSource.currentSortOrder = sortOrder
-      }
-    }
-    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
-  }
-
   private func updateToolbarAndMenu() {
     var toolbarItems = [
       UIBarButtonItem.flexibleSpace(),
@@ -418,6 +364,72 @@ final class DocumentListViewController: UIViewController {
   @objc private func performReview() {
     guard let studySession = studySession else { return }
     presentStudySessionViewController(for: studySession)
+  }
+}
+
+// MARK: - Menus
+
+extension DocumentListViewController {
+  /// A menu that shows all of the available actions.
+  private var actionsMenu: UIMenu {
+    UIMenu(title: "", options: .displayInline, children: [
+      openCommand,
+      reviewAction,
+      quotesAction,
+      shareAction,
+      importLibraryThingAction,
+    ])
+  }
+
+  private var openCommand: UICommand {
+    UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
+  }
+
+  /// A `UIAction` for importing books from LibraryThing or Goodreads
+  private var importLibraryThingAction: UIAction {
+    UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
+      guard let self = self else { return }
+      Logger.shared.info("Importing from LibraryThing")
+      let bookImporterViewController = BookImporterViewController(database: self.database)
+      bookImporterViewController.delegate = self
+      self.present(bookImporterViewController, animated: true)
+    }
+  }
+
+  /// A `UIAction` for showing randomly selected quotes.
+  private var quotesAction: UIAction {
+    UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
+      guard let self = self else { return }
+      self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
+    }
+  }
+
+  /// A `UIAction` for reviewing items in the library.
+  private var reviewAction: UIAction {
+    let itemsToReview = studySession?.count ?? 0
+    let reviewAction = UIAction(title: "Review (\(itemsToReview))", image: UIImage(systemName: "sparkles.rectangle.stack")) { [weak self] _ in
+      self?.performReview()
+    }
+    if itemsToReview == 0 {
+      reviewAction.attributes.insert(.disabled)
+    }
+    return reviewAction
+  }
+
+  /// A `UIAction` for exporting the current view of the library.
+  private var shareAction: UIAction {
+    UIAction(title: "Export", image: UIImage(systemName: "arrow.up.forward.app")) { [weak self] _ in
+      self?.exportAndShare()
+    }
+  }
+
+  private var sortMenu: UIMenu {
+    let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
+      UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
+        self?.dataSource.currentSortOrder = sortOrder
+      }
+    }
+    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
   }
 }
 
