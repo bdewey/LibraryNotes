@@ -12,14 +12,6 @@ import UIKit
 internal extension DocumentTableController {
   typealias Snapshot = NSDiffableDataSourceSnapshot<DocumentSection, Item>
 
-  private final class DataSource: UITableViewDiffableDataSource<DocumentSection, Item> {
-    // New behavior in Beta 6: The built-in data source defaults to "not editable" which
-    // disables the swipe actions.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-      return true
-    }
-  }
-
   /// Sections of the collection view
   enum DocumentSection {
     case wantToRead

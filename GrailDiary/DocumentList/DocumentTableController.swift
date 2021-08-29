@@ -17,20 +17,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
-/// A list cell that is clear by default, with tint background color when selected.
-private final class ClearBackgroundCell: UICollectionViewListCell {
-  override func updateConfiguration(using state: UICellConfigurationState) {
-    var backgroundConfiguration = UIBackgroundConfiguration.clear()
-    if state.isSelected {
-      backgroundConfiguration.backgroundColor = nil
-      backgroundConfiguration.backgroundColorTransformer = .init { $0.withAlphaComponent(0.5) }
-    } else {
-      backgroundConfiguration.backgroundColor = .grailSecondaryGroupedBackground
-    }
-    self.backgroundConfiguration = backgroundConfiguration
-  }
-}
-
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 public final class DocumentTableController: NSObject {
   /// Designated initializer.
