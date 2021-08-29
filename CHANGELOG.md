@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- New look-and-feel that's more "iOS Standard"
+
 ## [0.52.1-beta] - 2021-08-24
 
 ### Fixed
