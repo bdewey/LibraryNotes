@@ -52,6 +52,9 @@
 		D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33145782662926C00B4687F /* DocumentPickerView.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
 		D3378CD926D92DAA006750EC /* UIResponder+Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */; };
+		D3378CDC26DBC13E006750EC /* DocumentListViewController+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */; };
+		D3378CDE26DBC373006750EC /* PersonNameComponents+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */; };
+		D3378CE026DBC3D4006750EC /* CGFloat+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */; };
 		D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuotePrompt.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
@@ -217,6 +220,9 @@
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
 		D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIResponder+Debugging.swift"; sourceTree = "<group>"; };
+		D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentListViewController+Snapshot.swift"; sourceTree = "<group>"; };
+		D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersonNameComponents+Comparable.swift"; sourceTree = "<group>"; };
+		D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGFloat+Extensions.swift"; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuotePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotePrompt.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
@@ -365,7 +371,9 @@
 			isa = PBXGroup;
 			children = (
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
+				D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
+				D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */,
 			);
 			path = DocumentList;
 			sourceTree = "<group>";
@@ -446,6 +454,7 @@
 				D3558D7425D87F3000746600 /* BookSearchViewController.swift */,
 				D3131325269A2AD7004BBDBD /* BookView.swift */,
 				D31AFA82229D61E800ED2B76 /* CardDocumentProperties.swift */,
+				D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */,
 				D36ECC952426ED4D0028D808 /* CGVector+Extensions.swift */,
 				D37B0DBA23CDF79800F01D29 /* ChallengeTemplateMatcher.swift */,
 				D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */,
@@ -792,9 +801,11 @@
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D369182926BAD1E9001EB512 /* NoteDatabaseKey.swift in Sources */,
 				D37C887A26B5C9E900EC30C8 /* NoteDatabase.swift in Sources */,
+				D3378CDC26DBC13E006750EC /* DocumentListViewController+Snapshot.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
+				D3378CDE26DBC373006750EC /* PersonNameComponents+Comparable.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D3FA025426CD4018001A5A4C /* BookEditDetailsViewController.swift in Sources */,
 				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,
@@ -812,6 +823,7 @@
 				D331457726628EA000B4687F /* ImportForm.swift in Sources */,
 				D32215F126C41215000BA772 /* Sequence+DictionaryExtensions.swift in Sources */,
 				D31A02B82676A33D00A60525 /* ParsedAttributedString+PlainText.swift in Sources */,
+				D3378CE026DBC3D4006750EC /* CGFloat+Extensions.swift in Sources */,
 				D377818525DC2BCE004DD38F /* WebImporterConfiguration.swift in Sources */,
 				D31AFAD8229D61EE00ED2B76 /* TwoSidedCardView.swift in Sources */,
 				D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */,
