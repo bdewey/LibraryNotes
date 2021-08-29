@@ -176,7 +176,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-    updateToolbar()
+    updateToolbarAndMenu()
   }
 
   // MARK: - Keyboard support
@@ -223,7 +223,7 @@ final class DocumentListViewController: UIViewController {
   /// Stuff we can study based on the current selected documents.
   private var studySession: StudySession? {
     didSet {
-      updateToolbar()
+      updateToolbarAndMenu()
     }
   }
 
@@ -260,7 +260,7 @@ final class DocumentListViewController: UIViewController {
   private var quotesSubscription: AnyCancellable?
   private var quoteIdentifiers: [ContentIdentifier] = [] {
     didSet {
-      updateToolbar()
+      updateToolbarAndMenu()
     }
   }
 
@@ -286,17 +286,46 @@ final class DocumentListViewController: UIViewController {
 
   private var progressView: UIProgressView? {
     didSet {
-      updateToolbar()
+      updateToolbarAndMenu()
     }
   }
 
-  private func updateToolbar() {
-    let countLabel = UILabel(frame: .zero)
-    let bookCount = dataSource.bookCount
-    countLabel.text = bookCount == 1 ? "1 book" : "\(bookCount) books"
-    countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
-    countLabel.sizeToFit()
+  /// A `UIBarButtonItem` to display at the bottom of the list view.
+  ///
+  /// If `progressView` is non-nil (indicating a long-running task is happening), this will be a `UIBarButtonItem` wrapping the progress view.
+  /// Otherwise, it will be a `UIBarButtonItem` wrapping a count of the number of books.
+  private var displayBarButtonItem: UIBarButtonItem {
+    if let progressView = progressView {
+      return UIBarButtonItem(customView: progressView)
+    } else {
+      let countLabel = UILabel(frame: .zero)
+      let bookCount = dataSource.bookCount
+      countLabel.text = bookCount == 1 ? "1 book" : "\(bookCount) books"
+      countLabel.font = UIFont.preferredFont(forTextStyle: .caption1)
+      countLabel.sizeToFit()
+      return UIBarButtonItem(customView: countLabel)
+    }
+  }
 
+  private let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
+
+  /// A `UIAction` for importing books from LibraryThing or Goodreads
+  private lazy var importLibraryThingAction = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
+    guard let self = self else { return }
+    Logger.shared.info("Importing from LibraryThing")
+    let bookImporterViewController = BookImporterViewController(database: self.database)
+    bookImporterViewController.delegate = self
+    self.present(bookImporterViewController, animated: true)
+  }
+
+  /// A `UIAction` for showing randomly selected quotes.
+  private lazy var quotesAction = UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
+    guard let self = self else { return }
+    self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
+  }
+
+  /// A `UIAction` for reviewing items in the library.
+  private var reviewAction: UIAction {
     let itemsToReview = studySession?.count ?? 0
     let reviewAction = UIAction(title: "Review (\(itemsToReview))", image: UIImage(systemName: "sparkles.rectangle.stack")) { [weak self] _ in
       self?.performReview()
@@ -304,39 +333,38 @@ final class DocumentListViewController: UIViewController {
     if itemsToReview == 0 {
       reviewAction.attributes.insert(.disabled)
     }
+    return reviewAction
+  }
 
-    let quotesAction = UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
-      guard let self = self else { return }
-      self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
-    }
+  /// A `UIAction` for exporting the current view of the library.
+  private lazy var shareAction = UIAction(title: "Export", image: UIImage(systemName: "arrow.up.forward.app")) { [weak self] _ in
+    self?.exportAndShare()
+  }
 
+  /// A menu that shows all of the available actions.
+  private var actionsMenu: UIMenu {
+    UIMenu(title: "", options: .displayInline, children: [
+      openCommand,
+      reviewAction,
+      quotesAction,
+      shareAction,
+      importLibraryThingAction,
+    ])
+  }
+
+  private var sortMenu: UIMenu {
     let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
         self?.dataSource.currentSortOrder = sortOrder
       }
     }
+    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
+  }
 
-    let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
-    let importLibraryThing = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
-      guard let self = self else { return }
-      Logger.shared.info("Importing from LibraryThing")
-      let bookImporterViewController = BookImporterViewController(database: self.database)
-      bookImporterViewController.delegate = self
-      self.present(bookImporterViewController, animated: true)
-    }
-
-    let displayItem: UIBarButtonItem
-    if let progressView = progressView {
-      displayItem = UIBarButtonItem(customView: progressView)
-      Logger.shared.debug("Inserting a progress view into the toolbar")
-    } else {
-      displayItem = UIBarButtonItem(customView: countLabel)
-      Logger.shared.debug("No progress view for toolbar")
-    }
-
+  private func updateToolbarAndMenu() {
     var toolbarItems = [
       UIBarButtonItem.flexibleSpace(),
-      displayItem,
+      displayBarButtonItem,
       UIBarButtonItem.flexibleSpace(),
     ]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
@@ -344,17 +372,6 @@ final class DocumentListViewController: UIViewController {
     }
     self.toolbarItems = toolbarItems
 
-    let sortMenu = UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
-    let shareAction = UIAction(title: "Export", image: UIImage(systemName: "arrow.up.forward.app")) { [weak self] _ in
-      self?.exportAndShare()
-    }
-    let actionsMenu = UIMenu(title: "", options: .displayInline, children: [
-      openCommand,
-      reviewAction,
-      quotesAction,
-      shareAction,
-      importLibraryThing,
-    ])
     let navButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: UIMenu(children: [
       actionsMenu,
       sortMenu,
@@ -462,7 +479,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int) {
-    updateToolbar()
+    updateToolbarAndMenu()
   }
 }
 
