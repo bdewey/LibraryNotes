@@ -60,11 +60,11 @@ public final class BookEditDetailsViewController: UIViewController {
   private lazy var searchController: UISearchController = {
     let searchController = UISearchController(searchResultsController: nil)
     searchController.searchBar.delegate = self
+    searchController.searchBar.placeholder = "Search Google Books"
     searchController.searchBar.showsBookmarkButton = CaptureSessionManager.defaultVideoDevice != nil
     searchController.searchBar.setImage(UIImage(systemName: "barcode.viewfinder"), for: .bookmark, state: .normal)
     searchController.showsSearchResultsController = true
     searchController.searchBar.searchTextField.clearButtonMode = .whileEditing
-    searchController.obscuresBackgroundDuringPresentation = true
     searchController.delegate = self
     return searchController
   }()
