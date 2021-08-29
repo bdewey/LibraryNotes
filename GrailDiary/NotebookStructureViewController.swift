@@ -139,17 +139,11 @@ final class NotebookStructureViewController: UIViewController {
   public weak var delegate: NotebookStructureViewControllerDelegate?
   private let database: NoteDatabase
   private var notebookSubscription: AnyCancellable?
-  private var progressView: UIProgressView? {
-    didSet {
-      configureToolbar()
-    }
-  }
 
   private lazy var collectionView: UICollectionView = {
     let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
       var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
-      config.backgroundColor = .grailBackground
-      // the first section has no header; everything else gets a header.
+      config.backgroundColor = .grailSecondaryBackground
       config.headerMode = .none
       // The last section gets a footer
       config.footerMode = (sectionIndex == Section.allCases.count - 1) ? .supplementary : .none
@@ -432,35 +426,11 @@ private extension UIBarButtonItem {
 
 private extension NotebookStructureViewController {
   func configureToolbar() {
-    var toolbarItems: [UIBarButtonItem] = [documentActionMenu(), .flexibleSpace()]
-    if let progressView = progressView {
-      toolbarItems.append(UIBarButtonItem(customView: progressView))
-      toolbarItems.append(.flexibleSpace())
-    }
+    var toolbarItems: [UIBarButtonItem] = [.flexibleSpace()]
     if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
       toolbarItems.append(newNoteButton)
     }
     self.toolbarItems = toolbarItems
-  }
-
-  private func documentActionMenu() -> UIBarButtonItem {
-    let openCommand = UICommand(title: "Open", image: UIImage(systemName: "doc"), action: #selector(AppCommands.openNewFile))
-    let importLibraryThing = UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
-      guard let self = self else { return }
-      Logger.shared.info("Importing from LibraryThing")
-      let bookImporterViewController = BookImporterViewController(database: self.database)
-      bookImporterViewController.delegate = self
-      self.present(bookImporterViewController, animated: true)
-    }
-    return UIBarButtonItem(
-      image: UIImage(systemName: "ellipsis.circle"),
-      menu: UIMenu(
-        children: [
-          openCommand,
-          importLibraryThing,
-        ]
-      )
-    )
   }
 
   func updateSnapshot() {
@@ -515,21 +485,5 @@ private extension NotebookStructureViewController {
       snapshot.append([stringToItem[hashtag]!], to: parent ?? root)
     }
     return snapshot
-  }
-}
-
-extension NotebookStructureViewController: BookImporterViewControllerDelegate {
-  func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int) {
-    let progressView = UIProgressView(progressViewStyle: .bar)
-    progressView.progress = 0
-    self.progressView = progressView
-  }
-
-  func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int) {
-    progressView?.progress = Float(partialCount) / Float(totalCount)
-  }
-
-  func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
-    progressView = nil
   }
 }

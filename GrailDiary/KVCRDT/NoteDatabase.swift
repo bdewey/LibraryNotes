@@ -343,6 +343,7 @@ public final class NoteDatabase {
     return collection.prompts[promptIdentifier.promptIndex]
   }
 
+  // TODO: This doesn't actually filter by tag
   public func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
     keyValueDocument.keyValueCRDT.readPublisher(keyPrefix: NoteDatabaseKey.promptPrefix(for: promptType))
       .map { results in

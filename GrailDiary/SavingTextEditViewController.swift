@@ -215,7 +215,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
       }
     } else {
-      navigationItem.rightBarButtonItems = [makeInsertBookDetailsButton(), notebookViewController?.makeNewNoteButtonItem()]
+      navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), makeInsertBookDetailsButton()]
         .compactMap { $0 }
       navigationController?.isToolbarHidden = true
       toolbarItems = []
