@@ -4,12 +4,13 @@ import BookKit
 import Combine
 import Logging
 import SnapKit
+import SwiftUI
 import UIKit
 
 private extension Logger {
   static let bookSearch: Logger = {
     var bookSearch = Logger(label: "org.brians-brain.BookSearch")
-    bookSearch.logLevel = .debug
+    bookSearch.logLevel = .info
     return bookSearch
   }()
 }
@@ -32,7 +33,7 @@ private struct ViewModel: Hashable, Identifiable {
 
 public protocol BookSearchViewControllerDelegate: AnyObject {
   /// The person selected a book.
-  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?)
+  func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: AugmentedBook, coverImage: UIImage?)
 
   /// The person canceled without selecting a book.
   /// (Note this is not guaranteed to be called with the pull-down presentation style)
@@ -42,11 +43,17 @@ public protocol BookSearchViewControllerDelegate: AnyObject {
   func bookSearchViewControllerDidSkip(_ viewController: BookSearchViewController)
 }
 
-/// Searches Google for information about a book.
+public extension AugmentedBook {
+  /// A blank book.
+  static let blank = AugmentedBook(title: "", authors: [])
+}
+
+@MainActor
 public final class BookSearchViewController: UIViewController {
-  public init(apiKey: String, showSkipButton: Bool) {
+  public init(apiKey: String, book: AugmentedBook = .blank, coverImage: UIImage? = nil, showSkipButton: Bool) {
     self.apiKey = apiKey
     self.showSkipButton = showSkipButton
+    self.model = BookEditViewModel(book: book, coverImage: coverImage)
     super.init(nibName: nil, bundle: nil)
   }
 
@@ -70,7 +77,8 @@ public final class BookSearchViewController: UIViewController {
     searchController.searchBar.setImage(UIImage(systemName: "barcode.viewfinder"), for: .bookmark, state: .normal)
     searchController.showsSearchResultsController = true
     searchController.searchBar.searchTextField.clearButtonMode = .whileEditing
-    searchController.obscuresBackgroundDuringPresentation = false
+    searchController.obscuresBackgroundDuringPresentation = true
+    searchController.delegate = self
     return searchController
   }()
 
@@ -116,6 +124,7 @@ public final class BookSearchViewController: UIViewController {
 
   private let imageCache = ImageCache()
   private var viewModels = [ViewModel]()
+  private var model = BookEditViewModel(book: AugmentedBook(title: "", authors: []), coverImage: nil)
   private lazy var decoder: JSONDecoder = {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
@@ -160,6 +169,24 @@ public final class BookSearchViewController: UIViewController {
 
   private var isShowingBarcodeScanner = false
 
+  private func hideSearchResults() {
+    Logger.bookSearch.info("Hiding search results")
+    UIView.animate(withDuration: 0.2) { [collectionView, barcodeScannerViewController] in
+      collectionView.alpha = 0
+      barcodeScannerViewController.view.alpha = 0
+    } completion: { [collectionView] success in
+      Logger.bookSearch.debug("Hiding done. Success = \(success), alpha = \(collectionView.alpha)")
+    }
+  }
+
+  private func showSearchResults() {
+    Logger.bookSearch.info("Showing search results")
+    UIView.animate(withDuration: 0.2) { [collectionView, barcodeScannerViewController] in
+      collectionView.alpha = 1
+      barcodeScannerViewController.view.alpha = 1
+    }
+  }
+
   @MainActor
   private func startScanning() async {
     guard !isShowingBarcodeScanner else { return }
@@ -195,16 +222,45 @@ public final class BookSearchViewController: UIViewController {
     }
   }
 
+  private lazy var skipButton = UIBarButtonItem(title: "Skip", primaryAction: UIAction { [weak self] _ in
+    guard let self = self else { return }
+    if self.model.isValid {
+      self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
+    } else {
+      self.delegate?.bookSearchViewControllerDidSkip(self)
+    }
+  })
+
+  private lazy var nextButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
+    guard let self = self else { return }
+    if self.model.isValid {
+      self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
+    } else {
+      Logger.bookSearch.error("Tapped Next on an invalid model. How?")
+    }
+  })
+
   override public func viewDidLoad() {
     super.viewDidLoad()
     addChild(barcodeScannerViewController)
     barcodeScannerViewController.didMove(toParent: self)
-    [
+    let hostingViewController = UIHostingController(rootView: BookEditView(model: model))
+    addChild(hostingViewController)
+    hostingViewController.didMove(toParent: self)
+
+    let subviews: [UIView] = [
+      hostingViewController.view,
       barcodeScannerViewController.view,
       collectionView,
       activityView,
-    ].forEach(view.addSubview)
+    ]
+    for subview in subviews {
+      view.addSubview(subview)
+    }
     updateBarcodeScannerConstraints(shouldShowBarcodeScanner: false)
+    hostingViewController.view.snp.makeConstraints { make in
+      make.edges.equalTo(view.safeAreaLayoutGuide)
+    }
     collectionView.snp.makeConstraints { make in
       make.top.equalTo(barcodeScannerViewController.view.snp.bottom)
       make.left.right.bottom.equalTo(view.safeAreaLayoutGuide)
@@ -212,6 +268,9 @@ public final class BookSearchViewController: UIViewController {
     activityView.snp.makeConstraints { make in
       make.center.equalToSuperview()
     }
+    collectionView.alpha = 0
+    barcodeScannerViewController.view.alpha = 0
+
     view.tintColor = .grailTint
     view.backgroundColor = .grailBackground
     let cancelButton = UIBarButtonItem(systemItem: .cancel)
@@ -221,21 +280,61 @@ public final class BookSearchViewController: UIViewController {
     }
     navigationItem.leftBarButtonItem = cancelButton
 
-    if showSkipButton {
-      let skipButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
-        guard let self = self else { return }
+    let skipButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
+      guard let self = self else { return }
+      if self.model.isValid {
+        self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
+      } else {
         self.delegate?.bookSearchViewControllerDidSkip(self)
-      })
-      navigationItem.rightBarButtonItem = skipButton
-    }
+      }
+    })
+    navigationItem.rightBarButtonItem = skipButton
     navigationItem.searchController = searchController
+    let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
+      self?.updateRightBarButtonItemIfNeeded()
+    }
+    CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
+    modelSubscription = model.objectWillChange.sink { [weak self] _ in
+      Logger.bookSearch.debug("Setting nextButtonNeedsUpdate to true. Model valid? \(self?.model.isValid ?? false)")
+      self?.nextButtonNeedsUpdate = true
+    }
+    updateRightBarButtonItemIfNeeded()
+  }
+
+  private var modelSubscription: AnyCancellable?
+  private var nextButtonNeedsUpdate = true
+
+  private func updateRightBarButtonItemIfNeeded() {
+    guard nextButtonNeedsUpdate else { return }
+    nextButtonNeedsUpdate = false
+    Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(model.isValid)")
+    if model.isValid {
+      navigationItem.rightBarButtonItem = nextButton
+      nextButton.isEnabled = true
+    } else {
+      if showSkipButton {
+        navigationItem.rightBarButtonItem = skipButton
+      } else {
+        navigationItem.rightBarButtonItem = nextButton
+        nextButton.isEnabled = false
+      }
+    }
   }
 }
 
 extension BookSearchViewController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    Logger.bookSearch.debug("Selected item at \(indexPath)")
     guard let viewModel = dataSource.itemIdentifier(for: indexPath) else { return }
-    delegate?.bookSearchViewController(self, didSelect: viewModel.book, coverImage: viewModel.coverImage)
+    model.book = AugmentedBook(viewModel.book)
+    model.coverImage = viewModel.coverImage
+    hideSearchResults()
+  }
+}
+
+extension BookSearchViewController: UISearchControllerDelegate {
+  public func didDismissSearchController(_ searchController: UISearchController) {
+    Logger.bookSearch.debug("Did dismiss seaarch controller")
   }
 }
 
@@ -257,6 +356,7 @@ extension BookSearchViewController: UISearchBarDelegate {
     if isShowingBarcodeScanner {
       stopScanning()
     } else {
+      showSearchResults()
       Task {
         await startScanning()
       }
@@ -272,6 +372,8 @@ extension BookSearchViewController: UISearchBarDelegate {
       activityView.stopAnimating()
       let viewModels = response.items.compactMap { ViewModel($0) }
       updateViewModels(viewModels)
+      showSearchResults()
+      searchController.isActive = false
     } catch {
       activityView.stopAnimating()
       throw error

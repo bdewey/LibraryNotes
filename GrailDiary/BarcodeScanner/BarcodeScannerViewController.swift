@@ -14,6 +14,7 @@ private extension Logger {
   }()
 }
 
+@MainActor
 public protocol BarcodeScannerViewControllerDelegate: AnyObject {
   func barcodeScannerViewController(_ viewController: BarcodeScannerViewController, didUpdateRecognizedBarcodes barcodes: Set<String>)
 }

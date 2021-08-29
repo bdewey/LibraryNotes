@@ -176,7 +176,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func editBookDetails(book: AugmentedBook) {
-    let bookViewController = BookEditDetailsViewController(book: book, coverImage: coverImage)
+    guard let apiKey = ApiKey.googleBooks else { return }
+    let bookViewController = BookSearchViewController(apiKey: apiKey, book: book, coverImage: coverImage, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Edit Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
@@ -320,9 +321,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
-  func textEditViewController(_ viewController: TextEditViewController, didAttach book: Book) {
+  func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook) {
     Logger.shared.info("Attaching book: \(book.title)")
-    note.metadata.book = AugmentedBook(book)
+    note.metadata.book = book
     note.metadata.modifiedTimestamp = Date()
     tryUpdateNote(note)
   }
@@ -406,7 +407,7 @@ extension SavingTextEditViewController: BookHeaderDelegate {
 }
 
 extension SavingTextEditViewController: BookSearchViewControllerDelegate {
-  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: Book, coverImage: UIImage?) {
+  public func bookSearchViewController(_ viewController: BookSearchViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
     if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
         _ = try storeImageData(imageData, type: .jpeg, key: type(of: noteStorage).coverImageKey)
@@ -415,7 +416,7 @@ extension SavingTextEditViewController: BookSearchViewControllerDelegate {
       }
     }
     textEditViewController(textEditViewController, didAttach: book)
-    textEditViewController.extendedNavigationHeaderView = BookHeader(book: AugmentedBook(book), coverImage: coverImage)
+    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 
@@ -428,19 +429,19 @@ extension SavingTextEditViewController: BookSearchViewControllerDelegate {
   }
 }
 
-extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
-  func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
-    dismiss(animated: true, completion: nil)
-  }
-
-  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook, coverImage: UIImage?) {
-    Logger.shared.info("Attaching book: \(book.title)")
-    self.coverImage = coverImage
-    note.metadata.book = book
-    note.metadata.modifiedTimestamp = Date()
-    tryUpdateNote(note)
-    let coverImage = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
-    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
-    dismiss(animated: true, completion: nil)
-  }
-}
+//extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
+//  func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
+//    dismiss(animated: true, completion: nil)
+//  }
+//
+//  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook, coverImage: UIImage?) {
+//    Logger.shared.info("Attaching book: \(book.title)")
+//    self.coverImage = coverImage
+//    note.metadata.book = book
+//    note.metadata.modifiedTimestamp = Date()
+//    tryUpdateNote(note)
+//    let coverImage = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
+//    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
+//    dismiss(animated: true, completion: nil)
+//  }
+//}
