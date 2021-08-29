@@ -11,7 +11,7 @@ import UIKit
 
 typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
 
-struct BookCollectionViewSnapshotBuilder {
+struct BookCollectionViewSnapshotBuilder: Equatable {
   var records: Set<Note.Identifier>
   var cardsPerDocument: [Note.Identifier: Int]
   var sortOrder: SortOrder = .author

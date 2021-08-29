@@ -7,6 +7,7 @@ import TextMarkupKit
 import UIKit
 
 /// Knows how to perform key actions with the document
+@MainActor
 public protocol DocumentTableControllerDelegate: AnyObject {
   /// Initiates studying.
   func presentStudySessionViewController(for studySession: StudySession)
@@ -18,6 +19,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
 }
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
+@MainActor
 public final class DocumentTableController: NSObject {
   /// Designated initializer.
   public init(
@@ -34,67 +36,7 @@ public final class DocumentTableController: NSObject {
     self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
-    let bookRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
-      guard case .page(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
-      let coverImage = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
-      let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
-      cell.contentConfiguration = configuration
-    }
-
-    let notebookPageRegistration = UICollectionView.CellRegistration<ClearBackgroundCell, Item> { cell, _, item in
-      guard case .page(let viewProperties) = item else { return }
-      var configuration = cell.defaultContentConfiguration()
-      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, style: .plainText(textStyle: .headline))
-      configuration.attributedText = title
-      let secondaryComponents: [String?] = [
-        viewProperties.noteProperties.summary,
-        viewProperties.noteProperties.tags.joined(separator: ", "),
-      ]
-      configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
-      configuration.secondaryTextProperties.color = .secondaryLabel
-      configuration.image = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
-
-      let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
-      let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
-      configuration.directionalLayoutMargins = .init(top: verticalMargin, leading: 0, bottom: verticalMargin, trailing: 0)
-      cell.contentConfiguration = configuration
-    }
-
-    let headerRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
-      guard case .header(let category, let count) = item else { return }
-      var configuration = UIListContentConfiguration.extraProminentInsetGroupedHeader()
-      configuration.prefersSideBySideTextAndSecondaryText = true
-      switch category {
-      case .wantToRead:
-        configuration.text = "Want to read"
-      case .currentlyReading:
-        configuration.text = "Currently reading"
-      case .read:
-        configuration.text = "Read"
-      case .other:
-        configuration.text = "Other"
-      }
-      configuration.secondaryText = "\(count)"
-      cell.contentConfiguration = configuration
-      cell.accessories = [.outlineDisclosure()]
-      cell.backgroundConfiguration?.backgroundColor = .grailSecondaryBackground
-    }
-
-    self.dataSource = UICollectionViewDiffableDataSource<DocumentSection, Item>(
-      collectionView: collectionView,
-      cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
-        switch item {
-        case .page(let viewProperties):
-          if viewProperties.noteProperties.book != nil {
-            return collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: item)
-          } else {
-            return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
-          }
-        case .header:
-          return collectionView.dequeueConfiguredReusableCell(using: headerRegistration, for: indexPath, item: item)
-        }
-      }
-    )
+    self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache)
 
     super.init()
     collectionView.delegate = self
@@ -115,9 +57,8 @@ public final class DocumentTableController: NSObject {
   }
 
   public var bookCount: Int {
-    let bookSections: [DocumentSection] = [.wantToRead, .currentlyReading, .read]
     var total = 0
-    for section in bookSections {
+    for section in BookSection.bookSections {
       total += dataSource.snapshot(for: section).bookCount
     }
     return total
@@ -131,6 +72,7 @@ public final class DocumentTableController: NSObject {
   private var needsPerformUpdates = false
   private var isPerformingUpdates = false
 
+  @MainActor
   private func updateDataSourceIfNeeded() {
     if needsPerformUpdates, !isPerformingUpdates {
       performUpdates(animated: true)
@@ -172,29 +114,30 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  private let dataSource: UICollectionViewDiffableDataSource<DocumentSection, Item>
+  private let dataSource: BookCollectionViewDataSource
 
-  var currentSortOrder = SortOrder.creationTimestamp {
+  var currentSortOrder = BookCollectionViewSnapshotBuilder.SortOrder.creationTimestamp {
     didSet {
       needsPerformUpdates = true
     }
   }
 
-  private var snapshotParameters: SnapshotParameters?
+  private var snapshotParameters: BookCollectionViewSnapshotBuilder?
 
+  @MainActor
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = bookNoteMetadata
       .map { $0.key }
       .filter { filteredPageIdentifiers?.contains($0) ?? true }
-    let newSnapshotParameters = SnapshotParameters(
+    let newSnapshotBuilder = BookCollectionViewSnapshotBuilder(
       records: Set(filteredRecordIdentifiers),
       cardsPerDocument: cardsPerDocument,
       sortOrder: currentSortOrder
     )
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
-    let reallyAnimate = animated && (newSnapshotParameters != snapshotParameters)
-    var collapsedSections = Set<DocumentSection>()
-    for section in DocumentSection.bookSections {
+    let reallyAnimate = animated && (newSnapshotBuilder != snapshotParameters)
+    var collapsedSections = Set<BookSection>()
+    for section in BookSection.bookSections {
       let sectionSnapshot = dataSource.snapshot(for: section)
       if let firstItem = sectionSnapshot.rootItems.first, !sectionSnapshot.isExpanded(firstItem) {
         collapsedSections.insert(section)
@@ -202,17 +145,17 @@ public final class DocumentTableController: NSObject {
     }
 
     isPerformingUpdates = true
-    dataSource.apply(newSnapshotParameters.snapshot(), animatingDifferences: reallyAnimate) {
+    dataSource.apply(BookCollectionViewSnapshot(), animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    let categorizedItems = newSnapshotParameters.categorizeMetadataRecords(bookNoteMetadata)
-    for section in DocumentSection.bookSections {
-      if var sectionSnapshot = newSnapshotParameters.sectionSnapshot(for: section, categorizedItems: categorizedItems) {
+    let categorizedItems = newSnapshotBuilder.categorizeMetadataRecords(bookNoteMetadata)
+    for section in BookSection.bookSections {
+      if var sectionSnapshot = newSnapshotBuilder.sectionSnapshot(for: section, categorizedItems: categorizedItems) {
         sectionSnapshot.collapseSections(in: collapsedSections)
         dataSource.apply(sectionSnapshot, to: section, animatingDifferences: reallyAnimate)
       }
     }
-    if let otherItems = newSnapshotParameters.sectionSnapshot(for: .other, categorizedItems: categorizedItems) {
+    if let otherItems = newSnapshotBuilder.sectionSnapshot(for: .other, categorizedItems: categorizedItems) {
       dataSource.apply(otherItems, to: .other, animatingDifferences: reallyAnimate)
     }
     selectedItems?.forEach { item in
@@ -220,7 +163,7 @@ public final class DocumentTableController: NSObject {
       collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
     delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers.count)
-    snapshotParameters = newSnapshotParameters
+    snapshotParameters = newSnapshotBuilder
   }
 }
 
@@ -232,7 +175,7 @@ extension DocumentTableController {
       return nil
     }
     switch item {
-    case .page(let properties):
+    case .book(let properties):
       let actions = availableItemActionConfigurations(properties).reversed().compactMap { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
     case .header:
@@ -240,7 +183,7 @@ extension DocumentTableController {
     }
   }
 
-  fileprivate func availableItemActionConfigurations(_ viewProperties: ViewProperties) -> [ActionConfiguration] {
+  fileprivate func availableItemActionConfigurations(_ viewProperties: BookViewProperties) -> [ActionConfiguration] {
     let actions: [ActionConfiguration?] = [
       .studyItem(viewProperties, sessionGenerator: sessionGenerator, delegate: delegate),
       .moveItemToWantToRead(viewProperties, in: database),
@@ -285,7 +228,7 @@ extension DocumentTableController {
       }
     }
 
-    static func deleteItem(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+    static func deleteItem(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       return ActionConfiguration(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
         if viewProperties.noteProperties.folder == PredefinedFolder.recentlyDeleted.rawValue {
           try database.deleteNote(noteIdentifier: viewProperties.pageKey)
@@ -299,7 +242,7 @@ extension DocumentTableController {
       }
     }
 
-    static func moveItemToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+    static func moveItemToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       guard viewProperties.bookCategory != .read else {
         return nil
       }
@@ -320,7 +263,7 @@ extension DocumentTableController {
       }
     }
 
-    static func moveItemToCurrentlyReading(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+    static func moveItemToCurrentlyReading(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       guard viewProperties.bookCategory != .currentlyReading else {
         return nil
       }
@@ -341,7 +284,7 @@ extension DocumentTableController {
       }
     }
 
-    static func moveItemToWantToRead(_ viewProperties: ViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
+    static func moveItemToWantToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
       guard viewProperties.bookCategory != .wantToRead else {
         return nil
       }
@@ -359,7 +302,7 @@ extension DocumentTableController {
     }
 
     static func studyItem(
-      _ viewProperties: ViewProperties,
+      _ viewProperties: BookViewProperties,
       sessionGenerator: SessionGenerator,
       delegate: DocumentTableControllerDelegate?
     ) -> ActionConfiguration? {
@@ -367,7 +310,7 @@ extension DocumentTableController {
       return ActionConfiguration(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
         Task {
           let studySession = try await sessionGenerator.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
-          delegate?.presentStudySessionViewController(for: studySession)
+          await delegate?.presentStudySessionViewController(for: studySession)
         }
       }
     }
@@ -385,7 +328,7 @@ public extension DocumentTableController {
       return false
     }
     switch item {
-    case .page(let viewProperties):
+    case .book(let viewProperties):
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
       return true
     case .header:
@@ -402,7 +345,7 @@ public extension DocumentTableController {
 
   func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
     let item = dataSource.snapshot().itemIdentifiers.first { item in
-      if case .page(let viewProperties) = item {
+      if case .book(let viewProperties) = item {
         return viewProperties.pageKey == noteIdentifier
       } else {
         return false
@@ -414,7 +357,7 @@ public extension DocumentTableController {
 
   func selectFirstNote() {
     let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { $0.bookCategory != nil })
-    if let firstNote = firstNote, case .page(let viewProperties) = firstNote {
+    if let firstNote = firstNote, case .book(let viewProperties) = firstNote {
       delegate?.showPage(with: viewProperties.pageKey, shiftFocus: false)
     }
   }
@@ -478,7 +421,7 @@ extension DocumentTableController: UICollectionViewDelegate {
   ) -> UIContextMenuConfiguration? {
     guard
       let item = dataSource.itemIdentifier(for: indexPath),
-      case .page(let itemProperties) = item
+      case .book(let itemProperties) = item
     else {
       return nil
     }

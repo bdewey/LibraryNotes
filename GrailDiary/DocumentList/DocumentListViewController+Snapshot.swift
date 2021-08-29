@@ -226,21 +226,21 @@ internal extension DocumentTableController {
   }
 }
 
-internal extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == DocumentTableController.Item {
+internal extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == BookCollectionViewItem {
   var bookCount: Int {
     var bookCount = 0
     for item in rootItems {
       switch item {
       case .header(_, let count):
         bookCount += count
-      case .page:
+      case .book:
         bookCount += 1
       }
     }
     return bookCount
   }
 
-  mutating func collapseSections(in collapsedSections: Set<DocumentTableController.DocumentSection>) {
+  mutating func collapseSections(in collapsedSections: Set<BookSection>) {
     for item in rootItems {
       guard case .header(let category, _) = item else { continue }
       if collapsedSections.contains(category) {

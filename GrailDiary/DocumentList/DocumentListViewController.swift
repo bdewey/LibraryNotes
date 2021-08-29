@@ -310,7 +310,7 @@ final class DocumentListViewController: UIViewController {
       self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
     }
 
-    let sortActions = DocumentTableController.SortOrder.allCases.map { sortOrder -> UIAction in
+    let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
         self?.dataSource.currentSortOrder = sortOrder
       }
