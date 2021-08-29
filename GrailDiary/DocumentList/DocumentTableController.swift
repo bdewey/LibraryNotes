@@ -124,7 +124,6 @@ public final class DocumentTableController: NSObject {
 
   private var snapshotParameters: BookCollectionViewSnapshotBuilder?
 
-  @MainActor
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = bookNoteMetadata
       .map { $0.key }
@@ -183,8 +182,8 @@ extension DocumentTableController {
     }
   }
 
-  fileprivate func availableItemActionConfigurations(_ viewProperties: BookViewProperties) -> [ActionConfiguration] {
-    let actions: [ActionConfiguration?] = [
+  fileprivate func availableItemActionConfigurations(_ viewProperties: BookViewProperties) -> [BookAction] {
+    let actions: [BookAction?] = [
       .studyItem(viewProperties, sessionGenerator: sessionGenerator, delegate: delegate),
       .moveItemToWantToRead(viewProperties, in: database),
       .moveItemToCurrentlyReading(viewProperties, in: database),
@@ -192,128 +191,6 @@ extension DocumentTableController {
       .deleteItem(viewProperties, in: database),
     ]
     return actions.compactMap { $0 }
-  }
-
-  fileprivate struct ActionConfiguration {
-    var title: String?
-    var image: UIImage?
-    var backgroundColor: UIColor?
-    var destructive: Bool = false
-    var availableAsSwipeAction = true
-    var handler: () throws -> Void
-
-    func asContextualAction() -> UIContextualAction? {
-      guard availableAsSwipeAction else { return nil }
-      let action = UIContextualAction(style: destructive ? .destructive : .normal, title: title) { _, _, completion in
-        do {
-          try handler()
-          completion(true)
-        } catch {
-          Logger.shared.error("Unexpected error executing action \(String(describing: title)): \(error)")
-          completion(false)
-        }
-      }
-      action.image = image
-      action.backgroundColor = backgroundColor
-      return action
-    }
-
-    func asAction() -> UIAction {
-      UIAction(title: title ?? "", image: image, attributes: destructive ? [.destructive] : []) { _ in
-        do {
-          try handler()
-        } catch {
-          Logger.shared.error("Unexpected error executing action \(String(describing: title)): \(error)")
-        }
-      }
-    }
-
-    static func deleteItem(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      return ActionConfiguration(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
-        if viewProperties.noteProperties.folder == PredefinedFolder.recentlyDeleted.rawValue {
-          try database.deleteNote(noteIdentifier: viewProperties.pageKey)
-        } else {
-          try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in
-            var note = note
-            note.metadata.folder = PredefinedFolder.recentlyDeleted.rawValue
-            return note
-          })
-        }
-      }
-    }
-
-    static func moveItemToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      guard viewProperties.bookCategory != .read else {
-        return nil
-      }
-      return ActionConfiguration(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
-        try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
-          var note = note
-          if var book = note.metadata.book {
-            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-            if book.readingHistory == nil {
-              book.readingHistory = ReadingHistory()
-            }
-            book.readingHistory!.finishReading(finishDate: today)
-            note.metadata.book = book
-          }
-          return note
-        })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
-      }
-    }
-
-    static func moveItemToCurrentlyReading(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      guard viewProperties.bookCategory != .currentlyReading else {
-        return nil
-      }
-      return ActionConfiguration(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
-        try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
-          var note = note
-          if var book = note.metadata.book {
-            let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-            if book.readingHistory == nil {
-              book.readingHistory = ReadingHistory()
-            }
-            book.readingHistory!.startReading(startDate: today)
-            note.metadata.book = book
-          }
-          return note
-        })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
-      }
-    }
-
-    static func moveItemToWantToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> ActionConfiguration? {
-      guard viewProperties.bookCategory != .wantToRead else {
-        return nil
-      }
-      return ActionConfiguration(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {
-        try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
-          var note = note
-          if var book = note.metadata.book {
-            book.readingHistory = nil
-            note.metadata.book = book
-          }
-          return note
-        })
-        Logger.shared.info("Moved \(viewProperties.pageKey) to 'want to read'")
-      }
-    }
-
-    static func studyItem(
-      _ viewProperties: BookViewProperties,
-      sessionGenerator: SessionGenerator,
-      delegate: DocumentTableControllerDelegate?
-    ) -> ActionConfiguration? {
-      if viewProperties.cardCount == 0 { return nil }
-      return ActionConfiguration(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
-        Task {
-          let studySession = try await sessionGenerator.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
-          await delegate?.presentStudySessionViewController(for: studySession)
-        }
-      }
-    }
   }
 }
 
@@ -444,7 +321,7 @@ private extension DocumentTableController {
     }
     Task {
       await Task.sleep(1000000000)
-      await refreshControl.endRefreshing()
+      refreshControl.endRefreshing()
     }
   }
 

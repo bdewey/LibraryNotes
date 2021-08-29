@@ -52,7 +52,6 @@
 		D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33145782662926C00B4687F /* DocumentPickerView.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
 		D3378CD926D92DAA006750EC /* UIResponder+Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */; };
-		D3378CDC26DBC13E006750EC /* DocumentListViewController+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */; };
 		D3378CDE26DBC373006750EC /* PersonNameComponents+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */; };
 		D3378CE026DBC3D4006750EC /* CGFloat+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */; };
 		D3378CE226DBC47C006750EC /* BookCollectionViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CE126DBC47C006750EC /* BookCollectionViewDataSource.swift */; };
@@ -61,6 +60,7 @@
 		D3378CE826DBC7E2006750EC /* BookCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CE726DBC7E2006750EC /* BookCollectionViewItem.swift */; };
 		D3378CEA26DBC9C5006750EC /* ClearBackgroundCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CE926DBC9C5006750EC /* ClearBackgroundCell.swift */; };
 		D3378CEC26DBCE5D006750EC /* BookCollectionViewSnapshotBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CEB26DBCE5D006750EC /* BookCollectionViewSnapshotBuilder.swift */; };
+		D3378CEE26DBE934006750EC /* BookAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CED26DBE934006750EC /* BookAction.swift */; };
 		D339C6FE21EB928700924178 /* QuotePrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FD21EB928700924178 /* QuotePrompt.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D33F647922999138008C3A92 /* String+ParsingHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33F647822999138008C3A92 /* String+ParsingHelpers.swift */; };
@@ -226,7 +226,6 @@
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
 		D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIResponder+Debugging.swift"; sourceTree = "<group>"; };
-		D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentListViewController+Snapshot.swift"; sourceTree = "<group>"; };
 		D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersonNameComponents+Comparable.swift"; sourceTree = "<group>"; };
 		D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGFloat+Extensions.swift"; sourceTree = "<group>"; };
 		D3378CE126DBC47C006750EC /* BookCollectionViewDataSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCollectionViewDataSource.swift; sourceTree = "<group>"; };
@@ -235,6 +234,7 @@
 		D3378CE726DBC7E2006750EC /* BookCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCollectionViewItem.swift; sourceTree = "<group>"; };
 		D3378CE926DBC9C5006750EC /* ClearBackgroundCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearBackgroundCell.swift; sourceTree = "<group>"; };
 		D3378CEB26DBCE5D006750EC /* BookCollectionViewSnapshotBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCollectionViewSnapshotBuilder.swift; sourceTree = "<group>"; };
+		D3378CED26DBE934006750EC /* BookAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAction.swift; sourceTree = "<group>"; };
 		D339C6FD21EB928700924178 /* QuotePrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotePrompt.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D33F647822999138008C3A92 /* String+ParsingHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+ParsingHelpers.swift"; sourceTree = "<group>"; };
@@ -382,6 +382,7 @@
 		D3378CDA26DAABEC006750EC /* DocumentList */ = {
 			isa = PBXGroup;
 			children = (
+				D3378CED26DBE934006750EC /* BookAction.swift */,
 				D3378CE126DBC47C006750EC /* BookCollectionViewDataSource.swift */,
 				D3378CE726DBC7E2006750EC /* BookCollectionViewItem.swift */,
 				D3378CEB26DBCE5D006750EC /* BookCollectionViewSnapshotBuilder.swift */,
@@ -389,7 +390,6 @@
 				D3378CE526DBC6CC006750EC /* BookViewProperties.swift */,
 				D3378CE926DBC9C5006750EC /* ClearBackgroundCell.swift */,
 				D375D33B20ED9BEC00EAB4F0 /* DocumentListViewController.swift */,
-				D3378CDB26DBC13E006750EC /* DocumentListViewController+Snapshot.swift */,
 				D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */,
 				D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */,
 			);
@@ -773,6 +773,7 @@
 				D362999226B3236300AF8F23 /* BookNoteMetadata.swift in Sources */,
 				D31AFACB229D61EE00ED2B76 /* PromptCollection.swift in Sources */,
 				D32215EF26C41108000BA772 /* SchedulingParameters+Standard.swift in Sources */,
+				D3378CEE26DBE934006750EC /* BookAction.swift in Sources */,
 				D37B0DBD23CE227900F01D29 /* Sequence+Set.swift in Sources */,
 				D3378CE826DBC7E2006750EC /* BookCollectionViewItem.swift in Sources */,
 				D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */,
@@ -822,7 +823,6 @@
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D369182926BAD1E9001EB512 /* NoteDatabaseKey.swift in Sources */,
 				D37C887A26B5C9E900EC30C8 /* NoteDatabase.swift in Sources */,
-				D3378CDC26DBC13E006750EC /* DocumentListViewController+Snapshot.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,

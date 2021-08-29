@@ -1,12 +1,7 @@
-//
-//  BookCollectionViewItem.swift
-//  BookCollectionViewItem
-//
-//  Created by Brian Dewey on 8/29/21.
-//  Copyright © 2021 Brian's Brain. All rights reserved.
-//
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
+import UIKit
 
 /// An item in the book collection view.
 enum BookCollectionViewItem: Hashable, CustomStringConvertible {
@@ -40,6 +35,30 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
       return properties.bookCategory
     } else {
       return nil
+    }
+  }
+}
+
+internal extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == BookCollectionViewItem {
+  var bookCount: Int {
+    var bookCount = 0
+    for item in rootItems {
+      switch item {
+      case .header(_, let count):
+        bookCount += count
+      case .book:
+        bookCount += 1
+      }
+    }
+    return bookCount
+  }
+
+  mutating func collapseSections(in collapsedSections: Set<BookSection>) {
+    for item in rootItems {
+      guard case .header(let category, _) = item else { continue }
+      if collapsedSections.contains(category) {
+        collapse([item])
+      }
     }
   }
 }
