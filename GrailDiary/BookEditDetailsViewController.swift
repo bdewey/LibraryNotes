@@ -361,19 +361,15 @@ extension BookEditDetailsViewController: UISearchBarDelegate {
 
   @MainActor
   private func searchGoogleBooks(for searchTerm: String, apiKey: String) async throws {
-    // TODO: Xcode 13 Beta 3 doesn't recognize "defer" blocks as being in the global actor
-    do {
-      activityView.startAnimating()
-      let response = try await GoogleBooks.search(for: searchTerm, apiKey: apiKey)
+    activityView.startAnimating()
+    defer {
       activityView.stopAnimating()
-      let viewModels = response.items.compactMap { SearchResultsViewModel($0) }
-      updateViewModels(viewModels)
-      showSearchResults()
-      searchController.isActive = false
-    } catch {
-      activityView.stopAnimating()
-      throw error
     }
+    let response = try await GoogleBooks.search(for: searchTerm, apiKey: apiKey)
+    let viewModels = response.items.compactMap { SearchResultsViewModel($0) }
+    updateViewModels(viewModels)
+    showSearchResults()
+    searchController.isActive = false
   }
 }
 

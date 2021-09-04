@@ -20,7 +20,7 @@
         }
       },
       {
-        "package": "GRDB.swift",
+        "package": "GRDB",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
           "branch": "xcode13",
@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
         "state": {
           "branch": "main",
-          "revision": "fa5af2150353eaa68b7fdc55c4656628d17750ba",
+          "revision": "838be73b167d2c1eafb09a6c07a7aee15250b2f7",
           "version": null
         }
       },
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
+          "revision": "173f567a2dfec11d74588eea82cecea555bdc0bc",
+          "version": "1.4.0"
         }
       },
       {
@@ -69,8 +69,8 @@
         "repositoryURL": "https://github.com/crspybits/swift-log-file",
         "state": {
           "branch": null,
-          "revision": "aa94b38bf88c7d9cbc87ceafcdffadaffbc2bffa",
-          "version": "0.1.0"
+          "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
+          "version": "0.0.1"
         }
       },
       {
@@ -80,15 +80,6 @@
           "branch": null,
           "revision": "b91b87a43a3915b0a482fb8ac26fc54f1769dd72",
           "version": "0.7.3"
-        }
-      },
-      {
-        "package": "XCGLogger",
-        "repositoryURL": "https://github.com/DaveWoodCom/XCGLogger.git",
-        "state": {
-          "branch": null,
-          "revision": "a9c4667b247928a29bdd41be2ec2c8d304215a54",
-          "version": "7.0.1"
         }
       }
     ]
