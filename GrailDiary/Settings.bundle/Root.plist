@@ -10,19 +10,19 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Immediately schedule new prompts</string>
+			<string>Enable experimental features</string>
 			<key>Key</key>
-			<string>immediately_schedule_prompts</string>
+			<string>enable_experimental_features</string>
 			<key>DefaultValue</key>
-			<true/>
+			<false/>
 		</dict>
 		<dict>
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>Use iCloud</string>
+			<string>Immediately schedule new prompts</string>
 			<key>Key</key>
-			<string>use_icloud</string>
+			<string>immediately_schedule_prompts</string>
 			<key>DefaultValue</key>
 			<true/>
 		</dict>

@@ -296,7 +296,7 @@ public final class TextEditViewController: UIViewController {
       })
     }
 
-    if !importActions.isEmpty {
+    if !importActions.isEmpty && UserDefaults.standard.enableExperimentalFeatures {
       inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), menu: UIMenu(children: importActions)))
     }
 
