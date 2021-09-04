@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## [0.54.0-beta] - 2021-09-04
 
 ### Added
 
 - Unified interface for searching for books and editing book details
+- "Experimental features" setting that controls the Import Kindle Highlights feature.
 
 ### Fixed
 
