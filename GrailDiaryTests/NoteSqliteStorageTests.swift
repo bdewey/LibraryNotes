@@ -142,6 +142,25 @@ final class NoteSqliteStorageTests: XCTestCase {
     XCTAssertEqual(database.studyLog.count, studySession.count)
   }
 
+  func testStudySessionWithIncorrectLearningItems() async throws {
+    _ = try database.createNote(Note.withChallenges)
+    // New items aren't eligible for at 3-5 days.
+    let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
+    var studySession = try await database.studySession(filter: nil, date: future)
+    XCTAssertEqual(3, studySession.count)
+    var expectedIncorrectAnswers = 3
+    while studySession.currentPrompt != nil {
+      if expectedIncorrectAnswers > 0 {
+        expectedIncorrectAnswers -= 1
+        studySession.recordAnswer(correct: false)
+      } else {
+        studySession.recordAnswer(correct: true)
+      }
+    }
+    // No asserts needed -- this test passes if this doesn't throw an error.
+    try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
+  }
+
   func testChallengeStabilityAcrossUnrelatedEdits() async throws {
     let originalText = """
     # Shakespeare quotes

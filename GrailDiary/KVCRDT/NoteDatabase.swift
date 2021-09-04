@@ -309,7 +309,7 @@ public final class NoteDatabase {
           delay = 0
         }
 
-        try schedulingItem.update(with: .standard, recallEase: entry.recallEase, timeIntervalSincePriorReview: delay)
+        try schedulingItem.update(with: .standard, recallEase: schedulingItem.recallEase(for: entry), timeIntervalSincePriorReview: delay)
         info.promptStatistics[promptIdentifier.promptIndex].applySchedulingItem(schedulingItem, on: date)
 
         if buryRelatedPrompts {
@@ -615,14 +615,16 @@ private extension Dictionary where Key == ScopedKey, Value == [Version] {
   }
 }
 
-private extension StudyLog.Entry {
-  var recallEase: RecallEase {
-    if statistics.correct > 0, statistics.incorrect == 0 {
+private extension PromptSchedulingMetadata {
+  func recallEase(for studyLogEntry: StudyLog.Entry) -> RecallEase {
+    if studyLogEntry.statistics.incorrect == 0, studyLogEntry.statistics.correct > 0 {
       return .good
     }
-    if statistics.correct > 0, statistics.incorrect == 1 {
+    switch mode {
+    case .learning:
+      return .again
+    case .review:
       return .hard
     }
-    return .again
   }
 }
