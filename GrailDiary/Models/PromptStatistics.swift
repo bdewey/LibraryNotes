@@ -40,10 +40,12 @@ public extension PromptStatistics {
         reviewSpacingFactor: spacedRepetitionFactor
       )
     } else {
-      // Create an item that's *just about to graduate* if we've never seen it before.
-      // That's because we make new items due "last learning interval" after creation
+      // TODO: Fully support the Anki scheduler.
+      // I'm trying to set the appropriate learning step here, but it's kind of pointless because
+      // I don't actually persist this. Once you have a due date, you're in "review" mode.
+      let learningStep = UserDefaults.standard.immediatelySchedulePrompts ? 0 : SchedulingParameters.standard.learningIntervals.count
       return PromptSchedulingMetadata(
-        mode: .learning(step: SchedulingParameters.standard.learningIntervals.count),
+        mode: .learning(step: learningStep),
         reviewCount: reviewCount,
         lapseCount: lapseCount,
         interval: idealInterval ?? 0,
