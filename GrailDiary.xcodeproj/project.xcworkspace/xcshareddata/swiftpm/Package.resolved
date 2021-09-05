@@ -33,7 +33,7 @@
         "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
         "state": {
           "branch": "main",
-          "revision": "838be73b167d2c1eafb09a6c07a7aee15250b2f7",
+          "revision": "03ea5520c46144b54a5119987c2a9c1978c835f8",
           "version": null
         }
       },
@@ -60,8 +60,8 @@
         "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "173f567a2dfec11d74588eea82cecea555bdc0bc",
-          "version": "1.4.0"
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
         }
       },
       {

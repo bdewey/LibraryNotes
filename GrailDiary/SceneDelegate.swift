@@ -38,13 +38,15 @@ extension UTType {
     {
       browser.configure(with: userActivity)
     }
-    if Self.isUITesting {
-      let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("grail")
-      // swiftlint:disable:next force_try
-      try! browser.openDocument(at: temporaryURL, createWelcomeContent: false, animated: false)
+    Task {
+      if Self.isUITesting {
+        let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("grail")
+        // swiftlint:disable:next force_try
+        try! await browser.openDocument(at: temporaryURL, createWelcomeContent: false, animated: false)
+      }
+      self.window = window
+      UITableView.appearance().backgroundColor = .grailGroupedBackground
     }
-    self.window = window
-    UITableView.appearance().backgroundColor = .grailGroupedBackground
   }
 
   func sceneWillResignActive(_ scene: UIScene) {

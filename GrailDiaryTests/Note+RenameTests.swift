@@ -9,12 +9,7 @@ final class NoteRenameTests: XCTestCase {
 
   override func setUp() async throws {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    let database = try NoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
-    let success = await database.open()
-    if !success {
-      throw TestError.couldNotOpenDatabase
-    }
-    self.database = database
+    self.database = try await NoteDatabase(fileURL: fileURL, author: Author(id: UUID(), name: "test"))
   }
 
   override func tearDown() async throws {

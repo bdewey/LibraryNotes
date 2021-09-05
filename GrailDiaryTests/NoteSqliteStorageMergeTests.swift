@@ -240,14 +240,10 @@ private extension NoteSqliteStorageMergeTests {
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   ) async throws -> NoteDatabase {
-    let database = try NoteDatabase(
+    return try await NoteDatabase(
       fileURL: fileURL,
       author: Author(id: device.identifierForVendor!, name: device.name)
     )
-    if await !database.open() {
-      throw TestError.couldNotOpenDatabase
-    }
-    return database
   }
 
   func runKeyValueTestCase(_ testCase: MergeTestCase) async throws {
