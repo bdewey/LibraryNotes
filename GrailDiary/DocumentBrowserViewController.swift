@@ -84,7 +84,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   ) async throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
-    if url.pathExtension == "kvcrdt" {
+    if url.pathExtension == "bookish" || url.pathExtension == "kvcrdt" {
       guard let author = Author(.current) else {
         throw NoteDatabaseError.noDeviceUUID
       }
@@ -138,7 +138,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   private func makeNewDocument() async throws -> URL? {
     let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-    let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
+    let url = directoryURL.appendingPathComponent("library").appendingPathExtension("bookish")
     let author = Author(UIDevice.current)!
     let document = try await NoteDatabase(fileURL: url, author: author)
     Logger.shared.info("Attempting to create a document at \(url.path)")

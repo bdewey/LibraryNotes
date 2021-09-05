@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Grail Diary</string>
+	<string>Bookish Notes</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -64,9 +64,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Grail Diary uses the camera to scan barcodes for book search.</string>
+	<string>Bookish Notes uses the camera to scan barcodes for book search.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Grail Diary can save your quotes to your Photos Libary.</string>
+	<string>Bookish Notes can save your quotes to your Photos Libary.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.org.brians-brain.CommonplaceBookApp</key>
@@ -132,6 +132,28 @@
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
 	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>org.brians-brain.kvcrdt</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Bookish Notes</string>
+			<key>UTTypeIconFiles</key>
+			<array/>
+			<key>UTTypeIdentifier</key>
+			<string>org.brians-brain.bookish</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>bookish</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>UTImportedTypeDeclarations</key>
 	<array>
 		<dict>
 			<key>UTTypeConformsTo</key>

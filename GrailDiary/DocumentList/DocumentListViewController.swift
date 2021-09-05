@@ -434,7 +434,7 @@ extension DocumentListViewController {
       guard let self = self else { return }
       Logger.shared.info("Sending feedback")
       let mailComposer = MFMailComposeViewController()
-      mailComposer.setSubject("Grail Diary Feedback")
+      mailComposer.setSubject("\(AppDelegate.appName) Feedback")
       mailComposer.setToRecipients(["bdewey@gmail.com"])
       mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
       if let zippedData = try? LogFileDirectory.shared.makeZippedLog() {

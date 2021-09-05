@@ -6,6 +6,7 @@ import UniformTypeIdentifiers
 
 extension UTType {
   static let kvcrdt = UTType("org.brians-brain.kvcrdt")!
+  static let bookish = UTType("org.brians-brain.bookish")!
 }
 
 @objc final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -28,7 +29,7 @@ extension UTType {
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
 
-    let browser = DocumentBrowserViewController(forOpening: [.kvcrdt])
+    let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .bookish])
 
     window.rootViewController = browser
     window.makeKeyAndVisible()
