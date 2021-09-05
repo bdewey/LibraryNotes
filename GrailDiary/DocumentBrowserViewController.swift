@@ -59,14 +59,15 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
       Logger.shared.error("In DocumentBrowserViewController.configure(with:), but cannot get URL from activity")
       return
     }
-    do {
-      var isStale = false
-      let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
-      try openDocument(at: url, createWelcomeContent: false, animated: false) { [self] in
-        self.topLevelViewController?.configure(with: userActivity)
+    Task {
+      do {
+        var isStale = false
+        let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
+        try await openDocument(at: url, createWelcomeContent: false, animated: false)
+        topLevelViewController?.configure(with: userActivity)
+      } catch {
+        Logger.shared.error("Error opening saved document: \(error)")
       }
-    } catch {
-      Logger.shared.error("Error opening saved document: \(error)")
     }
   }
 }
@@ -75,46 +76,49 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   /// Opens a document.
   /// - parameter url: The URL of the document to open
   /// - parameter controller: The view controller from which to present the DocumentListViewController
+  @MainActor
   func openDocument(
     at url: URL,
     createWelcomeContent: Bool,
-    animated: Bool,
-    completion: (() -> Void)? = nil
-  ) throws {
+    animated: Bool
+  ) async throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
-    Task {
-      let database: NoteDatabase
-      if url.pathExtension == "kvcrdt" {
-        guard let author = Author(.current) else {
-          throw NoteDatabaseError.noDeviceUUID
-        }
-        database = try await NoteDatabase(fileURL: url, author: author)
-      } else {
-        throw CocoaError(CocoaError.fileReadUnsupportedScheme)
+    let database: NoteDatabase
+    if url.pathExtension == "kvcrdt" {
+      guard let author = Author(.current) else {
+        throw NoteDatabaseError.noDeviceUUID
       }
-      Logger.shared.info("Using document at \(database.fileURL)")
-      let properties: [String: String] = [
-        "documentState": String(describing: database.documentState),
-      ]
-      Logger.shared.info("In open completion handler. \(properties)")
-      if !AppDelegate.isUITesting, createWelcomeContent {
-        database.tryCreatingWelcomeContent()
-      }
-      let viewController = NotebookViewController(database: database)
-      viewController.modalPresentationStyle = .fullScreen
-      viewController.modalTransitionStyle = .crossDissolve
-      viewController.view.tintColor = .systemOrange
-      self.present(viewController, animated: animated, completion: nil)
-      self.topLevelViewController = viewController
-      completion?()
+      database = try await NoteDatabase(fileURL: url, author: author)
+    } else {
+      throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
+    Logger.shared.info("Using document at \(database.fileURL)")
+    let properties: [String: String] = [
+      "documentState": String(describing: database.documentState),
+    ]
+    Logger.shared.info("In open completion handler. \(properties)")
+    if !AppDelegate.isUITesting, createWelcomeContent {
+      database.tryCreatingWelcomeContent()
+    }
+    let viewController = NotebookViewController(database: database)
+    viewController.modalPresentationStyle = .fullScreen
+    viewController.modalTransitionStyle = .crossDissolve
+    viewController.view.tintColor = .systemOrange
+    self.present(viewController, animated: animated, completion: nil)
+    self.topLevelViewController = viewController
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
     guard let url = documentURLs.first else {
       return
     }
-    try? openDocument(at: url, createWelcomeContent: false, animated: true)
+    Task {
+      do {
+        try await openDocument(at: url, createWelcomeContent: false, animated: true)
+      } catch {
+        Logger.shared.error("Unexpected error opening document at \(url): \(error)")
+      }
+    }
   }
 
   func documentBrowser(
@@ -147,7 +151,13 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
     Logger.shared.info("Imported document to \(destinationURL)")
-    try? openDocument(at: destinationURL, createWelcomeContent: false, animated: true)
+    Task {
+      do {
+        try await openDocument(at: destinationURL, createWelcomeContent: false, animated: true)
+      } catch {
+        Logger.shared.error("Error opening document at \(destinationURL): \(error)")
+      }
+    }
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
