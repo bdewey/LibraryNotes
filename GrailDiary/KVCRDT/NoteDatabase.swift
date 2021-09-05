@@ -80,11 +80,14 @@ public final class NoteDatabase {
   }
 
   public func merge(other: NoteDatabase) throws {
-    try keyValueDocument.keyValueCRDT.merge(source: other.keyValueDocument.keyValueCRDT)
+    guard let keyValueCRDT = keyValueDocument.keyValueCRDT, let otherKeyValueCRDT = other.keyValueDocument.keyValueCRDT else {
+      throw NoteDatabaseError.databaseIsNotOpen
+    }
+    try keyValueCRDT.merge(source: otherKeyValueCRDT)
   }
 
   public var notesDidChange: AnyPublisher<Void, Never> {
-    keyValueDocument.keyValueCRDT
+    keyValueDocument.keyValueCRDT!
       .didChangePublisher()
       .map { _ in () } // turn any value to a Void
       .catch { _ in Just<Void>(()) }
@@ -93,7 +96,7 @@ public final class NoteDatabase {
 
   public var bookMetadata: [String: BookNoteMetadata] {
     do {
-      let results = try keyValueDocument.keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
+      let results = try keyValueDocument.keyValueCRDT!.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
       return try results.asBookNoteMetadata()
     } catch {
       Logger.keyValueNoteDatabase.critical("Could not read book metadata: \(error)")
@@ -102,14 +105,14 @@ public final class NoteDatabase {
   }
 
   public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
-    keyValueDocument.keyValueCRDT
+    keyValueDocument.keyValueCRDT!
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .tryMap { try $0.asBookNoteMetadata() }
       .eraseToAnyPublisher()
   }
 
   public func readPublisher(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) -> AnyPublisher<[NoteDatabaseKey: [Version]], Error> {
-    keyValueDocument.keyValueCRDT
+    keyValueDocument.keyValueCRDT!
       .readPublisher(scope: noteIdentifier, key: key.rawValue)
       .map { scopedKeyDictionary in
         assert(scopedKeyDictionary.count < 2)
@@ -120,7 +123,7 @@ public final class NoteDatabase {
 
   /// Publishes individual key/value updates to the database.
   public var updatedValuesPublisher: AnyPublisher<(ScopedKey, [Version]), Never> {
-    keyValueDocument.keyValueCRDT.updatedValuesPublisher
+    keyValueDocument.keyValueCRDT!.updatedValuesPublisher
   }
 
   public func createNote(_ note: Note) throws -> Note.Identifier {
@@ -132,7 +135,7 @@ public final class NoteDatabase {
   }
 
   public func note(noteIdentifier: Note.Identifier) throws -> Note {
-    let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
+    let onDiskContents = try keyValueDocument.keyValueCRDT!.bulkRead(scope: noteIdentifier)
     Logger.keyValueNoteDatabase.info("Trying to read note \(noteIdentifier). Found \(onDiskContents.count) records.")
     guard let payload = try NoteUpdatePayload(onDiskContents: onDiskContents), let note = try payload.asNote() else {
       Logger.keyValueNoteDatabase.error("Could not convert on-disk contents into a note")
@@ -142,7 +145,7 @@ public final class NoteDatabase {
   }
 
   public func updateNote(noteIdentifier: Note.Identifier, updateBlock: (Note) -> Note) throws {
-    let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(scope: noteIdentifier)
+    let onDiskContents = try keyValueDocument.keyValueCRDT!.bulkRead(scope: noteIdentifier)
     let payload = try NoteUpdatePayload(onDiskContents: onDiskContents) ?? NoteUpdatePayload(noteIdentifier: noteIdentifier)
     let initialNote = try payload.asNote() ?? Note(markdown: "")
     let updatedNote = updateBlock(initialNote)
@@ -150,17 +153,17 @@ public final class NoteDatabase {
   }
 
   public func deleteNote(noteIdentifier: Note.Identifier) throws {
-    let updates = try keyValueDocument.keyValueCRDT.keys(scope: noteIdentifier).dictionaryMap {
+    let updates = try keyValueDocument.keyValueCRDT!.keys(scope: noteIdentifier).dictionaryMap {
       (key: $0, value: Value.null)
     }
-    try keyValueDocument.keyValueCRDT.bulkWrite(updates)
+    try keyValueDocument.keyValueCRDT!.bulkWrite(updates)
   }
 
   public func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
     let actualKey = (key == NoteDatabaseKey.coverImage.rawValue)
       ? NoteDatabaseKey.coverImage
       : NoteDatabaseKey.asset(assetKey: key ?? data.sha1Digest(), assetType: type)
-    try keyValueDocument.keyValueCRDT.writeBlob(
+    try keyValueDocument.keyValueCRDT!.writeBlob(
       data,
       to: actualKey.rawValue,
       scope: noteIdentifier,
@@ -172,7 +175,7 @@ public final class NoteDatabase {
 
   @available(*, deprecated, message: "Use read(noteIdentifier:key:) instead")
   public func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
-    guard let data = try keyValueDocument.keyValueCRDT.read(key: key, scope: noteIdentifier).resolved(with: .lastWriterWins)?.blob else {
+    guard let data = try keyValueDocument.keyValueCRDT!.read(key: key, scope: noteIdentifier).resolved(with: .lastWriterWins)?.blob else {
       throw NoteDatabaseError.noSuchAsset
     }
     return data
@@ -184,7 +187,7 @@ public final class NoteDatabase {
   ///   - key: The key associated with the value.
   /// - Returns: An array of value versions. Normally this will have zero or one value. However, if there are update conflicts from multiple authors, the result array may have more than one value.
   public func read(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) throws -> [Version] {
-    try keyValueDocument.keyValueCRDT.read(key: key.rawValue, scope: noteIdentifier)
+    try keyValueDocument.keyValueCRDT!.read(key: key.rawValue, scope: noteIdentifier)
   }
 
   /// Writes a value to the database.
@@ -193,18 +196,18 @@ public final class NoteDatabase {
   ///   - noteIdentifier: The note holding the value.
   ///   - key: The key associated with the value.
   public func writeValue(_ value: Value, noteIdentifier: Note.Identifier, key: NoteDatabaseKey) throws {
-    try keyValueDocument.keyValueCRDT.bulkWrite([ScopedKey(scope: noteIdentifier, key: key.rawValue): value])
+    try keyValueDocument.keyValueCRDT!.bulkWrite([ScopedKey(scope: noteIdentifier, key: key.rawValue): value])
   }
 
   /// Bulk read of keys from the database.
   /// - parameter isIncluded: A closure that determines if the value is included in the results.
   /// - returns: A mapping of `ScopedKey` to `[Version]`, where each entry in `[Version]` is a value written by a single author to that key.
   public func bulkRead(isIncluded: (String, String) -> Bool) throws -> [ScopedKey: [Version]] {
-    try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: isIncluded)
+    try keyValueDocument.keyValueCRDT!.bulkRead(isIncluded: isIncluded)
   }
 
   public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
-    try keyValueDocument.keyValueCRDT.write { db in
+    try keyValueDocument.keyValueCRDT!.write { db in
       for bookAndImage in booksAndImages {
         var payload = NoteUpdatePayload(noteIdentifier: UUID().uuidString)
         let bookAddedDate = bookAndImage.book.dateAdded ?? Date()
@@ -229,13 +232,13 @@ public final class NoteDatabase {
         if let imageData = bookAndImage.image {
           payload.insert(key: .coverImage, value: .blob(mimeType: imageData.type.preferredMIMEType ?? "application/octet-stream", blob: imageData.data))
         }
-        try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+        try keyValueDocument.keyValueCRDT!.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
       }
     }
   }
 
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
-    let scopedKeys = try keyValueDocument.keyValueCRDT.searchText(for: searchPattern)
+    let scopedKeys = try keyValueDocument.keyValueCRDT!.searchText(for: searchPattern)
     let uniqueIdentifiers = scopedKeys
       .map { $0.scope }
       .asSet()
@@ -248,7 +251,7 @@ public final class NoteDatabase {
   ) throws -> [PromptIdentifier] {
     let results: [ScopedKey: [Version]]
     do {
-      results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { scope, key -> Bool in
+      results = try keyValueDocument.keyValueCRDT!.bulkRead(isIncluded: { scope, key -> Bool in
         if let noteIdentifier = noteIdentifier {
           if noteIdentifier != scope { return false }
         }
@@ -274,7 +277,7 @@ public final class NoteDatabase {
 
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let scopedKeysToFetch = studySession.results.keys.map { ScopedKey(scope: $0.noteId, key: $0.promptKey) }
-    let promptInfo = try keyValueDocument.keyValueCRDT
+    let promptInfo = try keyValueDocument.keyValueCRDT!
       .bulkRead(keys: scopedKeysToFetch.map { $0.key })
       .dictionaryCompactMap(mapping: { scopedKey, versions -> (key: ScopedKey, value: PromptCollectionInfo)? in
         guard let info = versions.promptCollectionInfo else { return nil }
@@ -329,11 +332,11 @@ public final class NoteDatabase {
         assertionFailure()
       }
     }
-    try keyValueDocument.keyValueCRDT.bulkWrite(updates)
+    try keyValueDocument.keyValueCRDT!.bulkWrite(updates)
   }
 
   public func prompt(promptIdentifier: PromptIdentifier) throws -> Prompt {
-    guard let json = try keyValueDocument.keyValueCRDT.read(key: promptIdentifier.promptKey, scope: promptIdentifier.noteId).resolved(with: .lastWriterWins)?.json else {
+    guard let json = try keyValueDocument.keyValueCRDT!.read(key: promptIdentifier.promptKey, scope: promptIdentifier.noteId).resolved(with: .lastWriterWins)?.json else {
       throw NoteDatabaseError.unknownPromptCollection
     }
     let promptInfo = try JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
@@ -345,7 +348,7 @@ public final class NoteDatabase {
 
   // TODO: This doesn't actually filter by tag
   public func promptCollectionPublisher(promptType: PromptType, tagged tag: String?) -> AnyPublisher<[ContentIdentifier], Error> {
-    keyValueDocument.keyValueCRDT.readPublisher(keyPrefix: NoteDatabaseKey.promptPrefix(for: promptType))
+    keyValueDocument.keyValueCRDT!.readPublisher(keyPrefix: NoteDatabaseKey.promptPrefix(for: promptType))
       .map { results in
         results.map { scopedKey, _ in
           ContentIdentifier(noteId: scopedKey.scope, key: scopedKey.key)
@@ -357,7 +360,7 @@ public final class NoteDatabase {
   public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
     let candidateNotes = contentIdentifiers.map { $0.noteId }.asSet()
     let candidateKeys = contentIdentifiers.map { $0.key }.asSet()
-    let results = try keyValueDocument.keyValueCRDT.bulkRead(isIncluded: { scope, key in
+    let results = try keyValueDocument.keyValueCRDT!.bulkRead(isIncluded: { scope, key in
       if candidateNotes.contains(scope), [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.coverImage.rawValue].contains(key) {
         return true
       }
@@ -388,8 +391,8 @@ public final class NoteDatabase {
   }
 
   public func replaceText(_ originalText: String, with replacementText: String, filter: (BookNoteMetadata) -> Bool) throws {
-    try keyValueDocument.keyValueCRDT.write { db in
-      let metadataAndText = try keyValueDocument.keyValueCRDT.bulkRead(database: db, isIncluded: {
+    try keyValueDocument.keyValueCRDT!.write { db in
+      let metadataAndText = try keyValueDocument.keyValueCRDT!.bulkRead(database: db, isIncluded: {
         [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.noteText.rawValue].contains($1)
       })
       for (scopedKey, versions) in metadataAndText where scopedKey.key == NoteDatabaseKey.metadata.rawValue {
@@ -402,12 +405,12 @@ public final class NoteDatabase {
         }
         let updatedText = text.replacingOccurrences(of: originalText, with: replacementText)
         if updatedText != text {
-          let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(database: db, scope: scopedKey.scope)
+          let onDiskContents = try keyValueDocument.keyValueCRDT!.bulkRead(database: db, scope: scopedKey.scope)
           var payload = try NoteUpdatePayload(onDiskContents: onDiskContents)!
           if var note = try payload.asNote() {
             note.updateMarkdown(updatedText)
             try payload.update(with: note)
-            try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+            try keyValueDocument.keyValueCRDT!.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
           }
         }
       }
@@ -415,8 +418,8 @@ public final class NoteDatabase {
   }
 
   public func renameHashtag(_ originalHashtag: String, to newHashtag: String, filter: (BookNoteMetadata) -> Bool) throws {
-    try keyValueDocument.keyValueCRDT.write { db in
-      let metadataAndText = try keyValueDocument.keyValueCRDT.bulkRead(database: db, isIncluded: {
+    try keyValueDocument.keyValueCRDT!.write { db in
+      let metadataAndText = try keyValueDocument.keyValueCRDT!.bulkRead(database: db, isIncluded: {
         [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.noteText.rawValue].contains($1)
       })
       for (scopedKey, versions) in metadataAndText where scopedKey.key == NoteDatabaseKey.metadata.rawValue {
@@ -444,12 +447,12 @@ public final class NoteDatabase {
           parsedText.replaceCharacters(in: NSRange(location: location, length: originalHashtagLength), with: newHashtag)
         }
 
-        let onDiskContents = try keyValueDocument.keyValueCRDT.bulkRead(database: db, scope: scopedKey.scope)
+        let onDiskContents = try keyValueDocument.keyValueCRDT!.bulkRead(database: db, scope: scopedKey.scope)
         var payload = try NoteUpdatePayload(onDiskContents: onDiskContents)!
         if var note = try payload.asNote() {
           note.updateMarkdown(parsedText.string)
           try payload.update(with: note)
-          try keyValueDocument.keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+          try keyValueDocument.keyValueCRDT!.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
         }
       }
     }
@@ -457,7 +460,7 @@ public final class NoteDatabase {
 
   public var studyLog: StudyLog {
     do {
-      let records = try keyValueDocument.keyValueCRDT.bulkRead(scope: KeyValueNoteDatabaseScope.studyLog.rawValue)
+      let records = try keyValueDocument.keyValueCRDT!.bulkRead(scope: KeyValueNoteDatabaseScope.studyLog.rawValue)
       let entries = records.values.compactMap { versions -> StudyLog.Entry? in
         do {
           return try versions.studyLogEntry
@@ -501,7 +504,7 @@ private extension NoteDatabase {
   func saveBookNote(_ note: Note, existingContent: NoteUpdatePayload) throws {
     var existingContent = existingContent
     try existingContent.update(with: note)
-    try keyValueDocument.keyValueCRDT.bulkWrite(existingContent.asKeyValueCRDTUpdates())
+    try keyValueDocument.keyValueCRDT!.bulkWrite(existingContent.asKeyValueCRDTUpdates())
   }
 }
 
