@@ -29,6 +29,15 @@
         }
       },
       {
+        "package": "KeyValueCRDT",
+        "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
+        "state": {
+          "branch": "main",
+          "revision": "03ea5520c46144b54a5119987c2a9c1978c835f8",
+          "version": null
+        }
+      },
+      {
         "package": "SnapKit",
         "repositoryURL": "https://github.com/SnapKit/SnapKit",
         "state": {
@@ -47,12 +56,12 @@
         }
       },
       {
-        "package": "swift-argument-parser",
-        "repositoryURL": "https://github.com/apple/swift-argument-parser",
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log",
         "state": {
           "branch": null,
-          "revision": "6b2aa2748a7881eebb9f84fb10c01293e15b52ca",
-          "version": "0.5.0"
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
         }
       },
       {
