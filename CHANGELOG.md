@@ -9,6 +9,7 @@
 ### Fixed
 
 - File open performance
+- Flicker on file open
 
 ## [0.54.0-beta] - 2021-09-04
 
