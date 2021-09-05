@@ -6,6 +6,10 @@
 
 - "Send feedback" menu option
 
+### Fixed
+
+- File open performance
+
 ## [0.54.0-beta] - 2021-09-04
 
 ### Added
