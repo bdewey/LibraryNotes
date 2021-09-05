@@ -41,6 +41,8 @@
 		D32215F126C41215000BA772 /* Sequence+DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */; };
 		D32215F326C41379000BA772 /* NoteDatabase+ImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F226C41379000BA772 /* NoteDatabase+ImageStorage.swift */; };
 		D32215F526C413D3000BA772 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F426C413D3000BA772 /* ContentIdentifier.swift */; };
+		D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D324409726E525AF009B58DE /* ZIPFoundation */; };
+		D324409A26E525ED009B58DE /* LogFileDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D324409926E525ED009B58DE /* LogFileDirectory.swift */; };
 		D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
 		D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */; };
@@ -213,6 +215,7 @@
 		D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+DictionaryExtensions.swift"; sourceTree = "<group>"; };
 		D32215F226C41379000BA772 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D32215F426C413D3000BA772 /* ContentIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
+		D324409926E525ED009B58DE /* LogFileDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogFileDirectory.swift; sourceTree = "<group>"; };
 		D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GrailDiaryGrammar+Styles.swift"; sourceTree = "<group>"; };
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -327,6 +330,7 @@
 				D358CC422688DC6D00C991DB /* BookKit in Frameworks */,
 				D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */,
 				D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */,
+				D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -495,6 +499,7 @@
 				D37C887826B5C99D00EC30C8 /* KVCRDT */,
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
+				D324409926E525ED009B58DE /* LogFileDirectory.swift */,
 				D362999026B3234B00AF8F23 /* Models */,
 				D38862B323BB94FA00A44F1C /* Note.swift */,
 				D38862B523BE404300A44F1C /* Note+Markdown.swift */,
@@ -604,6 +609,7 @@
 				D358CC412688DC6D00C991DB /* BookKit */,
 				D37FF2B626BDE2A500E06747 /* KeyValueCRDT */,
 				D32215EC26C40585000BA772 /* CodableCSV */,
+				D324409726E525AF009B58DE /* ZIPFoundation */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* GrailDiary.app */;
@@ -698,6 +704,7 @@
 				D358CC402688DC6D00C991DB /* XCRemoteSwiftPackageReference "BookKit" */,
 				D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */,
 				D32215EB26C40585000BA772 /* XCRemoteSwiftPackageReference "CodableCSV" */,
+				D324409626E525AF009B58DE /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -856,6 +863,7 @@
 				D31AFAD0229D61EE00ED2B76 /* ClozePromptCollection.swift in Sources */,
 				D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */,
 				D3378CE626DBC6CC006750EC /* BookViewProperties.swift in Sources */,
+				D324409A26E525ED009B58DE /* LogFileDirectory.swift in Sources */,
 				D35E90C9230C755D00A46B3F /* UIApplication+Environment.swift in Sources */,
 				D31AFAD6229D61EE00ED2B76 /* AnswerStatistics.swift in Sources */,
 				D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */,
@@ -1235,6 +1243,14 @@
 				kind = branch;
 			};
 		};
+		D324409626E525AF009B58DE /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.9;
+			};
+		};
 		D358CC402688DC6D00C991DB /* XCRemoteSwiftPackageReference "BookKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/BookKit";
@@ -1298,6 +1314,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D32215EB26C40585000BA772 /* XCRemoteSwiftPackageReference "CodableCSV" */;
 			productName = CodableCSV;
+		};
+		D324409726E525AF009B58DE /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D324409626E525AF009B58DE /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
 		};
 		D358CC412688DC6D00C991DB /* BookKit */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -10,6 +10,7 @@ import MessageUI
 import SafariServices
 import SnapKit
 import UIKit
+import UniformTypeIdentifiers
 
 /// Implements a filterable list of documents in an interactive notebook.
 final class DocumentListViewController: UIViewController {
@@ -430,12 +431,17 @@ extension DocumentListViewController {
       return nil
     }
     return UIAction(title: "Send Feedback", image: UIImage(systemName: "envelope.open")) { [weak self] _ in
+      guard let self = self else { return }
       Logger.shared.info("Sending feedback")
       let mailComposer = MFMailComposeViewController()
       mailComposer.setSubject("Grail Diary Feedback")
       mailComposer.setToRecipients(["bdewey@gmail.com"])
       mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
-      self?.present(mailComposer, animated: true)
+      if let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
+        mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
+      }
+      mailComposer.mailComposeDelegate = self
+      self.present(mailComposer, animated: true)
     }
   }
 
@@ -451,7 +457,25 @@ extension DocumentListViewController {
 
 extension DocumentListViewController: MFMailComposeViewControllerDelegate {
   func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+    Logger.shared.info("Mail composer finished with result \(result)")
     controller.dismiss(animated: true)
+  }
+}
+
+extension MFMailComposeResult: CustomStringConvertible {
+  public var description: String {
+    switch self {
+    case .cancelled:
+      return "cancelled"
+    case .saved:
+      return "saved"
+    case .sent:
+      return "sent"
+    case .failed:
+      return "failed"
+    @unknown default:
+      return "unknown"
+    }
   }
 }
 
