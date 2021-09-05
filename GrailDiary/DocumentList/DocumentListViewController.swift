@@ -6,6 +6,7 @@ import Combine
 import CoreServices
 import CoreSpotlight
 import Logging
+import MessageUI
 import SafariServices
 import SnapKit
 import UIKit
@@ -378,7 +379,8 @@ extension DocumentListViewController {
       quotesAction,
       shareAction,
       importLibraryThingAction,
-    ])
+      sendFeedbackAction,
+    ].compactMap({ $0 }))
   }
 
   private var openCommand: UICommand {
@@ -423,6 +425,20 @@ extension DocumentListViewController {
     }
   }
 
+  private var sendFeedbackAction: UIAction? {
+    guard MFMailComposeViewController.canSendMail() else {
+      return nil
+    }
+    return UIAction(title: "Send Feedback", image: UIImage(systemName: "envelope.open")) { [weak self] _ in
+      Logger.shared.info("Sending feedback")
+      let mailComposer = MFMailComposeViewController()
+      mailComposer.setSubject("Grail Diary Feedback")
+      mailComposer.setToRecipients(["bdewey@gmail.com"])
+      mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
+      self?.present(mailComposer, animated: true)
+    }
+  }
+
   private var sortMenu: UIMenu {
     let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
@@ -430,6 +446,12 @@ extension DocumentListViewController {
       }
     }
     return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
+  }
+}
+
+extension DocumentListViewController: MFMailComposeViewControllerDelegate {
+  func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+    controller.dismiss(animated: true)
   }
 }
 
