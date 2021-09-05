@@ -62,7 +62,7 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
     do {
       var isStale = false
       let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
-      try openDocument(at: url, createWelcomeContent: false, animated: false) { [self] _ in
+      try openDocument(at: url, createWelcomeContent: false, animated: false) { [self] in
         self.topLevelViewController?.configure(with: userActivity)
       }
     } catch {
@@ -79,30 +79,26 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     at url: URL,
     createWelcomeContent: Bool,
     animated: Bool,
-    completion: ((Bool) -> Void)? = nil
+    completion: (() -> Void)? = nil
   ) throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
-    let database: NoteDatabase
-    if url.pathExtension == "kvcrdt" {
-      guard let author = Author(.current) else {
-        throw NoteDatabaseError.noDeviceUUID
-      }
-      database = try NoteDatabase(fileURL: url, author: author)
-    } else {
-      throw CocoaError(CocoaError.fileReadUnsupportedScheme)
-    }
-    Logger.shared.info("Using document at \(database.fileURL)")
     Task {
-      let success = await database.open()
+      let database: NoteDatabase
+      if url.pathExtension == "kvcrdt" {
+        guard let author = Author(.current) else {
+          throw NoteDatabaseError.noDeviceUUID
+        }
+        database = try await NoteDatabase(fileURL: url, author: author)
+      } else {
+        throw CocoaError(CocoaError.fileReadUnsupportedScheme)
+      }
+      Logger.shared.info("Using document at \(database.fileURL)")
       let properties: [String: String] = [
-        "Success": success.description,
         "documentState": String(describing: database.documentState),
       ]
       Logger.shared.info("In open completion handler. \(properties)")
-      if success, !AppDelegate.isUITesting {
-        if createWelcomeContent {
-          database.tryCreatingWelcomeContent()
-        }
+      if !AppDelegate.isUITesting, createWelcomeContent {
+        database.tryCreatingWelcomeContent()
       }
       let viewController = NotebookViewController(database: database)
       viewController.modalPresentationStyle = .fullScreen
@@ -110,7 +106,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       viewController.view.tintColor = .systemOrange
       self.present(viewController, animated: animated, completion: nil)
       self.topLevelViewController = viewController
-      completion?(success)
+      completion?()
     }
   }
 
@@ -140,11 +136,8 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
     let url = directoryURL.appendingPathComponent("diary").appendingPathExtension("kvcrdt")
     let author = Author(UIDevice.current)!
-    let document = try NoteDatabase(fileURL: url, author: author)
+    let document = try await NoteDatabase(fileURL: url, author: author)
     Logger.shared.info("Attempting to create a document at \(url.path)")
-    guard await document.open() else {
-      return nil
-    }
     document.tryCreatingWelcomeContent()
     guard await document.save(to: url, for: .forCreating) else {
       return nil
