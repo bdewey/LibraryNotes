@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- "Send feedback" menu option
+
 ## [0.54.0-beta] - 2021-09-04
 
 ### Added
