@@ -1,11 +1,8 @@
 # Changelog
 
-## [0.55.1-beta] - 2021-09-05
+## [0.55.0-beta] - 2021-09-05
 
 - Rebranded as **Bookish Notes**
-- Rebuilt with a proper Google Books API key
-
-## [0.55.0-beta] - 2021-09-05
 
 ### Added
 
@@ -15,6 +12,7 @@
 
 - File open performance
 - Flicker on file open
+- Rebuilt with a proper Google Books API key
 
 ## [0.54.0-beta] - 2021-09-04
 
