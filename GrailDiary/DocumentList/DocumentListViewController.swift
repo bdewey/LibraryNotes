@@ -105,7 +105,7 @@ final class DocumentListViewController: UIViewController {
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-//    view.backgroundColor = .grailBackground
+    view.backgroundColor = .grailBackground
     return view
   }()
 

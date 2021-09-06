@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Background color changing when there are no search results
+
 ## [0.55.0-beta] - 2021-09-05
 
 - Rebranded as **Bookish Notes**
