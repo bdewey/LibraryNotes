@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.55.1-beta] - 2021-09-05
+
+- Rebranded as **Bookish Notes**
+- Rebuilt with a proper Google Books API key
+
 ## [0.55.0-beta] - 2021-09-05
 
 ### Added
