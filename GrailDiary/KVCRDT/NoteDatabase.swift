@@ -45,12 +45,13 @@ public final class NoteDatabase {
 
   /// Initializes and opens the database stored at `fileURL`
   @MainActor
-  public init(fileURL: URL, author: Author) async throws {
-    self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, author: author)
+  public init(fileURL: URL, authorDescription: String) async throws {
+    self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, authorDescription: authorDescription)
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
     self.keyValueCRDT = keyValueCRDT
+    self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self
   }
 
@@ -63,7 +64,7 @@ public final class NoteDatabase {
 
   public var fileURL: URL { keyValueDocument.fileURL }
 
-  public var author: Author { keyValueDocument.author }
+  public let instanceID: UUID
 
   public var documentState: UIDocument.State { keyValueDocument.documentState }
 
@@ -299,7 +300,7 @@ public final class NoteDatabase {
       // The scope is what ties this entry to its corresponding scope & key.
       let entryKey = ScopedKey(
         scope: KeyValueNoteDatabaseScope.studyLog.rawValue,
-        key: NoteDatabaseKey.studyLogEntry(date: date, promptIdentifier: promptIdentifier, author: keyValueDocument.author).rawValue
+        key: NoteDatabaseKey.studyLogEntry(date: date, promptIdentifier: promptIdentifier, instanceID: instanceID).rawValue
       )
       updates[entryKey] = try Value(entry)
 

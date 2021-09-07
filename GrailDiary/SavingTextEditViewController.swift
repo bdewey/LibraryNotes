@@ -113,7 +113,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     guard
       let versionArray = versions[.noteText],
       let winningVersion = versionArray.max(by: { $0.timestamp < $1.timestamp }),
-      winningVersion.authorID != noteStorage.author.id
+      winningVersion.authorID != noteStorage.instanceID
     else {
       return
     }

@@ -242,7 +242,7 @@ private extension NoteSqliteStorageMergeTests {
   ) async throws -> NoteDatabase {
     return try await NoteDatabase(
       fileURL: fileURL,
-      author: Author(id: device.identifierForVendor!, name: device.name)
+      authorDescription: device.name
     )
   }
 

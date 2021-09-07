@@ -605,6 +605,7 @@ private extension Note {
 extension DocumentListViewController: BookImporterViewControllerDelegate {
   func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int) {
     let progressView = UIProgressView(progressViewStyle: .bar)
+    progressView.trackTintColor = .grailGroupedBackground
     progressView.progress = 0
     self.progressView = progressView
   }

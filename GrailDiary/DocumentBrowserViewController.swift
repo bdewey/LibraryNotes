@@ -85,10 +85,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
     if url.pathExtension == "bookish" || url.pathExtension == "kvcrdt" {
-      guard let author = Author(.current) else {
-        throw NoteDatabaseError.noDeviceUUID
-      }
-      database = try await NoteDatabase(fileURL: url, author: author)
+      database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.description)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
@@ -139,8 +136,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
     let url = directoryURL.appendingPathComponent("library").appendingPathExtension("bookish")
-    let author = Author(UIDevice.current)!
-    let document = try await NoteDatabase(fileURL: url, author: author)
+    let document = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.description)
     Logger.shared.info("Attempting to create a document at \(url.path)")
     document.tryCreatingWelcomeContent()
     guard await document.save(to: url, for: .forCreating) else {

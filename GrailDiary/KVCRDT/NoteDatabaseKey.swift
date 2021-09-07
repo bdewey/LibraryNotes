@@ -32,10 +32,10 @@ public struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLi
     return NoteDatabaseKey(rawValue: "assets/\(filename)")
   }
 
-  public static func studyLogEntry(date: Date, promptIdentifier: PromptIdentifier, author: Author) -> NoteDatabaseKey {
+  public static func studyLogEntry(date: Date, promptIdentifier: PromptIdentifier, instanceID: UUID) -> NoteDatabaseKey {
     let formattedTime = ISO8601DateFormatter().string(from: date)
     // Each key is globally unique so there should never be collisions.
-    let key = "\(formattedTime);note=\(promptIdentifier.noteId);promptId=\(promptIdentifier.promptKey);author=\(author.id.uuidString)"
+    let key = "\(formattedTime);note=\(promptIdentifier.noteId);promptId=\(promptIdentifier.promptKey);author=\(instanceID.uuidString)"
     return NoteDatabaseKey(rawValue: key)
   }
 

@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Use the version 0.4 of `KeyValueCRDT` for proper merging of different documents
 - Background color changing when there are no search results
 
 ## [0.55.0-beta] - 2021-09-05
