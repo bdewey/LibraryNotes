@@ -5,7 +5,13 @@ import UniformTypeIdentifiers
 
 /// A form that lets the user input parameters for a book import job
 struct ImportForm: View {
-  var importAction: ([URL], String, Bool, Bool) -> Void
+  struct ImportRequest {
+    var urls: [URL]
+    var hashtags: String
+    var downloadCoverImages: Bool
+    var dryRun: Bool
+  }
+  var importAction: (ImportRequest) -> Void
   @State private var downloadCoverImages = false
   @State private var dryRun = true
   @State private var showDocumentPicker = false
@@ -30,7 +36,8 @@ struct ImportForm: View {
     .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showDocumentPicker, content: {
       DocumentPickerView(contentTypes: [.json, .commaSeparatedText]) { urls in
-        importAction(urls, hashtags, downloadCoverImages, dryRun)
+        let importRequest = ImportRequest(urls: urls, hashtags: hashtags, downloadCoverImages: downloadCoverImages, dryRun: dryRun)
+        importAction(importRequest)
       }
     })
   }
@@ -38,7 +45,7 @@ struct ImportForm: View {
 
 struct ImportForm_Previews: PreviewProvider {
   static var previews: some View {
-    ImportForm(importAction: { _, _, _, _ in })
+    ImportForm(importAction: { _ in })
 //      .previewDevice("iPod touch (7th generation)")
   }
 }

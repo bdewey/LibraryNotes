@@ -39,12 +39,12 @@ final class BookImporterViewController: UIViewController {
     }
   }
 
-  private func importBooks(from urls: [URL], hashtags: String, downloadImages: Bool, dryRun: Bool) {
-    guard let url = urls.first else {
+  private func importBooks(importRequest: ImportForm.ImportRequest) {
+    guard let url = importRequest.urls.first else {
       Logger.shared.error("Could not find a notebook view controller in the hierarchy")
       return
     }
-    Logger.shared.info("Importing books from \(urls)")
+    Logger.shared.info("Importing books from \(importRequest.urls)")
     do {
       let bookInfo: [AugmentedBook]
       if url.pathExtension == UTType.commaSeparatedText.preferredFilenameExtension {
@@ -53,14 +53,15 @@ final class BookImporterViewController: UIViewController {
         bookInfo = try loadJSON(url: url)
       }
       delegate?.bookImporter(self, didStartImporting: bookInfo.count)
-      bookImporter.importBooks(books: bookInfo, hashtags: hashtags, dryRun: dryRun, downloadImages: downloadImages) { [self] processed, total in
-        if processed == total || processed % 5 == 0 {
-          Logger.shared.info("Processed \(processed) of \(total) books")
+      Task {
+        await bookImporter.importBooks(books: bookInfo, hashtags: importRequest.hashtags, dryRun: importRequest.dryRun, downloadImages: importRequest.downloadCoverImages) { [self] processed, total in
+          if processed == total || processed % 5 == 0 {
+            Logger.shared.info("Processed \(processed) of \(total) books")
+          }
+          self.delegate?.bookImporter(self, didProcess: processed, of: total)
         }
-        self.delegate?.bookImporter(self, didProcess: processed, of: total)
-      } completion: { [self] in
         Logger.shared.info("Done with import")
-        self.delegate?.bookImporterDidFinishImporting(self)
+        delegate?.bookImporterDidFinishImporting(self)
       }
     } catch {
       Logger.shared.error("Error importing LibaryThing file: \(error)")
