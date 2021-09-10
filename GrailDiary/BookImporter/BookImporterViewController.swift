@@ -40,30 +40,75 @@ final class BookImporterViewController: UIViewController {
   }
 
   private func importBooks(importRequest: BookImportRequest<URL>) {
-    let url = importRequest.item
-    Logger.shared.info("Importing books from \(importRequest.item)")
-    do {
-      let bookInfo: [AugmentedBook]
-      if url.pathExtension == UTType.commaSeparatedText.preferredFilenameExtension {
-        bookInfo = try AugmentedBook.loadGoodreadsCSV(url: url)
-      } else {
-        bookInfo = try loadJSON(url: url)
-      }
-      delegate?.bookImporter(self, didStartImporting: bookInfo.count)
-      Task {
-        await bookImporter.importBooks(request: importRequest.replacingItem(bookInfo)) { [self] processed, total in
-          if processed == total || processed % 5 == 0 {
-            Logger.shared.info("Processed \(processed) of \(total) books")
-          }
-          self.delegate?.bookImporter(self, didProcess: processed, of: total)
+    Task {
+      let url = importRequest.item
+      Logger.shared.info("Importing books from \(importRequest.item)")
+      do {
+        guard let importSource = try importRequest.importSource else {
+          Logger.shared.error("Could not determine the import source for \(url)")
+          return
         }
-        Logger.shared.info("Done with import")
-        delegate?.bookImporterDidFinishImporting(self)
+        switch importSource {
+        case .augmentedBooks(let books):
+          importBooks(books, importRequest: importRequest)
+        case .database(let url):
+          try await importDatabase(at: url)
+        }
+      } catch {
+        Logger.shared.error("Error importing \(url): \(error)")
       }
-    } catch {
-      Logger.shared.error("Error importing LibaryThing file: \(error)")
     }
     dismiss(animated: true)
+  }
+
+  private func importBooks<T>(_ bookInfo: [AugmentedBook], importRequest: BookImportRequest<T>) {
+    delegate?.bookImporter(self, didStartImporting: bookInfo.count)
+    Task {
+      await bookImporter.importBooks(request: importRequest.replacingItem(bookInfo)) { [self] processed, total in
+        if processed == total || processed % 5 == 0 {
+          Logger.shared.info("Processed \(processed) of \(total) books")
+        }
+        self.delegate?.bookImporter(self, didProcess: processed, of: total)
+      }
+      Logger.shared.info("Done with import")
+      delegate?.bookImporterDidFinishImporting(self)
+    }
+  }
+
+  private func importDatabase(at url: URL) async throws {
+    guard url != bookImporter.database.fileURL else {
+      throw CocoaError(.fileWriteFileExists)
+    }
+    let sourceDatabase = try await NoteDatabase(fileURL: url, authorDescription: "Importer")
+    try bookImporter.database.merge(other: sourceDatabase)
+  }
+}
+
+private enum ImportSource {
+  case augmentedBooks([AugmentedBook])
+  case database(URL)
+}
+
+private extension BookImportRequest where Item == URL {
+  /// What are we importing?
+  var importSource: ImportSource? {
+    get throws {
+      let values = try item.resourceValues(forKeys: [.contentTypeKey])
+      switch values.contentType {
+      case .none:
+        return nil
+      case .some(.bookish):
+        return .database(item)
+      case .some(.kvcrdt):
+        return .database(item)
+      case .some(.json):
+        return .augmentedBooks(try loadJSON(url: item))
+      case .some(.commaSeparatedText):
+        return .augmentedBooks(try AugmentedBook.loadGoodreadsCSV(url: item))
+      default:
+        return nil
+      }
+    }
   }
 
   private func loadJSON(url: URL) throws -> [AugmentedBook] {
