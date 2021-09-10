@@ -22,22 +22,19 @@ final class BookImporter {
 
   @MainActor
   func importBooks(
-    books: [AugmentedBook],
-    hashtags: String,
-    dryRun: Bool,
-    downloadImages: Bool,
+    request: BookImportRequest<[AugmentedBook]>,
     progressCallback: @escaping @MainActor (Int, Int) -> Void
   ) async {
-    let books = dryRun ? Array(books.prefix(10)) : books
+    let books = request.dryRun ? Array(request.item.shuffled().prefix(10)) : request.item
     for bookInfo in books {
-      if downloadImages, let isbn = bookInfo.book.isbn13 {
+      if request.downloadCoverImages, let isbn = bookInfo.book.isbn13 {
         booksAndImages.append(await BookAndImage(book: bookInfo, isbn: isbn))
       } else {
         booksAndImages.append(BookAndImage(book: bookInfo, image: nil))
       }
       progressCallback(booksAndImages.count, books.count)
     }
-    self.saveBooksAndImages(hashtags: hashtags)
+    self.saveBooksAndImages(hashtags: request.hashtags)
     Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
   }
 

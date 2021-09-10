@@ -39,12 +39,12 @@ final class BookImporterViewController: UIViewController {
     }
   }
 
-  private func importBooks(importRequest: ImportForm.ImportRequest) {
-    guard let url = importRequest.urls.first else {
+  private func importBooks(importRequest: BookImportRequest<[URL]>) {
+    guard let url = importRequest.item.first else {
       Logger.shared.error("Could not find a notebook view controller in the hierarchy")
       return
     }
-    Logger.shared.info("Importing books from \(importRequest.urls)")
+    Logger.shared.info("Importing books from \(importRequest.item)")
     do {
       let bookInfo: [AugmentedBook]
       if url.pathExtension == UTType.commaSeparatedText.preferredFilenameExtension {
@@ -54,7 +54,7 @@ final class BookImporterViewController: UIViewController {
       }
       delegate?.bookImporter(self, didStartImporting: bookInfo.count)
       Task {
-        await bookImporter.importBooks(books: bookInfo, hashtags: importRequest.hashtags, dryRun: importRequest.dryRun, downloadImages: importRequest.downloadCoverImages) { [self] processed, total in
+        await bookImporter.importBooks(request: importRequest.replacingItem(bookInfo)) { [self] processed, total in
           if processed == total || processed % 5 == 0 {
             Logger.shared.info("Processed \(processed) of \(total) books")
           }
