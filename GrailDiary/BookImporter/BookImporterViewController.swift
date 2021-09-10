@@ -39,11 +39,8 @@ final class BookImporterViewController: UIViewController {
     }
   }
 
-  private func importBooks(importRequest: BookImportRequest<[URL]>) {
-    guard let url = importRequest.item.first else {
-      Logger.shared.error("Could not find a notebook view controller in the hierarchy")
-      return
-    }
+  private func importBooks(importRequest: BookImportRequest<URL>) {
+    let url = importRequest.item
     Logger.shared.info("Importing books from \(importRequest.item)")
     do {
       let bookInfo: [AugmentedBook]
