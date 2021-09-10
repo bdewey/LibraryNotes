@@ -229,7 +229,6 @@
 		D331457626628EA000B4687F /* ImportForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportForm.swift; sourceTree = "<group>"; };
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
-		D33424F426EB8FBE0029D6DE /* BookKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BookKit; path = ../BookKit; sourceTree = "<group>"; };
 		D33424F526EB988C0029D6DE /* BookImportRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImportRequest.swift; sourceTree = "<group>"; };
 		D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIResponder+Debugging.swift"; sourceTree = "<group>"; };
 		D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersonNameComponents+Comparable.swift"; sourceTree = "<group>"; };
@@ -440,7 +439,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D33424F426EB8FBE0029D6DE /* BookKit */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,

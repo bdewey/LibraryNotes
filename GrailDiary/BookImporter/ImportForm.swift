@@ -45,7 +45,7 @@ struct ImportForm: View {
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showDocumentPicker, content: {
-      DocumentPickerView(contentTypes: [.json, .commaSeparatedText, .kvcrdt, .bookish]) { urls in
+      DocumentPickerView(contentTypes: [.json, .commaSeparatedText, .kvcrdt, .libnotes]) { urls in
         selectedURL = urls.first
       }
     })

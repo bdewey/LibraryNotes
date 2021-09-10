@@ -97,7 +97,7 @@ private extension BookImportRequest where Item == URL {
       switch values.contentType {
       case .none:
         return nil
-      case .some(.bookish):
+      case .some(.libnotes):
         return .database(item)
       case .some(.kvcrdt):
         return .database(item)

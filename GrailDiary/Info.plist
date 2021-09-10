@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bookish Notes</string>
+	<string>Library Notes</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -64,9 +64,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Bookish Notes uses the camera to scan barcodes for book search.</string>
+	<string>Library Notes uses the camera to scan barcodes for book search.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Bookish Notes can save your quotes to your Photos Libary.</string>
+	<string>Library Notes can save your quotes to your Photos Libary.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.org.brians-brain.CommonplaceBookApp</key>
@@ -139,16 +139,16 @@
 				<string>org.brians-brain.kvcrdt</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Bookish Notes</string>
+			<string>Library Notes</string>
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
-			<string>org.brians-brain.bookish</string>
+			<string>org.brians-brain.libnotes</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
 				<array>
-					<string>bookish</string>
+					<string>libnotes</string>
 				</array>
 			</dict>
 		</dict>

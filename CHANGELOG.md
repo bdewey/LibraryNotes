@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## [0.56.0-beta] - 2021-09-10
+
+Trying a new brand! **Library Notes**
 
 ### Added
 
@@ -10,7 +12,7 @@
 
 - Use the version 0.4 of `KeyValueCRDT` for proper merging of different documents
 - Background color changing when there are no search results
-- When importing from LibraryThing / Goodreadds, properly index the book metadata
+- When importing from LibraryThing / Goodreads, properly index the book metadata
 
 ## [0.55.0-beta] - 2021-09-05
 
