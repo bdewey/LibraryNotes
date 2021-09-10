@@ -5,11 +5,13 @@ import UniformTypeIdentifiers
 
 /// A form that lets the user input parameters for a book import job
 struct ImportForm: View {
-  var importAction: ([URL], String, Bool, Bool) -> Void
+  var importAction: (BookImportRequest<URL>) -> Void
   @State private var downloadCoverImages = false
   @State private var dryRun = true
   @State private var showDocumentPicker = false
   @State private var hashtags = ""
+  @State private var selectedURL: URL?
+  @Environment(\.dismiss) var dismiss
 
   var body: some View {
     NavigationView {
@@ -21,24 +23,47 @@ struct ImportForm: View {
         Section(header: Text("Hashtags (Optional)"), footer: Text("Enter #hashtags for all imported books. Example: #goodreads")) {
           TextField("#hashtag", text: $hashtags)
         }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
-        Button("Select File") {
-          showDocumentPicker = true
-        }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
+        Section(footer: Text(verbatim: selectedURL?.lastPathComponent ?? "")) {
+          Button("Select File") {
+            showDocumentPicker = true
+          }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
+        }
       }
       .navigationTitle("Import Books")
+      .toolbar {
+        ToolbarItem(placement: .navigationBarLeading) {
+          Button("Cancel") {
+            dismiss()
+          }
+        }
+        ToolbarItem(placement: .navigationBarTrailing) {
+          Button(action: dispatchImportRequest) {
+            Text("Import").bold()
+          }.disabled(selectedURL == nil)
+        }
+      }
     }
     .navigationViewStyle(StackNavigationViewStyle())
     .sheet(isPresented: $showDocumentPicker, content: {
-      DocumentPickerView(contentTypes: [.json, .commaSeparatedText]) { urls in
-        importAction(urls, hashtags, downloadCoverImages, dryRun)
+      DocumentPickerView(contentTypes: [.json, .commaSeparatedText, .kvcrdt, .bookish]) { urls in
+        selectedURL = urls.first
       }
     })
+    .tint(Color(UIColor.grailTint))
+  }
+
+  func dispatchImportRequest() {
+    guard let selectedURL = selectedURL else {
+      return
+    }
+    let importRequest = BookImportRequest(item: selectedURL, hashtags: hashtags, downloadCoverImages: downloadCoverImages, dryRun: dryRun)
+    importAction(importRequest)
   }
 }
 
 struct ImportForm_Previews: PreviewProvider {
   static var previews: some View {
-    ImportForm(importAction: { _, _, _, _ in })
+    ImportForm(importAction: { _ in })
 //      .previewDevice("iPod touch (7th generation)")
   }
 }

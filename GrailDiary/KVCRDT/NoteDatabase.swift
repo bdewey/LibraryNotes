@@ -233,6 +233,7 @@ public final class NoteDatabase {
         }
         metadata.tags = hashtags.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
         payload.insert(key: .metadata, value: try Value(metadata))
+        payload.insert(key: .bookIndex, value: Value(metadata.indexedContents))
         if let review = bookAndImage.book.review {
           payload.insert(key: .noteText, value: .text(review))
         }

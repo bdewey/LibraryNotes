@@ -2,6 +2,7 @@
 
 import BookKit
 import Foundation
+import Logging
 
 // TODO: Move this to BookKit
 /// A book and its cover image.
@@ -12,6 +13,19 @@ public struct BookAndImage {
   public init(book: AugmentedBook, image: TypedData? = nil) {
     self.book = book
     self.image = image
+  }
+}
+
+extension BookAndImage {
+  /// Create a `BookAndImage` where we download the cover image from OpenLibrary.
+  public init(book: AugmentedBook, isbn: String) async {
+    self.book = book
+    do {
+      self.image = try await OpenLibrary.coverImage(forISBN: isbn)
+    } catch {
+      Logger.shared.error("Unexpected error getting OpenLibrary book cover for \(isbn): \(error)")
+      self.image = nil
+    }
   }
 }
 

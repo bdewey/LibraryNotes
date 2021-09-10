@@ -53,6 +53,7 @@
 		D331457726628EA000B4687F /* ImportForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = D331457626628EA000B4687F /* ImportForm.swift */; };
 		D33145792662926C00B4687F /* DocumentPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33145782662926C00B4687F /* DocumentPickerView.swift */; };
 		D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */; };
+		D33424F626EB988C0029D6DE /* BookImportRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D33424F526EB988C0029D6DE /* BookImportRequest.swift */; };
 		D3378CD926D92DAA006750EC /* UIResponder+Debugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */; };
 		D3378CDE26DBC373006750EC /* PersonNameComponents+Comparable.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */; };
 		D3378CE026DBC3D4006750EC /* CGFloat+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */; };
@@ -228,6 +229,8 @@
 		D331457626628EA000B4687F /* ImportForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportForm.swift; sourceTree = "<group>"; };
 		D33145782662926C00B4687F /* DocumentPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPickerView.swift; sourceTree = "<group>"; };
 		D3331C8622F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StringProtocol+FuzzyMatch.swift"; sourceTree = "<group>"; };
+		D33424F426EB8FBE0029D6DE /* BookKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BookKit; path = ../BookKit; sourceTree = "<group>"; };
+		D33424F526EB988C0029D6DE /* BookImportRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImportRequest.swift; sourceTree = "<group>"; };
 		D3378CD826D92DAA006750EC /* UIResponder+Debugging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIResponder+Debugging.swift"; sourceTree = "<group>"; };
 		D3378CDD26DBC373006750EC /* PersonNameComponents+Comparable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PersonNameComponents+Comparable.swift"; sourceTree = "<group>"; };
 		D3378CDF26DBC3D4006750EC /* CGFloat+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGFloat+Extensions.swift"; sourceTree = "<group>"; };
@@ -379,6 +382,7 @@
 				D331457626628EA000B4687F /* ImportForm.swift */,
 				D33145782662926C00B4687F /* DocumentPickerView.swift */,
 				D3F4EDBD2662F51C001289EC /* BookImporter.swift */,
+				D33424F526EB988C0029D6DE /* BookImportRequest.swift */,
 			);
 			path = BookImporter;
 			sourceTree = "<group>";
@@ -436,6 +440,7 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
+				D33424F426EB8FBE0029D6DE /* BookKit */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
@@ -813,6 +818,7 @@
 				D390C91926C955DF008E2A74 /* SessionGenerator.swift in Sources */,
 				D377818325DC0ADD004DD38F /* WebScrapingViewController.swift in Sources */,
 				D3378CD926D92DAA006750EC /* UIResponder+Debugging.swift in Sources */,
+				D33424F626EB988C0029D6DE /* BookImportRequest.swift in Sources */,
 				D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */,
 				D3FA025026C985FE001A5A4C /* CoverImageCache.swift in Sources */,
 				D31AFACA229D61EE00ED2B76 /* ClozePrompt.swift in Sources */,
