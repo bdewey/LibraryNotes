@@ -26,13 +26,24 @@ final class BookImporter {
     progressCallback: @escaping @MainActor (Int, Int) -> Void
   ) async {
     let books = request.dryRun ? Array(request.item.shuffled().prefix(10)) : request.item
-    for bookInfo in books {
-      if request.downloadCoverImages, let isbn = bookInfo.book.isbn13 {
-        booksAndImages.append(await BookAndImage(book: bookInfo, isbn: isbn))
-      } else {
-        booksAndImages.append(BookAndImage(book: bookInfo, image: nil))
+    if request.downloadCoverImages {
+      await withTaskGroup(of: BookAndImage.self) { group in
+        for book in books {
+          group.addTask {
+            if let isbn = book.isbn13 {
+              return await BookAndImage(book: book, isbn: isbn)
+            } else {
+              return BookAndImage(book: book, image: nil)
+            }
+          }
+        }
+        for await bookAndImage in group {
+          booksAndImages.append(bookAndImage)
+          progressCallback(booksAndImages.count, books.count)
+        }
       }
-      progressCallback(booksAndImages.count, books.count)
+    } else {
+      booksAndImages = books.map { BookAndImage(book: $0, image: nil) }
     }
     self.saveBooksAndImages(hashtags: request.hashtags)
     Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
