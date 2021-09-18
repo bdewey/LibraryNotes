@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-               BuildableName = "Library Notes.app"
+               BuildableName = "LibraryNotes.app"
                BlueprintName = "LibraryNotes"
                ReferencedContainer = "container:LibraryNotes.xcodeproj">
             </BuildableReference>
@@ -65,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-            BuildableName = "Library Notes.app"
+            BuildableName = "LibraryNotes.app"
             BlueprintName = "LibraryNotes"
             ReferencedContainer = "container:LibraryNotes.xcodeproj">
          </BuildableReference>
@@ -82,7 +82,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
-            BuildableName = "Library Notes.app"
+            BuildableName = "LibraryNotes.app"
             BlueprintName = "LibraryNotes"
             ReferencedContainer = "container:LibraryNotes.xcodeproj">
          </BuildableReference>
