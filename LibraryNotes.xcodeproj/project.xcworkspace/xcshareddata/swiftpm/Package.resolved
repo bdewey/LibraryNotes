@@ -5,26 +5,26 @@
         "package": "BookKit",
         "repositoryURL": "https://github.com/bdewey/BookKit",
         "state": {
-          "branch": "xcode13",
+          "branch": null,
           "revision": "c1afc62c018e38ad160850cf8b7ba532e17fb3f2",
-          "version": null
+          "version": "0.4.0"
         }
       },
       {
         "package": "CodableCSV",
-        "repositoryURL": "https://github.com/bdewey/CodableCSV",
+        "repositoryURL": "https://github.com/dehesa/CodableCSV",
         "state": {
-          "branch": "xcode13",
-          "revision": "7954e4ffdc7b700372a4f43944840d5b6da09e54",
-          "version": null
+          "branch": null,
+          "revision": "99ace2cfdfbc19108b529c021005fb57a460e715",
+          "version": "0.6.7"
         }
       },
       {
         "package": "GRDB",
         "repositoryURL": "https://github.com/bdewey/GRDB.swift",
         "state": {
-          "branch": "xcode13",
-          "revision": "d8718bd7a41f96698bcc6ce353d48a9a3b003cea",
+          "branch": "xcode13-rc",
+          "revision": "76c7764c715909d5575cec859ec7649fb4ca9e2c",
           "version": null
         }
       },
@@ -32,9 +32,9 @@
         "package": "KeyValueCRDT",
         "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
         "state": {
-          "branch": "main",
-          "revision": "933249603c1c8b3245fd6e19bd0ba269e45178c4",
-          "version": null
+          "branch": null,
+          "revision": "ceb4e2c46aeaaea4dd38292af53563207f42513e",
+          "version": "1.0.0"
         }
       },
       {
@@ -50,9 +50,9 @@
         "package": "SpacedRepetitionScheduler",
         "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
         "state": {
-          "branch": "xcode13",
-          "revision": "e79c015fc160c2725eae95eae4b26fa59e57f5f0",
-          "version": null
+          "branch": null,
+          "revision": "4557c67e74c3b8934abef17a8a06ef658fa88eb8",
+          "version": "0.3.0"
         }
       },
       {
