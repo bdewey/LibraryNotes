@@ -1,0 +1,97 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BookKit",
+        "repositoryURL": "https://github.com/bdewey/BookKit",
+        "state": {
+          "branch": null,
+          "revision": "c1afc62c018e38ad160850cf8b7ba532e17fb3f2",
+          "version": "0.4.0"
+        }
+      },
+      {
+        "package": "CodableCSV",
+        "repositoryURL": "https://github.com/dehesa/CodableCSV",
+        "state": {
+          "branch": null,
+          "revision": "99ace2cfdfbc19108b529c021005fb57a460e715",
+          "version": "0.6.7"
+        }
+      },
+      {
+        "package": "GRDB",
+        "repositoryURL": "https://github.com/bdewey/GRDB.swift",
+        "state": {
+          "branch": "xcode13-rc",
+          "revision": "76c7764c715909d5575cec859ec7649fb4ca9e2c",
+          "version": null
+        }
+      },
+      {
+        "package": "KeyValueCRDT",
+        "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
+        "state": {
+          "branch": null,
+          "revision": "ceb4e2c46aeaaea4dd38292af53563207f42513e",
+          "version": "1.0.0"
+        }
+      },
+      {
+        "package": "SnapKit",
+        "repositoryURL": "https://github.com/SnapKit/SnapKit",
+        "state": {
+          "branch": null,
+          "revision": "d458564516e5676af9c70b4f4b2a9178294f1bc6",
+          "version": "5.0.1"
+        }
+      },
+      {
+        "package": "SpacedRepetitionScheduler",
+        "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
+        "state": {
+          "branch": null,
+          "revision": "4557c67e74c3b8934abef17a8a06ef658fa88eb8",
+          "version": "0.3.0"
+        }
+      },
+      {
+        "package": "swift-log",
+        "repositoryURL": "https://github.com/apple/swift-log",
+        "state": {
+          "branch": null,
+          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+          "version": "1.4.2"
+        }
+      },
+      {
+        "package": "swift-log-file",
+        "repositoryURL": "https://github.com/crspybits/swift-log-file",
+        "state": {
+          "branch": null,
+          "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
+          "version": "0.0.1"
+        }
+      },
+      {
+        "package": "TextMarkupKit",
+        "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
+        "state": {
+          "branch": null,
+          "revision": "b91b87a43a3915b0a482fb8ac26fc54f1769dd72",
+          "version": "0.7.3"
+        }
+      },
+      {
+        "package": "ZIPFoundation",
+        "repositoryURL": "https://github.com/weichsel/ZIPFoundation",
+        "state": {
+          "branch": null,
+          "revision": "cf10bbff6ac3b873e97b36b9784c79866a051a8e",
+          "version": "0.9.12"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

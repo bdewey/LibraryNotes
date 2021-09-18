@@ -1,14 +1,120 @@
 # Changelog
 
-## Unreleased
+## [0.56.0-beta] - 2021-09-10
+
+Trying a new brand! **Library Notes**
+
+### Added
+
+- Ability to import another database
+
+### Fixed
+
+- Use the version 0.4 of `KeyValueCRDT` for proper merging of different documents
+- Background color changing when there are no search results
+- When importing from LibraryThing / Goodreads, properly index the book metadata
+
+## [0.55.0-beta] - 2021-09-05
+
+- Rebranded as **Bookish Notes**
+
+### Added
+
+- "Send feedback" menu option
+
+### Fixed
+
+- File open performance
+- Flicker on file open
+- Rebuilt with a proper Google Books API key
+
+## [0.54.0-beta] - 2021-09-04
+
+### Added
+
+- Unified interface for searching for books and editing book details
+- "Experimental features" setting that controls the Import Kindle Highlights feature.
+
+### Fixed
+
+- Bug where study sessions couldn't be saved
+
+## [0.53.0-beta] - 2021-08-29
+
+### Added
+
+- New look-and-feel that's more "iOS Standard"
+
+## [0.52.1-beta] - 2021-08-24
+
+### Fixed
+
+- Barcode scanner orientation
+
+## [0.52.0-beta] - 2021-08-22
+
+### Added
+
+- Ability to edit book details
+- Barcode scanner for book search
+
+### Fixed
+
+- Pull-to-refresh does something again.
+- Items that were in a non-default folder (e.g., "currently reading") were no longer showing up in the document list.
+
+## [0.51.3-beta] - 2021-08-15
+
+### Fixed
+
+- Study session generation is no longer a CPU hotspot
+- Generating cover images is no longer a CPU hotspot
+
+## [0.51.2-beta] - 2021-08-14
+
+### Fixed
+
+- Linked a new version of TextMarkupKit to resolve memory leaks
+- Brought back the version string in the structure view controller
+
+## [0.51.0-beta] - 2021-08-14
 
 ### Changed
 
+- **Major** iOS 15 only
+- When launching into collapsed environments (e.g., an iPhone), we no longer show a single blank note as the opening screen. Instead, we will show the document list.
+
+### Added
+
+- **Major** Support for a new file format: `.kvcrdt`. This should result in much more reliable file merging of offline changes. 
+- Catpure text from camera on phones that support it
+
+### Fixed
+
+- Deleting all text no longer crashes
+- Note titles are derived from Books, if present, otherwise from the first line of Markdown.
+- Memory leaks of `SavingTextEditViewController` and `TextEditViewController`
+
+### Removed
+
+- The share extension.
+
+## [0.50.0] - 2021-07-13
+
+### Changed
+
+- **Major** The app can now track your reading history with individual books, and it uses that information to update whether the book is "want to read" / "currently reading" / "read." These categories are also now groupings in the document list rather than different folders.
+- Standard star rating
+- Changed the appearance of the book headers
 - Book-related utility code has been moved to a stand-alone library, [BookKit](https://github.com/bdewey/BookKit).
+- Updated to Version 0.2 of [SpacedRepetitionScheduler](https://github.com/bdewey/SpacedRepetitionScheduler).
 
 ### Fixed
 
 - Improper use of cell registration (Thanks, Xcode 13!)
+- Broken formatting when I moved to TextMarkupKit
+- List-flashing-while-typing
+- Performance: Added an image cache for document thumbnails
 
 ## [0.49.0] - 2021-06-25
 
