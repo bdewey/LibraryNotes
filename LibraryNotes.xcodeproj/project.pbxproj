@@ -296,7 +296,7 @@
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
-		D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Library Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LibraryNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D3DC5ECE20EC9B0200F0B74B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -444,9 +444,9 @@
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
-				D3DC5EC120EC9B0100F0B74B /* GrailDiary */,
-				D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */,
-				D3E98F0421D470B2008445DA /* GrailDiaryUITests */,
+				D3DC5EC120EC9B0100F0B74B /* LibraryNotes */,
+				D3DC5ED820EC9B0200F0B74B /* LibraryNotesTests */,
+				D3E98F0421D470B2008445DA /* LibraryNotesUITests */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
@@ -457,14 +457,14 @@
 		D3DC5EC020EC9B0100F0B74B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */,
+				D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		D3DC5EC120EC9B0100F0B74B /* GrailDiary */ = {
+		D3DC5EC120EC9B0100F0B74B /* LibraryNotes */ = {
 			isa = PBXGroup;
 			children = (
 				D31AFAA2229D61ED00ED2B76 /* AnswerStatistics.swift */,
@@ -554,10 +554,10 @@
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 			);
-			path = GrailDiary;
+			path = LibraryNotes;
 			sourceTree = "<group>";
 		};
-		D3DC5ED820EC9B0200F0B74B /* GrailDiaryTests */ = {
+		D3DC5ED820EC9B0200F0B74B /* LibraryNotesTests */ = {
 			isa = PBXGroup;
 			children = (
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
@@ -574,24 +574,24 @@
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D3FA025126CCDD9F001A5A4C /* TestError.swift */,
 			);
-			path = GrailDiaryTests;
+			path = LibraryNotesTests;
 			sourceTree = "<group>";
 		};
-		D3E98F0421D470B2008445DA /* GrailDiaryUITests */ = {
+		D3E98F0421D470B2008445DA /* LibraryNotesUITests */ = {
 			isa = PBXGroup;
 			children = (
 				D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */,
 				D3E98F0721D470B2008445DA /* Info.plist */,
 			);
-			path = GrailDiaryUITests;
+			path = LibraryNotesUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D3DC5EBE20EC9B0100F0B74B /* Library Notes */ = {
+		D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "Library Notes" */;
+			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */;
 			buildPhases = (
 				D3DC5EBB20EC9B0100F0B74B /* Sources */,
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
@@ -604,7 +604,7 @@
 			);
 			dependencies = (
 			);
-			name = "Library Notes";
+			name = LibraryNotes;
 			packageProductDependencies = (
 				D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */,
 				D3E9B5942564FD4900E47375 /* Logging */,
@@ -618,7 +618,7 @@
 				D38A16E426F6544C00C04692 /* GRDB */,
 			);
 			productName = CommonplaceBookApp;
-			productReference = D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */;
+			productReference = D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
@@ -692,7 +692,7 @@
 					};
 				};
 			};
-			buildConfigurationList = D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "GrailDiary" */;
+			buildConfigurationList = D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "LibraryNotes" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -717,7 +717,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D3DC5EBE20EC9B0100F0B74B /* Library Notes */,
+				D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
 			);
@@ -912,12 +912,12 @@
 /* Begin PBXTargetDependency section */
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* Library Notes */;
+			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
 			targetProxy = D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */;
 		};
 		D3E98F0921D470B2008445DA /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* Library Notes */;
+			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
 			targetProxy = D3E98F0821D470B2008445DA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -1065,7 +1065,7 @@
 				CURRENT_PROJECT_VERSION = 92;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1092,7 +1092,7 @@
 				CURRENT_PROJECT_VERSION = 92;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = "$(SRCROOT)/GrailDiary/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1116,7 +1116,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = GrailDiaryTests/Info.plist;
+				INFOPLIST_FILE = LibraryNotesTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1129,7 +1129,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GrailDiary.app/GrailDiary";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryNotes.app/LibraryNotes";
 			};
 			name = Debug;
 		};
@@ -1141,7 +1141,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = GrailDiaryTests/Info.plist;
+				INFOPLIST_FILE = LibraryNotesTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1153,7 +1153,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GrailDiary.app/GrailDiary";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryNotes.app/LibraryNotes";
 			};
 			name = Release;
 		};
@@ -1162,7 +1162,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = GrailDiaryUITests/Info.plist;
+				INFOPLIST_FILE = LibraryNotesUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1184,7 +1184,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = GrailDiaryUITests/Info.plist;
+				INFOPLIST_FILE = LibraryNotesUITests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1204,7 +1204,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "GrailDiary" */ = {
+		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "LibraryNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DC5EDC20EC9B0200F0B74B /* Debug */,
@@ -1213,7 +1213,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "Library Notes" */ = {
+		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DC5EDF20EC9B0200F0B74B /* Debug */,
