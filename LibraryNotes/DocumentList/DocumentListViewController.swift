@@ -435,9 +435,9 @@ extension DocumentListViewController {
       Logger.shared.info("Sending feedback")
       let mailComposer = MFMailComposeViewController()
       mailComposer.setSubject("\(AppDelegate.appName) Feedback")
-      mailComposer.setToRecipients(["bdewey@gmail.com"])
+      mailComposer.setToRecipients(["librarynotesapp@gmail.com"])
       mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
-      if let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
+      if UIApplication.isTestFlight, let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
         mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
       }
       mailComposer.mailComposeDelegate = self

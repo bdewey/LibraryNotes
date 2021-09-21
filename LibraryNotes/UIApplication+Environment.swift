@@ -13,6 +13,11 @@ extension UIApplication {
     #endif
   }
 
+  /// True if this app was installed via Testflight.
+  static var isTestFlight: Bool {
+    Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+  }
+
   static var versionString: String {
     let shortVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
     let shortVersionNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")
