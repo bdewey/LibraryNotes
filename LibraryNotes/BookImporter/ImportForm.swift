@@ -16,16 +16,20 @@ struct ImportForm: View {
   var body: some View {
     NavigationView {
       Form {
-        Section(header: Text("Download")) {
-          Toggle("Cover Images", isOn: $downloadCoverImages)
-          Toggle("Dry Run", isOn: $dryRun)
+        Section(header: Text("Select File"), footer: Text(verbatim: selectedURL?.lastPathComponent ?? "Pick a Goodreads CSV file or LibraryThing JSON file to import.")) {
+          Button("Open Document Picker") {
+            showDocumentPicker = true
+          }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
+        }
+        Section(header: Text("Options"), footer: Text("If set, \(AppDelegate.appName) will download cover images from Open Library.")) {
+          Toggle("Download Cover Images", isOn: $downloadCoverImages)
         }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
-        Section(header: Text("Hashtags (Optional)"), footer: Text("Enter #hashtags for all imported books. Example: #goodreads")) {
+        Section(footer: Text("Optional: Apply #hashtags for all imported books. Example: #goodreads")) {
           TextField("#hashtag", text: $hashtags)
         }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
-        Section(footer: Text(verbatim: selectedURL?.lastPathComponent ?? "")) {
-          Button("Select File") {
-            showDocumentPicker = true
+        if UIApplication.isSimulator {
+          Section(header: Text("Debugging")) {
+            Toggle("Dry Run", isOn: $dryRun)
           }.listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
         }
       }
@@ -56,7 +60,12 @@ struct ImportForm: View {
     guard let selectedURL = selectedURL else {
       return
     }
-    let importRequest = BookImportRequest(item: selectedURL, hashtags: hashtags, downloadCoverImages: downloadCoverImages, dryRun: dryRun)
+    let importRequest = BookImportRequest(
+      item: selectedURL,
+      hashtags: hashtags,
+      downloadCoverImages: downloadCoverImages,
+      dryRun: dryRun && UIApplication.isSimulator
+    )
     importAction(importRequest)
   }
 }
