@@ -43,7 +43,7 @@ extension UTType {
       if Self.isUITesting {
         let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("grail")
         // swiftlint:disable:next force_try
-        try! await browser.openDocument(at: temporaryURL, createWelcomeContent: false, animated: false)
+        try! await browser.openDocument(at: temporaryURL, animated: false)
       }
       self.window = window
       UITableView.appearance().backgroundColor = .grailGroupedBackground

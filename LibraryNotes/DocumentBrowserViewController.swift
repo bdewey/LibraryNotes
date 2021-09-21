@@ -63,7 +63,7 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
       do {
         var isStale = false
         let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
-        try await openDocument(at: url, createWelcomeContent: false, animated: false)
+        try await openDocument(at: url, animated: false)
         topLevelViewController?.configure(with: userActivity)
       } catch {
         Logger.shared.error("Error opening saved document: \(error)")
@@ -79,7 +79,6 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   @MainActor
   func openDocument(
     at url: URL,
-    createWelcomeContent: Bool,
     animated: Bool
   ) async throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
@@ -94,9 +93,6 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
       "documentState": String(describing: database.documentState),
     ]
     Logger.shared.info("In open completion handler. \(properties)")
-    if !AppDelegate.isUITesting, createWelcomeContent {
-      database.tryCreatingWelcomeContent()
-    }
     let viewController = NotebookViewController(database: database)
     viewController.modalPresentationStyle = .fullScreen
     viewController.modalTransitionStyle = .crossDissolve
@@ -111,7 +107,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     }
     Task {
       do {
-        try await openDocument(at: url, createWelcomeContent: false, animated: true)
+        try await openDocument(at: url, animated: true)
       } catch {
         Logger.shared.error("Unexpected error opening document at \(url): \(error)")
       }
@@ -133,23 +129,14 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   }
 
   private func makeNewDocument() async throws -> URL? {
-    let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    try FileManager.default.createDirectory(at: directoryURL, withIntermediateDirectories: true, attributes: nil)
-    let url = directoryURL.appendingPathComponent("library").appendingPathExtension(UTType.libnotes.preferredFilenameExtension ?? "kvcrdt")
-    let document = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.description)
-    Logger.shared.info("Attempting to create a document at \(url.path)")
-    document.tryCreatingWelcomeContent()
-    guard await document.save(to: url, for: .forCreating) else {
-      return nil
-    }
-    return url
+    Bundle.main.url(forResource: "library", withExtension: "libnotes")
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
     Logger.shared.info("Imported document to \(destinationURL)")
     Task {
       do {
-        try await openDocument(at: destinationURL, createWelcomeContent: false, animated: true)
+        try await openDocument(at: destinationURL, animated: true)
       } catch {
         Logger.shared.error("Error opening document at \(destinationURL): \(error)")
       }
@@ -173,22 +160,5 @@ extension DocumentBrowserViewController: AppCommands {
 
   @objc func makeNewNote() {
     topLevelViewController?.makeNewNote()
-  }
-}
-
-// MARK: - NoteDatabase
-
-private extension NoteDatabase {
-  /// Tries to create a "weclome" note in the database. Logs errors.
-  func tryCreatingWelcomeContent() {
-    if let welcomeURL = Bundle.main.url(forResource: "Welcome", withExtension: "md") {
-      do {
-        let welcomeMarkdown = try String(contentsOf: welcomeURL)
-        let welcomeNote = Note(markdown: welcomeMarkdown)
-        _ = try createNote(welcomeNote)
-      } catch {
-        Logger.shared.error("Unexpected error creating welcome content: \(error)")
-      }
-    }
   }
 }
