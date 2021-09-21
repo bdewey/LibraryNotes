@@ -12,6 +12,15 @@ extension UserDefaults {
     bool(for: "enable_experimental_features", default: false)
   }
 
+  var hasRunBefore: Bool {
+    get {
+      bool(for: #function, default: false)
+    }
+    set {
+      set(newValue, forKey: #function)
+    }
+  }
+
   private func bool(for key: String, default: Bool) -> Bool {
     if value(forKey: key) == nil {
       Logger.shared.info("Setting default value for \(key): \(`default`)")
