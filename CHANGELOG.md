@@ -1,5 +1,24 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Error dialog on import errors
+
+### Fixed
+
+- Error importing LibraryThing JSON when date wasn't specified
+
+## [1.0.0] - 2021-09-21
+
+**This is it! Finally released on the app store!**
+
+- Provide "starter content" -- information about some Standard Ebooks (https://standardebooks.org)
+- Updated the welcome content
+- Feedback email goes to librarynotesapp@gmail.com and does not include log files (unless you're in TestFlight)
+- Simplified import screen
+
 ## [0.56.0-beta] - 2021-09-10
 
 Trying a new brand! **Library Notes**

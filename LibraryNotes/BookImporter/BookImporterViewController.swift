@@ -45,8 +45,7 @@ final class BookImporterViewController: UIViewController {
       Logger.shared.info("Importing books from \(importRequest.item)")
       do {
         guard let importSource = try importRequest.importSource else {
-          Logger.shared.error("Could not determine the import source for \(url)")
-          return
+          throw CocoaError(.fileNoSuchFile)
         }
         switch importSource {
         case .augmentedBooks(let books):
@@ -54,11 +53,17 @@ final class BookImporterViewController: UIViewController {
         case .database(let url):
           try await importDatabase(at: url)
         }
+        dismiss(animated: true)
       } catch {
         Logger.shared.error("Error importing \(url): \(error)")
+        let alertViewController = UIAlertController(title: "Error", message: "Unexpected error importing books from \(importRequest.item.lastPathComponent)", preferredStyle: .alert)
+        let okButton = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+          self?.dismiss(animated: true)
+        }
+        alertViewController.addAction(okButton)
+        present(alertViewController, animated: true)
       }
     }
-    dismiss(animated: true)
   }
 
   private func importBooks<T>(_ bookInfo: [AugmentedBook], importRequest: BookImportRequest<T>) {
