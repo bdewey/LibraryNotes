@@ -75,12 +75,6 @@ public struct Note {
   }
 
   @available(*, deprecated)
-  public var hashtags: [String] {
-    get { metadata.tags }
-    set { metadata.tags = newValue }
-  }
-
-  @available(*, deprecated)
   public var title: String {
     get { metadata.title }
     set { metadata.title = newValue }
