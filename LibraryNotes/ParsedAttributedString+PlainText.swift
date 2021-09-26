@@ -7,7 +7,7 @@ public extension ParsedAttributedString.Style {
   static func plainText(
     textStyle: UIFont.TextStyle,
     textColor: UIColor = .label,
-    imageStorage: ImageStorage? = nil,
+    imageStorage: ParsedAttributedStringFormatter? = nil,
     kern: CGFloat = 0,
     fontDesign: UIFontDescriptor.SystemDesign = .default
   ) -> ParsedAttributedString.Style {
@@ -19,7 +19,7 @@ public extension ParsedAttributedString.Style {
       .clozeHint: .remove,
     ]
     if let imageStorage = imageStorage {
-      formatters[.image] = AnyParsedAttributedStringFormatter(ImageReplacementFormatter(imageStorage))
+      formatters[.image] = AnyParsedAttributedStringFormatter(imageStorage)
     }
     var defaultAttributes = AttributedStringAttributesDescriptor(textStyle: textStyle, color: textColor)
     defaultAttributes.lineHeightMultiple = 1.2

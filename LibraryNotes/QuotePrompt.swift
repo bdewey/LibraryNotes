@@ -49,7 +49,7 @@ extension QuotePrompt: Prompt {
         .kern: 2.0,
       ]
     )
-    let (front, chapterAndVerse) = renderCardFront(imageStorage: BoundNote(identifier: properties.documentName, database: database))
+    let (front, chapterAndVerse) = renderCardFront(imageStorage: NoteScopedImageStorage(identifier: properties.documentName, database: database))
     view.front = front.trimmingTrailingWhitespace()
     let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, style: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
@@ -61,7 +61,7 @@ extension QuotePrompt: Prompt {
   }
 
   public func renderCardFront(
-    imageStorage: ImageStorage?
+    imageStorage: NoteScopedImageStorage?
   ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
     let renderedMarkdown = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .body, imageStorage: imageStorage))
     let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""

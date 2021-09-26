@@ -49,6 +49,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.coverImageCache = coverImageCache
     self.initialSelectedRange = initialSelectedRange
     self.autoFirstResponder = autoFirstResponder
+    self.imageStorage = NoteScopedImageStorage(identifier: noteIdentifier, database: database)
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
     setTitleMarkdown(note.metadata.preferredTitle)
@@ -68,6 +69,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var note: Note
   private let noteStorage: NoteDatabase
   private let coverImageCache: CoverImageCache
+  private let imageStorage: NoteScopedImageStorage
 
   private var coverImage: UIImage? {
     get {
@@ -95,7 +97,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = TextEditViewController(imageStorage: WeakReferenceImageStorage(self))
+    let viewController = TextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange = initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
@@ -277,7 +279,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func insertImageData(_ imageData: Data, type: UTType) {
     do {
       try forceSave()
-      let reference = try storeImageData(imageData, type: type, key: nil)
+      let reference: String = try imageStorage.storeImageData(imageData, type: type)
       let markdown = "\n\n\(reference)\n\n"
       let initialRange = textEditViewController.selectedRange
       var rawRange = textEditViewController.parsedAttributedString.rawStringRange(forRange: initialRange)
@@ -359,44 +361,6 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
   }
 }
 
-struct WeakReferenceImageStorage: ImageStorage {
-  weak var viewController: SavingTextEditViewController?
-
-  init(_ viewController: SavingTextEditViewController) {
-    self.viewController = viewController
-  }
-
-  enum Error: Swift.Error {
-    case storageNoLongerValid
-  }
-
-  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
-    guard let viewController = viewController else {
-      throw Error.storageNoLongerValid
-    }
-    return try viewController.storeImageData(imageData, type: type, key: key)
-  }
-
-  func retrieveImageDataForKey(_ key: String) throws -> Data {
-    guard let viewController = viewController else {
-      throw Error.storageNoLongerValid
-    }
-    return try viewController.retrieveImageDataForKey(key)
-  }
-}
-
-extension SavingTextEditViewController: ImageStorage {
-  func storeImageData(_ imageData: Data, type: UTType, key: String?) throws -> String {
-    try forceSave()
-    let imageKey = try noteStorage.writeAssociatedData(imageData, noteIdentifier: noteIdentifier, role: "embeddedImage", type: type, key: key)
-    return "![](\(imageKey))"
-  }
-
-  func retrieveImageDataForKey(_ key: String) throws -> Data {
-    return try noteStorage.readAssociatedData(from: noteIdentifier, key: key)
-  }
-}
-
 extension SavingTextEditViewController: BookHeaderDelegate {
   func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook) {
     Logger.shared.info("Updating book: \(book.title)")
@@ -410,7 +374,7 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
     if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
       do {
-        _ = try storeImageData(imageData, type: .jpeg, key: type(of: noteStorage).coverImageKey)
+        try imageStorage.storeCoverImage(imageData, type: .jpeg)
       } catch {
         Logger.shared.error("Unexpected error saving image data: \(error)")
       }
