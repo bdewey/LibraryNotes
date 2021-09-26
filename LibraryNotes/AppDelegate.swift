@@ -75,7 +75,7 @@ final class LogHandlerFactory {
 
   private func makeFileLogHandler(label: String) -> FileLogHandler {
     LogFileDirectory.shared.initializeCurrentLogFile()
-    var handler = try! FileLogHandler(label: label, localFile: LogFileDirectory.shared.currentLogFileURL)
+    let handler = try! FileLogHandler(label: label, localFile: LogFileDirectory.shared.currentLogFileURL)
     handler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
     return handler
   }

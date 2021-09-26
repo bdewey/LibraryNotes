@@ -100,7 +100,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   func testNotesShowUpInAllMetadata() async throws {
     let identifier = try database.createNote(Note.withHashtags)
     XCTAssertEqual(1, database.bookMetadata.count)
-    XCTAssertEqual(try database.bookMetadata[identifier]?.title, Note.withHashtags.title)
+    XCTAssertEqual(database.bookMetadata[identifier]?.title, Note.withHashtags.metadata.title)
   }
 
   func testCreatingNoteSendsNotification() async throws {
