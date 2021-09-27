@@ -16,7 +16,6 @@ public struct Note {
     self.promptCollections = promptCollections
   }
 
-  @available(*, deprecated)
   public init(
     creationTimestamp: Date,
     timestamp: Date,
