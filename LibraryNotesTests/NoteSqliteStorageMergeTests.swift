@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-@testable import LibraryNotes
 import KeyValueCRDT
+@testable import LibraryNotes
 import XCTest
 
 /// Specific test cases around merging database content.

@@ -166,28 +166,6 @@ public final class NoteDatabase {
     try keyValueCRDT.bulkWrite(updates)
   }
 
-  public func writeAssociatedData(_ data: Data, noteIdentifier: Note.Identifier, role: String, type: UTType, key: String?) throws -> String {
-    let actualKey = (key == NoteDatabaseKey.coverImage.rawValue)
-      ? NoteDatabaseKey.coverImage
-      : NoteDatabaseKey.asset(assetKey: key ?? data.sha1Digest(), assetType: type)
-    try keyValueCRDT.writeBlob(
-      data,
-      to: actualKey.rawValue,
-      scope: noteIdentifier,
-      mimeType: type.preferredMIMEType ?? "application/octet-stream",
-      timestamp: Date()
-    )
-    return actualKey.rawValue
-  }
-
-  @available(*, deprecated, message: "Use read(noteIdentifier:key:) instead")
-  public func readAssociatedData(from noteIdentifier: Note.Identifier, key: String) throws -> Data {
-    guard let data = try keyValueCRDT.read(key: key, scope: noteIdentifier).resolved(with: .lastWriterWins)?.blob else {
-      throw NoteDatabaseError.noSuchAsset
-    }
-    return data
-  }
-
   /// Reads a value from the database.
   /// - Parameters:
   ///   - noteIdentifier: The note holding the value.

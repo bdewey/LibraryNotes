@@ -1,8 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Combine
-@testable import LibraryNotes
 import KeyValueCRDT
+@testable import LibraryNotes
 import XCTest
 
 final class NoteSqliteStorageTests: XCTestCase {
@@ -62,13 +61,13 @@ final class NoteSqliteStorageTests: XCTestCase {
     let identifier = try database.createNote(Note.withHashtags)
     try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
       var note = oldNote
-      note.hashtags = ["#updated"]
+      note.metadata.tags = ["#updated"]
       return note
     })
     XCTAssertTrue(database.hasUnsavedChanges)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     var expectedNote = Note.withHashtags
-    expectedNote.hashtags = ["#updated"]
+    expectedNote.metadata.tags = ["#updated"]
     XCTAssertEqual(expectedNote, roundTripNote)
   }
 
@@ -101,7 +100,7 @@ final class NoteSqliteStorageTests: XCTestCase {
   func testNotesShowUpInAllMetadata() async throws {
     let identifier = try database.createNote(Note.withHashtags)
     XCTAssertEqual(1, database.bookMetadata.count)
-    XCTAssertEqual(try database.bookMetadata[identifier]?.title, Note.withHashtags.title)
+    XCTAssertEqual(database.bookMetadata[identifier]?.title, Note.withHashtags.metadata.title)
   }
 
   func testCreatingNoteSendsNotification() async throws {

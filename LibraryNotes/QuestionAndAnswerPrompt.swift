@@ -45,7 +45,7 @@ extension QuestionAndAnswerPrompt: Prompt {
     view.context = ParsedAttributedString(string: properties.attributionMarkdown, style: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, kern: 2.0))
     let formattedString = ParsedAttributedString(
       string: markdown,
-      style: .plainText(textStyle: .body, imageStorage: BoundNote(identifier: properties.documentName, database: database))
+      style: .plainText(textStyle: .body, imageStorage: NoteScopedImageStorage(identifier: properties.documentName, database: database))
     )
     if let node = try? formattedString.rawString.result.get() {
       let anchoredNode = AnchoredNode(node: node, startIndex: 0)

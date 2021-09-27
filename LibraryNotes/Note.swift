@@ -16,7 +16,6 @@ public struct Note {
     self.promptCollections = promptCollections
   }
 
-  @available(*, deprecated)
   public init(
     creationTimestamp: Date,
     timestamp: Date,
@@ -67,24 +66,6 @@ public struct Note {
 
   public var text: String?
   public var promptCollections: [ContentKey: PromptCollection]
-
-  @available(*, deprecated, message: "Use metadata.modifiedTimestamp")
-  public var timestamp: Date {
-    get { metadata.modifiedTimestamp }
-    set { metadata.modifiedTimestamp = newValue }
-  }
-
-  @available(*, deprecated)
-  public var hashtags: [String] {
-    get { metadata.tags }
-    set { metadata.tags = newValue }
-  }
-
-  @available(*, deprecated)
-  public var title: String {
-    get { metadata.title }
-    set { metadata.title = newValue }
-  }
 }
 
 extension Note: Equatable {

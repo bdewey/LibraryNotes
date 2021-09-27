@@ -37,7 +37,6 @@
 		D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31D7CDF2598CCC70083AB05 /* WebViewController.swift */; };
 		D32215EF26C41108000BA772 /* SchedulingParameters+Standard.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */; };
 		D32215F126C41215000BA772 /* Sequence+DictionaryExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */; };
-		D32215F326C41379000BA772 /* NoteDatabase+ImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F226C41379000BA772 /* NoteDatabase+ImageStorage.swift */; };
 		D32215F526C413D3000BA772 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F426C413D3000BA772 /* ContentIdentifier.swift */; };
 		D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D324409726E525AF009B58DE /* ZIPFoundation */; };
 		D324409A26E525ED009B58DE /* LogFileDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D324409926E525ED009B58DE /* LogFileDirectory.swift */; };
@@ -70,6 +69,7 @@
 		D3558D7725D9741100746600 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7625D9741100746600 /* ImageCache.swift */; };
 		D3558D7A25DA130900746600 /* ApiKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7925DA130900746600 /* ApiKey.swift */; };
 		D3583278267F7443009D8F68 /* GrailDiaryGrammar.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */; };
+		D35881482700E1E7006DFF89 /* NoteScopedImageStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35881472700E1E7006DFF89 /* NoteScopedImageStorage.swift */; };
 		D358CC422688DC6D00C991DB /* BookKit in Frameworks */ = {isa = PBXBuildFile; productRef = D358CC412688DC6D00C991DB /* BookKit */; };
 		D35B194726E3BFD900713A51 /* UserDefaults+GrailDiary.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35B194626E3BFD900713A51 /* UserDefaults+GrailDiary.swift */; };
 		D35C72C32189E0720082396D /* TextCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D35C72C22189E0720082396D /* TextCollectionViewCell.swift */; };
@@ -214,7 +214,6 @@
 		D31D7CDF2598CCC70083AB05 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchedulingParameters+Standard.swift"; sourceTree = "<group>"; };
 		D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+DictionaryExtensions.swift"; sourceTree = "<group>"; };
-		D32215F226C41379000BA772 /* NoteDatabase+ImageStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NoteDatabase+ImageStorage.swift"; sourceTree = "<group>"; };
 		D32215F426C413D3000BA772 /* ContentIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
 		D324409926E525ED009B58DE /* LogFileDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogFileDirectory.swift; sourceTree = "<group>"; };
 		D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GrailDiaryGrammar+Styles.swift"; sourceTree = "<group>"; };
@@ -249,6 +248,7 @@
 		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
 		D3558D7925DA130900746600 /* ApiKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApiKey.swift; sourceTree = "<group>"; };
 		D3583277267F7443009D8F68 /* GrailDiaryGrammar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GrailDiaryGrammar.swift; sourceTree = "<group>"; };
+		D35881472700E1E7006DFF89 /* NoteScopedImageStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScopedImageStorage.swift; sourceTree = "<group>"; };
 		D35B194626E3BFD900713A51 /* UserDefaults+GrailDiary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+GrailDiary.swift"; sourceTree = "<group>"; };
 		D35C72C22189E0720082396D /* TextCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextCollectionViewCell.swift; sourceTree = "<group>"; };
 		D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+NavigationController.swift"; sourceTree = "<group>"; };
@@ -511,7 +511,7 @@
 				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
 				D362CC2E25431C6E00462683 /* NotebookViewController.swift */,
-				D32215F226C41379000BA772 /* NoteDatabase+ImageStorage.swift */,
+				D35881472700E1E7006DFF89 /* NoteScopedImageStorage.swift */,
 				D31AFA9F229D61EC00ED2B76 /* NSAttributedString+ChapterAndVerse.swift */,
 				D30BD4FB22A0B8C2007E1F31 /* Optional+Collection.swift */,
 				D36ECC932426C25E0028D808 /* PanTranslationClassifier.swift */,
@@ -816,7 +816,6 @@
 				D369182726BAD10A001EB512 /* Version+NoteModels.swift in Sources */,
 				D3378CEA26DBC9C5006750EC /* ClearBackgroundCell.swift in Sources */,
 				D35DB41525D3748A00F558D8 /* Data+Image.swift in Sources */,
-				D32215F326C41379000BA772 /* NoteDatabase+ImageStorage.swift in Sources */,
 				D390C91926C955DF008E2A74 /* SessionGenerator.swift in Sources */,
 				D377818325DC0ADD004DD38F /* WebScrapingViewController.swift in Sources */,
 				D3378CD926D92DAA006750EC /* UIResponder+Debugging.swift in Sources */,
@@ -841,6 +840,7 @@
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
+				D35881482700E1E7006DFF89 /* NoteScopedImageStorage.swift in Sources */,
 				D3378CDE26DBC373006750EC /* PersonNameComponents+Comparable.swift in Sources */,
 				D3FBC62E241D4DF6005DA8C2 /* SemanticColor.swift in Sources */,
 				D304D3EB25BC8A6100178590 /* PredefinedFolder.swift in Sources */,

@@ -18,7 +18,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
-  public init(imageStorage: ImageStorage) {
+  public init(imageStorage: NoteScopedImageStorage) {
     self.imageStorage = imageStorage
     super.init(nibName: nil, bundle: nil)
     textView.textStorage.delegate = self
@@ -42,7 +42,7 @@ public final class TextEditViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let imageStorage: ImageStorage
+  private let imageStorage: NoteScopedImageStorage
 
   // Init-time state.
 
