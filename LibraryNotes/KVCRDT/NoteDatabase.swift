@@ -56,6 +56,16 @@ public final class NoteDatabase {
     self.allTagsInvalidationSubscription = notesDidChange.sink { [weak self] _ in
       self?.cachedAllTags = nil
     }
+    self.allTagsInvalidationSubscription = keyValueCRDT
+      .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
+      .sink(receiveCompletion: { error in
+        Logger.shared.error("Error maintaining cache: \(error)")
+      }, receiveValue: { [weak self] update in
+        guard let self = self else { return }
+        for scopedKey in update.keys {
+          self.cachedBookMetadata[scopedKey.scope] = nil
+        }
+      })
   }
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
@@ -133,11 +143,29 @@ public final class NoteDatabase {
     }
   }
 
+  @available(*, deprecated)
   public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
     keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .tryMap { try $0.asBookNoteMetadata() }
       .eraseToAnyPublisher()
+  }
+
+  private var cachedBookMetadataInvalidation: AnyCancellable?
+  private var cachedBookMetadata: [Note.Identifier: BookNoteMetadata] = [:]
+
+  public func bookMetadata(identifier: Note.Identifier) -> BookNoteMetadata? {
+    if let cachedResult = cachedBookMetadata[identifier] {
+      return cachedResult
+    }
+    do {
+      let value = try keyValueCRDT.read(key: identifier, scope: NoteDatabaseKey.metadata.rawValue).resolved(with: .lastWriterWins)?.decodeJSON(BookNoteMetadata.self)
+      cachedBookMetadata[identifier] = value
+      return value
+    } catch {
+      Logger.shared.error("Unexpected error getting metadata for \(identifier): \(error)")
+      return nil
+    }
   }
 
   public func readPublisher(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) -> AnyPublisher<[NoteDatabaseKey: [Version]], Error> {
