@@ -16,9 +16,9 @@ public struct BookAndImage {
   }
 }
 
-extension BookAndImage {
+public extension BookAndImage {
   /// Create a `BookAndImage` where we download the cover image from OpenLibrary.
-  public init(book: AugmentedBook, isbn: String) async {
+  init(book: AugmentedBook, isbn: String) async {
     self.book = book
     do {
       self.image = try await OpenLibrary.coverImage(forISBN: isbn)

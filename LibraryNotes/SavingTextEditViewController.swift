@@ -312,7 +312,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String] {
-    let hashtags = noteStorage.bookMetadata.values.hashtags
+    let hashtags = (try? noteStorage.allTags) ?? []
     let existingHashtags = hashtags.filter { $0.hasPrefix(hashtag) }
 
     // Make sure that "hashtag" is in the suggested results
@@ -393,7 +393,7 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
   }
 }
 
-//extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
+// extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
 //  func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
 //    dismiss(animated: true, completion: nil)
 //  }
@@ -408,4 +408,4 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
 //    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
 //    dismiss(animated: true, completion: nil)
 //  }
-//}
+// }

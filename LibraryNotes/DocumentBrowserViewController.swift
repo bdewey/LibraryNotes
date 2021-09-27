@@ -97,8 +97,8 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     viewController.modalPresentationStyle = .fullScreen
     viewController.modalTransitionStyle = .crossDissolve
     viewController.view.tintColor = .systemOrange
-    self.present(viewController, animated: animated, completion: nil)
-    self.topLevelViewController = viewController
+    present(viewController, animated: animated, completion: nil)
+    topLevelViewController = viewController
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {

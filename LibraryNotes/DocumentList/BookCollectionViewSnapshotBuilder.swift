@@ -78,7 +78,7 @@ struct BookCollectionViewSnapshotBuilder: Equatable {
 
   // "cardsPerDocument" doesn't count when determining if our snapshot builders are equal, as it doesn't
   // affect the ordering of items in the snapshot.
-  static func ==(lhs: BookCollectionViewSnapshotBuilder, rhs: BookCollectionViewSnapshotBuilder) -> Bool {
+  static func == (lhs: BookCollectionViewSnapshotBuilder, rhs: BookCollectionViewSnapshotBuilder) -> Bool {
     return (lhs.records, lhs.sortOrder) == (rhs.records, rhs.sortOrder)
   }
 }

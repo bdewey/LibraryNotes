@@ -381,7 +381,7 @@ extension DocumentListViewController {
       shareAction,
       importLibraryThingAction,
       sendFeedbackAction,
-    ].compactMap({ $0 }))
+    ].compactMap { $0 })
   }
 
   private var openCommand: UICommand {

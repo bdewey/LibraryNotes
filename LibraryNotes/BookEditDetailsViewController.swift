@@ -123,7 +123,7 @@ public final class BookEditDetailsViewController: UIViewController {
   private func updateViewModels(_ viewModels: [SearchResultsViewModel]) {
     assert(Thread.isMainThread)
     isBatchUpdating = true
-    self.searchResultsViewModels = viewModels
+    searchResultsViewModels = viewModels
     for viewModel in viewModels {
       if let url = viewModel.coverImageURL {
         imageCache.image(for: url) { result in

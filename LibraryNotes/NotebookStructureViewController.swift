@@ -455,7 +455,7 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.read
-    let hashtags = database.bookMetadata.values.hashtags
+    let hashtags = (try? database.allTags) ?? []
     root.hasChildren = !hashtags.isEmpty
     snapshot.append([root])
 

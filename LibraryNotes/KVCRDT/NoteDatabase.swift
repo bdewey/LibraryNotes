@@ -53,6 +53,9 @@ public final class NoteDatabase {
     self.keyValueCRDT = keyValueCRDT
     self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self
+    self.allTagsInvalidationSubscription = notesDidChange.sink { [weak self] _ in
+      self?.cachedAllTags = nil
+    }
   }
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
@@ -101,13 +104,32 @@ public final class NoteDatabase {
       .eraseToAnyPublisher()
   }
 
-  public var bookMetadata: [String: BookNoteMetadata] {
+  private var allTagsInvalidationSubscription: AnyCancellable?
+  private var cachedAllTags: [String]?
+
+  public var allTags: [String] {
+    get throws {
+      if let cachedAllTags = cachedAllTags {
+        return cachedAllTags
+      } else {
+        let tags = try keyValueCRDT.read { database in
+          try TagsRecord.allTags(in: database)
+        }
+        let tagsArray = Array(tags).sorted()
+        cachedAllTags = tagsArray
+        return tagsArray
+      }
+    }
+  }
+
+  // TODO: Exclude notes in the trash? Currently used only in tests so :shrug:
+  /// Gets the number of notes in the database
+  public var noteCount: Int {
     do {
-      let results = try keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
-      return try results.asBookNoteMetadata()
+      return try keyValueCRDT.keys(key: NoteDatabaseKey.metadata.rawValue).count
     } catch {
-      Logger.keyValueNoteDatabase.critical("Could not read book metadata: \(error)")
-      fatalError()
+      Logger.shared.error("Unexpected error getting note count: \(error)")
+      return 0
     }
   }
 

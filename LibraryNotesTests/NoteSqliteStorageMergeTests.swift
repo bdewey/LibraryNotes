@@ -70,7 +70,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: noteIdentifier), withoutHashtagNote)
-        XCTAssertEqual(storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.noteCount, 1)
       }
       .run(self)
   }
@@ -121,7 +121,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         let studySession = try await storage.studySession(filter: nil, date: future)
         XCTAssertEqual(0, studySession.count)
-        XCTAssertEqual(1, storage.bookMetadata.count)
+        XCTAssertEqual(1, storage.noteCount)
         let futureStudySession = try await storage.studySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
         XCTAssertEqual(3, futureStudySession.count)
       }
@@ -142,7 +142,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
-        XCTAssertEqual(storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.noteCount, 1)
       }
       .run(self)
   }

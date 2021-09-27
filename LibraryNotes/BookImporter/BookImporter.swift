@@ -23,7 +23,7 @@ final class BookImporter {
   @MainActor
   func importBooks(
     request: BookImportRequest<[AugmentedBook]>,
-    progressCallback: @escaping @MainActor (Int, Int) -> Void
+    progressCallback: @escaping @MainActor(Int, Int) -> Void
   ) async {
     let books = request.dryRun ? Array(request.item.shuffled().prefix(10)) : request.item
     if request.downloadCoverImages {
@@ -45,8 +45,8 @@ final class BookImporter {
     } else {
       booksAndImages = books.map { BookAndImage(book: $0, image: nil) }
     }
-    self.saveBooksAndImages(hashtags: request.hashtags)
-    Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
+    saveBooksAndImages(hashtags: request.hashtags)
+    Logger.shared.info("Finished processing books. Downloaded \(booksAndImages.filter { $0.image != nil }.count) images")
   }
 
   private func saveBooksAndImages(hashtags: String) {
