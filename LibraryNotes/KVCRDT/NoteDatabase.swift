@@ -159,13 +159,31 @@ public final class NoteDatabase {
       return cachedResult
     }
     do {
-      let value = try keyValueCRDT.read(key: identifier, scope: NoteDatabaseKey.metadata.rawValue).resolved(with: .lastWriterWins)?.decodeJSON(BookNoteMetadata.self)
+      let value = try keyValueCRDT.read(key: NoteDatabaseKey.metadata.rawValue, scope: identifier).resolved(with: .lastWriterWins)?.decodeJSON(BookNoteMetadata.self)
       cachedBookMetadata[identifier] = value
       return value
     } catch {
       Logger.shared.error("Unexpected error getting metadata for \(identifier): \(error)")
       return nil
     }
+  }
+
+  func noteIdentifiers(
+    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder
+  ) throws -> [Note.Identifier] {
+    let records = try keyValueCRDT.read { db in
+      try NoteIdentifierRecord
+        .all()
+        .distinct()
+        .fetchAll(db)
+    }
+    // TODO: Figure out why `.distinct()` isn't working, preserve sort order
+    var uniqueifier = Set<Note.Identifier>()
+    for record in records {
+      uniqueifier.insert(record.scope)
+    }
+    return Array(uniqueifier)
   }
 
   public func readPublisher(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) -> AnyPublisher<[NoteDatabaseKey: [Version]], Error> {

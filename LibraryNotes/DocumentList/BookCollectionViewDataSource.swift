@@ -7,16 +7,18 @@ import UIKit
 final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<BookSection, BookCollectionViewItem> {
   init(
     collectionView: UICollectionView,
-    coverImageCache: CoverImageCache
+    coverImageCache: CoverImageCache,
+    database: NoteDatabase
   ) {
-    let bookRegistration = Registration.makeBookRegistration(coverImageCache: coverImageCache)
-    let notebookPageRegistration = Registration.makePageRegistration(coverImageCache: coverImageCache)
+    let bookRegistration = Registration.makeBookRegistration(coverImageCache: coverImageCache, database: database)
+    let notebookPageRegistration = Registration.makePageRegistration(coverImageCache: coverImageCache, database: database)
     let headerRegistration = Registration.makeHeaderRegistration()
 
     super.init(collectionView: collectionView) { (collectionView, indexPath, item) -> UICollectionViewCell? in
       switch item {
       case .book(let viewProperties):
-        if viewProperties.noteProperties.book != nil {
+        let metadata = database.bookMetadata(identifier: viewProperties.pageKey)
+        if metadata?.book != nil {
           return collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: item)
         } else {
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
@@ -30,10 +32,17 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
 
 private enum Registration {
   static func makeBookRegistration(
-    coverImageCache: CoverImageCache
+    coverImageCache: CoverImageCache,
+    database: NoteDatabase
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
-      guard case .book(let viewProperties) = item, let book = viewProperties.noteProperties.book else { return }
+      guard
+        case .book(let viewProperties) = item,
+        let metadata = database.bookMetadata(identifier: viewProperties.pageKey),
+        let book = metadata.book
+      else {
+        return
+      }
       let coverImage = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
       let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
       cell.contentConfiguration = configuration
@@ -41,16 +50,22 @@ private enum Registration {
   }
 
   static func makePageRegistration(
-    coverImageCache: CoverImageCache
+    coverImageCache: CoverImageCache,
+    database: NoteDatabase
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
-      guard case .book(let viewProperties) = item else { return }
+      guard
+        case .book(let viewProperties) = item,
+        let metadata = database.bookMetadata(identifier: viewProperties.pageKey)
+      else {
+        return
+      }
       var configuration = cell.defaultContentConfiguration()
-      let title = ParsedAttributedString(string: viewProperties.noteProperties.title, style: .plainText(textStyle: .headline))
+      let title = ParsedAttributedString(string: metadata.title, style: .plainText(textStyle: .headline))
       configuration.attributedText = title
       let secondaryComponents: [String?] = [
-        viewProperties.noteProperties.summary,
-        viewProperties.noteProperties.tags.joined(separator: ", "),
+        metadata.summary,
+        metadata.tags.joined(separator: ", "),
       ]
       configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel

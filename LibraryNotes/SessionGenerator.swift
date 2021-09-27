@@ -26,15 +26,15 @@ public actor SessionGenerator {
   private var metadata: [Note.Identifier: BookNoteMetadata] = [:]
 
   public func startMonitoringDatabase() throws {
-    let results = try database.bulkRead(isIncluded: { _, key in
-      key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
-    })
-    for result in results {
-      processValue(scopedKey: result.key, versions: result.value)
-    }
-    valueSubscription = database.updatedValuesPublisher.sink(receiveValue: { [weak self] scopedKey, versions in
-      self?.asyncProcessValue(scopedKey: scopedKey, versions: versions)
-    })
+//    let results = try database.bulkRead(isIncluded: { _, key in
+//      key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
+//    })
+//    for result in results {
+//      processValue(scopedKey: result.key, versions: result.value)
+//    }
+//    valueSubscription = database.updatedValuesPublisher.sink(receiveValue: { [weak self] scopedKey, versions in
+//      self?.asyncProcessValue(scopedKey: scopedKey, versions: versions)
+//    })
   }
 
   public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {

@@ -123,6 +123,7 @@
 		D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B8259F9FB8008254DF /* FileLogging */; };
 		D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DA1B862569E8AB009DC866 /* SnapKit */; };
 		D3DBC4002701FAAB00C18438 /* TagsRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */; };
+		D3DBC4022702033A00C18438 /* NoteIdentifierRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
@@ -299,6 +300,7 @@
 		D3D8337B26F9AA040011B450 /* library.libnotes */ = {isa = PBXFileReference; lastKnownFileType = file; path = library.libnotes; sourceTree = "<group>"; };
 		D3DBC3FE2701496000C18438 /* KeyValueCRDT */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KeyValueCRDT; path = ../KeyValueCRDT; sourceTree = "<group>"; };
 		D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsRecord.swift; sourceTree = "<group>"; };
+		D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIdentifierRecord.swift; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LibraryNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -428,6 +430,7 @@
 				D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */,
 				D369182226BAD09F001EB512 /* Value+NoteModels.swift */,
 				D369182626BAD10A001EB512 /* Version+NoteModels.swift */,
+				D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */,
 			);
 			path = KVCRDT;
 			sourceTree = "<group>";
@@ -855,6 +858,7 @@
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
 				D3378CE426DBC645006750EC /* BookSection.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
+				D3DBC4022702033A00C18438 /* NoteIdentifierRecord.swift in Sources */,
 				D3331C8722F4EF11002B62AF /* StringProtocol+FuzzyMatch.swift in Sources */,
 				D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */,
 				D3378CEC26DBCE5D006750EC /* BookCollectionViewSnapshotBuilder.swift in Sources */,

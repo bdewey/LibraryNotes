@@ -49,17 +49,22 @@ final class DocumentListViewController: UIViewController {
 
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
-    metadataPipeline = database.bookMetadataPublisher()
-      .catch { error -> Just<[String: BookNoteMetadata]> in
-        Logger.shared.error("Unexpected error getting metadata: \(error)")
-        return Just([String: BookNoteMetadata]())
-      }
-      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
-      .sink(receiveValue: { [weak self] filteredBookMetadata in
-        self?.dataSource.bookNoteMetadata = filteredBookMetadata
-        self?.updateStudySession()
-        self?.updateQuoteList()
-      })
+    do {
+      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: .modificationTimestap)
+    } catch {
+      Logger.shared.error("Error getting note identifiers: \(error)")
+    }
+//    metadataPipeline = database.bookMetadataPublisher()
+//      .catch { error -> Just<[String: BookNoteMetadata]> in
+//        Logger.shared.error("Unexpected error getting metadata: \(error)")
+//        return Just([String: BookNoteMetadata]())
+//      }
+//      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
+//      .sink(receiveValue: { [weak self] filteredBookMetadata in
+//        self?.dataSource.bookNoteMetadata = filteredBookMetadata
+//        self?.updateStudySession()
+//        self?.updateQuoteList()
+//      })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -247,16 +252,16 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
-    let records = dataSource.bookNoteMetadata
-    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
-    studySessionGeneration += 1
-    let currentStudySessionGeneration = studySessionGeneration
-    currentStudySessionTask = Task {
-      let studySession = try await sessionGenerator.studySession(filter: filter, date: dueDate)
-      if currentStudySessionGeneration == studySessionGeneration {
-        self.studySession = studySession
-      }
-    }
+//    let records = dataSource.bookNoteMetadata
+//    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
+//    studySessionGeneration += 1
+//    let currentStudySessionGeneration = studySessionGeneration
+//    currentStudySessionTask = Task {
+//      let studySession = try await sessionGenerator.studySession(filter: filter, date: dueDate)
+//      if currentStudySessionGeneration == studySessionGeneration {
+//        self.studySession = studySession
+//      }
+//    }
   }
 
   private var quotesSubscription: AnyCancellable?

@@ -56,8 +56,9 @@ struct BookAction {
 
   /// Returns an action for deleting the book represented by `viewProperties`
   static func deleteItem(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> BookAction? {
+    guard let metadata = database.bookMetadata(identifier: viewProperties.pageKey) else { return nil }
     return BookAction(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
-      if viewProperties.noteProperties.folder == PredefinedFolder.recentlyDeleted.rawValue {
+      if metadata.folder == PredefinedFolder.recentlyDeleted.rawValue {
         try database.deleteNote(noteIdentifier: viewProperties.pageKey)
       } else {
         try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in

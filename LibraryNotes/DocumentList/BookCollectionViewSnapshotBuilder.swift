@@ -16,32 +16,13 @@ struct BookCollectionViewSnapshotBuilder: Equatable {
     case creationTimestamp = "Created Date"
     case modificationTimestap = "Modified Date"
     case rating = "Rating"
-
-    fileprivate var sortFunction: (BookViewProperties, BookViewProperties) -> Bool {
-      switch self {
-      case .author:
-        return BookViewProperties.lessThanPriorityAuthor
-      case .title:
-        return BookViewProperties.lessThanPriorityTitle
-      case .creationTimestamp:
-        return { BookViewProperties.lessThanPriorityCreation(lhs: $1, rhs: $0) }
-      case .modificationTimestap:
-        return { BookViewProperties.lessThanPriorityModified(lhs: $1, rhs: $0) }
-      case .rating:
-        return { BookViewProperties.lessThanPriorityRating(lhs: $1, rhs: $0) }
-      }
-    }
   }
 
-  func categorizeMetadataRecords(_ metadataRecords: [String: BookNoteMetadata]) -> [BookSection: [BookCollectionViewItem]] {
-    let viewProperties = records
+  func categorizeMetadataRecords(_ identifiers: [Note.Identifier]) -> [BookSection: [BookCollectionViewItem]] {
+    let viewProperties = identifiers
       .compactMap { identifier -> BookViewProperties? in
-        guard let metadataRecord = metadataRecords[identifier] else {
-          return nil
-        }
         return BookViewProperties(
           pageKey: identifier,
-          noteProperties: metadataRecord,
           cardCount: cardsPerDocument[identifier, default: 0]
         )
       }
@@ -49,7 +30,6 @@ struct BookCollectionViewSnapshotBuilder: Equatable {
     var categorizedItems: [BookSection: [BookCollectionViewItem]] = [:]
 
     let items = viewProperties
-      .sorted(by: sortOrder.sortFunction)
       .map {
         BookCollectionViewItem.book($0)
       }

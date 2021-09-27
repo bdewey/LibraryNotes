@@ -36,7 +36,7 @@ public final class DocumentTableController: NSObject {
     self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
-    self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache)
+    self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache, database: database)
 
     super.init()
     collectionView.delegate = self
@@ -64,11 +64,6 @@ public final class DocumentTableController: NSObject {
     return total
   }
 
-  /// All note identifiers currently displayed in the table.
-  public var noteIdentifiers: [Note.Identifier] {
-    dataSource.snapshot().itemIdentifiers.compactMap { $0.noteIdentifier }
-  }
-
   private var needsPerformUpdates = false
   private var isPerformingUpdates = false
 
@@ -94,7 +89,7 @@ public final class DocumentTableController: NSObject {
     }
   }
 
-  public var bookNoteMetadata: [String: BookNoteMetadata] = [:] {
+  public var noteIdentifiers: [Note.Identifier] = [] {
     didSet {
       updateCardsPerDocument()
       needsPerformUpdates = true
@@ -125,8 +120,7 @@ public final class DocumentTableController: NSObject {
   private var snapshotParameters: BookCollectionViewSnapshotBuilder?
 
   public func performUpdates(animated: Bool) {
-    let filteredRecordIdentifiers = bookNoteMetadata
-      .map { $0.key }
+    let filteredRecordIdentifiers = noteIdentifiers
       .filter { filteredPageIdentifiers?.contains($0) ?? true }
     let newSnapshotBuilder = BookCollectionViewSnapshotBuilder(
       records: Set(filteredRecordIdentifiers),
@@ -147,7 +141,7 @@ public final class DocumentTableController: NSObject {
     dataSource.apply(BookCollectionViewSnapshot(), animatingDifferences: reallyAnimate) {
       self.isPerformingUpdates = false
     }
-    let categorizedItems = newSnapshotBuilder.categorizeMetadataRecords(bookNoteMetadata)
+    let categorizedItems = newSnapshotBuilder.categorizeMetadataRecords(noteIdentifiers)
     for section in BookSection.bookSections {
       if var sectionSnapshot = newSnapshotBuilder.sectionSnapshot(for: section, categorizedItems: categorizedItems) {
         sectionSnapshot.collapseSections(in: collapsedSections)
