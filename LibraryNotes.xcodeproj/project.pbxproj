@@ -427,10 +427,10 @@
 				D369182426BAD0E9001EB512 /* JSONEncoders.swift */,
 				D37C887926B5C9E900EC30C8 /* NoteDatabase.swift */,
 				D369182826BAD1E9001EB512 /* NoteDatabaseKey.swift */,
+				D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */,
 				D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */,
 				D369182226BAD09F001EB512 /* Value+NoteModels.swift */,
 				D369182626BAD10A001EB512 /* Version+NoteModels.swift */,
-				D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */,
 			);
 			path = KVCRDT;
 			sourceTree = "<group>";

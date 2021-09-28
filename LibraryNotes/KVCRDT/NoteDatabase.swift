@@ -172,18 +172,18 @@ public final class NoteDatabase {
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: BookCollectionViewSnapshotBuilder.SortOrder
   ) throws -> [Note.Identifier] {
-    let records = try keyValueCRDT.read { db in
-      try NoteIdentifierRecord
-        .all()
-        .distinct()
-        .fetchAll(db)
+    let sqlLiteral = NoteIdentifierRecord.sqlLiteral(structureIdentifier: structureIdentifier, sortOrder: sortOrder)
+    let records = try keyValueCRDT.read { db -> [NoteIdentifierRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try NoteIdentifierRecord.fetchAll(db, sql: sql, arguments: arguments)
     }
-    // TODO: Figure out why `.distinct()` isn't working, preserve sort order
-    var uniqueifier = Set<Note.Identifier>()
-    for record in records {
-      uniqueifier.insert(record.scope)
-    }
-    return Array(uniqueifier)
+    return records.map { $0.scope }
+//    // TODO: Figure out why `.distinct()` isn't working, preserve sort order
+//    var uniqueifier = Set<Note.Identifier>()
+//    for record in records {
+//      uniqueifier.insert(record.scope)
+//    }
+//    return Array(uniqueifier)
   }
 
   public func readPublisher(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) -> AnyPublisher<[NoteDatabaseKey: [Version]], Error> {
