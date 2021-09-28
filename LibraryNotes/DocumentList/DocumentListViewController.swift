@@ -45,12 +45,18 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  var currentSortOrder = BookCollectionViewSnapshotBuilder.SortOrder.creationTimestamp {
+    didSet {
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
   private var metadataPipeline: AnyCancellable?
 
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
     do {
-      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: dataSource.currentSortOrder)
+      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: currentSortOrder)
     } catch {
       Logger.shared.error("Error getting note identifiers: \(error)")
     }
@@ -452,9 +458,8 @@ extension DocumentListViewController {
 
   private var sortMenu: UIMenu {
     let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
-      UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
-        self?.dataSource.currentSortOrder = sortOrder
-        self?.monitorDatabaseForFocusedStructure()
+      UIAction(title: sortOrder.rawValue, state: sortOrder == currentSortOrder ? .on : .off) { [weak self] _ in
+        self?.currentSortOrder = sortOrder
       }
     }
     return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)

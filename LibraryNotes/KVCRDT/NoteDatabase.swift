@@ -167,14 +167,6 @@ public final class NoteDatabase {
     }
   }
 
-  @available(*, deprecated)
-  public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
-    keyValueCRDT
-      .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
-      .tryMap { try $0.asBookNoteMetadata() }
-      .eraseToAnyPublisher()
-  }
-
   private var cachedBookMetadataInvalidation: AnyCancellable?
   private var cachedBookMetadata: [Note.Identifier: BookNoteMetadata] = [:]
 

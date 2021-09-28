@@ -111,12 +111,6 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: BookCollectionViewDataSource
 
-  var currentSortOrder = BookCollectionViewSnapshotBuilder.SortOrder.creationTimestamp {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
-
   private var snapshotParameters: BookCollectionViewSnapshotBuilder?
 
   public func performUpdates(animated: Bool) {
@@ -124,8 +118,7 @@ public final class DocumentTableController: NSObject {
       .filter { filteredPageIdentifiers?.contains($0) ?? true }
     let newSnapshotBuilder = BookCollectionViewSnapshotBuilder(
       records: Set(filteredRecordIdentifiers),
-      cardsPerDocument: cardsPerDocument,
-      sortOrder: currentSortOrder
+      cardsPerDocument: cardsPerDocument
     )
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
     let reallyAnimate = animated && (newSnapshotBuilder != snapshotParameters)
