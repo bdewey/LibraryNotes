@@ -72,7 +72,7 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
   private static func orderClause(sortOrder: BookCollectionViewSnapshotBuilder.SortOrder) -> SQL {
     switch sortOrder {
     case .author:
-      return "ORDER BY json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY name_sort(json_extract(entry.json, '$.book.authors[0]'))"
     case .title:
       return "ORDER BY coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .creationTimestamp:

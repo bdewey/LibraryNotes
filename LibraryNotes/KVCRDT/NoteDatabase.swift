@@ -3,6 +3,7 @@
 import BookKit
 import Combine
 import Foundation
+import GRDB
 import KeyValueCRDT
 import Logging
 import os
@@ -39,6 +40,21 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
+private extension DatabaseFunction {
+  /// A custom function that returns the family name before other name components to allow name sorting.
+  static let nameSort = DatabaseFunction("name_sort", argumentCount: 1, pure: true) { (values: [DatabaseValue]) in
+    // Extract string value, if any...
+    guard let string = String.fromDatabaseValue(values[0]), let components = try? PersonNameComponents(string) else {
+      return nil
+    }
+
+    // TODO: PersonNameComponents does not properly parse "T. S. Eliot" -- special case abbreviated names
+    return [components.familyName, components.givenName, components.middleName]
+      .compactMap { $0 }
+      .joined(separator: " ")
+  }
+}
+
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
 public final class NoteDatabase {
   public typealias IOCompletionHandler = (Bool) -> Void
@@ -46,7 +62,15 @@ public final class NoteDatabase {
   /// Initializes and opens the database stored at `fileURL`
   @MainActor
   public init(fileURL: URL, authorDescription: String) async throws {
-    self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, authorDescription: authorDescription)
+    var config = Configuration()
+    config.prepareDatabase { db in
+      db.add(function: .nameSort)
+    }
+    self.keyValueDocument = try UIKeyValueDocument(
+      fileURL: fileURL,
+      authorDescription: authorDescription,
+      configuration: config
+    )
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
