@@ -12,6 +12,10 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: BookCollectionViewSnapshotBuilder.SortOrder
   ) -> SQL {
+    return sql(structureIdentifier: structureIdentifier) + orderClause(sortOrder: sortOrder)
+  }
+
+  private static func sql(structureIdentifier: NotebookStructureViewController.StructureIdentifier) -> SQL {
     switch structureIdentifier {
     case .read:
       return """
@@ -26,8 +30,6 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
             json_extract(entry.json, '$.folder') IS NULL
             OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
         )
-    ORDER BY
-        json_extract(entry.json, '$.modifiedTimestamp') DESC;
   """
 
     case .trash:
@@ -40,8 +42,6 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
         entry.KEY = '.metadata'
         AND json_valid(entry.json)
         AND json_extract(entry.json, '$.folder') == 'recentlyDeleted'
-    ORDER BY
-        json_extract(entry.json, '$.modifiedTimestamp') DESC;
     """
 
     case .hashtag(let hashtag):
@@ -65,9 +65,22 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
             bookTags.value = \(hashtag)
             OR metadataTags.value = \(hashtag)
         )
-    ORDER BY
-        json_extract(entry.json, '$.modifiedTimestamp') DESC;
     """
+    }
+  }
+
+  private static func orderClause(sortOrder: BookCollectionViewSnapshotBuilder.SortOrder) -> SQL {
+    switch sortOrder {
+    case .author:
+      return "ORDER BY json_extract(entry.json, '$.modifiedTimestamp') DESC"
+    case .title:
+      return "ORDER BY coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+    case .creationTimestamp:
+      return "ORDER BY json_extract(entry.json, '$.creationTimestamp') DESC"
+    case .modificationTimestap:
+      return "ORDER BY json_extract(entry.json, '$.modifiedTimestamp') DESC"
+    case .rating:
+      return "ORDER BY json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     }
   }
 }

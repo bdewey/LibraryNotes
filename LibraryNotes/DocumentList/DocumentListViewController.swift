@@ -50,7 +50,7 @@ final class DocumentListViewController: UIViewController {
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
     do {
-      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: .modificationTimestap)
+      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: dataSource.currentSortOrder)
     } catch {
       Logger.shared.error("Error getting note identifiers: \(error)")
     }
@@ -454,6 +454,7 @@ extension DocumentListViewController {
     let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
         self?.dataSource.currentSortOrder = sortOrder
+        self?.monitorDatabaseForFocusedStructure()
       }
     }
     return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
