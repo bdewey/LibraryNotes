@@ -186,9 +186,14 @@ public final class NoteDatabase {
 
   func noteIdentifiers(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
-    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder
+    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder,
+    searchTerm: String?
   ) throws -> [Note.Identifier] {
-    let sqlLiteral = NoteIdentifierRecord.sqlLiteral(structureIdentifier: structureIdentifier, sortOrder: sortOrder)
+    let sqlLiteral = NoteIdentifierRecord.sqlLiteral(
+      structureIdentifier: structureIdentifier,
+      sortOrder: sortOrder,
+      searchTerm: searchTerm
+    )
     let records = try keyValueCRDT.read { db -> [NoteIdentifierRecord] in
       let (sql, arguments) = try sqlLiteral.build(db)
       return try NoteIdentifierRecord.fetchAll(db, sql: sql, arguments: arguments)
@@ -301,6 +306,7 @@ public final class NoteDatabase {
     }
   }
 
+  @available(*, deprecated)
   public func search(for searchPattern: String) throws -> [Note.Identifier] {
     let scopedKeys = try keyValueCRDT.searchText(for: searchPattern)
     let uniqueIdentifiers = scopedKeys

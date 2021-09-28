@@ -81,14 +81,6 @@ public final class DocumentTableController: NSObject {
     return control
   }()
 
-  /// If non-nil, only pages with these identifiers will be shown.
-  // TODO: Incorporate this into the query
-  public var filteredPageIdentifiers: Set<Note.Identifier>? {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
-
   public var noteIdentifiers: [Note.Identifier] = [] {
     didSet {
       updateCardsPerDocument()
@@ -115,7 +107,6 @@ public final class DocumentTableController: NSObject {
 
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = noteIdentifiers
-      .filter { filteredPageIdentifiers?.contains($0) ?? true }
     let newSnapshotBuilder = BookCollectionViewSnapshotBuilder(
       records: Set(filteredRecordIdentifiers),
       cardsPerDocument: cardsPerDocument

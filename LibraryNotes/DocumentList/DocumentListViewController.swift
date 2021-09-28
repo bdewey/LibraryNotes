@@ -51,12 +51,22 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  var currentSearchTerm: String? {
+    didSet {
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
   private var metadataPipeline: AnyCancellable?
 
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
     do {
-      dataSource.noteIdentifiers = try database.noteIdentifiers(structureIdentifier: focusedStructure, sortOrder: currentSortOrder)
+      dataSource.noteIdentifiers = try database.noteIdentifiers(
+        structureIdentifier: focusedStructure,
+        sortOrder: currentSortOrder,
+        searchTerm: currentSearchTerm
+      )
     } catch {
       Logger.shared.error("Error getting note identifiers: \(error)")
     }
@@ -176,7 +186,7 @@ final class DocumentListViewController: UIViewController {
   func searchBecomeFirstResponder() {
     navigationItem.searchController?.isActive = true
     navigationItem.searchController?.searchBar.becomeFirstResponder()
-    Logger.shared.info("Search should be activeg")
+    Logger.shared.info("Search should be active")
   }
 
   private var updateDueDatePipeline: AnyCancellable?
@@ -258,6 +268,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateStudySession() {
+    // TODO: Bring this back
 //    let records = dataSource.bookNoteMetadata
 //    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
 //    studySessionGeneration += 1
@@ -559,18 +570,11 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else {
-      dataSource.filteredPageIdentifiers = nil
+      currentSearchTerm = nil
       updateStudySession()
       return
     }
-    let pattern = searchController.searchBar.text ?? ""
-    Logger.shared.info("Issuing query: \(pattern)")
-    do {
-      let allIdentifiers = try database.search(for: pattern)
-      dataSource.filteredPageIdentifiers = Set(allIdentifiers)
-    } catch {
-      Logger.shared.error("Error issuing full text query: \(error)")
-    }
+    currentSearchTerm = searchController.searchBar.text
   }
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
@@ -578,7 +582,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    dataSource.filteredPageIdentifiers = nil
+    currentSearchTerm = nil
   }
 }
 

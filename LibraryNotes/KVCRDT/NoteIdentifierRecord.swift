@@ -10,9 +10,12 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
 
   static func sqlLiteral(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
-    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder
+    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder,
+    searchTerm: String?
   ) -> SQL {
-    return sql(structureIdentifier: structureIdentifier) + orderClause(sortOrder: sortOrder)
+    return sql(structureIdentifier: structureIdentifier)
+      + searchCondition(searchTerm: searchTerm)
+      + orderClause(sortOrder: sortOrder)
   }
 
   private static func sql(structureIdentifier: NotebookStructureViewController.StructureIdentifier) -> SQL {
@@ -67,6 +70,13 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
         )
     """
     }
+  }
+
+  private static func searchCondition(searchTerm: String?) -> SQL {
+    guard let searchTerm = searchTerm else {
+      return ""
+    }
+    return "AND entry.scope IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"
   }
 
   private static func orderClause(sortOrder: BookCollectionViewSnapshotBuilder.SortOrder) -> SQL {
