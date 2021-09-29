@@ -45,7 +45,7 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  var currentSortOrder = BookCollectionViewSnapshotBuilder.SortOrder.creationTimestamp {
+  var currentSortOrder = NoteIdentifierRecord.SortOrder.creationTimestamp {
     didSet {
       monitorDatabaseForFocusedStructure()
     }
@@ -360,7 +360,7 @@ final class DocumentListViewController: UIViewController {
         $0.headers = ["Title", "Authors", "ISBN", "ISBN13", "My Rating", "Number of Pages", "Year Published", "Original Publication Year", "Date Added", "Publisher", "Private Notes"]
       }
       for noteIdentifier in noteIdentifiers {
-        let note = try database.note(noteIdentifier: noteIdentifier)
+        let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
         guard let book = note.book else { continue }
         try writer.write(field: book.title)
         try listFormatter.string(from: book.authors).flatMap { try writer.write(field: $0) }
@@ -468,7 +468,7 @@ extension DocumentListViewController {
   }
 
   private var sortMenu: UIMenu {
-    let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
+    let sortActions = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UIAction in
       UIAction(title: sortOrder.rawValue, state: sortOrder == currentSortOrder ? .on : .off) { [weak self] _ in
         self?.currentSortOrder = sortOrder
       }

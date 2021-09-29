@@ -7,14 +7,10 @@ struct BookViewProperties: Hashable {
   /// UUID for this page
   let pageKey: Note.Identifier
 
-  /// How many cards are eligible for study in this page (dynamic and not serialized)
-  var cardCount: Int
-
   let bookCategory: BookSection?
 
-  init(pageKey: Note.Identifier, cardCount: Int) {
+  init(pageKey: Note.Identifier) {
     self.pageKey = pageKey
-    self.cardCount = cardCount
 
     self.bookCategory = .read
 

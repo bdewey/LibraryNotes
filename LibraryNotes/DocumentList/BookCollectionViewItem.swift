@@ -9,12 +9,12 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
   case header(BookSection, Int)
 
   /// A single book
-  case book(BookViewProperties)
+  case book(Note.Identifier)
 
   var description: String {
     switch self {
-    case .book(let viewProperties):
-      return "Page \(viewProperties.pageKey)"
+    case .book(let noteIdentifier):
+      return "Page \(noteIdentifier)"
     case .header(let category, let count):
       return "\(category) (\(count))"
     }
@@ -22,17 +22,8 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
 
   /// The note identifier for the item, if it exists.
   var noteIdentifier: Note.Identifier? {
-    if case .book(let viewProperties) = self {
-      return viewProperties.pageKey
-    } else {
-      return nil
-    }
-  }
-
-  /// If the receiver is a page, returns the category for that page, else nil.
-  var bookCategory: BookSection? {
-    if case .book(let properties) = self {
-      return properties.bookCategory
+    if case .book(let noteIdentifier) = self {
+      return noteIdentifier
     } else {
       return nil
     }

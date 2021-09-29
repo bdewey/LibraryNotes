@@ -7,7 +7,6 @@ typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection,
 
 struct BookCollectionViewSnapshotBuilder: Equatable {
   var records: Set<Note.Identifier>
-  var cardsPerDocument: [Note.Identifier: Int]
 
   enum SortOrder: String, CaseIterable {
     case author = "Author"
@@ -15,32 +14,6 @@ struct BookCollectionViewSnapshotBuilder: Equatable {
     case creationTimestamp = "Created Date"
     case modificationTimestap = "Modified Date"
     case rating = "Rating"
-  }
-
-  func categorizeMetadataRecords(_ identifiers: [Note.Identifier]) -> [BookSection: [BookCollectionViewItem]] {
-    let viewProperties = identifiers
-      .compactMap { identifier -> BookViewProperties? in
-        return BookViewProperties(
-          pageKey: identifier,
-          cardCount: cardsPerDocument[identifier, default: 0]
-        )
-      }
-
-    var categorizedItems: [BookSection: [BookCollectionViewItem]] = [:]
-
-    let items = viewProperties
-      .map {
-        BookCollectionViewItem.book($0)
-      }
-    for item in items {
-      switch item.bookCategory {
-      case .none:
-        categorizedItems[.other, default: []].append(item)
-      case .some(let category):
-        categorizedItems[category, default: []].append(item)
-      }
-    }
-    return categorizedItems
   }
 
   func sectionSnapshot(for section: BookSection, categorizedItems: [BookSection: [BookCollectionViewItem]]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>? {

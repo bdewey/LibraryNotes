@@ -4,13 +4,22 @@ import Foundation
 import GRDB
 
 /// Used to filter & sort note identifiers from the database.
-struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
-  static var databaseTableName: String { "entry" }
-  var scope: String
+public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
+  public static var databaseTableName: String { "entry" }
+  public var noteIdentifier: String
+  public var bookSection: BookSection
+
+  public enum SortOrder: String, CaseIterable {
+    case author = "Author"
+    case title = "Title"
+    case creationTimestamp = "Created Date"
+    case modificationTimestap = "Modified Date"
+    case rating = "Rating"
+  }
 
   static func sqlLiteral(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
-    sortOrder: BookCollectionViewSnapshotBuilder.SortOrder,
+    sortOrder: SortOrder,
     searchTerm: String?
   ) -> SQL {
     return sql(structureIdentifier: structureIdentifier)
@@ -23,7 +32,8 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
     case .read:
       return """
     SELECT
-        DISTINCT scope
+        DISTINCT scope AS noteIdentifier,
+        json_extract(entry.json, '$.bookSection') AS bookSection
     FROM
         entry
     WHERE
@@ -38,7 +48,8 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
     case .trash:
       return """
     SELECT
-        DISTINCT scope
+        DISTINCT scope AS noteIdentifier,
+        json_extract(entry.json, '$.bookSection') AS bookSection
     FROM
         entry
     WHERE
@@ -51,6 +62,8 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
       return """
     SELECT
         scope,
+        DISTINCT scope AS noteIdentifier,
+        json_extract(entry.json, '$.bookSection') AS bookSection
         metadataTags.value,
         bookTags.value
     FROM
@@ -79,18 +92,33 @@ struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
     return "AND entry.scope IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"
   }
 
-  private static func orderClause(sortOrder: BookCollectionViewSnapshotBuilder.SortOrder) -> SQL {
+  private static func orderClause(sortOrder: SortOrder) -> SQL {
     switch sortOrder {
     case .author:
-      return "ORDER BY name_sort(json_extract(entry.json, '$.book.authors[0]'))"
+      return "ORDER BY bookSection, name_sort(json_extract(entry.json, '$.book.authors[0]'))"
     case .title:
-      return "ORDER BY coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .creationTimestamp:
-      return "ORDER BY json_extract(entry.json, '$.creationTimestamp') DESC"
+      return "ORDER BY bookSection, json_extract(entry.json, '$.creationTimestamp') DESC"
     case .modificationTimestap:
-      return "ORDER BY json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .rating:
-      return "ORDER BY json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     }
+  }
+}
+
+extension Array where Element == NoteIdentifierRecord {
+  /// Given an array of `NoteIdentifierRecord` structs that is sorted by `bookSection`, returns the partion boundaries for each `bookSection` value.
+  public var bookSectionPartitions: [BookSection: Range<Int>] {
+    var results: [BookSection: Range<Int>] = [:]
+    for (index, element) in enumerated() {
+      if let existingRange = results[element.bookSection] {
+        results[element.bookSection] = existingRange.lowerBound ..< index + 1
+      } else {
+        results[element.bookSection] = index ..< index + 1
+      }
+    }
+    return results
   }
 }

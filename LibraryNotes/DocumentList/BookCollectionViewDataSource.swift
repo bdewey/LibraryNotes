@@ -16,8 +16,8 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
 
     super.init(collectionView: collectionView) { (collectionView, indexPath, item) -> UICollectionViewCell? in
       switch item {
-      case .book(let viewProperties):
-        let metadata = database.bookMetadata(identifier: viewProperties.pageKey)
+      case .book(let noteIdentifier):
+        let metadata = database.bookMetadata(identifier: noteIdentifier)
         if metadata?.book != nil {
           return collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: item)
         } else {
@@ -37,13 +37,13 @@ private enum Registration {
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
       guard
-        case .book(let viewProperties) = item,
-        let metadata = database.bookMetadata(identifier: viewProperties.pageKey),
+        case .book(let noteIdentifier) = item,
+        let metadata = database.bookMetadata(identifier: noteIdentifier),
         let book = metadata.book
       else {
         return
       }
-      let coverImage = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
+      let coverImage = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 300)
       let configuration = BookViewContentConfiguration(book: book, coverImage: coverImage)
       cell.contentConfiguration = configuration
     }
@@ -55,8 +55,8 @@ private enum Registration {
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
       guard
-        case .book(let viewProperties) = item,
-        let metadata = database.bookMetadata(identifier: viewProperties.pageKey)
+        case .book(let noteIdentifier) = item,
+        let metadata = database.bookMetadata(identifier: noteIdentifier)
       else {
         return
       }
@@ -69,7 +69,7 @@ private enum Registration {
       ]
       configuration.secondaryText = secondaryComponents.compactMap { $0 }.joined(separator: " ")
       configuration.secondaryTextProperties.color = .secondaryLabel
-      configuration.image = coverImageCache.coverImage(bookID: viewProperties.pageKey, maxSize: 300)
+      configuration.image = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 300)
 
       let headlineFont = UIFont.preferredFont(forTextStyle: .headline)
       let verticalMargin = max(20, 1.5 * headlineFont.lineHeight.roundedToScreenScale())
