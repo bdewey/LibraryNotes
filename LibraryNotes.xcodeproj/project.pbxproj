@@ -125,6 +125,8 @@
 		D3DBC4002701FAAB00C18438 /* TagsRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */; };
 		D3DBC4022702033A00C18438 /* NoteIdentifierRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */; };
 		D3DBC40427034C0400C18438 /* DatabaseMigrator+LibraryNotes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC40327034C0400C18438 /* DatabaseMigrator+LibraryNotes.swift */; };
+		D3DBC4062704A18E00C18438 /* String+Names.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC4052704A18E00C18438 /* String+Names.swift */; };
+		D3DBC4082704A38200C18438 /* String+NameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC4072704A38200C18438 /* String+NameTests.swift */; };
 		D3DC5EC320EC9B0100F0B74B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */; };
 		D3DC5ECC20EC9B0200F0B74B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */; };
 		D3DC5ECF20EC9B0200F0B74B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */; };
@@ -303,6 +305,8 @@
 		D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsRecord.swift; sourceTree = "<group>"; };
 		D3DBC4012702033A00C18438 /* NoteIdentifierRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIdentifierRecord.swift; sourceTree = "<group>"; };
 		D3DBC40327034C0400C18438 /* DatabaseMigrator+LibraryNotes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DatabaseMigrator+LibraryNotes.swift"; sourceTree = "<group>"; };
+		D3DBC4052704A18E00C18438 /* String+Names.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Names.swift"; sourceTree = "<group>"; };
+		D3DBC4072704A38200C18438 /* String+NameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NameTests.swift"; sourceTree = "<group>"; };
 		D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LibraryNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -564,6 +568,7 @@
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
+				D3DBC4052704A18E00C18438 /* String+Names.swift */,
 			);
 			path = LibraryNotes;
 			sourceTree = "<group>";
@@ -584,6 +589,7 @@
 				D3E8069E267FED4F009AA588 /* SummaryTests.swift */,
 				D374AB55229380E500F54561 /* TemporaryFile.swift */,
 				D3FA025126CCDD9F001A5A4C /* TestError.swift */,
+				D3DBC4072704A38200C18438 /* String+NameTests.swift */,
 			);
 			path = LibraryNotesTests;
 			sourceTree = "<group>";
@@ -859,6 +865,7 @@
 				D3558D7725D9741100746600 /* ImageCache.swift in Sources */,
 				D3558D7525D87F3000746600 /* BookEditDetailsViewController.swift in Sources */,
 				D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */,
+				D3DBC4062704A18E00C18438 /* String+Names.swift in Sources */,
 				D3378CE426DBC645006750EC /* BookSection.swift in Sources */,
 				D38862B423BB94FA00A44F1C /* Note.swift in Sources */,
 				D3DBC4022702033A00C18438 /* NoteIdentifierRecord.swift in Sources */,
@@ -901,6 +908,7 @@
 				D3FA025226CCDD9F001A5A4C /* TestError.swift in Sources */,
 				D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */,
 				D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */,
+				D3DBC4082704A38200C18438 /* String+NameTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,
 				D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */,

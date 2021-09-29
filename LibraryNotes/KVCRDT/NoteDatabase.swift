@@ -55,16 +55,6 @@ private extension DatabaseFunction {
   }
 }
 
-extension String {
-  func nameLastFirst() -> String {
-    guard let components = try? PersonNameComponents(self) else { return self }
-    // TODO: PersonNameComponents does not properly parse "T. S. Eliot" -- special case abbreviated names
-    return [components.familyName, components.givenName, components.middleName]
-      .compactMap { $0 }
-      .joined(separator: " ")
-  }
-}
-
 private extension BookNoteMetadata {
   mutating func upgradeToVersion1() {
     bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
