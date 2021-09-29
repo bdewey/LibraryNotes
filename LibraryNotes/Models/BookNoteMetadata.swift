@@ -54,7 +54,18 @@ public struct BookNoteMetadata: Codable, Equatable {
   public var folder: String?
 
   /// The book that this note is about.
-  public var book: AugmentedBook?
+  public var book: AugmentedBook? {
+    didSet {
+      bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
+      authorLastFirst = book?.authors.first?.nameLastFirst()
+    }
+  }
+
+  /// In the book list, the section this book belongs in
+  public var bookSection: BookSection?
+
+  /// The book's first author, listed with last name first
+  public var authorLastFirst: String?
 
   /// Information in this metadata structure that's worth putting in a full-text index for metadata surces.
   public var indexedContents: String? {
@@ -72,13 +83,12 @@ public struct BookNoteMetadata: Codable, Equatable {
   }
 }
 
-public extension Sequence where Element == BookNoteMetadata {
-  var hashtags: [String] {
-    let hashtags = filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
-      .reduce(into: Set<String>()) { hashtags, metadata in
-        hashtags.formUnion(metadata.tags)
-        hashtags.formUnion(metadata.book?.tags ?? [])
-      }
-    return Array(hashtags).sorted()
+public extension ReadingHistory {
+  var inferredBookCategory: BookSection {
+    if isCurrentlyReading {
+      return .currentlyReading
+    } else {
+      return .read
+    }
   }
 }

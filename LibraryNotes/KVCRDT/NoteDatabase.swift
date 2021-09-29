@@ -55,6 +55,71 @@ private extension DatabaseFunction {
   }
 }
 
+extension String {
+  func nameLastFirst() -> String {
+    guard let components = try? PersonNameComponents(self) else { return self }
+    // TODO: PersonNameComponents does not properly parse "T. S. Eliot" -- special case abbreviated names
+    return [components.familyName, components.givenName, components.middleName]
+      .compactMap { $0 }
+      .joined(separator: " ")
+  }
+}
+
+private extension BookNoteMetadata {
+  mutating func upgradeToVersion1() {
+    bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
+    authorLastFirst = book?.authors.first?.nameLastFirst()
+  }
+
+  func upgradingToVersion1() -> Self {
+    var copy = self
+    copy.upgradeToVersion1()
+    return copy
+  }
+}
+
+internal struct InternalMetadata: Codable, Comparable, CustomStringConvertible {
+  var majorVersion: Int
+  var minorVersion: Int
+
+  static func < (lhs: InternalMetadata, rhs: InternalMetadata) -> Bool {
+    (lhs.majorVersion, lhs.minorVersion) < (rhs.majorVersion, rhs.minorVersion)
+  }
+
+  var description: String {
+    "\(majorVersion).\(minorVersion)"
+  }
+}
+
+private extension KeyValueDatabase {
+  func upgradeVersionIfNeeded() throws {
+    if let internalMetadata = try read(key: ".libnotes-metadata").internalMetadata {
+      guard internalMetadata.majorVersion == 1 else {
+        throw CocoaError(.fileReadCorruptFile)
+      }
+      Logger.shared.info("Library version is \(internalMetadata)")
+      // Safe to proceed
+    } else {
+      // Need to run an upgrade
+      Logger.shared.info("Upgrading library")
+      let allMetadata = try bulkRead(key: NoteDatabaseKey.metadata.rawValue)
+      let upgradedMetadata = try allMetadata.mapValues { versions -> Value in
+        if let upgraded = versions.metadata?.upgradingToVersion1() {
+          return try Value(upgraded)
+        } else {
+          return .null
+        }
+      }
+      try write { db in
+        try bulkWrite(database: db, values: upgradedMetadata)
+        let metadataValue = try Value(InternalMetadata(majorVersion: 1, minorVersion: 0))
+        try bulkWrite(database: db, values: [ScopedKey(key: ".libnotes-metadata"): metadataValue])
+      }
+      Logger.shared.info("Upgrade complete")
+    }
+  }
+}
+
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
 public final class NoteDatabase {
   public typealias IOCompletionHandler = (Bool) -> Void
@@ -74,6 +139,7 @@ public final class NoteDatabase {
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
+    try keyValueCRDT.upgradeVersionIfNeeded()
     self.keyValueCRDT = keyValueCRDT
     self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self

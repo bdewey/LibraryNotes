@@ -34,4 +34,15 @@ extension Array where Element == Version {
       }
     }
   }
+
+  var internalMetadata: InternalMetadata? {
+    get throws {
+      // If there are conflicting version updates, we take the *max* of all versions.
+      try compactMap {
+        guard let json = $0.value.json else { return nil }
+        return try JSONDecoder.databaseDecoder.decode(InternalMetadata.self, from: json.data(using: .utf8)!)
+      }
+      .max()
+    }
+  }
 }
