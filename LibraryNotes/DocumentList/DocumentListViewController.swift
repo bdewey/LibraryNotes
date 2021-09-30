@@ -68,6 +68,7 @@ final class DocumentListViewController: UIViewController {
       .sink(receiveValue: { [weak self] noteIdentifiers in
         self?.dataSource.noteIdentifiers = noteIdentifiers
         self?.updateStudySession()
+        self?.updateQuoteList()
       })
   }
 
