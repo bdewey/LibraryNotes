@@ -11,7 +11,6 @@ extension String {
       return String(self[lastNameRange] + " " + self[startIndex ..< lastNameRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
     }
     guard let components = try? PersonNameComponents(self) else { return self }
-    // TODO: PersonNameComponents does not properly parse "T. S. Eliot" -- special case abbreviated names
     return [components.familyName, components.givenName, components.middleName]
       .compactMap { $0 }
       .joined(separator: " ")
@@ -21,4 +20,3 @@ extension String {
     NSRange((startIndex...).relative(to: self), in: self)
   }
 }
-
