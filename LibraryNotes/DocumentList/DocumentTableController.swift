@@ -45,14 +45,9 @@ public final class DocumentTableController: NSObject {
       self?.updateDataSourceIfNeeded()
     }
     CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
-    updateCardsPerDocument()
   }
 
-  public var dueDate = Date() {
-    didSet {
-      updateCardsPerDocument()
-    }
-  }
+  public var dueDate = Date()
 
   public var bookCount: Int {
     var total = 0
@@ -81,7 +76,6 @@ public final class DocumentTableController: NSObject {
 
   public var noteIdentifiers: [NoteIdentifierRecord] = [] {
     didSet {
-      updateCardsPerDocument()
       needsPerformUpdates = true
     }
   }
@@ -92,11 +86,6 @@ public final class DocumentTableController: NSObject {
   private let collectionView: UICollectionView
   private let database: NoteDatabase
   private let coverImageCache: CoverImageCache
-  private var cardsPerDocument = [Note.Identifier: Int]() {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
 
   private let dataSource: BookCollectionViewDataSource
 
@@ -294,21 +283,6 @@ private extension DocumentTableController {
     Task {
       await Task.sleep(1000000000)
       refreshControl.endRefreshing()
-    }
-  }
-
-  func updateCardsPerDocument() {
-    do {
-      let studySession = try database.studySession(date: dueDate)
-      cardsPerDocument = studySession
-        .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
-          cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
-        }
-      Logger.shared.debug(
-        "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
-      )
-    } catch {
-      Logger.shared.error("Error updating cards per document: \(error)")
     }
   }
 }
