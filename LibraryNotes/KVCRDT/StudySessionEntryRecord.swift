@@ -56,7 +56,7 @@ struct StudySessionEntryRecord: FetchableRecord, Codable {
         )
     """
     if let identifiers = identifiers {
-      baseSQL += " AND scope IN \(identifiers)"
+      baseSQL += " AND entry.scope IN \(identifiers)"
     }
     return baseSQL + " ORDER BY due"
   }

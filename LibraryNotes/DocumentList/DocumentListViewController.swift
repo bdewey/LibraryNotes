@@ -65,7 +65,10 @@ final class DocumentListViewController: UIViewController {
         Logger.shared.error("Error getting note identifiers: \(error)")
         return Just([])
       }
-      .assign(to: \.noteIdentifiers, on: dataSource)
+      .sink(receiveValue: { [weak self] noteIdentifiers in
+        self?.dataSource.noteIdentifiers = noteIdentifiers
+        self?.updateStudySession()
+      })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -241,26 +244,11 @@ final class DocumentListViewController: UIViewController {
     dueDate = dueDate.addingTimeInterval(7 * .day)
   }
 
-  private var studySessionGeneration = 0
-
-  private var currentStudySessionTask: Task<Void, Error>? {
-    willSet {
-      currentStudySessionTask?.cancel()
-    }
-  }
-
   private func updateStudySession() {
-    // TODO: Bring this back
-//    let records = dataSource.bookNoteMetadata
-//    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
-//    studySessionGeneration += 1
-//    let currentStudySessionGeneration = studySessionGeneration
-//    currentStudySessionTask = Task {
-//      let studySession = try await sessionGenerator.studySession(filter: filter, date: dueDate)
-//      if currentStudySessionGeneration == studySessionGeneration {
-//        self.studySession = studySession
-//      }
-//    }
+    studySession = try? database.studySession(
+      noteIdentifiers: Set(dataSource.noteIdentifiers.map({ $0.noteIdentifier })),
+      date: dueDate
+    )
   }
 
   private var quotesSubscription: AnyCancellable?

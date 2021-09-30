@@ -136,19 +136,24 @@ struct BookAction {
   }
 
   /// Returns an action for studying the items in the book represented by `viewProperties`
+  @MainActor
   static func studyItem(
     _ noteIdentifier: Note.Identifier,
     database: NoteDatabase,
     delegate: DocumentTableControllerDelegate?
   ) -> BookAction? {
-    return nil
-    // TODO: Fix
-//    if viewProperties.cardCount == 0 { return nil }
-//    return BookAction(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
-//      Task {
-//        let studySession = try await sessionGenerator.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
-//        await delegate?.presentStudySessionViewController(for: studySession)
-//      }
-//    }
+    do {
+      let studySession = try database.studySession(noteIdentifiers: [noteIdentifier], date: .now)
+      if studySession.isEmpty {
+        return nil
+      } else {
+        return BookAction(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
+          delegate?.presentStudySessionViewController(for: studySession)
+        }
+      }
+    } catch {
+      Logger.shared.error("Error getting study session for note \(noteIdentifier): \(error)")
+      return nil
+    }
   }
 }
