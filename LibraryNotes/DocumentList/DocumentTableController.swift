@@ -26,14 +26,12 @@ public final class DocumentTableController: NSObject {
     collectionView: UICollectionView,
     database: NoteDatabase,
     coverImageCache: CoverImageCache,
-    sessionGenerator: SessionGenerator,
     delegate: DocumentTableControllerDelegate
   ) {
     self.collectionView = collectionView
     self.database = database
     let coverImageCache = coverImageCache
     self.coverImageCache = coverImageCache
-    self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
     self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache, database: database)
@@ -94,7 +92,6 @@ public final class DocumentTableController: NSObject {
   private let collectionView: UICollectionView
   private let database: NoteDatabase
   private let coverImageCache: CoverImageCache
-  private let sessionGenerator: SessionGenerator
   private var cardsPerDocument = [Note.Identifier: Int]() {
     didSet {
       needsPerformUpdates = true
@@ -167,7 +164,7 @@ extension DocumentTableController {
 
   fileprivate func availableItemActionConfigurations(_ noteIdentifier: Note.Identifier) -> [BookAction] {
     let actions: [BookAction?] = [
-      .studyItem(noteIdentifier, sessionGenerator: sessionGenerator, delegate: delegate),
+      .studyItem(noteIdentifier, database: database, delegate: delegate),
       .moveItemToWantToRead(noteIdentifier, in: database),
       .moveItemToCurrentlyReading(noteIdentifier, in: database),
       .moveItemToRead(noteIdentifier, in: database),
@@ -301,8 +298,8 @@ private extension DocumentTableController {
   }
 
   func updateCardsPerDocument() {
-    Task {
-      let studySession = try await sessionGenerator.studySession(date: dueDate)
+    do {
+      let studySession = try database.studySession(date: dueDate)
       cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
@@ -310,6 +307,8 @@ private extension DocumentTableController {
       Logger.shared.debug(
         "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
       )
+    } catch {
+      Logger.shared.error("Error updating cards per document: \(error)")
     }
   }
 }

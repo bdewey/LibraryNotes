@@ -138,7 +138,7 @@ struct BookAction {
   /// Returns an action for studying the items in the book represented by `viewProperties`
   static func studyItem(
     _ noteIdentifier: Note.Identifier,
-    sessionGenerator: SessionGenerator,
+    database: NoteDatabase,
     delegate: DocumentTableControllerDelegate?
   ) -> BookAction? {
     return nil

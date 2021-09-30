@@ -21,13 +21,9 @@ final class DocumentListViewController: UIViewController {
   ) {
     self.database = database
     self.coverImageCache = coverImageCache
-    self.sessionGenerator = SessionGenerator(database: database)
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
-    Task {
-      try await sessionGenerator.startMonitoringDatabase()
-    }
   }
 
   @available(*, unavailable)
@@ -37,7 +33,6 @@ final class DocumentListViewController: UIViewController {
 
   public let database: NoteDatabase
   private let coverImageCache: CoverImageCache
-  public let sessionGenerator: SessionGenerator
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
@@ -78,7 +73,6 @@ final class DocumentListViewController: UIViewController {
       collectionView: collectionView,
       database: database,
       coverImageCache: coverImageCache,
-      sessionGenerator: sessionGenerator,
       delegate: self
     )
   }()
@@ -148,9 +142,7 @@ final class DocumentListViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    Task {
-      self.studySession = try await sessionGenerator.studySession(date: Date())
-    }
+    self.studySession = try? database.studySession(date: Date())
     dataSource.performUpdates(animated: false)
 
     let searchController = UISearchController(searchResultsController: nil)

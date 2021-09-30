@@ -20,6 +20,10 @@ private extension Logging.Logger {
   }()
 }
 
+private extension OSLog {
+  static let studySession = OSLog(subsystem: "org.brians-brain.NoteDatabase", category: "studySession")
+}
+
 enum KeyValueNoteDatabaseScope: String {
   case studyLog = ".studyLog"
 }
@@ -581,6 +585,26 @@ public final class NoteDatabase {
         }
       }
     }
+  }
+
+  public func studySession(noteIdentifiers: Set<Note.Identifier>? = nil, date: Date) throws -> StudySession {
+    let signpostID = OSSignpostID(log: .studySession)
+    os_signpost(.begin, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    let sqlLiteral = StudySessionEntryRecord.sql(identifiers: noteIdentifiers, due: date)
+    let entries = try keyValueCRDT.read { db -> [StudySessionEntryRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try StudySessionEntryRecord.fetchAll(db, sql: sql, arguments: arguments)
+    }
+    var studySession = StudySession()
+    for entry in entries {
+      guard let metadata = bookMetadata(identifier: entry.scope) else { continue }
+      studySession.append(
+        promptIdentifier: entry.promptIdentifier,
+        properties: CardDocumentProperties(documentName: entry.scope, attributionMarkdown: metadata.preferredTitle)
+      )
+    }
+    os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    return studySession
   }
 
   public var studyLog: StudyLog {
