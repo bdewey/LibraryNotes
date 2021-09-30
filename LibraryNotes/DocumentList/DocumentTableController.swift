@@ -302,7 +302,7 @@ private extension DocumentTableController {
 
   func updateCardsPerDocument() {
     Task {
-      let studySession = try await sessionGenerator.studySession(filter: nil, date: dueDate)
+      let studySession = try await sessionGenerator.studySession(date: dueDate)
       cardsPerDocument = studySession
         .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
           cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1

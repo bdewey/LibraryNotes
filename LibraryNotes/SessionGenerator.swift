@@ -2,6 +2,7 @@
 
 import Combine
 import Foundation
+import GRDB
 import KeyValueCRDT
 import os
 
@@ -16,14 +17,6 @@ public actor SessionGenerator {
   }
 
   private let database: NoteDatabase
-  private var valueSubscription: AnyCancellable?
-
-  // TODO: "Make it right, then make it fast"
-  // The main perf win from having the SessionGenerator is avoiding re-parsing the entire set of prompts when any prompt changes.
-  // The prompts & metadata are then put into naïve, unsorted arrays. Once this becomes a perf bottleneck, switch this to
-  // something more sophisticated
-  private var entries: [Entry] = []
-  private var metadata: [Note.Identifier: BookNoteMetadata] = [:]
 
   public func startMonitoringDatabase() throws {
 //    let results = try database.bulkRead(isIncluded: { _, key in
@@ -37,58 +30,67 @@ public actor SessionGenerator {
 //    })
   }
 
-  public func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) throws -> StudySession {
+  public func studySession(noteIdentifiers: Set<Note.Identifier>? = nil, date: Date) throws -> StudySession {
     let signpostID = OSSignpostID(log: .studySession)
     os_signpost(.begin, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    let sqlLiteral = StudySessionEntryRecord.sql(identifiers: noteIdentifiers, due: date)
+    let entries = try database.keyValueCRDT.read { db -> [StudySessionEntryRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try StudySessionEntryRecord.fetchAll(db, sql: sql, arguments: arguments)
+    }
     var studySession = StudySession()
     for entry in entries {
-      guard let metadata = self.metadata[entry.identifier] else {
-        assertionFailure()
-        continue
-      }
-      if let due = entry.statistics.due, due > date {
-        continue
-      }
-      if let filter = filter, !filter(entry.identifier, metadata) {
-        continue
-      }
+      guard let metadata = database.bookMetadata(identifier: entry.scope) else { continue }
       studySession.append(
         promptIdentifier: entry.promptIdentifier,
-        properties: CardDocumentProperties(documentName: entry.identifier, attributionMarkdown: metadata.preferredTitle)
+        properties: CardDocumentProperties(documentName: entry.scope, attributionMarkdown: metadata.preferredTitle)
       )
     }
     os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
     return studySession
   }
-
-  private nonisolated func asyncProcessValue(scopedKey: ScopedKey, versions: [Version]) {
-    Task {
-      await processValue(scopedKey: scopedKey, versions: versions)
-    }
-  }
-
-  private func processValue(scopedKey: ScopedKey, versions: [Version]) {
-    let signpostID = OSSignpostID(log: .studySession)
-    os_signpost(.begin, log: .studySession, name: "processValue", signpostID: signpostID)
-    if scopedKey.key == NoteDatabaseKey.metadata.rawValue {
-      self.metadata[scopedKey.scope] = versions.resolved(with: .lastWriterWins)?.bookNoteMetadata
-    } else if NoteDatabaseKey(rawValue: scopedKey.key).isPrompt {
-      entries.removeAll(where: { $0.promptIdentifier.promptKey == scopedKey.key })
-      if let promptInfo = versions.resolved(with: .lastWriterWins)?.promptCollectionInfo {
-        for (index, promptStatistics) in promptInfo.promptStatistics.enumerated() {
-          let entry = Entry(identifier: scopedKey.scope, promptIdentifier: PromptIdentifier(noteId: scopedKey.scope, promptKey: scopedKey.key, promptIndex: index), statistics: promptStatistics)
-          entries.append(entry)
-        }
-      }
-    }
-    os_signpost(.end, log: .studySession, name: "processValue", signpostID: signpostID)
-  }
 }
 
-private extension SessionGenerator {
-  struct Entry {
-    let identifier: Note.Identifier
-    let promptIdentifier: PromptIdentifier
-    let statistics: PromptStatistics
+struct StudySessionEntryRecord: FetchableRecord, Codable {
+
+  var scope: Note.Identifier
+  var key: String
+  var promptIndex: Int
+  var title: String?
+  var due: Date?
+
+  var promptIdentifier: PromptIdentifier {
+    PromptIdentifier(noteId: scope, promptKey: key, promptIndex: promptIndex)
+  }
+
+  static func sql(identifiers: Set<Note.Identifier>?, due: Date) -> SQL {
+    let dueString = ISO8601DateFormatter().string(from: due)
+    var baseSQL: SQL = """
+    SELECT
+        entry.scope AS scope,
+        entry.key AS KEY,
+        promptStatistics.key AS promptIndex,
+        coalesce(
+            json_extract(metadata.json, '$.book.title'),
+            json_extract(metadata.json, '$.title')
+        ) AS title,
+        json_extract(promptStatistics.value, '$.due') AS due
+    FROM
+        entry
+        JOIN json_each(entry.json, '$.promptStatistics') AS promptStatistics
+        JOIN entry metadata ON (
+            metadata.scope = entry.scope
+            AND metadata.key = '.metadata'
+        )
+    WHERE
+        (
+            due IS NULL
+            OR due <= \(dueString)
+        )
+    """
+    if let identifiers = identifiers {
+      baseSQL += " AND scope IN \(identifiers)"
+    }
+    return baseSQL + " ORDER BY due"
   }
 }

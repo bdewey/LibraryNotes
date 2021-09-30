@@ -149,7 +149,7 @@ final class DocumentListViewController: UIViewController {
       make.top.bottom.left.right.equalToSuperview()
     }
     Task {
-      self.studySession = try await sessionGenerator.studySession(filter: nil, date: Date())
+      self.studySession = try await sessionGenerator.studySession(date: Date())
     }
     dataSource.performUpdates(animated: false)
 

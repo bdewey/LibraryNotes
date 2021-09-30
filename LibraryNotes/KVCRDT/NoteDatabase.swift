@@ -153,7 +153,7 @@ public final class NoteDatabase {
   private let keyValueDocument: UIKeyValueDocument
 
   /// The `KeyValueDatabase` contained in `keyValueDocument`
-  private let keyValueCRDT: KeyValueDatabase
+  internal let keyValueCRDT: KeyValueDatabase
 
   public var fileURL: URL { keyValueDocument.fileURL }
 
