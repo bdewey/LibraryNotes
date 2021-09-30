@@ -240,17 +240,17 @@ public final class NoteDatabase {
     }
   }
 
-  func noteIdentifiers(
+  func noteIdentifiersPublisher(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
     searchTerm: String?
-  ) throws -> [NoteIdentifierRecord] {
+  ) -> AnyPublisher<[NoteIdentifierRecord], Error> {
     let sqlLiteral = NoteIdentifierRecord.sqlLiteral(
       structureIdentifier: structureIdentifier,
       sortOrder: sortOrder,
       searchTerm: searchTerm
     )
-    return try keyValueCRDT.read { db -> [NoteIdentifierRecord] in
+    return keyValueCRDT.valuePublisher { db -> [NoteIdentifierRecord] in
       let (sql, arguments) = try sqlLiteral.build(db)
       return try NoteIdentifierRecord.fetchAll(db, sql: sql, arguments: arguments)
     }

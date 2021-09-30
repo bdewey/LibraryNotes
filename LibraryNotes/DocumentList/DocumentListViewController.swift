@@ -61,26 +61,16 @@ final class DocumentListViewController: UIViewController {
 
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
-    do {
-      dataSource.noteIdentifiers = try database.noteIdentifiers(
-        structureIdentifier: focusedStructure,
-        sortOrder: currentSortOrder,
-        searchTerm: currentSearchTerm
-      )
-    } catch {
-      Logger.shared.error("Error getting note identifiers: \(error)")
-    }
-//    metadataPipeline = database.bookMetadataPublisher()
-//      .catch { error -> Just<[String: BookNoteMetadata]> in
-//        Logger.shared.error("Unexpected error getting metadata: \(error)")
-//        return Just([String: BookNoteMetadata]())
-//      }
-//      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
-//      .sink(receiveValue: { [weak self] filteredBookMetadata in
-//        self?.dataSource.bookNoteMetadata = filteredBookMetadata
-//        self?.updateStudySession()
-//        self?.updateQuoteList()
-//      })
+    metadataPipeline = database.noteIdentifiersPublisher(
+      structureIdentifier: focusedStructure,
+      sortOrder: currentSortOrder,
+      searchTerm: currentSearchTerm
+    )
+      .catch { error -> Just<[NoteIdentifierRecord]> in
+        Logger.shared.error("Error getting note identifiers: \(error)")
+        return Just([])
+      }
+      .assign(to: \.noteIdentifiers, on: dataSource)
   }
 
   private lazy var dataSource: DocumentTableController = {
