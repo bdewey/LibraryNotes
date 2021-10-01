@@ -81,6 +81,18 @@ public struct BookNoteMetadata: Codable, Equatable {
       lhs.tags == rhs.tags &&
       lhs.book == rhs.book
   }
+
+  /// Fill out `bookSection` and `authorLastFirst`, which exist in "version 1" but didn't exist prior.
+  mutating func upgradeToVersion1() {
+    bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
+    authorLastFirst = book?.authors.first?.nameLastFirst()
+  }
+
+  func upgradingToVersion1() -> Self {
+    var copy = self
+    copy.upgradeToVersion1()
+    return copy
+  }
 }
 
 public extension ReadingHistory {

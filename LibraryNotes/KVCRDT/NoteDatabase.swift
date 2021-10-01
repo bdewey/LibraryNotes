@@ -44,36 +44,18 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
-private extension DatabaseFunction {
-  /// A custom function that returns the family name before other name components to allow name sorting.
-  static let nameSort = DatabaseFunction("name_sort", argumentCount: 1, pure: true) { (values: [DatabaseValue]) in
-    // Extract string value, if any...
-    guard let string = String.fromDatabaseValue(values[0]), let components = try? PersonNameComponents(string) else {
-      return nil
-    }
-
-    // TODO: PersonNameComponents does not properly parse "T. S. Eliot" -- special case abbreviated names
-    return [components.familyName, components.givenName, components.middleName]
-      .compactMap { $0 }
-      .joined(separator: " ")
-  }
-}
-
-private extension BookNoteMetadata {
-  mutating func upgradeToVersion1() {
-    bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
-    authorLastFirst = book?.authors.first?.nameLastFirst()
-  }
-
-  func upgradingToVersion1() -> Self {
-    var copy = self
-    copy.upgradeToVersion1()
-    return copy
-  }
-}
-
+/// Hold the major & minor version for data in the key-value store.
+///
+/// If the major version is higher than what is expected, refuse to open the file.
+/// If the major verison is less than what is expected, run data migrations.
 internal struct InternalMetadata: Codable, Comparable, CustomStringConvertible {
+  /// The key for storing this metadata struct in the database.
+  static let key = ".libnotes-metadata"
+
+  /// File major version. The major version increments on incompatible changes.
   var majorVersion: Int
+
+  /// Minor version number. This increments on backwards-compatible format changes.
   var minorVersion: Int
 
   static func < (lhs: InternalMetadata, rhs: InternalMetadata) -> Bool {
@@ -86,8 +68,9 @@ internal struct InternalMetadata: Codable, Comparable, CustomStringConvertible {
 }
 
 private extension KeyValueDatabase {
+  /// Migrates pre-1.0 files to 1.0.
   func upgradeVersionIfNeeded() throws {
-    if let internalMetadata = try read(key: ".libnotes-metadata").internalMetadata {
+    if let internalMetadata = try read(key: InternalMetadata.key).internalMetadata {
       guard internalMetadata.majorVersion == 1 else {
         throw CocoaError(.fileReadCorruptFile)
       }
@@ -107,7 +90,7 @@ private extension KeyValueDatabase {
       try write { db in
         try bulkWrite(database: db, values: upgradedMetadata)
         let metadataValue = try Value(InternalMetadata(majorVersion: 1, minorVersion: 0))
-        try bulkWrite(database: db, values: [ScopedKey(key: ".libnotes-metadata"): metadataValue])
+        try bulkWrite(database: db, values: [ScopedKey(key: InternalMetadata.key): metadataValue])
       }
       Logger.shared.info("Upgrade complete")
     }
@@ -121,14 +104,9 @@ public final class NoteDatabase {
   /// Initializes and opens the database stored at `fileURL`
   @MainActor
   public init(fileURL: URL, authorDescription: String) async throws {
-    var config = Configuration()
-    config.prepareDatabase { db in
-      db.add(function: .nameSort)
-    }
     self.keyValueDocument = try UIKeyValueDocument(
       fileURL: fileURL,
-      authorDescription: authorDescription,
-      configuration: config
+      authorDescription: authorDescription
     )
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
@@ -157,7 +135,7 @@ public final class NoteDatabase {
   private let keyValueDocument: UIKeyValueDocument
 
   /// The `KeyValueDatabase` contained in `keyValueDocument`
-  internal let keyValueCRDT: KeyValueDatabase
+  private let keyValueCRDT: KeyValueDatabase
 
   public var fileURL: URL { keyValueDocument.fileURL }
 
@@ -198,9 +176,13 @@ public final class NoteDatabase {
       .eraseToAnyPublisher()
   }
 
+  /// Subscription for events that could invalidate the tag list, clearing the cache and resulting in recomputation.
   private var allTagsInvalidationSubscription: AnyCancellable?
+
+  /// A cached copy of the tags.
   private var cachedAllTags: [String]?
 
+  /// All tags used by all books in the database, sorted.
   public var allTags: [String] {
     get throws {
       if let cachedAllTags = cachedAllTags {
@@ -227,9 +209,13 @@ public final class NoteDatabase {
     }
   }
 
+  /// Subscription to changes that invalidate individual entries in `cachedBookMetadata`, resulting in invalidating individual entries.
   private var cachedBookMetadataInvalidation: AnyCancellable?
+
+  /// Cache of `BookNoteMetadata`
   private var cachedBookMetadata: [Note.Identifier: BookNoteMetadata] = [:]
 
+  /// Gets the `BookNoteMetadata` associated with `identifier`
   public func bookMetadata(identifier: Note.Identifier) -> BookNoteMetadata? {
     if let cachedResult = cachedBookMetadata[identifier] {
       return cachedResult
@@ -244,6 +230,12 @@ public final class NoteDatabase {
     }
   }
 
+  /// Publisher for an array of `NoteIdentifierRecord` structs that match specific search criteria and sort order.
+  /// - Parameters:
+  ///   - structureIdentifier: The "subsection" of the notebook in which to confine the results.
+  ///   - sortOrder: Sort order of the results.
+  ///   - searchTerm: Optional search term for full-text search.
+  /// - Returns: A publisher of `NoteIdentifierRecord` structs.
   func noteIdentifiersPublisher(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
@@ -363,15 +355,6 @@ public final class NoteDatabase {
         try keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
       }
     }
-  }
-
-  @available(*, deprecated)
-  public func search(for searchPattern: String) throws -> [Note.Identifier] {
-    let scopedKeys = try keyValueCRDT.searchText(for: searchPattern)
-    let uniqueIdentifiers = scopedKeys
-      .map { $0.scope }
-      .asSet()
-    return Array(uniqueIdentifiers)
   }
 
   public func eligiblePromptIdentifiers(

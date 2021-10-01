@@ -392,20 +392,3 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
     dismiss(animated: true, completion: nil)
   }
 }
-
-// extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
-//  func bookEditDetailsViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
-//    dismiss(animated: true, completion: nil)
-//  }
-//
-//  func bookEditDetailsViewController(_ viewController: BookEditDetailsViewController, didFinishEditing book: AugmentedBook, coverImage: UIImage?) {
-//    Logger.shared.info("Attaching book: \(book.title)")
-//    self.coverImage = coverImage
-//    note.metadata.book = book
-//    note.metadata.modifiedTimestamp = Date()
-//    tryUpdateNote(note)
-//    let coverImage = coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
-//    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
-//    dismiss(animated: true, completion: nil)
-//  }
-// }
