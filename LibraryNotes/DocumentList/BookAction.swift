@@ -55,12 +55,13 @@ struct BookAction {
   }
 
   /// Returns an action for deleting the book represented by `viewProperties`
-  static func deleteItem(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> BookAction? {
+  static func deleteItem(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
+    guard let metadata = database.bookMetadata(identifier: noteIdentifier) else { return nil }
     return BookAction(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
-      if viewProperties.noteProperties.folder == PredefinedFolder.recentlyDeleted.rawValue {
-        try database.deleteNote(noteIdentifier: viewProperties.pageKey)
+      if metadata.folder == PredefinedFolder.recentlyDeleted.rawValue {
+        try database.deleteNote(noteIdentifier: noteIdentifier)
       } else {
-        try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note in
+        try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note in
           var note = note
           note.metadata.folder = PredefinedFolder.recentlyDeleted.rawValue
           return note
@@ -70,12 +71,14 @@ struct BookAction {
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.read` section of the collection.
-  static func moveItemToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> BookAction? {
-    guard viewProperties.bookCategory != .read else {
+  static func moveItemToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
+    guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
+          viewProperties.bookSection != .read
+    else {
       return nil
     }
     return BookAction(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
-      try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
+      try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         if var book = note.metadata.book {
           let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
@@ -87,17 +90,19 @@ struct BookAction {
         }
         return note
       })
-      Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
+      Logger.shared.info("Moved \(noteIdentifier) to 'read'")
     }
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.currentlyReading` section of the collection.
-  static func moveItemToCurrentlyReading(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> BookAction? {
-    guard viewProperties.bookCategory != .currentlyReading else {
+  static func moveItemToCurrentlyReading(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
+    guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
+          viewProperties.bookSection != .currentlyReading
+    else {
       return nil
     }
     return BookAction(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
-      try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
+      try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         if var book = note.metadata.book {
           let today = Calendar.current.dateComponents([.year, .month, .day], from: Date())
@@ -109,17 +114,19 @@ struct BookAction {
         }
         return note
       })
-      Logger.shared.info("Moved \(viewProperties.pageKey) to 'read'")
+      Logger.shared.info("Moved \(noteIdentifier) to 'read'")
     }
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.wantToRead` section of the collection.
-  static func moveItemToWantToRead(_ viewProperties: BookViewProperties, in database: NoteDatabase) -> BookAction? {
-    guard viewProperties.bookCategory != .wantToRead else {
+  static func moveItemToWantToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
+    guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
+          viewProperties.bookSection != .wantToRead
+    else {
       return nil
     }
     return BookAction(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {
-      try database.updateNote(noteIdentifier: viewProperties.pageKey, updateBlock: { note -> Note in
+      try database.updateNote(noteIdentifier: noteIdentifier, updateBlock: { note -> Note in
         var note = note
         if var book = note.metadata.book {
           book.readingHistory = nil
@@ -127,22 +134,29 @@ struct BookAction {
         }
         return note
       })
-      Logger.shared.info("Moved \(viewProperties.pageKey) to 'want to read'")
+      Logger.shared.info("Moved \(noteIdentifier) to 'want to read'")
     }
   }
 
   /// Returns an action for studying the items in the book represented by `viewProperties`
+  @MainActor
   static func studyItem(
-    _ viewProperties: BookViewProperties,
-    sessionGenerator: SessionGenerator,
+    _ noteIdentifier: Note.Identifier,
+    database: NoteDatabase,
     delegate: DocumentTableControllerDelegate?
   ) -> BookAction? {
-    if viewProperties.cardCount == 0 { return nil }
-    return BookAction(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
-      Task {
-        let studySession = try await sessionGenerator.studySession(filter: { name, _ in name == viewProperties.pageKey }, date: Date())
-        await delegate?.presentStudySessionViewController(for: studySession)
+    do {
+      let studySession = try database.studySession(noteIdentifiers: [noteIdentifier], date: .now)
+      if studySession.isEmpty {
+        return nil
+      } else {
+        return BookAction(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
+          delegate?.presentStudySessionViewController(for: studySession)
+        }
       }
+    } catch {
+      Logger.shared.error("Error getting study session for note \(noteIdentifier): \(error)")
+      return nil
     }
   }
 }

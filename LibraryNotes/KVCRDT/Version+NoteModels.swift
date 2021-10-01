@@ -24,7 +24,7 @@ extension Array where Element == Version {
   /// for the entry.
   var studyLogEntry: StudyLog.Entry? {
     get throws {
-      switch self.count {
+      switch count {
       case 0:
         return nil
       case 1:
@@ -32,6 +32,17 @@ extension Array where Element == Version {
       default:
         throw VersionError.unexpectedVersionConflict
       }
+    }
+  }
+
+  var internalMetadata: InternalMetadata? {
+    get throws {
+      // If there are conflicting version updates, we take the *max* of all versions.
+      try compactMap {
+        guard let json = $0.value.json else { return nil }
+        return try JSONDecoder.databaseDecoder.decode(InternalMetadata.self, from: json.data(using: .utf8)!)
+      }
+      .max()
     }
   }
 }

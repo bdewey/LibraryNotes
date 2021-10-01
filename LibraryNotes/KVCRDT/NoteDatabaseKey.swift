@@ -20,6 +20,7 @@ public struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLi
   }
 
   // MARK: - Well-known keys
+
   //
   // These are keys that are present for all notes.
 
@@ -75,5 +76,4 @@ public struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLi
     let key = "\(formattedTime);note=\(promptIdentifier.noteId);promptId=\(promptIdentifier.promptKey);author=\(instanceID.uuidString)"
     return NoteDatabaseKey(rawValue: key)
   }
-
 }

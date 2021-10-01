@@ -21,13 +21,9 @@ final class DocumentListViewController: UIViewController {
   ) {
     self.database = database
     self.coverImageCache = coverImageCache
-    self.sessionGenerator = SessionGenerator(database: database)
     super.init(nibName: nil, bundle: nil)
     // assume we are showing "all notes" initially.
     navigationItem.title = NotebookStructureViewController.StructureIdentifier.read.description
-    Task {
-      try await sessionGenerator.startMonitoringDatabase()
-    }
   }
 
   @available(*, unavailable)
@@ -37,9 +33,20 @@ final class DocumentListViewController: UIViewController {
 
   public let database: NoteDatabase
   private let coverImageCache: CoverImageCache
-  public let sessionGenerator: SessionGenerator
 
   public var focusedStructure: NotebookStructureViewController.StructureIdentifier = .read {
+    didSet {
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
+  var currentSortOrder = NoteIdentifierRecord.SortOrder.creationTimestamp {
+    didSet {
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
+  var currentSearchTerm: String? {
     didSet {
       monitorDatabaseForFocusedStructure()
     }
@@ -49,17 +56,20 @@ final class DocumentListViewController: UIViewController {
 
   private func monitorDatabaseForFocusedStructure() {
     title = focusedStructure.longDescription
-    metadataPipeline = database.bookMetadataPublisher()
-      .catch { error -> Just<[String: BookNoteMetadata]> in
-        Logger.shared.error("Unexpected error getting metadata: \(error)")
-        return Just([String: BookNoteMetadata]())
-      }
-      .map { [focusedStructure] in $0.filter(focusedStructure.filterBookNoteMetadata) }
-      .sink(receiveValue: { [weak self] filteredBookMetadata in
-        self?.dataSource.bookNoteMetadata = filteredBookMetadata
-        self?.updateStudySession()
-        self?.updateQuoteList()
-      })
+    metadataPipeline = database.noteIdentifiersPublisher(
+      structureIdentifier: focusedStructure,
+      sortOrder: currentSortOrder,
+      searchTerm: currentSearchTerm
+    )
+    .catch { error -> Just<[NoteIdentifierRecord]> in
+      Logger.shared.error("Error getting note identifiers: \(error)")
+      return Just([])
+    }
+    .sink(receiveValue: { [weak self] noteIdentifiers in
+      self?.dataSource.noteIdentifiers = noteIdentifiers
+      self?.updateStudySession()
+      self?.updateQuoteList()
+    })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -67,7 +77,6 @@ final class DocumentListViewController: UIViewController {
       collectionView: collectionView,
       database: database,
       coverImageCache: coverImageCache,
-      sessionGenerator: sessionGenerator,
       delegate: self
     )
   }()
@@ -137,9 +146,7 @@ final class DocumentListViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    Task {
-      self.studySession = try await sessionGenerator.studySession(filter: nil, date: Date())
-    }
+    studySession = try? database.studySession(date: Date())
     dataSource.performUpdates(animated: false)
 
     let searchController = UISearchController(searchResultsController: nil)
@@ -165,7 +172,7 @@ final class DocumentListViewController: UIViewController {
   func searchBecomeFirstResponder() {
     navigationItem.searchController?.isActive = true
     navigationItem.searchController?.searchBar.becomeFirstResponder()
-    Logger.shared.info("Search should be activeg")
+    Logger.shared.info("Search should be active")
   }
 
   private var updateDueDatePipeline: AnyCancellable?
@@ -238,25 +245,11 @@ final class DocumentListViewController: UIViewController {
     dueDate = dueDate.addingTimeInterval(7 * .day)
   }
 
-  private var studySessionGeneration = 0
-
-  private var currentStudySessionTask: Task<Void, Error>? {
-    willSet {
-      currentStudySessionTask?.cancel()
-    }
-  }
-
   private func updateStudySession() {
-    let records = dataSource.bookNoteMetadata
-    let filter: (Note.Identifier, BookNoteMetadata) -> Bool = { identifier, _ in records[identifier] != nil }
-    studySessionGeneration += 1
-    let currentStudySessionGeneration = studySessionGeneration
-    currentStudySessionTask = Task {
-      let studySession = try await sessionGenerator.studySession(filter: filter, date: dueDate)
-      if currentStudySessionGeneration == studySessionGeneration {
-        self.studySession = studySession
-      }
-    }
+    studySession = try? database.studySession(
+      noteIdentifiers: Set(dataSource.noteIdentifiers.map { $0.noteIdentifier }),
+      date: dueDate
+    )
   }
 
   private var quotesSubscription: AnyCancellable?
@@ -338,7 +331,7 @@ final class DocumentListViewController: UIViewController {
         $0.headers = ["Title", "Authors", "ISBN", "ISBN13", "My Rating", "Number of Pages", "Year Published", "Original Publication Year", "Date Added", "Publisher", "Private Notes"]
       }
       for noteIdentifier in noteIdentifiers {
-        let note = try database.note(noteIdentifier: noteIdentifier)
+        let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
         guard let book = note.book else { continue }
         try writer.write(field: book.title)
         try listFormatter.string(from: book.authors).flatMap { try writer.write(field: $0) }
@@ -381,7 +374,7 @@ extension DocumentListViewController {
       shareAction,
       importLibraryThingAction,
       sendFeedbackAction,
-    ].compactMap({ $0 }))
+    ].compactMap { $0 })
   }
 
   private var openCommand: UICommand {
@@ -446,9 +439,9 @@ extension DocumentListViewController {
   }
 
   private var sortMenu: UIMenu {
-    let sortActions = BookCollectionViewSnapshotBuilder.SortOrder.allCases.map { sortOrder -> UIAction in
-      UIAction(title: sortOrder.rawValue, state: sortOrder == dataSource.currentSortOrder ? .on : .off) { [weak self] _ in
-        self?.dataSource.currentSortOrder = sortOrder
+    let sortActions = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UIAction in
+      UIAction(title: sortOrder.rawValue, state: sortOrder == currentSortOrder ? .on : .off) { [weak self] _ in
+        self?.currentSortOrder = sortOrder
       }
     }
     return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
@@ -548,18 +541,11 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
 extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelegate {
   func updateSearchResults(for searchController: UISearchController) {
     guard searchController.isActive else {
-      dataSource.filteredPageIdentifiers = nil
+      currentSearchTerm = nil
       updateStudySession()
       return
     }
-    let pattern = searchController.searchBar.text ?? ""
-    Logger.shared.info("Issuing query: \(pattern)")
-    do {
-      let allIdentifiers = try database.search(for: pattern)
-      dataSource.filteredPageIdentifiers = Set(allIdentifiers)
-    } catch {
-      Logger.shared.error("Error issuing full text query: \(error)")
-    }
+    currentSearchTerm = searchController.searchBar.text
   }
 
   func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
@@ -567,7 +553,7 @@ extension DocumentListViewController: UISearchResultsUpdating, UISearchBarDelega
   }
 
   func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-    dataSource.filteredPageIdentifiers = nil
+    currentSearchTerm = nil
   }
 }
 

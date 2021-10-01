@@ -3,7 +3,7 @@
 import Foundation
 
 /// Sections of the collection view
-enum BookSection {
+public enum BookSection: String, Codable {
   case wantToRead
   /// Books we are reading
   case currentlyReading
@@ -14,5 +14,5 @@ enum BookSection {
   case other
 
   /// The sections that hold books.
-  static let bookSections: [BookSection] = [.currentlyReading, .wantToRead, .read]
+  public static let bookSections: [BookSection] = [.currentlyReading, .wantToRead, .read]
 }

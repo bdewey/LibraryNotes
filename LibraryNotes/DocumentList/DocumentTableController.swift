@@ -18,6 +18,8 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
+typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
+
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 @MainActor
 public final class DocumentTableController: NSObject {
@@ -26,17 +28,15 @@ public final class DocumentTableController: NSObject {
     collectionView: UICollectionView,
     database: NoteDatabase,
     coverImageCache: CoverImageCache,
-    sessionGenerator: SessionGenerator,
     delegate: DocumentTableControllerDelegate
   ) {
     self.collectionView = collectionView
     self.database = database
     let coverImageCache = coverImageCache
     self.coverImageCache = coverImageCache
-    self.sessionGenerator = sessionGenerator
     self.delegate = delegate
 
-    self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache)
+    self.dataSource = BookCollectionViewDataSource(collectionView: collectionView, coverImageCache: coverImageCache, database: database)
 
     super.init()
     collectionView.delegate = self
@@ -47,14 +47,9 @@ public final class DocumentTableController: NSObject {
       self?.updateDataSourceIfNeeded()
     }
     CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
-    updateCardsPerDocument()
   }
 
-  public var dueDate = Date() {
-    didSet {
-      updateCardsPerDocument()
-    }
-  }
+  public var dueDate = Date()
 
   public var bookCount: Int {
     var total = 0
@@ -62,11 +57,6 @@ public final class DocumentTableController: NSObject {
       total += dataSource.snapshot(for: section).bookCount
     }
     return total
-  }
-
-  /// All note identifiers currently displayed in the table.
-  public var noteIdentifiers: [Note.Identifier] {
-    dataSource.snapshot().itemIdentifiers.compactMap { $0.noteIdentifier }
   }
 
   private var needsPerformUpdates = false
@@ -86,17 +76,8 @@ public final class DocumentTableController: NSObject {
     return control
   }()
 
-  /// If non-nil, only pages with these identifiers will be shown.
-  // TODO: Incorporate this into the query
-  public var filteredPageIdentifiers: Set<Note.Identifier>? {
+  public var noteIdentifiers: [NoteIdentifierRecord] = [] {
     didSet {
-      needsPerformUpdates = true
-    }
-  }
-
-  public var bookNoteMetadata: [String: BookNoteMetadata] = [:] {
-    didSet {
-      updateCardsPerDocument()
       needsPerformUpdates = true
     }
   }
@@ -107,34 +88,12 @@ public final class DocumentTableController: NSObject {
   private let collectionView: UICollectionView
   private let database: NoteDatabase
   private let coverImageCache: CoverImageCache
-  private let sessionGenerator: SessionGenerator
-  private var cardsPerDocument = [Note.Identifier: Int]() {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
 
   private let dataSource: BookCollectionViewDataSource
 
-  var currentSortOrder = BookCollectionViewSnapshotBuilder.SortOrder.creationTimestamp {
-    didSet {
-      needsPerformUpdates = true
-    }
-  }
-
-  private var snapshotParameters: BookCollectionViewSnapshotBuilder?
-
   public func performUpdates(animated: Bool) {
-    let filteredRecordIdentifiers = bookNoteMetadata
-      .map { $0.key }
-      .filter { filteredPageIdentifiers?.contains($0) ?? true }
-    let newSnapshotBuilder = BookCollectionViewSnapshotBuilder(
-      records: Set(filteredRecordIdentifiers),
-      cardsPerDocument: cardsPerDocument,
-      sortOrder: currentSortOrder
-    )
+    let filteredRecordIdentifiers = noteIdentifiers
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
-    let reallyAnimate = animated && (newSnapshotBuilder != snapshotParameters)
     var collapsedSections = Set<BookSection>()
     for section in BookSection.bookSections {
       let sectionSnapshot = dataSource.snapshot(for: section)
@@ -144,25 +103,37 @@ public final class DocumentTableController: NSObject {
     }
 
     isPerformingUpdates = true
-    dataSource.apply(BookCollectionViewSnapshot(), animatingDifferences: reallyAnimate) {
+    dataSource.apply(BookCollectionViewSnapshot(), animatingDifferences: animated) {
       self.isPerformingUpdates = false
     }
-    let categorizedItems = newSnapshotBuilder.categorizeMetadataRecords(bookNoteMetadata)
+    let partitions = noteIdentifiers.bookSectionPartitions
     for section in BookSection.bookSections {
-      if var sectionSnapshot = newSnapshotBuilder.sectionSnapshot(for: section, categorizedItems: categorizedItems) {
+      if var sectionSnapshot = sectionSnapshot(for: section, partitions: partitions, identifiers: noteIdentifiers) {
         sectionSnapshot.collapseSections(in: collapsedSections)
-        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: reallyAnimate)
+        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
       }
     }
-    if let otherItems = newSnapshotBuilder.sectionSnapshot(for: .other, categorizedItems: categorizedItems) {
-      dataSource.apply(otherItems, to: .other, animatingDifferences: reallyAnimate)
+    if let otherItems = sectionSnapshot(for: .other, partitions: partitions, identifiers: noteIdentifiers) {
+      dataSource.apply(otherItems, to: .other, animatingDifferences: animated)
     }
     selectedItems?.forEach { item in
       guard let indexPath = dataSource.indexPath(for: item) else { return }
       collectionView.selectItem(at: indexPath, animated: false, scrollPosition: [])
     }
     delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers.count)
-    snapshotParameters = newSnapshotBuilder
+  }
+
+  func sectionSnapshot(for section: BookSection, partitions: [BookSection: Range<Int>], identifiers: [NoteIdentifierRecord]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>? {
+    guard let range = partitions[section], !range.isEmpty else {
+      return nil
+    }
+    var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
+    let headerItem = BookCollectionViewItem.header(section, range.count)
+    let items: [BookCollectionViewItem] = identifiers[range].map { .book($0.noteIdentifier) }
+    bookSection.append([headerItem])
+    bookSection.append(items, to: headerItem)
+    bookSection.expand([headerItem])
+    return bookSection
   }
 }
 
@@ -182,13 +153,13 @@ extension DocumentTableController {
     }
   }
 
-  fileprivate func availableItemActionConfigurations(_ viewProperties: BookViewProperties) -> [BookAction] {
+  fileprivate func availableItemActionConfigurations(_ noteIdentifier: Note.Identifier) -> [BookAction] {
     let actions: [BookAction?] = [
-      .studyItem(viewProperties, sessionGenerator: sessionGenerator, delegate: delegate),
-      .moveItemToWantToRead(viewProperties, in: database),
-      .moveItemToCurrentlyReading(viewProperties, in: database),
-      .moveItemToRead(viewProperties, in: database),
-      .deleteItem(viewProperties, in: database),
+      .studyItem(noteIdentifier, database: database, delegate: delegate),
+      .moveItemToWantToRead(noteIdentifier, in: database),
+      .moveItemToCurrentlyReading(noteIdentifier, in: database),
+      .moveItemToRead(noteIdentifier, in: database),
+      .deleteItem(noteIdentifier, in: database),
     ]
     return actions.compactMap { $0 }
   }
@@ -205,8 +176,8 @@ public extension DocumentTableController {
       return false
     }
     switch item {
-    case .book(let viewProperties):
-      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: shiftFocus)
+    case .book(let noteIdentifier):
+      delegate?.showPage(with: noteIdentifier, shiftFocus: shiftFocus)
       return true
     case .header:
       var bookSection = dataSource.snapshot(for: section)
@@ -221,21 +192,13 @@ public extension DocumentTableController {
   }
 
   func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
-    let item = dataSource.snapshot().itemIdentifiers.first { item in
-      if case .book(let viewProperties) = item {
-        return viewProperties.pageKey == noteIdentifier
-      } else {
-        return false
-      }
-    }
-    guard let item = item else { return nil }
-    return dataSource.indexPath(for: item)
+    return dataSource.indexPath(for: .book(noteIdentifier))
   }
 
   func selectFirstNote() {
-    let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { $0.bookCategory != nil })
-    if let firstNote = firstNote, case .book(let viewProperties) = firstNote {
-      delegate?.showPage(with: viewProperties.pageKey, shiftFocus: false)
+    let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { if case .book = $0 { return true } else { return false } })
+    if let firstNote = firstNote, case .book(let noteIdentifier) = firstNote {
+      delegate?.showPage(with: noteIdentifier, shiftFocus: false)
     }
   }
 
@@ -322,19 +285,6 @@ private extension DocumentTableController {
     Task {
       await Task.sleep(1000000000)
       refreshControl.endRefreshing()
-    }
-  }
-
-  func updateCardsPerDocument() {
-    Task {
-      let studySession = try await sessionGenerator.studySession(filter: nil, date: dueDate)
-      cardsPerDocument = studySession
-        .reduce(into: [Note.Identifier: Int]()) { cardsPerDocument, card in
-          cardsPerDocument[card.noteIdentifier] = cardsPerDocument[card.noteIdentifier, default: 0] + 1
-        }
-      Logger.shared.debug(
-        "studySession.count = \(studySession.count). cardsPerDocument has \(self.cardsPerDocument.count) entries"
-      )
     }
   }
 }

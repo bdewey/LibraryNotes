@@ -70,7 +70,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: noteIdentifier), withoutHashtagNote)
-        XCTAssertEqual(storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.noteCount, 1)
       }
       .run(self)
   }
@@ -83,7 +83,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .performRemoteModification { storage in
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = try await storage.studySession(filter: nil, date: future)
+        var studySession = try storage.studySession(date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -95,7 +95,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = try await storage.studySession(filter: nil, date: future)
+        let studySession = try storage.studySession(date: future)
         XCTAssertEqual(0, studySession.count)
       }
       .run(self)
@@ -107,7 +107,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         _ = try storage.createNote(.withChallenges)
         // New items aren't eligible for at 3-5 days.
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        var studySession = try await storage.studySession(filter: nil, date: future)
+        var studySession = try storage.studySession(date: future)
         XCTAssertEqual(3, studySession.count)
         while studySession.currentPrompt != nil {
           studySession.recordAnswer(correct: true)
@@ -119,10 +119,10 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-        let studySession = try await storage.studySession(filter: nil, date: future)
+        let studySession = try storage.studySession(date: future)
         XCTAssertEqual(0, studySession.count)
-        XCTAssertEqual(1, storage.bookMetadata.count)
-        let futureStudySession = try await storage.studySession(filter: nil, date: future.addingTimeInterval(30 * 24 * 60 * 60))
+        XCTAssertEqual(1, storage.noteCount)
+        let futureStudySession = try storage.studySession(date: future.addingTimeInterval(30 * 24 * 60 * 60))
         XCTAssertEqual(3, futureStudySession.count)
       }
       .run(self)
@@ -142,7 +142,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .validate { storage in
         XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
-        XCTAssertEqual(storage.bookMetadata.count, 1)
+        XCTAssertEqual(storage.noteCount, 1)
       }
       .run(self)
   }
@@ -268,13 +268,5 @@ private extension NoteSqliteStorageMergeTests {
       throw TestError.couldNotCloseDatabase
     }
     return database.fileURL
-  }
-}
-
-extension NoteDatabase {
-  func studySession(filter: ((Note.Identifier, BookNoteMetadata) -> Bool)?, date: Date) async throws -> StudySession {
-    let sessionGenerator = SessionGenerator(database: self)
-    try await sessionGenerator.startMonitoringDatabase()
-    return try await sessionGenerator.studySession(filter: filter, date: date)
   }
 }

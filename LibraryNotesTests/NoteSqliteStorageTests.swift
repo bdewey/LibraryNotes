@@ -9,7 +9,7 @@ final class NoteSqliteStorageTests: XCTestCase {
 
   override func setUp() async throws {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    self.database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
+    database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
   }
 
   override func tearDown() async throws {
@@ -97,12 +97,6 @@ final class NoteSqliteStorageTests: XCTestCase {
     XCTAssertEqual(Note.simpleTest, roundTripNote)
   }
 
-  func testNotesShowUpInAllMetadata() async throws {
-    let identifier = try database.createNote(Note.withHashtags)
-    XCTAssertEqual(1, database.bookMetadata.count)
-    XCTAssertEqual(database.bookMetadata[identifier]?.title, Note.withHashtags.metadata.title)
-  }
-
   func testCreatingNoteSendsNotification() async throws {
     var didGetNotification = false
     let cancellable = database.notesDidChange.sink { didGetNotification = true }
@@ -115,18 +109,18 @@ final class NoteSqliteStorageTests: XCTestCase {
     let identifier = try database.createNote(Note.withHashtags)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.withHashtags, roundTripNote)
-    XCTAssertEqual(1, database.bookMetadata.count)
+    XCTAssertEqual(1, database.noteCount)
     try database.deleteNote(noteIdentifier: identifier)
     XCTAssertTrue(database.hasUnsavedChanges)
     XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
-    XCTAssertEqual(0, database.bookMetadata.count)
+    XCTAssertEqual(0, database.noteCount)
   }
 
   func testStudyLog() async throws {
     _ = try database.createNote(Note.withChallenges)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-    var studySession = try await database.studySession(filter: nil, date: future)
+    var studySession = try database.studySession(date: future)
     XCTAssertEqual(3, studySession.count)
     while studySession.currentPrompt != nil {
       studySession.recordAnswer(correct: true)
@@ -140,7 +134,7 @@ final class NoteSqliteStorageTests: XCTestCase {
     _ = try database.createNote(Note.withChallenges)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-    var studySession = try await database.studySession(filter: nil, date: future)
+    var studySession = try database.studySession(date: future)
     XCTAssertEqual(3, studySession.count)
     var expectedIncorrectAnswers = 3
     while studySession.currentPrompt != nil {
@@ -231,7 +225,7 @@ final class NoteSqliteStorageTests: XCTestCase {
     _ = try database.createNote(Note.multipleClozes)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
-    var studySession = try await database.studySession(filter: nil, date: future)
+    var studySession = try database.studySession(date: future)
     XCTAssertEqual(studySession.count, 2)
     studySession.ensureUniquePromptCollections()
     XCTAssertEqual(studySession.count, 1)
@@ -239,9 +233,9 @@ final class NoteSqliteStorageTests: XCTestCase {
       studySession.recordAnswer(correct: true)
     }
     try database.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-    studySession = try await database.studySession(filter: nil, date: future)
+    studySession = try database.studySession(date: future)
     XCTAssertEqual(studySession.count, 0)
-    studySession = try await database.studySession(filter: nil, date: future.addingTimeInterval(24 * .hour))
+    studySession = try database.studySession(date: future.addingTimeInterval(24 * .hour + 1 * .minute))
     XCTAssertEqual(studySession.count, 1)
   }
 }

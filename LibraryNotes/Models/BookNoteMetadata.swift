@@ -54,7 +54,18 @@ public struct BookNoteMetadata: Codable, Equatable {
   public var folder: String?
 
   /// The book that this note is about.
-  public var book: AugmentedBook?
+  public var book: AugmentedBook? {
+    didSet {
+      bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
+      authorLastFirst = book?.authors.first?.nameLastFirst()
+    }
+  }
+
+  /// In the book list, the section this book belongs in
+  public var bookSection: BookSection?
+
+  /// The book's first author, listed with last name first
+  public var authorLastFirst: String?
 
   /// Information in this metadata structure that's worth putting in a full-text index for metadata surces.
   public var indexedContents: String? {
@@ -70,15 +81,26 @@ public struct BookNoteMetadata: Codable, Equatable {
       lhs.tags == rhs.tags &&
       lhs.book == rhs.book
   }
+
+  /// Fill out `bookSection` and `authorLastFirst`, which exist in "version 1" but didn't exist prior.
+  mutating func upgradeToVersion1() {
+    bookSection = book?.readingHistory?.inferredBookCategory ?? .wantToRead
+    authorLastFirst = book?.authors.first?.nameLastFirst()
+  }
+
+  func upgradingToVersion1() -> Self {
+    var copy = self
+    copy.upgradeToVersion1()
+    return copy
+  }
 }
 
-public extension Sequence where Element == BookNoteMetadata {
-  var hashtags: [String] {
-    let hashtags = filter { $0.folder != PredefinedFolder.recentlyDeleted.rawValue }
-      .reduce(into: Set<String>()) { hashtags, metadata in
-        hashtags.formUnion(metadata.tags)
-        hashtags.formUnion(metadata.book?.tags ?? [])
-      }
-    return Array(hashtags).sorted()
+public extension ReadingHistory {
+  var inferredBookCategory: BookSection {
+    if isCurrentlyReading {
+      return .currentlyReading
+    } else {
+      return .read
+    }
   }
 }

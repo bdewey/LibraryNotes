@@ -17,9 +17,6 @@ final class NotebookStructureViewController: UIViewController {
   enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
     case trash
     case hashtag(String)
-
-    case wantToRead
-    case currentlyReading
     case read
 
     /// The raw value is used to serialize the focused element for state restoration.
@@ -27,12 +24,8 @@ final class NotebookStructureViewController: UIViewController {
       switch rawValue {
       case "##all##":
         self = .read
-      case "##inbox##":
-        self = .wantToRead
       case "##trash##":
         self = .trash
-      case "##currentlyReading##":
-        self = .currentlyReading
       default:
         self = .hashtag(rawValue)
       }
@@ -42,10 +35,6 @@ final class NotebookStructureViewController: UIViewController {
       switch self {
       case .trash:
         return "##trash##"
-      case .wantToRead:
-        return "##inbox##"
-      case .currentlyReading:
-        return "##currentlyReading##"
       case .read:
         return "##all##"
       case .hashtag(let hashtag):
@@ -56,8 +45,6 @@ final class NotebookStructureViewController: UIViewController {
     var description: String {
       switch self {
       case .trash: return "Trash"
-      case .wantToRead: return "Want to read"
-      case .currentlyReading: return "Currently reading"
       case .read: return "My Books"
       case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
       }
@@ -66,8 +53,6 @@ final class NotebookStructureViewController: UIViewController {
     var longDescription: String {
       switch self {
       case .trash: return "Trash"
-      case .wantToRead: return "Want to read"
-      case .currentlyReading: return "Currently reading"
       case .read: return "My Books"
       case .hashtag(let hashtag): return hashtag
       }
@@ -77,8 +62,6 @@ final class NotebookStructureViewController: UIViewController {
       switch self {
       case .hashtag, .read: return nil
       case .trash: return .recentlyDeleted
-      case .wantToRead: return .wantToRead
-      case .currentlyReading: return .currentlyReading
       }
     }
 
@@ -120,8 +103,6 @@ final class NotebookStructureViewController: UIViewController {
     var description: String { structureIdentifier.description }
     static let trash = Item(structureIdentifier: .trash, hasChildren: false, image: UIImage(systemName: "trash"))
 
-    static let wantToRead = Item(structureIdentifier: .wantToRead, hasChildren: false, image: UIImage(systemName: "list.star"))
-    static let currentlyReading = Item(structureIdentifier: .currentlyReading, hasChildren: false, image: UIImage(systemName: "book"))
     static let read = Item(structureIdentifier: .read, hasChildren: true, image: UIImage(systemName: "books.vertical"))
   }
 
@@ -455,7 +436,7 @@ private extension NotebookStructureViewController {
     var snapshot = NSDiffableDataSourceSectionSnapshot<Item>()
 
     var root = Item.read
-    let hashtags = database.bookMetadata.values.hashtags
+    let hashtags = (try? database.allTags) ?? []
     root.hasChildren = !hashtags.isEmpty
     snapshot.append([root])
 

@@ -3,6 +3,7 @@
 import BookKit
 import Combine
 import Foundation
+import GRDB
 import KeyValueCRDT
 import Logging
 import os
@@ -17,6 +18,10 @@ private extension Logging.Logger {
     logger.logLevel = .debug
     return logger
   }()
+}
+
+private extension OSLog {
+  static let studySession = OSLog(subsystem: "org.brians-brain.NoteDatabase", category: "studySession")
 }
 
 enum KeyValueNoteDatabaseScope: String {
@@ -39,6 +44,59 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
+/// Hold the major & minor version for data in the key-value store.
+///
+/// If the major version is higher than what is expected, refuse to open the file.
+/// If the major verison is less than what is expected, run data migrations.
+internal struct InternalMetadata: Codable, Comparable, CustomStringConvertible {
+  /// The key for storing this metadata struct in the database.
+  static let key = ".libnotes-metadata"
+
+  /// File major version. The major version increments on incompatible changes.
+  var majorVersion: Int
+
+  /// Minor version number. This increments on backwards-compatible format changes.
+  var minorVersion: Int
+
+  static func < (lhs: InternalMetadata, rhs: InternalMetadata) -> Bool {
+    (lhs.majorVersion, lhs.minorVersion) < (rhs.majorVersion, rhs.minorVersion)
+  }
+
+  var description: String {
+    "\(majorVersion).\(minorVersion)"
+  }
+}
+
+private extension KeyValueDatabase {
+  /// Migrates pre-1.0 files to 1.0.
+  func upgradeVersionIfNeeded() throws {
+    if let internalMetadata = try read(key: InternalMetadata.key).internalMetadata {
+      guard internalMetadata.majorVersion == 1 else {
+        throw CocoaError(.fileReadCorruptFile)
+      }
+      Logger.shared.info("Library version is \(internalMetadata)")
+      // Safe to proceed
+    } else {
+      // Need to run an upgrade
+      Logger.shared.info("Upgrading library")
+      let allMetadata = try bulkRead(key: NoteDatabaseKey.metadata.rawValue)
+      let upgradedMetadata = try allMetadata.mapValues { versions -> Value in
+        if let upgraded = versions.metadata?.upgradingToVersion1() {
+          return try Value(upgraded)
+        } else {
+          return .null
+        }
+      }
+      try write { db in
+        try bulkWrite(database: db, values: upgradedMetadata)
+        let metadataValue = try Value(InternalMetadata(majorVersion: 1, minorVersion: 0))
+        try bulkWrite(database: db, values: [ScopedKey(key: InternalMetadata.key): metadataValue])
+      }
+      Logger.shared.info("Upgrade complete")
+    }
+  }
+}
+
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
 public final class NoteDatabase {
   public typealias IOCompletionHandler = (Bool) -> Void
@@ -46,13 +104,30 @@ public final class NoteDatabase {
   /// Initializes and opens the database stored at `fileURL`
   @MainActor
   public init(fileURL: URL, authorDescription: String) async throws {
-    self.keyValueDocument = try UIKeyValueDocument(fileURL: fileURL, authorDescription: authorDescription)
+    self.keyValueDocument = try UIKeyValueDocument(
+      fileURL: fileURL,
+      authorDescription: authorDescription
+    )
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
+    try keyValueCRDT.upgradeVersionIfNeeded()
     self.keyValueCRDT = keyValueCRDT
     self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self
+    self.allTagsInvalidationSubscription = notesDidChange.sink { [weak self] _ in
+      self?.cachedAllTags = nil
+    }
+    self.allTagsInvalidationSubscription = keyValueCRDT
+      .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
+      .sink(receiveCompletion: { error in
+        Logger.shared.error("Error maintaining cache: \(error)")
+      }, receiveValue: { [weak self] update in
+        guard let self = self else { return }
+        for scopedKey in update.keys {
+          self.cachedBookMetadata[scopedKey.scope] = nil
+        }
+      })
   }
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
@@ -101,21 +176,80 @@ public final class NoteDatabase {
       .eraseToAnyPublisher()
   }
 
-  public var bookMetadata: [String: BookNoteMetadata] {
-    do {
-      let results = try keyValueCRDT.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
-      return try results.asBookNoteMetadata()
-    } catch {
-      Logger.keyValueNoteDatabase.critical("Could not read book metadata: \(error)")
-      fatalError()
+  /// Subscription for events that could invalidate the tag list, clearing the cache and resulting in recomputation.
+  private var allTagsInvalidationSubscription: AnyCancellable?
+
+  /// A cached copy of the tags.
+  private var cachedAllTags: [String]?
+
+  /// All tags used by all books in the database, sorted.
+  public var allTags: [String] {
+    get throws {
+      if let cachedAllTags = cachedAllTags {
+        return cachedAllTags
+      } else {
+        let tags = try keyValueCRDT.read { database in
+          try TagsRecord.allTags(in: database)
+        }
+        let tagsArray = Array(tags).sorted()
+        cachedAllTags = tagsArray
+        return tagsArray
+      }
     }
   }
 
-  public func bookMetadataPublisher() -> AnyPublisher<[String: BookNoteMetadata], Error> {
-    keyValueCRDT
-      .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
-      .tryMap { try $0.asBookNoteMetadata() }
-      .eraseToAnyPublisher()
+  // TODO: Exclude notes in the trash? Currently used only in tests so :shrug:
+  /// Gets the number of notes in the database
+  public var noteCount: Int {
+    do {
+      return try keyValueCRDT.keys(key: NoteDatabaseKey.metadata.rawValue).count
+    } catch {
+      Logger.shared.error("Unexpected error getting note count: \(error)")
+      return 0
+    }
+  }
+
+  /// Subscription to changes that invalidate individual entries in `cachedBookMetadata`, resulting in invalidating individual entries.
+  private var cachedBookMetadataInvalidation: AnyCancellable?
+
+  /// Cache of `BookNoteMetadata`
+  private var cachedBookMetadata: [Note.Identifier: BookNoteMetadata] = [:]
+
+  /// Gets the `BookNoteMetadata` associated with `identifier`
+  public func bookMetadata(identifier: Note.Identifier) -> BookNoteMetadata? {
+    if let cachedResult = cachedBookMetadata[identifier] {
+      return cachedResult
+    }
+    do {
+      let value = try keyValueCRDT.read(key: NoteDatabaseKey.metadata.rawValue, scope: identifier).resolved(with: .lastWriterWins)?.decodeJSON(BookNoteMetadata.self)
+      cachedBookMetadata[identifier] = value
+      return value
+    } catch {
+      Logger.shared.error("Unexpected error getting metadata for \(identifier): \(error)")
+      return nil
+    }
+  }
+
+  /// Publisher for an array of `NoteIdentifierRecord` structs that match specific search criteria and sort order.
+  /// - Parameters:
+  ///   - structureIdentifier: The "subsection" of the notebook in which to confine the results.
+  ///   - sortOrder: Sort order of the results.
+  ///   - searchTerm: Optional search term for full-text search.
+  /// - Returns: A publisher of `NoteIdentifierRecord` structs.
+  func noteIdentifiersPublisher(
+    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    sortOrder: NoteIdentifierRecord.SortOrder,
+    searchTerm: String?
+  ) -> AnyPublisher<[NoteIdentifierRecord], Error> {
+    let sqlLiteral = NoteIdentifierRecord.sqlLiteral(
+      structureIdentifier: structureIdentifier,
+      sortOrder: sortOrder,
+      searchTerm: searchTerm
+    )
+    return keyValueCRDT.valuePublisher { db -> [NoteIdentifierRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try NoteIdentifierRecord.fetchAll(db, sql: sql, arguments: arguments)
+    }
   }
 
   public func readPublisher(noteIdentifier: Note.Identifier, key: NoteDatabaseKey) -> AnyPublisher<[NoteDatabaseKey: [Version]], Error> {
@@ -221,14 +355,6 @@ public final class NoteDatabase {
         try keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
       }
     }
-  }
-
-  public func search(for searchPattern: String) throws -> [Note.Identifier] {
-    let scopedKeys = try keyValueCRDT.searchText(for: searchPattern)
-    let uniqueIdentifiers = scopedKeys
-      .map { $0.scope }
-      .asSet()
-    return Array(uniqueIdentifiers)
   }
 
   public func eligiblePromptIdentifiers(
@@ -442,6 +568,26 @@ public final class NoteDatabase {
         }
       }
     }
+  }
+
+  public func studySession(noteIdentifiers: Set<Note.Identifier>? = nil, date: Date) throws -> StudySession {
+    let signpostID = OSSignpostID(log: .studySession)
+    os_signpost(.begin, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    let sqlLiteral = StudySessionEntryRecord.sql(identifiers: noteIdentifiers, due: date)
+    let entries = try keyValueCRDT.read { db -> [StudySessionEntryRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try StudySessionEntryRecord.fetchAll(db, sql: sql, arguments: arguments)
+    }
+    var studySession = StudySession()
+    for entry in entries {
+      guard let metadata = bookMetadata(identifier: entry.scope) else { continue }
+      studySession.append(
+        promptIdentifier: entry.promptIdentifier,
+        properties: CardDocumentProperties(documentName: entry.scope, attributionMarkdown: metadata.preferredTitle)
+      )
+    }
+    os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    return studySession
   }
 
   public var studyLog: StudyLog {
