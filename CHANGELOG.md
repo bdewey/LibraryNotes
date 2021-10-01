@@ -4,6 +4,7 @@
 
 ### Added
 
+- Support for large libraries (9000+ books)
 - Error dialog on import errors
 
 ### Fixed
