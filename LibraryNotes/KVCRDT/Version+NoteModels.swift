@@ -24,7 +24,7 @@ extension Array where Element == Version {
   /// for the entry.
   var studyLogEntry: StudyLog.Entry? {
     get throws {
-      switch self.count {
+      switch count {
       case 0:
         return nil
       case 1:

@@ -73,7 +73,8 @@ struct BookAction {
   /// Returns an action for moving the book represented by `viewProperties` to the `.read` section of the collection.
   static func moveItemToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
-          viewProperties.bookSection != .read else {
+          viewProperties.bookSection != .read
+    else {
       return nil
     }
     return BookAction(title: "Read", image: UIImage(systemName: "books.vertical"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
@@ -96,7 +97,8 @@ struct BookAction {
   /// Returns an action for moving the book represented by `viewProperties` to the `.currentlyReading` section of the collection.
   static func moveItemToCurrentlyReading(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
-          viewProperties.bookSection != .currentlyReading else {
+          viewProperties.bookSection != .currentlyReading
+    else {
       return nil
     }
     return BookAction(title: "Currently Reading", image: UIImage(systemName: "book"), backgroundColor: .grailTint, availableAsSwipeAction: false) {
@@ -119,7 +121,8 @@ struct BookAction {
   /// Returns an action for moving the book represented by `viewProperties` to the `.wantToRead` section of the collection.
   static func moveItemToWantToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
-          viewProperties.bookSection != .wantToRead else {
+          viewProperties.bookSection != .wantToRead
+    else {
       return nil
     }
     return BookAction(title: "Want to Read", image: UIImage(systemName: "list.star"), backgroundColor: .systemIndigo, availableAsSwipeAction: false) {

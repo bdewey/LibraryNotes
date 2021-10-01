@@ -18,6 +18,8 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
 }
 
+typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
+
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 @MainActor
 public final class DocumentTableController: NSObject {

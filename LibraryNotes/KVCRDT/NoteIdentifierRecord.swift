@@ -1,4 +1,4 @@
-// Copyright © 2021 Brian's Brain. All rights reserved.
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import GRDB
@@ -31,57 +31,57 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
     switch structureIdentifier {
     case .read:
       return """
-    SELECT
-        DISTINCT scope AS noteIdentifier,
-        json_extract(entry.json, '$.bookSection') AS bookSection
-    FROM
-        entry
-    WHERE
-        entry.KEY = '.metadata'
-        AND json_valid(entry.json)
-        AND (
-            json_extract(entry.json, '$.folder') IS NULL
-            OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
-        )
-  """
+        SELECT
+            DISTINCT scope AS noteIdentifier,
+            json_extract(entry.json, '$.bookSection') AS bookSection
+        FROM
+            entry
+        WHERE
+            entry.KEY = '.metadata'
+            AND json_valid(entry.json)
+            AND (
+                json_extract(entry.json, '$.folder') IS NULL
+                OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
+            )
+      """
 
     case .trash:
       return """
-    SELECT
-        DISTINCT scope AS noteIdentifier,
-        json_extract(entry.json, '$.bookSection') AS bookSection
-    FROM
-        entry
-    WHERE
-        entry.KEY = '.metadata'
-        AND json_valid(entry.json)
-        AND json_extract(entry.json, '$.folder') == 'recentlyDeleted'
-    """
+      SELECT
+          DISTINCT scope AS noteIdentifier,
+          json_extract(entry.json, '$.bookSection') AS bookSection
+      FROM
+          entry
+      WHERE
+          entry.KEY = '.metadata'
+          AND json_valid(entry.json)
+          AND json_extract(entry.json, '$.folder') == 'recentlyDeleted'
+      """
 
     case .hashtag(let hashtag):
       return """
-    SELECT
-        scope,
-        DISTINCT scope AS noteIdentifier,
-        json_extract(entry.json, '$.bookSection') AS bookSection
-        metadataTags.value,
-        bookTags.value
-    FROM
-        entry
-        LEFT JOIN json_each(entry.json, '$.book.tags') AS bookTags
-        LEFT JOIN json_each(entry.json, '$.tags') AS metadataTags
-    WHERE
-        entry.KEY = '.metadata'
-        AND json_valid(entry.json)
-        AND (
-            json_extract(entry.json, '$.folder') IS NULL
-            OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
-        )
-        AND (
-            bookTags.value = \(hashtag)
-            OR metadataTags.value = \(hashtag)
-        )
-    """
+      SELECT
+          scope,
+          DISTINCT scope AS noteIdentifier,
+          json_extract(entry.json, '$.bookSection') AS bookSection
+          metadataTags.value,
+          bookTags.value
+      FROM
+          entry
+          LEFT JOIN json_each(entry.json, '$.book.tags') AS bookTags
+          LEFT JOIN json_each(entry.json, '$.tags') AS metadataTags
+      WHERE
+          entry.KEY = '.metadata'
+          AND json_valid(entry.json)
+          AND (
+              json_extract(entry.json, '$.folder') IS NULL
+              OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
+          )
+          AND (
+              bookTags.value = \(hashtag)
+              OR metadataTags.value = \(hashtag)
+          )
+      """
     }
   }
 
@@ -108,9 +108,9 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
   }
 }
 
-extension Array where Element == NoteIdentifierRecord {
+public extension Array where Element == NoteIdentifierRecord {
   /// Given an array of `NoteIdentifierRecord` structs that is sorted by `bookSection`, returns the partion boundaries for each `bookSection` value.
-  public var bookSectionPartitions: [BookSection: Range<Int>] {
+  var bookSectionPartitions: [BookSection: Range<Int>] {
     var results: [BookSection: Range<Int>] = [:]
     for (index, element) in enumerated() {
       if let existingRange = results[element.bookSection] {

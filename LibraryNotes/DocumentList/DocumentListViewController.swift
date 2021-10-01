@@ -61,15 +61,15 @@ final class DocumentListViewController: UIViewController {
       sortOrder: currentSortOrder,
       searchTerm: currentSearchTerm
     )
-      .catch { error -> Just<[NoteIdentifierRecord]> in
-        Logger.shared.error("Error getting note identifiers: \(error)")
-        return Just([])
-      }
-      .sink(receiveValue: { [weak self] noteIdentifiers in
-        self?.dataSource.noteIdentifiers = noteIdentifiers
-        self?.updateStudySession()
-        self?.updateQuoteList()
-      })
+    .catch { error -> Just<[NoteIdentifierRecord]> in
+      Logger.shared.error("Error getting note identifiers: \(error)")
+      return Just([])
+    }
+    .sink(receiveValue: { [weak self] noteIdentifiers in
+      self?.dataSource.noteIdentifiers = noteIdentifiers
+      self?.updateStudySession()
+      self?.updateQuoteList()
+    })
   }
 
   private lazy var dataSource: DocumentTableController = {
@@ -146,7 +146,7 @@ final class DocumentListViewController: UIViewController {
     collectionView.snp.makeConstraints { make in
       make.top.bottom.left.right.equalToSuperview()
     }
-    self.studySession = try? database.studySession(date: Date())
+    studySession = try? database.studySession(date: Date())
     dataSource.performUpdates(animated: false)
 
     let searchController = UISearchController(searchResultsController: nil)
@@ -247,7 +247,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateStudySession() {
     studySession = try? database.studySession(
-      noteIdentifiers: Set(dataSource.noteIdentifiers.map({ $0.noteIdentifier })),
+      noteIdentifiers: Set(dataSource.noteIdentifiers.map { $0.noteIdentifier }),
       date: dueDate
     )
   }
