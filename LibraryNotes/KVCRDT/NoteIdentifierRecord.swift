@@ -4,7 +4,7 @@ import Foundation
 import GRDB
 
 /// Used to filter & sort note identifiers from the database.
-public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable {
+public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equatable {
   public static var databaseTableName: String { "entry" }
   public var noteIdentifier: String
   public var bookSection: BookSection

@@ -97,6 +97,13 @@ public final class NoteDatabase {
           self.cachedBookMetadata[scopedKey.scope] = nil
         }
       })
+    cachedBookMetadataInvalidation = keyValueCRDT.updatedValuesPublisher
+      .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
+      .map({ $0.0.scope })
+      .sink { [weak self] noteIdentifier in
+        Logger.shared.debug("Invalidating metadata cache for \(noteIdentifier)")
+        self?.cachedBookMetadata[noteIdentifier] = nil
+      }
   }
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }

@@ -43,10 +43,17 @@ public final class DocumentTableController: NSObject {
     if FileManager.default.isUbiquitousItem(at: database.fileURL) {
       collectionView.refreshControl = refreshControl
     }
-    let needsPerformUpdatesObserver = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0) { [weak self] _, _ in
-      self?.updateDataSourceIfNeeded()
-    }
-    CFRunLoopAddObserver(CFRunLoopGetMain(), needsPerformUpdatesObserver, CFRunLoopMode.commonModes)
+    changedNoteSubscription = database.updatedValuesPublisher
+      .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
+      .map({ $0.0.scope })
+      .sink { [weak self] noteIdentifier in
+        guard let self = self else { return }
+        var snapshot = self.dataSource.snapshot()
+        if snapshot.indexOfItem(.book(noteIdentifier)) != nil {
+          snapshot.reconfigureItems([.book(noteIdentifier)])
+          self.dataSource.apply(snapshot, animatingDifferences: false)
+        }
+      }
   }
 
   public var dueDate = Date()
@@ -59,17 +66,6 @@ public final class DocumentTableController: NSObject {
     return total
   }
 
-  private var needsPerformUpdates = false
-  private var isPerformingUpdates = false
-
-  @MainActor
-  private func updateDataSourceIfNeeded() {
-    if needsPerformUpdates, !isPerformingUpdates {
-      performUpdates(animated: true)
-      needsPerformUpdates = false
-    }
-  }
-
   private lazy var refreshControl: UIRefreshControl = {
     let control = UIRefreshControl()
     control.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
@@ -78,7 +74,7 @@ public final class DocumentTableController: NSObject {
 
   public var noteIdentifiers: [NoteIdentifierRecord] = [] {
     didSet {
-      needsPerformUpdates = true
+      performUpdates(animated: true)
     }
   }
 
@@ -91,6 +87,8 @@ public final class DocumentTableController: NSObject {
 
   private let dataSource: BookCollectionViewDataSource
 
+  private var changedNoteSubscription: AnyCancellable?
+
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = noteIdentifiers
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
@@ -102,10 +100,6 @@ public final class DocumentTableController: NSObject {
       }
     }
 
-    isPerformingUpdates = true
-    dataSource.apply(BookCollectionViewSnapshot(), animatingDifferences: animated) {
-      self.isPerformingUpdates = false
-    }
     let partitions = noteIdentifiers.bookSectionPartitions
     for section in BookSection.bookSections {
       if var sectionSnapshot = sectionSnapshot(for: section, partitions: partitions, identifiers: noteIdentifiers) {
