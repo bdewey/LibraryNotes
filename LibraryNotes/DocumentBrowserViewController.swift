@@ -120,9 +120,20 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   ) {
     Task {
       do {
-        let url = try await makeNewDocument()
-        importHandler(url, .move)
+        guard let url = try await makeNewDocument() else {
+          assertionFailure()
+          importHandler(nil, .none)
+          return
+        }
+        Logger.shared.info("Trying to import from '\(url.path)'")
+        let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
+        if FileManager.default.fileExists(atPath: temporaryURL.path) {
+          try FileManager.default.removeItem(at: temporaryURL)
+        }
+        try FileManager.default.copyItem(at: url, to: temporaryURL)
+        importHandler(temporaryURL, .move)
       } catch {
+        Logger.shared.error("Unexpected error creating document: \(error)")
         importHandler(nil, .none)
       }
     }
