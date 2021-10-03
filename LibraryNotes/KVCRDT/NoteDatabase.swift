@@ -44,57 +44,26 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
-/// Hold the major & minor version for data in the key-value store.
-///
-/// If the major version is higher than what is expected, refuse to open the file.
-/// If the major verison is less than what is expected, run data migrations.
-internal struct InternalMetadata: Codable, Comparable, CustomStringConvertible {
-  /// The key for storing this metadata struct in the database.
-  static let key = ".libnotes-metadata"
+private struct NoteDatabaseUpgrader: ApplicationDataUpgrader {
+  let expectedApplicationIdentifier = ApplicationIdentifier(id: UTType.libnotes.identifier, majorVersion: 2, minorVersion: 0, applicationDescription: "Library Notes")
 
-  /// File major version. The major version increments on incompatible changes.
-  var majorVersion: Int
-
-  /// Minor version number. This increments on backwards-compatible format changes.
-  var minorVersion: Int
-
-  static func < (lhs: InternalMetadata, rhs: InternalMetadata) -> Bool {
-    (lhs.majorVersion, lhs.minorVersion) < (rhs.majorVersion, rhs.minorVersion)
-  }
-
-  var description: String {
-    "\(majorVersion).\(minorVersion)"
+  func upgradeApplicationData(in database: KeyValueDatabase) throws {
+    Logger.shared.info("Upgrading library")
+    let allMetadata = try database.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
+    let upgradedMetadata = try allMetadata.mapValues { versions -> Value in
+      if let upgraded = versions.metadata?.upgradingToVersion1() {
+        return try Value(upgraded)
+      } else {
+        return .null
+      }
+    }
+    try database.bulkWrite(upgradedMetadata)
+    Logger.shared.info("Upgrade complete")
   }
 }
 
-private extension KeyValueDatabase {
-  /// Migrates pre-1.0 files to 1.0.
-  func upgradeVersionIfNeeded() throws {
-    if let internalMetadata = try read(key: InternalMetadata.key).internalMetadata {
-      guard internalMetadata.majorVersion == 1 else {
-        throw CocoaError(.fileReadCorruptFile)
-      }
-      Logger.shared.info("Library version is \(internalMetadata)")
-      // Safe to proceed
-    } else {
-      // Need to run an upgrade
-      Logger.shared.info("Upgrading library")
-      let allMetadata = try bulkRead(key: NoteDatabaseKey.metadata.rawValue)
-      let upgradedMetadata = try allMetadata.mapValues { versions -> Value in
-        if let upgraded = versions.metadata?.upgradingToVersion1() {
-          return try Value(upgraded)
-        } else {
-          return .null
-        }
-      }
-      try write { db in
-        try bulkWrite(database: db, values: upgradedMetadata)
-        let metadataValue = try Value(InternalMetadata(majorVersion: 1, minorVersion: 0))
-        try bulkWrite(database: db, values: [ScopedKey(key: InternalMetadata.key): metadataValue])
-      }
-      Logger.shared.info("Upgrade complete")
-    }
-  }
+extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
+  static var noteDatabaseUpgrader: NoteDatabaseUpgrader { NoteDatabaseUpgrader() }
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
@@ -106,12 +75,12 @@ public final class NoteDatabase {
   public init(fileURL: URL, authorDescription: String) async throws {
     self.keyValueDocument = try UIKeyValueDocument(
       fileURL: fileURL,
-      authorDescription: authorDescription
+      authorDescription: authorDescription,
+      upgrader: .noteDatabaseUpgrader
     )
     guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
     }
-    try keyValueCRDT.upgradeVersionIfNeeded()
     self.keyValueCRDT = keyValueCRDT
     self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self

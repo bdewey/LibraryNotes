@@ -27,11 +27,6 @@ extension Value {
     }
   }
 
-  init(_ internalMetadata: InternalMetadata) throws {
-    let jsonData = try JSONEncoder.databaseEncoder.encode(internalMetadata)
-    self = .json(String(data: jsonData, encoding: .utf8)!)
-  }
-
   var bookNoteMetadata: BookNoteMetadata? {
     decodeJSON(BookNoteMetadata.self)
   }
