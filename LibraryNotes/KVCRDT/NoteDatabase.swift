@@ -301,34 +301,10 @@ public final class NoteDatabase {
     try keyValueCRDT.bulkRead(isIncluded: isIncluded)
   }
 
-  public func bulkImportBooks(_ booksAndImages: [BookAndImage], hashtags: String) throws {
+  public func bulkWrite(_ payload: [NoteUpdatePayload]) throws {
     try keyValueCRDT.write { db in
-      for bookAndImage in booksAndImages {
-        var payload = NoteUpdatePayload(noteIdentifier: UUID().uuidString)
-        let bookAddedDate = bookAndImage.book.dateAdded ?? Date()
-        var metadata = BookNoteMetadata(
-          title: bookAndImage.book.title,
-          creationTimestamp: bookAddedDate,
-          modifiedTimestamp: bookAddedDate
-        )
-        metadata.book = bookAndImage.book
-        if let dateAdded = bookAndImage.book.dateAdded {
-          // Assume we read the book
-          let components = Calendar.current.dateComponents([.year, .month, .day], from: dateAdded)
-          var readingHistory = ReadingHistory()
-          readingHistory.finishReading(finishDate: components)
-          metadata.book?.readingHistory = readingHistory
-        }
-        metadata.tags = hashtags.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-        payload.insert(key: .metadata, value: try Value(metadata))
-        payload.insert(key: .bookIndex, value: Value(metadata.indexedContents))
-        if let review = bookAndImage.book.review {
-          payload.insert(key: .noteText, value: .text(review))
-        }
-        if let imageData = bookAndImage.image {
-          payload.insert(key: .coverImage, value: .blob(mimeType: imageData.type.preferredMIMEType ?? "application/octet-stream", blob: imageData.data))
-        }
-        try keyValueCRDT.bulkWrite(database: db, values: payload.asKeyValueCRDTUpdates())
+      for item in payload {
+        try keyValueCRDT.bulkWrite(database: db, values: item.asKeyValueCRDTUpdates())
       }
     }
   }
@@ -616,15 +592,15 @@ private extension NoteDatabase {
   }
 }
 
-struct NoteUpdatePayload {
-  init(noteIdentifier: String) {
+public struct NoteUpdatePayload {
+  public init(noteIdentifier: String) {
     self.noteIdentifier = noteIdentifier
   }
 
   /// Creates a payload with the on-disk contents of a single note.
   /// - precondition: The `scope` of each `ScopedKey` must be the same, and must be note identifier.
   /// - throws `NoteDatabaseError.unexpectedNoteContent` if the scopes do not match.
-  init?(onDiskContents: [ScopedKey: [Version]]) throws {
+  public init?(onDiskContents: [ScopedKey: [Version]]) throws {
     var noteIdentifier: String?
     for (scopedKey, versions) in onDiskContents {
       if noteIdentifier == nil {
@@ -641,14 +617,14 @@ struct NoteUpdatePayload {
     }
   }
 
-  let noteIdentifier: String
+  public let noteIdentifier: String
   private var updates: [NoteDatabaseKey: Value] = [:]
 
-  mutating func insert(key: NoteDatabaseKey, value: Value) {
+  public mutating func insert(key: NoteDatabaseKey, value: Value) {
     updates[key] = value
   }
 
-  mutating func update(with note: Note) throws {
+  public mutating func update(with note: Note) throws {
     updates[.metadata] = try Value(note.metadata)
     updates[.noteText] = Value(note.text)
     updates[.bookIndex] = Value(note.metadata.indexedContents)
@@ -674,13 +650,13 @@ struct NoteUpdatePayload {
     }
   }
 
-  func asKeyValueCRDTUpdates() -> [ScopedKey: Value] {
+  public func asKeyValueCRDTUpdates() -> [ScopedKey: Value] {
     updates
       .map { (key: ScopedKey(scope: noteIdentifier, key: $0.key.rawValue), value: $0.value) }
       .dictionaryMap { $0 }
   }
 
-  func asNote() throws -> Note? {
+  public func asNote() throws -> Note? {
     guard let metadata = updates[.metadata]?.bookNoteMetadata else {
       return nil
     }

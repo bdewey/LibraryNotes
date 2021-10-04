@@ -597,12 +597,17 @@ extension DocumentListViewController: BookImporterViewControllerDelegate {
   }
 
   func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int) {
-    let newProgress = Float(partialCount) / Float(totalCount)
+    // Only fill 95% of the progress bar with book progress, saving the final 5% for saving the content
+    // to the database.
+    let newProgress = Float(partialCount) / (Float(totalCount) * 1.05)
     progressView?.progress = newProgress
     Logger.shared.debug("toolbar progress = \(newProgress)")
   }
 
   func bookImporterDidFinishImporting(_ bookImporter: BookImporterViewController) {
-    progressView = nil
+    progressView?.progress = 1
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+      self.progressView = nil
+    }
   }
 }
