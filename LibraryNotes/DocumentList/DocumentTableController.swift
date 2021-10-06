@@ -46,6 +46,7 @@ public final class DocumentTableController: NSObject {
     changedNoteSubscription = database.updatedValuesPublisher
       .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
       .map({ $0.0.scope })
+      .receive(on: DispatchQueue.main)
       .sink { [weak self] noteIdentifier in
         guard let self = self else { return }
         var snapshot = self.dataSource.snapshot()
@@ -89,6 +90,7 @@ public final class DocumentTableController: NSObject {
 
   private var changedNoteSubscription: AnyCancellable?
 
+  @MainActor
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = noteIdentifiers
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }

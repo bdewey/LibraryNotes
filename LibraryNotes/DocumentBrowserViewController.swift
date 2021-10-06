@@ -84,7 +84,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     Logger.shared.info("Opening document at \"\(url.path)\"")
     let database: NoteDatabase
     if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
-      database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.description)
+      database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }

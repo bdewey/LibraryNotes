@@ -119,7 +119,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     else {
       return
     }
-    Logger.shared.info("Found an updated version of note text. Winning author = \(winningVersion.authorID.uuidString), text = \(winningVersion.value.text ?? "nil")")
+    if versionArray.count > 1 {
+      Logger.shared.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map({ ($0.authorID, $0.timestamp) }))")
+    }
     textEditViewController.markdown = winningVersion.value.text ?? ""
     hasUnsavedChanges = false
   }
