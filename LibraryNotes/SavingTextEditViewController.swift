@@ -11,6 +11,14 @@ import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
+private extension Logger {
+  static let textSaving: Logger = {
+    var logger = Logger(label: "org.brians-brain.SavingTextEditViewController")
+    logger.logLevel = .info
+    return logger
+  }()
+}
+
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
@@ -55,7 +63,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     setTitleMarkdown(note.metadata.preferredTitle)
     self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
-        Logger.shared.info("No longer getting updates for \(noteIdentifier)")
+        Logger.textSaving.info("No longer getting updates for \(noteIdentifier)")
       }, receiveValue: { [weak self] versions in
         self?.updateVersionIfNeeded(versions)
       })
@@ -120,7 +128,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return
     }
     if versionArray.count > 1 {
-      Logger.shared.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map({ ($0.authorID, $0.timestamp) }))")
+      Logger.textSaving.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map({ ($0.authorID, $0.timestamp) }))")
     }
     textEditViewController.markdown = winningVersion.value.text ?? ""
     hasUnsavedChanges = false
@@ -160,7 +168,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     addChild(textEditViewController)
     textEditViewController.didMove(toParent: self)
     autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      if self?.hasUnsavedChanges ?? false { Logger.shared.debug("SavingTextEditViewController: autosave") }
+      if self?.hasUnsavedChanges ?? false { Logger.textSaving.debug("SavingTextEditViewController: autosave") }
       self?.saveIfNeeded()
     })
     navigationItem.largeTitleDisplayMode = .never
@@ -228,17 +236,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   /// Writes a note to storage.
-  private func updateNote(_ note: Note) throws {
-    assert(Thread.isMainThread)
-    var note = note
+  @MainActor
+  private func saveNote() throws {
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
-    note.metadata.folder = self.note.metadata.folder
-    note.metadata.book = self.note.metadata.book
-    note.metadata.creationTimestamp = self.note.metadata.creationTimestamp
-    setTitleMarkdown(note.metadata.preferredTitle)
-    Logger.shared.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
+    Logger.textSaving.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)
@@ -247,11 +250,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     })
   }
 
-  private func tryUpdateNote(_ note: Note) {
+  @MainActor
+  private func tryUpdateNote() {
     do {
-      try updateNote(note)
+      try saveNote()
     } catch {
-      Logger.shared.error("SavingTextEditViewController: Unexpected error saving page: \(error)")
+      Logger.textSaving.error("SavingTextEditViewController: Unexpected error saving page: \(error)")
       let alert = UIAlertController(title: "Oops", message: "There was an error saving this note: \(error)", preferredStyle: .alert)
       alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
       present(alert, animated: true, completion: nil)
@@ -260,20 +264,21 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   /// If there is updated markdown, creates a new Note in the background then saves it to storage.
   /// - parameter completion: A block to call after processing changes.
+  @MainActor
   private func saveIfNeeded() {
     assert(Thread.isMainThread)
     guard hasUnsavedChanges else {
       return
     }
-    let note = Note(parsedString: textEditViewController.parsedAttributedString.rawString)
-    tryUpdateNote(note)
+    note.updateMarkdown(textEditViewController.parsedAttributedString.rawString)
+    tryUpdateNote()
     hasUnsavedChanges = false
   }
 
   /// Saves the current contents to the database, whether or not hasUnsavedChanges is true.
   private func forceSave() throws {
-    let note = Note(parsedString: textEditViewController.parsedAttributedString.rawString)
-    try updateNote(note)
+    note.updateMarkdown(textEditViewController.parsedAttributedString.rawString)
+    try saveNote()
     hasUnsavedChanges = false
   }
 
@@ -290,7 +295,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       textEditViewController.textView.textStorage.replaceCharacters(in: initialRange, with: markdown)
       textEditViewController.selectedRange = textEditViewController.parsedAttributedString.range(forRawStringRange: rawRange)
     } catch {
-      Logger.shared.error("Could not save initial image: \(error)")
+      Logger.textSaving.error("Could not save initial image: \(error)")
     }
   }
 
@@ -301,12 +306,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   func textEditViewControllerDidClose(_ viewController: TextEditViewController) {
     saveIfNeeded()
-    Logger.shared.info("SavingTextEditViewController: Flushing and canceling timer")
+    Logger.textSaving.info("SavingTextEditViewController: Flushing and canceling timer")
     Task {
       do {
         try await noteStorage.flush()
       } catch {
-        Logger.shared.error("Error saving changes: \(error)")
+        Logger.textSaving.error("Error saving changes: \(error)")
       }
       autosaveTimer?.invalidate()
       autosaveTimer = nil
@@ -326,10 +331,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook) {
-    Logger.shared.info("Attaching book: \(book.title)")
+    Logger.textSaving.info("Attaching book: \(book.title)")
     note.metadata.book = book
     note.metadata.modifiedTimestamp = Date()
-    tryUpdateNote(note)
+    tryUpdateNote()
   }
 }
 
@@ -348,7 +353,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
     do {
       note = try database.note(noteIdentifier: restorationState.noteIdentifier)
     } catch {
-      Logger.shared.warning("Could not load note \(restorationState.noteIdentifier) when recovering user activity. Assuming note wasn't saved.")
+      Logger.textSaving.warning("Could not load note \(restorationState.noteIdentifier) when recovering user activity. Assuming note wasn't saved.")
       let (text, _) = Note.makeBlankNoteText()
       note = Note(markdown: text)
     }
@@ -365,10 +370,10 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
 
 extension SavingTextEditViewController: BookHeaderDelegate {
   func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook) {
-    Logger.shared.info("Updating book: \(book.title)")
+    Logger.textSaving.info("Updating book: \(book.title)")
     note.metadata.book = book
     note.metadata.modifiedTimestamp = Date()
-    tryUpdateNote(note)
+    tryUpdateNote()
   }
 }
 
@@ -378,7 +383,7 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
       do {
         try imageStorage.storeCoverImage(imageData, type: .jpeg)
       } catch {
-        Logger.shared.error("Unexpected error saving image data: \(error)")
+        Logger.textSaving.error("Unexpected error saving image data: \(error)")
       }
     }
     textEditViewController(textEditViewController, didAttach: book)

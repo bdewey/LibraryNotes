@@ -7,7 +7,7 @@ import GRDB
 public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equatable {
   public static var databaseTableName: String { "entry" }
   public var noteIdentifier: String
-  public var bookSection: BookSection
+  public var bookSection: BookSection?
 
   public enum SortOrder: String, CaseIterable {
     case author = "Author"
@@ -113,10 +113,11 @@ public extension Array where Element == NoteIdentifierRecord {
   var bookSectionPartitions: [BookSection: Range<Int>] {
     var results: [BookSection: Range<Int>] = [:]
     for (index, element) in enumerated() {
-      if let existingRange = results[element.bookSection] {
-        results[element.bookSection] = existingRange.lowerBound ..< index + 1
+      let section = element.bookSection ?? .other
+      if let existingRange = results[section] {
+        results[section] = existingRange.lowerBound ..< index + 1
       } else {
-        results[element.bookSection] = index ..< index + 1
+        results[section] = index ..< index + 1
       }
     }
     return results

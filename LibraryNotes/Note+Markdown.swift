@@ -79,6 +79,16 @@ public extension Note {
   mutating func updateMarkdown(_ markdown: String) {
     var newNote = Note(markdown: markdown)
     newNote.metadata.creationTimestamp = metadata.creationTimestamp
+    newNote.metadata.book = metadata.book
+    newNote.metadata.folder = metadata.folder
+    newNote.copyContentKeysForMatchingContent(from: self)
+    self = newNote
+  }
+
+  mutating func updateMarkdown(_ markdown: ParsedString) {
+    var newNote = Note(parsedString: markdown)
+    newNote.metadata.creationTimestamp = metadata.creationTimestamp
+    newNote.metadata.book = metadata.book
     newNote.metadata.folder = metadata.folder
     newNote.copyContentKeysForMatchingContent(from: self)
     self = newNote

@@ -11,6 +11,7 @@
 
 - Error importing LibraryThing JSON when date wasn't specified
 - Creating new document sometimes didn't work (just in debugger?)
+- Changing the book rating would lose all text (!!!)
 
 ## [1.0.0] - 2021-09-21
 
