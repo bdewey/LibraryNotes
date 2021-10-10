@@ -61,9 +61,8 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     case .hashtag(let hashtag):
       return """
       SELECT
-          scope,
           DISTINCT scope AS noteIdentifier,
-          json_extract(entry.json, '$.bookSection') AS bookSection
+          json_extract(entry.json, '$.bookSection') AS bookSection,
           metadataTags.value,
           bookTags.value
       FROM

@@ -107,10 +107,14 @@ public final class DocumentTableController: NSObject {
       if var sectionSnapshot = sectionSnapshot(for: section, partitions: partitions, identifiers: noteIdentifiers) {
         sectionSnapshot.collapseSections(in: collapsedSections)
         dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
+      } else {
+        dataSource.apply(.init(), to: section, animatingDifferences: animated)
       }
     }
     if let otherItems = sectionSnapshot(for: .other, partitions: partitions, identifiers: noteIdentifiers) {
       dataSource.apply(otherItems, to: .other, animatingDifferences: animated)
+    } else {
+      dataSource.apply(.init(), to: .other, animatingDifferences: animated)
     }
     selectedItems?.forEach { item in
       guard let indexPath = dataSource.indexPath(for: item) else { return }
