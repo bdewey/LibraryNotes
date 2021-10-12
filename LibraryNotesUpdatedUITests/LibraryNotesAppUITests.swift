@@ -12,6 +12,8 @@ private enum Identifiers {
   static let skipBookDetailsButton = "book-details-skip-button"
   static let studyButton = "study-button"
   static let advanceTimeButton = "advance-time-button"
+  static let bookHeaderTitle = "book-header-title"
+  static let bookHeaderAuthor = "book-header-author"
 }
 
 private enum TestContent {
@@ -54,7 +56,7 @@ private enum TestContent {
   """
 }
 
-final class CommonplaceBookAppUITests: XCTestCase {
+final class LibraryNotesAppUITests: XCTestCase {
   var application: XCUIApplication!
 
   override func setUp() {
@@ -85,7 +87,23 @@ final class CommonplaceBookAppUITests: XCTestCase {
   }
 
   func testCanCreateBookNote() {
-                
+    let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
+    newDocumentButton.tap()
+    
+    let tablesQuery = application.tables
+    let titleTextField = tablesQuery.textFields["Title"]
+    XCTAssertTrue(titleTextField.waitForExistence(timeout: 5))
+    titleTextField.tap()
+    titleTextField.typeText("My Test Book")
+
+    let authorTextField = tablesQuery/*@START_MENU_TOKEN@*/.textFields["Author"]/*[[".cells[\"Author\"].textFields[\"Author\"]",".textFields[\"Author\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+    authorTextField.tap()
+    authorTextField.typeText("Brian Dewey")
+    application.navigationBars["Add Book"].buttons["Next"].tap()
+    XCTAssertTrue(application.textViews[Identifiers.editDocumentView].waitForExistence(timeout: 5))
+    XCTAssertTrue(application.staticTexts[Identifiers.bookHeaderTitle].waitForExistence(timeout: 2))
+    XCTAssertEqual(application.staticTexts[Identifiers.bookHeaderTitle].label, "My Test Book")
+    XCTAssertEqual(application.staticTexts[Identifiers.bookHeaderAuthor].label, "Brian Dewey")
   }
 
   func testNewDocumentCanBeEdited() {
@@ -179,7 +197,7 @@ final class CommonplaceBookAppUITests: XCTestCase {
 }
 
 // Helpers
-extension CommonplaceBookAppUITests {
+extension LibraryNotesAppUITests {
   /// Waits for an element to exist in the hierarchy.
   /// - parameter element: The element to test for.
   /// - note: From http://masilotti.com/xctest-helpers/

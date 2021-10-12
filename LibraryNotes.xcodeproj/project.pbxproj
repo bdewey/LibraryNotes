@@ -113,6 +113,8 @@
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
+		D3C611322715FFB0007F8732 /* LibraryNotesUpdatedUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C611312715FFB0007F8732 /* LibraryNotesUpdatedUITests.swift */; };
+		D3C611342715FFB0007F8732 /* LibraryNotesAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */; };
 		D3D16CAB26F641B7004059E0 /* CodableCSV in Frameworks */ = {isa = PBXBuildFile; productRef = D3D16CAA26F641B7004059E0 /* CodableCSV */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
@@ -144,6 +146,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		D3C611352715FFB0007F8732 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D3DC5EBE20EC9B0100F0B74B;
+			remoteInfo = LibraryNotes;
+		};
 		D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
@@ -292,6 +301,9 @@
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
+		D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LibraryNotesUpdatedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3C611312715FFB0007F8732 /* LibraryNotesUpdatedUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryNotesUpdatedUITests.swift; sourceTree = "<group>"; };
+		D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryNotesAppUITests.swift; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3D8337B26F9AA040011B450 /* library.libnotes */ = {isa = PBXFileReference; lastKnownFileType = file; path = library.libnotes; sourceTree = "<group>"; };
@@ -324,6 +336,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D3C6112C2715FFB0007F8732 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBC20EC9B0100F0B74B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -443,6 +462,15 @@
 			path = BarcodeScanner;
 			sourceTree = "<group>";
 		};
+		D3C611302715FFB0007F8732 /* LibraryNotesUpdatedUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D3C611312715FFB0007F8732 /* LibraryNotesUpdatedUITests.swift */,
+				D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */,
+			);
+			path = LibraryNotesUpdatedUITests;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
@@ -452,6 +480,7 @@
 				D3DC5EC120EC9B0100F0B74B /* LibraryNotes */,
 				D3DC5ED820EC9B0200F0B74B /* LibraryNotesTests */,
 				D3E98F0421D470B2008445DA /* LibraryNotesUITests */,
+				D3C611302715FFB0007F8732 /* LibraryNotesUpdatedUITests */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
@@ -465,6 +494,7 @@
 				D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
+				D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -595,6 +625,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D3C6112E2715FFB0007F8732 /* LibraryNotesUpdatedUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3C611372715FFB1007F8732 /* Build configuration list for PBXNativeTarget "LibraryNotesUpdatedUITests" */;
+			buildPhases = (
+				D3C6112B2715FFB0007F8732 /* Sources */,
+				D3C6112C2715FFB0007F8732 /* Frameworks */,
+				D3C6112D2715FFB0007F8732 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D3C611362715FFB0007F8732 /* PBXTargetDependency */,
+			);
+			name = LibraryNotesUpdatedUITests;
+			productName = LibraryNotesUpdatedUITests;
+			productReference = D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */;
@@ -671,10 +719,14 @@
 		D3DC5EB720EC9B0100F0B74B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1230;
+				LastSwiftUpdateCheck = 1300;
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Brian's Brain";
 				TargetAttributes = {
+					D3C6112E2715FFB0007F8732 = {
+						CreatedOnToolsVersion = 13.0;
+						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
+					};
 					D3DC5EBE20EC9B0100F0B74B = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1210;
@@ -726,11 +778,19 @@
 				D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
+				D3C6112E2715FFB0007F8732 /* LibraryNotesUpdatedUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D3C6112D2715FFB0007F8732 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBD20EC9B0100F0B74B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -776,6 +836,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D3C6112B2715FFB0007F8732 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C611342715FFB0007F8732 /* LibraryNotesAppUITests.swift in Sources */,
+				D3C611322715FFB0007F8732 /* LibraryNotesUpdatedUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBB20EC9B0100F0B74B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -918,6 +987,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D3C611362715FFB0007F8732 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
+			targetProxy = D3C611352715FFB0007F8732 /* PBXContainerItemProxy */;
+		};
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
@@ -942,6 +1016,55 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		D3C611382715FFB1007F8732 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.LibraryNotesUpdatedUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryNotes;
+			};
+			name = Debug;
+		};
+		D3C611392715FFB1007F8732 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.LibraryNotesUpdatedUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryNotes;
+			};
+			name = Release;
+		};
 		D3DC5EDC20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
@@ -1183,7 +1306,7 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GrailDiary;
+				TEST_TARGET_NAME = LibraryNotes;
 			};
 			name = Debug;
 		};
@@ -1205,13 +1328,22 @@
 				PROVISIONING_PROFILE = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GrailDiary;
+				TEST_TARGET_NAME = LibraryNotes;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D3C611372715FFB1007F8732 /* Build configuration list for PBXNativeTarget "LibraryNotesUpdatedUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C611382715FFB1007F8732 /* Debug */,
+				D3C611392715FFB1007F8732 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "LibraryNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

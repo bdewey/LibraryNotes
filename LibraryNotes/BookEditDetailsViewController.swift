@@ -215,14 +215,18 @@ public final class BookEditDetailsViewController: UIViewController {
     }
   }
 
-  private lazy var skipButton = UIBarButtonItem(title: "Skip", primaryAction: UIAction { [weak self] _ in
-    guard let self = self else { return }
-    if self.model.isValid {
-      self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
-    } else {
-      self.delegate?.bookSearchViewControllerDidSkip(self)
-    }
-  })
+  private lazy var skipButton: UIBarButtonItem = {
+    let item = UIBarButtonItem(title: "Skip", primaryAction: UIAction { [weak self] _ in
+      guard let self = self else { return }
+      if self.model.isValid {
+        self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
+      } else {
+        self.delegate?.bookSearchViewControllerDidSkip(self)
+      }
+    })
+    item.accessibilityIdentifier = "book-details-skip-button"
+    return item
+  }()
 
   private lazy var nextButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
     guard let self = self else { return }
