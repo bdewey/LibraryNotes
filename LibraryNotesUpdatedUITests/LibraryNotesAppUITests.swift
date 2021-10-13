@@ -14,6 +14,7 @@ private enum Identifiers {
   static let advanceTimeButton = "advance-time-button"
   static let bookHeaderTitle = "book-header-title"
   static let bookHeaderAuthor = "book-header-author"
+  static let documentListActions = "document-list-actions"
 }
 
 private enum TestContent {
@@ -72,24 +73,33 @@ final class LibraryNotesAppUITests: XCTestCase {
     waitUntilElementExists(application.buttons[Identifiers.newDocumentButton])
   }
 
-  func testHasNewDocumentButton() {
+  var newDocumentButton: XCUIElement {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
-    XCTAssertTrue(newDocumentButton.exists)
+    XCTAssertTrue(newDocumentButton.waitForExistence(timeout: 1))
+    return newDocumentButton
+  }
+
+  var skipButton: XCUIElement {
+    let skipButton = application.buttons[Identifiers.skipBookDetailsButton]
+    XCTAssertTrue(skipButton.waitForExistence(timeout: 1))
+    return skipButton
+  }
+
+  var documentListActionButton: XCUIElement {
+    let button = application.buttons[Identifiers.documentListActions]
+    XCTAssertTrue(button.waitForExistence(timeout: 1))
+    return button
   }
 
   func testCanSkipBookDetailsAndMakeNote() {
-    let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     newDocumentButton.tap()
-    let skipButton = application.buttons[Identifiers.skipBookDetailsButton]
-    XCTAssertTrue(skipButton.waitForExistence(timeout: 5))
     skipButton.tap()
     XCTAssertTrue(application.textViews[Identifiers.editDocumentView].waitForExistence(timeout: 5))
   }
 
   func testCanCreateBookNote() {
-    let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     newDocumentButton.tap()
-    
+
     let tablesQuery = application.tables
     let titleTextField = tablesQuery.textFields["Title"]
     XCTAssertTrue(titleTextField.waitForExistence(timeout: 5))
@@ -113,8 +123,11 @@ final class LibraryNotesAppUITests: XCTestCase {
 
   func testStudyButtonEnabledAfterCreatingClozeContent() {
     createDocument(with: TestContent.singleCloze)
-    tapButton(identifier: Identifiers.advanceTimeButton)
-    waitUntilElementEnabled(application.buttons[Identifiers.studyButton])
+    documentListActionButton.tap()
+    XCTAssertTrue(application.buttons["Advance Time"].waitForExistence(timeout: 1))
+    application.buttons["Advance Time"].tap()
+    documentListActionButton.tap()
+    waitUntilElementEnabled(application.buttons["Review (1)"])
   }
 
   func testStudyButtonStartsDisabled() {
@@ -257,23 +270,22 @@ extension LibraryNotesAppUITests {
   }
 
   private func createDocument(with text: String) {
-    let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
-    waitUntilElementExists(newDocumentButton)
     newDocumentButton.tap()
+    skipButton.tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     editView.typeText(text)
-    application.buttons[Identifiers.backButton].tap()
+    application.buttons["My Books"].tap()
   }
 
   private func createDocument(with text: [String]) {
-    application.buttons[Identifiers.newDocumentButton].tap()
+    newDocumentButton.tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
     for line in text {
       editView.typeText(line)
     }
-    application.buttons[Identifiers.backButton].tap()
+    application.buttons["My Books"].tap()
   }
 
   private func study(expectedCards: Int, noCardsLeft: Bool = true) {
