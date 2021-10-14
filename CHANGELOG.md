@@ -1,17 +1,19 @@
 # Changelog
 
-## Unreleased
+## [1.1.0]
 
 ### Added
 
 - Support for large libraries (9000+ books)
 - Error dialog on import errors
+- Simple UI tests
 
 ### Fixed
 
 - Error importing LibraryThing JSON when date wasn't specified
 - Creating new document sometimes didn't work (just in debugger?)
-- Changing the book rating would lose all text (!!!)
+- Bug where adding a book rating would delete changes to notes made in that edit session
+- Miscellaneous UI bugs
 
 ## [1.0.0] - 2021-09-21
 
