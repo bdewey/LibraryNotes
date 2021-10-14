@@ -61,6 +61,7 @@ final class BookHeader: UIView {
     label.font = .preferredFont(forTextStyle: .title1)
     label.textColor = .label
     label.numberOfLines = 0
+    label.accessibilityIdentifier = "book-header-title"
     return label
   }()
 
@@ -68,6 +69,7 @@ final class BookHeader: UIView {
     let label = UILabel()
     label.font = .preferredFont(forTextStyle: .subheadline)
     label.textColor = .secondaryLabel
+    label.accessibilityIdentifier = "book-header-author"
     return label
   }()
 

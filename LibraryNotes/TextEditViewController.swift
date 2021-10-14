@@ -67,6 +67,7 @@ public final class TextEditViewController: UIViewController {
   public private(set) lazy var textView: MarkupFormattingTextView = {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
     view.backgroundColor = .grailBackground
+    view.accessibilityIdentifier = "edit-document-view"
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return view
   }()
@@ -210,7 +211,6 @@ public final class TextEditViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    view.accessibilityIdentifier = "edit-document-view"
     view.addSubview(textView)
     textView.snp.makeConstraints { make in
       make.edges.equalToSuperview()

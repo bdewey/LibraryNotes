@@ -92,18 +92,6 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private lazy var advanceTimeButton: UIBarButtonItem = {
-    let icon = UIImage(systemName: "clock")
-    let button = UIBarButtonItem(
-      image: icon,
-      style: .plain,
-      target: self,
-      action: #selector(advanceTime)
-    )
-    button.accessibilityIdentifier = "advance-time-button"
-    return button
-  }()
-
   private lazy var collectionView: UICollectionView = {
     var listConfiguration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
     listConfiguration.backgroundColor = .grailSecondaryBackground
@@ -163,9 +151,6 @@ final class DocumentListViewController: UIViewController {
       .map { Calendar.current.startOfDay(for: $0.addingTimeInterval(.day)) }
       .assign(to: \.dueDate, on: self)
     navigationController?.setToolbarHidden(false, animated: false)
-    if AppDelegate.isUITesting {
-      navigationItem.rightBarButtonItem = advanceTimeButton
-    }
     monitorDatabaseForFocusedStructure()
   }
 
@@ -317,6 +302,7 @@ final class DocumentListViewController: UIViewController {
       actionsMenu,
       sortMenu,
     ]))
+    navButton.accessibilityIdentifier = "document-list-actions"
     navigationItem.rightBarButtonItem = navButton
   }
 
@@ -374,6 +360,7 @@ extension DocumentListViewController {
       shareAction,
       importLibraryThingAction,
       sendFeedbackAction,
+      advanceTimeAction,
     ].compactMap { $0 })
   }
 
@@ -435,6 +422,13 @@ extension DocumentListViewController {
       }
       mailComposer.mailComposeDelegate = self
       self.present(mailComposer, animated: true)
+    }
+  }
+
+  private var advanceTimeAction: UIAction? {
+    guard AppDelegate.isUITesting else { return nil }
+    return UIAction(title: "Advance Time", image: UIImage(systemName: "clock"), identifier: UIAction.Identifier(rawValue: "advance-time")) { [weak self] _ in
+      self?.advanceTime()
     }
   }
 

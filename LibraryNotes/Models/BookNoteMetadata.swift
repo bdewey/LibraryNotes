@@ -27,7 +27,7 @@ public struct BookNoteMetadata: Codable, Equatable {
         let authors = book.authors.joined(separator: ", ")
         title += ": \(authors)"
       }
-      if let publishedDate = book.yearPublished {
+      if let publishedDate = book.originalYearPublished ?? book.yearPublished {
         title += " (\(publishedDate))"
       }
       return title
@@ -35,7 +35,7 @@ public struct BookNoteMetadata: Codable, Equatable {
       return title
     }
     // TODO: This isn't compiling on Xcode 13 and it should.
-//    book?.markdownTitle ?? title
+//    return (book?.markdownTitle) ?? title
   }
 
   /// A short summary of the book -- displayed in the list view

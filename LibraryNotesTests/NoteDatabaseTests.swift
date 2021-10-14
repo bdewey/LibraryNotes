@@ -4,7 +4,7 @@ import KeyValueCRDT
 @testable import LibraryNotes
 import XCTest
 
-final class NoteSqliteStorageTests: XCTestCase {
+final class NoteDatabaseTests: XCTestCase {
   private var database: NoteDatabase!
 
   override func setUp() async throws {
@@ -237,5 +237,70 @@ final class NoteSqliteStorageTests: XCTestCase {
     XCTAssertEqual(studySession.count, 0)
     studySession = try database.studySession(date: future.addingTimeInterval(24 * .hour + 1 * .minute))
     XCTAssertEqual(studySession.count, 1)
+  }
+
+  func testCanLoadVersionZeroDatabase() async throws {
+    guard let builtInURL = Bundle(for: Self.self).url(forResource: "library", withExtension: "libnotes") else {
+      throw CocoaError(.fileNoSuchFile)
+    }
+    let writableURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("libnotes")
+    try FileManager.default.copyItem(at: builtInURL, to: writableURL)
+    defer {
+      try? FileManager.default.removeItem(at: writableURL)
+    }
+
+    // Verify that the database exists and that it's still "version zero"
+
+    do {
+      let rawKeyValueCRDT = try KeyValueDatabase(fileURL: writableURL, authorDescription: "tests")
+      let applicationIdentifier = try rawKeyValueCRDT.applicationIdentifier
+      XCTAssertNil(applicationIdentifier)
+    }
+
+    // Now open as a database
+    let database = try await NoteDatabase(fileURL: writableURL, authorDescription: "test 2")
+
+    // While we've got it open, do some basic validation of the contents.
+    let titlesByCreationTimestamp = try await database.titles(structureIdentifier: .read, sortOrder: .creationTimestamp, searchTerm: nil)
+    XCTAssertEqual(titlesByCreationTimestamp, [
+      "_Library Notes User Manual_: Brian Dewey (2021)",
+      "_Anne of Green Gables_: L. M. Montgomery (1908)",
+      "_Poetry_: T. S. Eliot (1925)",
+      "_Othello_: William Shakespeare (1603)",
+      "_Hamlet_: William Shakespeare (1600)",
+    ])
+
+    let onlyDrama = try await database.titles(structureIdentifier: .hashtag("Drama"), sortOrder: .creationTimestamp, searchTerm: nil)
+    XCTAssertEqual(onlyDrama, [
+      "_Othello_: William Shakespeare (1603)",
+      "_Hamlet_: William Shakespeare (1600)",
+    ])
+
+    let closeResult = await database.close()
+    XCTAssertTrue(closeResult)
+
+    // Um, can I read from the old database?
+    do {
+      let rawKeyValueCRDT = try KeyValueDatabase(fileURL: writableURL, authorDescription: "tests")
+      let applicationIdentifier = try rawKeyValueCRDT.applicationIdentifier
+      XCTAssertEqual(applicationIdentifier, ApplicationIdentifier.currentLibraryNotesVersion)
+    }
+  }
+}
+
+private extension NoteDatabase {
+  func titles(
+    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    sortOrder: NoteIdentifierRecord.SortOrder,
+    searchTerm: String?
+  ) async throws -> [String] {
+    let publisher = noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: sortOrder, searchTerm: searchTerm)
+      .map { noteIdentifiers in
+        noteIdentifiers.map { self.bookMetadata(identifier: $0.noteIdentifier)?.preferredTitle ?? "nil" }
+      }
+    for try await value in publisher.values {
+      return value
+    }
+    throw MachError(.failure)
   }
 }

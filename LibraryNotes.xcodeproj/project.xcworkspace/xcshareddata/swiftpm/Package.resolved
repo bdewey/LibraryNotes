@@ -33,8 +33,8 @@
         "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
         "state": {
           "branch": null,
-          "revision": "f78a631c39f26b3a5b213310d1f71d53fd76b0d5",
-          "version": "1.2.0"
+          "revision": "460becd23a29b30dbfde184b155f3e4124e1fcdf",
+          "version": "1.2.1"
         }
       },
       {

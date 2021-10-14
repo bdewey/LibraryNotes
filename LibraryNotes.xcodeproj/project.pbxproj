@@ -106,13 +106,15 @@
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
 		D38A16E526F6544C00C04692 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D38A16E426F6544C00C04692 /* GRDB */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
-		D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */; };
+		D3AD01CC23BE7703004BB7DF /* NoteDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
 		D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
 		D3C5D26A214B1A7A0055F6B5 /* KeyboardInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */; };
+		D3C611342715FFB0007F8732 /* LibraryNotesAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */; };
+		D3C6113A271748C2007F8732 /* library.libnotes in Resources */ = {isa = PBXBuildFile; fileRef = D3D8337B26F9AA040011B450 /* library.libnotes */; };
 		D3D16CAB26F641B7004059E0 /* CodableCSV in Frameworks */ = {isa = PBXBuildFile; productRef = D3D16CAA26F641B7004059E0 /* CodableCSV */; };
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
@@ -130,7 +132,6 @@
 		D3DC5EE520EC9F7500F0B74B /* TextEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */; };
 		D3E8069F267FED4F009AA588 /* SummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E8069E267FED4F009AA588 /* SummaryTests.swift */; };
 		D3E806A2267FF900009AA588 /* TextMarkupKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3E806A1267FF900009AA588 /* TextMarkupKit */; };
-		D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */; };
 		D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B57B2564F92800E47375 /* StringProtocol+MiniMarkdown.swift */; };
 		D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */; };
 		D3E9B5952564FD4900E47375 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3E9B5942564FD4900E47375 /* Logging */; };
@@ -144,14 +145,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */ = {
+		D3C611352715FFB0007F8732 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = D3DC5EBE20EC9B0100F0B74B;
-			remoteInfo = CommonplaceBookApp;
+			remoteInfo = LibraryNotes;
 		};
-		D3E98F0821D470B2008445DA /* PBXContainerItemProxy */ = {
+		D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
 			proxyType = 1;
@@ -285,13 +286,15 @@
 		D38862B323BB94FA00A44F1C /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		D38862B523BE404300A44F1C /* Note+Markdown.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+Markdown.swift"; sourceTree = "<group>"; };
 		D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentTableController.swift; sourceTree = "<group>"; };
-		D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteSqliteStorageTests.swift; sourceTree = "<group>"; };
+		D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabaseTests.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
 		D3C5D269214B1A7A0055F6B5 /* KeyboardInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardInfo.swift; sourceTree = "<group>"; };
+		D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LibraryNotesUpdatedUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryNotesAppUITests.swift; sourceTree = "<group>"; };
 		D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotebookStructureViewController.swift; sourceTree = "<group>"; };
 		D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+CloseEnough.swift"; sourceTree = "<group>"; };
 		D3D8337B26F9AA040011B450 /* library.libnotes */ = {isa = PBXFileReference; lastKnownFileType = file; path = library.libnotes; sourceTree = "<group>"; };
@@ -309,9 +312,6 @@
 		D3DC5EDB20EC9B0200F0B74B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3DC5EE420EC9F7500F0B74B /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D3E8069E267FED4F009AA588 /* SummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryTests.swift; sourceTree = "<group>"; };
-		D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CommonplaceBookAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonplaceBookAppUITests.swift; sourceTree = "<group>"; };
-		D3E98F0721D470B2008445DA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3E9B57B2564F92800E47375 /* StringProtocol+MiniMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "StringProtocol+MiniMarkdown.swift"; sourceTree = "<group>"; };
 		D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Character+MiniMarkdown.swift"; sourceTree = "<group>"; };
 		D3F4EDBD2662F51C001289EC /* BookImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporter.swift; sourceTree = "<group>"; };
@@ -324,6 +324,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		D3C6112C2715FFB0007F8732 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBC20EC9B0100F0B74B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -343,13 +350,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D3DC5ED220EC9B0200F0B74B /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D3E98F0021D470B2008445DA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -443,6 +443,14 @@
 			path = BarcodeScanner;
 			sourceTree = "<group>";
 		};
+		D3C611302715FFB0007F8732 /* LibraryNotesUpdatedUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D3C611332715FFB0007F8732 /* LibraryNotesAppUITests.swift */,
+			);
+			path = LibraryNotesUpdatedUITests;
+			sourceTree = "<group>";
+		};
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
@@ -451,7 +459,7 @@
 				D311774725A4B64900E473FD /* Content */,
 				D3DC5EC120EC9B0100F0B74B /* LibraryNotes */,
 				D3DC5ED820EC9B0200F0B74B /* LibraryNotesTests */,
-				D3E98F0421D470B2008445DA /* LibraryNotesUITests */,
+				D3C611302715FFB0007F8732 /* LibraryNotesUpdatedUITests */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
 			);
@@ -464,7 +472,7 @@
 			children = (
 				D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
-				D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */,
+				D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -570,7 +578,7 @@
 				D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */,
 				D3446D3F23FAF20400BC269A /* Note+TestContent.swift */,
 				D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */,
-				D3AD01CB23BE7703004BB7DF /* NoteSqliteStorageTests.swift */,
+				D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */,
 				D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */,
 				D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */,
 				D31AFAE1229D620B00ED2B76 /* String+TypographyTests.swift */,
@@ -583,18 +591,27 @@
 			path = LibraryNotesTests;
 			sourceTree = "<group>";
 		};
-		D3E98F0421D470B2008445DA /* LibraryNotesUITests */ = {
-			isa = PBXGroup;
-			children = (
-				D3E98F0521D470B2008445DA /* CommonplaceBookAppUITests.swift */,
-				D3E98F0721D470B2008445DA /* Info.plist */,
-			);
-			path = LibraryNotesUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		D3C6112E2715FFB0007F8732 /* LibraryNotesUpdatedUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3C611372715FFB1007F8732 /* Build configuration list for PBXNativeTarget "LibraryNotesUpdatedUITests" */;
+			buildPhases = (
+				D3C6112B2715FFB0007F8732 /* Sources */,
+				D3C6112C2715FFB0007F8732 /* Frameworks */,
+				D3C6112D2715FFB0007F8732 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D3C611362715FFB0007F8732 /* PBXTargetDependency */,
+			);
+			name = LibraryNotesUpdatedUITests;
+			productName = LibraryNotesUpdatedUITests;
+			productReference = D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */;
@@ -647,34 +664,20 @@
 			productReference = D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D3E98F0A21D470B2008445DA /* Build configuration list for PBXNativeTarget "CommonplaceBookAppUITests" */;
-			buildPhases = (
-				D3E98EFF21D470B2008445DA /* Sources */,
-				D3E98F0021D470B2008445DA /* Frameworks */,
-				D3E98F0121D470B2008445DA /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D3E98F0921D470B2008445DA /* PBXTargetDependency */,
-			);
-			name = CommonplaceBookAppUITests;
-			productName = CommonplaceBookAppUITests;
-			productReference = D3E98F0321D470B2008445DA /* CommonplaceBookAppUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		D3DC5EB720EC9B0100F0B74B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1230;
+				LastSwiftUpdateCheck = 1300;
 				LastUpgradeCheck = 1220;
 				ORGANIZATIONNAME = "Brian's Brain";
 				TargetAttributes = {
+					D3C6112E2715FFB0007F8732 = {
+						CreatedOnToolsVersion = 13.0;
+						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
+					};
 					D3DC5EBE20EC9B0100F0B74B = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1210;
@@ -690,10 +693,6 @@
 					D3DC5ED420EC9B0200F0B74B = {
 						CreatedOnToolsVersion = 10.0;
 						LastSwiftMigration = 1000;
-						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
-					};
-					D3E98F0221D470B2008445DA = {
-						CreatedOnToolsVersion = 10.1;
 						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
 					};
 				};
@@ -725,12 +724,19 @@
 			targets = (
 				D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
-				D3E98F0221D470B2008445DA /* CommonplaceBookAppUITests */,
+				D3C6112E2715FFB0007F8732 /* LibraryNotesUpdatedUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		D3C6112D2715FFB0007F8732 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBD20EC9B0100F0B74B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -747,13 +753,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D3E98F0121D470B2008445DA /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				D3C6113A271748C2007F8732 /* library.libnotes in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -776,6 +776,14 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		D3C6112B2715FFB0007F8732 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C611342715FFB0007F8732 /* LibraryNotesAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D3DC5EBB20EC9B0100F0B74B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -896,7 +904,7 @@
 				D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */,
 				D3DBC4082704A38200C18438 /* String+NameTests.swift in Sources */,
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
-				D3AD01CC23BE7703004BB7DF /* NoteSqliteStorageTests.swift in Sources */,
+				D3AD01CC23BE7703004BB7DF /* NoteDatabaseTests.swift in Sources */,
 				D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */,
 				D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */,
 				D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */,
@@ -907,26 +915,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D3E98EFF21D470B2008445DA /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D3E98F0621D470B2008445DA /* CommonplaceBookAppUITests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		D3C611362715FFB0007F8732 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
+			targetProxy = D3C611352715FFB0007F8732 /* PBXContainerItemProxy */;
+		};
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
 			targetProxy = D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */;
-		};
-		D3E98F0921D470B2008445DA /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
-			targetProxy = D3E98F0821D470B2008445DA /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -942,6 +942,55 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		D3C611382715FFB1007F8732 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.LibraryNotesUpdatedUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryNotes;
+			};
+			name = Debug;
+		};
+		D3C611392715FFB1007F8732 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.LibraryNotesUpdatedUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = LibraryNotes;
+			};
+			name = Release;
+		};
 		D3DC5EDC20EC9B0200F0B74B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
@@ -1070,7 +1119,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 95;
+				CURRENT_PROJECT_VERSION = 98;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
@@ -1097,7 +1146,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 95;
+				CURRENT_PROJECT_VERSION = 98;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
@@ -1165,53 +1214,18 @@
 			};
 			name = Release;
 		};
-		D3E98F0B21D470B2008445DA /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = LibraryNotesUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GrailDiary;
-			};
-			name = Debug;
-		};
-		D3E98F0C21D470B2008445DA /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = K2UU8WDD8H;
-				INFOPLIST_FILE = LibraryNotesUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.1;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppUITests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "";
-				SWIFT_VERSION = 4.2;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = GrailDiary;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		D3C611372715FFB1007F8732 /* Build configuration list for PBXNativeTarget "LibraryNotesUpdatedUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C611382715FFB1007F8732 /* Debug */,
+				D3C611392715FFB1007F8732 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "LibraryNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1235,15 +1249,6 @@
 			buildConfigurations = (
 				D3DC5EE220EC9B0200F0B74B /* Debug */,
 				D3DC5EE320EC9B0200F0B74B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		D3E98F0A21D470B2008445DA /* Build configuration list for PBXNativeTarget "CommonplaceBookAppUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D3E98F0B21D470B2008445DA /* Debug */,
-				D3E98F0C21D470B2008445DA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

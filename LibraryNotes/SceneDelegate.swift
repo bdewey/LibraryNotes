@@ -4,7 +4,7 @@ import Logging
 import UIKit
 import UniformTypeIdentifiers
 
-extension UTType {
+public extension UTType {
   static let kvcrdt = UTType("org.brians-brain.kvcrdt")!
   static let libnotes = UTType("org.brians-brain.libnotes")!
 }

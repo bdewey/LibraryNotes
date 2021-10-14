@@ -11,7 +11,7 @@ extension Book {
       let authors = self.authors.joined(separator: ", ")
       title += ": \(authors)"
     }
-    if let publishedDate = yearPublished {
+    if let publishedDate = originalYearPublished ?? yearPublished {
       title += " (\(publishedDate))"
     }
     return title
