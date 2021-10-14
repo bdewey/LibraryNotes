@@ -44,8 +44,12 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
+public extension ApplicationIdentifier {
+  static let currentLibraryNotesVersion = ApplicationIdentifier(id: UTType.libnotes.identifier, majorVersion: 2, minorVersion: 0, applicationDescription: "Library Notes")
+}
+
 private struct NoteDatabaseUpgrader: ApplicationDataUpgrader {
-  let expectedApplicationIdentifier = ApplicationIdentifier(id: UTType.libnotes.identifier, majorVersion: 2, minorVersion: 0, applicationDescription: "Library Notes")
+  let expectedApplicationIdentifier = ApplicationIdentifier.currentLibraryNotesVersion
 
   func upgradeApplicationData(in database: KeyValueDatabase) throws {
     Logger.shared.info("Upgrading library")
