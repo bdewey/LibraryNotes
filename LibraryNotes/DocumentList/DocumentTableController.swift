@@ -283,7 +283,7 @@ private extension DocumentTableController {
       Logger.shared.error("Unexpected error refreshing file: \(error)")
     }
     Task {
-      await Task.sleep(1000000000)
+      try? await Task.sleep(nanoseconds: 1_000_000_000)
       refreshControl.endRefreshing()
     }
   }
