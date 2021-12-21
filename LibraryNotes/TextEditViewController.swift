@@ -243,7 +243,10 @@ public final class TextEditViewController: UIViewController {
     }))
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
+      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+        assertionFailure()
+        return
+      }
       if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
         let quoteDelimiterVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
         textView.textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
@@ -256,7 +259,10 @@ public final class TextEditViewController: UIViewController {
     }))
 
     inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      let nodePath = parsedAttributedString.path(to: textView.selectedRange.location)
+      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+        assertionFailure()
+        return
+      }
       if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
         let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
         textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
@@ -269,7 +275,10 @@ public final class TextEditViewController: UIViewController {
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self, textView, parsedAttributedString] _ in
       guard let self = self else { return }
-      let nodePath = parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1))
+      guard let nodePath = try? parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1)) else {
+        assertionFailure()
+        return
+      }
       let existingSelectedLocation = textView.selectedRange.location
       if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
         textView.textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
@@ -484,8 +493,8 @@ extension TextEditViewController: NSTextStorageDelegate {
 extension TextEditViewController: UICollectionViewDelegate {
   /// Handles selection for the typeahead accessory -- replaces the hashtag at the cursor with the selected hashtag.
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
     guard
+      let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location - 1),
       let selectedHashtag = typeaheadAccessory?.dataSource.itemIdentifier(for: indexPath),
       let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag })
     else {
@@ -513,7 +522,7 @@ extension TextEditViewController: UITextViewDelegate {
       return
     }
     // the cursor moved. If there's a hashtag view controller, see if we've strayed from its hashtag.
-    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
+    let nodePath = (try? parsedAttributedString.path(to: textView.selectedRange.location - 1)) ?? []
     if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }),
        hashtagNode.range.location == typeaheadAccessory?.anchor
     {
@@ -526,8 +535,9 @@ extension TextEditViewController: UITextViewDelegate {
 
   public func textViewDidChange(_ textView: UITextView) {
     guard textView.selectedRange.location > 0 else { return }
-    let nodePath = parsedAttributedString.path(to: textView.selectedRange.location - 1)
-    if let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
+    if
+      let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location - 1),
+      let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
       let hashtag = String(utf16CodeUnits: parsedAttributedString[hashtagNode.range], count: hashtagNode.range.length)
       let suggestions = delegate?.testEditViewController(self, hashtagSuggestionsFor: hashtag) ?? []
       if suggestions.isEmpty { typeaheadAccessory = nil }
@@ -551,22 +561,26 @@ extension TextEditViewController: UITextViewDelegate {
     // We do syntax highlighting. Don't do typing attributes, ever.
     textView.typingAttributes = [:]
 
+    let rawStringRange = parsedAttributedString.rawStringRange(forRange: range)
+    if rawStringRange.length != range.length {
+      let selectionRange = parsedAttributedString.range(forRawStringRange: rawStringRange)
+      Logger.shared.info("Changing selection range from \(range) to \(selectionRange) because of text replacement")
+      textView.selectedRange = selectionRange
+    }
+
     // Right now we only do special processing when inserting a newline
     guard range.length == 0, text == "\n" else { return true }
-    let nodePath = parsedAttributedString.path(to: range.location)
+    guard let nodePath = try? parsedAttributedString.path(to: range.location - 1) else {
+      // If range.location == 0, we expect to get an invalid argument exception and we should just return.
+      return true
+    }
     if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
-      if let paragraph = listItem.first(where: { $0.type == .paragraph }) {
-        let paragraphText = parsedAttributedString[paragraph.range]
-        if String(utf16CodeUnits: paragraphText, count: paragraphText.count).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-          // List termination! Someone's hitting return on a list item that contains nothing.
-          // Erase this marker.
-          let visibleRange = parsedAttributedString.range(forRawStringRange: listItem.range)
-          replaceCharacters(
-            in: visibleRange,
-            with: "\n"
-          )
-          return false
-        }
+      if let emptyListItemRange = parsedAttributedString.rangeOfEmptyListItem(listItem) {
+        replaceCharacters(
+          in: emptyListItemRange,
+          with: "\n"
+        )
+        return false
       }
 
       // List continuation!
@@ -654,5 +668,30 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 
   public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+private extension ParsedAttributedString {
+  /// If `listItem` is empty, returns the range of text that can be replaced to remove this list item from the text. Otherwise, returns nil.
+  func rangeOfEmptyListItem(_ listItem: AnchoredNode) -> NSRange? {
+    guard listItem.node.type == .listItem else {
+      assertionFailure("Expected a list item")
+      return nil
+    }
+    let location = listItem.range.location
+    var length = 1
+    while length <= listItem.range.length {
+      let maybeCharacter: Character? = rawString.character(at: location + length)
+      if let character = maybeCharacter {
+        if character == "\n" {
+          return NSRange(location: location, length: length)
+        }
+        if !CharacterSet.whitespaces.contains(character.unicodeScalars.first!) {
+          return nil
+        }
+      }
+      length += 1
+    }
+    return listItem.range
   }
 }
