@@ -15,6 +15,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     case creationTimestamp = "Created Date"
     case modificationTimestap = "Modified Date"
     case rating = "Rating"
+    case dateRead = "Date Read"
   }
 
   static func sqlLiteral(
@@ -36,6 +37,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
             json_extract(entry.json, '$.bookSection') AS bookSection
         FROM
             entry
+            LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
         WHERE
             entry.KEY = '.metadata'
             AND json_valid(entry.json)
@@ -52,6 +54,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
           json_extract(entry.json, '$.bookSection') AS bookSection
       FROM
           entry
+          LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
       WHERE
           entry.KEY = '.metadata'
           AND json_valid(entry.json)
@@ -69,6 +72,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
           entry
           LEFT JOIN json_each(entry.json, '$.book.tags') AS bookTags
           LEFT JOIN json_each(entry.json, '$.tags') AS metadataTags
+          LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
       WHERE
           entry.KEY = '.metadata'
           AND json_valid(entry.json)
@@ -103,6 +107,8 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       return "ORDER BY bookSection, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .rating:
       return "ORDER BY bookSection, json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+    case .dateRead:
+      return "ORDER BY bookSection, json_extract(readingHistory.value, '$.finish.year') DESC, json_extract(readingHistory.value, '$.finish.month') DESC, json_extract(readingHistory.value, '$.finish.day') DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
     }
   }
 }
