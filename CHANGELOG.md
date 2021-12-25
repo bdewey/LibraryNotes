@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Ability to group books by year read
+
+### Fixed
+
+- Bugs with list handling
+
 ## [1.1.0]
 
 ### Added
