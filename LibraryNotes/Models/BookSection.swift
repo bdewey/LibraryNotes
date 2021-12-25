@@ -15,4 +15,17 @@ public enum BookSection: String, Codable {
 
   /// The sections that hold books.
   public static let bookSections: [BookSection] = [.currentlyReading, .wantToRead, .read]
+
+  var headerText: String {
+    switch self {
+    case .wantToRead:
+      return "Want to read"
+    case .currentlyReading:
+      return "Currently reading"
+    case .read:
+      return "Read"
+    case .other:
+      return "Other"
+    }
+  }
 }

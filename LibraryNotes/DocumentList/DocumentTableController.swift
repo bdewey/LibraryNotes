@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import Algorithms
 import BookKit
 import Combine
 import Logging
@@ -16,6 +17,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
+  var documentTableControllerShouldGroupByYearRead: Bool { get }
 }
 
 typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
@@ -102,16 +104,17 @@ public final class DocumentTableController: NSObject {
       }
     }
 
-    let partitions = noteIdentifiers.bookSectionPartitions
+    let chunks = noteIdentifiers.chunked(on: { $0.bookSection ?? .other })
+    let noteIdentifiersBySection = Dictionary(uniqueKeysWithValues: chunks)
     for section in BookSection.bookSections {
-      if var sectionSnapshot = sectionSnapshot(for: section, partitions: partitions, identifiers: noteIdentifiers) {
+      if var sectionSnapshot = sectionSnapshot(for: section, noteIdentifiersBySection: noteIdentifiersBySection) {
         sectionSnapshot.collapseSections(in: collapsedSections)
         dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
       } else {
         dataSource.apply(.init(), to: section, animatingDifferences: animated)
       }
     }
-    if let otherItems = sectionSnapshot(for: .other, partitions: partitions, identifiers: noteIdentifiers) {
+    if let otherItems = sectionSnapshot(for: .other, noteIdentifiersBySection: noteIdentifiersBySection) {
       dataSource.apply(otherItems, to: .other, animatingDifferences: animated)
     } else {
       dataSource.apply(.init(), to: .other, animatingDifferences: animated)
@@ -123,17 +126,35 @@ public final class DocumentTableController: NSObject {
     delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers.count)
   }
 
-  func sectionSnapshot(for section: BookSection, partitions: [BookSection: Range<Int>], identifiers: [NoteIdentifierRecord]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>? {
-    guard let range = partitions[section], !range.isEmpty else {
+  func sectionSnapshot(for section: BookSection, noteIdentifiersBySection: [BookSection: ArraySlice<NoteIdentifierRecord>]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>? {
+    guard let slice = noteIdentifiersBySection[section], !slice.isEmpty else {
       return nil
     }
-    var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
-    let headerItem = BookCollectionViewItem.header(section, range.count)
-    let items: [BookCollectionViewItem] = identifiers[range].map { .book($0.noteIdentifier) }
-    bookSection.append([headerItem])
-    bookSection.append(items, to: headerItem)
-    bookSection.expand([headerItem])
-    return bookSection
+    if section == .read && (delegate?.documentTableControllerShouldGroupByYearRead ?? false) {
+      var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
+      let booksByYear = slice.chunked(on: { $0.finishYear })
+      for (year, yearSlice) in booksByYear {
+        let headerItem: BookCollectionViewItem
+        if let year = year {
+          headerItem = .yearReadHeader(year, yearSlice.count)
+        } else {
+          headerItem = .header(.read, yearSlice.count)
+        }
+        let items: [BookCollectionViewItem] = yearSlice.map { .book($0.noteIdentifier) }
+        bookSection.append([headerItem])
+        bookSection.append(items, to: headerItem)
+        bookSection.expand([headerItem])
+      }
+      return bookSection
+    } else {
+      var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
+      let headerItem = BookCollectionViewItem.header(section, slice.count)
+      let items: [BookCollectionViewItem] = slice.map { .book($0.noteIdentifier) }
+      bookSection.append([headerItem])
+      bookSection.append(items, to: headerItem)
+      bookSection.expand([headerItem])
+      return bookSection
+    }
   }
 }
 
@@ -148,7 +169,7 @@ extension DocumentTableController {
     case .book(let properties):
       let actions = availableItemActionConfigurations(properties).reversed().compactMap { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
-    case .header:
+    case .header, .yearReadHeader:
       return nil
     }
   }
@@ -179,7 +200,7 @@ public extension DocumentTableController {
     case .book(let noteIdentifier):
       delegate?.showPage(with: noteIdentifier, shiftFocus: shiftFocus)
       return true
-    case .header:
+    case .header, .yearReadHeader:
       var bookSection = dataSource.snapshot(for: section)
       if bookSection.isExpanded(item) {
         bookSection.collapse([item])
@@ -283,7 +304,7 @@ private extension DocumentTableController {
       Logger.shared.error("Unexpected error refreshing file: \(error)")
     }
     Task {
-      await Task.sleep(1000000000)
+      try? await Task.sleep(nanoseconds: 1_000_000_000)
       refreshControl.endRefreshing()
     }
   }

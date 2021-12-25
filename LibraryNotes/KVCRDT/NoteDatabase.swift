@@ -214,16 +214,19 @@ public final class NoteDatabase {
   /// - Parameters:
   ///   - structureIdentifier: The "subsection" of the notebook in which to confine the results.
   ///   - sortOrder: Sort order of the results.
+  ///   - groupByYearRead: If true, results should be grouped by year read as well as by general "section"
   ///   - searchTerm: Optional search term for full-text search.
   /// - Returns: A publisher of `NoteIdentifierRecord` structs.
   func noteIdentifiersPublisher(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
+    groupByYearRead: Bool,
     searchTerm: String?
   ) -> AnyPublisher<[NoteIdentifierRecord], Error> {
     let sqlLiteral = NoteIdentifierRecord.sqlLiteral(
       structureIdentifier: structureIdentifier,
       sortOrder: sortOrder,
+      groupByYearRead: groupByYearRead,
       searchTerm: searchTerm
     )
     return keyValueCRDT.valuePublisher { db -> [NoteIdentifierRecord] in

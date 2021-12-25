@@ -52,6 +52,12 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
+  var groupByYearRead: Bool = true {
+    didSet {
+      monitorDatabaseForFocusedStructure()
+    }
+  }
+
   private var metadataPipeline: AnyCancellable?
 
   private func monitorDatabaseForFocusedStructure() {
@@ -59,6 +65,7 @@ final class DocumentListViewController: UIViewController {
     metadataPipeline = database.noteIdentifiersPublisher(
       structureIdentifier: focusedStructure,
       sortOrder: currentSortOrder,
+      groupByYearRead: groupByYearRead,
       searchTerm: currentSearchTerm
     )
     .catch { error -> Just<[NoteIdentifierRecord]> in
@@ -361,6 +368,7 @@ extension DocumentListViewController {
       importLibraryThingAction,
       sendFeedbackAction,
       advanceTimeAction,
+      groupByYearReadAction
     ].compactMap { $0 })
   }
 
@@ -429,6 +437,12 @@ extension DocumentListViewController {
     guard AppDelegate.isUITesting else { return nil }
     return UIAction(title: "Advance Time", image: UIImage(systemName: "clock"), identifier: UIAction.Identifier(rawValue: "advance-time")) { [weak self] _ in
       self?.advanceTime()
+    }
+  }
+
+  private var groupByYearReadAction: UIAction {
+    UIAction(title: "Group By Year Read", image: UIImage(systemName: "calendar"), state: groupByYearRead ? .on : .off) { [weak self] _ in
+      self?.groupByYearRead.toggle()
     }
   }
 
@@ -526,6 +540,8 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int) {
     updateToolbarAndMenu()
   }
+
+  var documentTableControllerShouldGroupByYearRead: Bool { groupByYearRead }
 }
 
 // MARK: - Search
