@@ -23,7 +23,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
         } else {
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
         }
-      case .header:
+      case .header, .yearReadHeader:
         return collectionView.dequeueConfiguredReusableCell(using: headerRegistration, for: indexPath, item: item)
       }
     }
@@ -80,20 +80,11 @@ private enum Registration {
 
   static func makeHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<UICollectionViewListCell, BookCollectionViewItem> { cell, _, item in
-      guard case .header(let category, let count) = item else { return }
+      guard let headerText = item.headerText else { return }
       var configuration = UIListContentConfiguration.extraProminentInsetGroupedHeader()
       configuration.prefersSideBySideTextAndSecondaryText = true
-      switch category {
-      case .wantToRead:
-        configuration.text = "Want to read"
-      case .currentlyReading:
-        configuration.text = "Currently reading"
-      case .read:
-        configuration.text = "Read"
-      case .other:
-        configuration.text = "Other"
-      }
-      configuration.secondaryText = "\(count)"
+      configuration.text = headerText.primaryHeaderText
+      configuration.secondaryText = headerText.secondaryHeaderText
       cell.contentConfiguration = configuration
       cell.accessories = [.outlineDisclosure()]
       cell.backgroundConfiguration?.backgroundColor = .grailSecondaryBackground

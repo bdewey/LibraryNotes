@@ -8,6 +8,9 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
   /// The header for a section of books.
   case header(BookSection, Int)
 
+  /// Header for a section of books read in a particular year
+  case yearReadHeader(Int, Int)
+
   /// A single book
   case book(Note.Identifier)
 
@@ -17,6 +20,29 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
       return "Page \(noteIdentifier)"
     case .header(let category, let count):
       return "\(category) (\(count))"
+    case .yearReadHeader(let yearRead, let count):
+      return "Read \(yearRead) (\(count))"
+    }
+  }
+
+  var isHeader: Bool {
+    switch self {
+    case .header, .yearReadHeader:
+      return true
+    case .book:
+      return false
+    }
+  }
+
+  /// If this item represents a header, contains the primary & secondary text for the header row
+  var headerText: (primaryHeaderText: String, secondaryHeaderText: String)? {
+    switch self {
+    case .header(let bookSection, let count):
+      return (primaryHeaderText: bookSection.headerText, secondaryHeaderText: "\(count)")
+    case .yearReadHeader(let yearRead, let count):
+      return (primaryHeaderText: "Read in \(yearRead)", secondaryHeaderText: "\(count)")
+    case .book:
+      return nil
     }
   }
 
@@ -36,6 +62,8 @@ internal extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType 
     for item in rootItems {
       switch item {
       case .header(_, let count):
+        bookCount += count
+      case .yearReadHeader(_, let count):
         bookCount += count
       case .book:
         bookCount += 1

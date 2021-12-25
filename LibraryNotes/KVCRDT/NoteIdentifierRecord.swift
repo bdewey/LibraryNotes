@@ -8,6 +8,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   public static var databaseTableName: String { "entry" }
   public var noteIdentifier: String
   public var bookSection: BookSection?
+  public var finishYear: Int?
 
   public enum SortOrder: String, CaseIterable {
     case author = "Author"
@@ -34,7 +35,8 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       return """
         SELECT
             DISTINCT scope AS noteIdentifier,
-            json_extract(entry.json, '$.bookSection') AS bookSection
+            json_extract(entry.json, '$.bookSection') AS bookSection,
+            json_extract(readingHistory.value, '$.finish.year') AS finishYear
         FROM
             entry
             LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
@@ -51,7 +53,8 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       return """
       SELECT
           DISTINCT scope AS noteIdentifier,
-          json_extract(entry.json, '$.bookSection') AS bookSection
+          json_extract(entry.json, '$.bookSection') AS bookSection,
+          json_extract(readingHistory.value, '$.finish.year') AS finishYear
       FROM
           entry
           LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
@@ -66,6 +69,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       SELECT
           DISTINCT scope AS noteIdentifier,
           json_extract(entry.json, '$.bookSection') AS bookSection,
+          json_extract(readingHistory.value, '$.finish.year') AS finishYear,
           metadataTags.value,
           bookTags.value
       FROM
@@ -98,33 +102,17 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   private static func orderClause(sortOrder: SortOrder) -> SQL {
     switch sortOrder {
     case .author:
-      return "ORDER BY bookSection, json_extract(entry.json, '$.authorLastFirst'), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.authorLastFirst'), json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .title:
-      return "ORDER BY bookSection, coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .creationTimestamp:
-      return "ORDER BY bookSection, json_extract(entry.json, '$.creationTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
     case .modificationTimestap:
-      return "ORDER BY bookSection, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .rating:
-      return "ORDER BY bookSection, json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
     case .dateRead:
-      return "ORDER BY bookSection, json_extract(readingHistory.value, '$.finish.year') DESC, json_extract(readingHistory.value, '$.finish.month') DESC, json_extract(readingHistory.value, '$.finish.day') DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
+      return "ORDER BY bookSection, finishYear DESC, json_extract(readingHistory.value, '$.finish.month') DESC, json_extract(readingHistory.value, '$.finish.day') DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
     }
-  }
-}
-
-public extension Array where Element == NoteIdentifierRecord {
-  /// Given an array of `NoteIdentifierRecord` structs that is sorted by `bookSection`, returns the partion boundaries for each `bookSection` value.
-  var bookSectionPartitions: [BookSection: Range<Int>] {
-    var results: [BookSection: Range<Int>] = [:]
-    for (index, element) in enumerated() {
-      let section = element.bookSection ?? .other
-      if let existingRange = results[section] {
-        results[section] = existingRange.lowerBound ..< index + 1
-      } else {
-        results[section] = index ..< index + 1
-      }
-    }
-    return results
   }
 }
