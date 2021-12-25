@@ -294,7 +294,7 @@ private extension NoteDatabase {
     sortOrder: NoteIdentifierRecord.SortOrder,
     searchTerm: String?
   ) async throws -> [String] {
-    let publisher = noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: sortOrder, searchTerm: searchTerm)
+    let publisher = noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: sortOrder, groupByYearRead: false, searchTerm: searchTerm)
       .map { noteIdentifiers in
         noteIdentifiers.map { self.bookMetadata(identifier: $0.noteIdentifier)?.preferredTitle ?? "nil" }
       }
