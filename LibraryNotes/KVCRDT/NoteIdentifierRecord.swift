@@ -22,11 +22,12 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   static func sqlLiteral(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: SortOrder,
+    groupByYearRead: Bool,
     searchTerm: String?
   ) -> SQL {
     return sql(structureIdentifier: structureIdentifier)
       + searchCondition(searchTerm: searchTerm)
-      + orderClause(sortOrder: sortOrder)
+      + orderClause(sortOrder: sortOrder, groupByYearRead: groupByYearRead)
   }
 
   private static func sql(structureIdentifier: NotebookStructureViewController.StructureIdentifier) -> SQL {
@@ -99,20 +100,42 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     return "AND entry.scope IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"
   }
 
-  private static func orderClause(sortOrder: SortOrder) -> SQL {
+  private static func orderClause(sortOrder: SortOrder, groupByYearRead: Bool) -> SQL {
+    var sortClauses: [SQL] = ["bookSection"]
+    if groupByYearRead {
+      sortClauses.append("finishYear DESC")
+    }
     switch sortOrder {
     case .author:
-      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.authorLastFirst'), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "json_extract(entry.json, '$.authorLastFirst')",
+        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+      ])
     case .title:
-      return "ORDER BY bookSection, finishYear DESC, coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')), json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title'))",
+        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+      ])
     case .creationTimestamp:
-      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "json_extract(entry.json, '$.creationTimestamp') DESC",
+      ])
     case .modificationTimestap:
-      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+      ])
     case .rating:
-      return "ORDER BY bookSection, finishYear DESC, json_extract(entry.json, '$.book.rating') DESC, json_extract(entry.json, '$.modifiedTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "json_extract(entry.json, '$.book.rating') DESC",
+        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+      ])
     case .dateRead:
-      return "ORDER BY bookSection, finishYear DESC, json_extract(readingHistory.value, '$.finish.month') DESC, json_extract(readingHistory.value, '$.finish.day') DESC, json_extract(entry.json, '$.creationTimestamp') DESC"
+      sortClauses.append(contentsOf: [
+        "json_extract(readingHistory.value, '$.finish.month') DESC",
+        "json_extract(readingHistory.value, '$.finish.day') DESC",
+        "json_extract(entry.json, '$.creationTimestamp') DESC",
+      ])
     }
+    return "ORDER BY " + sortClauses.joined(separator: ",")
   }
 }

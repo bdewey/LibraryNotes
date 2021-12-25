@@ -17,6 +17,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
+  var documentTableControllerShouldGroupByYearRead: Bool { get }
 }
 
 typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
@@ -129,7 +130,7 @@ public final class DocumentTableController: NSObject {
     guard let slice = noteIdentifiersBySection[section], !slice.isEmpty else {
       return nil
     }
-    if section == .read {
+    if section == .read && (delegate?.documentTableControllerShouldGroupByYearRead ?? false) {
       var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
       let booksByYear = slice.chunked(on: { $0.finishYear })
       for (year, yearSlice) in booksByYear {
