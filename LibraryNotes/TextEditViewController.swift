@@ -575,11 +575,10 @@ extension TextEditViewController: UITextViewDelegate {
       return true
     }
     if let listItem = nodePath.first(where: { $0.node.type == .listItem }) {
-      if let emptyListItemRange = parsedAttributedString.rangeOfEmptyListItem(listItem) {
-        replaceCharacters(
-          in: emptyListItemRange,
-          with: "\n"
-        )
+      if let listDelimiter = nodePath.first(where: { $0.node.type == .listDelimiter }) {
+        // We are hitting "return" right after a list delimiter. Replace that delimiter with a return instead.
+        let delimiterRange = parsedAttributedString.range(forRawStringRange: listDelimiter.range)
+        replaceCharacters(in: delimiterRange, with: "\n")
         return false
       }
 
@@ -668,30 +667,5 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 
   public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
     dismiss(animated: true, completion: nil)
-  }
-}
-
-private extension ParsedAttributedString {
-  /// If `listItem` is empty, returns the range of text that can be replaced to remove this list item from the text. Otherwise, returns nil.
-  func rangeOfEmptyListItem(_ listItem: AnchoredNode) -> NSRange? {
-    guard listItem.node.type == .listItem else {
-      assertionFailure("Expected a list item")
-      return nil
-    }
-    let location = listItem.range.location
-    var length = 1
-    while length <= listItem.range.length {
-      let maybeCharacter: Character? = rawString.character(at: location + length)
-      if let character = maybeCharacter {
-        if character == "\n" {
-          return NSRange(location: location, length: length)
-        }
-        if !CharacterSet.whitespaces.contains(character.unicodeScalars.first!) {
-          return nil
-        }
-      }
-      length += 1
-    }
-    return listItem.range
   }
 }
