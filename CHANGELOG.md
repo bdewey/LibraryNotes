@@ -13,6 +13,7 @@
 ### Fixed
 
 - Bugs with list handling
+- Hashtag list didn't update in real time
 
 ## [1.1.0]
 

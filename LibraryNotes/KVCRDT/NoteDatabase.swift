@@ -91,7 +91,7 @@ public final class NoteDatabase {
     self.allTagsInvalidationSubscription = notesDidChange.sink { [weak self] _ in
       self?.cachedAllTags = nil
     }
-    self.allTagsInvalidationSubscription = keyValueCRDT
+    self.cachedBookMetadataInvalidation = keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .sink(receiveCompletion: { error in
         Logger.shared.error("Error maintaining cache: \(error)")
@@ -101,13 +101,14 @@ public final class NoteDatabase {
           self.cachedBookMetadata[scopedKey.scope] = nil
         }
       })
-    cachedBookMetadataInvalidation = keyValueCRDT.updatedValuesPublisher
-      .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
-      .map({ $0.0.scope })
-      .sink { [weak self] noteIdentifier in
-        Logger.shared.debug("Invalidating metadata cache for \(noteIdentifier)")
-        self?.cachedBookMetadata[noteIdentifier] = nil
-      }
+    // Once upon a time I had both of these methods of invalidating cachedBookMetadata, and I don't know why.
+//    cachedBookMetadataInvalidation = keyValueCRDT.updatedValuesPublisher
+//      .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
+//      .map({ $0.0.scope })
+//      .sink { [weak self] noteIdentifier in
+//        Logger.shared.debug("Invalidating metadata cache for \(noteIdentifier)")
+//        self?.cachedBookMetadata[noteIdentifier] = nil
+//      }
   }
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
