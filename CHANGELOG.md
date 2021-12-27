@@ -6,6 +6,10 @@
 
 - Ability to group books by year read
 
+### Changed
+
+- When you scroll the search results, the software keyboard now goes away
+
 ### Fixed
 
 - Bugs with list handling
