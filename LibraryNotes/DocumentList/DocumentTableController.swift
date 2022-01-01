@@ -53,8 +53,9 @@ public final class DocumentTableController: NSObject {
       .sink { [weak self] noteIdentifier in
         guard let self = self else { return }
         var snapshot = self.dataSource.snapshot()
-        if snapshot.indexOfItem(.book(noteIdentifier)) != nil {
-          snapshot.reconfigureItems([.book(noteIdentifier)])
+        let itemsToUpdate = snapshot.itemIdentifiers.filter({ $0.matchesNoteIdentifier(noteIdentifier) })
+        if !itemsToUpdate.isEmpty {
+          snapshot.reconfigureItems(itemsToUpdate)
           self.dataSource.apply(snapshot, animatingDifferences: false)
         }
       }
@@ -141,7 +142,7 @@ public final class DocumentTableController: NSObject {
         } else {
           headerItem = .header(.read, yearSlice.count)
         }
-        let items: [BookCollectionViewItem] = yearSlice.map { .book($0.noteIdentifier) }
+        let items: [BookCollectionViewItem] = yearSlice.map { .book($0.noteIdentifier, year) }
         bookSection.append([headerItem])
         bookSection.append(items, to: headerItem)
         bookSection.expand([headerItem])
@@ -150,7 +151,7 @@ public final class DocumentTableController: NSObject {
     } else {
       var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
       let headerItem = BookCollectionViewItem.header(section, slice.count)
-      let items: [BookCollectionViewItem] = slice.map { .book($0.noteIdentifier) }
+      let items: [BookCollectionViewItem] = slice.map { .book($0.noteIdentifier, $0.finishYear) }
       bookSection.append([headerItem])
       bookSection.append(items, to: headerItem)
       bookSection.expand([headerItem])
@@ -167,7 +168,7 @@ extension DocumentTableController {
       return nil
     }
     switch item {
-    case .book(let properties):
+    case .book(let properties, _):
       let actions = availableItemActionConfigurations(properties).reversed().compactMap { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
     case .header, .yearReadHeader:
@@ -198,7 +199,7 @@ public extension DocumentTableController {
       return false
     }
     switch item {
-    case .book(let noteIdentifier):
+    case .book(let noteIdentifier, _):
       delegate?.showPage(with: noteIdentifier, shiftFocus: shiftFocus)
       return true
     case .header, .yearReadHeader:
@@ -214,12 +215,13 @@ public extension DocumentTableController {
   }
 
   func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
-    return dataSource.indexPath(for: .book(noteIdentifier))
+    // TODO: This is a hack
+    return dataSource.indexPath(for: .book(noteIdentifier, nil))
   }
 
   func selectFirstNote() {
     let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { if case .book = $0 { return true } else { return false } })
-    if let firstNote = firstNote, case .book(let noteIdentifier) = firstNote {
+    if let firstNote = firstNote, case .book(let noteIdentifier, _) = firstNote {
       delegate?.showPage(with: noteIdentifier, shiftFocus: false)
     }
   }
@@ -287,7 +289,7 @@ extension DocumentTableController: UICollectionViewDelegate {
   ) -> UIContextMenuConfiguration? {
     guard
       let item = dataSource.itemIdentifier(for: indexPath),
-      case .book(let itemProperties) = item
+      case .book(let itemProperties, _) = item
     else {
       return nil
     }

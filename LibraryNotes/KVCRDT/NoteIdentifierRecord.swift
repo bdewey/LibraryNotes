@@ -9,6 +9,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   public var noteIdentifier: String
   public var bookSection: BookSection?
   public var finishYear: Int?
+  public var startYear: Int?
 
   public enum SortOrder: String, CaseIterable {
     case author = "Author"
@@ -34,61 +35,70 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     switch structureIdentifier {
     case .read:
       return """
-        SELECT
-            DISTINCT scope AS noteIdentifier,
-            json_extract(entry.json, '$.bookSection') AS bookSection,
-            json_extract(readingHistory.value, '$.finish.year') AS finishYear
-        FROM
-            entry
-            LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
-        WHERE
-            entry.KEY = '.metadata'
-            AND json_valid(entry.json)
-            AND (
-                json_extract(entry.json, '$.folder') IS NULL
-                OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
-            )
+      SELECT
+        DISTINCT scope AS noteIdentifier,
+        json_extract(readingHistory.value, '$.start.year') AS startYear,
+        json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        CASE
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
+            WHEN json_extract(readingHistory.value, '$.finish.year') IS NOT NULL THEN 'read'
+        END as bookSection
+      FROM
+        entry
+        LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
+      WHERE
+        entry.KEY = '.metadata'
+        AND json_valid(entry.json)
+        AND (
+            json_extract(entry.json, '$.folder') IS NULL
+            OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
+        )
       """
 
     case .trash:
       return """
       SELECT
-          DISTINCT scope AS noteIdentifier,
-          json_extract(entry.json, '$.bookSection') AS bookSection,
-          json_extract(readingHistory.value, '$.finish.year') AS finishYear
+        DISTINCT scope AS noteIdentifier,
+        json_extract(readingHistory.value, '$.start.year') AS startYear,
+        json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        CASE
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
+            WHEN json_extract(readingHistory.value, '$.finish.year') IS NOT NULL THEN 'read'
+        END as bookSection
       FROM
-          entry
-          LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
+        entry
+        LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
       WHERE
-          entry.KEY = '.metadata'
-          AND json_valid(entry.json)
-          AND json_extract(entry.json, '$.folder') == 'recentlyDeleted'
+        entry.KEY = '.metadata'
+        AND json_valid(entry.json)
+        AND json_extract(entry.json, '$.folder') == 'recentlyDeleted'
       """
 
     case .hashtag(let hashtag):
       return """
       SELECT
-          DISTINCT scope AS noteIdentifier,
-          json_extract(entry.json, '$.bookSection') AS bookSection,
-          json_extract(readingHistory.value, '$.finish.year') AS finishYear,
-          metadataTags.value,
-          bookTags.value
+        DISTINCT scope AS noteIdentifier,
+        json_extract(readingHistory.value, '$.start.year') AS startYear,
+        json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        CASE
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
+            WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
+            WHEN json_extract(readingHistory.value, '$.finish.year') IS NOT NULL THEN 'read'
+        END as bookSection
       FROM
-          entry
-          LEFT JOIN json_each(entry.json, '$.book.tags') AS bookTags
-          LEFT JOIN json_each(entry.json, '$.tags') AS metadataTags
-          LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
+        entry
+        LEFT JOIN json_each(entry.json, '$.book.tags') AS bookTags
+        LEFT JOIN json_each(entry.json, '$.tags') AS metadataTags
+        LEFT JOIN json_each(entry.json, '$.book.readingHistory.entries') AS readingHistory
       WHERE
-          entry.KEY = '.metadata'
-          AND json_valid(entry.json)
-          AND (
-              json_extract(entry.json, '$.folder') IS NULL
-              OR json_extract(entry.json, '$.folder') != 'recentlyDeleted'
-          )
-          AND (
-              bookTags.value = \(hashtag)
-              OR metadataTags.value = \(hashtag)
-          )
+        entry.KEY = '.metadata'
+        AND json_valid(entry.json)
+        AND (
+            bookTags.value = \(hashtag)
+            OR metadataTags.value = \(hashtag)
+        )
       """
     }
   }

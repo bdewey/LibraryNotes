@@ -12,11 +12,11 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
   case yearReadHeader(Int, Int)
 
   /// A single book
-  case book(Note.Identifier)
+  case book(Note.Identifier, Int?)
 
   var description: String {
     switch self {
-    case .book(let noteIdentifier):
+    case .book(let noteIdentifier, _):
       return "Page \(noteIdentifier)"
     case .header(let category, let count):
       return "\(category) (\(count))"
@@ -48,10 +48,22 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible {
 
   /// The note identifier for the item, if it exists.
   var noteIdentifier: Note.Identifier? {
-    if case .book(let noteIdentifier) = self {
+    if case .book(let noteIdentifier, _) = self {
       return noteIdentifier
     } else {
       return nil
+    }
+  }
+
+  /// Returns true if the receiver is a book that contains `noteIdentifier`
+  /// - Parameter noteIdentifier: The note identifier to test for.
+  /// - Returns: True if this is a book that matches the note identifier.
+  func matchesNoteIdentifier(_ noteIdentifier: Note.Identifier) -> Bool {
+    switch self {
+    case .header, .yearReadHeader:
+      return false
+    case .book(let myNoteIdentifier, _):
+      return myNoteIdentifier == noteIdentifier
     }
   }
 }

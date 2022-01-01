@@ -16,7 +16,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
 
     super.init(collectionView: collectionView) { (collectionView, indexPath, item) -> UICollectionViewCell? in
       switch item {
-      case .book(let noteIdentifier):
+      case .book(let noteIdentifier, _):
         let metadata = database.bookMetadata(identifier: noteIdentifier)
         if metadata?.book != nil {
           return collectionView.dequeueConfiguredReusableCell(using: bookRegistration, for: indexPath, item: item)
@@ -37,7 +37,7 @@ private enum Registration {
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
       guard
-        case .book(let noteIdentifier) = item,
+        case .book(let noteIdentifier, _) = item,
         let metadata = database.bookMetadata(identifier: noteIdentifier),
         let book = metadata.book
       else {
@@ -55,7 +55,7 @@ private enum Registration {
   ) -> UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<ClearBackgroundCell, BookCollectionViewItem> { cell, _, item in
       guard
-        case .book(let noteIdentifier) = item,
+        case .book(let noteIdentifier, _) = item,
         let metadata = database.bookMetadata(identifier: noteIdentifier)
       else {
         return
