@@ -17,7 +17,6 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool)
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool)
   func documentTableController(_ documentTableController: DocumentTableController, didUpdateWithNoteCount noteCount: Int)
-  func documentTableControllerDidScroll(_ documentTableController: DocumentTableController)
   var documentTableControllerShouldGroupByYearRead: Bool { get }
 }
 
@@ -272,10 +271,6 @@ public extension DocumentTableController {
 // MARK: - UICollectionViewDelegate
 
 extension DocumentTableController: UICollectionViewDelegate {
-  public func scrollViewDidScroll(_ scrollView: UIScrollView) {
-    delegate?.documentTableControllerDidScroll(self)
-  }
-  
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     if !selectItemAtIndexPath(indexPath, shiftFocus: true) {
       collectionView.deselectItem(at: indexPath, animated: false)

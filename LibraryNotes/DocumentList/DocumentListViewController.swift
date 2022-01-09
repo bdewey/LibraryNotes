@@ -110,6 +110,7 @@ final class DocumentListViewController: UIViewController {
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
     view.backgroundColor = .grailBackground
+    view.keyboardDismissMode = .onDrag
     return view
   }()
 
@@ -483,17 +484,6 @@ extension MFMailComposeResult: CustomStringConvertible {
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
-  func documentTableControllerDidScroll(_ documentTableController: DocumentTableController) {
-    guard
-      let searchController = navigationItem.searchController,
-      let text = searchController.searchBar.text,
-      !text.isEmpty
-    else {
-      return
-    }
-    searchController.searchBar.resignFirstResponder()
-  }
-
   func showQuotes(quotes: [ContentIdentifier], shiftFocus: Bool) {
     let quotesVC = QuotesViewController(database: database)
     quotesVC.quoteIdentifiers = quotes
