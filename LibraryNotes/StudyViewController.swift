@@ -431,15 +431,25 @@ public final class StudyViewController: UIViewController {
       )
       promptView.delegate = self
       view.addSubview(promptView)
-      promptView.snp.makeConstraints { make in
-        make.left.right.equalTo(self.view.readableContentGuide)
-        make.centerY.equalToSuperview()
-      }
       completion(promptView)
     } catch {
       Logger.shared.error("Unexpected error generating prompt view: \(error)")
       completion(nil)
     }
+  }
+
+  public override func viewWillLayoutSubviews() {
+    super.viewWillLayoutSubviews()
+    guard let currentCardView = currentCardView, currentCardView.transform == .identity else {
+      return
+    }
+    var layoutFrame = view.safeAreaLayoutGuide.layoutFrame
+    layoutFrame.origin.y = closeButton.frame.maxY + 10
+    layoutFrame.size.height = (needsReviewButton.frame.minY - layoutFrame.origin.y) - 10
+    let readableWidth = view.readableContentGuide.layoutFrame.width
+    let desiredSize = currentCardView.sizeThatFits(CGSize(width: readableWidth, height: .greatestFiniteMagnitude))
+    currentCardView.frame = CGRect(origin: .zero, size: CGSize(width: readableWidth, height: min(desiredSize.height, layoutFrame.height)))
+    currentCardView.center = CGPoint(x: layoutFrame.midX, y: layoutFrame.midY)
   }
 }
 

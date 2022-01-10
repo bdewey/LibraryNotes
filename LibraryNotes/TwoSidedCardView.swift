@@ -1,11 +1,10 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import AVFoundation
-import SnapKit
 import UIKit
 
 private extension CGFloat {
-  static let padding: CGFloat = 8
+  static let padding: CGFloat = 10
 }
 
 /// A generic card with a "front" and a "back" side.
@@ -25,33 +24,71 @@ public final class TwoSidedCardView: PromptView {
   }
 
   private func commonInit() {
-    [background, contextLabel, frontLabel, backLabel].forEach { addSubview($0) }
+    [background, contentScrollView, contextLabel, frontLabel, backLabel].forEach { addSubview($0) }
+    [contextLabel, frontLabel, backLabel].forEach { contentScrollView.addSubview($0) }
     backgroundColor = .clear
-    createConstraints()
+    let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(revealAnswer))
+    addGestureRecognizer(tapRecognizer)
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
     setAnswerVisible(false, animated: false)
   }
 
-  private var frontLabelConstraints: ConstraintMakerEditable?
-  private var backLabelConstraints: ConstraintMakerEditable?
+  private struct Layout: Equatable {
+    var contextLabelFrame: CGRect
+    var frontLabelFrame: CGRect
+    var backLabelFrame: CGRect
+    var isAnswerVisible: Bool
 
-  private func createConstraints() {
-    background.snp.makeConstraints { make in
-      make.edges.equalToSuperview()
+    var desiredHeight: CGFloat {
+      isAnswerVisible ? backLabelFrame.maxY : frontLabelFrame.maxY
     }
-    contextLabel.snp.makeConstraints { make in
-      make.top.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
+  }
+
+  private func computeLayout(layoutArea: CGRect) -> Layout {
+    let contextLabelSize = contextLabel.sizeThatFits(layoutArea.size)
+    var (contextLabelFrame, remainder) = layoutArea.divided(atDistance: contextLabelSize.height, from: .minYEdge)
+    (_, remainder) = remainder.divided(atDistance: .padding, from: .minYEdge)
+    let frontLabelSize = frontLabel.sizeThatFits(remainder.size)
+    let backLabelSize = backLabel.sizeThatFits(remainder.size)
+    let frontLabelFrame: CGRect
+    let backLabelFrame: CGRect
+    (frontLabelFrame, _) = remainder.divided(atDistance: frontLabelSize.height, from: .minYEdge)
+    (backLabelFrame, _) = remainder.divided(atDistance: backLabelSize.height, from: .minYEdge)
+    return Layout(
+      contextLabelFrame: contextLabelFrame,
+      frontLabelFrame: frontLabelFrame,
+      backLabelFrame: backLabelFrame,
+      isAnswerVisible: isAnswerVisible
+    )
+  }
+
+  public override func sizeThatFits(_ size: CGSize) -> CGSize {
+    let layoutArea = CGRect(origin: .zero, size: size).insetBy(dx: .padding * 2, dy: .padding * 2)
+    let layout = computeLayout(layoutArea: layoutArea)
+    return CGSize(width: size.width, height: layout.desiredHeight + 2 * .padding)
+  }
+
+  private var priorLayout: Layout?
+
+  public override func layoutSubviews() {
+    background.frame = bounds
+    var layoutArea = bounds
+    layoutArea.size.height = .greatestFiniteMagnitude
+    layoutArea.size.width -= contentScrollView.contentInset.left + contentScrollView.contentInset.right
+    let layout = computeLayout(layoutArea: layoutArea)
+    if priorLayout == layout {
+      // No change needed
+      return
     }
-    frontLabel.snp.makeConstraints { make in
-      make.top.equalTo(contextLabel.snp.bottom).offset(1.0 * CGFloat.padding)
-      make.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
-      self.frontLabelConstraints = make.bottom.equalToSuperview().inset(2.0 * CGFloat.padding)
-    }
-    backLabel.snp.makeConstraints { make in
-      make.top.equalTo(frontLabel.snp.top)
-      make.left.right.equalToSuperview().inset(2.0 * CGFloat.padding)
-      self.backLabelConstraints = make.bottom.equalToSuperview().inset(2.0 * CGFloat.padding)
-    }
+    let childContentSize = CGSize(width: layoutArea.width, height: layout.desiredHeight)
+    contentScrollView.contentSize = childContentSize
+    contentScrollView.frame.size.width = bounds.size.width
+    contentScrollView.frame.size.height = min(bounds.size.height, childContentSize.height + 2 * .padding)
+    contentScrollView.center = CGPoint(x: bounds.midX, y: bounds.midY)
+    contextLabel.frame = layout.contextLabelFrame
+    backLabel.frame = layout.backLabelFrame
+    frontLabel.frame = layout.frontLabelFrame
+    print("childContentSize: \(childContentSize). Layout: \(layout). Bounds = \(bounds)")
   }
 
   /// A string displayed at the top of the card, both front and back, that gives context
@@ -80,6 +117,12 @@ public final class TwoSidedCardView: PromptView {
     view.backgroundColor = .grailSecondaryGroupedBackground
     view.clipsToBounds = true
     return view
+  }()
+
+  private let contentScrollView: UIScrollView = {
+    let scrollView = UIScrollView(frame: .zero)
+    scrollView.contentInset = UIEdgeInsets(top: .padding, left: .padding, bottom: .padding, right: .padding)
+    return scrollView
   }()
 
   private let contextLabel: UILabel = {
@@ -111,15 +154,12 @@ public final class TwoSidedCardView: PromptView {
     let animations = {
       self.frontLabel.alpha = answerVisible ? 0 : 1
       self.backLabel.alpha = answerVisible ? 1 : 0
-      if answerVisible {
-        self.frontLabelConstraints?.constraint.deactivate()
-        self.backLabelConstraints?.constraint.activate()
-      } else {
-        self.frontLabelConstraints?.constraint.activate()
-        self.backLabelConstraints?.constraint.deactivate()
-      }
       self.setNeedsLayout()
-      if animated { self.layoutIfNeeded() }
+      self.superview?.setNeedsLayout()
+      if animated {
+        self.superview?.layoutIfNeeded()
+        self.layoutIfNeeded()
+      }
     }
     if animated {
       UIView.animate(withDuration: 0.2, animations: animations)

@@ -14,6 +14,7 @@
 
 - Bugs with list handling
 - Hashtag list didn't update in real time
+- Cards that are bigger than the viewport now scroll rather than obscuring the navigation chrome
 
 ## [1.1.0]
 
