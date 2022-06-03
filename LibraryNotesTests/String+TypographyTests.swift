@@ -32,4 +32,8 @@ final class StringTypographyTests: XCTestCase {
       XCTAssertEqual(afterSubtitution.string, testCase.value)
     }
   }
+
+  func testFilenameSanitization() {
+    XCTAssertEqual("Hello, World!".whitespaceCondensed().sanitized(), "Hello-World")
+  }
 }
