@@ -42,8 +42,12 @@ public final class DocumentTableController: NSObject {
 
     super.init()
     collectionView.delegate = self
-    if FileManager.default.isUbiquitousItem(at: database.fileURL) {
-      collectionView.refreshControl = refreshControl
+    if #available(macCatalyst 15.0, *) {
+
+    } else {
+      if FileManager.default.isUbiquitousItem(at: database.fileURL) {
+        collectionView.refreshControl = refreshControl
+      }
     }
     changedNoteSubscription = database.updatedValuesPublisher
       .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })

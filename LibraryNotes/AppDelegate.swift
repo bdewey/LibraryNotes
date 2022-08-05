@@ -13,6 +13,10 @@ public extension Logger {
   }()
 }
 
+extension UIMenu.Identifier {
+  static let openMenu = UIMenu.Identifier("org.brians-brain.LibraryNotes.Open")
+}
+
 @UIApplicationMain
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
@@ -54,6 +58,24 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   internal static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
+
+  override func buildMenu(with builder: UIMenuBuilder) {
+    let openMenu = UIMenu(
+      title: "",
+      image: nil,
+      identifier: .openMenu,
+      options: .displayInline,
+      children: [
+        UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command)
+      ])
+    builder.replace(menu: .newScene, with: openMenu)
+  }
+
+  @objc func openCommand() {
+    let options = UIWindowScene.ActivationRequestOptions()
+    options.preferredPresentationStyle = .prominent
+    UIApplication.shared.requestSceneSessionActivation(nil, userActivity: nil, options: options)
+  }
 }
 
 /// Creates log handlers. Note that since this tends to run before logging is set up, and if it fails we can't get debug information for other bugs,
