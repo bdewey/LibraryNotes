@@ -4,6 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
+import LinkPresentation
 import Logging
 import ObjectiveCTextStorageWrapper
 import SnapKit
@@ -60,13 +61,26 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.imageStorage = NoteScopedImageStorage(identifier: noteIdentifier, database: database)
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(note.metadata.preferredTitle)
     self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
         Logger.textSaving.info("No longer getting updates for \(noteIdentifier)")
       }, receiveValue: { [weak self] versions in
         self?.updateVersionIfNeeded(versions)
       })
+    if #available(iOS 16.0, *) {
+      self.navigationItem.style = .editor
+      let metadata = LPLinkMetadata()
+      var urlComponents = URLComponents(url: database.fileURL, resolvingAgainstBaseURL: false)!
+      urlComponents.queryItems = [.init(name: "id", value: noteIdentifier)]
+      let noteURL = urlComponents.url!
+      metadata.originalURL = noteURL
+      metadata.url = noteURL
+      if let coverImage {
+        metadata.imageProvider = NSItemProvider(object: coverImage)
+      }
+      self.navigationItem.documentProperties = UIDocumentProperties(metadata: metadata)
+    }
+    setTitleMarkdown(note.metadata.preferredTitle)
   }
 
   @available(*, unavailable)
@@ -142,6 +156,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
     navigationItem.titleView = label
     textEditViewController.navigationTitleView = label
+    if #available(iOS 16.0, *) {
+      if let metadata = navigationItem.documentProperties?.metadata {
+        metadata.title = label.attributedText?.string
+        navigationItem.documentProperties?.metadata = metadata
+      }
+    }
   }
 
   override var isEditing: Bool {
