@@ -69,6 +69,26 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command)
       ])
     builder.replace(menu: .newScene, with: openMenu)
+    if #available(macCatalyst 16.0, *) {
+      builder.remove(menu: .document)
+    }
+    let exportMenu = UIMenu(title: "Export", image: nil, identifier: .init("org.brians-brain.LibraryNotes.Export"), options: [], children: [
+      UICommand(title: "Export to CSV...", action: #selector(DocumentListViewController.exportToCSV)),
+      UICommand(title: "Export to Zip...", action: #selector(DocumentListViewController.exportToZip)),
+    ])
+    builder.insertChild(
+      UIMenu(
+        title: "",
+        image: nil,
+        identifier: .init("org.brians-brain.LibraryNotes.Import"),
+        options: .displayInline,
+        children: [
+          UIKeyCommand(title: "Import...", action: #selector(DocumentListViewController.importBooks), input: "i", modifierFlags: [.shift, .command]),
+          exportMenu,
+        ]
+      ),
+      atEndOfMenu: .file
+    )
   }
 
   @objc func openCommand() {
