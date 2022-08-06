@@ -20,4 +20,15 @@ extension UIResponder {
     }
     return responderStrings.joined(separator: "\n")
   }
+
+  var windowScene: UIWindowScene? {
+    var responder: UIResponder? = self
+    while let currentRepsonder = responder {
+      if let scene = currentRepsonder as? UIWindowScene {
+        return scene
+      }
+      responder = currentRepsonder.next
+    }
+    return nil
+  }
 }
