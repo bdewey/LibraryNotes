@@ -110,6 +110,7 @@
 		D3AD01CC23BE7703004BB7DF /* NoteDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
+		D3BA54CF28A088C10048C718 /* GenericLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */; };
 		D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
@@ -292,6 +293,7 @@
 		D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabaseTests.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericLocalizedError.swift; sourceTree = "<group>"; };
 		D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
@@ -571,6 +573,7 @@
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 				D3DBC4052704A18E00C18438 /* String+Names.swift */,
 				D3398DC22847A105009D2C9E /* String+Filenames.swift */,
+				D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */,
 			);
 			path = LibraryNotes;
 			sourceTree = "<group>";
@@ -804,6 +807,7 @@
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */,
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */,
+				D3BA54CF28A088C10048C718 /* GenericLocalizedError.swift in Sources */,
 				D3378CE226DBC47C006750EC /* BookCollectionViewDataSource.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D369182326BAD09F001EB512 /* Value+NoteModels.swift in Sources */,

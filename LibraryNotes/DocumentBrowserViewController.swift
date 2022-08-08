@@ -9,6 +9,33 @@ import UniformTypeIdentifiers
   func openNewFile()
 }
 
+extension NSUserActivity {
+  private enum ActivityKey {
+    static let openDocumentActivity = "org.brians-brain.GrailDiary.OpenNotebook"
+    static let documentURL = "org.brians-brain.GrailDiary.OpenNotebook.URL"
+  }
+
+  /// Creates an ``NSUserActivity`` for opening the library at ``url``.
+  static func openLibrary(at url: URL) throws -> NSUserActivity {
+    let urlData = try url.bookmarkData()
+    let activity = NSUserActivity(activityType: ActivityKey.openDocumentActivity)
+    activity.title = "Open Library"
+    activity.addUserInfoEntries(from: [ActivityKey.documentURL: urlData])
+    return activity
+  }
+
+  /// Gets the URL of the library to open.
+  var libraryURL: URL {
+    get throws {
+      guard activityType == ActivityKey.openDocumentActivity, let urlData = userInfo?[ActivityKey.documentURL] as? Data else {
+        throw GenericLocalizedError(errorDescription: "Activity does not have type \(ActivityKey.openDocumentActivity) or does not have the URL data")
+      }
+      var isStale = false
+      return try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
+    }
+  }
+}
+
 /// Our custom DocumentBrowserViewController that knows how to open new files, etc.
 final class DocumentBrowserViewController: UIDocumentBrowserViewController {
   override init(forOpening contentTypes: [UTType]?) {
@@ -42,10 +69,7 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
     let url = notebookViewController.fileURL
     do {
-      let urlData = try url.bookmarkData()
-      let activity = NSUserActivity(activityType: ActivityKey.openDocumentActivity)
-      activity.title = "View Notebook"
-      activity.addUserInfoEntries(from: [ActivityKey.documentURL: urlData])
+      let activity = try NSUserActivity.openLibrary(at: url)
       topLevelViewController?.updateUserActivity(activity)
       return activity
     } catch {
@@ -55,14 +79,9 @@ final class DocumentBrowserViewController: UIDocumentBrowserViewController {
   }
 
   func configure(with userActivity: NSUserActivity) {
-    guard let urlData = userActivity.userInfo?[ActivityKey.documentURL] as? Data else {
-      Logger.shared.error("In DocumentBrowserViewController.configure(with:), but cannot get URL from activity")
-      return
-    }
     Task {
       do {
-        var isStale = false
-        let url = try URL(resolvingBookmarkData: urlData, bookmarkDataIsStale: &isStale)
+        let url = try userActivity.libraryURL
         try await openDocument(at: url, animated: false)
         topLevelViewController?.configure(with: userActivity)
       } catch {
@@ -99,6 +118,11 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     viewController.view.tintColor = .systemOrange
     present(viewController, animated: animated, completion: nil)
     topLevelViewController = viewController
+    #if targetEnvironment(macCatalyst)
+    windowScene?.title = url.deletingPathExtension().lastPathComponent
+    windowScene?.titlebar?.representedURL = url
+    print("represented url = \(String(describing: windowScene?.titlebar?.representedURL))")
+    #endif
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {

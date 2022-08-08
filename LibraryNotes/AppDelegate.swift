@@ -69,7 +69,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command)
       ])
     builder.replace(menu: .newScene, with: openMenu)
-    if #available(macCatalyst 16.0, *) {
+    if #available(macCatalyst 16.0, iOS 16.0, *) {
       builder.remove(menu: .document)
     }
     let exportMenu = UIMenu(title: "Export", image: nil, identifier: .init("org.brians-brain.LibraryNotes.Export"), options: [], children: [

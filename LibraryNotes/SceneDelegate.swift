@@ -16,6 +16,10 @@ public extension UTType {
   /// The top-level UISplitViewController that is showing the note contents.
   var topLevelViewController: NotebookViewController?
 
+  #if targetEnvironment(macCatalyst)
+  let toolbarDelegate = ToolbarDelegate()
+  #endif
+
   static var isUITesting: Bool = {
     CommandLine.arguments.contains("--uitesting")
   }()
@@ -25,9 +29,44 @@ public extension UTType {
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
   ) {
-    Logger.shared.info("Connecting a new scene to a scene session (self = \(ObjectIdentifier(self))")
+    Logger.shared.info("\(#function) Connecting a new scene to a scene session (self = \(ObjectIdentifier(self))")
     guard let windowScene = scene as? UIWindowScene else { return }
+    configureWindowScene(windowScene) { browser in
+      if !Self.isUITesting,
+         let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity
+      {
+        browser.configure(with: userActivity)
+      } else if let firstLaunchURL = self.firstLaunchURL {
+        try await browser.openDocument(at: firstLaunchURL, animated: false)
+      }
+    }
+  }
+
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let urlContext = URLContexts.first else {
+      Logger.shared.warning("\(#function) Nothing to open")
+      return
+    }
+    do {
+      let activity = try NSUserActivity.openLibrary(at: urlContext.url)
+      Logger.shared.info("\(#function) Creating new scene to open \(urlContext.url)")
+      UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil)
+    } catch {
+      Logger.shared.error("\(#function): Error creating openLibrary activity: \(error)")
+    }
+  }
+
+  private func configureWindowScene(_ windowScene: UIWindowScene, browserConfigurationBlock: @escaping (DocumentBrowserViewController) async throws -> Void) {
     let window = UIWindow(windowScene: windowScene)
+    //    windowScene.titlebar?.titleVisibility = .hidden
+    //    windowScene.titlebar?.toolbar = nil
+    //    windowScene.titlebar?.separatorStyle = .none
+#if targetEnvironment(macCatalyst)
+    let toolbar = NSToolbar(identifier: "main")
+    toolbar.delegate = toolbarDelegate
+    toolbar.displayMode = .iconOnly
+    windowScene.titlebar?.toolbar = toolbar
+#endif
 
     let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
 
@@ -35,16 +74,10 @@ public extension UTType {
     window.makeKeyAndVisible()
 
     Task {
-      if !Self.isUITesting,
-         let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity
-      {
-        browser.configure(with: userActivity)
-      } else if let firstLaunchURL = firstLaunchURL {
-        do {
-          try await browser.openDocument(at: firstLaunchURL, animated: false)
-        } catch {
-          Logger.shared.error("Unexpected error opening \(firstLaunchURL): \(error)")
-        }
+      do {
+        try await browserConfigurationBlock(browser)
+      } catch {
+        Logger.shared.error("\(#function) Error configuring browser: \(error)")
       }
       self.window = window
       UITableView.appearance().backgroundColor = .grailGroupedBackground
@@ -87,3 +120,25 @@ public extension UTType {
     return scene.userActivity
   }
 }
+
+#if targetEnvironment(macCatalyst)
+final class ToolbarDelegate: NSObject, NSToolbarDelegate {
+  func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    Logger.shared.trace("\(#function)")
+    return [.toggleSidebar]
+  }
+
+  func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+    Logger.shared.trace("\(#function)")
+    return toolbarDefaultItemIdentifiers(toolbar)
+  }
+
+  func toolbar(
+    _ toolbar: NSToolbar,
+    itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+    willBeInsertedIntoToolbar flag: Bool
+  ) -> NSToolbarItem? {
+    return nil
+  }
+}
+#endif

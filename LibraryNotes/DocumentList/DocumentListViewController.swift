@@ -312,7 +312,16 @@ final class DocumentListViewController: UIViewController {
       sortMenu,
     ]))
     navButton.accessibilityIdentifier = "document-list-actions"
-    navigationItem.rightBarButtonItem = navButton
+    if #available(macCatalyst 16.0, iOS 16.0, *) {
+      navigationItem.style = .editor
+      navigationItem.centerItemGroups = [
+        UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview)).creatingFixedGroup(),
+        navButton.creatingMovableGroup(customizationIdentifier: "yolo")
+      ]
+    } else {
+      // Fallback on earlier versions
+      navigationItem.rightBarButtonItem = navButton
+    }
   }
 
   @objc func exportToCSV() {
