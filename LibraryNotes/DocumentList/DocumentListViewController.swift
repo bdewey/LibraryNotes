@@ -319,8 +319,10 @@ final class DocumentListViewController: UIViewController {
         sortMenu,
         groupByYearReadAction,
       ]))
+      let reviewItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview))
+      reviewItem.isEnabled = canPerformAction(reviewItem.action!, withSender: nil)
       navigationItem.trailingItemGroups = [
-        UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview)).creatingFixedGroup(),
+        reviewItem.creatingFixedGroup(),
         sortOptions.creatingFixedGroup(),
       ]
     }
@@ -499,8 +501,8 @@ final class DocumentListViewController: UIViewController {
     return url
   }
 
-  @objc private func performReview() {
-    guard let studySession = studySession else { return }
+  @objc func performReview() {
+    guard let studySession = studySession, !studySession.isEmpty else { return }
     presentStudySessionViewController(for: studySession)
   }
 }
@@ -548,9 +550,12 @@ extension DocumentListViewController {
   /// A `UIAction` for showing randomly selected quotes.
   private var quotesAction: UIAction {
     UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
-      guard let self = self else { return }
-      self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
+      self?.showRandomQuotes()
     }
+  }
+
+  @objc func showRandomQuotes() {
+    showQuotes(quotes: quoteIdentifiers, shiftFocus: true)
   }
 
   /// A `UIAction` for reviewing items in the library.
@@ -589,6 +594,8 @@ extension DocumentListViewController {
   override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
     if action == #selector(sendFeedback) {
       return MFMailComposeViewController.canSendMail()
+    } else if action == #selector(performReview) {
+      return !studySession.isEmpty
     } else {
       return super.canPerformAction(action, withSender: sender)
     }

@@ -73,9 +73,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       options: .displayInline,
       children: [
         newNoteCommand,
-        UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command)
+        UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command),
       ])
     builder.replace(menu: .newScene, with: openMenu)
+    builder.insertSibling(UIMenu(options: .displayInline, children: [
+      UICommand(title: "Review", action: #selector(DocumentListViewController.performReview)),
+      UICommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes))
+    ]), afterMenu: .openMenu)
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       builder.remove(menu: .document)
     }
