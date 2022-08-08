@@ -314,7 +314,7 @@ final class DocumentListViewController: UIViewController {
     navButton.accessibilityIdentifier = "document-list-actions"
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       navigationItem.style = .editor
-      navigationItem.centerItemGroups = [
+      navigationItem.trailingItemGroups = [
         UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview)).creatingFixedGroup(),
         navButton.creatingMovableGroup(customizationIdentifier: "yolo")
       ]
@@ -338,7 +338,6 @@ final class DocumentListViewController: UIViewController {
   private func exportAndShare() {
     let noteIdentifiers = dataSource.noteIdentifiers
     Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
-    let listFormatter = ListFormatter()
     do {
       let exportURL = try writeToCSV()
       let activityViewController = UIActivityViewController(activityItems: [exportURL], applicationActivities: nil)

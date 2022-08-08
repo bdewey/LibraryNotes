@@ -119,6 +119,9 @@ public final class NotebookViewController: UIViewController {
     splitViewController.preferredDisplayMode = .oneBesideSecondary
     splitViewController.showsSecondaryOnlyButton = true
     splitViewController.delegate = self
+    #if targetEnvironment(macCatalyst)
+    splitViewController.presentsWithGesture = false
+    #endif
     return splitViewController
   }()
 
