@@ -314,9 +314,13 @@ final class DocumentListViewController: UIViewController {
     navButton.accessibilityIdentifier = "document-list-actions"
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       navigationItem.style = .editor
+      let sortOptions = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), menu: UIMenu(children: [
+        sortMenu,
+        groupByYearReadAction,
+      ]))
       navigationItem.trailingItemGroups = [
         UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview)).creatingFixedGroup(),
-        navButton.creatingMovableGroup(customizationIdentifier: "yolo")
+        sortOptions.creatingFixedGroup(),
       ]
     } else {
       // Fallback on earlier versions
@@ -609,7 +613,7 @@ extension DocumentListViewController {
         self?.currentSortOrder = sortOrder
       }
     }
-    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
+    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), options: .displayInline, children: sortActions)
   }
 }
 
