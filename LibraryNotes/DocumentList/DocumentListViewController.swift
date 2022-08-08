@@ -580,18 +580,29 @@ extension DocumentListViewController {
       return nil
     }
     return UIAction(title: "Send Feedback", image: UIImage(systemName: "envelope.open")) { [weak self] _ in
-      guard let self = self else { return }
-      Logger.shared.info("Sending feedback")
-      let mailComposer = MFMailComposeViewController()
-      mailComposer.setSubject("\(AppDelegate.appName) Feedback")
-      mailComposer.setToRecipients(["librarynotesapp@gmail.com"])
-      mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
-      if UIApplication.isTestFlight, let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
-        mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
-      }
-      mailComposer.mailComposeDelegate = self
-      self.present(mailComposer, animated: true)
+      self?.sendFeedback()
     }
+  }
+
+  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    if action == #selector(sendFeedback) {
+      return MFMailComposeViewController.canSendMail()
+    } else {
+      return super.canPerformAction(action, withSender: sender)
+    }
+  }
+
+  @objc func sendFeedback() {
+    Logger.shared.info("Sending feedback")
+    let mailComposer = MFMailComposeViewController()
+    mailComposer.setSubject("\(AppDelegate.appName) Feedback")
+    mailComposer.setToRecipients(["librarynotesapp@gmail.com"])
+    mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
+    if UIApplication.isTestFlight, let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
+      mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
+    }
+    mailComposer.mailComposeDelegate = self
+    self.present(mailComposer, animated: true)
   }
 
   private var advanceTimeAction: UIAction? {

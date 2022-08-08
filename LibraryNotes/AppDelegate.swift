@@ -89,6 +89,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       ),
       atEndOfMenu: .file
     )
+    builder.insertChild(UIMenu(title: "", options: .displayInline, children: [UICommand(title: "Send feedback to the developer...", action: #selector(DocumentListViewController.sendFeedback))]), atStartOfMenu: .help)
   }
 
   @objc func openCommand() {
