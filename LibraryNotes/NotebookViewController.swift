@@ -141,14 +141,6 @@ public final class NotebookViewController: UIViewController {
   override public var canBecomeFirstResponder: Bool { true }
 
   private func configureKeyCommands() {
-    let newNoteCommand = UIKeyCommand(
-      title: "New Note",
-      action: #selector(makeNewNote),
-      input: "n",
-      modifierFlags: [.command]
-    )
-    addKeyCommand(newNoteCommand)
-
     let focusTagsCommand = UIKeyCommand(
       title: "View Tags",
       action: #selector(tagsBecomeFirstResponder),

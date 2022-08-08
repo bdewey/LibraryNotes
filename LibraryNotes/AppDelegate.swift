@@ -60,12 +60,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   }()
 
   override func buildMenu(with builder: UIMenuBuilder) {
+    let newNoteCommand = UIKeyCommand(
+      title: "New Note",
+      action: #selector(NotebookViewController.makeNewNote),
+      input: "n",
+      modifierFlags: [.command]
+    )
     let openMenu = UIMenu(
       title: "",
       image: nil,
       identifier: .openMenu,
       options: .displayInline,
       children: [
+        newNoteCommand,
         UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command)
       ])
     builder.replace(menu: .newScene, with: openMenu)
