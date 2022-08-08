@@ -312,7 +312,8 @@ final class DocumentListViewController: UIViewController {
       sortMenu,
     ]))
     navButton.accessibilityIdentifier = "document-list-actions"
-    if #available(macCatalyst 16.0, iOS 16.0, *) {
+#if targetEnvironment(macCatalyst)
+    if #available(macCatalyst 16.0, *) {
       navigationItem.style = .editor
       let sortOptions = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), menu: UIMenu(children: [
         sortMenu,
@@ -322,10 +323,11 @@ final class DocumentListViewController: UIViewController {
         UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview)).creatingFixedGroup(),
         sortOptions.creatingFixedGroup(),
       ]
-    } else {
+    }
+#else
       // Fallback on earlier versions
       navigationItem.rightBarButtonItem = navButton
-    }
+#endif
   }
 
   @objc func exportToCSV() {
