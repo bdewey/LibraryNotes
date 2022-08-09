@@ -109,7 +109,7 @@ final class NotebookStructureViewController: UIViewController {
   public init(database: NoteDatabase) {
     self.database = database
     super.init(nibName: nil, bundle: nil)
-    title = AppDelegate.appName
+    navigationItem.largeTitleDisplayMode = .never
   }
 
   @available(*, unavailable)
@@ -124,7 +124,9 @@ final class NotebookStructureViewController: UIViewController {
   private lazy var collectionView: UICollectionView = {
     let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
       var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
-      config.backgroundColor = .grailSecondaryBackground
+      #if !targetEnvironment(macCatalyst)
+        config.backgroundColor = .grailSecondaryBackground
+      #endif
       config.headerMode = .none
       // The last section gets a footer
       config.footerMode = (sectionIndex == Section.allCases.count - 1) ? .supplementary : .none
@@ -146,10 +148,11 @@ final class NotebookStructureViewController: UIViewController {
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
     let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
-      var contentConfiguration = cell.defaultContentConfiguration()
+      var contentConfiguration = UIListContentConfiguration.sidebarCell()
       contentConfiguration.text = item.description
       contentConfiguration.textProperties.color = .label
       contentConfiguration.image = item.image
+      cell.backgroundConfiguration = UIBackgroundConfiguration.listSidebarCell()
       cell.contentConfiguration = contentConfiguration
 
       // Only items with children get an outline disclosure identifier.
@@ -216,7 +219,10 @@ final class NotebookStructureViewController: UIViewController {
     notebookSubscription = database.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
-    navigationController?.setToolbarHidden(false, animated: false)
+    #if targetEnvironment(macCatalyst)
+    navigationController?.setNavigationBarHidden(true, animated: false)
+    #endif
+    navigationController?.setToolbarHidden(true, animated: false)
   }
 
   override func viewWillAppear(_ animated: Bool) {

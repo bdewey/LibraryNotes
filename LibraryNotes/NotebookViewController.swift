@@ -84,7 +84,19 @@ public final class NotebookViewController: UIViewController {
     }
   }
 
-  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
+#if targetEnvironment(macCatalyst)
+  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+    rootViewController: structureViewController,
+    barTintColor: nil,
+    prefersLargeTitles: false
+  )
+#else
+  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+    rootViewController: structureViewController,
+    barTintColor: .grailBackground,
+    prefersLargeTitles: false
+  )
+#endif
 
   private lazy var structureViewController = makeStructureViewController()
 
@@ -116,7 +128,8 @@ public final class NotebookViewController: UIViewController {
       for: .secondary
     )
     splitViewController.setViewController(compactNavigationController, for: .compact)
-    splitViewController.preferredDisplayMode = .oneBesideSecondary
+    splitViewController.primaryBackgroundStyle = .sidebar
+    splitViewController.preferredDisplayMode = .twoBesideSecondary
     splitViewController.showsSecondaryOnlyButton = true
     splitViewController.delegate = self
     #if targetEnvironment(macCatalyst)
@@ -446,12 +459,16 @@ extension NotebookViewController {
 
 private extension UINavigationController {
   /// Creates a UINavigationController with the expected configuration for being a notebook navigation controller.
-  static func notebookNavigationController(rootViewController: UIViewController, prefersLargeTitles: Bool = false) -> UINavigationController {
+  static func notebookNavigationController(
+    rootViewController: UIViewController,
+    barTintColor: UIColor? = .grailBackground,
+    prefersLargeTitles: Bool = false
+  ) -> UINavigationController {
     let navigationController = UINavigationController(
       rootViewController: rootViewController
     )
     navigationController.navigationBar.prefersLargeTitles = prefersLargeTitles
-    navigationController.navigationBar.barTintColor = .grailBackground
+    navigationController.navigationBar.barTintColor = barTintColor
     return navigationController
   }
 }
