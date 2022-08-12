@@ -503,7 +503,12 @@ final class DocumentListViewController: UIViewController {
 
   @objc func performReview() {
     guard let studySession = studySession, !studySession.isEmpty else { return }
-    presentStudySessionViewController(for: studySession)
+    #if targetEnvironment(macCatalyst)
+      let activity = NSUserActivity.studySession(databaseURL: database.fileURL, focusStructure: focusedStructure)
+      UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil)
+    #else
+      presentStudySessionViewController(for: studySession)
+    #endif
   }
 }
 
@@ -759,10 +764,6 @@ extension DocumentListViewController: StudyViewControllerDelegate {
     } catch {
       Logger.shared.error("Unexpected error recording study session results: \(error)")
     }
-  }
-
-  func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
-    dismiss(animated: true, completion: nil)
   }
 }
 

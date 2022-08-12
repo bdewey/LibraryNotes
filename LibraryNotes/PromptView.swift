@@ -8,6 +8,10 @@ public protocol PromptViewDelegate: AnyObject {
   func promptViewDidRevealAnswer(_ promptView: PromptView)
 }
 
+@objc public protocol PromptViewActions {
+  func revealAnswer()
+}
+
 open class PromptView: UIControl {
   public var isAnswerVisible = false
   public weak var delegate: PromptViewDelegate?

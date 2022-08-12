@@ -9,7 +9,22 @@ import UIKit
 
 public protocol StudyViewControllerDelegate: AnyObject {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
-  func studyViewControllerDidCancel(_ studyViewController: StudyViewController)
+}
+
+extension NSUserActivity {
+  static let studySessionActivityType = "org.brians-brain.LibraryNotes.StudySession"
+  static let databaseFileKey = "org.brians-brain.LibraryNotes.DatabaseURL"
+  static let focusStructureKey = "org.brians-brain.LibraryNotes.FocusStructure"
+
+  static func studySession(databaseURL: URL, focusStructure: NotebookStructureViewController.StructureIdentifier) -> NSUserActivity {
+    let activity = NSUserActivity(activityType: studySessionActivityType)
+    activity.requiredUserInfoKeys = [databaseFileKey, focusStructureKey]
+    activity.addUserInfoEntries(from: [
+      databaseFileKey: databaseURL.absoluteString,
+      focusStructureKey: focusStructure.rawValue,
+    ])
+    return activity
+  }
 }
 
 /// Presents a stack of cards for studying.
@@ -33,7 +48,7 @@ public final class StudyViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
   }
 
-  private func finishStudySession() {
+  @objc private func finishStudySession() {
     studySession.studySessionEndDate = Date()
     delegate?.studyViewController(self, didFinishSession: studySession)
     dismiss(animated: true, completion: nil)
@@ -48,7 +63,7 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   /// The document we are studying from
-  private let database: NoteDatabase
+  let database: NoteDatabase
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -77,6 +92,11 @@ public final class StudyViewController: UIViewController {
     return button
   }()
 
+  @objc private func handleGotItRightCommand() {
+    guard gotItRightButton.isEnabled else { return }
+    markCurrentCardCorrect(true, currentTranslation: .zero)
+  }
+
   private lazy var needsReviewButton: UIButton = {
     let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
       Logger.shared.info("Needs review")
@@ -88,6 +108,11 @@ public final class StudyViewController: UIViewController {
     button.isEnabled = false
     return button
   }()
+
+  @objc private func handleNeedsReviewCommand() {
+    guard needsReviewButton.isEnabled else { return }
+    markCurrentCardCorrect(false, currentTranslation: .zero)
+  }
 
   private lazy var closeButton: UIButton = {
     let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
@@ -255,6 +280,15 @@ public final class StudyViewController: UIViewController {
     configureUI(animated: false, completion: nil)
     // Assumes we're presented in a navigation controller
     navigationController?.presentationController?.delegate = self
+
+    let gotItRightCommand = UIKeyCommand(action: #selector(handleGotItRightCommand), input: UIKeyCommand.inputRightArrow, modifierFlags: .command)
+    let needsReviewCommand = UIKeyCommand(action: #selector(handleNeedsReviewCommand), input: UIKeyCommand.inputLeftArrow, modifierFlags: .command)
+    let closeSessionCommand = UIKeyCommand(action: #selector(finishStudySession), input: UIKeyCommand.inputEscape)
+    let revealAnswerCommand = UIKeyCommand(action: #selector(PromptViewActions.revealAnswer), input: UIKeyCommand.inputUpArrow, modifierFlags: .command)
+
+    for command in [gotItRightCommand, needsReviewCommand, closeSessionCommand, revealAnswerCommand] {
+      addKeyCommand(command)
+    }
   }
 
   /// How to transform the image while swiping.
@@ -431,6 +465,7 @@ public final class StudyViewController: UIViewController {
       )
       promptView.delegate = self
       view.addSubview(promptView)
+      promptView.becomeFirstResponder()
       completion(promptView)
     } catch {
       Logger.shared.error("Unexpected error generating prompt view: \(error)")

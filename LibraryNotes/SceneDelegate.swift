@@ -11,6 +11,8 @@ public extension UTType {
 
 @objc final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
+  var studyWindow: UIWindow?
+
   /// The currently open database
   var database: NoteDatabase?
   /// The top-level UISplitViewController that is showing the note contents.
@@ -31,6 +33,30 @@ public extension UTType {
   ) {
     Logger.shared.info("\(#function) Connecting a new scene to a scene session (self = \(ObjectIdentifier(self))")
     guard let windowScene = scene as? UIWindowScene else { return }
+    if
+      let userActivity = connectionOptions.userActivities.first,
+      userActivity.activityType == NSUserActivity.studySessionActivityType,
+      let databaseURLString = userActivity.userInfo?[NSUserActivity.databaseFileKey] as? String,
+      let structureIdentifier = (userActivity.userInfo?[NSUserActivity.focusStructureKey] as? String).flatMap({ NotebookStructureViewController.StructureIdentifier.init(rawValue: $0)}),
+      let databaseURL = URL(string: databaseURLString)
+    {
+      windowScene.title = "Review \(databaseURL.deletingPathExtension().lastPathComponent)"
+      Task {
+        let database = try await NoteDatabase(fileURL: databaseURL, authorDescription: UIDevice.current.name)
+        for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
+          let noteIdentifiers = noteIdentifierRecords.map({ $0.noteIdentifier })
+          let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
+          let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
+          studyViewController.view.backgroundColor = .grailBackground
+          let window = UIWindow(windowScene: windowScene)
+          window.rootViewController = studyViewController
+          window.makeKeyAndVisible()
+          self.studyWindow = window
+          return
+        }
+      }
+      return
+    }
     configureWindowScene(windowScene) { browser in
       if !Self.isUITesting,
          let userActivity = connectionOptions.userActivities.first ?? scene.session.stateRestorationActivity
@@ -108,6 +134,14 @@ public extension UTType {
 
   func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
     return scene.userActivity
+  }
+}
+
+extension SceneDelegate: StudyViewControllerDelegate {
+  func studyViewController(_ studyViewController: StudyViewController, didFinishSession studySession: StudySession) {
+    guard let session = studyViewController.windowScene?.session else { return }
+    try? studyViewController.database.updateStudySessionResults(studySession, on: .now, buryRelatedPrompts: true)
+    UIApplication.shared.requestSceneSessionDestruction(session, options: nil)
   }
 }
 

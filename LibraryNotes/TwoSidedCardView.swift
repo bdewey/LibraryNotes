@@ -12,7 +12,7 @@ private extension CGFloat {
 /// The view initially shows the card front with no buttons. When you tap the card, it will
 /// show the card back and two buttons: "Got it" and "study more."
 ///
-public final class TwoSidedCardView: PromptView {
+public final class TwoSidedCardView: PromptView, PromptViewActions {
   override public init(frame: CGRect) {
     super.init(frame: frame)
     commonInit()
@@ -31,6 +31,7 @@ public final class TwoSidedCardView: PromptView {
     addGestureRecognizer(tapRecognizer)
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
     setAnswerVisible(false, animated: false)
+    let revealAnswerCommand = UIKeyCommand(action: #selector(revealAnswer), input: " ", modifierFlags: .command)
   }
 
   private struct Layout: Equatable {
@@ -168,7 +169,9 @@ public final class TwoSidedCardView: PromptView {
     }
   }
 
-  @objc private func revealAnswer() {
+  public override var canBecomeFirstResponder: Bool { true }
+
+  @objc public func revealAnswer() {
     setAnswerVisible(true, animated: true)
     delegate?.promptViewDidRevealAnswer(self)
   }
