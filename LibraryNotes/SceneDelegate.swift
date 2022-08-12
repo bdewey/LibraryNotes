@@ -58,16 +58,6 @@ public extension UTType {
 
   private func configureWindowScene(_ windowScene: UIWindowScene, browserConfigurationBlock: @escaping (DocumentBrowserViewController) async throws -> Void) {
     let window = UIWindow(windowScene: windowScene)
-    //    windowScene.titlebar?.titleVisibility = .hidden
-    //    windowScene.titlebar?.toolbar = nil
-    //    windowScene.titlebar?.separatorStyle = .none
-#if targetEnvironment(macCatalyst)
-    let toolbar = NSToolbar(identifier: "main")
-    toolbar.delegate = toolbarDelegate
-    toolbar.displayMode = .iconOnly
-    windowScene.titlebar?.toolbar = toolbar
-#endif
-
     let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
 
     window.rootViewController = browser

@@ -219,9 +219,6 @@ final class NotebookStructureViewController: UIViewController {
     notebookSubscription = database.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
-    #if targetEnvironment(macCatalyst)
-    navigationController?.setNavigationBarHidden(true, animated: false)
-    #endif
     navigationController?.setToolbarHidden(true, animated: false)
   }
 
