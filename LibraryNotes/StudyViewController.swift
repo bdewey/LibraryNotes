@@ -11,22 +11,6 @@ public protocol StudyViewControllerDelegate: AnyObject {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
 }
 
-extension NSUserActivity {
-  static let studySessionActivityType = "org.brians-brain.LibraryNotes.StudySession"
-  static let databaseFileKey = "org.brians-brain.LibraryNotes.DatabaseURL"
-  static let focusStructureKey = "org.brians-brain.LibraryNotes.FocusStructure"
-
-  static func studySession(databaseURL: URL, focusStructure: NotebookStructureViewController.StructureIdentifier) -> NSUserActivity {
-    let activity = NSUserActivity(activityType: studySessionActivityType)
-    activity.requiredUserInfoKeys = [databaseFileKey, focusStructureKey]
-    activity.addUserInfoEntries(from: [
-      databaseFileKey: databaseURL.absoluteString,
-      focusStructureKey: focusStructure.rawValue,
-    ])
-    return activity
-  }
-}
-
 /// Presents a stack of cards for studying.
 // TODO: Refactor
 // swiftlint:disable:next type_body_length

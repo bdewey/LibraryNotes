@@ -21,7 +21,7 @@ extension UIResponder {
     return responderStrings.joined(separator: "\n")
   }
 
-  var windowScene: UIWindowScene? {
+  var responderChainWindowScene: UIWindowScene? {
     var responder: UIResponder? = self
     while let currentRepsonder = responder {
       if let scene = currentRepsonder as? UIWindowScene {
