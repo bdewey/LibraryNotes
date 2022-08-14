@@ -17,6 +17,17 @@ public extension StringProtocol where Self.SubSequence == Substring {
     return (prefix: prefix, suffix: self[prefix.endIndex...])
   }
 
+  /// If the receiver has the prefix `prefix`, returns the remaining string.
+  /// - Parameter prefix: The prefix to look for.
+  /// - Returns: The remaining string after removing `prefix` if the receiver stars with `prefix`; otherwise nil.
+  func suffixIfHasPrefix(_ prefix: Substring) -> String? {
+    guard hasPrefix(prefix) else {
+      return nil
+    }
+    let index = index(startIndex, offsetBy: prefix.count)
+    return String(self[index...])
+  }
+
   func suffix(where predicate: (Character) -> Bool) -> Substring {
     guard startIndex != endIndex else { return self[startIndex ..< endIndex] }
     // TODO: what i *want* to do is just call prefix on the reversed string, but the type

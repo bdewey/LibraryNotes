@@ -32,6 +32,34 @@ extension NSUserActivity {
     static let focusStructure = "org.brians-brain.LibraryNotes.FocusStructure"
   }
 
+  /// A "thing" that can be studied in a notebook.
+  enum StudyTarget {
+    /// An entire section of a notebook.
+    case focusStructure(NotebookStructureViewController.StructureIdentifier)
+
+    /// A single note in a notebook.
+    case note(Note.Identifier)
+
+    init?(rawValue: String) {
+      if let focusStructureString = rawValue.suffixIfHasPrefix("focus-structure:"), let focusStructure = NotebookStructureViewController.StructureIdentifier(rawValue: focusStructureString) {
+        self = .focusStructure(focusStructure)
+      } else if let noteIdentifier = rawValue.suffixIfHasPrefix("note-identifier:") {
+        self = .note(noteIdentifier)
+      } else {
+        return nil
+      }
+    }
+
+    var rawValue: String {
+      switch self {
+      case .note(let identifier):
+        return "note-identifier:\(identifier)"
+      case .focusStructure(let identifier):
+        return "focus-structure:\(identifier.rawValue)"
+      }
+    }
+  }
+
   /// Creates an ``NSUserActivity`` for opening the library at ``url``.
   static func openLibrary(at url: URL) throws -> NSUserActivity {
     let urlData = try url.bookmarkData()
@@ -52,25 +80,27 @@ extension NSUserActivity {
     }
   }
 
-  var focusStructure: NotebookStructureViewController.StructureIdentifier {
+  /// The "thing" this activity says we should study.
+  var studyTarget: StudyTarget {
     get throws {
       guard
         let rawValue = userInfo?[UserInfoKey.focusStructure] as? String,
-        let focusStructure = NotebookStructureViewController.StructureIdentifier(rawValue: rawValue)
+        let studyTarget = StudyTarget(rawValue: rawValue)
       else {
         throw GenericLocalizedError(errorDescription: "Could not get focusStructure from activity")
       }
-      return focusStructure
+      return studyTarget
     }
   }
 
-  static func studySession(databaseURL: URL, focusStructure: NotebookStructureViewController.StructureIdentifier) throws -> NSUserActivity {
+  /// Constructs an `NSUserActivity` for studying a target in a database.
+  static func studySession(databaseURL: URL, studyTarget: StudyTarget) throws -> NSUserActivity {
     let activity = NSUserActivity(activityType: LibraryNotesActivityType.studySession.rawValue)
     activity.requiredUserInfoKeys = [UserInfoKey.documentURL, UserInfoKey.focusStructure]
     let bookmarkData = try databaseURL.bookmarkData()
     activity.addUserInfoEntries(from: [
       UserInfoKey.documentURL: bookmarkData,
-      UserInfoKey.focusStructure: focusStructure.rawValue,
+      UserInfoKey.focusStructure: studyTarget.rawValue,
     ])
     return activity
   }
@@ -166,21 +196,28 @@ extension NSUserActivity {
   }
 
   func configureStudySessionWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {
-    guard let databaseURL = try? userActivity.libraryURL, let structureIdentifier = try? userActivity.focusStructure else {
+    guard let databaseURL = try? userActivity.libraryURL, let studyTarget = try? userActivity.studyTarget else {
       return false
     }
     window.windowScene?.title = "Review \(databaseURL.deletingPathExtension().lastPathComponent)"
     Task {
       let database = try await NoteDatabase(fileURL: databaseURL, authorDescription: UIDevice.current.name)
-      for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
-        let noteIdentifiers = noteIdentifierRecords.map({ $0.noteIdentifier })
-        let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
-        let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
-        studyViewController.view.backgroundColor = .grailBackground
-        window.rootViewController = studyViewController
-        self.studyWindow = window
-        return
+      var noteIdentifiers: [Note.Identifier]?
+      switch studyTarget {
+      case .note(let identifier):
+        noteIdentifiers = [identifier]
+      case .focusStructure(let structureIdentifier):
+        for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
+          noteIdentifiers = noteIdentifierRecords.map { $0.noteIdentifier }
+          break
+        }
       }
+      guard let noteIdentifiers else { return }
+      let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
+      let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
+      studyViewController.view.backgroundColor = .grailBackground
+      window.rootViewController = studyViewController
+      self.studyWindow = window
     }
     return true
   }

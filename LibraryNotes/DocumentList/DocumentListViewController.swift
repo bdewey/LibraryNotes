@@ -504,15 +504,7 @@ final class DocumentListViewController: UIViewController {
   @objc func performReview() {
     guard let studySession = studySession, !studySession.isEmpty else { return }
 #if targetEnvironment(macCatalyst)
-    let options = UIScene.ActivationRequestOptions()
-    options.collectionJoinBehavior = .disallowed
-    if let existingScene = UIApplication.shared.firstConnectedWindowSceneWithRootViewController(type: StudyViewController.self, predicate: { studyViewController in
-      studyViewController.database.fileURL == database.fileURL
-    }) {
-      UIApplication.shared.requestSceneSessionActivation(existingScene.session, userActivity: nil, options: options)
-    } else if let activity = try? NSUserActivity.studySession(databaseURL: database.fileURL, focusStructure: focusedStructure) {
-      UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: options)
-    }
+    UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .focusStructure(focusedStructure))
 #else
     presentStudySessionViewController(for: studySession)
 #endif
