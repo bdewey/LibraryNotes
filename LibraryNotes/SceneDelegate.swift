@@ -24,12 +24,16 @@ enum LibraryNotesActivityType: String {
 
   /// Start a new study session.
   case studySession = "org.brians-brain.LibraryNotes.StudySession"
+
+  /// Show random quotes
+  case showRandomQuotes = "org.brians-brain.LibraryNotes.RandomQuotes"
 }
 
 extension NSUserActivity {
   private enum UserInfoKey {
     static let documentURL = "org.brians-brain.GrailDiary.OpenNotebook.URL"
     static let focusStructure = "org.brians-brain.LibraryNotes.FocusStructure"
+    static let quoteIdentifiers = "org.brians-brain.LibraryNotes.QuoteIdentifiers"
   }
 
   /// A "thing" that can be studied in a notebook.
@@ -80,6 +84,18 @@ extension NSUserActivity {
     }
   }
 
+  var quoteIdentifiers: [ContentIdentifier] {
+    get throws {
+      guard
+        let data = userInfo?[UserInfoKey.quoteIdentifiers] as? Data,
+        let identifiers = try? JSONDecoder().decode([ContentIdentifier].self, from: data)
+      else {
+        throw GenericLocalizedError(errorDescription: "Activity does not have \(UserInfoKey.quoteIdentifiers)")
+      }
+      return identifiers
+    }
+  }
+
   /// The "thing" this activity says we should study.
   var studyTarget: StudyTarget {
     get throws {
@@ -101,6 +117,18 @@ extension NSUserActivity {
     activity.addUserInfoEntries(from: [
       UserInfoKey.documentURL: bookmarkData,
       UserInfoKey.focusStructure: studyTarget.rawValue,
+    ])
+    return activity
+  }
+
+  static func showRandomQuotes(databaseURL: URL, quoteIdentifiers: [ContentIdentifier]) throws -> NSUserActivity {
+    let activity = NSUserActivity(activityType: LibraryNotesActivityType.showRandomQuotes.rawValue)
+    activity.requiredUserInfoKeys = [UserInfoKey.documentURL, UserInfoKey.quoteIdentifiers]
+    let bookmarkData = try databaseURL.bookmarkData()
+    let identifierData = try JSONEncoder().encode(quoteIdentifiers)
+    activity.addUserInfoEntries(from: [
+      UserInfoKey.documentURL: bookmarkData,
+      UserInfoKey.quoteIdentifiers: identifierData,
     ])
     return activity
   }
@@ -162,7 +190,26 @@ extension NSUserActivity {
       return configureLibraryWindow(window, userActivity: userActivity)
     case .studySession:
       return configureStudySessionWindow(window, userActivity: userActivity)
+    case .showRandomQuotes:
+      return configureQuotesWindow(window, userActivity: userActivity)
     }
+  }
+
+  func configureQuotesWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {
+    guard let url = try? userActivity.libraryURL else {
+      return false
+    }
+    Logger.sceneDelegate.info("Showing random quotes from \"\(url.path)\"")
+#if targetEnvironment(macCatalyst)
+    window.windowScene?.title = "Random Quotes"
+#endif
+    Task {
+      let database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
+      let quotesViewController = QuotesViewController(database: database)
+      quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
+      window.rootViewController = UINavigationController(rootViewController: quotesViewController)
+    }
+    return true
   }
 
   func configureLibraryWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {

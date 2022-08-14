@@ -28,10 +28,16 @@ extension UIApplication {
     predicate: (ViewController) -> Bool
   ) -> UIWindowScene? {
     firstConnectedWindowScene { windowScene in
-      guard let rootViewController = windowScene.keyWindow?.rootViewController as? ViewController else {
-        return false
+      if let rootViewController = windowScene.keyWindow?.rootViewController as? ViewController {
+        return predicate(rootViewController)
       }
-      return predicate(rootViewController)
+      if
+        let navigationController = windowScene.keyWindow?.rootViewController as? UINavigationController,
+        !navigationController.viewControllers.isEmpty,
+        let rootViewController = navigationController.viewControllers[0] as? ViewController {
+        return predicate(rootViewController)
+      }
+      return false
     }
   }
 
@@ -50,6 +56,24 @@ extension UIApplication {
     }) {
       requestSceneSessionActivation(existingScene.session, userActivity: nil, options: options)
     } else if let activity = try? NSUserActivity.studySession(databaseURL: databaseURL, studyTarget: studyTarget) {
+      UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: options)
+    }
+  }
+
+  /// Activates or creates a Random Quotes scene.
+  ///
+  /// If there is currently a Random Quotes scene for this database, that scene will be activated without modification.
+  /// - Parameters:
+  ///   - databaseURL: The database URL to extract random quotes from.
+  ///   - quoteIdentifiers: The eligible quote identifiers.
+  func activateRandomQuotesScene(databaseURL: URL, quoteIdentifiers: [ContentIdentifier]) {
+    let options = UIScene.ActivationRequestOptions()
+    options.collectionJoinBehavior = .disallowed
+    if let existingScene = firstConnectedWindowSceneWithRootViewController(type: QuotesViewController.self, predicate: { quotesViewController in
+      quotesViewController.database.fileURL == databaseURL
+    }) {
+      requestSceneSessionActivation(existingScene.session, userActivity: nil, options: options)
+    } else if let activity = try? NSUserActivity.showRandomQuotes(databaseURL: databaseURL, quoteIdentifiers: quoteIdentifiers) {
       UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: options)
     }
   }

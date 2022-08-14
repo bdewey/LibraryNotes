@@ -559,7 +559,11 @@ extension DocumentListViewController {
   }
 
   @objc func showRandomQuotes() {
+#if targetEnvironment(macCatalyst)
+    UIApplication.shared.activateRandomQuotesScene(databaseURL: database.fileURL, quoteIdentifiers: quoteIdentifiers)
+#else
     showQuotes(quotes: quoteIdentifiers, shiftFocus: true)
+#endif
   }
 
   /// A `UIAction` for reviewing items in the library.
