@@ -99,19 +99,19 @@ public final class NotebookViewController: UISplitViewController {
     }
   }
 
-#if targetEnvironment(macCatalyst)
-  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
-    rootViewController: structureViewController,
-    barTintColor: nil,
-    prefersLargeTitles: false
-  )
-#else
-  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
-    rootViewController: structureViewController,
-    barTintColor: .grailBackground,
-    prefersLargeTitles: false
-  )
-#endif
+  #if targetEnvironment(macCatalyst)
+    private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+      rootViewController: structureViewController,
+      barTintColor: nil,
+      prefersLargeTitles: false
+    )
+  #else
+    private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+      rootViewController: structureViewController,
+      barTintColor: .grailBackground,
+      prefersLargeTitles: false
+    )
+  #endif
 
   private lazy var structureViewController = makeStructureViewController()
 
@@ -268,7 +268,7 @@ public final class NotebookViewController: UISplitViewController {
     ])
     structureViewController.updateUserActivity(userActivity)
 
-    if let secondaryViewController = self.secondaryViewController {
+    if let secondaryViewController = secondaryViewController {
       do {
         let controllerType = type(of: secondaryViewController).notebookDetailType
         userActivity.addUserInfoEntries(
@@ -466,7 +466,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     _ svc: UISplitViewController,
     displayModeForExpandingToProposedDisplayMode proposedDisplayMode: UISplitViewController.DisplayMode
   ) -> UISplitViewController.DisplayMode {
-    if let secondaryViewController = self.secondaryViewController(forCollaped: true) {
+    if let secondaryViewController = secondaryViewController(forCollaped: true) {
       do {
         let activityData = try secondaryViewController.userActivityData()
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
@@ -494,7 +494,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     compactNavigationController.popToRootViewController(animated: false)
     compactNavigationController.pushViewController(compactDocumentList, animated: false)
 
-    if let secondaryViewController = self.secondaryViewController(forCollaped: false), secondaryViewController.shouldShowWhenCollapsed {
+    if let secondaryViewController = secondaryViewController(forCollaped: false), secondaryViewController.shouldShowWhenCollapsed {
       do {
         let activityData = try secondaryViewController.userActivityData()
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(

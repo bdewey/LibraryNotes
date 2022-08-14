@@ -27,16 +27,14 @@ public final class StarRatingView: UIView {
     configureUI()
   }
 
-  private lazy var starViews: [UIImageView] = {
-    (1 ... 5).map { index in
-      let imageView = UIImageView(image: UIImage(systemName: "star")!)
-      imageView.tag = index
-      imageView.isUserInteractionEnabled = true
-      let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapStar))
-      imageView.addGestureRecognizer(tapGestureRecognizer)
-      return imageView
-    }
-  }()
+  private lazy var starViews: [UIImageView] = (1 ... 5).map { index in
+    let imageView = UIImageView(image: UIImage(systemName: "star")!)
+    imageView.tag = index
+    imageView.isUserInteractionEnabled = true
+    let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapStar))
+    imageView.addGestureRecognizer(tapGestureRecognizer)
+    return imageView
+  }
 
   private func configureUI() {
     (0 ..< rating).forEach { index in

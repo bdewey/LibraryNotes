@@ -24,7 +24,7 @@ public extension String {
   }
 
   func count(of character: Character) -> Int {
-    return reduce(0) { (count, stringCharacter) -> Int in
+    return reduce(0) { count, stringCharacter -> Int in
       if stringCharacter == character { return count + 1 }
       return count
     }

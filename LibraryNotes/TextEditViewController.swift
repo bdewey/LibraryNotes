@@ -194,7 +194,7 @@ public final class TextEditViewController: UIViewController {
       cell.contentConfiguration = contentConfiguration
     }
 
-    let typeaheadDataSource = UICollectionViewDiffableDataSource<String, String>(collectionView: typeaheadSelectionView) { (collectionView, indexPath, hashtag) -> UICollectionViewCell? in
+    let typeaheadDataSource = UICollectionViewDiffableDataSource<String, String>(collectionView: typeaheadSelectionView) { collectionView, indexPath, hashtag -> UICollectionViewCell? in
       collectionView.dequeueConfiguredReusableCell(using: hashtagCellRegistration, for: indexPath, item: hashtag)
     }
     let typeaheadInfo = TypeaheadAccessory(
@@ -537,7 +537,8 @@ extension TextEditViewController: UITextViewDelegate {
     guard textView.selectedRange.location > 0 else { return }
     if
       let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location - 1),
-      let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
+      let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag })
+    {
       let hashtag = String(utf16CodeUnits: parsedAttributedString[hashtagNode.range], count: hashtagNode.range.length)
       let suggestions = delegate?.testEditViewController(self, hashtagSuggestionsFor: hashtag) ?? []
       if suggestions.isEmpty { typeaheadAccessory = nil }

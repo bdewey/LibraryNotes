@@ -168,7 +168,7 @@ public final class StudyViewController: UIViewController {
         }
         return (swipe, swipe.classifier.matchStrength(vector: vector))
       }
-      .reduce(nil) { (priorResult, tuple) -> (Swipe, CGFloat)? in
+      .reduce(nil) { priorResult, tuple -> (Swipe, CGFloat)? in
         guard let result = priorResult else {
           return tuple
         }
@@ -219,9 +219,7 @@ public final class StudyViewController: UIViewController {
     current.addGestureRecognizer(panGestureRecognizer)
   }
 
-  private lazy var progressView: UIProgressView = {
-    UIProgressView(progressViewStyle: .default)
-  }()
+  private lazy var progressView: UIProgressView = .init(progressViewStyle: .default)
 
   private lazy var doneImageView: UIImageView = {
     let check = UIImage(systemName: "checkmark.seal")
@@ -457,7 +455,7 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  public override func viewWillLayoutSubviews() {
+  override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
     guard let currentCardView = currentCardView, currentCardView.transform == .identity else {
       return

@@ -89,7 +89,7 @@ private struct TypographyScanner<S: Scannable> {
   }
 
   mutating func makeTypographySubstitutions() {
-    while let current = self.current {
+    while let current = current {
       if current == "\"" {
         // Open quote if the next thing is non-space.
         if next?.isNonWhitespace ?? false {

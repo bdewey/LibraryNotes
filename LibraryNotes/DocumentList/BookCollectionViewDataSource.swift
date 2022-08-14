@@ -14,7 +14,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
     let notebookPageRegistration = Registration.makePageRegistration(coverImageCache: coverImageCache, database: database)
     let headerRegistration = Registration.makeHeaderRegistration()
 
-    super.init(collectionView: collectionView) { (collectionView, indexPath, item) -> UICollectionViewCell? in
+    super.init(collectionView: collectionView) { collectionView, indexPath, item -> UICollectionViewCell? in
       switch item {
       case .book(let noteIdentifier, _):
         let metadata = database.bookMetadata(identifier: noteIdentifier)

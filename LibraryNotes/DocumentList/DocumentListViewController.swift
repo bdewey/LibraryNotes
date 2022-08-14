@@ -80,14 +80,12 @@ final class DocumentListViewController: UIViewController {
     })
   }
 
-  private lazy var dataSource: DocumentTableController = {
-    DocumentTableController(
-      collectionView: collectionView,
-      database: database,
-      coverImageCache: coverImageCache,
-      delegate: self
-    )
-  }()
+  private lazy var dataSource: DocumentTableController = .init(
+    collectionView: collectionView,
+    database: database,
+    coverImageCache: coverImageCache,
+    delegate: self
+  )
 
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
@@ -312,24 +310,24 @@ final class DocumentListViewController: UIViewController {
       sortMenu,
     ]))
     navButton.accessibilityIdentifier = "document-list-actions"
-#if targetEnvironment(macCatalyst)
-    if #available(macCatalyst 16.0, *) {
-      navigationItem.style = .editor
-      let sortOptions = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), menu: UIMenu(children: [
-        sortMenu,
-        groupByYearReadAction,
-      ]))
-      let reviewItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview))
-      reviewItem.isEnabled = canPerformAction(reviewItem.action!, withSender: nil)
-      navigationItem.trailingItemGroups = [
-        reviewItem.creatingFixedGroup(),
-        sortOptions.creatingFixedGroup(),
-      ]
-    }
-#else
+    #if targetEnvironment(macCatalyst)
+      if #available(macCatalyst 16.0, *) {
+        navigationItem.style = .editor
+        let sortOptions = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), menu: UIMenu(children: [
+          sortMenu,
+          groupByYearReadAction,
+        ]))
+        let reviewItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview))
+        reviewItem.isEnabled = canPerformAction(reviewItem.action!, withSender: nil)
+        navigationItem.trailingItemGroups = [
+          reviewItem.creatingFixedGroup(),
+          sortOptions.creatingFixedGroup(),
+        ]
+      }
+    #else
       // Fallback on earlier versions
       navigationItem.rightBarButtonItem = navButton
-#endif
+    #endif
   }
 
   @objc func exportToCSV() {
@@ -503,11 +501,11 @@ final class DocumentListViewController: UIViewController {
 
   @objc func performReview() {
     guard let studySession = studySession, !studySession.isEmpty else { return }
-#if targetEnvironment(macCatalyst)
-    UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .focusStructure(focusedStructure))
-#else
-    presentStudySessionViewController(for: studySession)
-#endif
+    #if targetEnvironment(macCatalyst)
+      UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .focusStructure(focusedStructure))
+    #else
+      presentStudySessionViewController(for: studySession)
+    #endif
   }
 }
 
@@ -524,7 +522,7 @@ extension DocumentListViewController {
       importLibraryThingAction,
       sendFeedbackAction,
       advanceTimeAction,
-      groupByYearReadAction
+      groupByYearReadAction,
     ].compactMap { $0 })
   }
 
@@ -546,7 +544,7 @@ extension DocumentListViewController {
 
   @objc func importBooks() {
     Logger.shared.info("Importing from LibraryThing")
-    let bookImporterViewController = BookImporterViewController(database: self.database)
+    let bookImporterViewController = BookImporterViewController(database: database)
     bookImporterViewController.delegate = self
     present(bookImporterViewController, animated: true)
   }
@@ -559,11 +557,11 @@ extension DocumentListViewController {
   }
 
   @objc func showRandomQuotes() {
-#if targetEnvironment(macCatalyst)
-    UIApplication.shared.activateRandomQuotesScene(databaseURL: database.fileURL, quoteIdentifiers: quoteIdentifiers)
-#else
-    showQuotes(quotes: quoteIdentifiers, shiftFocus: true)
-#endif
+    #if targetEnvironment(macCatalyst)
+      UIApplication.shared.activateRandomQuotesScene(databaseURL: database.fileURL, quoteIdentifiers: quoteIdentifiers)
+    #else
+      showQuotes(quotes: quoteIdentifiers, shiftFocus: true)
+    #endif
   }
 
   /// A `UIAction` for reviewing items in the library.
@@ -587,8 +585,6 @@ extension DocumentListViewController {
     }
     return UIMenu(title: "Export", image: UIImage(systemName: "arrow.up.forward.app"), children: [csvAction, zipAction])
   }
-
-
 
   private var sendFeedbackAction: UIAction? {
     guard MFMailComposeViewController.canSendMail() else {
@@ -619,7 +615,7 @@ extension DocumentListViewController {
       mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
     }
     mailComposer.mailComposeDelegate = self
-    self.present(mailComposer, animated: true)
+    present(mailComposer, animated: true)
   }
 
   private var advanceTimeAction: UIAction? {
@@ -699,7 +695,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   // TODO: This isn't actually called :-(
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
-      let splitViewController = self.splitViewController,
+      let splitViewController = splitViewController,
       splitViewController.viewControllers.count > 1,
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
       let detailViewController = navigationController.viewControllers.first as? SavingTextEditViewController

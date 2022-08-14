@@ -55,9 +55,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
-  internal static var isUITesting: Bool = {
-    CommandLine.arguments.contains("--uitesting")
-  }()
+  internal static var isUITesting: Bool = CommandLine.arguments.contains("--uitesting")
 
   override func buildMenu(with builder: UIMenuBuilder) {
     let newNoteCommand = UIKeyCommand(
@@ -74,11 +72,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       children: [
         newNoteCommand,
         UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command),
-      ])
+      ]
+    )
     builder.replace(menu: .newScene, with: openMenu)
     builder.insertSibling(UIMenu(options: .displayInline, children: [
       UICommand(title: "Review", action: #selector(DocumentListViewController.performReview)),
-      UICommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes))
+      UICommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes)),
     ]), afterMenu: .openMenu)
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       builder.remove(menu: .document)

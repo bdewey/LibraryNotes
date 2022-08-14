@@ -1,4 +1,4 @@
-//  Copyright © 2022 Brian's Brain. All rights reserved.
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import UIKit
 
@@ -34,7 +34,8 @@ extension UIApplication {
       if
         let navigationController = windowScene.keyWindow?.rootViewController as? UINavigationController,
         !navigationController.viewControllers.isEmpty,
-        let rootViewController = navigationController.viewControllers[0] as? ViewController {
+        let rootViewController = navigationController.viewControllers[0] as? ViewController
+      {
         return predicate(rootViewController)
       }
       return false

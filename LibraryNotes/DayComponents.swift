@@ -13,7 +13,7 @@ public struct DayComponents: Equatable, Comparable, Hashable {
   /// Note: This does the component extraction from the current calendar.
   public init(_ date: Date) {
     let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-    year = components.year!
+    self.year = components.year!
     self.month = components.month!
     self.day = components.day!
   }

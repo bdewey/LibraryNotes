@@ -63,7 +63,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
     )
   }
 
-  public override func sizeThatFits(_ size: CGSize) -> CGSize {
+  override public func sizeThatFits(_ size: CGSize) -> CGSize {
     let layoutArea = CGRect(origin: .zero, size: size).insetBy(dx: .padding * 2, dy: .padding * 2)
     let layout = computeLayout(layoutArea: layoutArea)
     return CGSize(width: size.width, height: layout.desiredHeight + 2 * .padding)
@@ -71,7 +71,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
 
   private var priorLayout: Layout?
 
-  public override func layoutSubviews() {
+  override public func layoutSubviews() {
     background.frame = bounds
     var layoutArea = bounds
     layoutArea.size.height = .greatestFiniteMagnitude
@@ -169,7 +169,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
     }
   }
 
-  public override var canBecomeFirstResponder: Bool { true }
+  override public var canBecomeFirstResponder: Bool { true }
 
   @objc public func revealAnswer() {
     setAnswerVisible(true, animated: true)

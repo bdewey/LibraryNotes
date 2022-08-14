@@ -43,20 +43,19 @@ public final class DocumentTableController: NSObject {
     super.init()
     collectionView.delegate = self
     if #available(macCatalyst 15.0, *) {
-
     } else {
       if FileManager.default.isUbiquitousItem(at: database.fileURL) {
         collectionView.refreshControl = refreshControl
       }
     }
-    changedNoteSubscription = database.updatedValuesPublisher
-      .filter({ $0.0.key == NoteDatabaseKey.metadata.rawValue })
-      .map({ $0.0.scope })
+    self.changedNoteSubscription = database.updatedValuesPublisher
+      .filter { $0.0.key == NoteDatabaseKey.metadata.rawValue }
+      .map { $0.0.scope }
       .receive(on: DispatchQueue.main)
       .sink { [weak self] noteIdentifier in
         guard let self = self else { return }
         var snapshot = self.dataSource.snapshot()
-        let itemsToUpdate = snapshot.itemIdentifiers.filter({ $0.matchesNoteIdentifier(noteIdentifier) })
+        let itemsToUpdate = snapshot.itemIdentifiers.filter { $0.matchesNoteIdentifier(noteIdentifier) }
         if !itemsToUpdate.isEmpty {
           snapshot.reconfigureItems(itemsToUpdate)
           self.dataSource.apply(snapshot, animatingDifferences: false)
@@ -135,7 +134,7 @@ public final class DocumentTableController: NSObject {
     guard let slice = noteIdentifiersBySection[section], !slice.isEmpty else {
       return nil
     }
-    if section == .read && (delegate?.documentTableControllerShouldGroupByYearRead ?? false) {
+    if section == .read, delegate?.documentTableControllerShouldGroupByYearRead ?? false {
       var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
       let booksByYear = slice.chunked(on: { $0.finishYear })
       for (year, yearSlice) in booksByYear {
@@ -310,7 +309,7 @@ private extension DocumentTableController {
       Logger.shared.error("Unexpected error refreshing file: \(error)")
     }
     Task {
-      try? await Task.sleep(nanoseconds: 1_000_000_000)
+      try? await Task.sleep(nanoseconds: 1000000000)
       refreshControl.endRefreshing()
     }
   }

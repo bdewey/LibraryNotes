@@ -92,9 +92,9 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     present(viewController, animated: animated, completion: nil)
     topLevelViewController = viewController
     #if targetEnvironment(macCatalyst)
-    responderChainWindowScene?.title = url.deletingPathExtension().lastPathComponent
-    responderChainWindowScene?.titlebar?.representedURL = url
-    print("represented url = \(String(describing: responderChainWindowScene?.titlebar?.representedURL))")
+      responderChainWindowScene?.title = url.deletingPathExtension().lastPathComponent
+      responderChainWindowScene?.titlebar?.representedURL = url
+      print("represented url = \(String(describing: responderChainWindowScene?.titlebar?.representedURL))")
     #endif
   }
 

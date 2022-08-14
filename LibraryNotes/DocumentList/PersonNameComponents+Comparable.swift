@@ -4,11 +4,11 @@ import Foundation
 
 public extension PersonNameComponents {
   func compare(to other: PersonNameComponents) -> ComparisonResult {
-    if let familyName = self.familyName, let otherFamilyName = other.familyName {
+    if let familyName = familyName, let otherFamilyName = other.familyName {
       let result = familyName.compare(otherFamilyName, options: [.diacriticInsensitive, .caseInsensitive])
       if result != .orderedSame { return result }
     }
-    if let givenName = self.givenName, let otherGivenName = other.givenName {
+    if let givenName = givenName, let otherGivenName = other.givenName {
       return givenName.compare(otherGivenName)
     }
     return .orderedSame

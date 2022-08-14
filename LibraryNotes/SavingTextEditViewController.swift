@@ -142,7 +142,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return
     }
     if versionArray.count > 1 {
-      Logger.textSaving.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map({ ($0.authorID, $0.timestamp) }))")
+      Logger.textSaving.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map { ($0.authorID, $0.timestamp) })")
     }
     textEditViewController.markdown = winningVersion.value.text ?? ""
     hasUnsavedChanges = false

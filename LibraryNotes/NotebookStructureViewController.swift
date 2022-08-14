@@ -163,7 +163,7 @@ final class NotebookStructureViewController: UIViewController {
       }
     }
 
-    let dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
+    let dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { view, indexPath, item -> UICollectionViewCell? in
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 

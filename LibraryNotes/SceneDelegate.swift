@@ -144,12 +144,10 @@ extension NSUserActivity {
   var topLevelViewController: NotebookViewController?
 
   #if targetEnvironment(macCatalyst)
-  let toolbarDelegate = ToolbarDelegate()
+    let toolbarDelegate = ToolbarDelegate()
   #endif
 
-  static var isUITesting: Bool = {
-    CommandLine.arguments.contains("--uitesting")
-  }()
+  static var isUITesting: Bool = CommandLine.arguments.contains("--uitesting")
 
   func scene(
     _ scene: UIScene,
@@ -200,9 +198,9 @@ extension NSUserActivity {
       return false
     }
     Logger.sceneDelegate.info("Showing random quotes from \"\(url.path)\"")
-#if targetEnvironment(macCatalyst)
-    window.windowScene?.title = "Random Quotes"
-#endif
+    #if targetEnvironment(macCatalyst)
+      window.windowScene?.title = "Random Quotes"
+    #endif
     Task {
       let database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
       let quotesViewController = QuotesViewController(database: database)
@@ -217,10 +215,10 @@ extension NSUserActivity {
       return false
     }
     Logger.sceneDelegate.info("Opening document at \"\(url.path)\"")
-#if targetEnvironment(macCatalyst)
-    window.windowScene?.title = url.deletingPathExtension().lastPathComponent
-    window.windowScene?.titlebar?.representedURL = url
-#endif
+    #if targetEnvironment(macCatalyst)
+      window.windowScene?.title = url.deletingPathExtension().lastPathComponent
+      window.windowScene?.titlebar?.representedURL = url
+    #endif
     Task {
       let database: NoteDatabase
       if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
@@ -354,23 +352,23 @@ extension SceneDelegate: StudyViewControllerDelegate {
 }
 
 #if targetEnvironment(macCatalyst)
-final class ToolbarDelegate: NSObject, NSToolbarDelegate {
-  func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-    Logger.sceneDelegate.trace("\(#function)")
-    return [.toggleSidebar]
-  }
+  final class ToolbarDelegate: NSObject, NSToolbarDelegate {
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+      Logger.sceneDelegate.trace("\(#function)")
+      return [.toggleSidebar]
+    }
 
-  func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-    Logger.sceneDelegate.trace("\(#function)")
-    return toolbarDefaultItemIdentifiers(toolbar)
-  }
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+      Logger.sceneDelegate.trace("\(#function)")
+      return toolbarDefaultItemIdentifiers(toolbar)
+    }
 
-  func toolbar(
-    _ toolbar: NSToolbar,
-    itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
-    willBeInsertedIntoToolbar flag: Bool
-  ) -> NSToolbarItem? {
-    return nil
+    func toolbar(
+      _ toolbar: NSToolbar,
+      itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
+      willBeInsertedIntoToolbar flag: Bool
+    ) -> NSToolbarItem? {
+      return nil
+    }
   }
-}
 #endif
