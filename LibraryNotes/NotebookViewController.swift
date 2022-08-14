@@ -43,12 +43,11 @@ public final class NotebookViewController: UISplitViewController {
     )
     setViewController(compactNavigationController, for: .compact)
     primaryBackgroundStyle = .sidebar
+    preferredPrimaryColumnWidth = 240
+    preferredSupplementaryColumnWidth = 340
     preferredDisplayMode = .twoBesideSecondary
     showsSecondaryOnlyButton = true
     delegate = self
-//    #if targetEnvironment(macCatalyst)
-//    splitViewController.presentsWithGesture = false
-//    #endif
   }
 
   @available(*, unavailable)
