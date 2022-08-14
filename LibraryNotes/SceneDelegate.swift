@@ -200,6 +200,13 @@ extension NSUserActivity {
       return false
     }
     window.windowScene?.title = "Review \(databaseURL.deletingPathExtension().lastPathComponent)"
+    if let sizeRestrictions = window.windowScene?.sizeRestrictions {
+      sizeRestrictions.minimumSize = CGSize(width: 500, height: 400)
+      sizeRestrictions.maximumSize = CGSize(width: 500, height: 400)
+      if #available(macCatalyst 16.0, *) {
+        sizeRestrictions.allowsFullScreen = false
+      }
+    }
     Task {
       let database = try await NoteDatabase(fileURL: databaseURL, authorDescription: UIDevice.current.name)
       var noteIdentifiers: [Note.Identifier]?
