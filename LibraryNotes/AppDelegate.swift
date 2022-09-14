@@ -76,7 +76,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     )
     builder.replace(menu: .newScene, with: openMenu)
     builder.insertSibling(UIMenu(options: .displayInline, children: [
-      UICommand(title: "Review", action: #selector(DocumentListViewController.performReview)),
+      UIKeyCommand(title: "Review", action: #selector(DocumentListViewController.performReview), input: "r", modifierFlags: [.command, .shift]),
       UICommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes)),
     ]), afterMenu: .openMenu)
     if #available(macCatalyst 16.0, iOS 16.0, *) {

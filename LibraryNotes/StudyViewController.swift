@@ -70,8 +70,12 @@ public final class StudyViewController: UIViewController {
       self?.markCurrentCardCorrect(true, currentTranslation: .zero)
     }))
     button.setTitle("Got it right", for: .normal)
-    button.setTitleColor(.systemGreen, for: .normal)
-    button.setTitleColor(.systemGray, for: .disabled)
+    #if targetEnvironment(macCatalyst)
+      button.configuration = UIButton.Configuration.borderedProminent()
+    #else
+      button.setTitleColor(.systemGreen, for: .normal)
+      button.setTitleColor(.systemGray, for: .disabled)
+    #endif
     button.isEnabled = false
     return button
   }()
@@ -106,6 +110,20 @@ public final class StudyViewController: UIViewController {
     button.setImage(UIImage(systemName: "xmark"), for: .normal)
     button.setTitleColor(.systemGray, for: .normal)
     return button
+  }()
+
+  private lazy var keyHintLabel: UILabel = {
+    let label = UILabel(frame: .zero)
+    label.font = .preferredFont(forTextStyle: .caption1)
+    label.textColor = .secondaryLabel
+    label.text = "Press space to reveal answer"
+    label.sizeToFit()
+    #if !targetEnvironment(macCatalyst)
+    // This overrides the `alpha` property that we manipulate in various states
+    // We only need to show this label on Catalyst
+    label.isHidden = true
+    #endif
+    return label
   }()
 
   private struct Swipe: Identifiable {
@@ -184,6 +202,9 @@ public final class StudyViewController: UIViewController {
   private func hideAllSwipeMessages() {
     gotItRightButton.isEnabled = false
     needsReviewButton.isEnabled = false
+    UIView.animate(withDuration: 0.1) { [keyHintLabel] in
+      keyHintLabel.alpha = 1
+    }
   }
 
   /// The view displaying the current card.
@@ -232,7 +253,7 @@ public final class StudyViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton].forEach(view.addSubview)
+    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton, keyHintLabel].forEach(view.addSubview)
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
@@ -251,22 +272,28 @@ public final class StudyViewController: UIViewController {
       make.right.equalTo(doneImageView.snp.left).offset(-8)
     }
     needsReviewButton.snp.makeConstraints { make in
-      make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
+      make.centerY.equalTo(gotItRightButton)
       make.left.equalToSuperview().offset(16)
     }
     gotItRightButton.snp.makeConstraints { make in
       make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
       make.right.equalToSuperview().offset(-16)
     }
+    keyHintLabel.snp.makeConstraints { make in
+      make.centerY.equalTo(gotItRightButton)
+      make.centerX.equalToSuperview()
+    }
     studySession.studySessionStartDate = Date()
     configureUI(animated: false, completion: nil)
     // Assumes we're presented in a navigation controller
     navigationController?.presentationController?.delegate = self
 
-    let gotItRightCommand = UIKeyCommand(action: #selector(handleGotItRightCommand), input: UIKeyCommand.inputRightArrow, modifierFlags: .command)
-    let needsReviewCommand = UIKeyCommand(action: #selector(handleNeedsReviewCommand), input: UIKeyCommand.inputLeftArrow, modifierFlags: .command)
-    let closeSessionCommand = UIKeyCommand(action: #selector(finishStudySession), input: UIKeyCommand.inputEscape)
-    let revealAnswerCommand = UIKeyCommand(action: #selector(PromptViewActions.revealAnswer), input: UIKeyCommand.inputUpArrow, modifierFlags: .command)
+    let gotItRightCommand = UIKeyCommand(action: #selector(handleGotItRightCommand), input: UIKeyCommand.inputRightArrow, modifierFlags: [], discoverabilityTitle: "Got it right")
+    gotItRightCommand.wantsPriorityOverSystemBehavior = true
+    let needsReviewCommand = UIKeyCommand(action: #selector(handleNeedsReviewCommand), input: UIKeyCommand.inputLeftArrow, modifierFlags: [], discoverabilityTitle: "Needs review")
+    needsReviewCommand.wantsPriorityOverSystemBehavior = true
+    let closeSessionCommand = UIKeyCommand(action: #selector(finishStudySession), input: UIKeyCommand.inputEscape, discoverabilityTitle: "Close session")
+    let revealAnswerCommand = UIKeyCommand(action: #selector(PromptViewActions.revealAnswer), input: " ", modifierFlags: [], discoverabilityTitle: "Reveal answer")
 
     for command in [gotItRightCommand, needsReviewCommand, closeSessionCommand, revealAnswerCommand] {
       addKeyCommand(command)
@@ -484,6 +511,9 @@ extension StudyViewController: PromptViewDelegate {
   public func promptViewDidRevealAnswer(_ promptView: PromptView) {
     gotItRightButton.isEnabled = true
     needsReviewButton.isEnabled = true
+    UIView.animate(withDuration: 0.1) { [keyHintLabel] in
+      keyHintLabel.alpha = 0
+    }
   }
 }
 

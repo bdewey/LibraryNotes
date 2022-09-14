@@ -31,7 +31,6 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
     addGestureRecognizer(tapRecognizer)
     addTarget(self, action: #selector(revealAnswer), for: .touchUpInside)
     setAnswerVisible(false, animated: false)
-    let revealAnswerCommand = UIKeyCommand(action: #selector(revealAnswer), input: " ", modifierFlags: .command)
   }
 
   private struct Layout: Equatable {

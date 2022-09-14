@@ -139,6 +139,15 @@ public final class NotebookViewController: UISplitViewController {
 
   override public var canBecomeFirstResponder: Bool { true }
 
+  private var isFirstAppearance = true
+  override public func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if isFirstAppearance {
+      isFirstAppearance = false
+      documentListViewController.becomeFirstResponder()
+    }
+  }
+
   private func configureKeyCommands() {
     let focusTagsCommand = UIKeyCommand(
       title: "View Tags",

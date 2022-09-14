@@ -1,115 +1,113 @@
 {
-  "object": {
-    "pins": [
-      {
-        "package": "BookKit",
-        "repositoryURL": "https://github.com/bdewey/BookKit",
-        "state": {
-          "branch": null,
-          "revision": "4a91aeb65857215d9a130bc0bd9a3277c49c66a7",
-          "version": "0.5.0"
-        }
-      },
-      {
-        "package": "CodableCSV",
-        "repositoryURL": "https://github.com/dehesa/CodableCSV",
-        "state": {
-          "branch": null,
-          "revision": "99ace2cfdfbc19108b529c021005fb57a460e715",
-          "version": "0.6.7"
-        }
-      },
-      {
-        "package": "GRDB",
-        "repositoryURL": "https://github.com/bdewey/GRDB.swift",
-        "state": {
-          "branch": "xcode13-rc",
-          "revision": "76c7764c715909d5575cec859ec7649fb4ca9e2c",
-          "version": null
-        }
-      },
-      {
-        "package": "KeyValueCRDT",
-        "repositoryURL": "https://github.com/bdewey/KeyValueCRDT",
-        "state": {
-          "branch": null,
-          "revision": "460becd23a29b30dbfde184b155f3e4124e1fcdf",
-          "version": "1.2.1"
-        }
-      },
-      {
-        "package": "SnapKit",
-        "repositoryURL": "https://github.com/SnapKit/SnapKit",
-        "state": {
-          "branch": null,
-          "revision": "d458564516e5676af9c70b4f4b2a9178294f1bc6",
-          "version": "5.0.1"
-        }
-      },
-      {
-        "package": "SpacedRepetitionScheduler",
-        "repositoryURL": "https://github.com/bdewey/SpacedRepetitionScheduler.git",
-        "state": {
-          "branch": null,
-          "revision": "4557c67e74c3b8934abef17a8a06ef658fa88eb8",
-          "version": "0.3.0"
-        }
-      },
-      {
-        "package": "swift-algorithms",
-        "repositoryURL": "https://github.com/apple/swift-algorithms.git",
-        "state": {
-          "branch": null,
-          "revision": "b14b7f4c528c942f121c8b860b9410b2bf57825e",
-          "version": "1.0.0"
-        }
-      },
-      {
-        "package": "swift-log",
-        "repositoryURL": "https://github.com/apple/swift-log",
-        "state": {
-          "branch": null,
-          "revision": "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-          "version": "1.4.2"
-        }
-      },
-      {
-        "package": "swift-log-file",
-        "repositoryURL": "https://github.com/crspybits/swift-log-file",
-        "state": {
-          "branch": null,
-          "revision": "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
-          "version": "0.0.1"
-        }
-      },
-      {
-        "package": "swift-numerics",
-        "repositoryURL": "https://github.com/apple/swift-numerics",
-        "state": {
-          "branch": null,
-          "revision": "0a5bc04095a675662cf24757cc0640aa2204253b",
-          "version": "1.0.2"
-        }
-      },
-      {
-        "package": "TextMarkupKit",
-        "repositoryURL": "https://github.com/bdewey/TextMarkupKit",
-        "state": {
-          "branch": null,
-          "revision": "5d928fc72765dd7468f14345ece40cfa34a658da",
-          "version": "0.9.1"
-        }
-      },
-      {
-        "package": "ZIPFoundation",
-        "repositoryURL": "https://github.com/weichsel/ZIPFoundation",
-        "state": {
-          "branch": null,
-          "revision": "cf10bbff6ac3b873e97b36b9784c79866a051a8e",
-          "version": "0.9.12"
-        }
+  "pins" : [
+    {
+      "identity" : "bookkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/BookKit",
+      "state" : {
+        "revision" : "4a91aeb65857215d9a130bc0bd9a3277c49c66a7",
+        "version" : "0.5.0"
       }
-    ]
-  },
-  "version": 1
+    },
+    {
+      "identity" : "codablecsv",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dehesa/CodableCSV",
+      "state" : {
+        "revision" : "99ace2cfdfbc19108b529c021005fb57a460e715",
+        "version" : "0.6.7"
+      }
+    },
+    {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/GRDB.swift",
+      "state" : {
+        "branch" : "xcode13-rc",
+        "revision" : "76c7764c715909d5575cec859ec7649fb4ca9e2c"
+      }
+    },
+    {
+      "identity" : "keyvaluecrdt",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/KeyValueCRDT",
+      "state" : {
+        "revision" : "460becd23a29b30dbfde184b155f3e4124e1fcdf",
+        "version" : "1.2.1"
+      }
+    },
+    {
+      "identity" : "snapkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SnapKit/SnapKit",
+      "state" : {
+        "revision" : "d458564516e5676af9c70b4f4b2a9178294f1bc6",
+        "version" : "5.0.1"
+      }
+    },
+    {
+      "identity" : "spacedrepetitionscheduler",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/SpacedRepetitionScheduler.git",
+      "state" : {
+        "revision" : "4557c67e74c3b8934abef17a8a06ef658fa88eb8",
+        "version" : "0.3.0"
+      }
+    },
+    {
+      "identity" : "swift-algorithms",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-algorithms.git",
+      "state" : {
+        "revision" : "b14b7f4c528c942f121c8b860b9410b2bf57825e",
+        "version" : "1.0.0"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log",
+      "state" : {
+        "revision" : "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
+        "version" : "1.4.2"
+      }
+    },
+    {
+      "identity" : "swift-log-file",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/crspybits/swift-log-file",
+      "state" : {
+        "revision" : "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
+        "version" : "0.0.1"
+      }
+    },
+    {
+      "identity" : "swift-numerics",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-numerics",
+      "state" : {
+        "revision" : "0a5bc04095a675662cf24757cc0640aa2204253b",
+        "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "textmarkupkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/TextMarkupKit",
+      "state" : {
+        "revision" : "5d928fc72765dd7468f14345ece40cfa34a658da",
+        "version" : "0.9.1"
+      }
+    },
+    {
+      "identity" : "zipfoundation",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/weichsel/ZIPFoundation",
+      "state" : {
+        "revision" : "cf10bbff6ac3b873e97b36b9784c79866a051a8e",
+        "version" : "0.9.12"
+      }
+    }
+  ],
+  "version" : 2
 }

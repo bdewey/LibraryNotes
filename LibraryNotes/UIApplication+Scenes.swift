@@ -51,7 +51,9 @@ extension UIApplication {
   ///   - studyTarget: The content to study.
   func activateStudySessionScene(databaseURL: URL, studyTarget: NSUserActivity.StudyTarget) {
     let options = UIScene.ActivationRequestOptions()
-    options.collectionJoinBehavior = .disallowed
+    #if targetEnvironment(macCatalyst)
+      options.collectionJoinBehavior = .disallowed
+    #endif
     if let existingScene = firstConnectedWindowSceneWithRootViewController(type: StudyViewController.self, predicate: { studyViewController in
       studyViewController.database.fileURL == databaseURL
     }) {
@@ -69,7 +71,9 @@ extension UIApplication {
   ///   - quoteIdentifiers: The eligible quote identifiers.
   func activateRandomQuotesScene(databaseURL: URL, quoteIdentifiers: [ContentIdentifier]) {
     let options = UIScene.ActivationRequestOptions()
-    options.collectionJoinBehavior = .disallowed
+    #if targetEnvironment(macCatalyst)
+      options.collectionJoinBehavior = .disallowed
+    #endif
     if let existingScene = firstConnectedWindowSceneWithRootViewController(type: QuotesViewController.self, predicate: { quotesViewController in
       quotesViewController.database.fileURL == databaseURL
     }) {
