@@ -77,8 +77,15 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     builder.replace(menu: .newScene, with: openMenu)
     builder.insertSibling(UIMenu(options: .displayInline, children: [
       UIKeyCommand(title: "Review", action: #selector(DocumentListViewController.performReview), input: "r", modifierFlags: [.command, .shift]),
-      UICommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes)),
     ]), afterMenu: .openMenu)
+    builder.insertSibling(UIMenu(options: .displayInline, children: [
+      UIKeyCommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes), input: "1", modifierFlags: [.command]),
+    ]), beforeMenu: .bringAllToFront)
+    builder.insertChild(
+      UIMenu(options: .displayInline, children: [DocumentListViewController.groupByYearReadCommand]),
+      atStartOfMenu: .view
+    )
+    builder.insertChild(DocumentListViewController.sortMenu, atStartOfMenu: .view)
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       builder.remove(menu: .document)
     }

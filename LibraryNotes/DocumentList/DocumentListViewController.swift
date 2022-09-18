@@ -307,21 +307,16 @@ final class DocumentListViewController: UIViewController {
 
     let navButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: UIMenu(children: [
       actionsMenu,
-      sortMenu,
+      Self.sortMenu,
     ]))
     navButton.accessibilityIdentifier = "document-list-actions"
     #if targetEnvironment(macCatalyst)
       if #available(macCatalyst 16.0, *) {
         navigationItem.style = .editor
-        let sortOptions = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal.decrease.circle"), menu: UIMenu(children: [
-          sortMenu,
-          groupByYearReadAction,
-        ]))
         let reviewItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview))
         reviewItem.isEnabled = canPerformAction(reviewItem.action!, withSender: nil)
         navigationItem.trailingItemGroups = [
           reviewItem.creatingFixedGroup(),
-          sortOptions.creatingFixedGroup(),
         ]
       }
     #else
@@ -522,7 +517,7 @@ extension DocumentListViewController {
       importLibraryThingAction,
       sendFeedbackAction,
       advanceTimeAction,
-      groupByYearReadAction,
+      Self.groupByYearReadCommand,
     ].compactMap { $0 })
   }
 
@@ -625,19 +620,39 @@ extension DocumentListViewController {
     }
   }
 
-  private var groupByYearReadAction: UIAction {
-    UIAction(title: "Group By Year Read", image: UIImage(systemName: "calendar"), state: groupByYearRead ? .on : .off) { [weak self] _ in
-      self?.groupByYearRead.toggle()
+  static var groupByYearReadCommand: UICommand {
+    UICommand(title: "Group By Year Read", image: UIImage(systemName: "calendar"), action: #selector(handleGroupByYearReadCommand), propertyList: "groupByYearRead")
+  }
+
+  @objc private func handleGroupByYearReadCommand() {
+    groupByYearRead.toggle()
+    UIMenuSystem.main.setNeedsRevalidate()
+  }
+
+  @objc private func handleSortCommand(_ command: UICommand) {
+    guard let rawValue = command.propertyList as? String, let commandSortOrder = NoteIdentifierRecord.SortOrder(rawValue: rawValue) else {
+      return
+    }
+    currentSortOrder = commandSortOrder
+    UIMenuSystem.main.setNeedsRevalidate()
+  }
+
+  override func validate(_ command: UICommand) {
+    guard let rawValue = command.propertyList as? String else {
+      return
+    }
+    if rawValue == "groupByYearRead" {
+      command.state = groupByYearRead ? .on : .off
+    } else if let commandSortOrder = NoteIdentifierRecord.SortOrder(rawValue: rawValue) {
+      command.state = (commandSortOrder == currentSortOrder) ? .on : .off
     }
   }
 
-  private var sortMenu: UIMenu {
-    let sortActions = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UIAction in
-      UIAction(title: sortOrder.rawValue, state: sortOrder == currentSortOrder ? .on : .off) { [weak self] _ in
-        self?.currentSortOrder = sortOrder
-      }
+  static var sortMenu: UIMenu {
+    let sortCommands = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UICommand in
+      UICommand(title: sortOrder.rawValue, action: #selector(handleSortCommand), propertyList: sortOrder.rawValue)
     }
-    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), options: .displayInline, children: sortActions)
+    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), options: .displayInline, children: sortCommands)
   }
 }
 
