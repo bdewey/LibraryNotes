@@ -278,6 +278,9 @@ public final class BookEditDetailsViewController: UIViewController {
     navigationItem.leftBarButtonItem = cancelButton
 
     navigationItem.searchController = searchController
+    if #available(macCatalyst 16.0, iOS 16.0, *) {
+      navigationItem.preferredSearchBarPlacement = .stacked
+    }
     monitorModelAndUpdateRightBarButtonItem()
   }
 

@@ -100,6 +100,7 @@ struct BookEditView: View {
       }
       .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
     }
+    .grailListBackground()
   }
 
   @ViewBuilder var coverImageView: some View {
@@ -140,5 +141,31 @@ struct BookEditView_Previews: PreviewProvider {
       ),
       coverImage: nil
     ))
+  }
+}
+
+struct GrailListBackgroundModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(macCatalyst 16.0, iOS 16.0, *) {
+      content
+        .background(Color(.grailGroupedBackground))
+        .scrollContentBackground(.hidden)
+    } else {
+      content
+    }
+  }
+}
+
+extension View {
+  @ViewBuilder func `if`<Result: View>(_ condition: Bool, transform: (Self) -> Result) -> some View {
+    if condition {
+      transform(self)
+    } else {
+      self
+    }
+  }
+
+  func grailListBackground() -> some View {
+    self.modifier(GrailListBackgroundModifier())
   }
 }
