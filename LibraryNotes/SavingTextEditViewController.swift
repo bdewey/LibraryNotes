@@ -249,12 +249,10 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       }
     } else {
       if #available(iOS 16.0, *) {
-        let barButtonItem = notebookViewController?.makeNewNoteButtonItem()
-        
         navigationItem.pinnedTrailingGroup = notebookViewController?.makeNewNoteButtonItem().creatingFixedGroup()
         navigationItem.trailingItemGroups = [
-          makeInsertBookDetailsButton()?.creatingFixedGroup()
-        ].compactMap({ $0 })
+          makeInsertBookDetailsButton()?.creatingFixedGroup(),
+        ].compactMap { $0 }
       } else {
         // Fallback on earlier versions
         navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), makeInsertBookDetailsButton()]

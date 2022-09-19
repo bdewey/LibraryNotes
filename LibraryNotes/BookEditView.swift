@@ -166,6 +166,6 @@ extension View {
   }
 
   func grailListBackground() -> some View {
-    self.modifier(GrailListBackgroundModifier())
+    modifier(GrailListBackgroundModifier())
   }
 }

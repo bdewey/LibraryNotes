@@ -119,9 +119,9 @@ public final class StudyViewController: UIViewController {
     label.text = "Press space to reveal answer"
     label.sizeToFit()
     #if !targetEnvironment(macCatalyst)
-    // This overrides the `alpha` property that we manipulate in various states
-    // We only need to show this label on Catalyst
-    label.isHidden = true
+      // This overrides the `alpha` property that we manipulate in various states
+      // We only need to show this label on Catalyst
+      label.isHidden = true
     #endif
     return label
   }()
