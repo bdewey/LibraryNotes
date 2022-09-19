@@ -216,26 +216,50 @@ public final class BookEditDetailsViewController: UIViewController {
   }
 
   private lazy var skipButton: UIBarButtonItem = {
-    let item = UIBarButtonItem(title: "Skip", primaryAction: UIAction { [weak self] _ in
-      guard let self = self else { return }
-      if self.model.isValid {
-        self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
-      } else {
-        self.delegate?.bookSearchViewControllerDidSkip(self)
-      }
-    })
+    #if targetEnvironment(macCatalyst)
+      var configuration = UIButton.Configuration.bordered()
+      configuration.title = "Skip"
+      let customButton = UIButton(configuration: configuration, primaryAction: UIAction(handler: { [weak self] _ in
+        self?.handleSkipButtonTap()
+      }))
+      customButton.sizeToFit()
+      let item = UIBarButtonItem(customView: customButton)
+    #else
+      let item = UIBarButtonItem(title: "Skip", style: .done, target: self, action: #selector(handleSkipButtonTap))
+    #endif
     item.accessibilityIdentifier = "book-details-skip-button"
     return item
   }()
 
-  private lazy var nextButton = UIBarButtonItem(title: "Next", primaryAction: UIAction { [weak self] _ in
-    guard let self = self else { return }
-    if self.model.isValid {
-      self.delegate?.bookSearchViewController(self, didSelect: self.model.book, coverImage: self.model.coverImage)
+  @objc private func handleSkipButtonTap() {
+    if model.isValid {
+      delegate?.bookSearchViewController(self, didSelect: model.book, coverImage: model.coverImage)
+    } else {
+      delegate?.bookSearchViewControllerDidSkip(self)
+    }
+  }
+
+  private lazy var nextButton: UIBarButtonItem = {
+    #if targetEnvironment(macCatalyst)
+      var configuration = UIButton.Configuration.borderedProminent()
+      configuration.title = "Next"
+      let customButton = UIButton(configuration: configuration, primaryAction: UIAction(handler: { [weak self] _ in
+        self?.handleNextButtonTap()
+      }))
+      customButton.sizeToFit()
+      return UIBarButtonItem(customView: customButton)
+    #else
+      UIBarButtonItem(title: "Next", style: .done, target: self, action: #selector(handleNextButtonTap))
+    #endif
+  }()
+
+  @objc private func handleNextButtonTap() {
+    if model.isValid {
+      delegate?.bookSearchViewController(self, didSelect: model.book, coverImage: model.coverImage)
     } else {
       Logger.bookSearch.error("Tapped Next on an invalid model. How?")
     }
-  })
+  }
 
   override public func viewDidLoad() {
     super.viewDidLoad()
@@ -270,18 +294,19 @@ public final class BookEditDetailsViewController: UIViewController {
 
     view.tintColor = .grailTint
     view.backgroundColor = .grailBackground
-    let cancelButton = UIBarButtonItem(systemItem: .cancel)
-    cancelButton.primaryAction = UIAction { [weak self] _ in
-      guard let self = self else { return }
-      self.delegate?.bookSearchViewControllerDidCancel(self)
-    }
-    navigationItem.leftBarButtonItem = cancelButton
 
     navigationItem.searchController = searchController
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       navigationItem.preferredSearchBarPlacement = .stacked
     }
     monitorModelAndUpdateRightBarButtonItem()
+
+    let cancelCommand = UIKeyCommand(input: UIKeyCommand.inputEscape, modifierFlags: [], action: #selector(handleEscapeKey))
+    addKeyCommand(cancelCommand)
+  }
+
+  @objc private func handleEscapeKey() {
+    delegate?.bookSearchViewControllerDidCancel(self)
   }
 
   private var modelSubscription: AnyCancellable?
@@ -311,17 +336,42 @@ public final class BookEditDetailsViewController: UIViewController {
     guard rightBarButtonItemNeedsUpdate else { return }
     rightBarButtonItemNeedsUpdate = false
     Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(model.isValid)")
+
+    let cancelAction = UIAction { [weak self] _ in
+      guard let self = self else { return }
+      self.delegate?.bookSearchViewControllerDidCancel(self)
+    }
+    #if targetEnvironment(macCatalyst)
+      var configuration = UIButton.Configuration.bordered()
+      configuration.title = "Cancel"
+      let customCancelButton = UIButton(configuration: configuration, primaryAction: cancelAction)
+      customCancelButton.sizeToFit()
+      let cancelButton = UIBarButtonItem(customView: customCancelButton)
+    #else
+      let cancelButton = UIBarButtonItem(systemItem: .cancel)
+      cancelButton.primaryAction = cancelAction
+    #endif
+
+    var primaryActionButtonItem: UIBarButtonItem?
     if model.isValid {
-      navigationItem.rightBarButtonItem = nextButton
       nextButton.isEnabled = true
+      primaryActionButtonItem = nextButton
     } else {
       if showSkipButton {
-        navigationItem.rightBarButtonItem = skipButton
+        primaryActionButtonItem = skipButton
       } else {
-        navigationItem.rightBarButtonItem = nextButton
+        primaryActionButtonItem = nextButton
         nextButton.isEnabled = false
       }
     }
+
+    #if targetEnvironment(macCatalyst)
+      toolbarItems = [.flexibleSpace(), cancelButton, primaryActionButtonItem].compactMap { $0 }
+      navigationController?.isToolbarHidden = false
+    #else
+      navigationItem.leftBarButtonItem = cancelButton
+      navigationItem.rightBarButtonItem = primaryActionButtonItem
+    #endif
   }
 }
 
