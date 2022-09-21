@@ -46,7 +46,7 @@ final class NotebookStructureViewController: UIViewController {
       switch self {
       case .trash: return "Trash"
       case .read: return "My Books"
-      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
+      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last ?? "")
       }
     }
 
