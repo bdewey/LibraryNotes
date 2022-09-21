@@ -335,8 +335,6 @@ public final class TextEditViewController: UIViewController {
       autoFirstResponder = false
     }
     adjustMargins()
-    let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
-    UIMenuController.shared.menuItems = [highlightMenuItem]
     navigationController?.navigationBar.standardAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
     if extendedNavigationHeaderView != nil {
       navigationController?.navigationBar.standardAppearance.shadowColor = nil
@@ -618,6 +616,14 @@ extension TextEditViewController: UITextViewDelegate {
       replaceCharacters(in: range, with: "\n\n")
     }
     return false
+  }
+
+  public func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+    guard range.length > 0 else {
+      return nil
+    }
+    let highlight = UICommand(title: "Highlight", action: #selector(convertTextToCloze))
+    return UIMenu(children: suggestedActions + [highlight])
   }
 
   /// Gets the line of text that contains a given location.
