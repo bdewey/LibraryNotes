@@ -1,10 +1,19 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import AVFoundation
+import Logging
 import UIKit
 
 private extension CGFloat {
   static let padding: CGFloat = 10
+}
+
+private extension Logger {
+  static let cardLayout: Logger = {
+    var logger = Logger(label: "org.brians-brain.BarcodeScanner")
+    logger.logLevel = .debug
+    return logger
+  }()
 }
 
 /// A generic card with a "front" and a "back" side.
@@ -54,41 +63,42 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
     let backLabelFrame: CGRect
     (frontLabelFrame, _) = remainder.divided(atDistance: frontLabelSize.height, from: .minYEdge)
     (backLabelFrame, _) = remainder.divided(atDistance: backLabelSize.height, from: .minYEdge)
-    return Layout(
+    let layout = Layout(
       contextLabelFrame: contextLabelFrame,
       frontLabelFrame: frontLabelFrame,
       backLabelFrame: backLabelFrame,
       isAnswerVisible: isAnswerVisible
     )
+    Logger.cardLayout.trace("\(#function) computed layout for \(layoutArea.size). backLabelFrame = \(backLabelFrame) backBounding = \(backLabelSize) desired height = \(layout.desiredHeight)")
+    return layout
   }
 
   override public func sizeThatFits(_ size: CGSize) -> CGSize {
-    let layoutArea = CGRect(origin: .zero, size: size).insetBy(dx: .padding * 2, dy: .padding * 2)
+    var size = size
+    size.width -= contentScrollView.contentInset.left + contentScrollView.contentInset.right
+    size.height -= contentScrollView.contentInset.top + contentScrollView.contentInset.bottom
+    let layoutArea = CGRect(origin: .zero, size: size)
     let layout = computeLayout(layoutArea: layoutArea)
-    return CGSize(width: size.width, height: layout.desiredHeight + 2 * .padding)
+    Logger.cardLayout.trace("\(#function) isAnswerVisible = \(layout.isAnswerVisible), desired height plus padding = \(layout.desiredHeight + 2 * .padding)")
+    return CGSize(width: size.width, height: layout.desiredHeight + contentScrollView.contentInset.top + contentScrollView.contentInset.bottom)
   }
 
-  private var priorLayout: Layout?
-
   override public func layoutSubviews() {
+    Logger.cardLayout.trace("Enter \(#function)")
     background.frame = bounds
     var layoutArea = bounds
     layoutArea.size.height = .greatestFiniteMagnitude
     layoutArea.size.width -= contentScrollView.contentInset.left + contentScrollView.contentInset.right
     let layout = computeLayout(layoutArea: layoutArea)
-    if priorLayout == layout {
-      // No change needed
-      return
-    }
     let childContentSize = CGSize(width: layoutArea.width, height: layout.desiredHeight)
     contentScrollView.contentSize = childContentSize
     contentScrollView.frame.size.width = bounds.size.width
-    contentScrollView.frame.size.height = min(bounds.size.height, childContentSize.height + 2 * .padding)
+    contentScrollView.frame.size.height = min(bounds.size.height, childContentSize.height + contentScrollView.contentInset.top + contentScrollView.contentInset.bottom)
     contentScrollView.center = CGPoint(x: bounds.midX, y: bounds.midY)
     contextLabel.frame = layout.contextLabelFrame
     backLabel.frame = layout.backLabelFrame
     frontLabel.frame = layout.frontLabelFrame
-    print("childContentSize: \(childContentSize). Layout: \(layout). Bounds = \(bounds)")
+    Logger.cardLayout.trace("Exit \(#function). childContentSize: \(childContentSize). Layout: \(layout). Bounds height = \(bounds.height)")
   }
 
   /// A string displayed at the top of the card, both front and back, that gives context
@@ -121,7 +131,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
 
   private let contentScrollView: UIScrollView = {
     let scrollView = UIScrollView(frame: .zero)
-    scrollView.contentInset = UIEdgeInsets(top: .padding, left: .padding, bottom: .padding, right: .padding)
+    scrollView.contentInset = UIEdgeInsets(top: 2 * .padding, left: .padding, bottom: 2 * .padding, right: .padding)
     return scrollView
   }()
 

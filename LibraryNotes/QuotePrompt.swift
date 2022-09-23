@@ -54,7 +54,8 @@ extension QuotePrompt: Prompt {
     let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, style: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
     back.append(front.trimmingTrailingWhitespace())
-    back.append(NSAttributedString(string: "\n\n"))
+    // Make sure the string we append gets a paragraph style
+    back.append(ParsedAttributedString(string: "\n\n", style: .plainText(textStyle: .caption1)))
     back.append(attribution.trimmingTrailingWhitespace())
     view.back = back
     return view
