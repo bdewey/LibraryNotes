@@ -107,6 +107,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
       atEndOfMenu: .file
     )
     builder.insertChild(UIMenu(title: "", options: .displayInline, children: [UICommand(title: "Send feedback to the developer...", action: #selector(DocumentListViewController.sendFeedback))]), atStartOfMenu: .help)
+    builder.replace(menu: .format, with: UIMenu(title: "Format", children: [
+      UIKeyCommand(title: "Bold", action: #selector(toggleBoldface), input: "b", modifierFlags: .command),
+      UIKeyCommand(title: "Italic", action: #selector(toggleItalics), input: "i", modifierFlags: .command),
+    ]))
   }
 
   @objc func openCommand() {
