@@ -226,7 +226,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     present(navigationController, animated: true, completion: nil)
   }
 
-  func makeInsertBookDetailsButton() -> UIBarButtonItem? {
+  func makeInsertBookDetailsButton() -> UIBarButtonItem {
     return UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), primaryAction: UIAction { [weak self] _ in
       self?.editOrInsertBookDetails()
     })
@@ -241,30 +241,25 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   private func configureToolbar() {
+    navigationItem.customizationIdentifier = "savingTextEditViewController"
+    navigationItem.centerItemGroups = [
+      makeInsertBookDetailsButton().creatingFixedGroup(),
+      .optionalGroup(
+        customizationIdentifier: "format",
+        representativeItem: UIBarButtonItem(title: "Format", image: UIImage(systemName: "bold.italic.underline")),
+        items: [
+          textEditViewController.toggleBoldfaceBarButtonItem,
+          textEditViewController.toggleItalicsBarButtonItem,
+        ]
+      ),
+    ]
     if splitViewController?.isCollapsed ?? false {
-      navigationItem.rightBarButtonItem = makeInsertBookDetailsButton()
       navigationController?.isToolbarHidden = false
       if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
         toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
       }
     } else {
-      if #available(iOS 16.0, *) {
-        navigationItem.customizationIdentifier = "savingTextEditViewController"
-        navigationItem.pinnedTrailingGroup = notebookViewController?.makeNewNoteButtonItem().creatingFixedGroup()
-        navigationItem.leadingItemGroups = [
-          makeInsertBookDetailsButton()?.creatingFixedGroup(),
-        ].compactMap { $0 }
-        navigationItem.centerItemGroups = [
-          textEditViewController.toggleBoldfaceBarButtonItem.creatingOptionalGroup(customizationIdentifier: "bold", isInDefaultCustomization: true),
-          textEditViewController.toggleItalicsBarButtonItem.creatingOptionalGroup(customizationIdentifier: "italic", isInDefaultCustomization: true),
-        ]
-      } else {
-        // Fallback on earlier versions
-        navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), makeInsertBookDetailsButton()]
-          .compactMap { $0 }
-        navigationController?.isToolbarHidden = true
-        toolbarItems = []
-      }
+      navigationItem.pinnedTrailingGroup = notebookViewController?.makeNewNoteButtonItem().creatingFixedGroup()
     }
   }
 
