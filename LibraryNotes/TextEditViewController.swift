@@ -229,13 +229,7 @@ public final class TextEditViewController: UIViewController {
 
     inputBarItems.append(toggleBoldfaceBarButtonItem)
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
-      let currentSelectedRange = textView.selectedRange
-      let nextLocation = currentSelectedRange.upperBound + 1
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "_")
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "_")
-      textView.selectedRange = NSRange(location: nextLocation, length: 0)
-    }))
+    inputBarItems.append(toggleItalicsBarButtonItem)
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
       guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
@@ -408,29 +402,48 @@ public final class TextEditViewController: UIViewController {
   /// Toggles "bold" at the current location in `textView`
   /// - Parameter sender: Unused
   public override func toggleBoldface(_ sender: Any?) {
+    toggleInlineDelimitedText(nodeType: .strongEmphasis, openingDelimiter: "**", closingDelimiter: "**")
+  }
+
+  var toggleItalicsBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(primaryAction: UIAction(title: "Italic", image: UIImage(systemName: "italic")) { [weak self] _ in
+      self?.toggleItalics(nil)
+    })
+  }
+
+  public override func toggleItalics(_ sender: Any?) {
+    toggleInlineDelimitedText(nodeType: .emphasis, openingDelimiter: "_", closingDelimiter: "_")
+  }
+
+  private func toggleInlineDelimitedText(nodeType: SyntaxTreeNodeType, openingDelimiter: String, closingDelimiter: String) {
     guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
       assertionFailure()
       return
     }
-    if let boldNode = nodePath.first(where: { $0.node.type == .strongEmphasis }) {
+    if let node = nodePath.first(where: { $0.node.type == nodeType }) {
       // Case 1: The current location is currently contained in a "bold" region. Remove the delimiters.
-      let delimiters = boldNode.findNodes(where: { $0.type == .delimiter }).sorted(by: { $0.range.location < $1.range.location })
+      let delimiters = node.findNodes(where: { $0.type == .delimiter }).sorted(by: { $0.range.location < $1.range.location })
+      var locationDelta = 0
+      var initialLocation = textView.selectedRange.location
       for delimiter in delimiters.reversed() {
+        if delimiter.startIndex < initialLocation {
+          locationDelta -= delimiter.range.length
+        }
         textView.textStorage.replaceCharacters(in: delimiter.range, with: "")
       }
-      textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
+      textView.selectedRange = NSRange(location: initialLocation - locationDelta, length: 0)
     } else if textView.selectedRange.length > 0 {
-      // Case 2: The current selected text isn't bold and has non-zero length. Put "bold" delimiters around the selected text.
+      // Case 2: The current selected text isn't of the desired type and has non-zero length. Put delimiters around the selected text.
       let currentSelectedRange = textView.selectedRange
-      let nextLocation = currentSelectedRange.upperBound + 2
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
+      let nextLocation = currentSelectedRange.upperBound + openingDelimiter.utf16.count
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: closingDelimiter)
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: openingDelimiter)
       textView.selectedRange = NSRange(location: nextLocation, length: 0)
     } else if let wordRange = try? textView.textStorage.rangeOfWord(at: textView.selectedRange.location) {
-      // Case 3: The current text isn't bold but has zero length. Put bold delimiters around the current word.
-      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.upperBound, length: 0), with: "**")
-      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.lowerBound, length: 0), with: "**")
-      textView.selectedRange = NSRange(location: wordRange.upperBound + 4, length: 0)
+      // Case 3: The current text isn't bold but has zero length. Put delimiters around the current word.
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.upperBound, length: 0), with: closingDelimiter)
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.lowerBound, length: 0), with: openingDelimiter)
+      textView.selectedRange = NSRange(location: wordRange.upperBound + openingDelimiter.utf16.count + closingDelimiter.utf16.count, length: 0)
     }
   }
 

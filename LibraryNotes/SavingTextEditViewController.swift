@@ -255,7 +255,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
           makeInsertBookDetailsButton()?.creatingFixedGroup(),
         ].compactMap { $0 }
         navigationItem.centerItemGroups = [
-          textEditViewController.toggleBoldfaceBarButtonItem.creatingOptionalGroup(customizationIdentifier: "bold", isInDefaultCustomization: true)
+          textEditViewController.toggleBoldfaceBarButtonItem.creatingOptionalGroup(customizationIdentifier: "bold", isInDefaultCustomization: true),
+          textEditViewController.toggleItalicsBarButtonItem.creatingOptionalGroup(customizationIdentifier: "italic", isInDefaultCustomization: true),
         ]
       } else {
         // Fallback on earlier versions
