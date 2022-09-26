@@ -426,10 +426,11 @@ public final class TextEditViewController: UIViewController {
       var locationDelta = 0
       var initialLocation = textView.selectedRange.location
       for delimiter in delimiters.reversed() {
-        if delimiter.startIndex < initialLocation {
+        let delimiterVisibleRange = parsedAttributedString.range(forRawStringRange: delimiter.range)
+        if delimiterVisibleRange.location < initialLocation {
           locationDelta -= delimiter.range.length
         }
-        textView.textStorage.replaceCharacters(in: delimiter.range, with: "")
+        textView.textStorage.replaceCharacters(in: delimiterVisibleRange, with: "")
       }
       textView.selectedRange = NSRange(location: initialLocation - locationDelta, length: 0)
     } else if textView.selectedRange.length > 0 {
