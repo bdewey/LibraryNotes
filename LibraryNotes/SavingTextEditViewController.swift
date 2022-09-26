@@ -227,7 +227,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   }
 
   func makeInsertBookDetailsButton() -> UIBarButtonItem? {
-    return UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
+    return UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), primaryAction: UIAction { [weak self] _ in
       self?.editOrInsertBookDetails()
     })
   }
@@ -249,10 +249,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       }
     } else {
       if #available(iOS 16.0, *) {
+        navigationItem.customizationIdentifier = "savingTextEditViewController"
         navigationItem.pinnedTrailingGroup = notebookViewController?.makeNewNoteButtonItem().creatingFixedGroup()
-        navigationItem.trailingItemGroups = [
+        navigationItem.leadingItemGroups = [
           makeInsertBookDetailsButton()?.creatingFixedGroup(),
         ].compactMap { $0 }
+        navigationItem.centerItemGroups = [
+          textEditViewController.toggleBoldfaceBarButtonItem.creatingOptionalGroup(customizationIdentifier: "bold", isInDefaultCustomization: true)
+        ]
       } else {
         // Fallback on earlier versions
         navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), makeInsertBookDetailsButton()]

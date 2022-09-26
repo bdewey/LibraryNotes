@@ -21,6 +21,36 @@ public extension NSAttributedString {
     )?.range
   }
 
+  /// Returns the range of the word that contains `location`.
+  /// - Parameter location: A location in the receiver.
+  /// - Returns: The range of the word (delimited by spaces or punctuation) that contains `location`. If no word contains `location`, returns `nil`.
+  /// - throws `GenericLocalizedError` if `location` is outside the bounds of the receiver, or if `location` is not a valid `Character` location in the underlying `String`.
+  internal func rangeOfWord(at location: Int) throws -> NSRange? {
+    guard location < length else {
+      throw GenericLocalizedError(errorDescription: "Location \(location) is beyond the end of the string \(length)")
+    }
+    guard let stringRange = Range(NSRange(location: location, length: 0), in: string) else {
+      throw GenericLocalizedError(errorDescription: "Location \(location) does not start at a character boundary in string")
+    }
+    var wordLowerBound = stringRange.lowerBound
+    if !CharacterSet.alphanumerics.contains(string.unicodeScalars[wordLowerBound]) {
+      return nil
+    }
+    while wordLowerBound > string.startIndex, CharacterSet.alphanumerics.contains(string.unicodeScalars[wordLowerBound]) {
+      wordLowerBound = string.index(before: wordLowerBound)
+    }
+    if !CharacterSet.alphanumerics.contains(string.unicodeScalars[wordLowerBound]) {
+      // we went too far
+      wordLowerBound = string.index(after: wordLowerBound)
+    }
+    var wordUpperBound = stringRange.upperBound
+    while wordUpperBound < string.endIndex, CharacterSet.alphanumerics.contains(string.unicodeScalars[wordUpperBound]) {
+      wordUpperBound = string.index(after: wordUpperBound)
+    }
+    // Since the range is non-inclusive of `wordUpperBound`, we don't have to rewind if we went too far.
+    return NSRange(wordLowerBound ..< wordUpperBound, in: string)
+  }
+
   /// The chapter and verse annotation in the receiver, if present.
   var chapterAndVerseAnnotation: Substring? {
     if

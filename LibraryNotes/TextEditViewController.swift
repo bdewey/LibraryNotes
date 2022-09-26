@@ -68,6 +68,7 @@ public final class TextEditViewController: UIViewController {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
     view.backgroundColor = .grailBackground
     view.accessibilityIdentifier = "edit-document-view"
+    view.isFindInteractionEnabled = true
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     return view
   }()
@@ -226,13 +227,7 @@ public final class TextEditViewController: UIViewController {
     }
     inputBarItems.append(UIBarButtonItem(title: "#", primaryAction: insertHashtagAction))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "bold"), primaryAction: UIAction { [textView] _ in
-      let currentSelectedRange = textView.selectedRange
-      let nextLocation = currentSelectedRange.upperBound + 2
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
-      textView.selectedRange = NSRange(location: nextLocation, length: 0)
-    }))
+    inputBarItems.append(toggleBoldfaceBarButtonItem)
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
       let currentSelectedRange = textView.selectedRange
@@ -402,6 +397,41 @@ public final class TextEditViewController: UIViewController {
     textView.selectedRange = endRange
     textView.scrollRangeToVisible(endRange)
     textView.becomeFirstResponder()
+  }
+
+  var toggleBoldfaceBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(primaryAction: UIAction(title: "Bold", image: UIImage(systemName: "bold")) { [weak self] _ in
+      self?.toggleBoldface(nil)
+    })
+  }
+
+  /// Toggles "bold" at the current location in `textView`
+  /// - Parameter sender: Unused
+  public override func toggleBoldface(_ sender: Any?) {
+    guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+      assertionFailure()
+      return
+    }
+    if let boldNode = nodePath.first(where: { $0.node.type == .strongEmphasis }) {
+      // Case 1: The current location is currently contained in a "bold" region. Remove the delimiters.
+      let delimiters = boldNode.findNodes(where: { $0.type == .delimiter }).sorted(by: { $0.range.location < $1.range.location })
+      for delimiter in delimiters.reversed() {
+        textView.textStorage.replaceCharacters(in: delimiter.range, with: "")
+      }
+      textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
+    } else if textView.selectedRange.length > 0 {
+      // Case 2: The current selected text isn't bold and has non-zero length. Put "bold" delimiters around the selected text.
+      let currentSelectedRange = textView.selectedRange
+      let nextLocation = currentSelectedRange.upperBound + 2
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
+      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    } else if let wordRange = try? textView.textStorage.rangeOfWord(at: textView.selectedRange.location) {
+      // Case 3: The current text isn't bold but has zero length. Put bold delimiters around the current word.
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.upperBound, length: 0), with: "**")
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.lowerBound, length: 0), with: "**")
+      textView.selectedRange = NSRange(location: wordRange.upperBound + 4, length: 0)
+    }
   }
 
   // MARK: - Keyboard

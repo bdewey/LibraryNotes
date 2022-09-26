@@ -244,7 +244,7 @@ public final class NotebookViewController: UISplitViewController {
         self?.makeNewNote()
       }
     }
-    let button = UIBarButtonItem(image: UIImage(systemName: "plus"), primaryAction: primaryAction)
+    let button = UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), primaryAction: primaryAction)
     button.accessibilityIdentifier = "new-document"
     return button
   }
