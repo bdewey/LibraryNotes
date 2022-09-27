@@ -95,8 +95,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/TextMarkupKit",
       "state" : {
-        "revision" : "5d928fc72765dd7468f14345ece40cfa34a658da",
-        "version" : "0.9.1"
+        "revision" : "ddd2160dea6d4c3703991ea83e1113fffb636c4b",
+        "version" : "0.10.0"
       }
     },
     {

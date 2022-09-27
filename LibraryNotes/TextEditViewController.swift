@@ -15,6 +15,11 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook)
 }
 
+@objc protocol TextEditingFormattingActions {
+  /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
+  func toggleSummaryParagraph()
+}
+
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
@@ -247,19 +252,8 @@ public final class TextEditViewController: UIViewController {
       }
     }))
 
-    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
-        assertionFailure()
-        return
-      }
-      if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
-      } else {
-        textView.textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
-      }
+    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [weak self] _ in
+      self?.toggleSummaryParagraph()
     }))
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self, textView, parsedAttributedString] _ in
@@ -718,5 +712,79 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 
   public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+// MARK: - TextEditingFormattingActions
+
+extension TextEditViewController: TextEditingFormattingActions {
+
+  /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
+  func toggleSummaryParagraph() {
+    guard let (blockType, openingRange) = try? block(containing: textView.selectedRange.location) else {
+      assertionFailure()
+      return
+    }
+    let visibleRange = parsedAttributedString.range(forRawStringRange: openingRange)
+    if blockType == .summary {
+      textView.textStorage.replaceCharacters(in: visibleRange, with: "")
+      textView.selectedRange = NSRange(location: textView.selectedRange.location - visibleRange.length, length: 0)
+    } else {
+      var replacementString = "tl;dr: "
+      if blockType == .blankLine {
+        replacementString.insert("\n", at: replacementString.startIndex)
+      }
+      textView.textStorage.replaceCharacters(in: visibleRange, with: replacementString)
+      textView.selectedRange = NSRange(location: textView.selectedRange.location - visibleRange.length + replacementString.count, length: 0)
+    }
+  }
+
+  /// Returns the type of MiniMarkdown block containing `location`
+  /// - Parameter location: The location to be contained.
+  /// - Returns: A tuple containing the type of block that contains `location` and the opening delimiter for the block.
+  private func block(containing location: Int) throws -> (type: SyntaxTreeNodeType, openingDelimiterRange: NSRange)? {
+    guard parsedAttributedString.count > 0 else {
+      // There's no parsed path if the buffer is empty.
+      return (type: .paragraph, openingDelimiterRange: NSRange(location: 0, length: 0))
+    }
+    guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+      throw GenericLocalizedError(errorDescription: "Location \(location) is not in the parse tree for parsedAttributedString")
+    }
+    if
+      let heading = nodePath.first(where: { $0.node.type == .header }),
+      let delimiter = heading.first(where: { $0.type == .delimiter }),
+      let softTab = heading.first(where: { $0.type == .softTab })
+    {
+      return (type: .header, openingDelimiterRange: delimiter.range.union(softTab.range))
+    }
+    let blocks: [(SyntaxTreeNodeType, SyntaxTreeNodeType)] = [
+      (.summary, .summaryDelimiter),
+      (.listItem, .listDelimiter),
+      (.blockquote, .delimiter),
+    ]
+    for (blockType, delimiterType) in blocks {
+      if let info = nodePath.searchForBlockType(blockType, delimiter: delimiterType) {
+        return info
+      }
+    }
+    for blockType in [SyntaxTreeNodeType.blankLine, SyntaxTreeNodeType.paragraph] {
+      if let blockNode = nodePath.first(where: { $0.node.type == blockType }) {
+        return (type: blockType, openingDelimiterRange: NSRange(location: blockNode.range.location, length: 0))
+      }
+    }
+    return nil
+  }
+}
+
+private extension Array<AnchoredNode> {
+  func searchForBlockType(
+    _ type: SyntaxTreeNodeType,
+    delimiter: SyntaxTreeNodeType
+  ) -> (type: SyntaxTreeNodeType, openingDelimiterRange: NSRange)? {
+    if let blockNode = first(where: { $0.node.type == type }), let delimiterNode = blockNode.first(where: { $0.type == delimiter }) {
+      return (type: type, openingDelimiterRange: delimiterNode.range)
+    } else {
+      return nil
+    }
   }
 }

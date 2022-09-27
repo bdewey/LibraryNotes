@@ -50,7 +50,8 @@ public final class GrailDiaryGrammar: PackratGrammar {
         InOrder(Literal("Summary: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter)),
         InOrder(Literal("tl;dr: ", compareOptions: [.caseInsensitive]).as(.summaryDelimiter))
       ),
-      coreGrammar.singleLineStyledText.wrapping(in: .summaryBody)
+      coreGrammar.singleLineStyledText.wrapping(in: .summaryBody),
+      coreGrammar.newline.zeroOrOne().wrapping(in: .summaryBody)
     ).wrapping(in: .summary).memoize()
 
     coreGrammar.customBlockRules = [questionAndAnswer, summary]
