@@ -252,6 +252,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
           textEditViewController.toggleItalicsBarButtonItem,
         ]
       ),
+      UIBarButtonItem(title: "Summary", image: nil, target: nil, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)).creatingOptionalGroup(customizationIdentifier: "summary", isInDefaultCustomization: false)
     ]
     if splitViewController?.isCollapsed ?? false {
       navigationController?.isToolbarHidden = false
