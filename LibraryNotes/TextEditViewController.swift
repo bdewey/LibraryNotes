@@ -27,6 +27,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 
   /// Turns the current paragraph into a quote (`> `) if it isn't one, or a normal paragraph if it is.
   func toggleQuote()
+
+  /// Turns the current paragraph into a bullet list item (`* `) if it isn't one, or a normal paragraph if it is.
+  func toggleBulletList()
 }
 
 /// Allows editing of a single text file.
@@ -254,21 +257,8 @@ public final class TextEditViewController: UIViewController {
       self?.toggleSummaryParagraph()
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self, textView, parsedAttributedString] _ in
-      guard let self = self else { return }
-      guard let nodePath = try? parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1)) else {
-        assertionFailure()
-        return
-      }
-      let existingSelectedLocation = textView.selectedRange.location
-      if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
-        textView.textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
-        textView.selectedRange = NSRange(location: existingSelectedLocation - 2, length: textView.selectedRange.length)
-      } else {
-        let lineRange = self.lineRange(at: existingSelectedLocation)
-        textView.textStorage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: "* ")
-        textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
-      }
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self] _ in
+      self?.toggleBulletList()
     }))
 
     if textView.canPerformAction(#selector(UIResponder.captureTextFromCamera), withSender: nil) {
@@ -726,6 +716,10 @@ extension TextEditViewController: TextEditingFormattingActions {
 
   func toggleQuote() {
     toggleParagraph(type: .blockquote, openingDelimiter: "> ")
+  }
+
+  func toggleBulletList() {
+    toggleParagraph(type: .listItem, openingDelimiter: "* ")
   }
 
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
