@@ -110,6 +110,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     builder.replace(menu: .format, with: UIMenu(title: "Format", children: [
       UIMenu(title: "Block formatting", identifier: .init("org.brians-brain.block-format"), options: .displayInline, children: [
         UIKeyCommand(title: "Heading", action: #selector(TextEditingFormattingActions.toggleHeading), input: "h", modifierFlags: [.shift, .command]),
+        UIKeyCommand(title: "Subheading", action: #selector(TextEditingFormattingActions.toggleSubheading), input: "j", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Summary", action: #selector(TextEditingFormattingActions.toggleSummaryParagraph), input: "s", modifierFlags: [.shift, .command])
       ]),
       UIKeyCommand(title: "Bold", action: #selector(toggleBoldface), input: "b", modifierFlags: .command),

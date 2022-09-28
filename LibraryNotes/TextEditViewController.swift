@@ -21,6 +21,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 
   /// Turns the current paragraph into a first-level heading (`# `) if it isn't, or a normal paragraph if it is.
   func toggleHeading()
+
+  /// Turns the current paragraph into a second-level heading (`## `) if it isn't, or a normal paragraph if it is.
+  func toggleSubheading()
 }
 
 /// Allows editing of a single text file.
@@ -724,6 +727,10 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 extension TextEditViewController: TextEditingFormattingActions {
   func toggleHeading() {
     toggleParagraph(type: .header, openingDelimiter: "# ")
+  }
+
+  func toggleSubheading() {
+    toggleParagraph(type: .header, openingDelimiter: "## ")
   }
 
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
