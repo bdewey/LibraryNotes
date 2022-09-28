@@ -30,6 +30,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 
   /// Turns the current paragraph into a bullet list item (`* `) if it isn't one, or a normal paragraph if it is.
   func toggleBulletList()
+
+  /// Turns the current paragraph into a numbed list item (`1. `) if it isn't one, or a normal paragraph if it is.
+  func toggleNumberedList()
 }
 
 /// Allows editing of a single text file.
@@ -720,6 +723,10 @@ extension TextEditViewController: TextEditingFormattingActions {
 
   func toggleBulletList() {
     toggleParagraph(type: .listItem, openingDelimiter: "* ")
+  }
+
+  func toggleNumberedList() {
+    toggleParagraph(type: .listItem, openingDelimiter: "1. ")
   }
 
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.

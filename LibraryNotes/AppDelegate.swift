@@ -112,6 +112,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         UIKeyCommand(title: "Heading", action: #selector(TextEditingFormattingActions.toggleHeading), input: "h", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Subheading", action: #selector(TextEditingFormattingActions.toggleSubheading), input: "j", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Bulleted list", action: #selector(TextEditingFormattingActions.toggleBulletList), input: "7", modifierFlags: [.shift, .command]),
+        UIKeyCommand(title: "Numbered list", action: #selector(TextEditingFormattingActions.toggleNumberedList), input: "9", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Quote", action: #selector(TextEditingFormattingActions.toggleQuote), input: "u", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Summary", action: #selector(TextEditingFormattingActions.toggleSummaryParagraph), input: "s", modifierFlags: [.shift, .command])
       ]),

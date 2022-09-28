@@ -246,6 +246,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleHeading)),
       UIBarButtonItem(title: "Quote", image: UIImage(systemName: "text.quote"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleQuote)),
       UIBarButtonItem(title: "Bulleted list", image: UIImage(systemName: "list.bullet"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleBulletList)),
+      UIBarButtonItem(title: "Numbered list", image: UIImage(systemName: "list.number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleNumberedList)),
       UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
     ]
     navigationItem.centerItemGroups = [
