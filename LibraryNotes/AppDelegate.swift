@@ -109,6 +109,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     builder.insertChild(UIMenu(title: "", options: .displayInline, children: [UICommand(title: "Send feedback to the developer...", action: #selector(DocumentListViewController.sendFeedback))]), atStartOfMenu: .help)
     builder.replace(menu: .format, with: UIMenu(title: "Format", children: [
       UIMenu(title: "Block formatting", identifier: .init("org.brians-brain.block-format"), options: .displayInline, children: [
+        UIKeyCommand(title: "Heading", action: #selector(TextEditingFormattingActions.toggleHeading), input: "h", modifierFlags: [.shift, .command]),
         UIKeyCommand(title: "Summary", action: #selector(TextEditingFormattingActions.toggleSummaryParagraph), input: "s", modifierFlags: [.shift, .command])
       ]),
       UIKeyCommand(title: "Bold", action: #selector(toggleBoldface), input: "b", modifierFlags: .command),

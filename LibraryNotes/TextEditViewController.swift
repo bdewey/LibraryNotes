@@ -18,6 +18,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 @objc protocol TextEditingFormattingActions {
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
   func toggleSummaryParagraph()
+
+  /// Turns the current paragraph into a first-level heading (`# `) if it isn't, or a normal paragraph if it is.
+  func toggleHeading()
 }
 
 /// Allows editing of a single text file.
@@ -75,6 +78,7 @@ public final class TextEditViewController: UIViewController {
     view.accessibilityIdentifier = "edit-document-view"
     view.isFindInteractionEnabled = true
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    view.keyboardDismissMode = .onDragWithAccessory
     return view
   }()
 
@@ -718,19 +722,26 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 // MARK: - TextEditingFormattingActions
 
 extension TextEditViewController: TextEditingFormattingActions {
+  func toggleHeading() {
+    toggleParagraph(type: .header, openingDelimiter: "# ")
+  }
 
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
   func toggleSummaryParagraph() {
+    toggleParagraph(type: .summary, openingDelimiter: "tl;dr: ")
+  }
+
+  private func toggleParagraph(type: SyntaxTreeNodeType, openingDelimiter: String) {
     guard let (blockType, openingRange) = try? block(containing: textView.selectedRange.location) else {
       assertionFailure()
       return
     }
     let visibleRange = parsedAttributedString.range(forRawStringRange: openingRange)
-    if blockType == .summary {
+    if blockType == type {
       textView.textStorage.replaceCharacters(in: visibleRange, with: "")
       textView.selectedRange = NSRange(location: textView.selectedRange.location - visibleRange.length, length: 0)
     } else {
-      var replacementString = "tl;dr: "
+      var replacementString = openingDelimiter
       if blockType == .blankLine {
         replacementString.insert("\n", at: replacementString.startIndex)
       }

@@ -242,8 +242,17 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 
   private func configureToolbar() {
     navigationItem.customizationIdentifier = "savingTextEditViewController"
+    let blockFormatItems: [UIBarButtonItem] = [
+      UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleHeading)),
+      UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
+    ]
     navigationItem.centerItemGroups = [
       makeInsertBookDetailsButton().creatingFixedGroup(),
+      .optionalGroup(
+        customizationIdentifier: "block-format",
+        representativeItem: UIBarButtonItem(title: "Paragraph", image: UIImage(systemName: "paragraphsign")),
+        items: blockFormatItems
+      ),
       .optionalGroup(
         customizationIdentifier: "format",
         representativeItem: UIBarButtonItem(title: "Format", image: UIImage(systemName: "bold.italic.underline")),
@@ -252,7 +261,6 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
           textEditViewController.toggleItalicsBarButtonItem,
         ]
       ),
-      UIBarButtonItem(title: "Summary", image: nil, target: nil, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)).creatingOptionalGroup(customizationIdentifier: "summary", isInDefaultCustomization: false)
     ]
     if splitViewController?.isCollapsed ?? false {
       navigationController?.isToolbarHidden = false
