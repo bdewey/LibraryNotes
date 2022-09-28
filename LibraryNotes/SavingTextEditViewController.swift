@@ -244,6 +244,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     navigationItem.customizationIdentifier = "savingTextEditViewController"
     let blockFormatItems: [UIBarButtonItem] = [
       UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleHeading)),
+      UIBarButtonItem(title: "Quote", image: UIImage(systemName: "text.quote"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleQuote)),
       UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
     ]
     navigationItem.centerItemGroups = [

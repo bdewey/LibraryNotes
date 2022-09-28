@@ -24,6 +24,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 
   /// Turns the current paragraph into a second-level heading (`## `) if it isn't, or a normal paragraph if it is.
   func toggleSubheading()
+
+  /// Turns the current paragraph into a quote (`> `) if it isn't one, or a normal paragraph if it is.
+  func toggleQuote()
 }
 
 /// Allows editing of a single text file.
@@ -243,20 +246,8 @@ public final class TextEditViewController: UIViewController {
 
     inputBarItems.append(toggleItalicsBarButtonItem)
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
-        assertionFailure()
-        return
-      }
-      if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
-        let quoteDelimiterVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
-        textView.textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
-      } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
-      }
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [weak self] _ in
+      self?.toggleQuote()
     }))
 
     inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [weak self] _ in
@@ -731,6 +722,10 @@ extension TextEditViewController: TextEditingFormattingActions {
 
   func toggleSubheading() {
     toggleParagraph(type: .header, openingDelimiter: "## ")
+  }
+
+  func toggleQuote() {
+    toggleParagraph(type: .blockquote, openingDelimiter: "> ")
   }
 
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
