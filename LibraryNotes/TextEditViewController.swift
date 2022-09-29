@@ -248,9 +248,9 @@ public final class TextEditViewController: UIViewController {
     }
     inputBarItems.append(UIBarButtonItem(title: "#", primaryAction: insertHashtagAction))
 
-    inputBarItems.append(toggleBoldfaceBarButtonItem)
+    inputBarItems.append(Self.toggleBoldfaceBarButtonItem)
 
-    inputBarItems.append(toggleItalicsBarButtonItem)
+    inputBarItems.append(Self.toggleItalicsBarButtonItem)
 
     inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [weak self] _ in
       self?.toggleQuote()
@@ -378,10 +378,8 @@ public final class TextEditViewController: UIViewController {
     textView.becomeFirstResponder()
   }
 
-  var toggleBoldfaceBarButtonItem: UIBarButtonItem {
-    UIBarButtonItem(primaryAction: UIAction(title: "Bold", image: UIImage(systemName: "bold")) { [weak self] _ in
-      self?.toggleBoldface(nil)
-    })
+  static var toggleBoldfaceBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(title: "Bold", image: UIImage(systemName: "bold"), target: nil, action: #selector(toggleBoldface))
   }
 
   /// Toggles "bold" at the current location in `textView`
@@ -390,10 +388,8 @@ public final class TextEditViewController: UIViewController {
     toggleInlineDelimitedText(nodeType: .strongEmphasis, openingDelimiter: "**", closingDelimiter: "**")
   }
 
-  var toggleItalicsBarButtonItem: UIBarButtonItem {
-    UIBarButtonItem(primaryAction: UIAction(title: "Italic", image: UIImage(systemName: "italic")) { [weak self] _ in
-      self?.toggleItalics(nil)
-    })
+  static var toggleItalicsBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(title: "Italic", image: UIImage(systemName: "italic"), target: nil, action: #selector(toggleItalics))
   }
 
   public override func toggleItalics(_ sender: Any?) {

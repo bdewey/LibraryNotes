@@ -211,42 +211,34 @@ public final class NotebookViewController: UISplitViewController {
   }
 
   @objc func makeNewNote() {
-    let hashtag = focusedNotebookStructure.hashtag
-    let folder = focusedNotebookStructure.predefinedFolder
-    let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
-    var note = Note(markdown: text)
-    note.metadata.folder = folder?.rawValue
-    let viewController = SavingTextEditViewController(
-      note: note,
-      database: database,
-      coverImageCache: coverImageCache,
-      containsOnlyDefaultContent: true,
-      initialSelectedRange: NSRange(location: offset, length: 0),
-      autoFirstResponder: true
-    )
-    setSecondaryViewController(viewController, pushIfCollapsed: true)
-    Logger.shared.info("Created a new view controller for a blank document")
+    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
+      let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
+      bookSearchViewController.delegate = self
+      bookSearchViewController.title = "Add Book"
+      let navigationController = UINavigationController(rootViewController: bookSearchViewController)
+      navigationController.navigationBar.tintColor = .grailTint
+      present(navigationController, animated: true)
+    } else {
+      let hashtag = focusedNotebookStructure.hashtag
+      let folder = focusedNotebookStructure.predefinedFolder
+      let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
+      var note = Note(markdown: text)
+      note.metadata.folder = folder?.rawValue
+      let viewController = SavingTextEditViewController(
+        note: note,
+        database: database,
+        coverImageCache: coverImageCache,
+        containsOnlyDefaultContent: true,
+        initialSelectedRange: NSRange(location: offset, length: 0),
+        autoFirstResponder: true
+      )
+      setSecondaryViewController(viewController, pushIfCollapsed: true)
+      Logger.shared.info("Created a new view controller for a blank document")
+    }
   }
 
-  public func makeNewNoteButtonItem() -> UIBarButtonItem {
-    let primaryAction: UIAction
-    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
-      primaryAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
-        bookSearchViewController.delegate = self
-        bookSearchViewController.title = "Add Book"
-        let navigationController = UINavigationController(rootViewController: bookSearchViewController)
-        navigationController.navigationBar.tintColor = .grailTint
-        self?.present(navigationController, animated: true)
-      })
-    } else {
-      primaryAction = UIAction { [weak self] _ in
-        self?.makeNewNote()
-      }
-    }
-    let button = UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), primaryAction: primaryAction)
-    button.accessibilityIdentifier = "new-document"
-    return button
+  public static func makeNewNoteButtonItem() -> UIBarButtonItem {
+    UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), target: nil, action: #selector(makeNewNote))
   }
 
   func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {

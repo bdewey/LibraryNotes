@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import Algorithms
 import Logging
 import UIKit
 import UniformTypeIdentifiers
@@ -174,6 +175,14 @@ extension NSUserActivity {
       let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
       window.rootViewController = browser
     }
+
+    #if targetEnvironment(macCatalyst)
+    let toolbar = NSToolbar(identifier: "main")
+    toolbar.displayMode = .iconOnly
+    toolbar.delegate = toolbarDelegate
+    toolbar.allowsUserCustomization = true
+    windowScene.titlebar?.toolbar = toolbar
+    #endif
     window.makeKeyAndVisible()
     self.window = window
   }
@@ -352,10 +361,53 @@ extension SceneDelegate: StudyViewControllerDelegate {
 }
 
 #if targetEnvironment(macCatalyst)
+extension NSToolbarItem.Identifier {
+  static let centerItemGroups = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
+  static let trailingItemGroups = NSToolbarItem.Identifier("org.brians-brain.trailing-item-groups")
+
+  func subidentifier(index: Int) -> NSToolbarItem.Identifier {
+    NSToolbarItem.Identifier("\(rawValue)-\(index)")
+  }
+
+  func subIdentifierIndex(from subIdentifier: NSToolbarItem.Identifier) -> Int? {
+    guard subIdentifier.rawValue.hasPrefix(rawValue) else {
+      return nil
+    }
+    // Remove the prefix and dash
+    let suffixSubstring = subIdentifier.rawValue.dropFirst(rawValue.count + 1)
+    return Int(suffixSubstring)
+  }
+}
+
+extension NSToolbarItemGroup {
+  convenience init(identifier: NSToolbarItem.Identifier, barButtonGroup: UIBarButtonItemGroup) {
+    let subitems = barButtonGroup.barButtonItems.enumerated().map { (index, barButtonItem) -> NSToolbarItem in
+      let item = NSToolbarItem(itemIdentifier: identifier.subidentifier(index: index), barButtonItem: barButtonItem)
+      item.toolTip = barButtonItem.title
+      return item
+    }
+    self.init(itemIdentifier: identifier)
+    self.subitems = subitems
+  }
+}
+
   final class ToolbarDelegate: NSObject, NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
       Logger.sceneDelegate.trace("\(#function)")
-      return [.toggleSidebar]
+      let groupIdentifier = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
+      let groupIdentifiers = SavingTextEditViewController.centerItemGroups.indices
+        .map { groupIdentifier.subidentifier(index: $0) }
+        .interspersed(with: .space)
+      var identifiers: [NSToolbarItem.Identifier] = [
+        .toggleSidebar,
+        .supplementarySidebarTrackingSeparatorItemIdentifier,
+        .flexibleSpace,
+      ]
+      identifiers.append(contentsOf: groupIdentifiers)
+      identifiers.append(.flexibleSpace)
+      identifiers.append(.trailingItemGroups)
+
+      return identifiers
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -368,6 +420,19 @@ extension SceneDelegate: StudyViewControllerDelegate {
       itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
       willBeInsertedIntoToolbar flag: Bool
     ) -> NSToolbarItem? {
+      if let centerItemGroupIndex = NSToolbarItem.Identifier.centerItemGroups.subIdentifierIndex(from: itemIdentifier) {
+        let centerItemGroups = SavingTextEditViewController.centerItemGroups
+        guard centerItemGroups.indices.contains(centerItemGroupIndex) else {
+          return nil
+        }
+        return NSToolbarItemGroup(identifier: itemIdentifier, barButtonGroup: centerItemGroups[centerItemGroupIndex])
+      }
+      if itemIdentifier == .trailingItemGroups {
+        let barButtonItem = NotebookViewController.makeNewNoteButtonItem()
+        let toolbarItem = NSToolbarItem(itemIdentifier: .trailingItemGroups, barButtonItem: barButtonItem)
+        toolbarItem.toolTip = barButtonItem.title
+        return toolbarItem
+      }
       return nil
     }
   }

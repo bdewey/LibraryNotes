@@ -226,13 +226,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     present(navigationController, animated: true, completion: nil)
   }
 
-  func makeInsertBookDetailsButton() -> UIBarButtonItem {
-    return UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), primaryAction: UIAction { [weak self] _ in
-      self?.editOrInsertBookDetails()
-    })
-  }
-
-  private func editOrInsertBookDetails() {
+  @objc private func editOrInsertBookDetails() {
     if let book = note.metadata.book {
       editBookDetails(book: book)
     } else if let apiKey = ApiKey.googleBooks {
@@ -240,17 +234,16 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
-  private func configureToolbar() {
-    navigationItem.customizationIdentifier = "savingTextEditViewController"
+  static var centerItemGroups: [UIBarButtonItemGroup] {
     let blockFormatItems: [UIBarButtonItem] = [
-      UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleHeading)),
-      UIBarButtonItem(title: "Quote", image: UIImage(systemName: "text.quote"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleQuote)),
-      UIBarButtonItem(title: "Bulleted list", image: UIImage(systemName: "list.bullet"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleBulletList)),
-      UIBarButtonItem(title: "Numbered list", image: UIImage(systemName: "list.number"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleNumberedList)),
-      UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: textEditViewController, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
+      UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: nil, action: #selector(TextEditingFormattingActions.toggleHeading)),
+      UIBarButtonItem(title: "Quote", image: UIImage(systemName: "text.quote"), target: nil, action: #selector(TextEditingFormattingActions.toggleQuote)),
+      UIBarButtonItem(title: "Bulleted list", image: UIImage(systemName: "list.bullet"), target: nil, action: #selector(TextEditingFormattingActions.toggleBulletList)),
+      UIBarButtonItem(title: "Numbered list", image: UIImage(systemName: "list.number"), target: nil, action: #selector(TextEditingFormattingActions.toggleNumberedList)),
+      UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: nil, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
     ]
-    navigationItem.centerItemGroups = [
-      makeInsertBookDetailsButton().creatingFixedGroup(),
+    return [
+      UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), target: nil, action: #selector(editOrInsertBookDetails)).creatingFixedGroup(),
       .optionalGroup(
         customizationIdentifier: "block-format",
         representativeItem: UIBarButtonItem(title: "Paragraph", image: UIImage(systemName: "paragraphsign")),
@@ -260,18 +253,21 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         customizationIdentifier: "format",
         representativeItem: UIBarButtonItem(title: "Format", image: UIImage(systemName: "bold.italic.underline")),
         items: [
-          textEditViewController.toggleBoldfaceBarButtonItem,
-          textEditViewController.toggleItalicsBarButtonItem,
+          TextEditViewController.toggleBoldfaceBarButtonItem,
+          TextEditViewController.toggleItalicsBarButtonItem,
         ]
       ),
     ]
+  }
+
+  private func configureToolbar() {
+    navigationItem.customizationIdentifier = "savingTextEditViewController"
+    navigationItem.centerItemGroups = Self.centerItemGroups
     if splitViewController?.isCollapsed ?? false {
       navigationController?.isToolbarHidden = false
-      if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
-        toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
-      }
+      toolbarItems = [UIBarButtonItem.flexibleSpace(), NotebookViewController.makeNewNoteButtonItem()]
     } else {
-      navigationItem.pinnedTrailingGroup = notebookViewController?.makeNewNoteButtonItem().creatingFixedGroup()
+      navigationItem.pinnedTrailingGroup = NotebookViewController.makeNewNoteButtonItem().creatingFixedGroup()
     }
   }
 
