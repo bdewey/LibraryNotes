@@ -15,7 +15,7 @@ public struct AttributedQuote: Identifiable, Hashable {
   public var thumbnailImage: Data?
 
   public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
-    return lhs.id == rhs.id
+    lhs.id == rhs.id
   }
 
   public func hash(into hasher: inout Hasher) {

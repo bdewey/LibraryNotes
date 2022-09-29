@@ -14,7 +14,7 @@ public struct AnswerStatistics: Codable, Equatable, Hashable {
   public static let empty = AnswerStatistics(correct: 0, incorrect: 0)
 
   public static func + (lhs: AnswerStatistics, rhs: AnswerStatistics) -> AnswerStatistics {
-    return AnswerStatistics(
+    AnswerStatistics(
       correct: lhs.correct + rhs.correct,
       incorrect: lhs.incorrect + rhs.incorrect
     )

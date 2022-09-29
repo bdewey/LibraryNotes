@@ -39,7 +39,7 @@ public final class NoteBundlePagePropertiesListDiffable: ListDiffable {
   }
 
   public func diffIdentifier() -> NSObjectProtocol {
-    return fileMetadata.fileName as NSString
+    fileMetadata.fileName as NSString
   }
 
   public func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
@@ -52,9 +52,9 @@ public final class NoteBundlePagePropertiesListDiffable: ListDiffable {
 
 /// Debuggability extensions for PagePropertiesListDiffable.
 extension NoteBundlePagePropertiesListDiffable: CustomStringConvertible, CustomDebugStringConvertible {
-  public var description: String { return String(describing: properties) }
+  public var description: String { String(describing: properties) }
   public var debugDescription: String {
-    return "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) "
+    "DocumentPropertiesListDiffable \(Unmanaged.passUnretained(self).toOpaque()) "
       + String(describing: properties)
   }
 }

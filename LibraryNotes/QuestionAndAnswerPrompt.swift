@@ -20,7 +20,7 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
 
   // MARK: - Public
 
-  public var type: PromptType { return .questionAndAnswer }
+  public var type: PromptType { .questionAndAnswer }
 
   public static func extract(from parsedString: ParsedString) -> [QuestionAndAnswerPrompt] {
     guard let root = try? parsedString.result.get() else { return [] }
@@ -36,7 +36,7 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
   }
 
   /// The single prompt from this template: Ourselves!
-  public var prompts: [Prompt] { return [self] }
+  public var prompts: [Prompt] { [self] }
 }
 
 extension QuestionAndAnswerPrompt: Prompt {

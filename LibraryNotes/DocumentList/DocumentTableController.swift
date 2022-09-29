@@ -50,10 +50,10 @@ public final class DocumentTableController: NSObject {
     }
     self.changedNoteSubscription = database.updatedValuesPublisher
       .filter { $0.0.key == NoteDatabaseKey.metadata.rawValue }
-      .map { $0.0.scope }
+      .map(\.0.scope)
       .receive(on: DispatchQueue.main)
       .sink { [weak self] noteIdentifier in
-        guard let self = self else { return }
+        guard let self else { return }
         var snapshot = self.dataSource.snapshot()
         let itemsToUpdate = snapshot.itemIdentifiers.filter { $0.matchesNoteIdentifier(noteIdentifier) }
         if !itemsToUpdate.isEmpty {
@@ -139,7 +139,7 @@ public final class DocumentTableController: NSObject {
       let booksByYear = slice.chunked(on: { $0.finishYear })
       for (year, yearSlice) in booksByYear {
         let headerItem: BookCollectionViewItem
-        if let year = year {
+        if let year {
           headerItem = .yearReadHeader(year, yearSlice.count)
         } else {
           headerItem = .header(.read, yearSlice.count)
@@ -178,7 +178,7 @@ extension DocumentTableController {
     }
   }
 
-  fileprivate func availableItemActionConfigurations(_ noteIdentifier: Note.Identifier) -> [BookAction] {
+  private func availableItemActionConfigurations(_ noteIdentifier: Note.Identifier) -> [BookAction] {
     let actions: [BookAction?] = [
       .studyItem(noteIdentifier, database: database, delegate: delegate),
       .moveItemToWantToRead(noteIdentifier, in: database),
@@ -218,12 +218,12 @@ public extension DocumentTableController {
 
   func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
     // TODO: This is a hack
-    return dataSource.indexPath(for: .book(noteIdentifier, nil))
+    dataSource.indexPath(for: .book(noteIdentifier, nil))
   }
 
   func selectFirstNote() {
     let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { if case .book = $0 { return true } else { return false } })
-    if let firstNote = firstNote, case .book(let noteIdentifier, _) = firstNote {
+    if let firstNote, case .book(let noteIdentifier, _) = firstNote {
       delegate?.showPage(with: noteIdentifier, shiftFocus: false)
     }
   }
@@ -292,7 +292,7 @@ extension DocumentTableController: UICollectionViewDelegate {
       return nil
     }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
-      guard let self = self else { return nil }
+      guard let self else { return nil }
       let menuActions = self.availableItemActionConfigurations(itemProperties).map { $0.asAction() }
       return UIMenu(title: "", children: menuActions)
     }

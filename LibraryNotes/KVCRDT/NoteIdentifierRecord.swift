@@ -26,7 +26,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     groupByYearRead: Bool,
     searchTerm: String?
   ) -> SQL {
-    return sql(structureIdentifier: structureIdentifier)
+    sql(structureIdentifier: structureIdentifier)
       + searchCondition(searchTerm: searchTerm)
       + orderClause(sortOrder: sortOrder, groupByYearRead: groupByYearRead)
   }
@@ -104,7 +104,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   }
 
   private static func searchCondition(searchTerm: String?) -> SQL {
-    guard let searchTerm = searchTerm else {
+    guard let searchTerm else {
       return ""
     }
     return "AND entry.scope IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"

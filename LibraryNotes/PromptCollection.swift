@@ -52,7 +52,7 @@ public protocol PromptCollection {
 public extension PromptCollection {
   /// Default implementation of `newPromptDelay`. If the setting `immediately_schedule_prompts` is true, then we have no delay.
   var newPromptDelay: TimeInterval {
-    return UserDefaults.standard.immediatelySchedulePrompts ? 0 : SchedulingParameters.standard.initialSchedulingDelay
+    UserDefaults.standard.immediatelySchedulePrompts ? 0 : SchedulingParameters.standard.initialSchedulingDelay
   }
 }
 
@@ -65,6 +65,6 @@ private extension SchedulingParameters {
 public extension Array where Element: PromptCollection {
   /// Returns the prompts from all of the collections in the array.
   var prompts: [Prompt] {
-    return [Prompt](map { $0.prompts }.joined())
+    [Prompt](map(\.prompts).joined())
   }
 }

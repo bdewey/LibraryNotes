@@ -24,7 +24,7 @@ public extension String {
   }
 
   func whitespaceCondensed() -> String {
-    return components(separatedBy: .whitespacesAndNewlines)
+    components(separatedBy: .whitespacesAndNewlines)
       .filter { !$0.isEmpty }
       .joined(separator: "-")
   }

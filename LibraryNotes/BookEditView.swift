@@ -142,7 +142,7 @@ struct CaptionedRow<Format: ParseableFormatStyle>: View where Format.FormatOutpu
     case .formatted(let binding, let format):
       return format.format(binding.wrappedValue)
     case .optionalFormatted(let binding, let format):
-      return binding.wrappedValue.flatMap({ format.format($0) }) ?? ""
+      return binding.wrappedValue.flatMap { format.format($0) } ?? ""
     }
   }
 
@@ -223,7 +223,7 @@ struct GrailListBackgroundModifier: ViewModifier {
 }
 
 extension View {
-  @ViewBuilder func `if`<Result: View>(_ condition: Bool, transform: (Self) -> Result) -> some View {
+  @ViewBuilder func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
     if condition {
       transform(self)
     } else {

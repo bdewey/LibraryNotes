@@ -12,7 +12,7 @@ public extension DataProtocol {
   }
 
   func toHexString() -> String {
-    return lazy.map { byte in
+    lazy.map { byte in
       (byte <= 0xF ? "0" : "") + String(byte, radix: 16)
     }.joined()
   }
@@ -21,6 +21,6 @@ public extension DataProtocol {
 public extension String {
   /// Returns the SHA-1 digest of this string in UTF-8 encoding.
   func sha1Digest() -> String {
-    return data(using: .utf8)!.sha1Digest()
+    data(using: .utf8)!.sha1Digest()
   }
 }

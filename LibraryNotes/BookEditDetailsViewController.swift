@@ -338,7 +338,7 @@ public final class BookEditDetailsViewController: UIViewController {
     Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(model.isValid)")
 
     let cancelAction = UIAction { [weak self] _ in
-      guard let self = self else { return }
+      guard let self else { return }
       self.delegate?.bookSearchViewControllerDidCancel(self)
     }
     #if targetEnvironment(macCatalyst)

@@ -375,7 +375,7 @@ public final class StudyViewController: UIViewController {
         } completion: { _ in
           self.finishStudySession()
         }
-      } else if let correct = correct {
+      } else if let correct {
         markCurrentCardCorrect(correct, currentTranslation: translation)
       } else {
         // Need to return
@@ -457,7 +457,7 @@ public final class StudyViewController: UIViewController {
     for sessionPromptIdentifier: StudySession.SessionPromptIdentifier?,
     completion: @escaping (PromptView?) -> Void
   ) {
-    guard let sessionPromptIdentifier = sessionPromptIdentifier else {
+    guard let sessionPromptIdentifier else {
       completion(nil)
       return
     }
@@ -484,7 +484,7 @@ public final class StudyViewController: UIViewController {
 
   override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    guard let currentCardView = currentCardView, currentCardView.transform == .identity else {
+    guard let currentCardView, currentCardView.transform == .identity else {
       return
     }
     var layoutFrame = view.safeAreaLayoutGuide.layoutFrame
@@ -519,7 +519,7 @@ extension StudyViewController: PromptViewDelegate {
 
 extension CGPoint {
   static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
-    return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
   }
 
   static func += (lhs: inout CGPoint, rhs: CGPoint) {
@@ -529,6 +529,6 @@ extension CGPoint {
 
 extension CGFloat {
   func plusOrMinus(_ delta: CGFloat) -> Range<CGFloat> {
-    return (self - delta) ..< (self + delta)
+    (self - delta) ..< (self + delta)
   }
 }

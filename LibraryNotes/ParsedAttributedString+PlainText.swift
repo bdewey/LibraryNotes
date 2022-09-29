@@ -18,7 +18,7 @@ public extension ParsedAttributedString.Style {
       .delimiter: .remove,
       .clozeHint: .remove,
     ]
-    if let imageStorage = imageStorage {
+    if let imageStorage {
       formatters[.image] = AnyParsedAttributedStringFormatter(imageStorage)
     }
     var defaultAttributes = AttributedStringAttributesDescriptor(textStyle: textStyle, color: textColor)

@@ -21,7 +21,7 @@ public struct BookNoteMetadata: Codable, Equatable {
 
   /// The "preferred title" of this note. If this note is about a specific book, the preferred title is derived from the book metadata. Otherwise, returns the `title`
   public var preferredTitle: String {
-    if let book = book {
+    if let book {
       var title = "_\(book.title)_"
       if !book.authors.isEmpty {
         let authors = book.authors.joined(separator: ", ")
@@ -69,7 +69,7 @@ public struct BookNoteMetadata: Codable, Equatable {
 
   /// Information in this metadata structure that's worth putting in a full-text index for metadata surces.
   public var indexedContents: String? {
-    guard let book = book else { return nil }
+    guard let book else { return nil }
     return [book.title, book.authors.joined(separator: " ")].joined(separator: " ")
   }
 

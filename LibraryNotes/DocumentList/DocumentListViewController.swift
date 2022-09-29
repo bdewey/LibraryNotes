@@ -90,7 +90,7 @@ final class DocumentListViewController: UIViewController {
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
     get {
-      return dataSource.dueDate
+      dataSource.dueDate
     }
     set {
       dataSource.dueDate = newValue
@@ -103,7 +103,7 @@ final class DocumentListViewController: UIViewController {
     listConfiguration.backgroundColor = .grailSecondaryBackground
     listConfiguration.headerMode = .firstItemInSection
     listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
-      guard let self = self else { return nil }
+      guard let self else { return nil }
       return self.dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
@@ -229,7 +229,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func startStudySession() {
-    guard let studySession = studySession else { return }
+    guard let studySession else { return }
     presentStudySessionViewController(for: studySession)
   }
 
@@ -239,7 +239,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateStudySession() {
     studySession = try? database.studySession(
-      noteIdentifiers: Set(dataSource.noteIdentifiers.map { $0.noteIdentifier }),
+      noteIdentifiers: Set(dataSource.noteIdentifiers.map(\.noteIdentifier)),
       date: dueDate
     )
   }
@@ -282,7 +282,7 @@ final class DocumentListViewController: UIViewController {
   /// If `progressView` is non-nil (indicating a long-running task is happening), this will be a `UIBarButtonItem` wrapping the progress view.
   /// Otherwise, it will be a `UIBarButtonItem` wrapping a count of the number of books.
   private var displayBarButtonItem: UIBarButtonItem {
-    if let progressView = progressView {
+    if let progressView {
       return UIBarButtonItem(customView: progressView)
     } else {
       let countLabel = UILabel(frame: .zero)
@@ -415,7 +415,7 @@ final class DocumentListViewController: UIViewController {
     for noteIdentifier in noteIdentifiers {
       await Task.yield()
       let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
-      let fileURL = self.fileURL(title: note.metadata.exportTitle, directory: destinationURL)
+      let fileURL = fileURL(title: note.metadata.exportTitle, directory: destinationURL)
       var buffer = ""
       if let book = note.metadata.book {
         buffer = "---\n"
@@ -495,7 +495,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc func performReview() {
-    guard let studySession = studySession, !studySession.isEmpty else { return }
+    guard let studySession, !studySession.isEmpty else { return }
     #if targetEnvironment(macCatalyst)
       UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .focusStructure(focusedStructure))
     #else
@@ -528,7 +528,7 @@ extension DocumentListViewController {
   /// A `UIAction` for importing books from LibraryThing or Goodreads
   private var importLibraryThingAction: UIAction {
     UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
-      guard let self = self else { return }
+      guard let self else { return }
       self.importBooks()
     }
   }
@@ -710,7 +710,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   // TODO: This isn't actually called :-(
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
-      let splitViewController = splitViewController,
+      let splitViewController,
       splitViewController.viewControllers.count > 1,
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
       let detailViewController = navigationController.viewControllers.first as? SavingTextEditViewController
@@ -783,7 +783,7 @@ extension DocumentListViewController: StudyViewControllerDelegate {
 
 private extension Note {
   var book: AugmentedBook? {
-    return metadata.book
+    metadata.book
   }
 
   var rating: Int? {
@@ -820,7 +820,7 @@ extension DocumentListViewController: BookImporterViewControllerDelegate {
 
 private extension BookNoteMetadata {
   var exportTitle: String {
-    if let book = book {
+    if let book {
       return "\(book.title) \(book.authors.joined(separator: " "))"
     } else {
       return title
@@ -830,15 +830,15 @@ private extension BookNoteMetadata {
 
 private extension DateComponents {
   var yaml: String {
-    guard let year = year else {
+    guard let year else {
       return ""
     }
     var output = "\(year)"
-    guard let month = month else {
+    guard let month else {
       return output
     }
     output.append("-\(month.formatted(.number.precision(.integerLength(2))))")
-    guard let day = day else {
+    guard let day else {
       return output
     }
     output.append("-\(day.formatted(.number.precision(.integerLength(2))))")

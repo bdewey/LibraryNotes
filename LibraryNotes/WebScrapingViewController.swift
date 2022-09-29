@@ -64,7 +64,7 @@ public final class WebScrapingViewController: UIViewController {
   override public func viewDidLoad() {
     super.viewDidLoad()
     navigationItem.leftBarButtonItem = UIBarButtonItem(systemItem: .done, primaryAction: UIAction { [weak self] _ in
-      guard let self = self else { return }
+      guard let self else { return }
       self.delegate?.webScrapingViewControllerDidCancel(self)
     })
     navigationItem.rightBarButtonItem = importButton
@@ -91,7 +91,7 @@ private extension WebScrapingViewController {
 
   func runImportScript() {
     webView.evaluateJavaScript(javascript) { [weak self] result, error in
-      guard let self = self else { return }
+      guard let self else { return }
       if let result = result as? String {
         self.delegate?.webScrapingViewController(self, didScrapeMarkdown: result)
       } else {

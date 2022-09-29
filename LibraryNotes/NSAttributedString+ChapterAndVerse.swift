@@ -97,7 +97,7 @@ public extension NSAttributedString {
     }
     let nsRange = NSRange(index ..< string.endIndex, in: string)
     // swiftlint:disable:next force_cast
-    let mutableCopy = self.mutableCopy() as! NSMutableAttributedString
+    let mutableCopy = mutableCopy() as! NSMutableAttributedString
     mutableCopy.deleteCharacters(in: nsRange)
     return mutableCopy
   }

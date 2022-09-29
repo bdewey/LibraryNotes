@@ -269,7 +269,7 @@ public final class NotebookViewController: UISplitViewController {
     ])
     structureViewController.updateUserActivity(userActivity)
 
-    if let secondaryViewController = secondaryViewController {
+    if let secondaryViewController {
       do {
         let controllerType = type(of: secondaryViewController).notebookDetailType
         userActivity.addUserInfoEntries(

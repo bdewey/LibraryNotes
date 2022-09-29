@@ -334,7 +334,7 @@ private extension NotebookStructureViewController {
       newlySelectedItem = parent
     }
     dataSource.apply(snapshot, to: .notes, animatingDifferences: true)
-    if let newlySelectedItem = newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
+    if let newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
       collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
       selectItemAtIndexPath(indexPath, shiftFocus: false)
     }
@@ -363,7 +363,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
     let item = dataSource.itemIdentifier(for: indexPath)
     guard case .hashtag(let hashtag) = item?.structureIdentifier else { return nil }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self, database] _ in
-      guard let self = self else { return nil }
+      guard let self else { return nil }
       let rename = UIAction(title: "Rename \(hashtag)", image: UIImage(systemName: "square.and.pencil")) { _ in
         Logger.shared.debug("Rename \(hashtag)")
         let alert = UIAlertController(title: "Rename \(hashtag)", message: nil, preferredStyle: .alert)

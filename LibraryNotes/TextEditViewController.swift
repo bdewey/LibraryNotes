@@ -77,7 +77,7 @@ public final class TextEditViewController: UIViewController {
   /// The markdown
   public var markdown: String {
     get {
-      return parsedAttributedString.rawString as String
+      parsedAttributedString.rawString as String
     }
     set {
       textView.textStorage.replaceCharacters(in: NSRange(location: 0, length: textView.textStorage.length), with: newValue)
@@ -96,7 +96,7 @@ public final class TextEditViewController: UIViewController {
 
   public var selectedRange: NSRange {
     get {
-      return textView.selectedRange
+      textView.selectedRange
     }
     set {
       textView.selectedRange = newValue
@@ -120,7 +120,7 @@ public final class TextEditViewController: UIViewController {
       extendedNavigationHeaderView?.removeFromSuperview()
     }
     didSet {
-      guard let extendedNavigationHeaderView = extendedNavigationHeaderView else {
+      guard let extendedNavigationHeaderView else {
         return
       }
       textView.addSubview(extendedNavigationHeaderView)
@@ -138,7 +138,7 @@ public final class TextEditViewController: UIViewController {
   /// Position `navigationBorderView` between the header & text. Note this depends on scroll position since it will pin to the top, so call
   /// this on each scrollViewDidScroll.
   private func layoutNavigationBorderView() {
-    guard let navigationBorderView = navigationBorderView else {
+    guard let navigationBorderView else {
       return
     }
     let yPosition = max(0, textView.contentOffset.y + textView.adjustedContentInset.top - textView.contentInset.top)
@@ -179,7 +179,7 @@ public final class TextEditViewController: UIViewController {
 
   /// Creates a typeahead accessory for text starting at location `anchor`. If the accessory already exists, returns it.
   private func makeTypeaheadAccessoryIfNecessary(anchoredAt anchor: Int) -> TypeaheadAccessory {
-    if let typeaheadAccessory = typeaheadAccessory, typeaheadAccessory.anchor == anchor {
+    if let typeaheadAccessory, typeaheadAccessory.anchor == anchor {
       return typeaheadAccessory
     }
     let gridUnit: CGFloat = 8
@@ -270,7 +270,7 @@ public final class TextEditViewController: UIViewController {
 
     let importActions = WebImporterConfiguration.shared.map { config in
       UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
-        guard let self = self else { return }
+        guard let self else { return }
         let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
         webViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: webViewController)
@@ -326,7 +326,7 @@ public final class TextEditViewController: UIViewController {
     if let bookHeader = extendedNavigationHeaderView as? BookHeader {
       bookHeader.minimumTextX = view.readableContentGuide.layoutFrame.minX + 28
     }
-    if let extendedNavigationHeaderView = extendedNavigationHeaderView {
+    if let extendedNavigationHeaderView {
       let height = extendedNavigationHeaderView.sizeThatFits(CGSize(width: view.frame.width, height: UIView.layoutFittingExpandedSize.height)).height
       extendedNavigationHeaderView.frame = CGRect(origin: CGPoint(x: 0, y: -height), size: CGSize(width: view.frame.width, height: height))
     }
@@ -384,7 +384,7 @@ public final class TextEditViewController: UIViewController {
 
   /// Toggles "bold" at the current location in `textView`
   /// - Parameter sender: Unused
-  public override func toggleBoldface(_ sender: Any?) {
+  override public func toggleBoldface(_ sender: Any?) {
     toggleInlineDelimitedText(nodeType: .strongEmphasis, openingDelimiter: "**", closingDelimiter: "**")
   }
 
@@ -392,7 +392,7 @@ public final class TextEditViewController: UIViewController {
     UIBarButtonItem(title: "Italic", image: UIImage(systemName: "italic"), target: nil, action: #selector(toggleItalics))
   }
 
-  public override func toggleItalics(_ sender: Any?) {
+  override public func toggleItalics(_ sender: Any?) {
     toggleInlineDelimitedText(nodeType: .emphasis, openingDelimiter: "_", closingDelimiter: "_")
   }
 
@@ -786,7 +786,7 @@ extension TextEditViewController: TextEditingFormattingActions {
   }
 }
 
-private extension Array<AnchoredNode> {
+private extension [AnchoredNode] {
   func searchForBlockType(
     _ type: SyntaxTreeNodeType,
     delimiter: SyntaxTreeNodeType

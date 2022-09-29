@@ -5,7 +5,7 @@ import UIKit
 
 public final class CameraCaptureView: UIView {
   override public class var layerClass: AnyClass {
-    return AVCaptureVideoPreviewLayer.self
+    AVCaptureVideoPreviewLayer.self
   }
 
   var videoPreviewLayer: AVCaptureVideoPreviewLayer {
@@ -18,7 +18,7 @@ public final class CameraCaptureView: UIView {
 
   public var session: AVCaptureSession? {
     get {
-      return videoPreviewLayer.session
+      videoPreviewLayer.session
     }
 
     set {

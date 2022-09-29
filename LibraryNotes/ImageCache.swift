@@ -23,7 +23,7 @@ public final class ImageCache {
     }
     let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, _, error in
       DispatchQueue.main.async {
-        if let data = data, let image = UIImage(data: data) {
+        if let data, let image = UIImage(data: data) {
           self.cache.setObject(image, forKey: nsURL)
           completion(.success(image))
         } else {

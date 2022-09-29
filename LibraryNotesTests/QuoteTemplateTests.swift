@@ -34,14 +34,14 @@ final class QuoteTemplateTests: XCTestCase {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
-    let cards = quoteTemplates.map { $0.prompts }.joined()
+    let cards = quoteTemplates.map(\.prompts).joined()
     XCTAssertEqual(cards.count, 5)
   }
 
   func testSerialization() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
-    let strings = quoteTemplates.map { $0.rawValue }
+    let strings = quoteTemplates.map(\.rawValue)
     let decodedTemplates = strings.map { QuotePrompt(rawValue: $0) }
     XCTAssertEqual(decodedTemplates, quoteTemplates)
   }

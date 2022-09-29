@@ -109,7 +109,7 @@ extension Array {
         remainder.append(element)
       }
     }
-    if let value = value {
+    if let value {
       return (value: value, remainder: remainder)
     } else {
       return nil

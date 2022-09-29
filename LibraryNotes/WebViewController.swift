@@ -52,7 +52,7 @@ public final class WebViewController: UIViewController {
   }
 
   @objc private func showNotes() {
-    guard let relatedNotesViewController = relatedNotesViewController else { return }
+    guard let relatedNotesViewController else { return }
     Logger.shared.info("Should show notes now")
     let navigationController = UINavigationController(rootViewController: relatedNotesViewController)
     navigationController.navigationBar.prefersLargeTitles = false

@@ -121,7 +121,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
-    if let initialSelectedRange = initialSelectedRange {
+    if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
     }
     viewController.autoFirstResponder = autoFirstResponder
@@ -378,7 +378,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
   static var notebookDetailType: String { "SavingTextEditViewController" }
 
   func userActivityData() throws -> Data {
-    return try JSONEncoder().encode(restorationState)
+    try JSONEncoder().encode(restorationState)
   }
 
   var shouldShowWhenCollapsed: Bool { !restorationState.containsOnlyDefaultContent }

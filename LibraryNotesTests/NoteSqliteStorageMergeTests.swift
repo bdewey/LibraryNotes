@@ -240,7 +240,7 @@ private extension NoteSqliteStorageMergeTests {
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   ) async throws -> NoteDatabase {
-    return try await NoteDatabase(
+    try await NoteDatabase(
       fileURL: fileURL,
       authorDescription: device.name
     )

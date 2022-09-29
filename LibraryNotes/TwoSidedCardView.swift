@@ -104,19 +104,19 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
   /// A string displayed at the top of the card, both front and back, that gives context
   /// about what to do with the card.
   public var context: NSAttributedString? {
-    get { return contextLabel.attributedText }
+    get { contextLabel.attributedText }
     set { contextLabel.attributedText = newValue }
   }
 
   /// The contents of the card front.
   public var front: NSAttributedString? {
-    get { return frontLabel.attributedText }
+    get { frontLabel.attributedText }
     set { frontLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 
   /// The contents of the card back.
   public var back: NSAttributedString? {
-    get { return backLabel.attributedText }
+    get { backLabel.attributedText }
     set { backLabel.attributedText = newValue?.withTypographySubstitutions }
   }
 

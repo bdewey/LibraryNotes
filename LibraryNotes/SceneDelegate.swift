@@ -177,11 +177,11 @@ extension NSUserActivity {
     }
 
     #if targetEnvironment(macCatalyst)
-    let toolbar = NSToolbar(identifier: "main")
-    toolbar.displayMode = .iconOnly
-    toolbar.delegate = toolbarDelegate
-    toolbar.allowsUserCustomization = true
-    windowScene.titlebar?.toolbar = toolbar
+      let toolbar = NSToolbar(identifier: "main")
+      toolbar.displayMode = .iconOnly
+      toolbar.delegate = toolbarDelegate
+      toolbar.allowsUserCustomization = true
+      windowScene.titlebar?.toolbar = toolbar
     #endif
     window.makeKeyAndVisible()
     self.window = window
@@ -269,7 +269,7 @@ extension NSUserActivity {
         noteIdentifiers = [identifier]
       case .focusStructure(let structureIdentifier):
         for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
-          noteIdentifiers = noteIdentifierRecords.map { $0.noteIdentifier }
+          noteIdentifiers = noteIdentifierRecords.map(\.noteIdentifier)
           break
         }
       }
@@ -348,7 +348,7 @@ extension NSUserActivity {
   }
 
   func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-    return scene.userActivity
+    scene.userActivity
   }
 }
 
@@ -361,35 +361,35 @@ extension SceneDelegate: StudyViewControllerDelegate {
 }
 
 #if targetEnvironment(macCatalyst)
-extension NSToolbarItem.Identifier {
-  static let centerItemGroups = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
-  static let trailingItemGroups = NSToolbarItem.Identifier("org.brians-brain.trailing-item-groups")
+  extension NSToolbarItem.Identifier {
+    static let centerItemGroups = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
+    static let trailingItemGroups = NSToolbarItem.Identifier("org.brians-brain.trailing-item-groups")
 
-  func subidentifier(index: Int) -> NSToolbarItem.Identifier {
-    NSToolbarItem.Identifier("\(rawValue)-\(index)")
-  }
-
-  func subIdentifierIndex(from subIdentifier: NSToolbarItem.Identifier) -> Int? {
-    guard subIdentifier.rawValue.hasPrefix(rawValue) else {
-      return nil
+    func subidentifier(index: Int) -> NSToolbarItem.Identifier {
+      NSToolbarItem.Identifier("\(rawValue)-\(index)")
     }
-    // Remove the prefix and dash
-    let suffixSubstring = subIdentifier.rawValue.dropFirst(rawValue.count + 1)
-    return Int(suffixSubstring)
-  }
-}
 
-extension NSToolbarItemGroup {
-  convenience init(identifier: NSToolbarItem.Identifier, barButtonGroup: UIBarButtonItemGroup) {
-    let subitems = barButtonGroup.barButtonItems.enumerated().map { (index, barButtonItem) -> NSToolbarItem in
-      let item = NSToolbarItem(itemIdentifier: identifier.subidentifier(index: index), barButtonItem: barButtonItem)
-      item.toolTip = barButtonItem.title
-      return item
+    func subIdentifierIndex(from subIdentifier: NSToolbarItem.Identifier) -> Int? {
+      guard subIdentifier.rawValue.hasPrefix(rawValue) else {
+        return nil
+      }
+      // Remove the prefix and dash
+      let suffixSubstring = subIdentifier.rawValue.dropFirst(rawValue.count + 1)
+      return Int(suffixSubstring)
     }
-    self.init(itemIdentifier: identifier)
-    self.subitems = subitems
   }
-}
+
+  extension NSToolbarItemGroup {
+    convenience init(identifier: NSToolbarItem.Identifier, barButtonGroup: UIBarButtonItemGroup) {
+      let subitems = barButtonGroup.barButtonItems.enumerated().map { index, barButtonItem -> NSToolbarItem in
+        let item = NSToolbarItem(itemIdentifier: identifier.subidentifier(index: index), barButtonItem: barButtonItem)
+        item.toolTip = barButtonItem.title
+        return item
+      }
+      self.init(itemIdentifier: identifier)
+      self.subitems = subitems
+    }
+  }
 
   final class ToolbarDelegate: NSObject, NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
