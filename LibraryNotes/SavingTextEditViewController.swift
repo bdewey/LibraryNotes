@@ -226,7 +226,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     present(navigationController, animated: true, completion: nil)
   }
 
-  @objc private func editOrInsertBookDetails() {
+  @objc func editOrInsertBookDetails() {
     if let book = note.metadata.book {
       editBookDetails(book: book)
     } else if let apiKey = ApiKey.googleBooks {

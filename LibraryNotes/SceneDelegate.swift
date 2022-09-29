@@ -174,15 +174,14 @@ extension NSUserActivity {
       Logger.sceneDelegate.trace("Window has not yet been configured; creating document browser")
       let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
       window.rootViewController = browser
-    }
-
-    #if targetEnvironment(macCatalyst)
+      // Set up a custom toolbar.
       let toolbar = NSToolbar(identifier: "main")
       toolbar.displayMode = .iconOnly
       toolbar.delegate = toolbarDelegate
       toolbar.allowsUserCustomization = true
       windowScene.titlebar?.toolbar = toolbar
-    #endif
+    }
+
     window.makeKeyAndVisible()
     self.window = window
   }
@@ -227,6 +226,13 @@ extension NSUserActivity {
     #if targetEnvironment(macCatalyst)
       window.windowScene?.title = url.deletingPathExtension().lastPathComponent
       window.windowScene?.titlebar?.representedURL = url
+
+      // Set up a custom toolbar.
+      let toolbar = NSToolbar(identifier: "main")
+      toolbar.displayMode = .iconOnly
+      toolbar.delegate = toolbarDelegate
+      toolbar.allowsUserCustomization = true
+      window.windowScene?.titlebar?.toolbar = toolbar
     #endif
     Task {
       let database: NoteDatabase

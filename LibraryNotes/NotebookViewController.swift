@@ -237,6 +237,24 @@ public final class NotebookViewController: UISplitViewController {
     }
   }
 
+  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    if action == #selector(editOrInsertBookDetails) {
+      return secondaryViewController is SavingTextEditViewController
+    } else {
+      return super.canPerformAction(action, withSender: sender)
+    }
+  }
+
+  /// Forward the `editOrInsertBookDetails` selector to the active `SavingTextEditViewController`, if it is visible in the window.
+  ///
+  /// This is to enable the "info" toolbar button to work even when the editor window doesn't have focus, but something else in the notebook does.
+  @objc private func editOrInsertBookDetails() {
+    guard let editor = secondaryViewController as? SavingTextEditViewController else {
+      return
+    }
+    editor.editOrInsertBookDetails()
+  }
+
   public static func makeNewNoteButtonItem() -> UIBarButtonItem {
     UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), target: nil, action: #selector(makeNewNote))
   }
