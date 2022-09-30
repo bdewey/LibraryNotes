@@ -11,7 +11,7 @@ public extension PromptType {
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.
 public struct ClozePromptCollection: PromptCollection {
-  public var type: PromptType { return .cloze }
+  public var type: PromptType { .cloze }
 
   public init?(rawValue: String) {
     self.markdown = rawValue
@@ -67,6 +67,6 @@ struct ObjectIdentityHashable<T: AnyObject>: Hashable {
   }
 
   static func == (lhs: ObjectIdentityHashable<T>, rhs: ObjectIdentityHashable<T>) -> Bool {
-    return lhs.value === rhs.value
+    lhs.value === rhs.value
   }
 }

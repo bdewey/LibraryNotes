@@ -96,7 +96,7 @@ public final class NoteDatabase {
       .sink(receiveCompletion: { error in
         Logger.shared.error("Error maintaining cache: \(error)")
       }, receiveValue: { [weak self] update in
-        guard let self = self else { return }
+        guard let self else { return }
         for scopedKey in update.keys {
           self.cachedBookMetadata[scopedKey.scope] = nil
         }
@@ -166,7 +166,7 @@ public final class NoteDatabase {
   /// All tags used by all books in the database, sorted.
   public var allTags: [String] {
     get throws {
-      if let cachedAllTags = cachedAllTags {
+      if let cachedAllTags {
         return cachedAllTags
       } else {
         let tags = try keyValueCRDT.read { database in
@@ -219,6 +219,31 @@ public final class NoteDatabase {
   ///   - searchTerm: Optional search term for full-text search.
   /// - Returns: A publisher of `NoteIdentifierRecord` structs.
   func noteIdentifiersPublisher(
+    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    sortOrder: NoteIdentifierRecord.SortOrder,
+    groupByYearRead: Bool,
+    searchTerm: String?
+  ) -> AnyPublisher<[NoteIdentifierRecord], Error> {
+    let sqlLiteral = NoteIdentifierRecord.sqlLiteral(
+      structureIdentifier: structureIdentifier,
+      sortOrder: sortOrder,
+      groupByYearRead: groupByYearRead,
+      searchTerm: searchTerm
+    )
+    return keyValueCRDT.valuePublisher { db -> [NoteIdentifierRecord] in
+      let (sql, arguments) = try sqlLiteral.build(db)
+      return try NoteIdentifierRecord.fetchAll(db, sql: sql, arguments: arguments)
+    }
+  }
+
+  /// Returns an array of `NoteIdentifierRecord` structs that match specific search criteria and sort order.
+  /// - Parameters:
+  ///   - structureIdentifier: The "subsection" of the notebook in which to confine the results.
+  ///   - sortOrder: Sort order of the results.
+  ///   - groupByYearRead: If true, results should be grouped by year read as well as by general "section"
+  ///   - searchTerm: Optional search term for full-text search.
+  /// - Returns: An array of `NoteIdentifierRecord` structs.
+  func noteIdentifiers(
     structureIdentifier: NotebookStructureViewController.StructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
     groupByYearRead: Bool,
@@ -324,7 +349,7 @@ public final class NoteDatabase {
     let results: [ScopedKey: [Version]]
     do {
       results = try keyValueCRDT.bulkRead(isIncluded: { scope, key -> Bool in
-        if let noteIdentifier = noteIdentifier {
+        if let noteIdentifier {
           if noteIdentifier != scope { return false }
         }
         return key.hasPrefix("prompt=") || key == NoteDatabaseKey.metadata.rawValue
@@ -350,7 +375,7 @@ public final class NoteDatabase {
   public func updateStudySessionResults(_ studySession: StudySession, on date: Date, buryRelatedPrompts: Bool) throws {
     let scopedKeysToFetch = studySession.results.keys.map { ScopedKey(scope: $0.noteId, key: $0.promptKey) }
     let promptInfo = try keyValueCRDT
-      .bulkRead(keys: scopedKeysToFetch.map { $0.key })
+      .bulkRead(keys: scopedKeysToFetch.map(\.key))
       .dictionaryCompactMap(mapping: { scopedKey, versions -> (key: ScopedKey, value: PromptCollectionInfo)? in
         guard let info = versions.promptCollectionInfo else { return nil }
         return (key: scopedKey, value: info)
@@ -430,8 +455,8 @@ public final class NoteDatabase {
   }
 
   public func attributedQuotes(for contentIdentifiers: [ContentIdentifier]) throws -> [AttributedQuote] {
-    let candidateNotes = contentIdentifiers.map { $0.noteId }.asSet()
-    let candidateKeys = contentIdentifiers.map { $0.key }.asSet()
+    let candidateNotes = contentIdentifiers.map(\.noteId).asSet()
+    let candidateKeys = contentIdentifiers.map(\.key).asSet()
     let results = try keyValueCRDT.bulkRead(isIncluded: { scope, key in
       if candidateNotes.contains(scope), [NoteDatabaseKey.metadata.rawValue, NoteDatabaseKey.coverImage.rawValue].contains(key) {
         return true
@@ -618,7 +643,7 @@ public struct NoteUpdatePayload {
       }
       updates[NoteDatabaseKey(rawValue: scopedKey.key)] = versions.resolved(with: .lastWriterWins)
     }
-    if let noteIdentifier = noteIdentifier {
+    if let noteIdentifier {
       self.noteIdentifier = noteIdentifier
     } else {
       return nil
@@ -636,7 +661,7 @@ public struct NoteUpdatePayload {
     updates[.metadata] = try Value(note.metadata)
     updates[.noteText] = Value(note.text)
     updates[.bookIndex] = Value(note.metadata.indexedContents)
-    let unusedPromptKeys = Set(updates.keys.filter { $0.isPrompt }.map { $0.rawValue }).subtracting(note.promptCollections.keys)
+    let unusedPromptKeys = Set(updates.keys.filter(\.isPrompt).map(\.rawValue)).subtracting(note.promptCollections.keys)
     if !unusedPromptKeys.isEmpty {
       Logger.keyValueNoteDatabase.debug("Will remove unused prompt keys: \(unusedPromptKeys)")
     }
@@ -687,14 +712,14 @@ public struct NoteUpdatePayload {
   }
 }
 
-private extension Dictionary where Key == ScopedKey, Value == [Version] {
+private extension [ScopedKey: [Version]] {
   func asBookNoteMetadata() throws -> [String: BookNoteMetadata] {
     map { scopedKey, versions -> (key: String, value: KeyValueCRDT.Value?) in
       let tuple = (key: scopedKey.scope, value: versions.resolved(with: .lastWriterWins))
       return tuple
     }
     .dictionaryCompactMap { noteID, value -> (key: String, value: BookNoteMetadata)? in
-      guard let value = value else { return nil } // Key was deleted, no need to log error.
+      guard let value else { return nil } // Key was deleted, no need to log error.
       guard let json = value.json, let data = json.data(using: .utf8) else {
         Logger.keyValueNoteDatabase.error("Value for \(noteID) was not type JSON, ignoring")
         return nil

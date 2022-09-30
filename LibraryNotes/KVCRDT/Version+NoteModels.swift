@@ -7,7 +7,7 @@ enum VersionError: String, Error {
   case unexpectedVersionConflict = "Detected a version conflict on a key/value entry that should never conflict"
 }
 
-extension Array where Element == Version {
+extension [Version] {
   var metadata: BookNoteMetadata? {
     guard let json = resolved(with: .lastWriterWins)?.json else { return nil }
     return try? JSONDecoder.databaseDecoder.decode(BookNoteMetadata.self, from: json.data(using: .utf8)!)

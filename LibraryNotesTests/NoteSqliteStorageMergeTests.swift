@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import KeyValueCRDT
-@testable import LibraryNotes
+@testable import Library_Notes
 import XCTest
 
 /// Specific test cases around merging database content.
@@ -240,7 +240,7 @@ private extension NoteSqliteStorageMergeTests {
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   ) async throws -> NoteDatabase {
-    return try await NoteDatabase(
+    try await NoteDatabase(
       fileURL: fileURL,
       authorDescription: device.name
     )

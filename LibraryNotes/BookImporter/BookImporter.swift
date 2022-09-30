@@ -24,7 +24,7 @@ final class BookImporter {
   @MainActor
   func importBooks(
     request: BookImportRequest<[AugmentedBook]>,
-    progressCallback: @escaping @MainActor(Int, Int) -> Void
+    progressCallback: @escaping @MainActor (Int, Int) -> Void
   ) async {
     let books = request.dryRun ? Array(request.item.shuffled().prefix(10)) : request.item
     if request.downloadCoverImages {

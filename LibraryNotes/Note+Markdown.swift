@@ -64,12 +64,12 @@ public extension Note {
 
   static func makeBlankNoteText(title: String? = nil, hashtag: String? = nil) -> (String, Int) {
     var initialText = "# "
-    if let title = title {
+    if let title {
       initialText += title
     }
     let initialOffset = initialText.count
     initialText += "\n"
-    if let hashtag = hashtag {
+    if let hashtag {
       initialText += hashtag
       initialText += "\n"
     }

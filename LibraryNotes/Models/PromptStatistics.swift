@@ -29,7 +29,7 @@ public struct PromptStatistics: Codable {
 
 public extension PromptStatistics {
   var schedulingItem: PromptSchedulingMetadata {
-    if let due = due, let lastReview = lastReview {
+    if let due, let lastReview {
       let interval = due.timeIntervalSince(lastReview)
       assert(interval > 0)
       return PromptSchedulingMetadata(

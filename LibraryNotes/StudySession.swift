@@ -39,7 +39,7 @@ public struct StudySession {
   }
 
   var allIdentifiers: Set<PromptIdentifier> {
-    return sessionPromptIdentifiers.allIdentifiers
+    sessionPromptIdentifiers.allIdentifiers
   }
 
   /// Creates a study session where all cards come from a single document.
@@ -136,7 +136,7 @@ public struct StudySession {
 
   /// Number of cards remaining in the study session.
   public var remainingPrompts: Int {
-    return sessionPromptIdentifiers.endIndex - currentIndex
+    sessionPromptIdentifiers.endIndex - currentIndex
   }
 
   public static func += (lhs: inout StudySession, rhs: StudySession) {
@@ -147,14 +147,14 @@ public struct StudySession {
 }
 
 extension StudySession: Collection {
-  public var startIndex: Int { return sessionPromptIdentifiers.startIndex }
-  public var endIndex: Int { return sessionPromptIdentifiers.endIndex }
+  public var startIndex: Int { sessionPromptIdentifiers.startIndex }
+  public var endIndex: Int { sessionPromptIdentifiers.endIndex }
   public func index(after i: Int) -> Int {
-    return sessionPromptIdentifiers.index(after: i)
+    sessionPromptIdentifiers.index(after: i)
   }
 
   public subscript(position: Int) -> SessionPromptIdentifier {
-    return sessionPromptIdentifiers[position]
+    sessionPromptIdentifiers[position]
   }
 }
 
@@ -179,9 +179,9 @@ extension StudySession {
   }
 }
 
-extension Sequence where Element == StudySession.SessionPromptIdentifier {
+extension Sequence<StudySession.SessionPromptIdentifier> {
   /// For a sequence of cards, return the set of all identifiers.
   var allIdentifiers: Set<PromptIdentifier> {
-    return reduce(into: Set<PromptIdentifier>()) { $0.insert($1.promptIdentifier) }
+    reduce(into: Set<PromptIdentifier>()) { $0.insert($1.promptIdentifier) }
   }
 }

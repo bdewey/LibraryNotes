@@ -40,7 +40,7 @@ private struct TypographyScanner<S: Scannable> {
   }
 
   var current: Character? {
-    return safeCharacter(at: index)
+    safeCharacter(at: index)
   }
 
   var previous: Character? {
@@ -89,7 +89,7 @@ private struct TypographyScanner<S: Scannable> {
   }
 
   mutating func makeTypographySubstitutions() {
-    while let current = self.current {
+    while let current {
       if current == "\"" {
         // Open quote if the next thing is non-space.
         if next?.isNonWhitespace ?? false {
@@ -119,36 +119,36 @@ private struct TypographyScanner<S: Scannable> {
 
 extension String: Scannable {
   func string(from range: ClosedRange<String.Index>) -> String {
-    return String(self[range])
+    String(self[range])
   }
 }
 
 extension NSMutableAttributedString: Scannable {
   public var startIndex: String.Index {
-    return string.startIndex
+    string.startIndex
   }
 
   public var endIndex: String.Index {
-    return string.endIndex
+    string.endIndex
   }
 
   public subscript(i: String.Index) -> Character {
-    return string[i]
+    string[i]
   }
 
   public func index(after i: String.Index) -> String.Index {
-    return string.index(after: i)
+    string.index(after: i)
   }
 
   public func index(before i: String.Index) -> String.Index {
-    return string.index(before: i)
+    string.index(before: i)
   }
 
   func string(from range: ClosedRange<String.Index>) -> String {
-    return String(string[range])
+    String(string[range])
   }
 
-  func replaceSubrange<C>(_ bounds: ClosedRange<String.Index>, with replacement: C) where C: Collection, C.Element == Character {
+  func replaceSubrange(_ bounds: ClosedRange<String.Index>, with replacement: some Collection<Character>) {
     let nsrange = NSRange(bounds, in: string)
     replaceCharacters(in: nsrange, with: String(replacement))
   }

@@ -57,7 +57,7 @@ struct ImportForm: View {
   }
 
   func dispatchImportRequest() {
-    guard let selectedURL = selectedURL else {
+    guard let selectedURL else {
       return
     }
     let importRequest = BookImportRequest(

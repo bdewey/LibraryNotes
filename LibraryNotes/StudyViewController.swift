@@ -9,7 +9,6 @@ import UIKit
 
 public protocol StudyViewControllerDelegate: AnyObject {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
-  func studyViewControllerDidCancel(_ studyViewController: StudyViewController)
 }
 
 /// Presents a stack of cards for studying.
@@ -33,7 +32,7 @@ public final class StudyViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
   }
 
-  private func finishStudySession() {
+  @objc private func finishStudySession() {
     studySession.studySessionEndDate = Date()
     delegate?.studyViewController(self, didFinishSession: studySession)
     dismiss(animated: true, completion: nil)
@@ -48,7 +47,7 @@ public final class StudyViewController: UIViewController {
   private var studySession: StudySession
 
   /// The document we are studying from
-  private let database: NoteDatabase
+  let database: NoteDatabase
 
   private weak var delegate: StudyViewControllerDelegate?
 
@@ -71,11 +70,20 @@ public final class StudyViewController: UIViewController {
       self?.markCurrentCardCorrect(true, currentTranslation: .zero)
     }))
     button.setTitle("Got it right", for: .normal)
-    button.setTitleColor(.systemGreen, for: .normal)
-    button.setTitleColor(.systemGray, for: .disabled)
+    #if targetEnvironment(macCatalyst)
+      button.configuration = UIButton.Configuration.borderedProminent()
+    #else
+      button.setTitleColor(.systemGreen, for: .normal)
+      button.setTitleColor(.systemGray, for: .disabled)
+    #endif
     button.isEnabled = false
     return button
   }()
+
+  @objc private func handleGotItRightCommand() {
+    guard gotItRightButton.isEnabled else { return }
+    markCurrentCardCorrect(true, currentTranslation: .zero)
+  }
 
   private lazy var needsReviewButton: UIButton = {
     let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
@@ -89,6 +97,11 @@ public final class StudyViewController: UIViewController {
     return button
   }()
 
+  @objc private func handleNeedsReviewCommand() {
+    guard needsReviewButton.isEnabled else { return }
+    markCurrentCardCorrect(false, currentTranslation: .zero)
+  }
+
   private lazy var closeButton: UIButton = {
     let button = UIButton(type: .roundedRect, primaryAction: UIAction(handler: { [weak self] _ in
       Logger.shared.info("Needs review")
@@ -97,6 +110,20 @@ public final class StudyViewController: UIViewController {
     button.setImage(UIImage(systemName: "xmark"), for: .normal)
     button.setTitleColor(.systemGray, for: .normal)
     return button
+  }()
+
+  private lazy var keyHintLabel: UILabel = {
+    let label = UILabel(frame: .zero)
+    label.font = .preferredFont(forTextStyle: .caption1)
+    label.textColor = .secondaryLabel
+    label.text = "Press space to reveal answer"
+    label.sizeToFit()
+    #if !targetEnvironment(macCatalyst)
+      // This overrides the `alpha` property that we manipulate in various states
+      // We only need to show this label on Catalyst
+      label.isHidden = true
+    #endif
+    return label
   }()
 
   private struct Swipe: Identifiable {
@@ -159,7 +186,7 @@ public final class StudyViewController: UIViewController {
         }
         return (swipe, swipe.classifier.matchStrength(vector: vector))
       }
-      .reduce(nil) { (priorResult, tuple) -> (Swipe, CGFloat)? in
+      .reduce(nil) { priorResult, tuple -> (Swipe, CGFloat)? in
         guard let result = priorResult else {
           return tuple
         }
@@ -175,6 +202,9 @@ public final class StudyViewController: UIViewController {
   private func hideAllSwipeMessages() {
     gotItRightButton.isEnabled = false
     needsReviewButton.isEnabled = false
+    UIView.animate(withDuration: 0.1) { [keyHintLabel] in
+      keyHintLabel.alpha = 1
+    }
   }
 
   /// The view displaying the current card.
@@ -210,9 +240,7 @@ public final class StudyViewController: UIViewController {
     current.addGestureRecognizer(panGestureRecognizer)
   }
 
-  private lazy var progressView: UIProgressView = {
-    UIProgressView(progressViewStyle: .default)
-  }()
+  private lazy var progressView: UIProgressView = .init(progressViewStyle: .default)
 
   private lazy var doneImageView: UIImageView = {
     let check = UIImage(systemName: "checkmark.seal")
@@ -225,7 +253,7 @@ public final class StudyViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton].forEach(view.addSubview)
+    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton, keyHintLabel].forEach(view.addSubview)
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
@@ -244,17 +272,32 @@ public final class StudyViewController: UIViewController {
       make.right.equalTo(doneImageView.snp.left).offset(-8)
     }
     needsReviewButton.snp.makeConstraints { make in
-      make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
+      make.centerY.equalTo(gotItRightButton)
       make.left.equalToSuperview().offset(16)
     }
     gotItRightButton.snp.makeConstraints { make in
       make.lastBaseline.equalTo(progressView.snp.top).offset(-16)
       make.right.equalToSuperview().offset(-16)
     }
+    keyHintLabel.snp.makeConstraints { make in
+      make.centerY.equalTo(gotItRightButton)
+      make.centerX.equalToSuperview()
+    }
     studySession.studySessionStartDate = Date()
     configureUI(animated: false, completion: nil)
     // Assumes we're presented in a navigation controller
     navigationController?.presentationController?.delegate = self
+
+    let gotItRightCommand = UIKeyCommand(action: #selector(handleGotItRightCommand), input: UIKeyCommand.inputRightArrow, modifierFlags: [], discoverabilityTitle: "Got it right")
+    gotItRightCommand.wantsPriorityOverSystemBehavior = true
+    let needsReviewCommand = UIKeyCommand(action: #selector(handleNeedsReviewCommand), input: UIKeyCommand.inputLeftArrow, modifierFlags: [], discoverabilityTitle: "Needs review")
+    needsReviewCommand.wantsPriorityOverSystemBehavior = true
+    let closeSessionCommand = UIKeyCommand(action: #selector(finishStudySession), input: UIKeyCommand.inputEscape, discoverabilityTitle: "Close session")
+    let revealAnswerCommand = UIKeyCommand(action: #selector(PromptViewActions.revealAnswer), input: " ", modifierFlags: [], discoverabilityTitle: "Reveal answer")
+
+    for command in [gotItRightCommand, needsReviewCommand, closeSessionCommand, revealAnswerCommand] {
+      addKeyCommand(command)
+    }
   }
 
   /// How to transform the image while swiping.
@@ -332,7 +375,7 @@ public final class StudyViewController: UIViewController {
         } completion: { _ in
           self.finishStudySession()
         }
-      } else if let correct = correct {
+      } else if let correct {
         markCurrentCardCorrect(correct, currentTranslation: translation)
       } else {
         // Need to return
@@ -414,7 +457,7 @@ public final class StudyViewController: UIViewController {
     for sessionPromptIdentifier: StudySession.SessionPromptIdentifier?,
     completion: @escaping (PromptView?) -> Void
   ) {
-    guard let sessionPromptIdentifier = sessionPromptIdentifier else {
+    guard let sessionPromptIdentifier else {
       completion(nil)
       return
     }
@@ -431,6 +474,7 @@ public final class StudyViewController: UIViewController {
       )
       promptView.delegate = self
       view.addSubview(promptView)
+      promptView.becomeFirstResponder()
       completion(promptView)
     } catch {
       Logger.shared.error("Unexpected error generating prompt view: \(error)")
@@ -438,9 +482,9 @@ public final class StudyViewController: UIViewController {
     }
   }
 
-  public override func viewWillLayoutSubviews() {
+  override public func viewWillLayoutSubviews() {
     super.viewWillLayoutSubviews()
-    guard let currentCardView = currentCardView, currentCardView.transform == .identity else {
+    guard let currentCardView, currentCardView.transform == .identity else {
       return
     }
     var layoutFrame = view.safeAreaLayoutGuide.layoutFrame
@@ -467,12 +511,15 @@ extension StudyViewController: PromptViewDelegate {
   public func promptViewDidRevealAnswer(_ promptView: PromptView) {
     gotItRightButton.isEnabled = true
     needsReviewButton.isEnabled = true
+    UIView.animate(withDuration: 0.1) { [keyHintLabel] in
+      keyHintLabel.alpha = 0
+    }
   }
 }
 
 extension CGPoint {
   static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
-    return CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
   }
 
   static func += (lhs: inout CGPoint, rhs: CGPoint) {
@@ -482,6 +529,6 @@ extension CGPoint {
 
 extension CGFloat {
   func plusOrMinus(_ delta: CGFloat) -> Range<CGFloat> {
-    return (self - delta) ..< (self + delta)
+    (self - delta) ..< (self + delta)
   }
 }

@@ -13,14 +13,14 @@ public struct QuotePrompt: PromptCollection {
     self.markdown = rawValue
   }
 
-  public var type: PromptType { return .quote }
+  public var type: PromptType { .quote }
 
   /// The quote template is itself a card.
-  public var prompts: [Prompt] { return [self] }
+  public var prompts: [Prompt] { [self] }
 
   private let markdown: String
   public var rawValue: String {
-    return markdown
+    markdown
   }
 
   public static func extract(from parsedString: ParsedString) -> [QuotePrompt] {
@@ -54,7 +54,8 @@ extension QuotePrompt: Prompt {
     let attribution = ParsedAttributedString(string: "—" + properties.attributionMarkdown + " " + chapterAndVerse, style: .plainText(textStyle: .caption1))
     let back = NSMutableAttributedString()
     back.append(front.trimmingTrailingWhitespace())
-    back.append(NSAttributedString(string: "\n\n"))
+    // Make sure the string we append gets a paragraph style
+    back.append(ParsedAttributedString(string: "\n\n", style: .plainText(textStyle: .caption1)))
     back.append(attribution.trimmingTrailingWhitespace())
     view.back = back
     return view
@@ -72,6 +73,6 @@ extension QuotePrompt: Prompt {
 
 extension QuotePrompt: Equatable {
   public static func == (lhs: QuotePrompt, rhs: QuotePrompt) -> Bool {
-    return lhs.markdown == rhs.markdown
+    lhs.markdown == rhs.markdown
   }
 }

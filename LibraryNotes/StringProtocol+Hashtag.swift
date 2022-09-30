@@ -10,8 +10,8 @@ public extension StringProtocol {
   /// - `book` is a prefix of `book/2020`
   /// - `book/2020` **is not** a prefix of `book`
   /// - `book` **is not** a prefix of `books` (path components must exactly match)
-  func isPathPrefix<S: StringProtocol>(
-    of otherPath: S,
+  func isPathPrefix(
+    of otherPath: some StringProtocol,
     pathSeparator: Character = "/",
     compareOptions: String.CompareOptions = [.caseInsensitive]
   ) -> Bool {

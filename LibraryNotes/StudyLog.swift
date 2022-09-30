@@ -82,7 +82,7 @@ public struct StudyLog {
   /// Computes dates until which we should suppress the given identifier from further
   /// study.
   public func identifierSuppressionDates() -> [PromptIdentifier: Date] {
-    return entries.reduce(into: [PromptIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
+    entries.reduce(into: [PromptIdentifier: (currentDate: Date, nextDate: Date)]()) { suppressionDates, entry in
       guard entry.statistics.correct > 0 else {
         suppressionDates[entry.identifier] = nil
         return
@@ -101,12 +101,12 @@ public struct StudyLog {
 }
 
 extension StudyLog: BidirectionalCollection {
-  public var startIndex: Int { return entries.startIndex }
-  public var endIndex: Int { return entries.endIndex }
-  public func index(after i: Int) -> Int { return i + 1 }
-  public func index(before i: Int) -> Int { return i - 1 }
+  public var startIndex: Int { entries.startIndex }
+  public var endIndex: Int { entries.endIndex }
+  public func index(after i: Int) -> Int { i + 1 }
+  public func index(before i: Int) -> Int { i - 1 }
 
   public subscript(position: Int) -> Entry {
-    return entries[position]
+    entries[position]
   }
 }

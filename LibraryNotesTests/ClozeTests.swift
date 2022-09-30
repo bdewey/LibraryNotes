@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-@testable import LibraryNotes
+@testable import Library_Notes
 import ObjectiveCTextStorageWrapper
 import TextMarkupKit
 import XCTest

@@ -28,11 +28,26 @@ public extension UIViewController {
 /// - primary: The overall notebook structure (currently based around hashtags)
 /// - supplementary: A list of notes
 /// - secondary: An individual note
-public final class NotebookViewController: UIViewController {
+public final class NotebookViewController: UISplitViewController {
   init(database: NoteDatabase) {
     self.database = database
     self.coverImageCache = CoverImageCache(database: database)
-    super.init(nibName: nil, bundle: nil)
+    super.init(style: .tripleColumn)
+    let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController, prefersLargeTitles: true)
+
+    setViewController(primaryNavigationController, for: .primary)
+    setViewController(supplementaryNavigationController, for: .supplementary)
+    setViewController(
+      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, coverImageCache: coverImageCache, containsOnlyDefaultContent: true)),
+      for: .secondary
+    )
+    setViewController(compactNavigationController, for: .compact)
+    primaryBackgroundStyle = .sidebar
+    preferredPrimaryColumnWidth = 240
+    preferredSupplementaryColumnWidth = 340
+    preferredDisplayMode = .twoBesideSecondary
+    showsSecondaryOnlyButton = true
+    delegate = self
   }
 
   @available(*, unavailable)
@@ -53,7 +68,7 @@ public final class NotebookViewController: UIViewController {
   private var focusedNotebookStructure: NotebookStructureViewController.StructureIdentifier = .read {
     didSet {
       documentListViewController.focusedStructure = focusedNotebookStructure
-      if notebookSplitViewController.isCollapsed {
+      if isCollapsed {
         let compactListViewController = DocumentListViewController(database: database, coverImageCache: coverImageCache)
         compactListViewController.focusedStructure = focusedNotebookStructure
         compactNavigationController.pushViewController(compactListViewController, animated: true)
@@ -62,7 +77,7 @@ public final class NotebookViewController: UIViewController {
   }
 
   public func setSecondaryViewController(_ viewController: NotebookSecondaryViewController, pushIfCollapsed: Bool) {
-    if notebookSplitViewController.isCollapsed {
+    if isCollapsed {
       if pushIfCollapsed {
         if compactNavigationController.viewControllers.count < 3 {
           compactNavigationController.pushViewController(viewController, animated: true)
@@ -72,19 +87,31 @@ public final class NotebookViewController: UIViewController {
         }
       }
     } else {
-      notebookSplitViewController.setViewController(UINavigationController.notebookNavigationController(rootViewController: viewController), for: .secondary)
+      setViewController(UINavigationController.notebookNavigationController(rootViewController: viewController), for: .secondary)
     }
   }
 
   public func pushSecondaryViewController(_ viewController: UIViewController) {
-    if notebookSplitViewController.isCollapsed {
+    if isCollapsed {
       compactNavigationController.pushViewController(viewController, animated: true)
     } else {
-      notebookSplitViewController.setViewController(viewController, for: .secondary)
+      setViewController(viewController, for: .secondary)
     }
   }
 
-  private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: structureViewController, prefersLargeTitles: true)
+  #if targetEnvironment(macCatalyst)
+    private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+      rootViewController: structureViewController,
+      barTintColor: nil,
+      prefersLargeTitles: false
+    )
+  #else
+    private lazy var primaryNavigationController = UINavigationController.notebookNavigationController(
+      rootViewController: structureViewController,
+      barTintColor: .grailBackground,
+      prefersLargeTitles: false
+    )
+  #endif
 
   private lazy var structureViewController = makeStructureViewController()
 
@@ -104,48 +131,24 @@ public final class NotebookViewController: UIViewController {
 
   private lazy var compactNavigationController = UINavigationController.notebookNavigationController(rootViewController: makeStructureViewController(), prefersLargeTitles: true)
 
-  /// The split view we are managing.
-  private lazy var notebookSplitViewController: UISplitViewController = {
-    let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController, prefersLargeTitles: true)
-
-    let splitViewController = UISplitViewController(style: .tripleColumn)
-    splitViewController.setViewController(primaryNavigationController, for: .primary)
-    splitViewController.setViewController(supplementaryNavigationController, for: .supplementary)
-    splitViewController.setViewController(
-      UINavigationController.notebookNavigationController(rootViewController: SavingTextEditViewController(database: database, coverImageCache: coverImageCache, containsOnlyDefaultContent: true)),
-      for: .secondary
-    )
-    splitViewController.setViewController(compactNavigationController, for: .compact)
-    splitViewController.preferredDisplayMode = .oneBesideSecondary
-    splitViewController.showsSecondaryOnlyButton = true
-    splitViewController.delegate = self
-    return splitViewController
-  }()
-
   override public func viewDidLoad() {
     super.viewDidLoad()
 
-    // Set up notebookSplitViewController as a child
-    view.addSubview(notebookSplitViewController.view)
-    notebookSplitViewController.view.snp.makeConstraints { make in
-      make.edges.equalToSuperview()
-    }
-    addChild(notebookSplitViewController)
-    notebookSplitViewController.didMove(toParent: self)
     configureKeyCommands()
   }
 
   override public var canBecomeFirstResponder: Bool { true }
 
-  private func configureKeyCommands() {
-    let newNoteCommand = UIKeyCommand(
-      title: "New Note",
-      action: #selector(makeNewNote),
-      input: "n",
-      modifierFlags: [.command]
-    )
-    addKeyCommand(newNoteCommand)
+  private var isFirstAppearance = true
+  override public func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    if isFirstAppearance {
+      isFirstAppearance = false
+      documentListViewController.becomeFirstResponder()
+    }
+  }
 
+  private func configureKeyCommands() {
     let focusTagsCommand = UIKeyCommand(
       title: "View Tags",
       action: #selector(tagsBecomeFirstResponder),
@@ -180,17 +183,17 @@ public final class NotebookViewController: UIViewController {
   }
 
   @objc func searchBecomeFirstResponder() {
-    notebookSplitViewController.show(.supplementary)
+    show(.supplementary)
     documentListViewController.searchBecomeFirstResponder()
   }
 
   @objc func tagsBecomeFirstResponder() {
-    notebookSplitViewController.show(.primary)
+    show(.primary)
     structureViewController.becomeFirstResponder()
   }
 
   @objc func notesBecomeFirstResponder() {
-    notebookSplitViewController.show(.supplementary)
+    show(.supplementary)
     documentListViewController.becomeFirstResponder()
   }
 
@@ -208,42 +211,52 @@ public final class NotebookViewController: UIViewController {
   }
 
   @objc func makeNewNote() {
-    let hashtag = focusedNotebookStructure.hashtag
-    let folder = focusedNotebookStructure.predefinedFolder
-    let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
-    var note = Note(markdown: text)
-    note.metadata.folder = folder?.rawValue
-    let viewController = SavingTextEditViewController(
-      note: note,
-      database: database,
-      coverImageCache: coverImageCache,
-      containsOnlyDefaultContent: true,
-      initialSelectedRange: NSRange(location: offset, length: 0),
-      autoFirstResponder: true
-    )
-    setSecondaryViewController(viewController, pushIfCollapsed: true)
-    Logger.shared.info("Created a new view controller for a blank document")
+    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
+      let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
+      bookSearchViewController.delegate = self
+      bookSearchViewController.title = "Add Book"
+      let navigationController = UINavigationController(rootViewController: bookSearchViewController)
+      navigationController.navigationBar.tintColor = .grailTint
+      present(navigationController, animated: true)
+    } else {
+      let hashtag = focusedNotebookStructure.hashtag
+      let folder = focusedNotebookStructure.predefinedFolder
+      let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
+      var note = Note(markdown: text)
+      note.metadata.folder = folder?.rawValue
+      let viewController = SavingTextEditViewController(
+        note: note,
+        database: database,
+        coverImageCache: coverImageCache,
+        containsOnlyDefaultContent: true,
+        initialSelectedRange: NSRange(location: offset, length: 0),
+        autoFirstResponder: true
+      )
+      setSecondaryViewController(viewController, pushIfCollapsed: true)
+      Logger.shared.info("Created a new view controller for a blank document")
+    }
   }
 
-  public func makeNewNoteButtonItem() -> UIBarButtonItem {
-    let primaryAction: UIAction
-    if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
-      primaryAction = UIAction(title: "Book Note", image: UIImage(systemName: "text.book.closed"), handler: { [weak self] _ in
-        let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
-        bookSearchViewController.delegate = self
-        bookSearchViewController.title = "Add Book"
-        let navigationController = UINavigationController(rootViewController: bookSearchViewController)
-        navigationController.navigationBar.tintColor = .grailTint
-        self?.present(navigationController, animated: true)
-      })
+  override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    if action == #selector(editOrInsertBookDetails) {
+      return secondaryViewController is SavingTextEditViewController
     } else {
-      primaryAction = UIAction { [weak self] _ in
-        self?.makeNewNote()
-      }
+      return super.canPerformAction(action, withSender: sender)
     }
-    let button = UIBarButtonItem(image: UIImage(systemName: "square.and.pencil"), primaryAction: primaryAction)
-    button.accessibilityIdentifier = "new-document"
-    return button
+  }
+
+  /// Forward the `editOrInsertBookDetails` selector to the active `SavingTextEditViewController`, if it is visible in the window.
+  ///
+  /// This is to enable the "info" toolbar button to work even when the editor window doesn't have focus, but something else in the notebook does.
+  @objc private func editOrInsertBookDetails() {
+    guard let editor = secondaryViewController as? SavingTextEditViewController else {
+      return
+    }
+    editor.editOrInsertBookDetails()
+  }
+
+  public static func makeNewNoteButtonItem() -> UIBarButtonItem {
+    UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), target: nil, action: #selector(makeNewNote))
   }
 
   func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
@@ -270,11 +283,11 @@ public final class NotebookViewController: UIViewController {
   func updateUserActivity(_ userActivity: NSUserActivity) {
     userActivity.addUserInfoEntries(from: [
       ActivityKey.notebookStructure: focusedNotebookStructure.rawValue,
-      ActivityKey.displayMode: notebookSplitViewController.displayMode.rawValue,
+      ActivityKey.displayMode: displayMode.rawValue,
     ])
     structureViewController.updateUserActivity(userActivity)
 
-    if let secondaryViewController = self.secondaryViewController {
+    if let secondaryViewController {
       do {
         let controllerType = type(of: secondaryViewController).notebookDetailType
         userActivity.addUserInfoEntries(
@@ -290,7 +303,7 @@ public final class NotebookViewController: UIViewController {
   }
 
   var secondaryViewController: NotebookSecondaryViewController? {
-    secondaryViewController(forCollaped: notebookSplitViewController.isCollapsed)
+    secondaryViewController(forCollaped: isCollapsed)
   }
 
   func secondaryViewController(forCollaped collapsed: Bool) -> NotebookSecondaryViewController? {
@@ -300,7 +313,7 @@ public final class NotebookViewController: UIViewController {
       } else {
         return nil
       }
-    } else if let navigationController = notebookSplitViewController.viewController(for: .secondary) as? UINavigationController {
+    } else if let navigationController = viewController(for: .secondary) as? UINavigationController {
       return navigationController.viewControllers.first as? NotebookSecondaryViewController
     }
     return nil
@@ -316,7 +329,7 @@ public final class NotebookViewController: UIViewController {
     if let rawDisplayMode = userActivity.userInfo?[ActivityKey.displayMode] as? Int,
        let displayMode = UISplitViewController.DisplayMode(rawValue: rawDisplayMode)
     {
-      notebookSplitViewController.preferredDisplayMode = displayMode
+      preferredDisplayMode = displayMode
     }
     structureViewController.configure(with: userActivity)
 
@@ -436,7 +449,7 @@ extension NotebookViewController: NotebookStructureViewControllerDelegate {
   }
 
   func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController) {
-    notebookSplitViewController.show(.supplementary)
+    show(.supplementary)
     documentListViewController.becomeFirstResponder()
   }
 }
@@ -451,12 +464,16 @@ extension NotebookViewController {
 
 private extension UINavigationController {
   /// Creates a UINavigationController with the expected configuration for being a notebook navigation controller.
-  static func notebookNavigationController(rootViewController: UIViewController, prefersLargeTitles: Bool = false) -> UINavigationController {
+  static func notebookNavigationController(
+    rootViewController: UIViewController,
+    barTintColor: UIColor? = .grailBackground,
+    prefersLargeTitles: Bool = false
+  ) -> UINavigationController {
     let navigationController = UINavigationController(
       rootViewController: rootViewController
     )
-    navigationController.navigationBar.prefersLargeTitles = prefersLargeTitles
-    navigationController.navigationBar.barTintColor = .grailBackground
+//    navigationController.navigationBar.prefersLargeTitles = prefersLargeTitles
+//    navigationController.navigationBar.barTintColor = barTintColor
     return navigationController
   }
 }
@@ -468,7 +485,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     _ svc: UISplitViewController,
     displayModeForExpandingToProposedDisplayMode proposedDisplayMode: UISplitViewController.DisplayMode
   ) -> UISplitViewController.DisplayMode {
-    if let secondaryViewController = self.secondaryViewController(forCollaped: true) {
+    if let secondaryViewController = secondaryViewController(forCollaped: true) {
       do {
         let activityData = try secondaryViewController.userActivityData()
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(
@@ -496,7 +513,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
     compactNavigationController.popToRootViewController(animated: false)
     compactNavigationController.pushViewController(compactDocumentList, animated: false)
 
-    if let secondaryViewController = self.secondaryViewController(forCollaped: false), secondaryViewController.shouldShowWhenCollapsed {
+    if let secondaryViewController = secondaryViewController(forCollaped: false), secondaryViewController.shouldShowWhenCollapsed {
       do {
         let activityData = try secondaryViewController.userActivityData()
         let viewController = try NotebookSecondaryViewControllerRegistry.shared.reconstruct(

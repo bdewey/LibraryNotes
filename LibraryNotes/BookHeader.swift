@@ -96,7 +96,7 @@ final class BookHeader: UIView {
 
   private lazy var readingHistoryButton: UIButton = {
     let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
-      guard let self = self else { return }
+      guard let self else { return }
       if self.book.readingHistory?.isCurrentlyReading ?? false {
         self.finishReading()
       } else {
@@ -244,7 +244,7 @@ extension BookHeader: StarRatingViewDelegate {
 
 internal extension ReadingHistory {
   var currentReadingStatus: String? {
-    guard let entries = entries else { return nil }
+    guard let entries else { return nil }
     var yearRead: Int?
     for entry in entries {
       if let finishDateComponents = entry.finish {
@@ -253,7 +253,7 @@ internal extension ReadingHistory {
         return "Currently reading"
       }
     }
-    if let yearRead = yearRead {
+    if let yearRead {
       return "Read in \(yearRead)"
     } else {
       return nil

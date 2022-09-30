@@ -110,6 +110,8 @@
 		D3AD01CC23BE7703004BB7DF /* NoteDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */; };
 		D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */; };
 		D3B8514E22AC0794004F3B95 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = D3B8514D22AC0794004F3B95 /* Settings.bundle */; };
+		D3BA54CF28A088C10048C718 /* GenericLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */; };
+		D3BA54D128A87B740048C718 /* UIApplication+Scenes.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3BA54D028A87B740048C718 /* UIApplication+Scenes.swift */; };
 		D3C0B5DC2650247900A33CCA /* QuotesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */; };
 		D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3C1F402210E5AC400F92E85 /* CoreServices.framework */; };
 		D3C5C7DE232E871F00A8BEDF /* QuestionAndAnswerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */; };
@@ -292,6 +294,8 @@
 		D3AD01CB23BE7703004BB7DF /* NoteDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDatabaseTests.swift; sourceTree = "<group>"; };
 		D3B3323F232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerPrompt.swift; sourceTree = "<group>"; };
 		D3B8514D22AC0794004F3B95 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
+		D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericLocalizedError.swift; sourceTree = "<group>"; };
+		D3BA54D028A87B740048C718 /* UIApplication+Scenes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIApplication+Scenes.swift"; sourceTree = "<group>"; };
 		D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuotesViewController.swift; sourceTree = "<group>"; };
 		D3C1F402210E5AC400F92E85 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
 		D3C5C7DD232E871F00A8BEDF /* QuestionAndAnswerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionAndAnswerTests.swift; sourceTree = "<group>"; };
@@ -306,7 +310,7 @@
 		D3DBC4052704A18E00C18438 /* String+Names.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Names.swift"; sourceTree = "<group>"; };
 		D3DBC4072704A38200C18438 /* String+NameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+NameTests.swift"; sourceTree = "<group>"; };
 		D3DBC4092705F1C500C18438 /* StudySessionEntryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudySessionEntryRecord.swift; sourceTree = "<group>"; };
-		D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LibraryNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Library Notes.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3DC5EC220EC9B0100F0B74B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3DC5ECB20EC9B0200F0B74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D3DC5ECE20EC9B0200F0B74B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -474,7 +478,7 @@
 		D3DC5EC020EC9B0100F0B74B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */,
+				D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 				D3C6112F2715FFB0007F8732 /* LibraryNotesUpdatedUITests.xctest */,
 			);
@@ -566,11 +570,13 @@
 				D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */,
 				D35C8B92259AF6F000A92CEB /* UIViewController+NavigationController.swift */,
 				D35B194626E3BFD900713A51 /* UserDefaults+GrailDiary.swift */,
+				D3BA54D028A87B740048C718 /* UIApplication+Scenes.swift */,
 				D377818425DC2BCE004DD38F /* WebImporterConfiguration.swift */,
 				D377818225DC0ADD004DD38F /* WebScrapingViewController.swift */,
 				D31D7CDF2598CCC70083AB05 /* WebViewController.swift */,
 				D3DBC4052704A18E00C18438 /* String+Names.swift */,
 				D3398DC22847A105009D2C9E /* String+Filenames.swift */,
+				D3BA54CE28A088C10048C718 /* GenericLocalizedError.swift */,
 			);
 			path = LibraryNotes;
 			sourceTree = "<group>";
@@ -646,7 +652,7 @@
 				D3DAF6012777936D0055FA5F /* Algorithms */,
 			);
 			productName = CommonplaceBookApp;
-			productReference = D3DC5EBF20EC9B0100F0B74B /* LibraryNotes.app */;
+			productReference = D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */;
 			productType = "com.apple.product-type.application";
 		};
 		D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */ = {
@@ -804,6 +810,7 @@
 				D31AFAC3229D61EE00ED2B76 /* String+Typography.swift in Sources */,
 				D31D7CE02598CCC70083AB05 /* WebViewController.swift in Sources */,
 				D3B33240232FC55C00F0B710 /* QuestionAndAnswerPrompt.swift in Sources */,
+				D3BA54CF28A088C10048C718 /* GenericLocalizedError.swift in Sources */,
 				D3378CE226DBC47C006750EC /* BookCollectionViewDataSource.swift in Sources */,
 				D31AFAB5229D61EE00ED2B76 /* TimeInterval+CommonIntervals.swift in Sources */,
 				D369182326BAD09F001EB512 /* Value+NoteModels.swift in Sources */,
@@ -860,6 +867,7 @@
 				D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */,
 				D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */,
 				D362CC2F25431C6E00462683 /* NotebookViewController.swift in Sources */,
+				D3BA54D128A87B740048C718 /* UIApplication+Scenes.swift in Sources */,
 				D35B194726E3BFD900713A51 /* UserDefaults+GrailDiary.swift in Sources */,
 				D369182526BAD0E9001EB512 /* JSONEncoders.swift in Sources */,
 				D37C887526B5C72600EC30C8 /* BookAndImage.swift in Sources */,
@@ -1110,22 +1118,26 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 104;
+				CURRENT_PROJECT_VERSION = 106;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = NO;
+				PRODUCT_NAME = "Library Notes";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+				TEST_HOST = "";
 			};
 			name = Debug;
 		};
@@ -1137,22 +1149,26 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 104;
+				CURRENT_PROJECT_VERSION = 106;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 2.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = NO;
+				PRODUCT_NAME = "Library Notes";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+				TEST_HOST = "";
 			};
 			name = Release;
 		};
@@ -1165,7 +1181,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = LibraryNotesTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1177,7 +1193,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryNotes.app/LibraryNotes";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Library Notes.app/Library Notes";
 			};
 			name = Debug;
 		};
@@ -1190,7 +1206,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = LibraryNotesTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

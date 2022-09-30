@@ -15,7 +15,7 @@ public struct AttributedQuote: Identifiable, Hashable {
   public var thumbnailImage: Data?
 
   public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
-    return lhs.id == rhs.id
+    lhs.id == rhs.id
   }
 
   public func hash(into hasher: inout Hasher) {
@@ -35,7 +35,7 @@ public final class QuotesViewController: UIViewController {
     fatalError("init(coder:) has not been implemented")
   }
 
-  private let database: NoteDatabase
+  public let database: NoteDatabase
   private var quoteSubscription: AnyCancellable?
 
   /// This is the set of *all* eligible quote identifiers ot show. We will show a subset of these.

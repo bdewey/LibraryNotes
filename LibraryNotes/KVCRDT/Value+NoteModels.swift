@@ -20,7 +20,7 @@ extension Value {
   }
 
   init(_ text: String?) {
-    if let text = text {
+    if let text {
       self = .text(text)
     } else {
       self = .null
@@ -41,7 +41,7 @@ extension Value {
 
   func decodeJSON<T: Decodable>(_ type: T.Type) -> T? {
     guard
-      let json = self.json,
+      let json,
       let data = json.data(using: .utf8),
       let decodedItem = try? JSONDecoder.databaseDecoder.decode(type, from: data)
     else {

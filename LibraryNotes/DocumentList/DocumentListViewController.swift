@@ -80,19 +80,17 @@ final class DocumentListViewController: UIViewController {
     })
   }
 
-  private lazy var dataSource: DocumentTableController = {
-    DocumentTableController(
-      collectionView: collectionView,
-      database: database,
-      coverImageCache: coverImageCache,
-      delegate: self
-    )
-  }()
+  private lazy var dataSource: DocumentTableController = .init(
+    collectionView: collectionView,
+    database: database,
+    coverImageCache: coverImageCache,
+    delegate: self
+  )
 
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
     get {
-      return dataSource.dueDate
+      dataSource.dueDate
     }
     set {
       dataSource.dueDate = newValue
@@ -105,7 +103,7 @@ final class DocumentListViewController: UIViewController {
     listConfiguration.backgroundColor = .grailSecondaryBackground
     listConfiguration.headerMode = .firstItemInSection
     listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
-      guard let self = self else { return nil }
+      guard let self else { return nil }
       return self.dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
@@ -231,7 +229,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   @objc private func startStudySession() {
-    guard let studySession = studySession else { return }
+    guard let studySession else { return }
     presentStudySessionViewController(for: studySession)
   }
 
@@ -241,7 +239,7 @@ final class DocumentListViewController: UIViewController {
 
   private func updateStudySession() {
     studySession = try? database.studySession(
-      noteIdentifiers: Set(dataSource.noteIdentifiers.map { $0.noteIdentifier }),
+      noteIdentifiers: Set(dataSource.noteIdentifiers.map(\.noteIdentifier)),
       date: dueDate
     )
   }
@@ -284,7 +282,7 @@ final class DocumentListViewController: UIViewController {
   /// If `progressView` is non-nil (indicating a long-running task is happening), this will be a `UIBarButtonItem` wrapping the progress view.
   /// Otherwise, it will be a `UIBarButtonItem` wrapping a count of the number of books.
   private var displayBarButtonItem: UIBarButtonItem {
-    if let progressView = progressView {
+    if let progressView {
       return UIBarButtonItem(customView: progressView)
     } else {
       let countLabel = UILabel(frame: .zero)
@@ -302,46 +300,47 @@ final class DocumentListViewController: UIViewController {
       displayBarButtonItem,
       UIBarButtonItem.flexibleSpace(),
     ]
-    if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
-      toolbarItems.append(newNoteButton)
+    if splitViewController?.isCollapsed ?? false {
+      toolbarItems.append(NotebookViewController.makeNewNoteButtonItem())
     }
     self.toolbarItems = toolbarItems
 
     let navButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), menu: UIMenu(children: [
       actionsMenu,
-      sortMenu,
+      Self.sortMenu,
     ]))
     navButton.accessibilityIdentifier = "document-list-actions"
-    navigationItem.rightBarButtonItem = navButton
+    #if targetEnvironment(macCatalyst)
+      if #available(macCatalyst 16.0, *) {
+        navigationItem.style = .editor
+        let reviewItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: self, action: #selector(performReview))
+        reviewItem.isEnabled = canPerformAction(reviewItem.action!, withSender: nil)
+        navigationItem.trailingItemGroups = [
+          reviewItem.creatingFixedGroup(),
+        ]
+      }
+    #else
+      // Fallback on earlier versions
+      navigationItem.rightBarButtonItem = navButton
+    #endif
+  }
+
+  @objc func exportToCSV() {
+    do {
+      let url = try writeToCSV()
+      let exportPicker = UIDocumentPickerViewController(forExporting: [url])
+      present(exportPicker, animated: true)
+    } catch {
+      Logger.shared.error("Error exporting CSV: \(error)")
+    }
   }
 
   /// Exports the selection of books in a CSV format that roughly matches the Goodreads CSV format. Opens the share sheet to determine the final disposition of the file.
   private func exportAndShare() {
     let noteIdentifiers = dataSource.noteIdentifiers
     Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
-    let listFormatter = ListFormatter()
     do {
-      let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(title ?? "export").csv")
-      let writer = try CSVWriter(fileURL: exportURL) {
-        $0.headers = ["Title", "Authors", "ISBN", "ISBN13", "My Rating", "Number of Pages", "Year Published", "Original Publication Year", "Date Added", "Publisher", "Private Notes"]
-      }
-      for noteIdentifier in noteIdentifiers {
-        let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
-        guard let book = note.book else { continue }
-        try writer.write(field: book.title)
-        try listFormatter.string(from: book.authors).flatMap { try writer.write(field: $0) }
-        try writer.write(field: book.isbn ?? "")
-        try writer.write(field: book.isbn13 ?? "")
-        try writer.write(field: note.rating?.description ?? "")
-        try writer.write(field: book.numberOfPages?.description ?? "")
-        try writer.write(field: book.yearPublished?.description ?? "")
-        try writer.write(field: book.originalYearPublished?.description ?? "")
-        try writer.write(field: DayComponents(note.metadata.creationTimestamp).description)
-        try writer.write(field: book.publisher ?? "")
-        try writer.write(field: note.text ?? "")
-        try writer.endRow()
-      }
-      try writer.endEncoding()
+      let exportURL = try writeToCSV()
       let activityViewController = UIActivityViewController(activityItems: [exportURL], applicationActivities: nil)
       let popover = activityViewController.popoverPresentationController
       popover?.barButtonItem = navigationItem.rightBarButtonItem
@@ -351,7 +350,53 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  private func exportToZip() async {
+  private func writeToCSV() throws -> URL {
+    let noteIdentifiers = dataSource.noteIdentifiers
+    Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
+    let listFormatter = ListFormatter()
+    let exportURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(title ?? "export").csv")
+    let writer = try CSVWriter(fileURL: exportURL) {
+      $0.headers = ["Title", "Authors", "ISBN", "ISBN13", "My Rating", "Number of Pages", "Year Published", "Original Publication Year", "Date Added", "Publisher", "Private Notes"]
+    }
+    for noteIdentifier in noteIdentifiers {
+      let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
+      guard let book = note.book else { continue }
+      try writer.write(field: book.title)
+      try listFormatter.string(from: book.authors).flatMap { try writer.write(field: $0) }
+      try writer.write(field: book.isbn ?? "")
+      try writer.write(field: book.isbn13 ?? "")
+      try writer.write(field: note.rating?.description ?? "")
+      try writer.write(field: book.numberOfPages?.description ?? "")
+      try writer.write(field: book.yearPublished?.description ?? "")
+      try writer.write(field: book.originalYearPublished?.description ?? "")
+      try writer.write(field: DayComponents(note.metadata.creationTimestamp).description)
+      try writer.write(field: book.publisher ?? "")
+      try writer.write(field: note.text ?? "")
+      try writer.endRow()
+    }
+    try writer.endEncoding()
+    return exportURL
+  }
+
+  @objc func exportToZip() {
+    Task {
+      let url = try await exportToZip()
+      let exportPicker = UIDocumentPickerViewController(forExporting: [url])
+      present(exportPicker, animated: true)
+    }
+  }
+
+  private func shareExportedZip() {
+    Task {
+      let destinationURL = try await exportToZip()
+      let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
+      let popover = activityViewController.popoverPresentationController
+      popover?.barButtonItem = navigationItem.rightBarButtonItem
+      present(activityViewController, animated: true)
+    }
+  }
+
+  private func exportToZip() async throws -> URL {
     let noteIdentifiers = dataSource.noteIdentifiers
     Logger.shared.info("Exporting and sharing \(noteIdentifiers.count) books...")
 
@@ -365,80 +410,74 @@ final class DocumentListViewController: UIViewController {
     var completedBooks = 0
     await Task.yield()
 
-    do {
-      let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("Library Notes")
-      try? FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true)
-      for noteIdentifier in noteIdentifiers {
-        await Task.yield()
-        let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
-        let fileURL = self.fileURL(title: note.metadata.exportTitle, directory: destinationURL)
-        var buffer = ""
-        if let book = note.metadata.book {
-          buffer = "---\n"
-          buffer.append("title: \(book.title)\n")
-          buffer.append("authors:\n")
-          for author in book.authors {
-            buffer.append("- \(author)\n")
-          }
-          if let year = book.originalYearPublished ?? book.yearPublished {
-            buffer.append("year-published: \(year)\n")
-          }
-          if let rating = book.rating {
-            buffer.append("rating: \(rating)\n")
-          }
-          if let readingHistoryEntries = book.readingHistory?.entries?.filter({ $0.finish != nil }), !readingHistoryEntries.isEmpty {
-            buffer.append("reading-history:\n")
-            for entry in readingHistoryEntries {
-              buffer.append("- \(entry.finish!.yaml)\n")
-            }
-          }
-          buffer.append("---\n\n")
+    let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("Library Notes")
+    try? FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true)
+    for noteIdentifier in noteIdentifiers {
+      await Task.yield()
+      let note = try database.note(noteIdentifier: noteIdentifier.noteIdentifier)
+      let fileURL = fileURL(title: note.metadata.exportTitle, directory: destinationURL)
+      var buffer = ""
+      if let book = note.metadata.book {
+        buffer = "---\n"
+        buffer.append("title: \(book.title)\n")
+        buffer.append("authors:\n")
+        for author in book.authors {
+          buffer.append("- \(author)\n")
         }
-        let imageDirectory = fileURL.deletingPathExtension()
-        if let coverImage = try? database.read(noteIdentifier: noteIdentifier.noteIdentifier, key: .coverImage).resolved(with: .lastWriterWins) {
-          switch coverImage {
-          case .blob(mimeType: let mimeType, blob: let data):
-            try? FileManager.default.createDirectory(at: imageDirectory, withIntermediateDirectories: false)
-            var imageURL = imageDirectory.appendingPathComponent("coverImage")
-            if let type = UTType(mimeType: mimeType), let pathExtension = type.preferredFilenameExtension {
-              imageURL.appendPathExtension(pathExtension)
-            }
-            do {
-              try data.write(to: imageURL, options: .atomic)
-              buffer.append("![Book cover](\(imageDirectory.lastPathComponent)/\(imageURL.lastPathComponent))\n\n")
-              await Task.yield()
-            } catch {
-              Logger.shared.error("Error saving cover image: \(error)")
-            }
-          case .json, .null, .text: break
+        if let year = book.originalYearPublished ?? book.yearPublished {
+          buffer.append("year-published: \(year)\n")
+        }
+        if let rating = book.rating {
+          buffer.append("rating: \(rating)\n")
+        }
+        if let readingHistoryEntries = book.readingHistory?.entries?.filter({ $0.finish != nil }), !readingHistoryEntries.isEmpty {
+          buffer.append("reading-history:\n")
+          for entry in readingHistoryEntries {
+            buffer.append("- \(entry.finish!.yaml)\n")
           }
         }
-        if let text = note.text {
-          text.write(to: &buffer)
-        }
-        if !buffer.isEmpty {
-          try buffer.write(to: fileURL, atomically: true, encoding: .utf8)
-        }
-        completedBooks += 1
-        progressView.progress = Float(completedBooks) / Float(noteIdentifiers.count)
+        buffer.append("---\n\n")
       }
-      let zipArchiveURL = destinationURL.deletingLastPathComponent().appendingPathComponent("Library Notes").appendingPathExtension("zip")
-      let zipResult = await Task.detached {
-        try FileManager.default.zipItem(at: destinationURL, to: zipArchiveURL, compressionMethod: .deflate)
-      }.result
-      switch zipResult {
-      case .failure(let error):
-        Logger.shared.error("Error creating zip archive: \(error)")
-      case .success: break
+      let imageDirectory = fileURL.deletingPathExtension()
+      if let coverImage = try? database.read(noteIdentifier: noteIdentifier.noteIdentifier, key: .coverImage).resolved(with: .lastWriterWins) {
+        switch coverImage {
+        case .blob(mimeType: let mimeType, blob: let data):
+          try? FileManager.default.createDirectory(at: imageDirectory, withIntermediateDirectories: false)
+          var imageURL = imageDirectory.appendingPathComponent("coverImage")
+          if let type = UTType(mimeType: mimeType), let pathExtension = type.preferredFilenameExtension {
+            imageURL.appendPathExtension(pathExtension)
+          }
+          do {
+            try data.write(to: imageURL, options: .atomic)
+            buffer.append("![Book cover](\(imageDirectory.lastPathComponent)/\(imageURL.lastPathComponent))\n\n")
+            await Task.yield()
+          } catch {
+            Logger.shared.error("Error saving cover image: \(error)")
+          }
+        case .json, .null, .text: break
+        }
       }
-      Logger.shared.info("Exported notes to \(destinationURL)")
-      let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
-      let popover = activityViewController.popoverPresentationController
-      popover?.barButtonItem = navigationItem.rightBarButtonItem
-      present(activityViewController, animated: true)
-    } catch {
-      Logger.shared.error("Error creating ZIP: \(error)")
+      if let text = note.text {
+        text.write(to: &buffer)
+      }
+      if !buffer.isEmpty {
+        try buffer.write(to: fileURL, atomically: true, encoding: .utf8)
+      }
+      completedBooks += 1
+      progressView.progress = Float(completedBooks) / Float(noteIdentifiers.count)
     }
+    let zipArchiveURL = destinationURL.deletingLastPathComponent().appendingPathComponent("Library Notes").appendingPathExtension("zip")
+    let zipResult = await Task.detached {
+      try FileManager.default.zipItem(at: destinationURL, to: zipArchiveURL, compressionMethod: .deflate)
+    }.result
+    switch zipResult {
+    case .failure(let error):
+      Logger.shared.error("Error creating zip archive: \(error)")
+      throw error
+    case .success: break
+    }
+    Logger.shared.info("Exported notes to \(destinationURL)")
+    return zipArchiveURL
   }
 
   private func fileURL(title: String, directory: URL) -> URL {
@@ -455,9 +494,13 @@ final class DocumentListViewController: UIViewController {
     return url
   }
 
-  @objc private func performReview() {
-    guard let studySession = studySession else { return }
-    presentStudySessionViewController(for: studySession)
+  @objc func performReview() {
+    guard let studySession, !studySession.isEmpty else { return }
+    #if targetEnvironment(macCatalyst)
+      UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .focusStructure(focusedStructure))
+    #else
+      presentStudySessionViewController(for: studySession)
+    #endif
   }
 }
 
@@ -474,7 +517,7 @@ extension DocumentListViewController {
       importLibraryThingAction,
       sendFeedbackAction,
       advanceTimeAction,
-      groupByYearReadAction
+      Self.groupByYearReadCommand,
     ].compactMap { $0 })
   }
 
@@ -485,20 +528,35 @@ extension DocumentListViewController {
   /// A `UIAction` for importing books from LibraryThing or Goodreads
   private var importLibraryThingAction: UIAction {
     UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
-      guard let self = self else { return }
-      Logger.shared.info("Importing from LibraryThing")
-      let bookImporterViewController = BookImporterViewController(database: self.database)
-      bookImporterViewController.delegate = self
-      self.present(bookImporterViewController, animated: true)
+      guard let self else { return }
+      self.importBooks()
     }
+  }
+
+  private var importBooksKeyCommand: UIKeyCommand {
+    UIKeyCommand(input: "I", modifierFlags: [.shift, .command], action: #selector(importBooks))
+  }
+
+  @objc func importBooks() {
+    Logger.shared.info("Importing from LibraryThing")
+    let bookImporterViewController = BookImporterViewController(database: database)
+    bookImporterViewController.delegate = self
+    present(bookImporterViewController, animated: true)
   }
 
   /// A `UIAction` for showing randomly selected quotes.
   private var quotesAction: UIAction {
     UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
-      guard let self = self else { return }
-      self.showQuotes(quotes: self.quoteIdentifiers, shiftFocus: true)
+      self?.showRandomQuotes()
     }
+  }
+
+  @objc func showRandomQuotes() {
+    #if targetEnvironment(macCatalyst)
+      UIApplication.shared.activateRandomQuotesScene(databaseURL: database.fileURL, quoteIdentifiers: quoteIdentifiers)
+    #else
+      showQuotes(quotes: quoteIdentifiers, shiftFocus: true)
+    #endif
   }
 
   /// A `UIAction` for reviewing items in the library.
@@ -515,9 +573,7 @@ extension DocumentListViewController {
 
   private var exportMenu: UIMenu {
     let zipAction = UIAction(title: "Zip") { [weak self] _ in
-      Task {
-        await self?.exportToZip()
-      }
+      self?.shareExportedZip()
     }
     let csvAction = UIAction(title: "CSV") { [weak self] _ in
       self?.exportAndShare()
@@ -525,25 +581,36 @@ extension DocumentListViewController {
     return UIMenu(title: "Export", image: UIImage(systemName: "arrow.up.forward.app"), children: [csvAction, zipAction])
   }
 
-
-
   private var sendFeedbackAction: UIAction? {
     guard MFMailComposeViewController.canSendMail() else {
       return nil
     }
     return UIAction(title: "Send Feedback", image: UIImage(systemName: "envelope.open")) { [weak self] _ in
-      guard let self = self else { return }
-      Logger.shared.info("Sending feedback")
-      let mailComposer = MFMailComposeViewController()
-      mailComposer.setSubject("\(AppDelegate.appName) Feedback")
-      mailComposer.setToRecipients(["librarynotesapp@gmail.com"])
-      mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
-      if UIApplication.isTestFlight, let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
-        mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
-      }
-      mailComposer.mailComposeDelegate = self
-      self.present(mailComposer, animated: true)
+      self?.sendFeedback()
     }
+  }
+
+  override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+    if action == #selector(sendFeedback) {
+      return MFMailComposeViewController.canSendMail()
+    } else if action == #selector(performReview) {
+      return !studySession.isEmpty
+    } else {
+      return super.canPerformAction(action, withSender: sender)
+    }
+  }
+
+  @objc func sendFeedback() {
+    Logger.shared.info("Sending feedback")
+    let mailComposer = MFMailComposeViewController()
+    mailComposer.setSubject("\(AppDelegate.appName) Feedback")
+    mailComposer.setToRecipients(["librarynotesapp@gmail.com"])
+    mailComposer.setMessageBody("Version \(UIApplication.versionString)", isHTML: false)
+    if UIApplication.isTestFlight, let zippedData = try? LogFileDirectory.shared.makeZippedLog() {
+      mailComposer.addAttachmentData(zippedData, mimeType: UTType.zip.preferredMIMEType ?? "application/zip", fileName: "log.zip")
+    }
+    mailComposer.mailComposeDelegate = self
+    present(mailComposer, animated: true)
   }
 
   private var advanceTimeAction: UIAction? {
@@ -553,19 +620,39 @@ extension DocumentListViewController {
     }
   }
 
-  private var groupByYearReadAction: UIAction {
-    UIAction(title: "Group By Year Read", image: UIImage(systemName: "calendar"), state: groupByYearRead ? .on : .off) { [weak self] _ in
-      self?.groupByYearRead.toggle()
+  static var groupByYearReadCommand: UICommand {
+    UICommand(title: "Group By Year Read", image: UIImage(systemName: "calendar"), action: #selector(handleGroupByYearReadCommand), propertyList: "groupByYearRead")
+  }
+
+  @objc private func handleGroupByYearReadCommand() {
+    groupByYearRead.toggle()
+    UIMenuSystem.main.setNeedsRevalidate()
+  }
+
+  @objc private func handleSortCommand(_ command: UICommand) {
+    guard let rawValue = command.propertyList as? String, let commandSortOrder = NoteIdentifierRecord.SortOrder(rawValue: rawValue) else {
+      return
+    }
+    currentSortOrder = commandSortOrder
+    UIMenuSystem.main.setNeedsRevalidate()
+  }
+
+  override func validate(_ command: UICommand) {
+    guard let rawValue = command.propertyList as? String else {
+      return
+    }
+    if rawValue == "groupByYearRead" {
+      command.state = groupByYearRead ? .on : .off
+    } else if let commandSortOrder = NoteIdentifierRecord.SortOrder(rawValue: rawValue) {
+      command.state = (commandSortOrder == currentSortOrder) ? .on : .off
     }
   }
 
-  private var sortMenu: UIMenu {
-    let sortActions = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UIAction in
-      UIAction(title: sortOrder.rawValue, state: sortOrder == currentSortOrder ? .on : .off) { [weak self] _ in
-        self?.currentSortOrder = sortOrder
-      }
+  static var sortMenu: UIMenu {
+    let sortCommands = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UICommand in
+      UICommand(title: sortOrder.rawValue, action: #selector(handleSortCommand), propertyList: sortOrder.rawValue)
     }
-    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), children: sortActions)
+    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), options: .displayInline, children: sortCommands)
   }
 }
 
@@ -623,7 +710,7 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   // TODO: This isn't actually called :-(
   func documentTableDidDeleteDocument(with noteIdentifier: Note.Identifier) {
     guard
-      let splitViewController = self.splitViewController,
+      let splitViewController,
       splitViewController.viewControllers.count > 1,
       let navigationController = splitViewController.viewControllers.last as? UINavigationController,
       let detailViewController = navigationController.viewControllers.first as? SavingTextEditViewController
@@ -692,15 +779,11 @@ extension DocumentListViewController: StudyViewControllerDelegate {
       Logger.shared.error("Unexpected error recording study session results: \(error)")
     }
   }
-
-  func studyViewControllerDidCancel(_ studyViewController: StudyViewController) {
-    dismiss(animated: true, completion: nil)
-  }
 }
 
 private extension Note {
   var book: AugmentedBook? {
-    return metadata.book
+    metadata.book
   }
 
   var rating: Int? {
@@ -737,7 +820,7 @@ extension DocumentListViewController: BookImporterViewControllerDelegate {
 
 private extension BookNoteMetadata {
   var exportTitle: String {
-    if let book = book {
+    if let book {
       return "\(book.title) \(book.authors.joined(separator: " "))"
     } else {
       return title
@@ -747,15 +830,15 @@ private extension BookNoteMetadata {
 
 private extension DateComponents {
   var yaml: String {
-    guard let year = year else {
+    guard let year else {
       return ""
     }
     var output = "\(year)"
-    guard let month = month else {
+    guard let month else {
       return output
     }
     output.append("-\(month.formatted(.number.precision(.integerLength(2))))")
-    guard let day = day else {
+    guard let day else {
       return output
     }
     output.append("-\(day.formatted(.number.precision(.integerLength(2))))")

@@ -15,6 +15,26 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook)
 }
 
+@objc protocol TextEditingFormattingActions {
+  /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
+  func toggleSummaryParagraph()
+
+  /// Turns the current paragraph into a first-level heading (`# `) if it isn't, or a normal paragraph if it is.
+  func toggleHeading()
+
+  /// Turns the current paragraph into a second-level heading (`## `) if it isn't, or a normal paragraph if it is.
+  func toggleSubheading()
+
+  /// Turns the current paragraph into a quote (`> `) if it isn't one, or a normal paragraph if it is.
+  func toggleQuote()
+
+  /// Turns the current paragraph into a bullet list item (`* `) if it isn't one, or a normal paragraph if it is.
+  func toggleBulletList()
+
+  /// Turns the current paragraph into a numbed list item (`1. `) if it isn't one, or a normal paragraph if it is.
+  func toggleNumberedList()
+}
+
 /// Allows editing of a single text file.
 public final class TextEditViewController: UIViewController {
   /// Designated initializer.
@@ -57,7 +77,7 @@ public final class TextEditViewController: UIViewController {
   /// The markdown
   public var markdown: String {
     get {
-      return parsedAttributedString.rawString as String
+      parsedAttributedString.rawString as String
     }
     set {
       textView.textStorage.replaceCharacters(in: NSRange(location: 0, length: textView.textStorage.length), with: newValue)
@@ -68,13 +88,15 @@ public final class TextEditViewController: UIViewController {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
     view.backgroundColor = .grailBackground
     view.accessibilityIdentifier = "edit-document-view"
+    view.isFindInteractionEnabled = true
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+    view.keyboardDismissMode = .onDragWithAccessory
     return view
   }()
 
   public var selectedRange: NSRange {
     get {
-      return textView.selectedRange
+      textView.selectedRange
     }
     set {
       textView.selectedRange = newValue
@@ -98,7 +120,7 @@ public final class TextEditViewController: UIViewController {
       extendedNavigationHeaderView?.removeFromSuperview()
     }
     didSet {
-      guard let extendedNavigationHeaderView = extendedNavigationHeaderView else {
+      guard let extendedNavigationHeaderView else {
         return
       }
       textView.addSubview(extendedNavigationHeaderView)
@@ -116,7 +138,7 @@ public final class TextEditViewController: UIViewController {
   /// Position `navigationBorderView` between the header & text. Note this depends on scroll position since it will pin to the top, so call
   /// this on each scrollViewDidScroll.
   private func layoutNavigationBorderView() {
-    guard let navigationBorderView = navigationBorderView else {
+    guard let navigationBorderView else {
       return
     }
     let yPosition = max(0, textView.contentOffset.y + textView.adjustedContentInset.top - textView.contentInset.top)
@@ -157,7 +179,7 @@ public final class TextEditViewController: UIViewController {
 
   /// Creates a typeahead accessory for text starting at location `anchor`. If the accessory already exists, returns it.
   private func makeTypeaheadAccessoryIfNecessary(anchoredAt anchor: Int) -> TypeaheadAccessory {
-    if let typeaheadAccessory = typeaheadAccessory, typeaheadAccessory.anchor == anchor {
+    if let typeaheadAccessory, typeaheadAccessory.anchor == anchor {
       return typeaheadAccessory
     }
     let gridUnit: CGFloat = 8
@@ -194,7 +216,7 @@ public final class TextEditViewController: UIViewController {
       cell.contentConfiguration = contentConfiguration
     }
 
-    let typeaheadDataSource = UICollectionViewDiffableDataSource<String, String>(collectionView: typeaheadSelectionView) { (collectionView, indexPath, hashtag) -> UICollectionViewCell? in
+    let typeaheadDataSource = UICollectionViewDiffableDataSource<String, String>(collectionView: typeaheadSelectionView) { collectionView, indexPath, hashtag -> UICollectionViewCell? in
       collectionView.dequeueConfiguredReusableCell(using: hashtagCellRegistration, for: indexPath, item: hashtag)
     }
     let typeaheadInfo = TypeaheadAccessory(
@@ -226,68 +248,20 @@ public final class TextEditViewController: UIViewController {
     }
     inputBarItems.append(UIBarButtonItem(title: "#", primaryAction: insertHashtagAction))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "bold"), primaryAction: UIAction { [textView] _ in
-      let currentSelectedRange = textView.selectedRange
-      let nextLocation = currentSelectedRange.upperBound + 2
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "**")
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "**")
-      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    inputBarItems.append(Self.toggleBoldfaceBarButtonItem)
+
+    inputBarItems.append(Self.toggleItalicsBarButtonItem)
+
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [weak self] _ in
+      self?.toggleQuote()
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "italic"), primaryAction: UIAction { [textView] _ in
-      let currentSelectedRange = textView.selectedRange
-      let nextLocation = currentSelectedRange.upperBound + 1
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: "_")
-      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: "_")
-      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [weak self] _ in
+      self?.toggleSummaryParagraph()
     }))
 
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "text.quote"), primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
-        assertionFailure()
-        return
-      }
-      if let blockQuote = nodePath.first(where: { $0.node.type == .blockquote }) {
-        let quoteDelimiterVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: blockQuote.range.location, length: 2))
-        textView.textStorage.replaceCharacters(in: quoteDelimiterVisibleRange, with: "")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location - 2, length: textView.selectedRange.length)
-      } else if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "> ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 2, length: 0)
-      }
-    }))
-
-    inputBarItems.append(UIBarButtonItem(title: "tl;dr:", image: nil, primaryAction: UIAction { [textView, parsedAttributedString] _ in
-      guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
-        assertionFailure()
-        return
-      }
-      if let paragraph = nodePath.first(where: { $0.node.type == .paragraph }) {
-        let paragraphStartVisibleRange = parsedAttributedString.range(forRawStringRange: NSRange(location: paragraph.range.location, length: 0))
-        textView.textStorage.replaceCharacters(in: paragraphStartVisibleRange, with: "tl;dr: ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
-      } else {
-        textView.textStorage.replaceCharacters(in: NSRange(location: textView.selectedRange.location, length: 0), with: "tl;dr: ")
-        textView.selectedRange = NSRange(location: textView.selectedRange.location + 7, length: 0)
-      }
-    }))
-
-    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self, textView, parsedAttributedString] _ in
-      guard let self = self else { return }
-      guard let nodePath = try? parsedAttributedString.path(to: max(0, textView.selectedRange.location - 1)) else {
-        assertionFailure()
-        return
-      }
-      let existingSelectedLocation = textView.selectedRange.location
-      if let existingListItem = nodePath.first(where: { $0.node.type == .listItem }) {
-        textView.textStorage.replaceCharacters(in: NSRange(location: existingListItem.range.location, length: 2), with: "")
-        textView.selectedRange = NSRange(location: existingSelectedLocation - 2, length: textView.selectedRange.length)
-      } else {
-        let lineRange = self.lineRange(at: existingSelectedLocation)
-        textView.textStorage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: "* ")
-        textView.selectedRange = NSRange(location: existingSelectedLocation + 2, length: 0)
-      }
+    inputBarItems.append(UIBarButtonItem(image: UIImage(systemName: "list.bullet"), primaryAction: UIAction { [weak self] _ in
+      self?.toggleBulletList()
     }))
 
     if textView.canPerformAction(#selector(UIResponder.captureTextFromCamera), withSender: nil) {
@@ -296,7 +270,7 @@ public final class TextEditViewController: UIViewController {
 
     let importActions = WebImporterConfiguration.shared.map { config in
       UIAction(title: config.title, image: config.image, handler: { [weak self] _ in
-        guard let self = self else { return }
+        guard let self else { return }
         let webViewController = WebScrapingViewController(initialURL: config.initialURL, javascript: config.importJavascript)
         webViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: webViewController)
@@ -335,8 +309,6 @@ public final class TextEditViewController: UIViewController {
       autoFirstResponder = false
     }
     adjustMargins()
-    let highlightMenuItem = UIMenuItem(title: "Highlight", action: #selector(convertTextToCloze))
-    UIMenuController.shared.menuItems = [highlightMenuItem]
     navigationController?.navigationBar.standardAppearance.backgroundEffect = UIBlurEffect(style: .systemThinMaterial)
     if extendedNavigationHeaderView != nil {
       navigationController?.navigationBar.standardAppearance.shadowColor = nil
@@ -354,7 +326,7 @@ public final class TextEditViewController: UIViewController {
     if let bookHeader = extendedNavigationHeaderView as? BookHeader {
       bookHeader.minimumTextX = view.readableContentGuide.layoutFrame.minX + 28
     }
-    if let extendedNavigationHeaderView = extendedNavigationHeaderView {
+    if let extendedNavigationHeaderView {
       let height = extendedNavigationHeaderView.sizeThatFits(CGSize(width: view.frame.width, height: UIView.layoutFittingExpandedSize.height)).height
       extendedNavigationHeaderView.frame = CGRect(origin: CGPoint(x: 0, y: -height), size: CGSize(width: view.frame.width, height: height))
     }
@@ -404,6 +376,57 @@ public final class TextEditViewController: UIViewController {
     textView.selectedRange = endRange
     textView.scrollRangeToVisible(endRange)
     textView.becomeFirstResponder()
+  }
+
+  static var toggleBoldfaceBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(title: "Bold", image: UIImage(systemName: "bold"), target: nil, action: #selector(toggleBoldface))
+  }
+
+  /// Toggles "bold" at the current location in `textView`
+  /// - Parameter sender: Unused
+  override public func toggleBoldface(_ sender: Any?) {
+    toggleInlineDelimitedText(nodeType: .strongEmphasis, openingDelimiter: "**", closingDelimiter: "**")
+  }
+
+  static var toggleItalicsBarButtonItem: UIBarButtonItem {
+    UIBarButtonItem(title: "Italic", image: UIImage(systemName: "italic"), target: nil, action: #selector(toggleItalics))
+  }
+
+  override public func toggleItalics(_ sender: Any?) {
+    toggleInlineDelimitedText(nodeType: .emphasis, openingDelimiter: "_", closingDelimiter: "_")
+  }
+
+  private func toggleInlineDelimitedText(nodeType: SyntaxTreeNodeType, openingDelimiter: String, closingDelimiter: String) {
+    guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+      assertionFailure()
+      return
+    }
+    if let node = nodePath.first(where: { $0.node.type == nodeType }) {
+      // Case 1: The current location is currently contained in a "bold" region. Remove the delimiters.
+      let delimiters = node.findNodes(where: { $0.type == .delimiter }).sorted(by: { $0.range.location < $1.range.location })
+      var locationDelta = 0
+      let initialLocation = textView.selectedRange.location
+      for delimiter in delimiters.reversed() {
+        let delimiterVisibleRange = parsedAttributedString.range(forRawStringRange: delimiter.range)
+        if delimiterVisibleRange.location < initialLocation {
+          locationDelta -= delimiter.range.length
+        }
+        textView.textStorage.replaceCharacters(in: delimiterVisibleRange, with: "")
+      }
+      textView.selectedRange = NSRange(location: initialLocation - locationDelta, length: 0)
+    } else if textView.selectedRange.length > 0 {
+      // Case 2: The current selected text isn't of the desired type and has non-zero length. Put delimiters around the selected text.
+      let currentSelectedRange = textView.selectedRange
+      let nextLocation = currentSelectedRange.upperBound + openingDelimiter.utf16.count
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.upperBound, length: 0), with: closingDelimiter)
+      textView.textStorage.replaceCharacters(in: NSRange(location: currentSelectedRange.location, length: 0), with: openingDelimiter)
+      textView.selectedRange = NSRange(location: nextLocation, length: 0)
+    } else if let wordRange = try? textView.textStorage.rangeOfWord(at: textView.selectedRange.location) {
+      // Case 3: The current text isn't bold but has zero length. Put delimiters around the current word.
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.upperBound, length: 0), with: closingDelimiter)
+      textView.textStorage.replaceCharacters(in: NSRange(location: wordRange.lowerBound, length: 0), with: openingDelimiter)
+      textView.selectedRange = NSRange(location: wordRange.upperBound + openingDelimiter.utf16.count + closingDelimiter.utf16.count, length: 0)
+    }
   }
 
   // MARK: - Keyboard
@@ -537,7 +560,8 @@ extension TextEditViewController: UITextViewDelegate {
     guard textView.selectedRange.location > 0 else { return }
     if
       let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location - 1),
-      let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag }) {
+      let hashtagNode = nodePath.first(where: { $0.node.type == .hashtag })
+    {
       let hashtag = String(utf16CodeUnits: parsedAttributedString[hashtagNode.range], count: hashtagNode.range.length)
       let suggestions = delegate?.testEditViewController(self, hashtagSuggestionsFor: hashtag) ?? []
       if suggestions.isEmpty { typeaheadAccessory = nil }
@@ -619,6 +643,14 @@ extension TextEditViewController: UITextViewDelegate {
     return false
   }
 
+  public func textView(_ textView: UITextView, editMenuForTextIn range: NSRange, suggestedActions: [UIMenuElement]) -> UIMenu? {
+    guard range.length > 0 else {
+      return nil
+    }
+    let highlight = UICommand(title: "Highlight", action: #selector(convertTextToCloze))
+    return UIMenu(children: suggestedActions + [highlight])
+  }
+
   /// Gets the line of text that contains a given location.
   private func line(at location: Int) -> String {
     let nsstring = textView.textStorage.string as NSString
@@ -667,5 +699,102 @@ extension TextEditViewController: WebScrapingViewControllerDelegate {
 
   public func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController) {
     dismiss(animated: true, completion: nil)
+  }
+}
+
+// MARK: - TextEditingFormattingActions
+
+extension TextEditViewController: TextEditingFormattingActions {
+  func toggleHeading() {
+    toggleParagraph(type: .header, openingDelimiter: "# ")
+  }
+
+  func toggleSubheading() {
+    toggleParagraph(type: .header, openingDelimiter: "## ")
+  }
+
+  func toggleQuote() {
+    toggleParagraph(type: .blockquote, openingDelimiter: "> ")
+  }
+
+  func toggleBulletList() {
+    toggleParagraph(type: .listItem, openingDelimiter: "* ")
+  }
+
+  func toggleNumberedList() {
+    toggleParagraph(type: .listItem, openingDelimiter: "1. ")
+  }
+
+  /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
+  func toggleSummaryParagraph() {
+    toggleParagraph(type: .summary, openingDelimiter: "tl;dr: ")
+  }
+
+  private func toggleParagraph(type: SyntaxTreeNodeType, openingDelimiter: String) {
+    guard let (blockType, openingRange) = try? block(containing: textView.selectedRange.location) else {
+      assertionFailure()
+      return
+    }
+    let visibleRange = parsedAttributedString.range(forRawStringRange: openingRange)
+    if blockType == type {
+      textView.textStorage.replaceCharacters(in: visibleRange, with: "")
+      textView.selectedRange = NSRange(location: textView.selectedRange.location - visibleRange.length, length: 0)
+    } else {
+      var replacementString = openingDelimiter
+      if blockType == .blankLine {
+        replacementString.insert("\n", at: replacementString.startIndex)
+      }
+      textView.textStorage.replaceCharacters(in: visibleRange, with: replacementString)
+      textView.selectedRange = NSRange(location: textView.selectedRange.location - visibleRange.length + replacementString.count, length: 0)
+    }
+  }
+
+  /// Returns the type of MiniMarkdown block containing `location`
+  /// - Parameter location: The location to be contained.
+  /// - Returns: A tuple containing the type of block that contains `location` and the opening delimiter for the block.
+  private func block(containing location: Int) throws -> (type: SyntaxTreeNodeType, openingDelimiterRange: NSRange)? {
+    guard parsedAttributedString.count > 0 else {
+      // There's no parsed path if the buffer is empty.
+      return (type: .paragraph, openingDelimiterRange: NSRange(location: 0, length: 0))
+    }
+    guard let nodePath = try? parsedAttributedString.path(to: textView.selectedRange.location) else {
+      throw GenericLocalizedError(errorDescription: "Location \(location) is not in the parse tree for parsedAttributedString")
+    }
+    if
+      let heading = nodePath.first(where: { $0.node.type == .header }),
+      let delimiter = heading.first(where: { $0.type == .delimiter }),
+      let softTab = heading.first(where: { $0.type == .softTab })
+    {
+      return (type: .header, openingDelimiterRange: delimiter.range.union(softTab.range))
+    }
+    let blocks: [(SyntaxTreeNodeType, SyntaxTreeNodeType)] = [
+      (.summary, .summaryDelimiter),
+      (.listItem, .listDelimiter),
+      (.blockquote, .delimiter),
+    ]
+    for (blockType, delimiterType) in blocks {
+      if let info = nodePath.searchForBlockType(blockType, delimiter: delimiterType) {
+        return info
+      }
+    }
+    for blockType in [SyntaxTreeNodeType.blankLine, SyntaxTreeNodeType.paragraph] {
+      if let blockNode = nodePath.first(where: { $0.node.type == blockType }) {
+        return (type: blockType, openingDelimiterRange: NSRange(location: blockNode.range.location, length: 0))
+      }
+    }
+    return nil
+  }
+}
+
+private extension [AnchoredNode] {
+  func searchForBlockType(
+    _ type: SyntaxTreeNodeType,
+    delimiter: SyntaxTreeNodeType
+  ) -> (type: SyntaxTreeNodeType, openingDelimiterRange: NSRange)? {
+    if let blockNode = first(where: { $0.node.type == type }), let delimiterNode = blockNode.first(where: { $0.type == delimiter }) {
+      return (type: type, openingDelimiterRange: delimiterNode.range)
+    } else {
+      return nil
+    }
   }
 }

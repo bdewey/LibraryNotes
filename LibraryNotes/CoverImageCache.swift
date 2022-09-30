@@ -62,7 +62,7 @@ private extension CoverImageCache {
     }
 
     static func == (lhs: CoverImageCache.CacheKey, rhs: CoverImageCache.CacheKey) -> Bool {
-      return (lhs.noteIdentifier, lhs.maxSize) == (rhs.noteIdentifier, rhs.maxSize)
+      (lhs.noteIdentifier, lhs.maxSize) == (rhs.noteIdentifier, rhs.maxSize)
     }
 
     override func isEqual(_ object: Any?) -> Bool {

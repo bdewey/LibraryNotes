@@ -6,9 +6,9 @@ import Foundation
 extension Book {
   /// A citation for this book in simple Markdown.
   var markdownTitle: String {
-    var title = "_\(self.title)_"
+    var title = "_\(title)_"
     if !authors.isEmpty {
-      let authors = self.authors.joined(separator: ", ")
+      let authors = authors.joined(separator: ", ")
       title += ": \(authors)"
     }
     if let publishedDate = originalYearPublished ?? yearPublished {

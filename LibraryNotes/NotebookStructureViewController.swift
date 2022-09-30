@@ -46,7 +46,7 @@ final class NotebookStructureViewController: UIViewController {
       switch self {
       case .trash: return "Trash"
       case .read: return "My Books"
-      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last!)
+      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last ?? "")
       }
     }
 
@@ -109,7 +109,7 @@ final class NotebookStructureViewController: UIViewController {
   public init(database: NoteDatabase) {
     self.database = database
     super.init(nibName: nil, bundle: nil)
-    title = AppDelegate.appName
+    navigationItem.largeTitleDisplayMode = .never
   }
 
   @available(*, unavailable)
@@ -124,7 +124,9 @@ final class NotebookStructureViewController: UIViewController {
   private lazy var collectionView: UICollectionView = {
     let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
       var config = UICollectionLayoutListConfiguration(appearance: .sidebar)
-      config.backgroundColor = .grailSecondaryBackground
+      #if !targetEnvironment(macCatalyst)
+        config.backgroundColor = .grailSecondaryBackground
+      #endif
       config.headerMode = .none
       // The last section gets a footer
       config.footerMode = (sectionIndex == Section.allCases.count - 1) ? .supplementary : .none
@@ -146,10 +148,11 @@ final class NotebookStructureViewController: UIViewController {
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
     let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
-      var contentConfiguration = cell.defaultContentConfiguration()
+      var contentConfiguration = UIListContentConfiguration.sidebarCell()
       contentConfiguration.text = item.description
       contentConfiguration.textProperties.color = .label
       contentConfiguration.image = item.image
+      cell.backgroundConfiguration = UIBackgroundConfiguration.listSidebarCell()
       cell.contentConfiguration = contentConfiguration
 
       // Only items with children get an outline disclosure identifier.
@@ -160,7 +163,7 @@ final class NotebookStructureViewController: UIViewController {
       }
     }
 
-    let dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { (view, indexPath, item) -> UICollectionViewCell? in
+    let dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { view, indexPath, item -> UICollectionViewCell? in
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 
@@ -216,7 +219,7 @@ final class NotebookStructureViewController: UIViewController {
     notebookSubscription = database.notesDidChange.receive(on: DispatchQueue.main).sink { [weak self] in
       self?.updateSnapshot()
     }
-    navigationController?.setToolbarHidden(false, animated: false)
+    navigationController?.setToolbarHidden(true, animated: false)
   }
 
   override func viewWillAppear(_ animated: Bool) {
@@ -331,7 +334,7 @@ private extension NotebookStructureViewController {
       newlySelectedItem = parent
     }
     dataSource.apply(snapshot, to: .notes, animatingDifferences: true)
-    if let newlySelectedItem = newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
+    if let newlySelectedItem, let indexPath = dataSource.indexPath(for: newlySelectedItem) {
       collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
       selectItemAtIndexPath(indexPath, shiftFocus: false)
     }
@@ -360,7 +363,7 @@ extension NotebookStructureViewController: UICollectionViewDelegate {
     let item = dataSource.itemIdentifier(for: indexPath)
     guard case .hashtag(let hashtag) = item?.structureIdentifier else { return nil }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self, database] _ in
-      guard let self = self else { return nil }
+      guard let self else { return nil }
       let rename = UIAction(title: "Rename \(hashtag)", image: UIImage(systemName: "square.and.pencil")) { _ in
         Logger.shared.debug("Rename \(hashtag)")
         let alert = UIAlertController(title: "Rename \(hashtag)", message: nil, preferredStyle: .alert)
@@ -408,8 +411,8 @@ private extension UIBarButtonItem {
 private extension NotebookStructureViewController {
   func configureToolbar() {
     var toolbarItems: [UIBarButtonItem] = [.flexibleSpace()]
-    if splitViewController?.isCollapsed ?? false, let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
-      toolbarItems.append(newNoteButton)
+    if splitViewController?.isCollapsed ?? false {
+      toolbarItems.append(NotebookViewController.makeNewNoteButtonItem())
     }
     self.toolbarItems = toolbarItems
   }

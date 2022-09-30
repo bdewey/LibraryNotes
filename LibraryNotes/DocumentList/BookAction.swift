@@ -151,7 +151,11 @@ struct BookAction {
         return nil
       } else {
         return BookAction(title: "Study", image: UIImage(systemName: "rectangle.stack"), backgroundColor: .systemBlue) {
-          delegate?.presentStudySessionViewController(for: studySession)
+          #if targetEnvironment(macCatalyst)
+            UIApplication.shared.activateStudySessionScene(databaseURL: database.fileURL, studyTarget: .note(noteIdentifier))
+          #else
+            delegate?.presentStudySessionViewController(for: studySession)
+          #endif
         }
       }
     } catch {

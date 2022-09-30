@@ -4,18 +4,18 @@ import Foundation
 
 public extension PersonNameComponents {
   func compare(to other: PersonNameComponents) -> ComparisonResult {
-    if let familyName = self.familyName, let otherFamilyName = other.familyName {
+    if let familyName, let otherFamilyName = other.familyName {
       let result = familyName.compare(otherFamilyName, options: [.diacriticInsensitive, .caseInsensitive])
       if result != .orderedSame { return result }
     }
-    if let givenName = self.givenName, let otherGivenName = other.givenName {
+    if let givenName, let otherGivenName = other.givenName {
       return givenName.compare(otherGivenName)
     }
     return .orderedSame
   }
 }
 
-extension Optional: Comparable where Wrapped == PersonNameComponents {
+extension PersonNameComponents?: Comparable {
   public static func < (lhs: Wrapped?, rhs: Wrapped?) -> Bool {
     switch (lhs, rhs) {
     case (.none, .some):

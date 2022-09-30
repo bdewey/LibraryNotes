@@ -90,8 +90,8 @@ struct BookEditView: View {
 
       Section(header: Text("Book Details")) {
         CaptionedRow(caption: "Title", text: $model.book.title)
-        CaptionedRow(caption: "Author", text: model.binding(keyPath: \.authors))
-        CaptionedRow(caption: "Tags (comma separated)", text: model.binding(keyPath: \.tags))
+        CaptionedRow(caption: "Author", value: $model.book.authors, format: .commaSeparatedList)
+        CaptionedRow(caption: "Tags (comma separated)", value: $model.book.tags, format: .commaSeparatedList)
         CaptionedRow(caption: "Publisher", text: model.binding(keyPath: \.publisher))
         CaptionedRow(caption: "Year Published", text: model.binding(keyPath: \.yearPublished))
         CaptionedRow(caption: "Original Year Published", text: model.binding(keyPath: \.originalYearPublished))
@@ -100,6 +100,7 @@ struct BookEditView: View {
       }
       .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
     }
+    .grailListBackground()
   }
 
   @ViewBuilder var coverImageView: some View {
@@ -114,31 +115,123 @@ struct BookEditView: View {
 /// Show a floating caption over a text row
 ///
 /// See https://medium.com/swlh/simpler-better-floating-label-textfields-in-swiftui-24f7d06da8b8
-struct CaptionedRow: View {
+struct CaptionedRow<Format: ParseableFormatStyle>: View where Format.FormatOutput == String {
+  private enum Storage {
+    case text(Binding<String>)
+    case formatted(Binding<Format.FormatInput>, Format)
+    case optionalFormatted(Binding<Format.FormatInput?>, Format)
+  }
+
   let caption: String
-  @Binding var text: String
+  private var storage: Storage
+
+  init(caption: String, value: Binding<Format.FormatInput>, format: Format) {
+    self.caption = caption
+    self.storage = .formatted(value, format)
+  }
+
+  init(caption: String, value: Binding<Format.FormatInput?>, format: Format) {
+    self.caption = caption
+    self.storage = .optionalFormatted(value, format)
+  }
+
+  private var text: String {
+    switch storage {
+    case .text(let binding):
+      return binding.wrappedValue
+    case .formatted(let binding, let format):
+      return format.format(binding.wrappedValue)
+    case .optionalFormatted(let binding, let format):
+      return binding.wrappedValue.flatMap { format.format($0) } ?? ""
+    }
+  }
 
   var body: some View {
     VStack(alignment: .leading, spacing: 2) {
       Text(caption).font(.caption).foregroundColor(.secondary)
         .opacity(text.isEmpty ? 0 : 1)
         .offset(y: text.isEmpty ? 20 : 0)
-      TextField(caption, text: $text.animation())
+      switch storage {
+      case .text(let stringBinding):
+        TextField(caption, text: stringBinding.animation())
+      case .formatted(let binding, let formatStyle):
+        TextField(caption, value: binding, format: formatStyle)
+      case .optionalFormatted(let binding, let formatStyle):
+        TextField(caption, value: binding, format: formatStyle)
+      }
     }.animation(.default, value: text)
+  }
+}
+
+extension CaptionedRow where Format == CommaSeparatedListFormatStyle {
+  init(caption: String, text: Binding<String>) {
+    self.caption = caption
+    self.storage = .text(text)
+  }
+}
+
+struct CommaSeparatedListFormatStyle: ParseableFormatStyle {
+  var parseStrategy = CommaSeparatedListFormatParseStrategy()
+
+  func format(_ value: [String]) -> String {
+    value
+      .filter { !$0.isEmpty }
+      .joined(separator: ", ")
+  }
+}
+
+extension ParseableFormatStyle where Self == CommaSeparatedListFormatStyle {
+  static var commaSeparatedList: CommaSeparatedListFormatStyle { CommaSeparatedListFormatStyle() }
+}
+
+struct CommaSeparatedListFormatParseStrategy: ParseStrategy {
+  func parse(_ value: String) throws -> [String] {
+    value.split(separator: ",")
+      .map(String.init)
+      .map { $0.trimmingCharacters(in: .whitespaces) }
+      .filter { !$0.isEmpty }
   }
 }
 
 struct BookEditView_Previews: PreviewProvider {
   static var previews: some View {
-    BookEditView(model: BookEditViewModel(
-      book: AugmentedBook(
-        title: "Dune",
-        authors: ["Frank Herbert"],
-        review: "This is a review",
-        rating: 4,
-        dateAdded: nil
-      ),
-      coverImage: nil
-    ))
+    Group {
+      BookEditView(model: BookEditViewModel(
+        book: AugmentedBook(
+          title: "Dune",
+          authors: ["Frank Herbert"],
+          review: "This is a review",
+          rating: 4,
+          dateAdded: nil
+        ),
+        coverImage: nil
+      ))
+    }
+  }
+}
+
+struct GrailListBackgroundModifier: ViewModifier {
+  func body(content: Content) -> some View {
+    if #available(macCatalyst 16.0, iOS 16.0, *) {
+      content
+        .background(Color(.grailGroupedBackground))
+        .scrollContentBackground(.hidden)
+    } else {
+      content
+    }
+  }
+}
+
+extension View {
+  @ViewBuilder func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
+    if condition {
+      transform(self)
+    } else {
+      self
+    }
+  }
+
+  func grailListBackground() -> some View {
+    modifier(GrailListBackgroundModifier())
   }
 }

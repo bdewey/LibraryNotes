@@ -45,7 +45,7 @@ public final class BarcodeScannerViewController: UIViewController {
   private var startScanningTask: Task<Bool, Error>?
 
   public func startScanning() async throws -> Bool {
-    if let startScanningTask = startScanningTask {
+    if let startScanningTask {
       return try await startScanningTask.value
     }
     let startScanningTask = Task { () throws -> Bool in

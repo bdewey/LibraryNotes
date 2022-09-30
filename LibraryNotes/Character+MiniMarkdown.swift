@@ -20,11 +20,11 @@ private extension CharacterSet {
 public extension Character {
   /// `true` if CharacterSet.whitespacesAndNewlines contains `self`.
   var isWhitespaceOrNewline: Bool {
-    return CharacterSet.whitespacesAndNewlines.contains(self)
+    CharacterSet.whitespacesAndNewlines.contains(self)
   }
 
   /// `true` if CharacterSet.whitespaces contains `self`
   var isWhitespace: Bool {
-    return CharacterSet.whitespaces.contains(self)
+    CharacterSet.whitespaces.contains(self)
   }
 }

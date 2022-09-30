@@ -67,7 +67,7 @@ private func assignKeys(
   for temporaryKey in temporaryKeys {
     let promptCollection = challengeTemplates[temporaryKey]!
     if let (candidate, remainder) = otherKeys[promptCollection.fingerprint, default: []].findFirst(
-      where: { (_, otherKey) -> Bool in
+      where: { _, otherKey -> Bool in
         let otherPromptCollection = otherChallengeTemplates[otherKey]!
         return predicate(promptCollection, otherPromptCollection)
       }
@@ -109,7 +109,7 @@ extension Array {
         remainder.append(element)
       }
     }
-    if let value = value {
+    if let value {
       return (value: value, remainder: remainder)
     } else {
       return nil

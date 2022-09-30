@@ -52,7 +52,7 @@ public final class WebViewController: UIViewController {
   }
 
   @objc private func showNotes() {
-    guard let relatedNotesViewController = relatedNotesViewController else { return }
+    guard let relatedNotesViewController else { return }
     Logger.shared.info("Should show notes now")
     let navigationController = UINavigationController(rootViewController: relatedNotesViewController)
     navigationController.navigationBar.prefersLargeTitles = false
@@ -70,9 +70,9 @@ public final class WebViewController: UIViewController {
     if splitViewController?.isCollapsed ?? false {
       navigationItem.rightBarButtonItems = []
       navigationController?.isToolbarHidden = false
-      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), notebookViewController?.makeNewNoteButtonItem()].compactMap { $0 }
+      toolbarItems = [showNotesButton, UIBarButtonItem.flexibleSpace(), NotebookViewController.makeNewNoteButtonItem()].compactMap { $0 }
     } else {
-      navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), showNotesButton].compactMap { $0 }
+      navigationItem.rightBarButtonItems = [NotebookViewController.makeNewNoteButtonItem(), showNotesButton].compactMap { $0 }
       navigationController?.isToolbarHidden = true
       toolbarItems = []
     }

@@ -12,19 +12,19 @@ public extension String {
   }
 
   func string(at range: NSRange) -> String {
-    return String(self[Range(range, in: self)!])
+    String(self[Range(range, in: self)!])
   }
 
   func int(at range: NSRange) -> Int? {
-    return Int(string(at: range))
+    Int(string(at: range))
   }
 
   var completeRange: NSRange {
-    return NSRange(startIndex ..< endIndex, in: self)
+    NSRange(startIndex ..< endIndex, in: self)
   }
 
   func count(of character: Character) -> Int {
-    return reduce(0) { (count, stringCharacter) -> Int in
+    reduce(0) { count, stringCharacter -> Int in
       if stringCharacter == character { return count + 1 }
       return count
     }

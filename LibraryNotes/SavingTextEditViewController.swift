@@ -4,6 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
+import LinkPresentation
 import Logging
 import ObjectiveCTextStorageWrapper
 import SnapKit
@@ -60,13 +61,26 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.imageStorage = NoteScopedImageStorage(identifier: noteIdentifier, database: database)
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
     super.init(nibName: nil, bundle: nil)
-    setTitleMarkdown(note.metadata.preferredTitle)
     self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
         Logger.textSaving.info("No longer getting updates for \(noteIdentifier)")
       }, receiveValue: { [weak self] versions in
         self?.updateVersionIfNeeded(versions)
       })
+    if #available(iOS 16.0, *) {
+      self.navigationItem.style = .editor
+      let metadata = LPLinkMetadata()
+      var urlComponents = URLComponents(url: database.fileURL, resolvingAgainstBaseURL: false)!
+      urlComponents.queryItems = [.init(name: "id", value: noteIdentifier)]
+      let noteURL = urlComponents.url!
+      metadata.originalURL = noteURL
+      metadata.url = noteURL
+      if let coverImage {
+        metadata.imageProvider = NSItemProvider(object: coverImage)
+      }
+      self.navigationItem.documentProperties = UIDocumentProperties(metadata: metadata)
+    }
+    setTitleMarkdown(note.metadata.preferredTitle)
   }
 
   @available(*, unavailable)
@@ -107,7 +121,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private lazy var textEditViewController: TextEditViewController = {
     let viewController = TextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
-    if let initialSelectedRange = initialSelectedRange {
+    if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
     }
     viewController.autoFirstResponder = autoFirstResponder
@@ -128,7 +142,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       return
     }
     if versionArray.count > 1 {
-      Logger.textSaving.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map({ ($0.authorID, $0.timestamp) }))")
+      Logger.textSaving.info("Picked winner \(winningVersion.authorID.uuidString) from \(versionArray.map { ($0.authorID, $0.timestamp) })")
     }
     textEditViewController.markdown = winningVersion.value.text ?? ""
     hasUnsavedChanges = false
@@ -142,6 +156,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
     navigationItem.titleView = label
     textEditViewController.navigationTitleView = label
+    if #available(iOS 16.0, *) {
+      if let metadata = navigationItem.documentProperties?.metadata {
+        metadata.title = label.attributedText?.string
+        navigationItem.documentProperties?.metadata = metadata
+      }
+    }
   }
 
   override var isEditing: Bool {
@@ -206,13 +226,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     present(navigationController, animated: true, completion: nil)
   }
 
-  func makeInsertBookDetailsButton() -> UIBarButtonItem? {
-    return UIBarButtonItem(image: UIImage(systemName: "text.book.closed"), primaryAction: UIAction { [weak self] _ in
-      self?.editOrInsertBookDetails()
-    })
-  }
-
-  private func editOrInsertBookDetails() {
+  @objc func editOrInsertBookDetails() {
     if let book = note.metadata.book {
       editBookDetails(book: book)
     } else if let apiKey = ApiKey.googleBooks {
@@ -220,18 +234,40 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     }
   }
 
+  static var centerItemGroups: [UIBarButtonItemGroup] {
+    let blockFormatItems: [UIBarButtonItem] = [
+      UIBarButtonItem(title: "Heading", image: UIImage(systemName: "number"), target: nil, action: #selector(TextEditingFormattingActions.toggleHeading)),
+      UIBarButtonItem(title: "Quote", image: UIImage(systemName: "text.quote"), target: nil, action: #selector(TextEditingFormattingActions.toggleQuote)),
+      UIBarButtonItem(title: "Bulleted list", image: UIImage(systemName: "list.bullet"), target: nil, action: #selector(TextEditingFormattingActions.toggleBulletList)),
+      UIBarButtonItem(title: "Numbered list", image: UIImage(systemName: "list.number"), target: nil, action: #selector(TextEditingFormattingActions.toggleNumberedList)),
+      UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: nil, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
+    ]
+    return [
+      UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), target: nil, action: #selector(editOrInsertBookDetails)).creatingFixedGroup(),
+      .optionalGroup(
+        customizationIdentifier: "block-format",
+        representativeItem: UIBarButtonItem(title: "Paragraph", image: UIImage(systemName: "paragraphsign")),
+        items: blockFormatItems
+      ),
+      .optionalGroup(
+        customizationIdentifier: "format",
+        representativeItem: UIBarButtonItem(title: "Format", image: UIImage(systemName: "bold.italic.underline")),
+        items: [
+          TextEditViewController.toggleBoldfaceBarButtonItem,
+          TextEditViewController.toggleItalicsBarButtonItem,
+        ]
+      ),
+    ]
+  }
+
   private func configureToolbar() {
+    navigationItem.customizationIdentifier = "savingTextEditViewController"
+    navigationItem.centerItemGroups = Self.centerItemGroups
     if splitViewController?.isCollapsed ?? false {
-      navigationItem.rightBarButtonItem = makeInsertBookDetailsButton()
       navigationController?.isToolbarHidden = false
-      if let newNoteButton = notebookViewController?.makeNewNoteButtonItem() {
-        toolbarItems = [UIBarButtonItem.flexibleSpace(), newNoteButton]
-      }
+      toolbarItems = [UIBarButtonItem.flexibleSpace(), NotebookViewController.makeNewNoteButtonItem()]
     } else {
-      navigationItem.rightBarButtonItems = [notebookViewController?.makeNewNoteButtonItem(), makeInsertBookDetailsButton()]
-        .compactMap { $0 }
-      navigationController?.isToolbarHidden = true
-      toolbarItems = []
+      navigationItem.pinnedTrailingGroup = NotebookViewController.makeNewNoteButtonItem().creatingFixedGroup()
     }
   }
 
@@ -342,7 +378,7 @@ extension SavingTextEditViewController: NotebookSecondaryViewController {
   static var notebookDetailType: String { "SavingTextEditViewController" }
 
   func userActivityData() throws -> Data {
-    return try JSONEncoder().encode(restorationState)
+    try JSONEncoder().encode(restorationState)
   }
 
   var shouldShowWhenCollapsed: Bool { !restorationState.containsOnlyDefaultContent }

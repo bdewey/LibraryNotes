@@ -23,7 +23,7 @@ private extension LayoutManager {
   /// - The background is `quaternarySystemFill`
   /// - A 4 point border on the left edge is filled with `blockquoteBorderColor`
   func drawBlockquotes(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
-    guard let textStorage = textStorage else {
+    guard let textStorage else {
       return
     }
 
@@ -31,7 +31,7 @@ private extension LayoutManager {
       preconditionFailure("When drawBackgroundForGlyphRange is called, the graphics context is supposed to be set by UIKit")
     }
 
-    let characterRange = self.characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
+    let characterRange = characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
     textStorage.enumerateAttribute(.blockquoteBorderColor, in: characterRange, options: []) { object, range, _ in
       guard let color = object as? UIColor else {
         return

@@ -106,7 +106,7 @@ final class LibraryNotesAppUITests: XCTestCase {
     titleTextField.tap()
     titleTextField.typeText("My Test Book")
 
-    let authorTextField = tablesQuery/*@START_MENU_TOKEN@*/.textFields["Author"]/*[[".cells[\"Author\"].textFields[\"Author\"]",".textFields[\"Author\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
+    let authorTextField = tablesQuery/*@START_MENU_TOKEN@*/ .textFields["Author"]/*[[".cells[\"Author\"].textFields[\"Author\"]",".textFields[\"Author\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
     authorTextField.tap()
     authorTextField.typeText("Brian Dewey")
     application.navigationBars["Add Book"].buttons["Next"].tap()
@@ -186,7 +186,7 @@ extension LibraryNotesAppUITests {
     line: Int = #line
   ) {
     expectation(for: predicate, evaluatedWith: object, handler: nil)
-    waitForExpectations(timeout: 5) { (error) -> Void in
+    waitForExpectations(timeout: 5) { error in
       XCTAssertNil(error)
     }
   }

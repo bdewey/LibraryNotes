@@ -1,3 +1,5 @@
+// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+
 import Foundation
 
 public extension String {
@@ -11,25 +13,23 @@ public extension String {
 
     invalidCharacters.remove("-")
 
-    let slice = self
-      .components(separatedBy: invalidCharacters)
+    let slice = components(separatedBy: invalidCharacters)
       .joined(separator: "")
       .prefix(maximumLength)
     return String(slice)
   }
 
-  mutating func sanitize() -> Void {
-    self = self.sanitized()
+  mutating func sanitize() {
+    self = sanitized()
   }
 
   func whitespaceCondensed() -> String {
-    return self.components(separatedBy: .whitespacesAndNewlines)
+    components(separatedBy: .whitespacesAndNewlines)
       .filter { !$0.isEmpty }
       .joined(separator: "-")
   }
 
-  mutating func condenseWhitespace() -> Void {
-    self = self.whitespaceCondensed()
+  mutating func condenseWhitespace() {
+    self = whitespaceCondensed()
   }
 }
-

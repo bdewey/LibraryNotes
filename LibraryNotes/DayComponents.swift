@@ -13,18 +13,18 @@ public struct DayComponents: Equatable, Comparable, Hashable {
   /// Note: This does the component extraction from the current calendar.
   public init(_ date: Date) {
     let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
-    year = components.year!
+    self.year = components.year!
     self.month = components.month!
     self.day = components.day!
   }
 
   /// Gets the Date equivalent of the components in the current calendar.
   public var date: Date {
-    return Calendar.current.date(from: dateComponents)!
+    Calendar.current.date(from: dateComponents)!
   }
 
   public static func < (lhs: DayComponents, rhs: DayComponents) -> Bool {
-    return lhs.year < rhs.year || lhs.month < rhs.month || lhs.day < rhs.day
+    lhs.year < rhs.year || lhs.month < rhs.month || lhs.day < rhs.day
   }
 
   /// Returns the number of days between two components.
@@ -65,7 +65,7 @@ extension DayComponents: LosslessStringConvertible {
   }
 
   public var description: String {
-    return [
+    [
       String(year),
       String(format: "%02d", month),
       String(format: "%02d", day),
@@ -95,6 +95,6 @@ extension DayComponents: Codable {
 // We don't need to see separate year-month-day in the debugger; the string is enough.
 extension DayComponents: CustomReflectable {
   public var customMirror: Mirror {
-    return Mirror(DayComponents.self, children: ["day": String(describing: self)])
+    Mirror(DayComponents.self, children: ["day": String(describing: self)])
   }
 }

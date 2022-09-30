@@ -66,7 +66,7 @@ final class BookImporterViewController: UIViewController {
     }
   }
 
-  private func importBooks<T>(_ bookInfo: [AugmentedBook], importRequest: BookImportRequest<T>) {
+  private func importBooks(_ bookInfo: [AugmentedBook], importRequest: BookImportRequest<some Any>) {
     delegate?.bookImporter(self, didStartImporting: bookInfo.count)
     Task {
       await bookImporter.importBooks(request: importRequest.replacingItem(bookInfo)) { [self] processed, total in

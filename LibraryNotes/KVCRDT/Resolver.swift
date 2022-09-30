@@ -18,7 +18,7 @@ extension Resolver where Self == LastWriterWinsResolver {
   static var lastWriterWins: LastWriterWinsResolver { LastWriterWinsResolver() }
 }
 
-extension Array where Element == Version {
+extension [Version] {
   func resolved(with resolver: Resolver) -> Value? {
     resolver.resolveVersions(self)
   }
