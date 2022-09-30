@@ -341,6 +341,7 @@ public final class TextEditViewController: UIViewController {
       didPerformInitialLayout = true
       textView.contentOffset.y = -textView.adjustedContentInset.top
     }
+    layoutNavigationBorderView()
   }
 
   private func adjustMargins() {
