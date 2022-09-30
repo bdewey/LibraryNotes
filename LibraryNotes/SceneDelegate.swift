@@ -174,12 +174,14 @@ extension NSUserActivity {
       Logger.sceneDelegate.trace("Window has not yet been configured; creating document browser")
       let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
       window.rootViewController = browser
-      // Set up a custom toolbar.
-      let toolbar = NSToolbar(identifier: "main")
-      toolbar.displayMode = .iconOnly
-      toolbar.delegate = toolbarDelegate
-      toolbar.allowsUserCustomization = true
-      windowScene.titlebar?.toolbar = toolbar
+      #if targetEnvironment(macCatalyst)
+        // Set up a custom toolbar.
+        let toolbar = NSToolbar(identifier: "main")
+        toolbar.displayMode = .iconOnly
+        toolbar.delegate = toolbarDelegate
+        toolbar.allowsUserCustomization = true
+        windowScene.titlebar?.toolbar = toolbar
+      #endif
     }
 
     window.makeKeyAndVisible()
