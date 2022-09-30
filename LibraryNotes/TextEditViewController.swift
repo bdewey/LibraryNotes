@@ -405,7 +405,7 @@ public final class TextEditViewController: UIViewController {
       // Case 1: The current location is currently contained in a "bold" region. Remove the delimiters.
       let delimiters = node.findNodes(where: { $0.type == .delimiter }).sorted(by: { $0.range.location < $1.range.location })
       var locationDelta = 0
-      var initialLocation = textView.selectedRange.location
+      let initialLocation = textView.selectedRange.location
       for delimiter in delimiters.reversed() {
         let delimiterVisibleRange = parsedAttributedString.range(forRawStringRange: delimiter.range)
         if delimiterVisibleRange.location < initialLocation {
