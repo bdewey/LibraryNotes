@@ -372,6 +372,7 @@ extension SceneDelegate: StudyViewControllerDelegate {
   extension NSToolbarItem.Identifier {
     static let centerItemGroups = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
     static let trailingItemGroups = NSToolbarItem.Identifier("org.brians-brain.trailing-item-groups")
+    static let review = NSToolbarItem.Identifier("org.brians-brain.review")
 
     func subidentifier(index: Int) -> NSToolbarItem.Identifier {
       NSToolbarItem.Identifier("\(rawValue)-\(index)")
@@ -401,13 +402,13 @@ extension SceneDelegate: StudyViewControllerDelegate {
 
   final class ToolbarDelegate: NSObject, NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-      Logger.sceneDelegate.trace("\(#function)")
       let groupIdentifier = NSToolbarItem.Identifier("org.brians-brain.center-item-groups")
       let groupIdentifiers = SavingTextEditViewController.centerItemGroups.indices
         .map { groupIdentifier.subidentifier(index: $0) }
         .interspersed(with: .space)
       var identifiers: [NSToolbarItem.Identifier] = [
         .toggleSidebar,
+        .review,
         .supplementarySidebarTrackingSeparatorItemIdentifier,
         .flexibleSpace,
       ]
@@ -415,6 +416,7 @@ extension SceneDelegate: StudyViewControllerDelegate {
       identifiers.append(.flexibleSpace)
       identifiers.append(.trailingItemGroups)
 
+      Logger.sceneDelegate.trace("\(#function) \(identifiers)")
       return identifiers
     }
 
@@ -428,6 +430,7 @@ extension SceneDelegate: StudyViewControllerDelegate {
       itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
       willBeInsertedIntoToolbar flag: Bool
     ) -> NSToolbarItem? {
+      Logger.sceneDelegate.trace("\(#function) -- \(itemIdentifier.rawValue)")
       if let centerItemGroupIndex = NSToolbarItem.Identifier.centerItemGroups.subIdentifierIndex(from: itemIdentifier) {
         let centerItemGroups = SavingTextEditViewController.centerItemGroups
         guard centerItemGroups.indices.contains(centerItemGroupIndex) else {
@@ -437,7 +440,13 @@ extension SceneDelegate: StudyViewControllerDelegate {
       }
       if itemIdentifier == .trailingItemGroups {
         let barButtonItem = NotebookViewController.makeNewNoteButtonItem()
-        let toolbarItem = NSToolbarItem(itemIdentifier: .trailingItemGroups, barButtonItem: barButtonItem)
+        let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+        toolbarItem.toolTip = barButtonItem.title
+        return toolbarItem
+      }
+      if itemIdentifier == .review {
+        let barButtonItem = UIBarButtonItem(title: "Review", image: UIImage(systemName: "sparkles.rectangle.stack"), target: nil, action: #selector(DocumentListViewController.performReview))
+        let toolbarItem = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
         toolbarItem.toolTip = barButtonItem.title
         return toolbarItem
       }
