@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased
+## Unreleased (2.0)
+
+### Added
+
+- A Mac app!
+
+### Changed
+
+- Refined toolbar support
+
+## [1.2.0]
 
 ### Added
 
