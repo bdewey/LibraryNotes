@@ -48,9 +48,8 @@ extension ClozePrompt: Prompt {
         .trimmingTrailingWhitespace()
     )
     if !properties.attributionMarkdown.isEmpty {
-      back.append(NSAttributedString(string: "\n\n"))
       let attribution = ParsedAttributedString(
-        string: "—" + properties.attributionMarkdown + " " + chapterAndVerse,
+        string: "\n\n—" + properties.attributionMarkdown + " " + chapterAndVerse,
         style: .plainText(textStyle: .caption1)
       )
       back.append(attribution.trimmingTrailingWhitespace())
