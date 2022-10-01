@@ -148,6 +148,7 @@ final class BookHeader: UIView {
     super.layoutSubviews()
     let frames = makeLayoutFrames(bounds: bounds)
     coverImageView.frame = frames.coverImageView
+    Logger.bookHeader.trace("BookHeader.layoutSubviews bounds = \(bounds), coverImageView = \(frames.coverImageView)")
     titleLabel.frame = frames.titleLabel
     authorLabel.frame = frames.authorLabel
     starRatingView.frame = frames.starRatingView
@@ -161,6 +162,8 @@ final class BookHeader: UIView {
     let frames = makeLayoutFrames(bounds: CGRect(origin: .zero, size: size))
     var result = size
     result.height = max(frames.imageColumnHeight, frames.infoColumnHeight)
+    assert(result.height != .infinity)
+    Logger.bookHeader.trace("BookHeader.sizeThatFits constraining size = \(size) height = \(result.height)")
     return result
   }
 
@@ -174,8 +177,35 @@ final class BookHeader: UIView {
     var tagsLabel: CGRect = .zero
     var imageColumnHeight: CGFloat = 0
     var infoColumnHeight: CGFloat = 0
+
+    /// Returns whether all of the layout frames are contained in `bounds`.
+    func areContained(in bounds: CGRect) -> Bool {
+      let keyPaths: [KeyPath<LayoutFrames, CGRect>] = [
+        \.coverImageView,
+        \.titleLabel,
+        \.authorLabel,
+        \.starRatingView,
+        \.readingHistoryButton,
+        \.readingStatusLabel,
+        \.tagsLabel,
+      ]
+      var invalidFrames: [CGRect] = []
+      for keyPath in keyPaths {
+        let frame = self[keyPath: keyPath]
+        if frame.origin.x == .infinity || frame.origin.y == .infinity || frame.size.height == .infinity || frame.size.width == .infinity {
+          Logger.bookHeader.error("Invalid frame \(frame) has infinite dimension")
+          invalidFrames.append(frame)
+        }
+        if !bounds.contains(frame) {
+          Logger.bookHeader.error("Invalid frame \(frame) is not contained in \(bounds)")
+          invalidFrames.append(frame)
+        }
+      }
+      return invalidFrames.isEmpty
+    }
   }
 
+  /// The minimum X coordinate of the content in `BookHeader`
   var minimumTextX: CGFloat = 0 {
     didSet {
       setNeedsLayout()
@@ -188,19 +218,25 @@ final class BookHeader: UIView {
     layoutArea.origin.y += padding
     layoutArea.size.height -= 2 * padding
 
-    // Trim the layout area horizontally to fit in the readableContentGuide
-    layoutArea.origin.x = max(layoutArea.origin.x, readableContentGuide.layoutFrame.origin.x)
-    layoutArea.size.width = min(layoutArea.size.width, readableContentGuide.layoutFrame.size.width)
+    // Trim the layout area horizontally to put content in an area no wider than readableContentGuide.layoutFrame.width
+    let contentWidth = min(readableContentGuide.layoutFrame.width, layoutArea.width)
+    layoutArea.origin.x += (layoutArea.width - contentWidth) / 2
+    layoutArea.size.width = contentWidth
+    assert(bounds.contains(layoutArea))
 
     if let imageSize = coverImageView.image?.size, imageSize.width > 0, imageSize.height > 0 {
       let imageWidth = ceil(layoutArea.width * imageWidthFraction)
       (frames.coverImageView, layoutArea) = layoutArea.divided(atDistance: imageWidth, from: .minXEdge)
-      frames.coverImageView.size.height = imageWidth * (imageSize.height / imageSize.width)
+      frames.coverImageView.size.height = min(imageWidth * (imageSize.height / imageSize.width), layoutArea.height)
       let originAdjustment = titleLabel.font.ascender - titleLabel.font.capHeight
       frames.coverImageView.origin.y += originAdjustment
+      frames.coverImageView.size.height -= originAdjustment
+      assert(bounds.contains(frames.coverImageView))
       layoutArea = layoutArea.inset(by: .left(padding))
     }
+    assert(bounds.contains(layoutArea))
     layoutArea = layoutArea.inset(by: .left(max(0, minimumTextX - layoutArea.minX)))
+    assert(bounds.contains(layoutArea))
     let titleSize = titleLabel.sizeThatFits(layoutArea.size)
     (frames.titleLabel, layoutArea) = layoutArea.divided(atDistance: titleSize.height, from: .minYEdge)
     layoutArea = layoutArea.inset(by: .top(padding))
@@ -209,12 +245,12 @@ final class BookHeader: UIView {
     layoutArea = layoutArea.inset(by: .top(padding))
     let starSize = starRatingView.systemLayoutSizeFitting(layoutArea.size)
     (frames.starRatingView, layoutArea) = layoutArea.divided(atDistance: starSize.height, from: .minYEdge)
-    frames.starRatingView.size.width = starSize.width
+    frames.starRatingView.size.width = min(starSize.width, layoutArea.width)
 
     // Now go from the bottom
     let buttonSize = readingHistoryButton.sizeThatFits(layoutArea.size)
     (frames.readingHistoryButton, layoutArea) = layoutArea.divided(atDistance: buttonSize.height, from: .maxYEdge)
-    frames.readingHistoryButton.size.width = buttonSize.width
+    frames.readingHistoryButton.size.width = min(buttonSize.width, layoutArea.width)
     layoutArea = layoutArea.inset(by: .bottom(padding))
 
     let readLabelSize = readingStatusLabel.sizeThatFits(layoutArea.size)
@@ -228,6 +264,7 @@ final class BookHeader: UIView {
     frames.imageColumnHeight = frames.coverImageView.maxY + padding
     frames.infoColumnHeight = (frames.readingHistoryButton.maxY - layoutArea.height) + padding
 
+    assert(frames.areContained(in: bounds))
     return frames
   }
 
