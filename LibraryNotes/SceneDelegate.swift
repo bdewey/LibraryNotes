@@ -13,7 +13,7 @@ public extension UTType {
 private extension Logger {
   static let sceneDelegate: Logger = {
     var logger = Logger(label: "org.brians-brain.LibraryNotes.SceneDelegate")
-    logger.logLevel = .trace
+    logger.logLevel = .debug
     return logger
   }()
 }
@@ -161,17 +161,17 @@ extension NSUserActivity {
     var isConfigured = false
 
     if let stateRestorationActivity = session.stateRestorationActivity {
-      Logger.sceneDelegate.trace("Attempting to restore state activity: \(stateRestorationActivity.activityType)")
+      Logger.sceneDelegate.debug("Attempting to restore state activity: \(stateRestorationActivity.activityType)")
       isConfigured = isConfigured || configureWindow(window, userActivity: stateRestorationActivity)
     }
     for userActivity in connectionOptions.userActivities {
       Logger.sceneDelegate.trace("Will consider connectionOptions.userActivity \(userActivity.activityType), isConfigured = \(isConfigured)")
       isConfigured = isConfigured || configureWindow(window, userActivity: userActivity)
-      Logger.sceneDelegate.trace("Did consider connectionOptions.userActivity \(userActivity.activityType), isConfigured = \(isConfigured)")
+      Logger.sceneDelegate.debug("Did consider connectionOptions.userActivity \(userActivity.activityType), isConfigured = \(isConfigured)")
     }
 
     if !isConfigured {
-      Logger.sceneDelegate.trace("Window has not yet been configured; creating document browser")
+      Logger.sceneDelegate.debug("Window has not yet been configured; creating document browser")
       let browser = DocumentBrowserViewController(forOpening: [.kvcrdt, .libnotes])
       window.rootViewController = browser
       #if targetEnvironment(macCatalyst)
