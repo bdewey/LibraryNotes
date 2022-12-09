@@ -3,6 +3,7 @@
 import SnapKit
 import UIKit
 
+@MainActor
 public protocol StarRatingViewDelegate: AnyObject {
   func starRatingView(_ view: StarRatingView, didChangeRating rating: Int)
 }

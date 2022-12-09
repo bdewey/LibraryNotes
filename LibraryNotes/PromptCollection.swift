@@ -23,10 +23,13 @@ public struct PromptType: RawRepresentable, Hashable {
   /// - parameter templateClass: The PromptCollection associated with this type.
   public init(rawValue: String, class templateClass: PromptCollection.Type) {
     self.rawValue = rawValue
-    PromptType.classMap[rawValue] = templateClass
+    Task { @MainActor in
+      PromptType.classMap[rawValue] = templateClass
+    }
   }
 
   /// Mapping between rawValue and PromptCollection classes.
+  @MainActor
   public private(set) static var classMap = [String: PromptCollection.Type]()
 }
 

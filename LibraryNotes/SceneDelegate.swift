@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Algorithms
+@preconcurrency import KeyValueCRDT
 import Logging
 import UIKit
 import UniformTypeIdentifiers
@@ -135,6 +136,7 @@ extension NSUserActivity {
   }
 }
 
+@MainActor
 @objc final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
   var window: UIWindow?
   var studyWindow: UIWindow?

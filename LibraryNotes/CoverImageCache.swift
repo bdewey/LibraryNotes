@@ -5,6 +5,7 @@ import Logging
 import UIKit
 
 /// A simple cache of book cover images.
+@MainActor
 public final class CoverImageCache {
   /// Designated initializer.
   /// - parameter database: The database that stores books.

@@ -3,7 +3,7 @@
 import BookKit
 import Combine
 import Foundation
-import KeyValueCRDT
+@preconcurrency import KeyValueCRDT
 import LinkPresentation
 import Logging
 import ObjectiveCTextStorageWrapper

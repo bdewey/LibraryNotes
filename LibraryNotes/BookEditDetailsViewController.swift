@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import BookKit
+@preconcurrency import BookKit
 import Combine
 import Logging
 import SnapKit
@@ -15,6 +15,7 @@ private extension Logger {
   }()
 }
 
+@MainActor
 public protocol BookEditDetailsViewControllerDelegate: AnyObject {
   /// The person selected a book.
   func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?)
@@ -443,7 +444,7 @@ extension BookEditDetailsViewController: BarcodeScannerViewControllerDelegate {
   }
 }
 
-private struct SearchResultsViewModel: Hashable, Identifiable {
+private struct SearchResultsViewModel: Hashable, Identifiable, Sendable {
   var id = UUID()
   var book: Book
   var coverImage: UIImage?

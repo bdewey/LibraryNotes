@@ -4,12 +4,13 @@ import AVFoundation
 import Foundation
 import UIKit
 
+@MainActor
 public protocol PromptViewDelegate: AnyObject {
   func promptViewDidRevealAnswer(_ promptView: PromptView)
 }
 
 @objc public protocol PromptViewActions {
-  func revealAnswer()
+  @MainActor func revealAnswer()
 }
 
 open class PromptView: UIControl {

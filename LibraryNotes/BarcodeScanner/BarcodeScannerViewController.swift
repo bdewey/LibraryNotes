@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import AVFoundation
+@preconcurrency import AVFoundation
 import Combine
 import Logging
 import SwiftUI
@@ -48,7 +48,7 @@ public final class BarcodeScannerViewController: UIViewController {
     if let startScanningTask {
       return try await startScanningTask.value
     }
-    let startScanningTask = Task { () throws -> Bool in
+    let startScanningTask = Task { @MainActor in
       let hasPermission = await checkCapturePermission()
       if !hasPermission {
         showPermissionAlert()

@@ -30,6 +30,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
   }
 }
 
+@MainActor
 private enum Registration {
   static func makeBookRegistration(
     coverImageCache: CoverImageCache,

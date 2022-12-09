@@ -3,6 +3,7 @@
 import UIKit
 
 /// View controllers that we show in the detail screen of the NotebookViewController conform to this protocol.
+@MainActor
 public protocol NotebookSecondaryViewController: UIViewController {
   /// A string identifying the type of detail screen (editor, quotes)
   static var notebookDetailType: String { get }
@@ -16,6 +17,7 @@ public protocol NotebookSecondaryViewController: UIViewController {
 }
 
 /// Maintains a mapping between secondary view controller "type strings" and actual types.
+@MainActor
 public struct NotebookSecondaryViewControllerRegistry {
   private let typeMapping: [String: NotebookSecondaryViewController.Type]
 

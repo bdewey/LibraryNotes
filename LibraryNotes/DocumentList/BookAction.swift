@@ -28,6 +28,7 @@ struct BookAction {
   var handler: () throws -> Void
 
   /// Returns the action as a `UIContextualAction`, if possible.
+  @MainActor
   func asContextualAction() -> UIContextualAction? {
     guard availableAsSwipeAction else { return nil }
     let action = UIContextualAction(style: destructive ? .destructive : .normal, title: title) { _, _, completion in
@@ -44,6 +45,7 @@ struct BookAction {
     return action
   }
 
+  @MainActor
   func asAction() -> UIAction {
     UIAction(title: title ?? "", image: image, attributes: destructive ? [.destructive] : []) { _ in
       do {
@@ -55,6 +57,7 @@ struct BookAction {
   }
 
   /// Returns an action for deleting the book represented by `viewProperties`
+  @MainActor
   static func deleteItem(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let metadata = database.bookMetadata(identifier: noteIdentifier) else { return nil }
     return BookAction(title: "Delete", image: UIImage(systemName: "trash"), destructive: true) {
@@ -71,6 +74,7 @@ struct BookAction {
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.read` section of the collection.
+  @MainActor
   static func moveItemToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
           viewProperties.bookSection != .read
@@ -95,6 +99,7 @@ struct BookAction {
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.currentlyReading` section of the collection.
+  @MainActor
   static func moveItemToCurrentlyReading(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
           viewProperties.bookSection != .currentlyReading
@@ -119,6 +124,7 @@ struct BookAction {
   }
 
   /// Returns an action for moving the book represented by `viewProperties` to the `.wantToRead` section of the collection.
+  @MainActor
   static func moveItemToWantToRead(_ noteIdentifier: Note.Identifier, in database: NoteDatabase) -> BookAction? {
     guard let viewProperties = database.bookMetadata(identifier: noteIdentifier),
           viewProperties.bookSection != .wantToRead

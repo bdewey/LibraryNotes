@@ -13,6 +13,7 @@ public struct PromptIdentifier: Hashable, Codable {
 
 /// A specific thing to recall.
 public protocol Prompt {
+  @MainActor
   /// Returns a view that can quiz a person about the thing to remember.
   ///
   /// - parameter document: The document the card came from. Can be used for things like

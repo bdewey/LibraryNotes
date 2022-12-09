@@ -4,7 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import GRDB
-import KeyValueCRDT
+@preconcurrency import KeyValueCRDT
 import Logging
 import os
 import SpacedRepetitionScheduler
@@ -71,11 +71,11 @@ extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
+@MainActor
 public final class NoteDatabase {
   public typealias IOCompletionHandler = (Bool) -> Void
 
   /// Initializes and opens the database stored at `fileURL`
-  @MainActor
   public init(fileURL: URL, authorDescription: String) async throws {
     self.keyValueDocument = try UIKeyValueDocument(
       fileURL: fileURL,
@@ -625,7 +625,7 @@ private extension NoteDatabase {
   }
 }
 
-public struct NoteUpdatePayload {
+public struct NoteUpdatePayload: Sendable {
   public init(noteIdentifier: String) {
     self.noteIdentifier = noteIdentifier
   }
@@ -689,6 +689,7 @@ public struct NoteUpdatePayload {
       .dictionaryMap { $0 }
   }
 
+  @MainActor
   public func asNote() throws -> Note? {
     guard let metadata = updates[.metadata]?.bookNoteMetadata else {
       return nil

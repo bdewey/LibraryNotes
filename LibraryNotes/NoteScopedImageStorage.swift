@@ -7,6 +7,7 @@ import UIKit
 import UniformTypeIdentifiers
 
 /// Stores and retrieves images in a ``NoteDatabase`` that are scoped to a specific note.
+@MainActor
 public struct NoteScopedImageStorage {
   /// The note for which the images are stored.
   public let identifier: Note.Identifier

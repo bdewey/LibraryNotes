@@ -6,7 +6,7 @@ import SnapKit
 import TextMarkupKit
 import UIKit
 
-public struct AttributedQuote: Identifiable, Hashable {
+public struct AttributedQuote: Identifiable, Hashable, Sendable {
   public var id: String { "\(noteId):\(key)" }
   public var noteId: String
   public var key: String

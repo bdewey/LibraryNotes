@@ -4,6 +4,7 @@ import Logging
 import UIKit
 import WebKit
 
+@MainActor
 public protocol WebScrapingViewControllerDelegate: AnyObject {
   func webScrapingViewController(_ viewController: WebScrapingViewController, didScrapeMarkdown: String)
   func webScrapingViewControllerDidCancel(_ viewController: WebScrapingViewController)

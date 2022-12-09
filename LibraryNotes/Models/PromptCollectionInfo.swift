@@ -24,6 +24,7 @@ public extension PromptCollectionInfo {
     self.promptStatistics = Array(repeating: PromptStatistics(), count: promptCollection.prompts.count)
   }
 
+  @MainActor
   func asPromptCollection() throws -> PromptCollection {
     guard let klass = PromptType.classMap[type], let collection = klass.init(rawValue: rawValue) else {
       throw NoteDatabaseError.unknownPromptType
