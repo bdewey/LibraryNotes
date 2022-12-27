@@ -119,7 +119,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = TextEditViewController(imageStorage: imageStorage)
+    let viewController = ParsingTextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
@@ -253,8 +253,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         customizationIdentifier: "format",
         representativeItem: UIBarButtonItem(title: "Format", image: UIImage(systemName: "bold.italic.underline")),
         items: [
-          TextEditViewController.toggleBoldfaceBarButtonItem,
-          TextEditViewController.toggleItalicsBarButtonItem,
+          .toggleBoldface,
+          .toggleItalics,
         ]
       ),
     ]
@@ -306,14 +306,14 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     guard hasUnsavedChanges else {
       return
     }
-    note.updateMarkdown(textEditViewController.parsedAttributedString.rawString)
+    note.updateMarkdown(textEditViewController.markdown)
     tryUpdateNote()
     hasUnsavedChanges = false
   }
 
   /// Saves the current contents to the database, whether or not hasUnsavedChanges is true.
   private func forceSave() throws {
-    note.updateMarkdown(textEditViewController.parsedAttributedString.rawString)
+    note.updateMarkdown(textEditViewController.markdown)
     try saveNote()
     hasUnsavedChanges = false
   }
@@ -322,14 +322,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private func insertImageData(_ imageData: Data, type: UTType) {
     do {
       try forceSave()
-      let reference: String = try imageStorage.storeImageData(imageData, type: type)
-      let markdown = "\n\n\(reference)\n\n"
-      let initialRange = textEditViewController.selectedRange
-      var rawRange = textEditViewController.parsedAttributedString.rawStringRange(forRange: initialRange)
-      rawRange.location += markdown.utf16.count
-      rawRange.length = 0
-      textEditViewController.textView.textStorage.replaceCharacters(in: initialRange, with: markdown)
-      textEditViewController.selectedRange = textEditViewController.parsedAttributedString.range(forRawStringRange: rawRange)
+      try textEditViewController.insertImageData(imageData, type: type)
     } catch {
       Logger.textSaving.error("Could not save initial image: \(error)")
     }
