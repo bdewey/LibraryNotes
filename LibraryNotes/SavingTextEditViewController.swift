@@ -119,7 +119,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private lazy var textEditViewController: TextEditViewController = {
-    let viewController = ParsingTextEditViewController(imageStorage: imageStorage)
+    let viewController: TextEditViewController
+    if UserDefaults.standard.enableExperimentalFeatures {
+      viewController = RichTextEditViewController(imageStorage: imageStorage)
+    } else {
+      viewController = ParsingTextEditViewController(imageStorage: imageStorage)
+    }
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange

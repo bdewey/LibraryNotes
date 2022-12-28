@@ -19,7 +19,10 @@ public protocol TextEditViewController: UIViewController {
   var extendedNavigationHeaderView: UIView? { get set }
   func editEndOfDocument()
   var selectedRange: NSRange { get set }
+  var selectedRawTextRange: NSRange { get set }
   func insertImageData(_ imageData: Data, type: UTType) throws
+  var autoFirstResponder: Bool { get set }
+  var delegate: TextEditViewControllerDelegate? { get set }
 }
 
 @objc protocol TextEditingFormattingActions {
