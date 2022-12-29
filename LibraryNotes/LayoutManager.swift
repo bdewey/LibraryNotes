@@ -38,7 +38,9 @@ private extension LayoutManager {
       }
       logger.debug("Drawing a vertical bar")
       let verticalBarGlyphRange = glyphRange(forCharacterRange: range, actualCharacterRange: nil)
-      enumerateLineFragments(forGlyphRange: verticalBarGlyphRange) { rect, _, _, _, _ in
+      enumerateLineFragments(forGlyphRange: verticalBarGlyphRange) { rect, usedRect, _, _, _ in
+        // trim the vertical range of `rect` to `usedRect` to make sure we don't draw over paragraph spacing.
+        let rect = CGRect(x: rect.origin.x, y: usedRect.origin.y, width: rect.width, height: usedRect.height)
         var verticalBarRect = rect.offsetBy(dx: origin.x, dy: origin.y)
         UIColor.quaternarySystemFill.setFill()
         context.fill(verticalBarRect)

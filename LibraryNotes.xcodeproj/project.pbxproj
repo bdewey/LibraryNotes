@@ -224,6 +224,7 @@
 		D31BE3FF295B6BBE00AAEA93 /* RichTextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichTextEditViewController.swift; sourceTree = "<group>"; };
 		D31BE401295B781300AAEA93 /* TextEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditViewController.swift; sourceTree = "<group>"; };
 		D31BE403295B787900AAEA93 /* UIBarButtonItem+EditActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIBarButtonItem+EditActions.swift"; sourceTree = "<group>"; };
+		D31BE405295DE00200AAEA93 /* TextMarkupKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TextMarkupKit; path = ../Documents/GitHub/TextMarkupKit; sourceTree = "<group>"; };
 		D31D7CDF2598CCC70083AB05 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SchedulingParameters+Standard.swift"; sourceTree = "<group>"; };
 		D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+DictionaryExtensions.swift"; sourceTree = "<group>"; };
@@ -468,6 +469,7 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
+				D31BE405295DE00200AAEA93 /* TextMarkupKit */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,

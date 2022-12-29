@@ -32,6 +32,8 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
     view.isFindInteractionEnabled = true
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     view.keyboardDismissMode = .onDragWithAccessory
+    view.allowsEditingTextAttributes = true
+    view.usesStandardTextScaling = true
     return view
   }()
 
@@ -163,7 +165,9 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
 
 private extension ParsedAttributedString.Style {
   static let defaultRichTextEditing: ParsedAttributedString.Style = {
-    var style = GrailDiaryGrammar.defaultEditingStyle().removingDelimiters()
+    var attributes = AttributedStringAttributesDescriptor.standardAttributes()
+    attributes.paragraphSpacing = 20
+    var style = GrailDiaryGrammar.defaultEditingStyle(defaultAttributes: attributes).removingDelimiters()
     style.formatters[.blockquote] = AnyParsedAttributedStringFormatter {
       $0.italic = true
       $0.blockquoteBorderColor = UIColor.systemOrange
@@ -173,6 +177,7 @@ private extension ParsedAttributedString.Style {
 
   func removingDelimiters() -> ParsedAttributedString.Style {
     var copy = self
+    copy.formatters[.blankLine] = .remove
     copy.formatters[.delimiter] = .remove
     copy.formatters[.clozeHint] = .remove
     return copy
