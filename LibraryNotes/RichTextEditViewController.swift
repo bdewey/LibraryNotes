@@ -84,11 +84,10 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
 
   public var markdown: String {
     get {
-      textView.text
+      textView.attributedText.makeMiniMarkdown()
     }
     set {
-      let storage = ParsedAttributedString(string: newValue, style: .defaultRichTextEditing.renderingImages(from: imageStorage))
-      textView.attributedText = storage
+      textView.attributedText = NSAttributedString(miniMarkdown: newValue, style: .defaultRichTextEditing.renderingImages(from: imageStorage))
     }
   }
 
@@ -160,26 +159,5 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
   public func insertImageData(_ imageData: Data, type: UTType) throws {
     #warning("Not implemented")
     fatalError()
-  }
-}
-
-private extension ParsedAttributedString.Style {
-  static let defaultRichTextEditing: ParsedAttributedString.Style = {
-    var attributes = AttributedStringAttributesDescriptor.standardAttributes()
-    attributes.paragraphSpacing = 20
-    var style = GrailDiaryGrammar.defaultEditingStyle(defaultAttributes: attributes).removingDelimiters()
-    style.formatters[.blockquote] = AnyParsedAttributedStringFormatter {
-      $0.italic = true
-      $0.blockquoteBorderColor = UIColor.systemOrange
-    }
-    return style
-  }()
-
-  func removingDelimiters() -> ParsedAttributedString.Style {
-    var copy = self
-    copy.formatters[.blankLine] = .remove
-    copy.formatters[.delimiter] = .remove
-    copy.formatters[.clozeHint] = .remove
-    return copy
   }
 }
