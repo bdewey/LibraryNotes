@@ -57,15 +57,32 @@ public extension NSAttributedString {
   /// Constructs a mini-markdown string that would yield the formatting present in this attributed string.
   func makeMiniMarkdown() -> String {
     var results = ""
-    let tokenizer = NLTokenizer(unit: .paragraph)
-    tokenizer.string = string
-    tokenizer.enumerateTokens(in: string.startIndex ..< string.endIndex) { paragraphRange, _ in
-      if !results.isEmpty {
-        results.append("\n")
+    enumerateAttributes(in: NSRange(location: 0, length: length)) { attributes, range, _ in
+      if attributes.symbolicTraits.contains(.traitBold) {
+        results.append("**")
+      } else if attributes.symbolicTraits.contains(.traitItalic) {
+        results.append("_")
       }
-      results.append(contentsOf: string[paragraphRange])
-      return true
+      let foo = self.string[range]
+      var str = String(utf16CodeUnits: foo, count: foo.count)
+      str.replace("\n", with: "\n\n")
+      results += str
+      if attributes.symbolicTraits.contains(.traitBold) {
+        results.append("**")
+      } else if attributes.symbolicTraits.contains(.traitItalic) {
+        results.append("_")
+      }
     }
     return results
+  }
+}
+
+private extension [NSAttributedString.Key: Any] {
+  var symbolicTraits: UIFontDescriptor.SymbolicTraits {
+    if let font = self[.font] as? UIFont {
+      return font.fontDescriptor.symbolicTraits
+    } else {
+      return .init()
+    }
   }
 }

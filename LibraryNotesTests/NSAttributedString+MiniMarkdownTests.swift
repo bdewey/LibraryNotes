@@ -26,4 +26,11 @@ final class NSAttributedString_MiniMarkdownTests: XCTestCase {
     XCTAssertEqual(attributedString.string, "This is the first paragraph. This is part of the first paragraph.\nAnd this is the second paragraph.")
     XCTAssertEqual(attributedString.makeMiniMarkdown(), "This is the first paragraph. This is part of the first paragraph.\n\nAnd this is the second paragraph.")
   }
+
+  func testSimpleInlineFormatting() {
+    let miniMarkdown = "This string has **bold** and *italic* text."
+    let attributedString = NSAttributedString(miniMarkdown: miniMarkdown)
+    XCTAssertEqual(attributedString.string, "This string has bold and italic text.")
+    XCTAssertEqual(attributedString.makeMiniMarkdown(), "This string has **bold** and _italic_ text.")
+  }
 }
