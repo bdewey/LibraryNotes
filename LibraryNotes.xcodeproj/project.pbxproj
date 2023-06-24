@@ -147,6 +147,7 @@
 		D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBD2662F51C001289EC /* BookImporter.swift */; };
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */; };
+		D3F8A46A2975AAE100D4A929 /* LibraryNotesTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F8A4692975AAE100D4A929 /* LibraryNotesTextView.swift */; };
 		D3FA025026C985FE001A5A4C /* CoverImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA024F26C985FE001A5A4C /* CoverImageCache.swift */; };
 		D3FA025226CCDD9F001A5A4C /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA025126CCDD9F001A5A4C /* TestError.swift */; };
 		D3FA025626CDDD58001A5A4C /* BookEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FA025526CDDD58001A5A4C /* BookEditView.swift */; };
@@ -335,6 +336,7 @@
 		D3F4EDBD2662F51C001289EC /* BookImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookImporter.swift; sourceTree = "<group>"; };
 		D3F4EDBF266515E1001289EC /* BookHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookHeader.swift; sourceTree = "<group>"; };
 		D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationMimeType.swift; sourceTree = "<group>"; };
+		D3F8A4692975AAE100D4A929 /* LibraryNotesTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryNotesTextView.swift; sourceTree = "<group>"; };
 		D3FA024F26C985FE001A5A4C /* CoverImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverImageCache.swift; sourceTree = "<group>"; };
 		D3FA025126CCDD9F001A5A4C /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestError.swift; sourceTree = "<group>"; };
 		D3FA025526CDDD58001A5A4C /* BookEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookEditView.swift; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 				D339C6FD21EB928700924178 /* QuotePrompt.swift */,
 				D3C0B5DB2650247900A33CCA /* QuotesViewController.swift */,
 				D31BE3FF295B6BBE00AAEA93 /* RichTextEditViewController.swift */,
+				D3F8A4692975AAE100D4A929 /* LibraryNotesTextView.swift */,
 				D30B0244229EB88900F3B459 /* SavingTextEditViewController.swift */,
 				D311778925AA384E00E473FD /* SceneDelegate.swift */,
 				D32215EE26C41108000BA772 /* SchedulingParameters+Standard.swift */,
@@ -804,6 +807,7 @@
 				D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */,
 				D3FA025626CDDD58001A5A4C /* BookEditView.swift in Sources */,
 				D30B0245229EB88900F3B459 /* SavingTextEditViewController.swift in Sources */,
+				D3F8A46A2975AAE100D4A929 /* LibraryNotesTextView.swift in Sources */,
 				D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */,
 				D311778A25AA384E00E473FD /* SceneDelegate.swift in Sources */,
 				D32215F526C413D3000BA772 /* ContentIdentifier.swift in Sources */,

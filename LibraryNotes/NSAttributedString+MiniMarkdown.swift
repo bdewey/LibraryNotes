@@ -18,6 +18,14 @@ public extension ParsedAttributedString.Style {
     style.formatters[.blankLine] = .remove
     style.formatters[.delimiter] = .remove
     style.formatters[.clozeHint] = .remove
+    style.formatters[.softTab] = .unselectable
+    style.formatters[.orderedListNumber] = .unselectable
+    style.formatters[.unorderedListOpening] = .unselectable
+    style.formatters[.list] = AnyParsedAttributedStringFormatter {
+      $0.listMarkers = [.decimal]
+      $0.firstLineHeadIndent = 0
+      $0.headIndent = 0
+    }
     return style
   }()
 }
@@ -51,6 +59,8 @@ public extension NSAttributedString {
   /// Construct an `NSAttributedString` from a plain-text Mini-Markdown `String`.
   convenience init(miniMarkdown: String, style: ParsedAttributedString.Style = .defaultRichTextEditing) {
     let parsedAttributedString = ParsedAttributedString(string: miniMarkdown, style: style)
+    print(parsedAttributedString.rawString.parsedContents)
+    print(parsedAttributedString)
     self.init(attributedString: parsedAttributedString)
   }
 

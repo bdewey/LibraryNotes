@@ -26,14 +26,14 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
     layoutManager.addTextContainer(textContainer)
     let storage = NSTextStorage()
     storage.addLayoutManager(layoutManager)
-    let view = UITextView(frame: .zero, textContainer: textContainer)
+//    let view = UITextView(usingTextLayoutManager: true)
+    let view = LibraryNotesTextView(frame: .zero, textContainer: textContainer)
     view.backgroundColor = .grailBackground
     view.accessibilityIdentifier = "edit-document-view"
     view.isFindInteractionEnabled = true
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     view.keyboardDismissMode = .onDragWithAccessory
     view.allowsEditingTextAttributes = true
-    view.usesStandardTextScaling = true
     return view
   }()
 
@@ -82,12 +82,18 @@ public final class RichTextEditViewController: UIViewController, TextEditViewCon
     )
   }
 
+  public var useStandardMarkdown = false
+
   public var markdown: String {
     get {
       textView.attributedText.makeMiniMarkdown()
     }
     set {
-      textView.attributedText = NSAttributedString(miniMarkdown: newValue, style: .defaultRichTextEditing.renderingImages(from: imageStorage))
+      if useStandardMarkdown, let attributedString = try? AttributedString(markdown: newValue) {
+        textView.attributedText = NSAttributedString(attributedString)
+      } else {
+        textView.attributedText = NSAttributedString(miniMarkdown: newValue, style: .defaultRichTextEditing.renderingImages(from: imageStorage))
+      }
     }
   }
 
