@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -176,14 +176,14 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D35C8BC2259E4BF200A92CEB /* Embed App Extensions */ = {
+		D35C8BC2259E4BF200A92CEB /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
 			);
-			name = "Embed App Extensions";
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -631,7 +631,7 @@
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
 				D3DC5EBD20EC9B0100F0B74B /* Resources */,
 				D32A1BAA229D8A6200B78576 /* Embed Frameworks */,
-				D35C8BC2259E4BF200A92CEB /* Embed App Extensions */,
+				D35C8BC2259E4BF200A92CEB /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -681,8 +681,9 @@
 		D3DC5EB720EC9B0100F0B74B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				BuildIndependentTargetsInParallel = YES;
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1220;
+				LastUpgradeCheck = 1500;
 				ORGANIZATIONNAME = "Brian's Brain";
 				TargetAttributes = {
 					D3C6112E2715FFB0007F8732 = {
@@ -995,6 +996,7 @@
 			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -1029,6 +1031,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -1058,6 +1061,7 @@
 			baseConfigurationReference = D3558D7825D9AFB700746600 /* Api.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -1092,6 +1096,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1119,7 +1124,6 @@
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 107;
-				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -1150,7 +1154,6 @@
 				CODE_SIGN_ENTITLEMENTS = LibraryNotes/CommonplaceBookApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 107;
-				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
