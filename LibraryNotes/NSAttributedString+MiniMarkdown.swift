@@ -18,14 +18,10 @@ public extension ParsedAttributedString.Style {
     style.formatters[.blankLine] = .remove
     style.formatters[.delimiter] = .remove
     style.formatters[.clozeHint] = .remove
-    style.formatters[.softTab] = .unselectable
-    style.formatters[.orderedListNumber] = .unselectable
-    style.formatters[.unorderedListOpening] = .unselectable
-    style.formatters[.list] = AnyParsedAttributedStringFormatter {
-      $0.listMarkers = [.decimal]
-      $0.firstLineHeadIndent = 0
-      $0.headIndent = 0
-    }
+    style.formatters[.softTab] = .remove
+    style.formatters[.orderedListNumber] = .remove
+    style.formatters[.unorderedListOpening] = .remove
+    style.formatters[.list] = AnyParsedAttributedStringFormatter(ListStyleFormatter())
     return style
   }()
 }
@@ -48,6 +44,28 @@ struct RemoveNewlineFormatter: ParsedAttributedStringFormatter {
       replacement[index] = .space
     }
     return (currentAttributes, replacement)
+  }
+}
+
+struct ListStyleFormatter: ParsedAttributedStringFormatter {
+  func formatNode(
+    _ node: SyntaxTreeNode,
+    in buffer: SafeUnicodeBuffer,
+    at offset: Int,
+    currentAttributes: AttributedStringAttributesDescriptor
+  ) -> (attributes: AttributedStringAttributesDescriptor, replacementCharacters: [unichar]?) {
+    var attributes = currentAttributes
+    attributes.firstLineHeadIndent = 0
+    attributes.headIndent = 0
+    switch node[ListTypeKey.self] {
+    case .ordered:
+      attributes.listMarkers.append(.decimal)
+    case .unordered:
+      attributes.listMarkers.append(.circle)
+    case .none:
+      break
+    }
+    return (attributes, nil)
   }
 }
 
