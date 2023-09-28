@@ -3,6 +3,7 @@
 import CommonCrypto
 import Foundation
 import Logging
+import os
 import SpacedRepetitionScheduler
 
 /// Extensible enum for the different types of prompts.
@@ -23,11 +24,21 @@ public struct PromptType: RawRepresentable, Hashable {
   /// - parameter templateClass: The PromptCollection associated with this type.
   public init(rawValue: String, class templateClass: PromptCollection.Type) {
     self.rawValue = rawValue
-    PromptType.classMap[rawValue] = templateClass
+    PromptType.protectedClassMap.withLock { classMap in
+      classMap[rawValue] = templateClass
+    }
   }
 
   /// Mapping between rawValue and PromptCollection classes.
-  public private(set) static var classMap = [String: PromptCollection.Type]()
+  public static var classMap: [String: PromptCollection.Type] {
+    get {
+      protectedClassMap.withLock { value in
+        return value
+      }
+    }
+  }
+
+  private static let protectedClassMap = OSAllocatedUnfairLock<[String: PromptCollection.Type]>(initialState: [:])
 }
 
 /// A PromptCollection is a serializable thing that knows how to generate one or more Prompts.

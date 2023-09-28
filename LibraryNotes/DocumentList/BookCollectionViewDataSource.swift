@@ -31,6 +31,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
 }
 
 private enum Registration {
+  @MainActor
   static func makeBookRegistration(
     coverImageCache: CoverImageCache,
     database: NoteDatabase
@@ -49,6 +50,7 @@ private enum Registration {
     }
   }
 
+  @MainActor
   static func makePageRegistration(
     coverImageCache: CoverImageCache,
     database: NoteDatabase
@@ -78,6 +80,7 @@ private enum Registration {
     }
   }
 
+  @MainActor
   static func makeHeaderRegistration() -> UICollectionView.CellRegistration<UICollectionViewListCell, BookCollectionViewItem> {
     UICollectionView.CellRegistration<UICollectionViewListCell, BookCollectionViewItem> { cell, _, item in
       guard let headerText = item.headerText else { return }

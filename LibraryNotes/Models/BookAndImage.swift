@@ -1,12 +1,12 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import BookKit
+@preconcurrency import BookKit
 import Foundation
 import Logging
 
 // TODO: Move this to BookKit
 /// A book and its cover image.
-public struct BookAndImage {
+public struct BookAndImage: Sendable {
   public var book: AugmentedBook
   public var image: TypedData?
 

@@ -6,6 +6,7 @@ import Foundation
 import KeyValueCRDT
 import LinkPresentation
 import Logging
+import MainOffender
 import ObjectiveCTextStorageWrapper
 import SnapKit
 import TextMarkupKit
@@ -188,8 +189,11 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     addChild(textEditViewController)
     textEditViewController.didMove(toParent: self)
     autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-      if self?.hasUnsavedChanges ?? false { Logger.textSaving.debug("SavingTextEditViewController: autosave") }
-      self?.saveIfNeeded()
+      guard let self else { return }
+      MainActor.runUnsafely {
+        if self.hasUnsavedChanges { Logger.textSaving.debug("SavingTextEditViewController: autosave") }
+        self.saveIfNeeded()
+      }
     })
     navigationItem.largeTitleDisplayMode = .never
   }
@@ -375,7 +379,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
 }
 
 extension SavingTextEditViewController: NotebookSecondaryViewController {
-  static var notebookDetailType: String { "SavingTextEditViewController" }
+  nonisolated static var notebookDetailType: String { "SavingTextEditViewController" }
 
   func userActivityData() throws -> Data {
     try JSONEncoder().encode(restorationState)

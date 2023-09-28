@@ -103,6 +103,7 @@
 		D380C98926D28CF200451943 /* BarcodeScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98826D28CF200451943 /* BarcodeScannerViewController.swift */; };
 		D380C98C26D28D4100451943 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98B26D28D4100451943 /* CameraCaptureView.swift */; };
 		D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98D26D28D5F00451943 /* CaptureSessionManager.swift */; };
+		D387D27A2AC5130600B5858F /* MainOffender in Frameworks */ = {isa = PBXBuildFile; productRef = D387D2792AC5130600B5858F /* MainOffender */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
 		D38A16E526F6544C00C04692 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D38A16E426F6544C00C04692 /* GRDB */; };
@@ -352,6 +353,7 @@
 				D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */,
 				D358CC422688DC6D00C991DB /* BookKit in Frameworks */,
 				D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */,
+				D387D27A2AC5130600B5858F /* MainOffender in Frameworks */,
 				D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */,
 				D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */,
 			);
@@ -650,6 +652,7 @@
 				D3D16CAA26F641B7004059E0 /* CodableCSV */,
 				D38A16E426F6544C00C04692 /* GRDB */,
 				D3DAF6012777936D0055FA5F /* Algorithms */,
+				D387D2792AC5130600B5858F /* MainOffender */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */;
@@ -730,6 +733,7 @@
 				D3D16CA926F641B7004059E0 /* XCRemoteSwiftPackageReference "CodableCSV" */,
 				D38A16E326F6544C00C04692 /* XCRemoteSwiftPackageReference "GRDB" */,
 				D3DAF6002777936D0055FA5F /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+				D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -1052,6 +1056,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -1110,6 +1115,7 @@
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -1139,6 +1145,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				TEST_HOST = "";
@@ -1169,6 +1176,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				TEST_HOST = "";
@@ -1298,6 +1306,14 @@
 				minimumVersion = 0.3.0;
 			};
 		};
+		D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mattmassicotte/MainOffender";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
 		D38A16E326F6544C00C04692 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/bdewey/GRDB.swift";
@@ -1376,6 +1392,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */;
 			productName = KeyValueCRDT;
+		};
+		D387D2792AC5130600B5858F /* MainOffender */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */;
+			productName = MainOffender;
 		};
 		D38A16E426F6544C00C04692 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;

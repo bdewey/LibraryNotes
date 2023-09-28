@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 /// An item in the book collection view.
-enum BookCollectionViewItem: Hashable, CustomStringConvertible {
+enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   /// The header for a section of books.
   case header(BookSection, Int)
 

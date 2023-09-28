@@ -3,9 +3,10 @@
 import UIKit
 
 /// View controllers that we show in the detail screen of the NotebookViewController conform to this protocol.
+@MainActor
 public protocol NotebookSecondaryViewController: UIViewController {
   /// A string identifying the type of detail screen (editor, quotes)
-  static var notebookDetailType: String { get }
+  nonisolated static var notebookDetailType: String { get }
 
   func userActivityData() throws -> Data
 
@@ -34,6 +35,7 @@ public struct NotebookSecondaryViewControllerRegistry {
   ])
 
   /// Builds a secondary view controller give its serialized data.
+  @MainActor
   public func reconstruct(
     type typeName: String,
     data: Data,

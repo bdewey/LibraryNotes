@@ -7,6 +7,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
+@MainActor
 protocol BookImporterViewControllerDelegate: AnyObject {
   func bookImporter(_ bookImporter: BookImporterViewController, didStartImporting count: Int)
   func bookImporter(_ bookImporter: BookImporterViewController, didProcess partialCount: Int, of totalCount: Int)

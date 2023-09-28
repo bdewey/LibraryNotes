@@ -8,7 +8,7 @@ import UniformTypeIdentifiers
 ///
 /// These keys are scoped to individual notes, so there can be multiple instances if the same key in the database. As an escape hatch,
 /// any string can be cast to a `NoteDatabaseKey`, but you are strongly encouraged to use one of the static factory methods.
-public struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral {
+public struct NoteDatabaseKey: RawRepresentable, Hashable, ExpressibleByStringLiteral, Sendable {
   public let rawValue: String
 
   public init(rawValue: String) {

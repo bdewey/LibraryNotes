@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import AVFoundation
+@preconcurrency import AVFoundation
 import Combine
 import Logging
 import SwiftUI
@@ -103,19 +103,24 @@ public final class BarcodeScannerViewController: UIViewController {
 }
 
 extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
-  public func metadataOutput(
+  nonisolated public func metadataOutput(
     _ output: AVCaptureMetadataOutput,
     didOutput metadataObjects: [AVMetadataObject],
     from connection: AVCaptureConnection
   ) {
-    for metadataObject in metadataObjects {
+    let barcodes = metadataObjects.compactMap { metadataObject -> String? in
       guard
         let barcodeObject = metadataObject as? AVMetadataMachineReadableCodeObject,
         let barcode = barcodeObject.stringValue
       else {
-        continue
+        return nil
       }
-      insertBarcode(barcode)
+      return barcode
+    }
+    Task { @MainActor in
+      for barcode in barcodes {
+        insertBarcode(barcode)
+      }
     }
   }
 }

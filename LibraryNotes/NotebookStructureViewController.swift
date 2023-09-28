@@ -6,6 +6,7 @@ import Logging
 import SnapKit
 import UIKit
 
+@MainActor
 protocol NotebookStructureViewControllerDelegate: AnyObject {
   func notebookStructureViewController(_ viewController: NotebookStructureViewController, didSelect structure: NotebookStructureViewController.StructureIdentifier)
   func notebookStructureViewControllerDidRequestChangeFocus(_ viewController: NotebookStructureViewController)

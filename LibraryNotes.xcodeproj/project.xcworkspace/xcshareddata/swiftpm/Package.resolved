@@ -37,6 +37,15 @@
       }
     },
     {
+      "identity" : "mainoffender",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/mattmassicotte/MainOffender",
+      "state" : {
+        "revision" : "343cc3797618c29b48b037b4e2beea0664e75315",
+        "version" : "0.1.0"
+      }
+    },
+    {
       "identity" : "snapkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/SnapKit/SnapKit",

@@ -6,7 +6,7 @@ import SnapKit
 import TextMarkupKit
 import UIKit
 
-public struct AttributedQuote: Identifiable, Hashable {
+public struct AttributedQuote: Identifiable, Hashable, Sendable {
   public var id: String { "\(noteId):\(key)" }
   public var noteId: String
   public var key: String
@@ -125,7 +125,7 @@ extension QuotesViewController: NotebookSecondaryViewController {
     let quoteIdentifiers: [ContentIdentifier]
   }
 
-  public static var notebookDetailType: String { "QuotesViewController" }
+  nonisolated public static var notebookDetailType: String { "QuotesViewController" }
 
   public var shouldShowWhenCollapsed: Bool { true }
 

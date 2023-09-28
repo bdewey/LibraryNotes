@@ -4,7 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import GRDB
-import KeyValueCRDT
+@preconcurrency import KeyValueCRDT
 import Logging
 import os
 import SpacedRepetitionScheduler
@@ -118,13 +118,13 @@ public final class NoteDatabase {
   /// The `KeyValueDatabase` contained in `keyValueDocument`
   private let keyValueCRDT: KeyValueDatabase
 
-  public var fileURL: URL { keyValueDocument.fileURL }
+  @MainActor public var fileURL: URL { keyValueDocument.fileURL }
 
   public let instanceID: UUID
 
-  public var documentState: UIDocument.State { keyValueDocument.documentState }
+  @MainActor public var documentState: UIDocument.State { keyValueDocument.documentState }
 
-  public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
+  @MainActor public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
 
   public func close() async -> Bool {
     await keyValueDocument.close()
@@ -134,6 +134,7 @@ public final class NoteDatabase {
     await keyValueDocument.save(to: url, for: saveOperation)
   }
 
+  @MainActor
   public func refresh() throws {
     try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
   }
@@ -142,6 +143,7 @@ public final class NoteDatabase {
     await keyValueDocument.save(to: fileURL, for: .forOverwriting)
   }
 
+  @MainActor
   public func merge(other: NoteDatabase) throws {
     guard let keyValueCRDT = keyValueDocument.keyValueCRDT, let otherKeyValueCRDT = other.keyValueDocument.keyValueCRDT else {
       throw NoteDatabaseError.databaseIsNotOpen
@@ -625,7 +627,7 @@ private extension NoteDatabase {
   }
 }
 
-public struct NoteUpdatePayload {
+public struct NoteUpdatePayload: Sendable {
   public init(noteIdentifier: String) {
     self.noteIdentifier = noteIdentifier
   }

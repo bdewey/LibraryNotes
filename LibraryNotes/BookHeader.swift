@@ -12,6 +12,7 @@ private extension Logger {
   }()
 }
 
+@MainActor
 protocol BookHeaderDelegate: AnyObject {
   func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook)
 }

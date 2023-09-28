@@ -28,6 +28,7 @@ struct BookAction {
   var handler: () throws -> Void
 
   /// Returns the action as a `UIContextualAction`, if possible.
+  @MainActor
   func asContextualAction() -> UIContextualAction? {
     guard availableAsSwipeAction else { return nil }
     let action = UIContextualAction(style: destructive ? .destructive : .normal, title: title) { _, _, completion in
@@ -44,6 +45,7 @@ struct BookAction {
     return action
   }
 
+  @MainActor
   func asAction() -> UIAction {
     UIAction(title: title ?? "", image: image, attributes: destructive ? [.destructive] : []) { _ in
       do {

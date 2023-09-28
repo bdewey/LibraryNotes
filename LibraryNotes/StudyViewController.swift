@@ -7,6 +7,7 @@ import UIKit
 
 // swiftlint:disable file_length
 
+@MainActor
 public protocol StudyViewControllerDelegate: AnyObject {
   func studyViewController(_ studyViewController: StudyViewController, didFinishSession: StudySession)
 }
@@ -136,6 +137,7 @@ public final class StudyViewController: UIViewController {
     let shouldDismiss: Bool
     let snapPoint: (UIView) -> CGPoint
 
+    @MainActor
     func makeLabel() -> UILabel {
       let label = UILabel(frame: .zero)
       label.font = UIFont.preferredFont(forTextStyle: .headline)

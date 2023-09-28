@@ -2,12 +2,14 @@
 
 import BookKit
 import Logging
+import MainOffender
 import MobileCoreServices
 import ObjectiveCTextStorageWrapper
 import SnapKit
 import TextMarkupKit
 import UIKit
 
+@MainActor
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
@@ -15,6 +17,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook)
 }
 
+@MainActor
 @objc protocol TextEditingFormattingActions {
   /// Turns the current paragraph into a summary (`tl;dr:`) paragraph if it isn't, or a normal paragraph if it is.
   func toggleSummaryParagraph()
@@ -501,14 +504,16 @@ public final class TextEditViewController: UIViewController {
 }
 
 extension TextEditViewController: NSTextStorageDelegate {
-  public func textStorage(
+  nonisolated public func textStorage(
     _ textStorage: NSTextStorage,
     didProcessEditing editedMask: NSTextStorage.EditActions,
     range editedRange: NSRange,
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    delegate?.textEditViewControllerDidChangeContents(self)
+    MainActor.runUnsafely {
+      delegate?.textEditViewControllerDidChangeContents(self)
+    }
   }
 }
 

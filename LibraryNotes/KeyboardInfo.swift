@@ -11,6 +11,7 @@ public struct KeyboardInfo {
 }
 
 extension KeyboardInfo {
+  @MainActor
   init?(_ notification: Notification) {
     guard notification.name == UIResponder.keyboardWillShowNotification ||
       notification.name == UIResponder.keyboardWillChangeFrameNotification

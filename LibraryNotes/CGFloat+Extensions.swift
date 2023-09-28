@@ -3,6 +3,7 @@
 import UIKit
 
 public extension CGFloat {
+  @MainActor
   func roundedToScreenScale(_ rule: FloatingPointRoundingRule = .toNearestOrAwayFromZero) -> CGFloat {
     let scale: CGFloat = 1.0 / UIScreen.main.scale
     return scale * (self / scale).rounded(rule)

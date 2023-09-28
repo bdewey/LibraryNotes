@@ -12,6 +12,7 @@ public struct PromptIdentifier: Hashable, Codable {
 }
 
 /// A specific thing to recall.
+@MainActor
 public protocol Prompt {
   /// Returns a view that can quiz a person about the thing to remember.
   ///

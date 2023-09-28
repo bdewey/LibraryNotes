@@ -3,7 +3,7 @@
 import Foundation
 
 /// Sections of the collection view
-public enum BookSection: String, Codable {
+public enum BookSection: String, Codable, Sendable {
   case wantToRead
   /// Books we are reading
   case currentlyReading

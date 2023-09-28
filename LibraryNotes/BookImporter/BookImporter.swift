@@ -1,13 +1,13 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import BookKit
+@preconcurrency import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
 import Logging
 
 /// An object that can download cover images from OpenLibrary and bulk-create notes for books.
-final class BookImporter {
+@MainActor final class BookImporter {
   init(database: NoteDatabase, apiKey: String?) {
     self.database = database
     self.apiKey = apiKey

@@ -4,6 +4,7 @@ import Foundation
 import UIKit
 
 /// A simple in-memory image cache, backed with `NSCache`
+@MainActor
 public final class ImageCache {
   public enum Error: Swift.Error {
     case unknownError
@@ -14,24 +15,19 @@ public final class ImageCache {
   /// Gets an image from a URL.
   /// - parameter url: The URL to load
   /// - parameter completion: Called upon getting the image. If the image is in the cache this is called synchronously. Otherwise, it will be called asynchronously on the main thread.
-  public func image(for url: URL, completion: @escaping (Result<UIImage, Swift.Error>) -> Void) {
+  public func image(for url: URL) async throws -> UIImage {
     let url = url.asSecureURL()
     let nsURL = url as NSURL
     if let cachedImage = cache.object(forKey: nsURL) {
-      completion(.success(cachedImage))
-      return
+      return cachedImage
     }
-    let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, _, error in
-      DispatchQueue.main.async {
-        if let data, let image = UIImage(data: data) {
-          self.cache.setObject(image, forKey: nsURL)
-          completion(.success(image))
-        } else {
-          completion(.failure(error ?? Error.unknownError))
-        }
-      }
+    let (data, _) = try await URLSession.shared.data(from: url)
+    if let image = UIImage(data: data) {
+      cache.setObject(image, forKey: nsURL)
+      return image
+    } else {
+      throw Error.unknownError
     }
-    task.resume()
   }
 }
 
