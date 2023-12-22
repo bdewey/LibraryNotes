@@ -4,6 +4,7 @@ import KeyValueCRDT
 @testable import Library_Notes
 import XCTest
 
+@MainActor
 final class NoteDatabaseTests: XCTestCase {
   private var database: NoteDatabase!
 

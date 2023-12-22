@@ -5,6 +5,7 @@ import ObjectiveCTextStorageWrapper
 import TextMarkupKit
 import XCTest
 
+@MainActor
 final class ClozeTests: XCTestCase {
   func testCloze() {
     do {

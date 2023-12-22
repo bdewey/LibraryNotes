@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/BookKit",
       "state" : {
-        "revision" : "4a91aeb65857215d9a130bc0bd9a3277c49c66a7",
-        "version" : "0.5.0"
+        "revision" : "f1d8bbbabb00c1d6b7eb97dce6c0c71c0a8b2328",
+        "version" : "0.6.0"
       }
     },
     {

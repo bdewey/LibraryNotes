@@ -5,6 +5,7 @@ import KeyValueCRDT
 import XCTest
 
 /// Specific test cases around merging database content.
+@MainActor
 final class NoteSqliteStorageMergeTests: XCTestCase {
   /// If you copy a file, then try to merge it in, nothing happens.
   func testNoopMerge() async throws {
@@ -199,8 +200,9 @@ private struct TestDevice {
   static let remote = TestDevice(name: "remote")
 }
 
+@MainActor
 private struct MergeTestCase {
-  typealias StorageModificationBlock = (NoteDatabase) async throws -> Void
+  typealias StorageModificationBlock = @MainActor (NoteDatabase) async throws -> Void
   var initialLocalStorageBlock: StorageModificationBlock?
   var localModificationBlock: StorageModificationBlock?
   var remoteModificationBlock: StorageModificationBlock?

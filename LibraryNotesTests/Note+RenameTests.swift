@@ -4,6 +4,7 @@ import KeyValueCRDT
 import Library_Notes
 import XCTest
 
+@MainActor
 final class NoteRenameTests: XCTestCase {
   private var database: NoteDatabase!
 

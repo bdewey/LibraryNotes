@@ -57,6 +57,7 @@ private enum TestContent {
   """
 }
 
+@MainActor
 final class LibraryNotesAppUITests: XCTestCase {
   var application: XCUIApplication!
 

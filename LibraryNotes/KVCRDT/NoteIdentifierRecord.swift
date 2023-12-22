@@ -11,7 +11,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   public var finishYear: Int?
   public var startYear: Int?
 
-  public enum SortOrder: String, CaseIterable {
+  public enum SortOrder: String, CaseIterable, Sendable {
     case author = "Author"
     case title = "Title"
     case creationTimestamp = "Created Date"

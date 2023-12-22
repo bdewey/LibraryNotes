@@ -707,7 +707,7 @@
 					};
 					D3DC5ED420EC9B0200F0B74B = {
 						CreatedOnToolsVersion = 10.0;
-						LastSwiftMigration = 1000;
+						LastSwiftMigration = "";
 						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
 					};
 				};
