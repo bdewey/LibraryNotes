@@ -17,7 +17,7 @@
 		D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D311787D25ACA14500E473FD /* DocumentBrowserViewController.swift */; };
 		D3131324269A1996004BBDBD /* StarRatingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3131323269A1996004BBDBD /* StarRatingView.swift */; };
 		D3131326269A2AD7004BBDBD /* BookView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3131325269A2AD7004BBDBD /* BookView.swift */; };
-		D31335B42B36023600F97066 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D31335B32B36023600F97066 /* GRDB */; };
+		D31335B72B3606A100F97066 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = D31335B62B3606A100F97066 /* GRDB */; };
 		D31A02B82676A33D00A60525 /* ParsedAttributedString+PlainText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31A02B72676A33D00A60525 /* ParsedAttributedString+PlainText.swift */; };
 		D31AFAAD229D61EE00ED2B76 /* UIStackView+SetArrangedSubviews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */; };
 		D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AFA7A229D61E800ED2B76 /* PromptView.swift */; };
@@ -349,7 +349,7 @@
 				D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D3E806A2267FF900009AA588 /* TextMarkupKit in Frameworks */,
-				D31335B42B36023600F97066 /* GRDB in Frameworks */,
+				D31335B72B3606A100F97066 /* GRDB in Frameworks */,
 				D3D16CAB26F641B7004059E0 /* CodableCSV in Frameworks */,
 				D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */,
 				D358CC422688DC6D00C991DB /* BookKit in Frameworks */,
@@ -654,7 +654,7 @@
 				D3D16CAA26F641B7004059E0 /* CodableCSV */,
 				D3DAF6012777936D0055FA5F /* Algorithms */,
 				D387D2792AC5130600B5858F /* MainOffender */,
-				D31335B32B36023600F97066 /* GRDB */,
+				D31335B62B3606A100F97066 /* GRDB */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* Library Notes.app */;
@@ -735,7 +735,7 @@
 				D3D16CA926F641B7004059E0 /* XCRemoteSwiftPackageReference "CodableCSV" */,
 				D3DAF6002777936D0055FA5F /* XCRemoteSwiftPackageReference "swift-algorithms" */,
 				D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */,
-				D31335B22B36023600F97066 /* XCRemoteSwiftPackageReference "GRDB" */,
+				D31335B52B3606A100F97066 /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
 			projectDirPath = "";
@@ -1276,12 +1276,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		D31335B22B36023600F97066 /* XCRemoteSwiftPackageReference "GRDB" */ = {
+		D31335B52B3606A100F97066 /* XCRemoteSwiftPackageReference "GRDB" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/bdewey/GRDB.swift";
+			repositoryURL = "https://github.com/groue/GRDB.swift";
 			requirement = {
-				branch = v5.26.1.fts5;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
 			};
 		};
 		D324409626E525AF009B58DE /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
@@ -1375,9 +1375,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		D31335B32B36023600F97066 /* GRDB */ = {
+		D31335B62B3606A100F97066 /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = D31335B22B36023600F97066 /* XCRemoteSwiftPackageReference "GRDB" */;
+			package = D31335B52B3606A100F97066 /* XCRemoteSwiftPackageReference "GRDB" */;
 			productName = GRDB;
 		};
 		D324409726E525AF009B58DE /* ZIPFoundation */ = {
