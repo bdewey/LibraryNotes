@@ -4,7 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import GRDB
-@preconcurrency import KeyValueCRDT
+import KeyValueCRDT
 import Logging
 import os
 import SpacedRepetitionScheduler

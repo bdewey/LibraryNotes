@@ -32,8 +32,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/KeyValueCRDT",
       "state" : {
-        "revision" : "460becd23a29b30dbfde184b155f3e4124e1fcdf",
-        "version" : "1.2.1"
+        "revision" : "376bb9c64d84645f9c6c3b61afe5a9a350d7d0eb",
+        "version" : "1.3.0"
       }
     },
     {
