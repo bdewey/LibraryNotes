@@ -41,13 +41,13 @@ public final class WebViewController: UIViewController {
     view = webView
   }
 
-  override public func viewWillAppear(_ animated: Bool) {
-    super.viewWillAppear(animated)
-    configureToolbar()
+  public override func viewDidLoad() {
+    super.viewDidLoad()
+    registerForTraitChanges([UITraitHorizontalSizeClass.self], action: #selector(configureToolbar))
   }
 
-  override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-    super.traitCollectionDidChange(previousTraitCollection)
+  public override func viewIsAppearing(_ animated: Bool) {
+    super.viewIsAppearing(animated)
     configureToolbar()
   }
 
@@ -63,6 +63,7 @@ public final class WebViewController: UIViewController {
     present(navigationController, animated: true, completion: nil)
   }
 
+  @objc
   private func configureToolbar() {
     let showNotesButton = UIBarButtonItem(image: UIImage(systemName: "note.text"), style: .plain, target: self, action: #selector(showNotes))
     showNotesButton.accessibilityIdentifier = "show-notes"

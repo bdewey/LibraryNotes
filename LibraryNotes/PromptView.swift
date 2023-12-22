@@ -9,6 +9,7 @@ public protocol PromptViewDelegate: AnyObject {
   func promptViewDidRevealAnswer(_ promptView: PromptView)
 }
 
+@MainActor
 @objc public protocol PromptViewActions {
   func revealAnswer()
 }

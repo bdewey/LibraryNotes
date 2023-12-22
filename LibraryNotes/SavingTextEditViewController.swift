@@ -6,7 +6,6 @@ import Foundation
 import KeyValueCRDT
 import LinkPresentation
 import Logging
-import MainOffender
 import ObjectiveCTextStorageWrapper
 import SnapKit
 import TextMarkupKit
@@ -190,7 +189,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     textEditViewController.didMove(toParent: self)
     autosaveTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
       guard let self else { return }
-      MainActor.runUnsafely {
+      MainActor.assumeIsolated {
         if self.hasUnsavedChanges { Logger.textSaving.debug("SavingTextEditViewController: autosave") }
         self.saveIfNeeded()
       }

@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Foundation
+// Workaround -- https://forums.swift.org/t/are-existential-types-sendable/58946
+@preconcurrency import Foundation
 import UIKit
 
 /// A simple in-memory image cache, backed with `NSCache`

@@ -657,9 +657,11 @@ extension DocumentListViewController {
 }
 
 extension DocumentListViewController: MFMailComposeViewControllerDelegate {
-  func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+  nonisolated func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
     Logger.shared.info("Mail composer finished with result \(result)")
-    controller.dismiss(animated: true)
+    MainActor.assumeIsolated {
+      controller.dismiss(animated: true)
+    }
   }
 }
 

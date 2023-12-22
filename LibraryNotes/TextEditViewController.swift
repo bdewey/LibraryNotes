@@ -2,7 +2,6 @@
 
 import BookKit
 import Logging
-import MainOffender
 import MobileCoreServices
 import ObjectiveCTextStorageWrapper
 import SnapKit
@@ -511,7 +510,7 @@ extension TextEditViewController: NSTextStorageDelegate {
     changeInLength delta: Int
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
-    MainActor.runUnsafely {
+    MainActor.assumeIsolated {
       delegate?.textEditViewControllerDidChangeContents(self)
     }
   }

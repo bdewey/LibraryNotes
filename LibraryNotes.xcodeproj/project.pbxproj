@@ -104,7 +104,6 @@
 		D380C98926D28CF200451943 /* BarcodeScannerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98826D28CF200451943 /* BarcodeScannerViewController.swift */; };
 		D380C98C26D28D4100451943 /* CameraCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98B26D28D4100451943 /* CameraCaptureView.swift */; };
 		D380C98E26D28D5F00451943 /* CaptureSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D380C98D26D28D5F00451943 /* CaptureSessionManager.swift */; };
-		D387D27A2AC5130600B5858F /* MainOffender in Frameworks */ = {isa = PBXBuildFile; productRef = D387D2792AC5130600B5858F /* MainOffender */; };
 		D38862B423BB94FA00A44F1C /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B323BB94FA00A44F1C /* Note.swift */; };
 		D38862B623BE404300A44F1C /* Note+Markdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38862B523BE404300A44F1C /* Note+Markdown.swift */; };
 		D3A99ED422EDDCA7000D6DE2 /* DocumentTableController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A99ED322EDDCA7000D6DE2 /* DocumentTableController.swift */; };
@@ -202,7 +201,6 @@
 		D311787D25ACA14500E473FD /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
 		D3131323269A1996004BBDBD /* StarRatingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarRatingView.swift; sourceTree = "<group>"; };
 		D3131325269A2AD7004BBDBD /* BookView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookView.swift; sourceTree = "<group>"; };
-		D31335B12B3600D600F97066 /* KeyValueCRDT */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = KeyValueCRDT; path = ../KeyValueCRDT; sourceTree = "<group>"; };
 		D31A02B72676A33D00A60525 /* ParsedAttributedString+PlainText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ParsedAttributedString+PlainText.swift"; sourceTree = "<group>"; };
 		D31AFA79229D61E700ED2B76 /* UIStackView+SetArrangedSubviews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIStackView+SetArrangedSubviews.swift"; sourceTree = "<group>"; };
 		D31AFA7A229D61E800ED2B76 /* PromptView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PromptView.swift; sourceTree = "<group>"; };
@@ -354,7 +352,6 @@
 				D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */,
 				D358CC422688DC6D00C991DB /* BookKit in Frameworks */,
 				D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */,
-				D387D27A2AC5130600B5858F /* MainOffender in Frameworks */,
 				D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */,
 				D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */,
 			);
@@ -465,7 +462,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D31335B12B3600D600F97066 /* KeyValueCRDT */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
@@ -653,7 +649,6 @@
 				D324409726E525AF009B58DE /* ZIPFoundation */,
 				D3D16CAA26F641B7004059E0 /* CodableCSV */,
 				D3DAF6012777936D0055FA5F /* Algorithms */,
-				D387D2792AC5130600B5858F /* MainOffender */,
 				D31335B62B3606A100F97066 /* GRDB */,
 			);
 			productName = CommonplaceBookApp;
@@ -734,7 +729,6 @@
 				D324409626E525AF009B58DE /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 				D3D16CA926F641B7004059E0 /* XCRemoteSwiftPackageReference "CodableCSV" */,
 				D3DAF6002777936D0055FA5F /* XCRemoteSwiftPackageReference "swift-algorithms" */,
-				D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */,
 				D31335B52B3606A100F97066 /* XCRemoteSwiftPackageReference "GRDB" */,
 			);
 			productRefGroup = D3DC5EC020EC9B0100F0B74B /* Products */;
@@ -1134,13 +1128,13 @@
 				CURRENT_PROJECT_VERSION = 107;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "Library Notes";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1165,13 +1159,13 @@
 				CURRENT_PROJECT_VERSION = 107;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp";
 				PRODUCT_NAME = "Library Notes";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -1316,14 +1310,6 @@
 				minimumVersion = 0.3.0;
 			};
 		};
-		D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mattmassicotte/MainOffender";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
-			};
-		};
 		D3D16CA926F641B7004059E0 /* XCRemoteSwiftPackageReference "CodableCSV" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/dehesa/CodableCSV";
@@ -1399,11 +1385,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */;
 			productName = KeyValueCRDT;
-		};
-		D387D2792AC5130600B5858F /* MainOffender */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D387D2782AC5130600B5858F /* XCRemoteSwiftPackageReference "MainOffender" */;
-			productName = MainOffender;
 		};
 		D3D16CAA26F641B7004059E0 /* CodableCSV */ = {
 			isa = XCSwiftPackageProductDependency;

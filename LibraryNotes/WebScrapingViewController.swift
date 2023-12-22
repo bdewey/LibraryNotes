@@ -105,7 +105,9 @@ private extension WebScrapingViewController {
 // MARK: - WKNavigationDelegate
 
 extension WebScrapingViewController: WKNavigationDelegate {
-  public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-    configureUI()
+  nonisolated public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    MainActor.assumeIsolated {
+      configureUI()
+    }
   }
 }

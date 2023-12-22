@@ -123,7 +123,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
   @objc func openCommand() {
     let options = UIWindowScene.ActivationRequestOptions()
-    options.preferredPresentationStyle = .prominent
+    options.placement = .prominent()
     UIApplication.shared.requestSceneSessionActivation(nil, userActivity: nil, options: options)
   }
 }
