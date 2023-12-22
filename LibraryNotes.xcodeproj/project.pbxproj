@@ -707,7 +707,7 @@
 					};
 					D3DC5ED420EC9B0200F0B74B = {
 						CreatedOnToolsVersion = 10.0;
-						LastSwiftMigration = "";
+						LastSwiftMigration = 1520;
 						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
 					};
 				};
@@ -1202,7 +1202,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Library Notes.app/Library Notes";
 			};
@@ -1226,7 +1226,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookAppTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
-				SWIFT_VERSION = 4.2;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LibraryNotes.app/LibraryNotes";
 			};
