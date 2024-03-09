@@ -7,6 +7,7 @@ import SwiftUI
 import UIKit
 
 private extension Logger {
+  @MainActor
   static let barcodeScanner: Logger = {
     var logger = Logger(label: "org.brians-brain.BarcodeScanner")
     logger.logLevel = .info

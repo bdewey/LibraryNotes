@@ -5,6 +5,7 @@ import Logging
 import UIKit
 
 private extension Logger {
+  @MainActor
   static let bookHeader: Logger = {
     var logger = Logger(label: "org.brians-brain.BookHeader")
     logger.logLevel = .debug
@@ -180,6 +181,7 @@ final class BookHeader: UIView {
     var infoColumnHeight: CGFloat = 0
 
     /// Returns whether all of the layout frames are contained in `bounds`.
+    @MainActor
     func areContained(in bounds: CGRect) -> Bool {
       let keyPaths: [KeyPath<LayoutFrames, CGRect>] = [
         \.coverImageView,

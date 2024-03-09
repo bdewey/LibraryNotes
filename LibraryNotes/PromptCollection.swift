@@ -9,7 +9,7 @@ import SpacedRepetitionScheduler
 /// Extensible enum for the different types of prompts.
 /// Also maintains a mapping between each type and the specific PromptCollection class
 /// associated with that type.
-public struct PromptType: RawRepresentable, Hashable {
+public struct PromptType: RawRepresentable, Hashable, Sendable {
   public let rawValue: String
 
   /// While required by the RawRepresentable protocol, this is not the preferred way

@@ -8,6 +8,7 @@ import SwiftUI
 import UIKit
 
 private extension Logger {
+  @MainActor
   static let bookSearch: Logger = {
     var bookSearch = Logger(label: "org.brians-brain.BookSearch")
     bookSearch.logLevel = .info

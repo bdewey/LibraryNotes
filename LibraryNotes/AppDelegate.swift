@@ -6,6 +6,7 @@ import Logging
 import UIKit
 
 public extension Logger {
+  @MainActor
   static let shared: Logger = {
     var logger = Logger(label: "org.brians-brain.grail-diary")
     logger.logLevel = .info
@@ -55,6 +56,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     return true
   }
 
+  @MainActor
   internal static var isUITesting: Bool = CommandLine.arguments.contains("--uitesting")
 
   override func buildMenu(with builder: UIMenuBuilder) {

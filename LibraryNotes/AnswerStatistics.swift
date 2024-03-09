@@ -11,6 +11,7 @@ public struct AnswerStatistics: Codable, Equatable, Hashable {
   public var incorrect: Int
 
   /// Convenience instance of 0 correct, 0 incorrect answers.
+  @MainActor
   public static let empty = AnswerStatistics(correct: 0, incorrect: 0)
 
   public static func + (lhs: AnswerStatistics, rhs: AnswerStatistics) -> AnswerStatistics {
