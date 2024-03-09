@@ -5,7 +5,7 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import LinkPresentation
-import Logging
+import os
 import ObjectiveCTextStorageWrapper
 import SnapKit
 import TextMarkupKit
@@ -13,11 +13,7 @@ import UIKit
 import UniformTypeIdentifiers
 
 private extension Logger {
-  static let textSaving: Logger = {
-    var logger = Logger(label: "org.brians-brain.SavingTextEditViewController")
-    logger.logLevel = .info
-    return logger
-  }()
+  static let textSaving = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SavingTextEditViewController")
 }
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
@@ -280,7 +276,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
-    Logger.textSaving.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
+    Logger.textSaving.debug("SavingTextEditViewController: Updating note \(self.noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)

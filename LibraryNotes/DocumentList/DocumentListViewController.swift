@@ -5,7 +5,7 @@ import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
-import Logging
+import os
 import MessageUI
 import SafariServices
 import SnapKit
@@ -258,7 +258,7 @@ final class DocumentListViewController: UIViewController {
     }
     didSet {
       quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
-        Logger.shared.error("Unexpected error getting quotes: \(error)")
+        Logger.shared.error("Unexpected error getting quotes: \(String(describing: error))")
       }, receiveValue: { [weak self] quoteIdentifiers in
         self?.quoteIdentifiers = quoteIdentifiers
         Logger.shared.debug("Got \(quoteIdentifiers.count) quotes")
@@ -267,7 +267,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateQuoteList() {
-    Logger.shared.info("Updating quote list for hashtag \(focusedStructure.hashtag ?? "nil")")
+    Logger.shared.info("Updating quote list for hashtag \(self.focusedStructure.hashtag ?? "nil")")
     quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
   }
 

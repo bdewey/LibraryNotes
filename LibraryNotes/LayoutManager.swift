@@ -1,10 +1,10 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
-import Logging
+import os
 import UIKit
 
-private let logger = Logger(label: "org.brians-brian.CommonplaceBookApp.LayoutManager")
+private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LayoutManager")
 
 /// Custom layout manager that knows how to draw vertical bars next to block quotes.
 /// Implementation inspired by the Wordpress Aztec HTML editing component:

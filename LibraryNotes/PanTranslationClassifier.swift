@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Logging
+import os
 import UIKit
 
 /// The job of a PanTranslationClassifier is to determine determine if the `translation` of a UIPanGestureRecognizer

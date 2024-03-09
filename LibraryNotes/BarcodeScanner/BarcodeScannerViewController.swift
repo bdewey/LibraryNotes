@@ -2,17 +2,13 @@
 
 @preconcurrency import AVFoundation
 import Combine
-import Logging
+import os
 import SwiftUI
 import UIKit
 
 private extension Logger {
   @MainActor
-  static let barcodeScanner: Logger = {
-    var logger = Logger(label: "org.brians-brain.BarcodeScanner")
-    logger.logLevel = .info
-    return logger
-  }()
+  static let barcodeScanner = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "BarcodeScanner")
 }
 
 @MainActor

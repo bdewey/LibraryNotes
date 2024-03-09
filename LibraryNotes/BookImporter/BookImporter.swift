@@ -4,7 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
-import Logging
+import os
 
 /// An object that can download cover images from OpenLibrary and bulk-create notes for books.
 @MainActor final class BookImporter {
@@ -62,7 +62,7 @@ import Logging
     do {
       let payload = try await task.value
       try database.bulkWrite(payload)
-      Logger.shared.info("Finished processing books. Downloaded \(booksAndImages.filter { $0.image != nil }.count) images")
+      Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
     } catch {
       Logger.shared.error("Error importing books: \(error)")
     }

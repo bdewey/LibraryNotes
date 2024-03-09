@@ -2,16 +2,12 @@
 
 import CoreSpotlight
 import FileLogging
-import Logging
+import os
 import UIKit
 
 public extension Logger {
   @MainActor
-  static let shared: Logger = {
-    var logger = Logger(label: "org.brians-brain.grail-diary")
-    logger.logLevel = .info
-    return logger
-  }()
+  static let shared: Logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes")
 }
 
 extension UIMenu.Identifier {
@@ -49,9 +45,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    let factory = LogHandlerFactory()
-    LoggingSystem.bootstrap(factory.logHandler(for:))
-
     Logger.shared.info("----- Launch application version \(UIApplication.versionString)")
     return true
   }
@@ -127,30 +120,5 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     let options = UIWindowScene.ActivationRequestOptions()
     options.placement = .prominent()
     UIApplication.shared.requestSceneSessionActivation(nil, userActivity: nil, options: options)
-  }
-}
-
-/// Creates log handlers. Note that since this tends to run before logging is set up, and if it fails we can't get debug information for other bugs,
-/// the strategy here is to crash on unexpected errors rather than "log and try to recover."
-// swiftlint:disable force_try
-final class LogHandlerFactory {
-  var defaultLogLevel = Logger.Level.info
-  var logLevelsForLabel = [String: Logger.Level]()
-
-  func logHandler(for label: String) -> LogHandler {
-    var streamHandler = StreamLogHandler.standardError(label: label)
-    streamHandler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
-
-    return MultiplexLogHandler([
-      streamHandler,
-      makeFileLogHandler(label: label),
-    ])
-  }
-
-  private func makeFileLogHandler(label: String) -> FileLogHandler {
-    LogFileDirectory.shared.initializeCurrentLogFile()
-    let handler = try! FileLogHandler(label: label, localFile: LogFileDirectory.shared.currentLogFileURL)
-    handler.logLevel = logLevelsForLabel[label, default: defaultLogLevel]
-    return handler
   }
 }

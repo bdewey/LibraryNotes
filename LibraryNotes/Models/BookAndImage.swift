@@ -2,7 +2,7 @@
 
 import BookKit
 import Foundation
-import Logging
+import os
 
 // TODO: Move this to BookKit
 /// A book and its cover image.

@@ -1,16 +1,12 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
-import Logging
+import os
 import UIKit
 
 private extension Logger {
   @MainActor
-  static let bookHeader: Logger = {
-    var logger = Logger(label: "org.brians-brain.BookHeader")
-    logger.logLevel = .debug
-    return logger
-  }()
+  static let bookHeader = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "BookHeader")
 }
 
 @MainActor
@@ -150,7 +146,7 @@ final class BookHeader: UIView {
     super.layoutSubviews()
     let frames = makeLayoutFrames(bounds: bounds)
     coverImageView.frame = frames.coverImageView
-    Logger.bookHeader.trace("BookHeader.layoutSubviews bounds = \(bounds), coverImageView = \(frames.coverImageView)")
+    Logger.bookHeader.trace("BookHeader.layoutSubviews bounds = \(self.bounds.debugDescription), coverImageView = \(frames.coverImageView.debugDescription)")
     titleLabel.frame = frames.titleLabel
     authorLabel.frame = frames.authorLabel
     starRatingView.frame = frames.starRatingView
@@ -165,7 +161,7 @@ final class BookHeader: UIView {
     var result = size
     result.height = max(frames.imageColumnHeight, frames.infoColumnHeight)
     assert(result.height != .infinity)
-    Logger.bookHeader.trace("BookHeader.sizeThatFits constraining size = \(size) height = \(result.height)")
+    Logger.bookHeader.trace("BookHeader.sizeThatFits constraining size = \(size.debugDescription) height = \(result.height)")
     return result
   }
 
@@ -196,11 +192,11 @@ final class BookHeader: UIView {
       for keyPath in keyPaths {
         let frame = self[keyPath: keyPath]
         if frame.origin.x == .infinity || frame.origin.y == .infinity || frame.size.height == .infinity || frame.size.width == .infinity {
-          Logger.bookHeader.error("Invalid frame \(frame) has infinite dimension")
+          Logger.bookHeader.error("Invalid frame \(frame.debugDescription) has infinite dimension")
           invalidFrames.append(frame)
         }
         if !bounds.contains(frame) {
-          Logger.bookHeader.error("Invalid frame \(frame) is not contained in \(bounds)")
+          Logger.bookHeader.error("Invalid frame \(frame.debugDescription) is not contained in \(bounds.debugDescription)")
           invalidFrames.append(frame)
         }
       }

@@ -2,18 +2,14 @@
 
 import BookKit
 import Combine
-import Logging
+import os
 import SnapKit
 import SwiftUI
 import UIKit
 
 private extension Logger {
   @MainActor
-  static let bookSearch: Logger = {
-    var bookSearch = Logger(label: "org.brians-brain.BookSearch")
-    bookSearch.logLevel = .info
-    return bookSearch
-  }()
+  static let bookSearch = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "BookSearch")
 }
 
 @MainActor
@@ -334,7 +330,7 @@ public final class BookEditDetailsViewController: UIViewController {
   private func updateRightBarButtonItemIfNeeded() {
     guard rightBarButtonItemNeedsUpdate else { return }
     rightBarButtonItemNeedsUpdate = false
-    Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(model.isValid)")
+    Logger.bookSearch.debug("Processing nextButtonNeedsUpdate to true. Model valid? \(self.model.isValid)")
 
     let cancelAction = UIAction { [weak self] _ in
       guard let self else { return }

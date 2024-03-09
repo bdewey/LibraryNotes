@@ -1,15 +1,11 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Logging
+import os
 import UIKit
 import WebKit
 
 extension Logger {
-  static let webView: Logger = {
-    var logger = Logger(label: "org.brians-brain.WebViewController")
-    logger.logLevel = .debug
-    return logger
-  }()
+  static let webView = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "WebViewController")
 }
 
 public final class WebViewController: UIViewController {

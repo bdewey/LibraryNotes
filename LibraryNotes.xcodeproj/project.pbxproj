@@ -122,7 +122,6 @@
 		D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */; };
 		D3D36892229C9A8000E4D062 /* Date+CloseEnough.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D36891229C9A8000E4D062 /* Date+CloseEnough.swift */; };
 		D3D8337C26F9AA040011B450 /* library.libnotes in Resources */ = {isa = PBXBuildFile; fileRef = D3D8337B26F9AA040011B450 /* library.libnotes */; };
-		D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */ = {isa = PBXBuildFile; productRef = D3D867B8259F9FB8008254DF /* FileLogging */; };
 		D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3DA1B862569E8AB009DC866 /* SnapKit */; };
 		D3DAF6022777936D0055FA5F /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = D3DAF6012777936D0055FA5F /* Algorithms */; };
 		D3DBC4002701FAAB00C18438 /* TagsRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3DBC3FF2701FAAB00C18438 /* TagsRecord.swift */; };
@@ -138,7 +137,6 @@
 		D3E806A2267FF900009AA588 /* TextMarkupKit in Frameworks */ = {isa = PBXBuildFile; productRef = D3E806A1267FF900009AA588 /* TextMarkupKit */; };
 		D3E9B57C2564F92800E47375 /* StringProtocol+MiniMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B57B2564F92800E47375 /* StringProtocol+MiniMarkdown.swift */; };
 		D3E9B5842564FA2200E47375 /* Character+MiniMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3E9B5832564FA2200E47375 /* Character+MiniMarkdown.swift */; };
-		D3E9B5952564FD4900E47375 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = D3E9B5942564FD4900E47375 /* Logging */; };
 		D3F4EDBE2662F51C001289EC /* BookImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBD2662F51C001289EC /* BookImporter.swift */; };
 		D3F4EDC0266515E1001289EC /* BookHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDBF266515E1001289EC /* BookHeader.swift */; };
 		D3F4EDC42666B7CE001289EC /* ApplicationMimeType.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3F4EDC32666B7CE001289EC /* ApplicationMimeType.swift */; };
@@ -343,7 +341,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3DAF6022777936D0055FA5F /* Algorithms in Frameworks */,
-				D3E9B5952564FD4900E47375 /* Logging in Frameworks */,
 				D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
 				D3E806A2267FF900009AA588 /* TextMarkupKit in Frameworks */,
@@ -351,7 +348,6 @@
 				D3D16CAB26F641B7004059E0 /* CodableCSV in Frameworks */,
 				D3DA1B872569E8AB009DC866 /* SnapKit in Frameworks */,
 				D358CC422688DC6D00C991DB /* BookKit in Frameworks */,
-				D3D867B9259F9FB8008254DF /* FileLogging in Frameworks */,
 				D37B0DB923CD476D00F01D29 /* SpacedRepetitionScheduler in Frameworks */,
 				D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */,
 			);
@@ -640,9 +636,7 @@
 			name = LibraryNotes;
 			packageProductDependencies = (
 				D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */,
-				D3E9B5942564FD4900E47375 /* Logging */,
 				D3DA1B862569E8AB009DC866 /* SnapKit */,
-				D3D867B8259F9FB8008254DF /* FileLogging */,
 				D3E806A1267FF900009AA588 /* TextMarkupKit */,
 				D358CC412688DC6D00C991DB /* BookKit */,
 				D37FF2B626BDE2A500E06747 /* KeyValueCRDT */,
@@ -720,9 +714,7 @@
 			mainGroup = D3DC5EB620EC9B0100F0B74B;
 			packageReferences = (
 				D37B0DB723CD476C00F01D29 /* XCRemoteSwiftPackageReference "SpacedRepetitionScheduler" */,
-				D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */,
 				D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */,
-				D3D867B7259F9FB8008254DF /* XCRemoteSwiftPackageReference "swift-log-file" */,
 				D3E806A0267FF900009AA588 /* XCRemoteSwiftPackageReference "TextMarkupKit" */,
 				D358CC402688DC6D00C991DB /* XCRemoteSwiftPackageReference "BookKit" */,
 				D369182A26BDDFC6001EB512 /* XCRemoteSwiftPackageReference "KeyValueCRDT" */,
@@ -1318,14 +1310,6 @@
 				minimumVersion = 0.6.7;
 			};
 		};
-		D3D867B7259F9FB8008254DF /* XCRemoteSwiftPackageReference "swift-log-file" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/crspybits/swift-log-file";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.0.1;
-			};
-		};
 		D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit";
@@ -1348,14 +1332,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.7.2;
-			};
-		};
-		D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-log";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1391,11 +1367,6 @@
 			package = D3D16CA926F641B7004059E0 /* XCRemoteSwiftPackageReference "CodableCSV" */;
 			productName = CodableCSV;
 		};
-		D3D867B8259F9FB8008254DF /* FileLogging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3D867B7259F9FB8008254DF /* XCRemoteSwiftPackageReference "swift-log-file" */;
-			productName = FileLogging;
-		};
 		D3DA1B862569E8AB009DC866 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D3DA1B852569E8AB009DC866 /* XCRemoteSwiftPackageReference "SnapKit" */;
@@ -1410,11 +1381,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D3E806A0267FF900009AA588 /* XCRemoteSwiftPackageReference "TextMarkupKit" */;
 			productName = TextMarkupKit;
-		};
-		D3E9B5942564FD4900E47375 /* Logging */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = D3E9B5932564FD4900E47375 /* XCRemoteSwiftPackageReference "swift-log" */;
-			productName = Logging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

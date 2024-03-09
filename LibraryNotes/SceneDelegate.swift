@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Algorithms
-import Logging
+import os
 import UIKit
 import UniformTypeIdentifiers
 
@@ -11,11 +11,7 @@ public extension UTType {
 }
 
 private extension Logger {
-  static let sceneDelegate: Logger = {
-    var logger = Logger(label: "org.brians-brain.LibraryNotes.SceneDelegate")
-    logger.logLevel = .debug
-    return logger
-  }()
+  static let sceneDelegate = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SceneDelegate")
 }
 
 /// The activities that this app knows how to handle.
@@ -155,7 +151,7 @@ extension NSUserActivity {
     willConnectTo session: UISceneSession,
     options connectionOptions: UIScene.ConnectionOptions
   ) {
-    Logger.sceneDelegate.info("\(#function) Connecting a new scene to a scene session (self = \(ObjectIdentifier(self))")
+    Logger.sceneDelegate.info("\(#function) Connecting a new scene to a scene session (self = \(String(describing: self))")
     guard let windowScene = scene as? UIWindowScene else { return }
     let window = UIWindow(windowScene: windowScene)
     var isConfigured = false

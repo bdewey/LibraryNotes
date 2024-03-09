@@ -1,5 +1,5 @@
 {
-  "originHash" : "17519d28ae2144ef2e5750ed2abe86784b0c201b4429bf7fd40971342a8f599b",
+  "originHash" : "4b3bbd54e502899cb4dcbe21f5fc942dc45b3c416ea5da178532b224d8c5d6b4",
   "pins" : [
     {
       "identity" : "bookkit",
@@ -71,15 +71,6 @@
       "state" : {
         "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
         "version" : "1.5.4"
-      }
-    },
-    {
-      "identity" : "swift-log-file",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/crspybits/swift-log-file",
-      "state" : {
-        "revision" : "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
-        "version" : "0.0.1"
       }
     },
     {

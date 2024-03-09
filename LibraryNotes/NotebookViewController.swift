@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
-import Logging
+import os
 import SnapKit
 import UIKit
 
@@ -427,7 +427,7 @@ extension NotebookViewController: BookEditDetailsViewControllerDelegate {
       setSecondaryViewController(viewController, pushIfCollapsed: true)
       Logger.shared.info("Created a new view controller for a book!")
     } catch {
-      Logger.shared.error("Unexpected error creating note for book \(book): \(error)")
+      Logger.shared.error("Unexpected error creating note for book \(String(describing: book)): \(String(describing: error))")
     }
   }
 
