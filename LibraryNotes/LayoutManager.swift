@@ -4,6 +4,7 @@ import Foundation
 import os
 import UIKit
 
+@MainActor
 private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LayoutManager")
 
 /// Custom layout manager that knows how to draw vertical bars next to block quotes.

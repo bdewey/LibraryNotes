@@ -80,6 +80,7 @@ final class DocumentListViewController: UIViewController {
     })
   }
 
+  @MainActor
   private lazy var dataSource: DocumentTableController = .init(
     collectionView: collectionView,
     database: database,

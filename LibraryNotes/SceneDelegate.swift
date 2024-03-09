@@ -11,7 +11,7 @@ public extension UTType {
 }
 
 private extension Logger {
-  static let sceneDelegate = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SceneDelegate")
+  static var sceneDelegate: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SceneDelegate") }
 }
 
 /// The activities that this app knows how to handle.

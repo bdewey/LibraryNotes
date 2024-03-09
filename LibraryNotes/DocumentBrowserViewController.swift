@@ -142,8 +142,8 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   }
 
   nonisolated func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-    Logger.shared.info("Imported document to \(destinationURL)")
     Task { @MainActor in
+      Logger.shared.info("Imported document to \(destinationURL)")
       do {
         try await openDocument(at: destinationURL, animated: true)
       } catch {
@@ -153,7 +153,9 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   }
 
   nonisolated func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
-    Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+    MainActor.assumeIsolated {
+      Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+    }
   }
 }
 

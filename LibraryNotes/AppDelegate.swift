@@ -5,9 +5,8 @@ import FileLogging
 import os
 import UIKit
 
-public extension Logger {
-  @MainActor
-  static let shared: Logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes")
+internal extension Logger {
+  static var shared: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes") }
 }
 
 extension UIMenu.Identifier {

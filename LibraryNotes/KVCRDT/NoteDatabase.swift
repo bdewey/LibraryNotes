@@ -12,8 +12,9 @@ import UIKit
 import UniformTypeIdentifiers
 
 private extension Logger {
-  static let keyValueNoteDatabase = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "KeyValueNoteDatabase")
-  static let studySession = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "studySession")
+  static var keyValueNoteDatabase: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "KeyValueNoteDatabase")
+  }
 }
 
 enum KeyValueNoteDatabaseScope: String {
@@ -131,6 +132,7 @@ public final class NoteDatabase {
     try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
   }
 
+  @MainActor
   public func flush() async throws {
     await keyValueDocument.save(to: fileURL, for: .forOverwriting)
   }

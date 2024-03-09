@@ -48,7 +48,6 @@ public struct ClozePromptCollection: PromptCollection {
     // A paragraph or list item that contains more than one cloze will appear more than
     // one time in `clozes`. Deduplicate using pointer identity.
     let clozeSet = Set<ObjectIdentityHashable>(clozeParents.map { ObjectIdentityHashable($0) })
-    Logger.shared.debug("Found \(clozeSet.count) clozes")
     return clozeSet.compactMap { wrappedNode -> ClozePromptCollection? in
       let node = wrappedNode.value
       let chars = parsedString[node.range]
