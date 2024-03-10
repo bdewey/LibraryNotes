@@ -29,7 +29,7 @@ public struct NotebookSecondaryViewControllerRegistry {
   }
 
   /// All known kinds of secondary view controllers. If you add a new secondary view controller, you need to also add it to this list.
-  public static let shared = NotebookSecondaryViewControllerRegistry(types: [
+  @MainActor public static let shared = NotebookSecondaryViewControllerRegistry(types: [
     SavingTextEditViewController.self,
     QuotesViewController.self,
   ])

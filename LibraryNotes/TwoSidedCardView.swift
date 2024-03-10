@@ -9,7 +9,9 @@ private extension CGFloat {
 }
 
 private extension Logger {
-  static let cardLayout = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "BarcodeScanner")
+  static var cardLayout: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CardLayout")
+  }
 }
 
 /// A generic card with a "front" and a "back" side.

@@ -3,7 +3,7 @@
 import Foundation
 import ZIPFoundation
 
-public struct LogFileDirectory {
+public struct LogFileDirectory: Sendable {
   /// The URL of the log file directory.
   public let url: URL
 

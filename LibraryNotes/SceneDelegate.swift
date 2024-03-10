@@ -144,7 +144,7 @@ extension NSUserActivity {
     let toolbarDelegate = ToolbarDelegate()
   #endif
 
-  static var isUITesting: Bool = CommandLine.arguments.contains("--uitesting")
+  static var isUITesting: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting")
 
   func scene(
     _ scene: UIScene,

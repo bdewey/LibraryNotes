@@ -79,7 +79,7 @@ public struct StudySession {
   public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentPrompt else { return }
     let identifier = currentCard.promptIdentifier
-    var statistics = results[currentCard.promptIdentifier, default: AnswerStatistics.empty]
+    var statistics = results[currentCard.promptIdentifier, default: AnswerStatistics()]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1

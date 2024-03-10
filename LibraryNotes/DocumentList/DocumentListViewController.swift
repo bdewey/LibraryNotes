@@ -81,12 +81,16 @@ final class DocumentListViewController: UIViewController {
   }
 
   @MainActor
-  private lazy var dataSource: DocumentTableController = .init(
-    collectionView: collectionView,
-    database: database,
-    coverImageCache: coverImageCache,
-    delegate: self
-  )
+  private lazy var dataSource: DocumentTableController = {
+    MainActor.assumeIsolated {
+      DocumentTableController(
+        collectionView: collectionView,
+        database: database,
+        coverImageCache: coverImageCache,
+        delegate: self
+      )
+    }
+  }()
 
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {

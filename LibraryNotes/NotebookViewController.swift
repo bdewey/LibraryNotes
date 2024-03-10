@@ -32,6 +32,7 @@ public final class NotebookViewController: UISplitViewController {
   init(database: NoteDatabase) {
     self.database = database
     self.coverImageCache = CoverImageCache(database: database)
+    self.documentListViewController = DocumentListViewController(database: database, coverImageCache: coverImageCache)
     super.init(style: .tripleColumn)
     let supplementaryNavigationController = UINavigationController.notebookNavigationController(rootViewController: documentListViewController, prefersLargeTitles: true)
 
@@ -124,10 +125,7 @@ public final class NotebookViewController: UISplitViewController {
   }
 
   /// A list of notes inside the notebook, displayed in the supplementary column
-  private lazy var documentListViewController: DocumentListViewController = {
-    let documentListViewController = DocumentListViewController(database: database, coverImageCache: coverImageCache)
-    return documentListViewController
-  }()
+  private let documentListViewController: DocumentListViewController
 
   private lazy var compactNavigationController = UINavigationController.notebookNavigationController(rootViewController: makeStructureViewController(), prefersLargeTitles: true)
 

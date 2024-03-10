@@ -5,7 +5,9 @@ import UIKit
 import WebKit
 
 extension Logger {
-  static let webView = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "WebViewController")
+  static var webView: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "WebViewController")
+  }
 }
 
 public final class WebViewController: UIViewController {

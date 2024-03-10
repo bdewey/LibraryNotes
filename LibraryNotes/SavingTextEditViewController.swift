@@ -13,7 +13,9 @@ import UIKit
 import UniformTypeIdentifiers
 
 private extension Logger {
-  static let textSaving = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SavingTextEditViewController")
+  static var textSaving: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SavingTextEditViewController")
+  }
 }
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
@@ -56,7 +58,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.autoFirstResponder = autoFirstResponder
     self.imageStorage = NoteScopedImageStorage(identifier: noteIdentifier, database: database)
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
+    self.textEditViewController = Self.makeTextEditViewController(imageStorage: imageStorage, note: note, initialSelectedRange: initialSelectedRange, autoFirstResponder: autoFirstResponder)
     super.init(nibName: nil, bundle: nil)
+    textEditViewController.delegate = self
     self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
         Logger.textSaving.info("No longer getting updates for \(noteIdentifier)")
@@ -114,16 +118,22 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
-  private lazy var textEditViewController: TextEditViewController = {
+  private let textEditViewController: TextEditViewController
+
+  private static func makeTextEditViewController(
+    imageStorage: NoteScopedImageStorage,
+    note: Note,
+    initialSelectedRange: NSRange?,
+    autoFirstResponder: Bool
+  ) -> TextEditViewController {
     let viewController = TextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
     }
     viewController.autoFirstResponder = autoFirstResponder
-    viewController.delegate = self
     return viewController
-  }()
+  }
 
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?

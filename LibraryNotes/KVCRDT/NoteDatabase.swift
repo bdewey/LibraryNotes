@@ -524,7 +524,7 @@ public final class NoteDatabase {
           continue
         }
 
-        let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar.shared)
+        let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar())
         guard let root = try? parsedText.result.get() else { continue }
         var replacementLocations = [Int]()
         root.forEach { node, startIndex, _ in

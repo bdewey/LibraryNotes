@@ -4,8 +4,11 @@ import Foundation
 import os
 import UIKit
 
-@MainActor
-private let logger = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LayoutManager")
+private extension Logger {
+  static var layoutManager: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LayoutManager")
+  }
+}
 
 /// Custom layout manager that knows how to draw vertical bars next to block quotes.
 /// Implementation inspired by the Wordpress Aztec HTML editing component:
@@ -37,7 +40,7 @@ private extension LayoutManager {
       guard let color = object as? UIColor else {
         return
       }
-      logger.debug("Drawing a vertical bar")
+      Logger.layoutManager.debug("Drawing a vertical bar")
       let verticalBarGlyphRange = glyphRange(forCharacterRange: range, actualCharacterRange: nil)
       enumerateLineFragments(forGlyphRange: verticalBarGlyphRange) { rect, _, _, _, _ in
         var verticalBarRect = rect.offsetBy(dx: origin.x, dy: origin.y)

@@ -38,10 +38,17 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 }
 
 /// Allows editing of a single text file.
-public final class TextEditViewController: UIViewController {
+@MainActor public final class TextEditViewController: UIViewController {
   /// Designated initializer.
   public init(imageStorage: NoteScopedImageStorage) {
     self.imageStorage = imageStorage
+    self.parsedAttributedString = ParsedAttributedString(
+      string: "",
+      style: GrailDiaryGrammar.defaultEditingStyle().renderingImages(
+        from: imageStorage
+      )
+    )
+    self.textView = Self.makeTextView(parsedAttributedString: parsedAttributedString)
     super.init(nibName: nil, bundle: nil)
     textView.textStorage.delegate = self
     textView.imageStorage = imageStorage
@@ -68,11 +75,7 @@ public final class TextEditViewController: UIViewController {
 
   // Init-time state.
 
-  public lazy var parsedAttributedString: ParsedAttributedString = {
-    let style = GrailDiaryGrammar.defaultEditingStyle().renderingImages(from: imageStorage)
-    let storage = ParsedAttributedString(string: "", style: style)
-    return storage
-  }()
+  public let parsedAttributedString: ParsedAttributedString
 
   public weak var delegate: TextEditViewControllerDelegate?
 
@@ -86,7 +89,9 @@ public final class TextEditViewController: UIViewController {
     }
   }
 
-  public private(set) lazy var textView: MarkupFormattingTextView = {
+  public let textView: MarkupFormattingTextView
+
+  private static func makeTextView(parsedAttributedString: ParsedAttributedString) -> MarkupFormattingTextView {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
     view.backgroundColor = .grailBackground
     view.accessibilityIdentifier = "edit-document-view"
@@ -94,7 +99,7 @@ public final class TextEditViewController: UIViewController {
     view.textContainerInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     view.keyboardDismissMode = .onDragWithAccessory
     return view
-  }()
+  }
 
   public var selectedRange: NSRange {
     get {
