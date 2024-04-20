@@ -41,9 +41,10 @@ final class DocumentListViewController: UIViewController {
     }
   }
 
-  var currentSortOrder = NoteIdentifierRecord.SortOrder.creationTimestamp {
+  var currentSortOrder = UserDefaults.standard.sortOrder {
     didSet {
       monitorDatabaseForFocusedStructure()
+      UserDefaults.standard.sortOrder = currentSortOrder
     }
   }
 

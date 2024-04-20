@@ -21,6 +21,15 @@ extension UserDefaults {
     }
   }
 
+  var sortOrder: NoteIdentifierRecord.SortOrder {
+    get {
+      string(forKey: #function).flatMap({ NoteIdentifierRecord.SortOrder(rawValue: $0) }) ?? .creationTimestamp
+    }
+    set {
+      set(newValue.rawValue, forKey: #function)
+    }
+  }
+
   private func bool(for key: String, default: Bool) -> Bool {
     if value(forKey: key) == nil {
       Logger.shared.info("Setting default value for \(key): \(`default`)")
