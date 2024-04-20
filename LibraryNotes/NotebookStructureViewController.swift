@@ -2,7 +2,7 @@
 
 import BookKit
 import Combine
-import Logging
+import os
 import SnapKit
 import UIKit
 
@@ -139,14 +139,6 @@ final class NotebookStructureViewController: UIViewController {
     return view
   }()
 
-  private let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
-    var footerConfiguration = footerView.defaultContentConfiguration()
-    footerConfiguration.text = "Version \(UIApplication.versionString)"
-    footerConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
-    footerConfiguration.textProperties.color = UIColor.secondaryLabel
-    footerView.contentConfiguration = footerConfiguration
-  }
-
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
     let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
       var contentConfiguration = UIListContentConfiguration.sidebarCell()
@@ -168,7 +160,15 @@ final class NotebookStructureViewController: UIViewController {
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 
-    dataSource.supplementaryViewProvider = { [footerRegistration] collectionView, kind, indexPath in
+    let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
+      var footerConfiguration = footerView.defaultContentConfiguration()
+      footerConfiguration.text = "Version \(UIApplication.versionString)"
+      footerConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
+      footerConfiguration.textProperties.color = UIColor.secondaryLabel
+      footerView.contentConfiguration = footerConfiguration
+    }
+
+    dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
       if kind == UICollectionView.elementKindSectionFooter {
         return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
       }

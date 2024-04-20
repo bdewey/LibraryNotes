@@ -19,7 +19,7 @@ public extension SyntaxTreeNodeType {
 }
 
 public final class GrailDiaryGrammar: PackratGrammar {
-  public static let shared = GrailDiaryGrammar()
+  @MainActor public static let shared = GrailDiaryGrammar()
 
   public init() {
     let coreGrammar = MiniMarkdownGrammar(

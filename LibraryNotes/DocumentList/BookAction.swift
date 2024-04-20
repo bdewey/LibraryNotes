@@ -2,7 +2,7 @@
 
 import BookKit
 import Foundation
-import Logging
+import os
 import UIKit
 
 /// An action we can perform on a book in the library.

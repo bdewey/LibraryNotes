@@ -5,19 +5,17 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import LinkPresentation
-import Logging
 import ObjectiveCTextStorageWrapper
+import os
 import SnapKit
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
 private extension Logger {
-  static let textSaving: Logger = {
-    var logger = Logger(label: "org.brians-brain.SavingTextEditViewController")
-    logger.logLevel = .info
-    return logger
-  }()
+  static var textSaving: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SavingTextEditViewController")
+  }
 }
 
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
@@ -60,7 +58,9 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     self.autoFirstResponder = autoFirstResponder
     self.imageStorage = NoteScopedImageStorage(identifier: noteIdentifier, database: database)
     self.restorationState = RestorationState(noteIdentifier: noteIdentifier, containsOnlyDefaultContent: containsOnlyDefaultContent)
+    self.textEditViewController = Self.makeTextEditViewController(imageStorage: imageStorage, note: note, initialSelectedRange: initialSelectedRange, autoFirstResponder: autoFirstResponder)
     super.init(nibName: nil, bundle: nil)
+    textEditViewController.delegate = self
     self.noteTextVersionCancellable = database.readPublisher(noteIdentifier: noteIdentifier, key: .noteText)
       .sink(receiveCompletion: { _ in
         Logger.textSaving.info("No longer getting updates for \(noteIdentifier)")
@@ -118,16 +118,22 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private var restorationState: RestorationState
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
-  private lazy var textEditViewController: TextEditViewController = {
+  private let textEditViewController: TextEditViewController
+
+  private static func makeTextEditViewController(
+    imageStorage: NoteScopedImageStorage,
+    note: Note,
+    initialSelectedRange: NSRange?,
+    autoFirstResponder: Bool
+  ) -> TextEditViewController {
     let viewController = TextEditViewController(imageStorage: imageStorage)
     viewController.markdown = note.text ?? ""
     if let initialSelectedRange {
       viewController.selectedRawTextRange = initialSelectedRange
     }
     viewController.autoFirstResponder = autoFirstResponder
-    viewController.delegate = self
     return viewController
-  }()
+  }
 
   private var hasUnsavedChanges = false
   private var autosaveTimer: Timer?
@@ -151,7 +157,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
   let noteIdentifier: Note.Identifier
 
-  internal func setTitleMarkdown(_ markdown: String) {
+  func setTitleMarkdown(_ markdown: String) {
     let label = UILabel(frame: .zero)
     label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
     navigationItem.titleView = label
@@ -280,7 +286,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     // TODO: This is awkward. Get rid of self.note here and get everything from oldNote.
     // I think this may depend on refactoring updateNote so I can know if oldNote was really an old note,
     // or if it was a blank note instead.
-    Logger.textSaving.debug("SavingTextEditViewController: Updating note \(noteIdentifier)")
+    Logger.textSaving.debug("SavingTextEditViewController: Updating note \(self.noteIdentifier)")
     try noteStorage.updateNote(noteIdentifier: noteIdentifier, updateBlock: { oldNote in
       var mergedNote = note
       mergedNote.copyContentKeysForMatchingContent(from: oldNote)

@@ -3,7 +3,7 @@
 import Foundation
 import ZIPFoundation
 
-public struct LogFileDirectory {
+public struct LogFileDirectory: Sendable {
   /// The URL of the log file directory.
   public let url: URL
 
@@ -36,7 +36,7 @@ public struct LogFileDirectory {
     return archive.data!
   }
 
-  public static let shared: LogFileDirectory = {
+  public static var shared: LogFileDirectory {
     // Right now, put the logs into the Documents directory so they're easy to find.
     // swiftlint:disable:next force_try
     let documentsDirectoryURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -44,5 +44,5 @@ public struct LogFileDirectory {
     // Try to create the "logs" subdirectory if it does not exist.
     try? FileManager.default.createDirectory(at: logDirectoryURL, withIntermediateDirectories: false, attributes: nil)
     return LogFileDirectory(url: logDirectoryURL)
-  }()
+  }
 }

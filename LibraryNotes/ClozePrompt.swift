@@ -2,7 +2,7 @@
 
 import AVFoundation
 import Foundation
-import Logging
+import os
 import TextMarkupKit
 import UIKit
 

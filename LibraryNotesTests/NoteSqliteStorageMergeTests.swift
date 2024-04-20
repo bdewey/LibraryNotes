@@ -5,10 +5,9 @@ import KeyValueCRDT
 import XCTest
 
 /// Specific test cases around merging database content.
-@MainActor
 final class NoteSqliteStorageMergeTests: XCTestCase {
   /// If you copy a file, then try to merge it in, nothing happens.
-  func testNoopMerge() async throws {
+  @MainActor func testNoopMerge() async throws {
     var noteIdentifier: Note.Identifier!
     try await MergeTestCase()
       .withInitialState { storage in
@@ -21,7 +20,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteCreationGetsIntegrated() async throws {
+  @MainActor func testRemoteCreationGetsIntegrated() async throws {
     var simpleIdentifier: Note.Identifier!
     var challengeIdentifier: Note.Identifier!
 
@@ -40,7 +39,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteHashtagGetsDeleted() async throws {
+  @MainActor func testRemoteHashtagGetsDeleted() async throws {
     let initialText = """
     # Test content
 
@@ -76,7 +75,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteStudyOfLocalPageGetsIncorporated() async throws {
+  @MainActor func testRemoteStudyOfLocalPageGetsIncorporated() async throws {
     try await MergeTestCase()
       .withInitialState { storage in
         _ = try storage.createNote(.withChallenges)
@@ -102,7 +101,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteStudyOfRemotePageGetsIncorporated() async throws {
+  @MainActor func testRemoteStudyOfRemotePageGetsIncorporated() async throws {
     try await MergeTestCase()
       .performRemoteModification { storage in
         _ = try storage.createNote(.withChallenges)
@@ -129,7 +128,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testLocalChangeIsPreserved() async throws {
+  @MainActor func testLocalChangeIsPreserved() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
@@ -148,7 +147,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testRemoteChangeGetsCopied() async throws {
+  @MainActor func testRemoteChangeGetsCopied() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
@@ -167,7 +166,7 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
       .run(self)
   }
 
-  func testLastWriterWins() async throws {
+  @MainActor func testLastWriterWins() async throws {
     var simpleIdentifier: Note.Identifier!
     var modifiedNote = Note(markdown: "Updated! #hashtag")
     modifiedNote.metadata.modifiedTimestamp = Date().addingTimeInterval(60)
@@ -232,7 +231,7 @@ private struct MergeTestCase {
     return copy
   }
 
-  func run(_ runner: NoteSqliteStorageMergeTests) async throws {
+  @MainActor func run(_ runner: NoteSqliteStorageMergeTests) async throws {
     try await runner.runKeyValueTestCase(self)
   }
 }
@@ -248,7 +247,7 @@ private extension NoteSqliteStorageMergeTests {
     )
   }
 
-  func runKeyValueTestCase(_ testCase: MergeTestCase) async throws {
+  @MainActor func runKeyValueTestCase(_ testCase: MergeTestCase) async throws {
     let localURL = try await makeKeyValueFile(device: .local, modificationBlock: testCase.initialLocalStorageBlock)
     let remoteURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
     try FileManager.default.copyItem(at: localURL, to: remoteURL)
@@ -260,7 +259,7 @@ private extension NoteSqliteStorageMergeTests {
     try await testCase.validationBlock?(localStorage)
   }
 
-  func makeKeyValueFile(
+  @MainActor func makeKeyValueFile(
     device: TestDevice,
     modificationBlock: MergeTestCase.StorageModificationBlock?
   ) async throws -> URL {

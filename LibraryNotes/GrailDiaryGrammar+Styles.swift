@@ -5,7 +5,7 @@ import UIKit
 
 extension GrailDiaryGrammar {
   /// An editing style for `GrailDiaryGrammar` strings, based on the `MiniMarkdownGrammar` default editing style.
-  static func defaultEditingStyle() -> ParsedAttributedString.Style {
+  @MainActor static func defaultEditingStyle() -> ParsedAttributedString.Style {
     var baseStyle = MiniMarkdownGrammar.defaultEditingStyle()
     let formatters: [SyntaxTreeNodeType: AnyParsedAttributedStringFormatter] = [
       .questionAndAnswer: .incrementListLevel,

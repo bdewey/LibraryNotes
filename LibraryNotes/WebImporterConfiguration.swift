@@ -3,7 +3,7 @@
 import Foundation
 import UIKit
 
-public struct WebImporterConfiguration {
+public struct WebImporterConfiguration: Sendable {
   var title: String
   var image: UIImage?
   var initialURL: URL

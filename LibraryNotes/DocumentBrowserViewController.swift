@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import KeyValueCRDT
-import Logging
+import os
 import UIKit
 import UniformTypeIdentifiers
 
@@ -116,34 +116,32 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     _ controller: UIDocumentBrowserViewController,
     didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void
   ) {
-    Task { @MainActor in
-      do {
-        guard let url = try await makeNewDocument() else {
-          assertionFailure()
-          importHandler(nil, .none)
-          return
-        }
-        Logger.shared.info("Trying to import from '\(url.path)'")
-        let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
-        if FileManager.default.fileExists(atPath: temporaryURL.path) {
-          try FileManager.default.removeItem(at: temporaryURL)
-        }
-        try FileManager.default.copyItem(at: url, to: temporaryURL)
-        importHandler(temporaryURL, .move)
-      } catch {
-        Logger.shared.error("Unexpected error creating document: \(error)")
+    do {
+      guard let url = makeNewDocument() else {
+        assertionFailure()
         importHandler(nil, .none)
+        return
       }
+      Logger.shared.info("Trying to import from '\(url.path)'")
+      let temporaryURL = FileManager.default.temporaryDirectory.appendingPathComponent(url.lastPathComponent)
+      if FileManager.default.fileExists(atPath: temporaryURL.path) {
+        try FileManager.default.removeItem(at: temporaryURL)
+      }
+      try FileManager.default.copyItem(at: url, to: temporaryURL)
+      importHandler(temporaryURL, .move)
+    } catch {
+      Logger.shared.error("Unexpected error creating document: \(error)")
+      importHandler(nil, .none)
     }
   }
 
-  private func makeNewDocument() async throws -> URL? {
+  private nonisolated func makeNewDocument() -> URL? {
     Bundle.main.url(forResource: "library", withExtension: "libnotes")
   }
 
   nonisolated func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-    Logger.shared.info("Imported document to \(destinationURL)")
     Task { @MainActor in
+      Logger.shared.info("Imported document to \(destinationURL)")
       do {
         try await openDocument(at: destinationURL, animated: true)
       } catch {
@@ -153,7 +151,9 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
   }
 
   nonisolated func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Swift.Error?) {
-    Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+    MainActor.assumeIsolated {
+      Logger.shared.error("Unable to import document at \(documentURL): \(error?.localizedDescription ?? "nil")")
+    }
   }
 }
 

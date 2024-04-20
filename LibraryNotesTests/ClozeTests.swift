@@ -5,9 +5,8 @@ import ObjectiveCTextStorageWrapper
 import TextMarkupKit
 import XCTest
 
-@MainActor
 final class ClozeTests: XCTestCase {
-  func testCloze() {
+  @MainActor func testCloze() {
     do {
       let parsedString = ParsedString("* Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?", grammar: GrailDiaryGrammar.shared)
       try parsedString.parsedResultsThatMatch("(document (list (list_item (list_delimiter unordered_list_opening tab) (paragraph text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text (cloze delimiter cloze_hint delimiter cloze_answer delimiter) text))))")
@@ -18,7 +17,7 @@ final class ClozeTests: XCTestCase {
     }
   }
 
-  func testFindClozeInText() {
+  @MainActor func testFindClozeInText() {
     let example = """
     # Mastering the verb "to be"
 
@@ -35,7 +34,7 @@ final class ClozeTests: XCTestCase {
     XCTAssertEqual(templates.count, 1)
   }
 
-  func testMultipleClozesInAnItem() {
+  @MainActor func testMultipleClozesInAnItem() {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
@@ -72,7 +71,7 @@ final class ClozeTests: XCTestCase {
     )
   }
 
-  func testYamlEncodingIsJustMarkdown() {
+  @MainActor func testYamlEncodingIsJustMarkdown() {
     let example = """
     * Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?
     """
@@ -80,7 +79,7 @@ final class ClozeTests: XCTestCase {
     XCTAssertEqual(decoded?.prompts.count, 2)
   }
 
-  func testClozeFormatting() {
+  @MainActor func testClozeFormatting() {
     // Simple storage that will mark clozes as bold.
     let string = ParsedAttributedString(
       string: "",

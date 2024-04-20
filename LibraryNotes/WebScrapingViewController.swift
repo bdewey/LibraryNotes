@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Logging
+import os
 import UIKit
 import WebKit
 
@@ -105,7 +105,7 @@ private extension WebScrapingViewController {
 // MARK: - WKNavigationDelegate
 
 extension WebScrapingViewController: WKNavigationDelegate {
-  nonisolated public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+  public nonisolated func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
     MainActor.assumeIsolated {
       configureUI()
     }

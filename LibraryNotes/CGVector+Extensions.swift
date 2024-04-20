@@ -4,7 +4,7 @@ import UIKit
 
 public extension CGVector {
   /// The direction of a vector, in radians.
-  struct Direction: RawRepresentable, Hashable {
+  struct Direction: RawRepresentable, Hashable, Sendable {
     public let rawValue: CGFloat
 
     public init(rawValue: CGFloat) {

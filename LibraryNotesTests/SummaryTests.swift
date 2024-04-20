@@ -5,7 +5,7 @@ import TextMarkupKit
 import XCTest
 
 final class SummaryTests: XCTestCase {
-  func testSummary() throws {
+  @MainActor func testSummary() throws {
     let example = """
     # _Book_, Author (Year)
 
@@ -20,7 +20,7 @@ final class SummaryTests: XCTestCase {
     )
   }
 
-  func testCaseInsensitiveSummary() throws {
+  @MainActor func testCaseInsensitiveSummary() throws {
     let example = """
     # _Book_, Author (Year)
 
@@ -35,7 +35,7 @@ final class SummaryTests: XCTestCase {
     )
   }
 
-  private func parseText(_ text: String, expectedStructure: String) throws {
+  @MainActor private func parseText(_ text: String, expectedStructure: String) throws {
     let parsedString = ParsedString(text, grammar: GrailDiaryGrammar.shared)
     do {
       try parsedString.parsedResultsThatMatch(expectedStructure)

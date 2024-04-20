@@ -10,4 +10,5 @@
 --wraparguments beforefirst
 --wrapcollections beforefirst
 --self init-only
+--selfrequired info, debug, trace, error
 --swiftversion 5.7

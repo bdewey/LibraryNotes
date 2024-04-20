@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Combine
-import Logging
+import os
 import SnapKit
 import TextMarkupKit
 import UIKit
@@ -125,7 +125,7 @@ extension QuotesViewController: NotebookSecondaryViewController {
     let quoteIdentifiers: [ContentIdentifier]
   }
 
-  nonisolated public static var notebookDetailType: String { "QuotesViewController" }
+  public nonisolated static var notebookDetailType: String { "QuotesViewController" }
 
   public var shouldShowWhenCollapsed: Bool { true }
 

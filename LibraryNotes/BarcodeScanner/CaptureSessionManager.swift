@@ -13,7 +13,10 @@ public actor CaptureSessionManager: NSObject {
   public let session = AVCaptureSession()
   private let metadataOutput = AVCaptureMetadataOutput()
 
-  public func configureSession(metadataDelegate: AVCaptureMetadataOutputObjectsDelegate? = nil, metadataQueue: DispatchQueue? = nil) throws {
+  public func configureSession(
+    metadataDelegate: AVCaptureMetadataOutputObjectsDelegate? = nil,
+    metadataQueue: DispatchQueue? = nil
+  ) throws {
     session.beginConfiguration()
     defer {
       session.commitConfiguration()
@@ -46,8 +49,22 @@ public actor CaptureSessionManager: NSObject {
     metadataOutput.rectOfInterest = initialRectOfInterest
   }
 
+  private var rotationObservation: NSKeyValueObservation?
+  private var rotationCoordinator: AVCaptureDevice.RotationCoordinator?
+
   public func startRunning() {
     session.startRunning()
+    if let deviceInput = session.inputs.first as? AVCaptureDeviceInput, let connection = session.connections.first {
+      let unsafeConnection = UnsafeCaptureConnection(connection)
+      rotationCoordinator = AVCaptureDevice.RotationCoordinator(device: deviceInput.device, previewLayer: connection.videoPreviewLayer)
+      rotationObservation = rotationCoordinator?.observe(\.videoRotationAngleForHorizonLevelPreview, options: [.initial, .new]) { _, change in
+        if let angle = change.newValue {
+          Task { @MainActor in
+            unsafeConnection.videoRotationAngle = angle
+          }
+        }
+      }
+    }
   }
 
   static let defaultVideoDevice: AVCaptureDevice? = {
@@ -61,4 +78,21 @@ public actor CaptureSessionManager: NSObject {
       return nil
     }
   }()
+}
+
+private struct UnsafeCaptureConnection: @unchecked Sendable {
+  private let _connection: AVCaptureConnection
+
+  init(_ connection: AVCaptureConnection) {
+    self._connection = connection
+  }
+
+  @MainActor var videoRotationAngle: CGFloat {
+    get {
+      _connection.videoRotationAngle
+    }
+    nonmutating set {
+      _connection.videoRotationAngle = newValue
+    }
+  }
 }

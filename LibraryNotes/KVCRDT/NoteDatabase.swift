@@ -5,23 +5,16 @@ import Combine
 import Foundation
 import GRDB
 import KeyValueCRDT
-import Logging
 import os
 import SpacedRepetitionScheduler
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
 
-private extension Logging.Logger {
-  static let keyValueNoteDatabase: Logging.Logger = {
-    var logger = Logger(label: "org.brians-brain.KeyValueNoteDatabase")
-    logger.logLevel = .debug
-    return logger
-  }()
-}
-
-private extension OSLog {
-  static let studySession = OSLog(subsystem: "org.brians-brain.NoteDatabase", category: "studySession")
+private extension Logger {
+  static var keyValueNoteDatabase: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "KeyValueNoteDatabase")
+  }
 }
 
 enum KeyValueNoteDatabaseScope: String {
@@ -71,7 +64,7 @@ extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
-public final class NoteDatabase {
+public final class NoteDatabase: @unchecked Sendable {
   public typealias IOCompletionHandler = (Bool) -> Void
 
   /// Initializes and opens the database stored at `fileURL`
@@ -94,7 +87,7 @@ public final class NoteDatabase {
     self.cachedBookMetadataInvalidation = keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .sink(receiveCompletion: { error in
-        Logger.shared.error("Error maintaining cache: \(error)")
+        Logger.shared.error("Error maintaining cache: \(String(describing: error))")
       }, receiveValue: { [weak self] update in
         guard let self else { return }
         for scopedKey in update.keys {
@@ -113,7 +106,7 @@ public final class NoteDatabase {
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
 
-  private let keyValueDocument: UIKeyValueDocument
+  @MainActor private let keyValueDocument: UIKeyValueDocument
 
   /// The `KeyValueDatabase` contained in `keyValueDocument`
   private let keyValueCRDT: KeyValueDatabase
@@ -126,11 +119,11 @@ public final class NoteDatabase {
 
   @MainActor public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
 
-  public func close() async -> Bool {
+  @MainActor public func close() async -> Bool {
     await keyValueDocument.close()
   }
 
-  public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
+  @MainActor public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
     await keyValueDocument.save(to: url, for: saveOperation)
   }
 
@@ -139,6 +132,7 @@ public final class NoteDatabase {
     try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
   }
 
+  @MainActor
   public func flush() async throws {
     await keyValueDocument.save(to: fileURL, for: .forOverwriting)
   }
@@ -427,7 +421,7 @@ public final class NoteDatabase {
         }
         updates[scopedKey] = try Value(info)
       } else {
-        Logger.keyValueNoteDatabase.error("Could not find info or index for \(scopedKey)")
+        Logger.keyValueNoteDatabase.error("Could not find info or index for \(String(describing: scopedKey))")
         assertionFailure()
       }
     }
@@ -530,7 +524,7 @@ public final class NoteDatabase {
           continue
         }
 
-        let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar.shared)
+        let parsedText = ParsedString(text, grammar: MiniMarkdownGrammar())
         guard let root = try? parsedText.result.get() else { continue }
         var replacementLocations = [Int]()
         root.forEach { node, startIndex, _ in
@@ -557,9 +551,11 @@ public final class NoteDatabase {
     }
   }
 
+  private let studySessionSignposter = OSSignposter(subsystem: Bundle.main.bundleIdentifier!, category: "StudySession")
+
   public func studySession(noteIdentifiers: Set<Note.Identifier>? = nil, date: Date) throws -> StudySession {
-    let signpostID = OSSignpostID(log: .studySession)
-    os_signpost(.begin, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    let signpostID = studySessionSignposter.makeSignpostID()
+    let interval = studySessionSignposter.beginInterval("makeStudySession", id: signpostID)
     let sqlLiteral = StudySessionEntryRecord.sql(identifiers: noteIdentifiers, due: date)
     let entries = try keyValueCRDT.read { db -> [StudySessionEntryRecord] in
       let (sql, arguments) = try sqlLiteral.build(db)
@@ -573,7 +569,7 @@ public final class NoteDatabase {
         properties: CardDocumentProperties(documentName: entry.scope, attributionMarkdown: metadata.preferredTitle)
       )
     }
-    os_signpost(.end, log: .studySession, name: "makeStudySession", signpostID: signpostID)
+    studySessionSignposter.endInterval("makeStudySession", interval)
     return studySession
   }
 

@@ -4,7 +4,7 @@ import BookKit
 import Foundation
 
 /// Holds the core information about books.
-public struct BookNoteMetadata: Codable, Equatable {
+public struct BookNoteMetadata: Codable, Equatable, Sendable {
   public init(title: String, summary: String? = nil, creationTimestamp: Date, modifiedTimestamp: Date, tags: [String] = [], folder: String? = nil, book: AugmentedBook? = nil) {
     self.title = title
     self.summary = summary

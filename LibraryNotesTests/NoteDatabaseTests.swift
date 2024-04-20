@@ -4,7 +4,6 @@ import KeyValueCRDT
 @testable import Library_Notes
 import XCTest
 
-@MainActor
 final class NoteDatabaseTests: XCTestCase {
   private var database: NoteDatabase!
 
@@ -13,19 +12,19 @@ final class NoteDatabaseTests: XCTestCase {
     database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
   }
 
-  override func tearDown() async throws {
+  @MainActor override func tearDown() async throws {
     _ = await database.close()
     try FileManager.default.removeItem(at: database.fileURL)
   }
 
-  func testRoundTripSimpleNoteContents() async throws {
+  @MainActor func testRoundTripSimpleNoteContents() async throws {
     let identifier = try database.createNote(Note.simpleTest)
     XCTAssertTrue(database.hasUnsavedChanges)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.simpleTest, roundTripNote)
   }
 
-  func testUpdateNonExistantNoteCreatesNote() async throws {
+  @MainActor func testUpdateNonExistantNoteCreatesNote() async throws {
     var note = Note.simpleTest
     let identifier = UUID().uuidString
     try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in
@@ -37,7 +36,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(note, roundTripNote)
   }
 
-  func testUpdateSimpleNote() async throws {
+  @MainActor func testUpdateSimpleNote() async throws {
     var note = Note.simpleTest
     let identifier = try database.createNote(note)
     note.text = "Version 2.0 text"
@@ -46,19 +45,19 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(note, roundTripNote)
   }
 
-  func testRoundTripHashtagNoteContents() async throws {
+  @MainActor func testRoundTripHashtagNoteContents() async throws {
     let identifier = try database.createNote(Note.withHashtags)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.withHashtags, roundTripNote)
   }
 
-  func testRoundTripReferenceWebPage() async throws {
+  @MainActor func testRoundTripReferenceWebPage() async throws {
     let identifier = try database.createNote(.withReferenceWebPage)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.withReferenceWebPage, roundTripNote)
   }
 
-  func testUpdateHashtags() async throws {
+  @MainActor func testUpdateHashtags() async throws {
     let identifier = try database.createNote(Note.withHashtags)
     try database.updateNote(noteIdentifier: identifier, updateBlock: { oldNote -> Note in
       var note = oldNote
@@ -72,14 +71,14 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(expectedNote, roundTripNote)
   }
 
-  func testUpdateNoteWithChallenges() async throws {
+  @MainActor func testUpdateNoteWithChallenges() async throws {
     let identifier = try database.createNote(Note.withChallenges)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.withChallenges, roundTripNote)
     XCTAssertEqual(roundTripNote.promptCollections.count, 3)
   }
 
-  func testPartialQuoteDoesntFail() async throws {
+  @MainActor func testPartialQuoteDoesntFail() async throws {
     let note = Note(markdown: """
     # Title
     >
@@ -91,14 +90,14 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(roundTripNote.promptCollections.count, 1)
   }
 
-  func testRemoveChallengesFromNote() async throws {
+  @MainActor func testRemoveChallengesFromNote() async throws {
     let identifier = try database.createNote(Note.withChallenges)
     try database.updateNote(noteIdentifier: identifier, updateBlock: { _ in Note.simpleTest })
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.simpleTest, roundTripNote)
   }
 
-  func testCreatingNoteSendsNotification() async throws {
+  @MainActor func testCreatingNoteSendsNotification() async throws {
     var didGetNotification = false
     let cancellable = database.notesDidChange.sink { didGetNotification = true }
     _ = try database.createNote(Note.simpleTest)
@@ -106,7 +105,7 @@ final class NoteDatabaseTests: XCTestCase {
     cancellable.cancel()
   }
 
-  func testDeleteNote() async throws {
+  @MainActor func testDeleteNote() async throws {
     let identifier = try database.createNote(Note.withHashtags)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.withHashtags, roundTripNote)
@@ -117,7 +116,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(0, database.noteCount)
   }
 
-  func testStudyLog() async throws {
+  @MainActor func testStudyLog() async throws {
     _ = try database.createNote(Note.withChallenges)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
@@ -131,7 +130,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(database.studyLog.count, studySession.count)
   }
 
-  func testStudySessionWithIncorrectLearningItems() async throws {
+  @MainActor func testStudySessionWithIncorrectLearningItems() async throws {
     _ = try database.createNote(Note.withChallenges)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
@@ -150,7 +149,7 @@ final class NoteDatabaseTests: XCTestCase {
     try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
   }
 
-  func testChallengeStabilityAcrossUnrelatedEdits() async throws {
+  @MainActor func testChallengeStabilityAcrossUnrelatedEdits() async throws {
     let originalText = """
     # Shakespeare quotes
 
@@ -173,7 +172,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(2, modifiedNote.promptCollections.count)
   }
 
-  func testChallengeStabilityWithTemplateEdits() async throws {
+  @MainActor func testChallengeStabilityWithTemplateEdits() async throws {
     let originalText = """
     # Shakespeare quotes
 
@@ -195,7 +194,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(modifiedNote.promptCollections.first!.value.rawValue, "> To be, or not to be, that is the question. (Hamlet)\n")
   }
 
-  func testSubstantialEditGetsNewKey() async throws {
+  @MainActor func testSubstantialEditGetsNewKey() async throws {
     let originalText = """
     # Shakespeare quotes
 
@@ -222,7 +221,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(modifiedNote.promptCollections.first!.value.rawValue, "> Out, out, damn spot!")
   }
 
-  func testBuryRelatedChallenges() async throws {
+  @MainActor func testBuryRelatedChallenges() async throws {
     _ = try database.createNote(Note.multipleClozes)
     // New items aren't eligible for at 3-5 days.
     let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
@@ -240,7 +239,7 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(studySession.count, 1)
   }
 
-  func testCanLoadVersionZeroDatabase() async throws {
+  @MainActor func testCanLoadVersionZeroDatabase() async throws {
     guard let builtInURL = Bundle(for: Self.self).url(forResource: "library", withExtension: "libnotes") else {
       throw CocoaError(.fileNoSuchFile)
     }

@@ -43,10 +43,10 @@ public struct StudySession {
   }
 
   /// Creates a study session where all cards come from a single document.
-  public init<PromptIdentifiers: Sequence>(
-    _ promptIdentifiers: PromptIdentifiers,
+  public init(
+    _ promptIdentifiers: some Sequence<PromptIdentifier>,
     properties: CardDocumentProperties
-  ) where PromptIdentifiers.Element == PromptIdentifier {
+  ) {
     let sessionPromptIdentifiers = promptIdentifiers.shuffled().map {
       SessionPromptIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, promptIdentifier: $0)
     }
@@ -79,7 +79,7 @@ public struct StudySession {
   public mutating func recordAnswer(correct: Bool) {
     guard let currentCard = currentPrompt else { return }
     let identifier = currentCard.promptIdentifier
-    var statistics = results[currentCard.promptIdentifier, default: AnswerStatistics.empty]
+    var statistics = results[currentCard.promptIdentifier, default: AnswerStatistics()]
     if correct {
       if !answeredIncorrectly.contains(identifier) { answeredCorrectly.insert(identifier) }
       statistics.correct += 1

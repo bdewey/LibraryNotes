@@ -3,7 +3,7 @@
 import UIKit
 
 /// A list cell that is clear by default, with tint background color when selected.
-internal final class ClearBackgroundCell: UICollectionViewListCell {
+final class ClearBackgroundCell: UICollectionViewListCell {
   override func updateConfiguration(using state: UICellConfigurationState) {
     var backgroundConfiguration = UIBackgroundConfiguration.clear()
     if state.isSelected {

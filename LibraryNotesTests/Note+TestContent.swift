@@ -4,7 +4,7 @@ import Foundation
 import Library_Notes
 
 extension Note {
-  static let simpleTest = Note(
+  static nonisolated(unsafe) let simpleTest = Note(
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: [],
@@ -14,7 +14,7 @@ extension Note {
     promptCollections: [:]
   )
 
-  static let withHashtags = Note(
+  static nonisolated(unsafe) let withHashtags = Note(
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: ["#ashtag"],
@@ -24,7 +24,7 @@ extension Note {
     promptCollections: [:]
   )
 
-  static let withChallenges = Note(markdown: """
+  static nonisolated(unsafe) let withChallenges = Note(markdown: """
   # Shakespeare quotes
 
   > To be, or not to be, that is the question. (Hamlet)
@@ -38,9 +38,9 @@ extension Note {
 
   """)
 
-  static let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
+  static nonisolated(unsafe) let multipleClozes = Note(markdown: "* This ?[](challenge) has multiple ?[](clozes).")
 
-  static let withReferenceWebPage = Note(
+  static nonisolated(unsafe) let withReferenceWebPage = Note(
     creationTimestamp: Date(),
     timestamp: Date(),
     hashtags: ["#test"],

@@ -68,7 +68,7 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   }
 }
 
-internal extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == BookCollectionViewItem {
+extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == BookCollectionViewItem {
   var bookCount: Int {
     var bookCount = 0
     for item in rootItems {

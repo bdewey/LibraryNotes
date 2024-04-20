@@ -5,8 +5,8 @@ import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
-import Logging
 import MessageUI
+import os
 import SafariServices
 import SnapKit
 import UIKit
@@ -80,12 +80,15 @@ final class DocumentListViewController: UIViewController {
     })
   }
 
-  private lazy var dataSource: DocumentTableController = .init(
-    collectionView: collectionView,
-    database: database,
-    coverImageCache: coverImageCache,
-    delegate: self
-  )
+  @MainActor
+  private lazy var dataSource: DocumentTableController = MainActor.assumeIsolated {
+    DocumentTableController(
+      collectionView: collectionView,
+      database: database,
+      coverImageCache: coverImageCache,
+      delegate: self
+    )
+  }
 
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
@@ -113,7 +116,7 @@ final class DocumentListViewController: UIViewController {
     return view
   }()
 
-  internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
+  func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
       notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
@@ -129,7 +132,7 @@ final class DocumentListViewController: UIViewController {
     collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
   }
 
-  internal func selectFirstNote() {
+  func selectFirstNote() {
     dataSource.selectFirstNote()
   }
 
@@ -258,7 +261,7 @@ final class DocumentListViewController: UIViewController {
     }
     didSet {
       quotesSubscription = quotesPublisher?.sink(receiveCompletion: { error in
-        Logger.shared.error("Unexpected error getting quotes: \(error)")
+        Logger.shared.error("Unexpected error getting quotes: \(String(describing: error))")
       }, receiveValue: { [weak self] quoteIdentifiers in
         self?.quoteIdentifiers = quoteIdentifiers
         Logger.shared.debug("Got \(quoteIdentifiers.count) quotes")
@@ -267,7 +270,7 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateQuoteList() {
-    Logger.shared.info("Updating quote list for hashtag \(focusedStructure.hashtag ?? "nil")")
+    Logger.shared.info("Updating quote list for hashtag \(self.focusedStructure.hashtag ?? "nil")")
     quotesPublisher = database.promptCollectionPublisher(promptType: .quote, tagged: focusedStructure.hashtag)
   }
 

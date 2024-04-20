@@ -1,7 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import AVFoundation
-import Logging
+import os
 import UIKit
 
 private extension CGFloat {
@@ -9,11 +9,9 @@ private extension CGFloat {
 }
 
 private extension Logger {
-  static let cardLayout: Logger = {
-    var logger = Logger(label: "org.brians-brain.BarcodeScanner")
-    logger.logLevel = .debug
-    return logger
-  }()
+  static var cardLayout: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "CardLayout")
+  }
 }
 
 /// A generic card with a "front" and a "back" side.
@@ -69,7 +67,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
       backLabelFrame: backLabelFrame,
       isAnswerVisible: isAnswerVisible
     )
-    Logger.cardLayout.trace("\(#function) computed layout for \(layoutArea.size). backLabelFrame = \(backLabelFrame) backBounding = \(backLabelSize) desired height = \(layout.desiredHeight)")
+    Logger.cardLayout.trace("computed layout for \(layoutArea.size.debugDescription). backLabelFrame = \(backLabelFrame.debugDescription) backBounding = \(backLabelSize.debugDescription) desired height = \(layout.desiredHeight)")
     return layout
   }
 
@@ -98,7 +96,7 @@ public final class TwoSidedCardView: PromptView, PromptViewActions {
     contextLabel.frame = layout.contextLabelFrame
     backLabel.frame = layout.backLabelFrame
     frontLabel.frame = layout.frontLabelFrame
-    Logger.cardLayout.trace("Exit \(#function). childContentSize: \(childContentSize). Layout: \(layout). Bounds height = \(bounds.height)")
+    Logger.cardLayout.trace("Exit \(#function). childContentSize: \(childContentSize.debugDescription). Layout: \(String(describing: layout)). Bounds height = \(self.bounds.height)")
   }
 
   /// A string displayed at the top of the card, both front and back, that gives context

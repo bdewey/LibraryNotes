@@ -4,7 +4,7 @@ import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
-import Logging
+import os
 
 /// An object that can download cover images from OpenLibrary and bulk-create notes for books.
 @MainActor final class BookImporter {
@@ -55,14 +55,14 @@ import Logging
       var results: [NoteUpdatePayload] = []
       for bookAndImage in booksAndImages {
         await Task.yield()
-        results.append(try bookAndImage.asNoteUpdatePayload(hashtags: request.hashtags))
+        try results.append(bookAndImage.asNoteUpdatePayload(hashtags: request.hashtags))
       }
       return results
     }
     do {
       let payload = try await task.value
       try database.bulkWrite(payload)
-      Logger.shared.info("Finished processing books. Downloaded \(booksAndImages.filter { $0.image != nil }.count) images")
+      Logger.shared.info("Finished processing books. Downloaded \(self.booksAndImages.filter { $0.image != nil }.count) images")
     } catch {
       Logger.shared.error("Error importing books: \(error)")
     }
@@ -94,7 +94,7 @@ private extension BookAndImage {
       metadata.book?.readingHistory = readingHistory
     }
     metadata.tags = hashtags.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-    payload.insert(key: .metadata, value: try Value(metadata))
+    try payload.insert(key: .metadata, value: Value(metadata))
     payload.insert(key: .bookIndex, value: Value(metadata.indexedContents))
     if let review = book.review {
       payload.insert(key: .noteText, value: .text(review))

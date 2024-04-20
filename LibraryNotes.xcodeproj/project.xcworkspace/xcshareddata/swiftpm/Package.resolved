@@ -1,4 +1,5 @@
 {
+  "originHash" : "55a83080bdb6c50282944bed8885ce7a44b10e26fa0624f4d74cb306eba1bede",
   "pins" : [
     {
       "identity" : "bookkit",
@@ -50,8 +51,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/SpacedRepetitionScheduler.git",
       "state" : {
-        "revision" : "4557c67e74c3b8934abef17a8a06ef658fa88eb8",
-        "version" : "0.3.0"
+        "revision" : "54192fabf7a80b35281ff70e0375f7f20201fcad",
+        "version" : "0.5.0"
       }
     },
     {
@@ -68,17 +69,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-log",
       "state" : {
-        "revision" : "5d66f7ba25daf4f94100e7022febf3c75e37a6c7",
-        "version" : "1.4.2"
-      }
-    },
-    {
-      "identity" : "swift-log-file",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/crspybits/swift-log-file",
-      "state" : {
-        "revision" : "0c4cdbeacf8467cbaf9f8c4d35ecf4bba31fc9a2",
-        "version" : "0.0.1"
+        "revision" : "e97a6fcb1ab07462881ac165fdbb37f067e205d5",
+        "version" : "1.5.4"
       }
     },
     {
@@ -95,8 +87,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/TextMarkupKit",
       "state" : {
-        "revision" : "ddd2160dea6d4c3703991ea83e1113fffb636c4b",
-        "version" : "0.10.0"
+        "revision" : "31198bae36a7d4f35d5086da907b6b3067687160",
+        "version" : "0.11.0"
       }
     },
     {
@@ -109,5 +101,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

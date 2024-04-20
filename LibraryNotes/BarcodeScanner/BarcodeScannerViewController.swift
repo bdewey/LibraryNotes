@@ -2,16 +2,13 @@
 
 @preconcurrency import AVFoundation
 import Combine
-import Logging
+import os
 import SwiftUI
 import UIKit
 
 private extension Logger {
-  static let barcodeScanner: Logger = {
-    var logger = Logger(label: "org.brians-brain.BarcodeScanner")
-    logger.logLevel = .info
-    return logger
-  }()
+  @MainActor
+  static let barcodeScanner = Logger(subsystem: Bundle.main.bundleIdentifier!, category: "BarcodeScanner")
 }
 
 @MainActor
@@ -55,26 +52,15 @@ public final class BarcodeScannerViewController: UIViewController {
         return false
       }
       cameraCaptureView.session = captureSessionManager.session
-      try await captureSessionManager.configureSession(metadataDelegate: self, metadataQueue: .main)
+      try await captureSessionManager.configureSession(
+        metadataDelegate: self,
+        metadataQueue: .main
+      )
       await captureSessionManager.startRunning()
-      updateSessionOrientation()
       return true
     }
     self.startScanningTask = startScanningTask
     return try await startScanningTask.value
-  }
-
-  override public func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-    super.viewWillTransition(to: size, with: coordinator)
-    updateSessionOrientation()
-  }
-
-  @MainActor
-  private func updateSessionOrientation() {
-    let deviceOrientation = UIDevice.current.orientation
-    let videoOrientation = AVCaptureVideoOrientation(deviceOrientation)
-    Logger.barcodeScanner.debug("Device orientation = \(deviceOrientation), video orientation = \(videoOrientation)")
-    cameraCaptureView.session?.connections.first?.videoOrientation = videoOrientation
   }
 
   private func checkCapturePermission() async -> Bool {
@@ -103,7 +89,7 @@ public final class BarcodeScannerViewController: UIViewController {
 }
 
 extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
-  nonisolated public func metadataOutput(
+  public nonisolated func metadataOutput(
     _ output: AVCaptureMetadataOutput,
     didOutput metadataObjects: [AVMetadataObject],
     from connection: AVCaptureConnection
@@ -121,68 +107,6 @@ extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
       for barcode in barcodes {
         insertBarcode(barcode)
       }
-    }
-  }
-}
-
-extension AVCaptureVideoOrientation: CustomStringConvertible {
-  // Note per Apple docs, "device orientation" and "interface orientation" flip the landscape values
-  fileprivate init(_ deviceOrientation: UIDeviceOrientation) {
-    switch deviceOrientation {
-    case .unknown:
-      self = .portrait
-    case .portrait:
-      self = .portrait
-    case .portraitUpsideDown:
-      self = .portraitUpsideDown
-    case .landscapeLeft:
-      self = .landscapeRight
-    case .landscapeRight:
-      self = .landscapeLeft
-    case .faceUp:
-      self = .portrait
-    case .faceDown:
-      self = .portrait
-    @unknown default:
-      self = .portrait
-    }
-  }
-
-  public var description: String {
-    switch self {
-    case .portrait:
-      return "portrait"
-    case .portraitUpsideDown:
-      return "portraitUpsideDown"
-    case .landscapeRight:
-      return "landscapeRight"
-    case .landscapeLeft:
-      return "landscapeLeft"
-    @unknown default:
-      return "unknown"
-    }
-  }
-}
-
-extension UIDeviceOrientation: CustomStringConvertible {
-  public var description: String {
-    switch self {
-    case .unknown:
-      return "unknown"
-    case .portrait:
-      return "portrait"
-    case .portraitUpsideDown:
-      return "portraitUpsideDown"
-    case .landscapeLeft:
-      return "landscapeLeft"
-    case .landscapeRight:
-      return "landscapeRight"
-    case .faceUp:
-      return "faceUp"
-    case .faceDown:
-      return "faceDown"
-    @unknown default:
-      return "unknown"
     }
   }
 }
