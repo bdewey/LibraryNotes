@@ -57,11 +57,10 @@ private enum TestContent {
   """
 }
 
-@MainActor
 final class LibraryNotesAppUITests: XCTestCase {
   var application: XCUIApplication!
 
-  override func setUp() {
+  @MainActor override func setUp() {
     // In UI tests it is usually best to stop immediately when a failure occurs.
     continueAfterFailure = false
 
@@ -74,31 +73,31 @@ final class LibraryNotesAppUITests: XCTestCase {
     waitUntilElementExists(application.buttons[Identifiers.newDocumentButton])
   }
 
-  var newDocumentButton: XCUIElement {
+  @MainActor var newDocumentButton: XCUIElement {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     XCTAssertTrue(newDocumentButton.waitForExistence(timeout: 1))
     return newDocumentButton
   }
 
-  var skipButton: XCUIElement {
+  @MainActor var skipButton: XCUIElement {
     let skipButton = application.buttons[Identifiers.skipBookDetailsButton]
     XCTAssertTrue(skipButton.waitForExistence(timeout: 1))
     return skipButton
   }
 
-  var documentListActionButton: XCUIElement {
+  @MainActor var documentListActionButton: XCUIElement {
     let button = application.buttons[Identifiers.documentListActions]
     XCTAssertTrue(button.waitForExistence(timeout: 1))
     return button
   }
 
-  func testCanSkipBookDetailsAndMakeNote() {
+  @MainActor func testCanSkipBookDetailsAndMakeNote() {
     newDocumentButton.tap()
     skipButton.tap()
     XCTAssertTrue(application.textViews[Identifiers.editDocumentView].waitForExistence(timeout: 5))
   }
 
-  func testCanCreateBookNote() {
+  @MainActor func testCanCreateBookNote() {
     newDocumentButton.tap()
 
     let tablesQuery = application.tables
@@ -117,12 +116,12 @@ final class LibraryNotesAppUITests: XCTestCase {
     XCTAssertEqual(application.staticTexts[Identifiers.bookHeaderAuthor].label, "Brian Dewey")
   }
 
-  func testNewDocumentCanBeEdited() {
+  @MainActor func testNewDocumentCanBeEdited() {
     createDocument(with: "Test Document")
     waitUntilElementExists(application.staticTexts["Test Document"])
   }
 
-  func testStudyButtonEnabledAfterCreatingClozeContent() {
+  @MainActor func testStudyButtonEnabledAfterCreatingClozeContent() {
     createDocument(with: TestContent.singleCloze)
     documentListActionButton.tap()
     XCTAssertTrue(application.buttons["Advance Time"].waitForExistence(timeout: 1))
@@ -137,7 +136,7 @@ extension LibraryNotesAppUITests {
   /// Waits for an element to exist in the hierarchy.
   /// - parameter element: The element to test for.
   /// - note: From http://masilotti.com/xctest-helpers/
-  private func waitUntilElementExists(
+  @MainActor private func waitUntilElementExists(
     _ element: XCUIElement,
     file: String = #file,
     line: Int = #line
@@ -151,7 +150,7 @@ extension LibraryNotesAppUITests {
     )
   }
 
-  private func waitUntilElementEnabled(
+  @MainActor private func waitUntilElementEnabled(
     _ element: XCUIElement,
     file: String = #file,
     line: Int = #line
@@ -165,7 +164,7 @@ extension LibraryNotesAppUITests {
     )
   }
 
-  private func waitUntilElementDisabled(
+  @MainActor private func waitUntilElementDisabled(
     _ element: XCUIElement,
     file: String = #file,
     line: Int = #line
@@ -179,7 +178,7 @@ extension LibraryNotesAppUITests {
     )
   }
 
-  private func wait(
+  @MainActor private func wait(
     for predicate: NSPredicate,
     evaluatedWith object: Any,
     message: String,
@@ -192,7 +191,7 @@ extension LibraryNotesAppUITests {
     }
   }
 
-  private func createDocument(with text: String) {
+  @MainActor private func createDocument(with text: String) {
     newDocumentButton.tap()
     skipButton.tap()
     let editView = application.textViews[Identifiers.editDocumentView]
@@ -201,7 +200,7 @@ extension LibraryNotesAppUITests {
     application.buttons["My Books"].tap()
   }
 
-  private func createDocument(with text: [String]) {
+  @MainActor private func createDocument(with text: [String]) {
     newDocumentButton.tap()
     let editView = application.textViews[Identifiers.editDocumentView]
     waitUntilElementExists(editView)
@@ -211,7 +210,7 @@ extension LibraryNotesAppUITests {
     application.buttons["My Books"].tap()
   }
 
-  private func study(expectedCards: Int, noCardsLeft: Bool = true) {
+  @MainActor private func study(expectedCards: Int, noCardsLeft: Bool = true) {
     let studyButton = tapButton(identifier: Identifiers.studyButton)
     let currentCard = application.otherElements[Identifiers.currentCardView]
     for _ in 0 ..< expectedCards {
@@ -231,7 +230,7 @@ extension LibraryNotesAppUITests {
   }
 
   @discardableResult
-  private func tapButton(identifier: String) -> XCUIElement {
+  @MainActor private func tapButton(identifier: String) -> XCUIElement {
     let button = application.buttons[identifier]
     waitUntilElementEnabled(button)
     button.tap()

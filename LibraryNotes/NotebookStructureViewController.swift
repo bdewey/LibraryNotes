@@ -160,15 +160,16 @@ final class NotebookStructureViewController: UIViewController {
       view.dequeueConfiguredReusableCell(using: hashtagRegistration, for: indexPath, item: item)
     }
 
+    let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
+      var footerConfiguration = footerView.defaultContentConfiguration()
+      footerConfiguration.text = "Version \(UIApplication.versionString)"
+      footerConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
+      footerConfiguration.textProperties.color = UIColor.secondaryLabel
+      footerView.contentConfiguration = footerConfiguration
+    }
+
     dataSource.supplementaryViewProvider = { collectionView, kind, indexPath in
       if kind == UICollectionView.elementKindSectionFooter {
-        let footerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionFooter) { footerView, _, _ in
-          var footerConfiguration = footerView.defaultContentConfiguration()
-          footerConfiguration.text = "Version \(UIApplication.versionString)"
-          footerConfiguration.textProperties.font = UIFont.preferredFont(forTextStyle: .caption1)
-          footerConfiguration.textProperties.color = UIColor.secondaryLabel
-          footerView.contentConfiguration = footerConfiguration
-        }
         return collectionView.dequeueConfiguredReusableSupplementary(using: footerRegistration, for: indexPath)
       }
       Logger.shared.error("Unexpected supplementary kind \(kind), returning nil")
