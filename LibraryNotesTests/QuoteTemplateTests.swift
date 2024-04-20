@@ -30,7 +30,7 @@ private let contentWithCloze = """
 """
 
 final class QuoteTemplateTests: XCTestCase {
-  func testLoadQuotes() {
+  @MainActor func testLoadQuotes() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
     XCTAssertEqual(quoteTemplates.count, 5)
@@ -38,7 +38,7 @@ final class QuoteTemplateTests: XCTestCase {
     XCTAssertEqual(cards.count, 5)
   }
 
-  func testSerialization() {
+  @MainActor func testSerialization() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
     let strings = quoteTemplates.map(\.rawValue)
@@ -51,7 +51,7 @@ final class QuoteTemplateTests: XCTestCase {
     XCTAssertEqual(decoded.prompts.count, 1)
   }
 
-  func testRenderCloze() {
+  @MainActor func testRenderCloze() {
     let buffer = ParsedString(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
 

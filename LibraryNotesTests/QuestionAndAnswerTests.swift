@@ -17,7 +17,7 @@ A: Yes! Just to make sure it **works**.
 """
 
 final class QuestionAndAnswerTests: XCTestCase {
-  func testParseSimpleExample() {
+  @MainActor func testParseSimpleExample() {
     let buffer = ParsedString(simpleExample, grammar: GrailDiaryGrammar.shared)
     guard let tree = try? buffer.result.get() else {
       XCTFail("Should parse!")
@@ -30,7 +30,7 @@ final class QuestionAndAnswerTests: XCTestCase {
     )
   }
 
-  func testQandA() {
+  @MainActor func testQandA() {
     let example = """
     # Sample file
 

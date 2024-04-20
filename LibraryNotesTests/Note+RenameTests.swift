@@ -4,7 +4,6 @@ import KeyValueCRDT
 import Library_Notes
 import XCTest
 
-@MainActor
 final class NoteRenameTests: XCTestCase {
   private var database: NoteDatabase!
 
@@ -13,7 +12,7 @@ final class NoteRenameTests: XCTestCase {
     database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
   }
 
-  override func tearDown() async throws {
+  @MainActor override func tearDown() async throws {
     _ = await database.close()
     try FileManager.default.removeItem(at: database.fileURL)
   }

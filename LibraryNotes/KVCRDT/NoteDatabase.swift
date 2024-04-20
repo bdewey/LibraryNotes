@@ -64,7 +64,7 @@ extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
 }
 
 /// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
-public final class NoteDatabase {
+public final class NoteDatabase: @unchecked Sendable {
   public typealias IOCompletionHandler = (Bool) -> Void
 
   /// Initializes and opens the database stored at `fileURL`
@@ -106,7 +106,7 @@ public final class NoteDatabase {
 
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
 
-  private let keyValueDocument: UIKeyValueDocument
+  @MainActor private let keyValueDocument: UIKeyValueDocument
 
   /// The `KeyValueDatabase` contained in `keyValueDocument`
   private let keyValueCRDT: KeyValueDatabase
@@ -119,11 +119,11 @@ public final class NoteDatabase {
 
   @MainActor public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
 
-  public func close() async -> Bool {
+  @MainActor public func close() async -> Bool {
     await keyValueDocument.close()
   }
 
-  public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
+  @MainActor public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
     await keyValueDocument.save(to: url, for: saveOperation)
   }
 
