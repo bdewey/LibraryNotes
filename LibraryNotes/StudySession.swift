@@ -43,10 +43,10 @@ public struct StudySession {
   }
 
   /// Creates a study session where all cards come from a single document.
-  public init<PromptIdentifiers: Sequence>(
-    _ promptIdentifiers: PromptIdentifiers,
+  public init(
+    _ promptIdentifiers: some Sequence<PromptIdentifier>,
     properties: CardDocumentProperties
-  ) where PromptIdentifiers.Element == PromptIdentifier {
+  ) {
     let sessionPromptIdentifiers = promptIdentifiers.shuffled().map {
       SessionPromptIdentifier(noteIdentifier: properties.documentName, noteTitle: properties.attributionMarkdown, promptIdentifier: $0)
     }

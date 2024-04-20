@@ -5,8 +5,8 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import LinkPresentation
-import os
 import ObjectiveCTextStorageWrapper
+import os
 import SnapKit
 import TextMarkupKit
 import UIKit
@@ -157,7 +157,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   /// The identifier for the displayed note; nil if the note is not yet saved to the database.
   let noteIdentifier: Note.Identifier
 
-  internal func setTitleMarkdown(_ markdown: String) {
+  func setTitleMarkdown(_ markdown: String) {
     let label = UILabel(frame: .zero)
     label.attributedText = ParsedAttributedString(string: markdown, style: .plainText(textStyle: .headline))
     navigationItem.titleView = label

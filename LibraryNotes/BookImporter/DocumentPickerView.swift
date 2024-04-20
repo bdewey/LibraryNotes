@@ -25,7 +25,7 @@ struct DocumentPickerView: UIViewControllerRepresentable {
   }
 
   final class DocumentPickerCoordinator: NSObject, UIDocumentPickerDelegate {
-    internal init(action: @escaping ([URL]) -> Void) {
+    init(action: @escaping ([URL]) -> Void) {
       self.action = action
     }
 

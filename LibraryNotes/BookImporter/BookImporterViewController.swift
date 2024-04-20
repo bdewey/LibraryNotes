@@ -74,7 +74,7 @@ final class BookImporterViewController: UIViewController {
         if processed == total || processed % 5 == 0 {
           Logger.shared.info("Processed \(processed) of \(total) books")
         }
-        self.delegate?.bookImporter(self, didProcess: processed, of: total)
+        delegate?.bookImporter(self, didProcess: processed, of: total)
       }
       Logger.shared.info("Done with import")
       delegate?.bookImporterDidFinishImporting(self)
@@ -108,9 +108,9 @@ private extension BookImportRequest where Item == URL {
       case .some(.kvcrdt):
         return .database(item)
       case .some(.json):
-        return .augmentedBooks(try loadJSON(url: item))
+        return try .augmentedBooks(loadJSON(url: item))
       case .some(.commaSeparatedText):
-        return .augmentedBooks(try AugmentedBook.loadGoodreadsCSV(url: item))
+        return try .augmentedBooks(AugmentedBook.loadGoodreadsCSV(url: item))
       default:
         return nil
       }
@@ -119,7 +119,7 @@ private extension BookImportRequest where Item == URL {
 
   private func loadJSON(url: URL) throws -> [AugmentedBook] {
     let data = try Data(contentsOf: url)
-    let libraryThingBooks = Array(try JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values)
+    let libraryThingBooks = try Array(JSONDecoder().decode([Int: LibraryThingBook].self, from: data).values)
     return libraryThingBooks.map { AugmentedBook($0) }
   }
 }

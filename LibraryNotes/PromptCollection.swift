@@ -3,7 +3,6 @@
 import CommonCrypto
 import Foundation
 import os
-import os
 import SpacedRepetitionScheduler
 
 /// Extensible enum for the different types of prompts.
@@ -31,10 +30,8 @@ public struct PromptType: RawRepresentable, Hashable, Sendable {
 
   /// Mapping between rawValue and PromptCollection classes.
   public static var classMap: [String: PromptCollection.Type] {
-    get {
-      protectedClassMap.withLock { value in
-        return value
-      }
+    protectedClassMap.withLock { value in
+      value
     }
   }
 

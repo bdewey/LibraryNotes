@@ -278,7 +278,7 @@ extension BookHeader: StarRatingViewDelegate {
   }
 }
 
-internal extension ReadingHistory {
+extension ReadingHistory {
   var currentReadingStatus: String? {
     guard let entries else { return nil }
     var yearRead: Int?

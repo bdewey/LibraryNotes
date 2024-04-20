@@ -89,7 +89,7 @@ public final class BarcodeScannerViewController: UIViewController {
 }
 
 extension BarcodeScannerViewController: AVCaptureMetadataOutputObjectsDelegate {
-  nonisolated public func metadataOutput(
+  public nonisolated func metadataOutput(
     _ output: AVCaptureMetadataOutput,
     didOutput metadataObjects: [AVMetadataObject],
     from connection: AVCaptureConnection

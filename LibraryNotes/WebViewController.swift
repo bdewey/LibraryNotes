@@ -39,12 +39,12 @@ public final class WebViewController: UIViewController {
     view = webView
   }
 
-  public override func viewDidLoad() {
+  override public func viewDidLoad() {
     super.viewDidLoad()
     registerForTraitChanges([UITraitHorizontalSizeClass.self], action: #selector(configureToolbar))
   }
 
-  public override func viewIsAppearing(_ animated: Bool) {
+  override public func viewIsAppearing(_ animated: Bool) {
     super.viewIsAppearing(animated)
     configureToolbar()
   }

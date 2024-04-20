@@ -135,7 +135,7 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     }
   }
 
-  nonisolated private func makeNewDocument() -> URL? {
+  private nonisolated func makeNewDocument() -> URL? {
     Bundle.main.url(forResource: "library", withExtension: "libnotes")
   }
 

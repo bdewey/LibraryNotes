@@ -288,10 +288,10 @@ public final class NotebookViewController: UISplitViewController {
     if let secondaryViewController {
       do {
         let controllerType = type(of: secondaryViewController).notebookDetailType
-        userActivity.addUserInfoEntries(
+        try userActivity.addUserInfoEntries(
           from: [
             ActivityKey.secondaryViewControllerType: controllerType,
-            ActivityKey.secondaryViewControllerData: try secondaryViewController.userActivityData(),
+            ActivityKey.secondaryViewControllerData: secondaryViewController.userActivityData(),
           ]
         )
       } catch {
@@ -493,7 +493,7 @@ extension NotebookViewController: UISplitViewControllerDelegate {
           coverImageCache: coverImageCache
         )
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [self] in
-          self.setSecondaryViewController(viewController, pushIfCollapsed: false)
+          setSecondaryViewController(viewController, pushIfCollapsed: false)
         }
       } catch {
         Logger.shared.error("Unexpected error rebuilding view hierarchy")

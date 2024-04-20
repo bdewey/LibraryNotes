@@ -5,8 +5,8 @@ import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
-import os
 import MessageUI
+import os
 import SafariServices
 import SnapKit
 import UIKit
@@ -81,16 +81,14 @@ final class DocumentListViewController: UIViewController {
   }
 
   @MainActor
-  private lazy var dataSource: DocumentTableController = {
-    MainActor.assumeIsolated {
-      DocumentTableController(
-        collectionView: collectionView,
-        database: database,
-        coverImageCache: coverImageCache,
-        delegate: self
-      )
-    }
-  }()
+  private lazy var dataSource: DocumentTableController = MainActor.assumeIsolated {
+    DocumentTableController(
+      collectionView: collectionView,
+      database: database,
+      coverImageCache: coverImageCache,
+      delegate: self
+    )
+  }
 
   private var databaseSubscription: AnyCancellable?
   private var dueDate: Date {
@@ -118,7 +116,7 @@ final class DocumentListViewController: UIViewController {
     return view
   }()
 
-  internal func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
+  func showPage(with noteIdentifier: Note.Identifier, shiftFocus: Bool) {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
       notebookViewController?.showNoteEditor(noteIdentifier: noteIdentifier, note: note, shiftFocus: shiftFocus)
@@ -134,7 +132,7 @@ final class DocumentListViewController: UIViewController {
     collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .top)
   }
 
-  internal func selectFirstNote() {
+  func selectFirstNote() {
     dataSource.selectFirstNote()
   }
 

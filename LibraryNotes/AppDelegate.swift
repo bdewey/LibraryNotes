@@ -4,7 +4,7 @@ import CoreSpotlight
 import os
 import UIKit
 
-internal extension Logger {
+extension Logger {
   static var shared: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes") }
 }
 
@@ -12,7 +12,7 @@ extension UIMenu.Identifier {
   static let openMenu = UIMenu.Identifier("org.brians-brain.LibraryNotes.Open")
 }
 
-@UIApplicationMain
+@main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
   static let didRequestOpenFileNotification = NSNotification.Name(rawValue: "org.brians-brain.didRequestOpenFile")
 
@@ -48,7 +48,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   }
 
   @MainActor
-  internal static var isUITesting: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting")
+  static var isUITesting: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting")
 
   override func buildMenu(with builder: UIMenuBuilder) {
     let newNoteCommand = UIKeyCommand(

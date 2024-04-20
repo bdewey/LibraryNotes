@@ -125,7 +125,7 @@ extension QuotesViewController: NotebookSecondaryViewController {
     let quoteIdentifiers: [ContentIdentifier]
   }
 
-  nonisolated public static var notebookDetailType: String { "QuotesViewController" }
+  public nonisolated static var notebookDetailType: String { "QuotesViewController" }
 
   public var shouldShowWhenCollapsed: Bool { true }
 

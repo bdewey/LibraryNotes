@@ -22,11 +22,11 @@ final class NoteRenameTests: XCTestCase {
     let identifier = try database.createNote(.withChallenges)
     XCTAssertTrue(try database.note(noteIdentifier: identifier).metadata.tags.contains("#test"))
     XCTAssertFalse(try database.note(noteIdentifier: identifier).metadata.tags.contains("#testing"))
-    let promptIdentifiers = Set(try database.eligiblePromptIdentifiers(before: Date().addingTimeInterval(7 * .day), limitedTo: identifier))
+    let promptIdentifiers = try Set(database.eligiblePromptIdentifiers(before: Date().addingTimeInterval(7 * .day), limitedTo: identifier))
     try database.replaceText("#test", with: "#testing", filter: { _ in true })
     XCTAssertTrue(try database.note(noteIdentifier: identifier).metadata.tags.contains("#testing"))
     XCTAssertFalse(try database.note(noteIdentifier: identifier).metadata.tags.contains("#test"))
-    let newPromptIdentifiers = Set(try database.eligiblePromptIdentifiers(before: Date().addingTimeInterval(7 * .day), limitedTo: identifier))
+    let newPromptIdentifiers = try Set(database.eligiblePromptIdentifiers(before: Date().addingTimeInterval(7 * .day), limitedTo: identifier))
     XCTAssertEqual(promptIdentifiers, newPromptIdentifiers)
   }
 

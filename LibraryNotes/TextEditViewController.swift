@@ -1,9 +1,9 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
-import os
 import MobileCoreServices
 import ObjectiveCTextStorageWrapper
+import os
 import SnapKit
 import TextMarkupKit
 import UIKit
@@ -508,7 +508,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
 }
 
 extension TextEditViewController: NSTextStorageDelegate {
-  nonisolated public func textStorage(
+  public nonisolated func textStorage(
     _ textStorage: NSTextStorage,
     didProcessEditing editedMask: NSTextStorage.EditActions,
     range editedRange: NSRange,

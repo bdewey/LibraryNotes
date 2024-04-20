@@ -55,7 +55,7 @@ import os
       var results: [NoteUpdatePayload] = []
       for bookAndImage in booksAndImages {
         await Task.yield()
-        results.append(try bookAndImage.asNoteUpdatePayload(hashtags: request.hashtags))
+        try results.append(bookAndImage.asNoteUpdatePayload(hashtags: request.hashtags))
       }
       return results
     }
@@ -94,7 +94,7 @@ private extension BookAndImage {
       metadata.book?.readingHistory = readingHistory
     }
     metadata.tags = hashtags.split(separator: " ", omittingEmptySubsequences: true).map(String.init)
-    payload.insert(key: .metadata, value: try Value(metadata))
+    try payload.insert(key: .metadata, value: Value(metadata))
     payload.insert(key: .bookIndex, value: Value(metadata.indexedContents))
     if let review = book.review {
       payload.insert(key: .noteText, value: .text(review))
