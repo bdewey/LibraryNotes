@@ -100,11 +100,11 @@ public final class DocumentTableController: NSObject {
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = noteIdentifiers
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
-    var collapsedSections = Set<BookSection>()
+    var sectionIsExpanded: [BookSection: Bool] = [:]
     for section in BookSection.bookSections {
       let sectionSnapshot = dataSource.snapshot(for: section)
-      if let firstItem = sectionSnapshot.rootItems.first, !sectionSnapshot.isExpanded(firstItem) {
-        collapsedSections.insert(section)
+      if let firstItem = sectionSnapshot.rootItems.first {
+        sectionIsExpanded[section] = sectionSnapshot.isExpanded(firstItem)
       }
     }
 
@@ -112,7 +112,12 @@ public final class DocumentTableController: NSObject {
     let noteIdentifiersBySection = Dictionary(uniqueKeysWithValues: chunks)
     for section in BookSection.bookSections {
       if var sectionSnapshot = sectionSnapshot(for: section, noteIdentifiersBySection: noteIdentifiersBySection) {
-        sectionSnapshot.collapseSections(in: collapsedSections)
+        let isExpanded = sectionIsExpanded[section] ?? (section == .wantToRead ? false : true)
+        if isExpanded {
+          sectionSnapshot.expand(sectionSnapshot.rootItems)
+        } else {
+          sectionSnapshot.collapse(sectionSnapshot.rootItems)
+        }
         dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
       } else {
         dataSource.apply(.init(), to: section, animatingDifferences: animated)
