@@ -38,9 +38,11 @@ import os
             }
           }
         }
-        for await bookAndImage in group {
-          booksAndImages.append(bookAndImage)
+        var bookAndImage: BookAndImage? = await group.next()
+        while bookAndImage != nil {
+          booksAndImages.append(bookAndImage!)
           progressCallback(booksAndImages.count, books.count)
+          bookAndImage = await group.next()
         }
       }
     } else {
