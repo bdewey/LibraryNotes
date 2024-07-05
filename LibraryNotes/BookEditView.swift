@@ -22,38 +22,40 @@ final class BookEditViewModel: ObservableObject {
     !book.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 
-  func binding(keyPath: WritableKeyPath<AugmentedBook, [String]>) -> Binding<String> {
-    Binding(
-      get: { self.book[keyPath: keyPath].joined(separator: ", ") },
-      set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
+  subscript (asString keyPath: WritableKeyPath<AugmentedBook, [String]>) -> String {
+    get {
+      self.book[keyPath: keyPath].joined(separator: ", ")
+    }
+    set {
+      self.book[keyPath: keyPath] = newValue.split(separator: ",")
         .map(String.init)
-        .map { $0.trimmingCharacters(in: .whitespaces) }
-      }
-    )
+        .map { $0.trimmingCharacters(in: .whitespaces)}
+    }
   }
 
-  func binding(keyPath: WritableKeyPath<AugmentedBook, [String]?>) -> Binding<String> {
-    Binding(
-      get: { self.book[keyPath: keyPath]?.joined(separator: ", ") ?? "" },
-      set: { self.book[keyPath: keyPath] = $0.split(separator: ",")
+  subscript (asString keyPath: WritableKeyPath<AugmentedBook, [String]?>) -> String {
+    get {
+      self.book[keyPath: keyPath]?.joined(separator: ", ") ?? ""
+    }
+    set {
+      self.book[keyPath: keyPath] = newValue.split(separator: ",")
         .map(String.init)
-        .map { $0.trimmingCharacters(in: .whitespaces) }
-      }
-    )
+        .map { $0.trimmingCharacters(in: .whitespaces)}
+    }
   }
 
-  func binding(keyPath: WritableKeyPath<AugmentedBook, Int?>) -> Binding<String> {
-    Binding(
-      get: { self.book[keyPath: keyPath].flatMap(String.init(describing:)) ?? "" },
-      set: { self.book[keyPath: keyPath] = Int($0) }
-    )
+  subscript (asString keyPath: WritableKeyPath<AugmentedBook, String?>) -> String {
+    get {
+      self.book[keyPath: keyPath] ?? ""
+    }
+    set {
+      self.book[keyPath: keyPath] = newValue
+    }
   }
 
-  func binding(keyPath: WritableKeyPath<AugmentedBook, String?>) -> Binding<String> {
-    Binding(
-      get: { self.book[keyPath: keyPath] ?? "" },
-      set: { self.book[keyPath: keyPath] = $0 }
-    )
+  subscript (asString keyPath: WritableKeyPath<AugmentedBook, Int?>) -> String {
+    get { self.book[keyPath: keyPath].flatMap(String.init(describing:)) ?? "" }
+    set { self.book[keyPath: keyPath] = Int(newValue) }
   }
 }
 
@@ -92,11 +94,11 @@ struct BookEditView: View {
         CaptionedRow(caption: "Title", text: $model.book.title)
         CaptionedRow(caption: "Author", value: $model.book.authors, format: .commaSeparatedList)
         CaptionedRow(caption: "Tags (comma separated)", value: $model.book.tags, format: .commaSeparatedList)
-        CaptionedRow(caption: "Publisher", text: model.binding(keyPath: \.publisher))
-        CaptionedRow(caption: "Year Published", text: model.binding(keyPath: \.yearPublished))
-        CaptionedRow(caption: "Original Year Published", text: model.binding(keyPath: \.originalYearPublished))
-        CaptionedRow(caption: "ISBN", text: model.binding(keyPath: \.isbn))
-        CaptionedRow(caption: "ISBN-13", text: model.binding(keyPath: \.isbn13))
+        CaptionedRow(caption: "Publisher", text: $model[asString: \.publisher])
+        CaptionedRow(caption: "Year Published", text: $model[asString: \.yearPublished])
+        CaptionedRow(caption: "Original Year Published", text: $model[asString: \.originalYearPublished])
+        CaptionedRow(caption: "ISBN", text: $model[asString: \.isbn])
+        CaptionedRow(caption: "ISBN-13", text: $model[asString: \.isbn13])
       }
       .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
     }

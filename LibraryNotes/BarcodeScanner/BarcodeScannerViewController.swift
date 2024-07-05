@@ -51,7 +51,7 @@ public final class BarcodeScannerViewController: UIViewController {
         showPermissionAlert()
         return false
       }
-      cameraCaptureView.session = captureSessionManager.session
+      cameraCaptureView.session = await captureSessionManager.session
       try await captureSessionManager.configureSession(
         metadataDelegate: self,
         metadataQueue: .main

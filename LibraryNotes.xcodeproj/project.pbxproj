@@ -41,7 +41,6 @@
 		D32215F526C413D3000BA772 /* ContentIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32215F426C413D3000BA772 /* ContentIdentifier.swift */; };
 		D324409826E525AF009B58DE /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = D324409726E525AF009B58DE /* ZIPFoundation */; };
 		D324409A26E525ED009B58DE /* LogFileDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D324409926E525ED009B58DE /* LogFileDirectory.swift */; };
-		D325369A2BD434350054AC8D /* ConcurrencyHacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32536992BD434350054AC8D /* ConcurrencyHacks.swift */; };
 		D326464726821C53002C42A6 /* GrailDiaryGrammar+Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */; };
 		D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */; };
 		D32A7A5B25A0B7B800950684 /* StringProtocol+Hashtag.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32A7A5A25A0B7B800950684 /* StringProtocol+Hashtag.swift */; };
@@ -222,7 +221,6 @@
 		D32215F026C41215000BA772 /* Sequence+DictionaryExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sequence+DictionaryExtensions.swift"; sourceTree = "<group>"; };
 		D32215F426C413D3000BA772 /* ContentIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentIdentifier.swift; sourceTree = "<group>"; };
 		D324409926E525ED009B58DE /* LogFileDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogFileDirectory.swift; sourceTree = "<group>"; };
-		D32536992BD434350054AC8D /* ConcurrencyHacks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConcurrencyHacks.swift; sourceTree = "<group>"; };
 		D326464626821C53002C42A6 /* GrailDiaryGrammar+Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GrailDiaryGrammar+Styles.swift"; sourceTree = "<group>"; };
 		D32A03B423007114002D17E7 /* DateComponentsFormatter+Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DateComponentsFormatter+Document.swift"; sourceTree = "<group>"; };
 		D32A1BA1229D750F00B78576 /* DiffMatchPatch.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = DiffMatchPatch.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -508,7 +506,6 @@
 				D31AFA9C229D61EC00ED2B76 /* ClozePromptCollection.swift */,
 				D37E6D37228DBC88006CD0FA /* CommonCrypto+Swift.swift */,
 				D375D33F20EDCE1700EAB4F0 /* CommonplaceBookApp.entitlements */,
-				D32536992BD434350054AC8D /* ConcurrencyHacks.swift */,
 				D32215F426C413D3000BA772 /* ContentIdentifier.swift */,
 				D3FA024F26C985FE001A5A4C /* CoverImageCache.swift */,
 				D35DB41425D3748A00F558D8 /* Data+Image.swift */,
@@ -842,7 +839,6 @@
 				D3D21876253A0BEE001DD2A3 /* NotebookStructureViewController.swift in Sources */,
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
-				D325369A2BD434350054AC8D /* ConcurrencyHacks.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
 				D369182926BAD1E9001EB512 /* NoteDatabaseKey.swift in Sources */,
 				D37C887A26B5C9E900EC30C8 /* NoteDatabase.swift in Sources */,
@@ -1050,7 +1046,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
@@ -1110,7 +1106,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -1142,7 +1138,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				TEST_HOST = "";
 			};
@@ -1175,7 +1171,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				TEST_HOST = "";
 			};

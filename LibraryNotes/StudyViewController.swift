@@ -255,7 +255,9 @@ public final class StudyViewController: UIViewController {
 
   override public func viewDidLoad() {
     super.viewDidLoad()
-    [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton, keyHintLabel].forEach(view.addSubview)
+    for subview in [colorWashView, blurView, doneImageView, progressView, needsReviewButton, gotItRightButton, closeButton, keyHintLabel] {
+      view.addSubview(subview)
+    }
     colorWashView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }

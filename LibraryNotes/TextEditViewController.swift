@@ -380,7 +380,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   }
 
   func editEndOfDocument() {
-    let endRange = NSRange(location: textView.textStorage.count, length: 0)
+    let endRange = NSRange(location: textView.textStorage.length, length: 0)
     textView.selectedRange = endRange
     textView.scrollRangeToVisible(endRange)
     textView.becomeFirstResponder()
@@ -763,7 +763,7 @@ extension TextEditViewController: TextEditingFormattingActions {
   /// - Parameter location: The location to be contained.
   /// - Returns: A tuple containing the type of block that contains `location` and the opening delimiter for the block.
   private func block(containing location: Int) throws -> (type: SyntaxTreeNodeType, openingDelimiterRange: NSRange)? {
-    guard parsedAttributedString.count > 0 else {
+    guard parsedAttributedString.length > 0 else {
       // There's no parsed path if the buffer is empty.
       return (type: .paragraph, openingDelimiterRange: NSRange(location: 0, length: 0))
     }

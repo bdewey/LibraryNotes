@@ -15,7 +15,7 @@ public extension PersonNameComponents {
   }
 }
 
-extension PersonNameComponents?: Comparable {
+extension PersonNameComponents?: @retroactive Comparable {
   public static func < (lhs: Wrapped?, rhs: Wrapped?) -> Bool {
     switch (lhs, rhs) {
     case (.none, .some):

@@ -669,7 +669,7 @@ extension DocumentListViewController: MFMailComposeViewControllerDelegate {
   }
 }
 
-extension MFMailComposeResult: CustomStringConvertible {
+extension MFMailComposeResult: @retroactive CustomStringConvertible {
   public var description: String {
     switch self {
     case .cancelled:
