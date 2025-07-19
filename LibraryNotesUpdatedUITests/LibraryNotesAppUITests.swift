@@ -57,10 +57,11 @@ private enum TestContent {
   """
 }
 
+@MainActor
 final class LibraryNotesAppUITests: XCTestCase {
   var application: XCUIApplication!
 
-  @MainActor override func setUp() {
+  override func setUp() async throws {
     // In UI tests it is usually best to stop immediately when a failure occurs.
     continueAfterFailure = false
 
@@ -73,31 +74,31 @@ final class LibraryNotesAppUITests: XCTestCase {
     waitUntilElementExists(application.buttons[Identifiers.newDocumentButton])
   }
 
-  @MainActor var newDocumentButton: XCUIElement {
+  var newDocumentButton: XCUIElement {
     let newDocumentButton = application.buttons[Identifiers.newDocumentButton]
     XCTAssertTrue(newDocumentButton.waitForExistence(timeout: 1))
     return newDocumentButton
   }
 
-  @MainActor var skipButton: XCUIElement {
+  var skipButton: XCUIElement {
     let skipButton = application.buttons[Identifiers.skipBookDetailsButton]
     XCTAssertTrue(skipButton.waitForExistence(timeout: 1))
     return skipButton
   }
 
-  @MainActor var documentListActionButton: XCUIElement {
+  var documentListActionButton: XCUIElement {
     let button = application.buttons[Identifiers.documentListActions]
     XCTAssertTrue(button.waitForExistence(timeout: 1))
     return button
   }
 
-  @MainActor func testCanSkipBookDetailsAndMakeNote() {
+  func testCanSkipBookDetailsAndMakeNote() {
     newDocumentButton.tap()
     skipButton.tap()
     XCTAssertTrue(application.textViews[Identifiers.editDocumentView].waitForExistence(timeout: 5))
   }
 
-  @MainActor func testCanCreateBookNote() {
+  func testCanCreateBookNote() {
     newDocumentButton.tap()
 
     let tablesQuery = application.tables
@@ -116,12 +117,12 @@ final class LibraryNotesAppUITests: XCTestCase {
     XCTAssertEqual(application.staticTexts[Identifiers.bookHeaderAuthor].label, "Brian Dewey")
   }
 
-  @MainActor func testNewDocumentCanBeEdited() {
+  func testNewDocumentCanBeEdited() {
     createDocument(with: "Test Document")
     waitUntilElementExists(application.staticTexts["Test Document"])
   }
 
-  @MainActor func testStudyButtonEnabledAfterCreatingClozeContent() {
+  func testStudyButtonEnabledAfterCreatingClozeContent() {
     createDocument(with: TestContent.singleCloze)
     documentListActionButton.tap()
     XCTAssertTrue(application.buttons["Advance Time"].waitForExistence(timeout: 1))
