@@ -141,11 +141,11 @@ final class NotebookStructureViewController: UIViewController {
 
   private lazy var dataSource: UICollectionViewDiffableDataSource<Section, Item> = {
     let hashtagRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, _, item in
-      var contentConfiguration = UIListContentConfiguration.sidebarCell()
+      var contentConfiguration = UIListContentConfiguration.cell()
       contentConfiguration.text = item.description
       contentConfiguration.textProperties.color = .label
       contentConfiguration.image = item.image
-      cell.backgroundConfiguration = UIBackgroundConfiguration.listSidebarCell()
+      cell.backgroundConfiguration = UIBackgroundConfiguration.listCell()
       cell.contentConfiguration = contentConfiguration
 
       // Only items with children get an outline disclosure identifier.

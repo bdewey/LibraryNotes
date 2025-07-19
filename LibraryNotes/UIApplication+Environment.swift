@@ -1,5 +1,7 @@
 // Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
 
+import os
+import StoreKit
 import UIKit
 
 @nonobjc
@@ -13,15 +15,26 @@ extension UIApplication {
     #endif
   }
 
-  /// True if this app was installed via Testflight.
-  static var isTestFlight: Bool {
-    Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
-  }
-
   static var versionString: String {
     let shortVersionString = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString")
     let shortVersionNumber = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion")
 
     return "\(shortVersionString ?? "nil") (\(shortVersionNumber ?? -1))"
+  }
+
+  @available(iOS 18.0, *)
+  static func isTestFlightAsync() async -> Bool {
+    do {
+      let verificationResult = try await AppTransaction.shared
+      switch verificationResult {
+      case .verified(let appTransaction):
+        return appTransaction.environment == .sandbox
+      case .unverified:
+        return false
+      }
+    } catch {
+      Logger.shared.error("Error validating app receipt: \(error)")
+      return false
+    }
   }
 }

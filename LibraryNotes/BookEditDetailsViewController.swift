@@ -95,7 +95,7 @@ public final class BookEditDetailsViewController: UIViewController {
       configuration.secondaryText = viewModel.book.authors.joined(separator: ", ")
       configuration.secondaryTextProperties.color = .secondaryLabel
       configuration.image = viewModel.coverImage
-      var backgroundConfiguration = UIBackgroundConfiguration.listPlainCell()
+      var backgroundConfiguration = UIBackgroundConfiguration.listCell()
       backgroundConfiguration.backgroundColor = .grailBackground
 
       cell.contentConfiguration = configuration

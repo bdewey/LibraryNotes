@@ -1124,8 +1124,8 @@
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1156,8 +1156,8 @@
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/LibraryNotes/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=macosx*]" = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
