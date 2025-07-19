@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import GRDB
@@ -34,7 +34,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   private static func sql(structureIdentifier: NotebookStructureViewController.StructureIdentifier) -> SQL {
     switch structureIdentifier {
     case .read:
-      return """
+      """
       SELECT
         DISTINCT scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
@@ -57,7 +57,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .trash:
-      return """
+      """
       SELECT
         DISTINCT scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
@@ -77,7 +77,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .hashtag(let hashtag):
-      return """
+      """
       SELECT
         DISTINCT scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,

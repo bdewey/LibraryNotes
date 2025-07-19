@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import os
 import UIKit
@@ -66,7 +66,7 @@ public final class WebScrapingViewController: UIViewController {
     super.viewDidLoad()
     navigationItem.leftBarButtonItem = UIBarButtonItem(systemItem: .done, primaryAction: UIAction { [weak self] _ in
       guard let self else { return }
-      self.delegate?.webScrapingViewControllerDidCancel(self)
+      delegate?.webScrapingViewControllerDidCancel(self)
     })
     navigationItem.rightBarButtonItem = importButton
     toolbarItems = [
@@ -94,7 +94,7 @@ private extension WebScrapingViewController {
     webView.evaluateJavaScript(javascript) { [weak self] result, error in
       guard let self else { return }
       if let result = result as? String {
-        self.delegate?.webScrapingViewController(self, didScrapeMarkdown: result)
+        delegate?.webScrapingViewController(self, didScrapeMarkdown: result)
       } else {
         Logger.shared.error("Unexpected error running Javascript: \(String(describing: error))")
       }

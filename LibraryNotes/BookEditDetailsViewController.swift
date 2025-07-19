@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Combine
@@ -334,7 +334,7 @@ public final class BookEditDetailsViewController: UIViewController {
 
     let cancelAction = UIAction { [weak self] _ in
       guard let self else { return }
-      self.delegate?.bookSearchViewControllerDidCancel(self)
+      delegate?.bookSearchViewControllerDidCancel(self)
     }
     #if targetEnvironment(macCatalyst)
       var configuration = UIButton.Configuration.bordered()

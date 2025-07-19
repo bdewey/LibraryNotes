@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import MobileCoreServices
@@ -282,7 +282,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
         webViewController.delegate = self
         let navigationController = UINavigationController(rootViewController: webViewController)
         navigationController.navigationBar.tintColor = .grailTint
-        self.present(navigationController, animated: true, completion: nil)
+        present(navigationController, animated: true, completion: nil)
       })
     }
 

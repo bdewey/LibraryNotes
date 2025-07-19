@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import os
@@ -97,12 +97,12 @@ final class BookHeader: UIView {
   private lazy var readingHistoryButton: UIButton = {
     let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
       guard let self else { return }
-      if self.book.readingHistory?.isCurrentlyReading ?? false {
-        self.finishReading()
+      if book.readingHistory?.isCurrentlyReading ?? false {
+        finishReading()
       } else {
-        self.startReading()
+        startReading()
       }
-      self.setNeedsLayout()
+      setNeedsLayout()
     }))
     return button
   }()

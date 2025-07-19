@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import SwiftUI
@@ -140,11 +140,11 @@ struct CaptionedRow<Format: ParseableFormatStyle>: View where Format.FormatOutpu
   private var text: String {
     switch storage {
     case .text(let binding):
-      return binding.wrappedValue
+      binding.wrappedValue
     case .formatted(let binding, let format):
-      return format.format(binding.wrappedValue)
+      format.format(binding.wrappedValue)
     case .optionalFormatted(let binding, let format):
-      return binding.wrappedValue.flatMap { format.format($0) } ?? ""
+      binding.wrappedValue.flatMap { format.format($0) } ?? ""
     }
   }
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Combine
@@ -93,7 +93,7 @@ public final class NoteDatabase: @unchecked Sendable {
       }, receiveValue: { [weak self] update in
         guard let self else { return }
         for scopedKey in update.keys {
-          self.cachedBookMetadata[scopedKey.scope] = nil
+          cachedBookMetadata[scopedKey.scope] = nil
         }
       })
     // Once upon a time I had both of these methods of invalidating cachedBookMetadata, and I don't know why.

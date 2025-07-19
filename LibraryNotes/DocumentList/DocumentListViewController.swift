@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import CodableCSV
@@ -108,7 +108,7 @@ final class DocumentListViewController: UIViewController {
     listConfiguration.headerMode = .firstItemInSection
     listConfiguration.trailingSwipeActionsConfigurationProvider = { [weak self] indexPath -> UISwipeActionsConfiguration? in
       guard let self else { return nil }
-      return self.dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
+      return dataSource.trailingSwipeActionsConfiguration(forRowAt: indexPath)
     }
     let layout = UICollectionViewCompositionalLayout.list(using: listConfiguration)
     let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -533,7 +533,7 @@ extension DocumentListViewController {
   private var importLibraryThingAction: UIAction {
     UIAction(title: "Bulk Import", image: UIImage(systemName: "arrow.down.doc")) { [weak self] _ in
       guard let self else { return }
-      self.importBooks()
+      importBooks()
     }
   }
 
@@ -675,15 +675,15 @@ extension MFMailComposeResult: @retroactive CustomStringConvertible {
   public var description: String {
     switch self {
     case .cancelled:
-      return "cancelled"
+      "cancelled"
     case .saved:
-      return "saved"
+      "saved"
     case .sent:
-      return "sent"
+      "sent"
     case .failed:
-      return "failed"
+      "failed"
     @unknown default:
-      return "unknown"
+      "unknown"
     }
   }
 }
@@ -829,9 +829,9 @@ extension DocumentListViewController: BookImporterViewControllerDelegate {
 private extension BookNoteMetadata {
   var exportTitle: String {
     if let book {
-      return "\(book.title) \(book.authors.joined(separator: " "))"
+      "\(book.title) \(book.authors.joined(separator: " "))"
     } else {
-      return title
+      title
     }
   }
 }

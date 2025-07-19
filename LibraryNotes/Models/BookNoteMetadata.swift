@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Foundation
@@ -98,9 +98,9 @@ public struct BookNoteMetadata: Codable, Equatable, Sendable {
 public extension ReadingHistory {
   var inferredBookCategory: BookSection {
     if isCurrentlyReading {
-      return .currentlyReading
+      .currentlyReading
     } else {
-      return .read
+      .read
     }
   }
 }

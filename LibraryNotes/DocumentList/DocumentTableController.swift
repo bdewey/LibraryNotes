@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Algorithms
 import BookKit
@@ -54,11 +54,11 @@ public final class DocumentTableController: NSObject {
       .receive(on: DispatchQueue.main)
       .sink { [weak self] noteIdentifier in
         guard let self else { return }
-        var snapshot = self.dataSource.snapshot()
+        var snapshot = dataSource.snapshot()
         let itemsToUpdate = snapshot.itemIdentifiers.filter { $0.matchesNoteIdentifier(noteIdentifier) }
         if !itemsToUpdate.isEmpty {
           snapshot.reconfigureItems(itemsToUpdate)
-          self.dataSource.apply(snapshot, animatingDifferences: false)
+          dataSource.apply(snapshot, animatingDifferences: false)
         }
       }
   }
@@ -143,11 +143,10 @@ public final class DocumentTableController: NSObject {
       var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
       let booksByYear = slice.chunked(on: { $0.finishYear })
       for (year, yearSlice) in booksByYear {
-        let headerItem: BookCollectionViewItem
-        if let year {
-          headerItem = .yearReadHeader(year, yearSlice.count)
+        let headerItem: BookCollectionViewItem = if let year {
+          .yearReadHeader(year, yearSlice.count)
         } else {
-          headerItem = .header(.read, yearSlice.count)
+          .header(.read, yearSlice.count)
         }
         let items: [BookCollectionViewItem] = yearSlice.map { .book($0.noteIdentifier, year) }
         bookSection.append([headerItem])
@@ -227,7 +226,7 @@ public extension DocumentTableController {
   }
 
   func selectFirstNote() {
-    let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { if case .book = $0 { return true } else { return false } })
+    let firstNote = dataSource.snapshot().itemIdentifiers.first(where: { if case .book = $0 { true } else { false } })
     if let firstNote, case .book(let noteIdentifier, _) = firstNote {
       delegate?.showPage(with: noteIdentifier, shiftFocus: false)
     }
@@ -298,7 +297,7 @@ extension DocumentTableController: UICollectionViewDelegate {
     }
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
       guard let self else { return nil }
-      let menuActions = self.availableItemActionConfigurations(itemProperties).map { $0.asAction() }
+      let menuActions = availableItemActionConfigurations(itemProperties).map { $0.asAction() }
       return UIMenu(title: "", children: menuActions)
     }
   }

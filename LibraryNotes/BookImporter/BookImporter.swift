@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Combine
@@ -32,9 +32,9 @@ import os
         for book in books {
           group.addTask {
             if let isbn = book.isbn13 {
-              return await BookAndImage(book: book, isbn: isbn)
+              await BookAndImage(book: book, isbn: isbn)
             } else {
-              return BookAndImage(book: book, image: nil)
+              BookAndImage(book: book, image: nil)
             }
           }
         }

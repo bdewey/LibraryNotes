@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 
@@ -19,13 +19,13 @@ public enum BookSection: String, Codable, Sendable {
   var headerText: String {
     switch self {
     case .wantToRead:
-      return "Want to read"
+      "Want to read"
     case .currentlyReading:
-      return "Currently reading"
+      "Currently reading"
     case .read:
-      return "Read"
+      "Read"
     case .other:
-      return "Other"
+      "Other"
     }
   }
 }

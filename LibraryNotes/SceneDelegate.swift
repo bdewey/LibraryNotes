@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Algorithms
 import os
@@ -54,9 +54,9 @@ extension NSUserActivity {
     var rawValue: String {
       switch self {
       case .note(let identifier):
-        return "note-identifier:\(identifier)"
+        "note-identifier:\(identifier)"
       case .focusStructure(let identifier):
-        return "focus-structure:\(identifier.rawValue)"
+        "focus-structure:\(identifier.rawValue)"
       }
     }
   }

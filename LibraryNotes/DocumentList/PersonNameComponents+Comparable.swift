@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 
@@ -20,13 +20,13 @@ extension PersonNameComponents?: @retroactive Comparable {
     switch (lhs, rhs) {
     case (.none, .some):
       // No name before name
-      return true
+      true
     case (.some, .none):
-      return false
+      false
     case (.none, .none):
-      return false
+      false
     case (.some(let lhs), .some(let rhs)):
-      return lhs.compare(to: rhs) == .orderedAscending
+      lhs.compare(to: rhs) == .orderedAscending
     }
   }
 }

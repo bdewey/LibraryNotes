@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Combine
@@ -35,34 +35,34 @@ final class NotebookStructureViewController: UIViewController {
     var rawValue: String {
       switch self {
       case .trash:
-        return "##trash##"
+        "##trash##"
       case .read:
-        return "##all##"
+        "##all##"
       case .hashtag(let hashtag):
-        return hashtag
+        hashtag
       }
     }
 
     var description: String {
       switch self {
-      case .trash: return "Trash"
-      case .read: return "My Books"
-      case .hashtag(let hashtag): return String(hashtag.split(separator: "/").last ?? "")
+      case .trash: "Trash"
+      case .read: "My Books"
+      case .hashtag(let hashtag): String(hashtag.split(separator: "/").last ?? "")
       }
     }
 
     var longDescription: String {
       switch self {
-      case .trash: return "Trash"
-      case .read: return "My Books"
-      case .hashtag(let hashtag): return hashtag
+      case .trash: "Trash"
+      case .read: "My Books"
+      case .hashtag(let hashtag): hashtag
       }
     }
 
     var predefinedFolder: PredefinedFolder? {
       switch self {
-      case .hashtag, .read: return nil
-      case .trash: return .recentlyDeleted
+      case .hashtag, .read: nil
+      case .trash: .recentlyDeleted
       }
     }
 

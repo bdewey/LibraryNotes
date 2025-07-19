@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2021  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import UIKit
@@ -17,20 +17,20 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   var description: String {
     switch self {
     case .book(let noteIdentifier, _):
-      return "Page \(noteIdentifier)"
+      "Page \(noteIdentifier)"
     case .header(let category, let count):
-      return "\(category) (\(count))"
+      "\(category) (\(count))"
     case .yearReadHeader(let yearRead, let count):
-      return "Read \(yearRead) (\(count))"
+      "Read \(yearRead) (\(count))"
     }
   }
 
   var isHeader: Bool {
     switch self {
     case .header, .yearReadHeader:
-      return true
+      true
     case .book:
-      return false
+      false
     }
   }
 
@@ -38,11 +38,11 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   var headerText: (primaryHeaderText: String, secondaryHeaderText: String)? {
     switch self {
     case .header(let bookSection, let count):
-      return (primaryHeaderText: bookSection.headerText, secondaryHeaderText: "\(count)")
+      (primaryHeaderText: bookSection.headerText, secondaryHeaderText: "\(count)")
     case .yearReadHeader(let yearRead, let count):
-      return (primaryHeaderText: "Read in \(yearRead)", secondaryHeaderText: "\(count)")
+      (primaryHeaderText: "Read in \(yearRead)", secondaryHeaderText: "\(count)")
     case .book:
-      return nil
+      nil
     }
   }
 
@@ -61,9 +61,9 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   func matchesNoteIdentifier(_ noteIdentifier: Note.Identifier) -> Bool {
     switch self {
     case .header, .yearReadHeader:
-      return false
+      false
     case .book(let myNoteIdentifier, _):
-      return myNoteIdentifier == noteIdentifier
+      myNoteIdentifier == noteIdentifier
     }
   }
 }
