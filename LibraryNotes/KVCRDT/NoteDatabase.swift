@@ -81,9 +81,11 @@ public final class NoteDatabase: @unchecked Sendable {
     self.keyValueCRDT = keyValueCRDT
     self.instanceID = keyValueCRDT.instanceID
     keyValueDocument.delegate = self
-    self.allTagsInvalidationSubscription = notesDidChange.sink { [weak self] _ in
-      self?.cachedAllTags = nil
-    }
+    self.allTagsInvalidationSubscription = notesDidChange
+      .receive(on: RunLoop.main)
+      .sink { [weak self] _ in
+        self?.cachedAllTags = nil
+      }
     self.cachedBookMetadataInvalidation = keyValueCRDT
       .readPublisher(key: NoteDatabaseKey.metadata.rawValue)
       .sink(receiveCompletion: { error in
