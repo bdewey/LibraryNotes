@@ -25,7 +25,7 @@ public extension PromptCollectionInfo {
   }
 
   func asPromptCollection() throws -> PromptCollection {
-    guard let klass = PromptType.classMap[type], let collection = klass.init(rawValue: rawValue) else {
+    guard let factory = PromptType.classMap[type], let collection = factory.makePromptCollection(rawValue: rawValue) else {
       throw NoteDatabaseError.unknownPromptType
     }
     return collection

@@ -23,7 +23,7 @@ extension UserDefaults {
 
   var sortOrder: NoteIdentifierRecord.SortOrder {
     get {
-      string(forKey: #function).flatMap({ NoteIdentifierRecord.SortOrder(rawValue: $0) }) ?? .creationTimestamp
+      string(forKey: #function).flatMap { NoteIdentifierRecord.SortOrder(rawValue: $0) } ?? .creationTimestamp
     }
     set {
       set(newValue.rawValue, forKey: #function)

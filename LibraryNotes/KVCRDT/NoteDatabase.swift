@@ -433,7 +433,7 @@ public final class NoteDatabase: @unchecked Sendable {
       throw NoteDatabaseError.unknownPromptCollection
     }
     let promptInfo = try JSONDecoder.databaseDecoder.decode(PromptCollectionInfo.self, from: json.data(using: .utf8)!)
-    guard let klass = PromptType.classMap[promptInfo.type], let collection = klass.init(rawValue: promptInfo.rawValue) else {
+    guard let factory = PromptType.classMap[promptInfo.type], let collection = factory.makePromptCollection(rawValue: promptInfo.rawValue) else {
       throw NoteDatabaseError.unknownPromptType
     }
     return collection.prompts[promptIdentifier.promptIndex]

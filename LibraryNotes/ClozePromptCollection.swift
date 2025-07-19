@@ -6,7 +6,13 @@ import TextMarkupKit
 import UIKit
 
 public extension PromptType {
-  static let cloze = PromptType(rawValue: "prompt=cloze", class: ClozePromptCollection.self)
+  static let cloze = PromptType(rawValue: "prompt=cloze", factory: ClozePromptCollectionFactory())
+}
+
+struct ClozePromptCollectionFactory: PromptCollectionFactory {
+  public func makePromptCollection(rawValue: String) -> PromptCollection? {
+    ClozePromptCollection(rawValue: rawValue)
+  }
 }
 
 /// A template for creating ClozeCards from a markdown block that contains one or more clozes.

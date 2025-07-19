@@ -22,40 +22,40 @@ final class BookEditViewModel: ObservableObject {
     !book.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 
-  subscript (asString keyPath: WritableKeyPath<AugmentedBook, [String]>) -> String {
+  subscript(asString keyPath: WritableKeyPath<AugmentedBook, [String]>) -> String {
     get {
-      self.book[keyPath: keyPath].joined(separator: ", ")
+      book[keyPath: keyPath].joined(separator: ", ")
     }
     set {
-      self.book[keyPath: keyPath] = newValue.split(separator: ",")
+      book[keyPath: keyPath] = newValue.split(separator: ",")
         .map(String.init)
-        .map { $0.trimmingCharacters(in: .whitespaces)}
+        .map { $0.trimmingCharacters(in: .whitespaces) }
     }
   }
 
-  subscript (asString keyPath: WritableKeyPath<AugmentedBook, [String]?>) -> String {
+  subscript(asString keyPath: WritableKeyPath<AugmentedBook, [String]?>) -> String {
     get {
-      self.book[keyPath: keyPath]?.joined(separator: ", ") ?? ""
+      book[keyPath: keyPath]?.joined(separator: ", ") ?? ""
     }
     set {
-      self.book[keyPath: keyPath] = newValue.split(separator: ",")
+      book[keyPath: keyPath] = newValue.split(separator: ",")
         .map(String.init)
-        .map { $0.trimmingCharacters(in: .whitespaces)}
+        .map { $0.trimmingCharacters(in: .whitespaces) }
     }
   }
 
-  subscript (asString keyPath: WritableKeyPath<AugmentedBook, String?>) -> String {
+  subscript(asString keyPath: WritableKeyPath<AugmentedBook, String?>) -> String {
     get {
-      self.book[keyPath: keyPath] ?? ""
+      book[keyPath: keyPath] ?? ""
     }
     set {
-      self.book[keyPath: keyPath] = newValue
+      book[keyPath: keyPath] = newValue
     }
   }
 
-  subscript (asString keyPath: WritableKeyPath<AugmentedBook, Int?>) -> String {
-    get { self.book[keyPath: keyPath].flatMap(String.init(describing:)) ?? "" }
-    set { self.book[keyPath: keyPath] = Int(newValue) }
+  subscript(asString keyPath: WritableKeyPath<AugmentedBook, Int?>) -> String {
+    get { book[keyPath: keyPath].flatMap(String.init(describing:)) ?? "" }
+    set { book[keyPath: keyPath] = Int(newValue) }
   }
 }
 
