@@ -5,7 +5,13 @@ import TextMarkupKit
 import UIKit
 
 public extension PromptType {
-  static let quote = PromptType(rawValue: "prompt=quote", class: QuotePrompt.self)
+  static let quote = PromptType(rawValue: "prompt=quote", factory: QuotePromptFactory())
+}
+
+struct QuotePromptFactory: PromptCollectionFactory {
+  func makePromptCollection(rawValue: String) -> (any PromptCollection)? {
+    QuotePrompt(rawValue: rawValue)
+  }
 }
 
 public struct QuotePrompt: PromptCollection {

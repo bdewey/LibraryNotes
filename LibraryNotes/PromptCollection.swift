@@ -21,21 +21,25 @@ public struct PromptType: RawRepresentable, Hashable, Sendable {
   ///
   /// - parameter rawValue: The string name for the type.
   /// - parameter templateClass: The PromptCollection associated with this type.
-  public init(rawValue: String, class templateClass: PromptCollection.Type) {
+  public init(rawValue: String, factory: any PromptCollectionFactory) {
     self.rawValue = rawValue
     PromptType.protectedClassMap.withLock { classMap in
-      classMap[rawValue] = templateClass
+      classMap[rawValue] = factory
     }
   }
 
   /// Mapping between rawValue and PromptCollection classes.
-  public static var classMap: [String: PromptCollection.Type] {
+  public static var classMap: [String: any PromptCollectionFactory] {
     protectedClassMap.withLock { value in
       value
     }
   }
 
-  private static let protectedClassMap = OSAllocatedUnfairLock<[String: PromptCollection.Type]>(initialState: [:])
+  private static let protectedClassMap = OSAllocatedUnfairLock<[String: any PromptCollectionFactory]>(initialState: [:])
+}
+
+public protocol PromptCollectionFactory: Sendable {
+  func makePromptCollection(rawValue: String) -> PromptCollection?
 }
 
 /// A PromptCollection is a serializable thing that knows how to generate one or more Prompts.

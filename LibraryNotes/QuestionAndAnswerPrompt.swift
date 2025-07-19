@@ -5,7 +5,13 @@ import TextMarkupKit
 import UIKit
 
 public extension PromptType {
-  static let questionAndAnswer = PromptType(rawValue: "prompt=qanda", class: QuestionAndAnswerPrompt.self)
+  static let questionAndAnswer = PromptType(rawValue: "prompt=qanda", factory: QuestionAndAnswerPromptFactory())
+}
+
+struct QuestionAndAnswerPromptFactory: PromptCollectionFactory {
+  func makePromptCollection(rawValue: String) -> (any PromptCollection)? {
+    QuestionAndAnswerPrompt(rawValue: rawValue)
+  }
 }
 
 /// Generates prompts from QuestionAndAnswer minimarkdown nodes.

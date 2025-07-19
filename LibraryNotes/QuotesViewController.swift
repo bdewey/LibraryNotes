@@ -103,9 +103,7 @@ public final class QuotesViewController: UIViewController {
     let shuffleButton = UIBarButtonItem(image: UIImage(systemName: "shuffle"), style: .plain, target: self, action: #selector(shuffleQuotes))
     navigationItem.rightBarButtonItem = shuffleButton
 
-    [
-      collectionView,
-    ].forEach(view.addSubview)
+    view.addSubview(collectionView)
 
     collectionView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
@@ -236,9 +234,7 @@ private final class QuoteView: UIView, UIContentView {
     let quoteBackground = UIView(frame: .zero)
     quoteBackground.addSubview(stack)
 
-    [
-      quoteBackground,
-    ].forEach(addSubview)
+    addSubview(quoteBackground)
 
     quoteBackground.snp.makeConstraints { make in
       make.top.equalToSuperview().inset(24)

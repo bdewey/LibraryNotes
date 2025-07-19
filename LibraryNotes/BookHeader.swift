@@ -27,7 +27,7 @@ final class BookHeader: UIView {
     authorLabel.text = book.authors.joined(separator: ", ")
     tagsLabel.text = book.tags?.joined(separator: ", ")
 
-    [
+    for subview in [
       titleLabel,
       authorLabel,
       starRatingView,
@@ -35,7 +35,9 @@ final class BookHeader: UIView {
       readingStatusLabel,
       readingHistoryButton,
       coverImageView,
-    ].forEach(addSubview)
+    ] {
+      addSubview(subview)
+    }
     configureReadingHistoryButton()
   }
 

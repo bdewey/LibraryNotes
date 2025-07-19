@@ -123,34 +123,44 @@ extension String: Scannable {
   }
 }
 
-extension NSMutableAttributedString: Scannable {
+public final class ScannableAttributedString: Scannable {
+  private let _attributedString: NSMutableAttributedString
+
+  public var attributedString: NSAttributedString {
+    _attributedString.copy() as! NSAttributedString
+  }
+
+  public init(_ attributedString: NSAttributedString) {
+    self._attributedString = attributedString.mutableCopy() as! NSMutableAttributedString
+  }
+
   public var startIndex: String.Index {
-    string.startIndex
+    _attributedString.string.startIndex
   }
 
   public var endIndex: String.Index {
-    string.endIndex
+    _attributedString.string.endIndex
   }
 
   public subscript(i: String.Index) -> Character {
-    string[i]
+    _attributedString.string[i]
   }
 
   public func index(after i: String.Index) -> String.Index {
-    string.index(after: i)
+    _attributedString.string.index(after: i)
   }
 
   public func index(before i: String.Index) -> String.Index {
-    string.index(before: i)
+    _attributedString.string.index(before: i)
   }
 
   func string(from range: ClosedRange<String.Index>) -> String {
-    String(string[range])
+    String(_attributedString.string[range])
   }
 
   func replaceSubrange(_ bounds: ClosedRange<String.Index>, with replacement: some Collection<Character>) {
-    let nsrange = NSRange(bounds, in: string)
-    replaceCharacters(in: nsrange, with: String(replacement))
+    let nsrange = NSRange(bounds, in: _attributedString.string)
+    _attributedString.replaceCharacters(in: nsrange, with: String(replacement))
   }
 }
 
@@ -164,9 +174,8 @@ public extension String {
 
 public extension NSAttributedString {
   var withTypographySubstitutions: NSAttributedString {
-    let copy = mutableCopy() as! NSMutableAttributedString // swiftlint:disable:this force_cast
-    var scanner = TypographyScanner(copy)
+    var scanner = TypographyScanner(ScannableAttributedString(self))
     scanner.makeTypographySubstitutions()
-    return scanner.scannable
+    return scanner.scannable.attributedString
   }
 }

@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/groue/GRDB.swift",
       "state" : {
-        "revision" : "eacbdf23af4228dea3bd0e5feb17c0f953829c15",
-        "version" : "6.23.0"
+        "revision" : "04e73c26c4ce8218ab85aaf791942bb0b204f330",
+        "version" : "7.4.1"
       }
     },
     {
@@ -33,8 +33,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/KeyValueCRDT",
       "state" : {
-        "revision" : "f3a50ec3875f8a49595465f0b6b38649331d6790",
-        "version" : "1.3.1"
+        "revision" : "1813a268daaac8f9a972633b52c70b0f09b8a1ee",
+        "version" : "1.4.0"
       }
     },
     {
