@@ -244,7 +244,7 @@ public final class BookEditDetailsViewController: UIViewController {
       customButton.sizeToFit()
       return UIBarButtonItem(customView: customButton)
     #else
-      UIBarButtonItem(title: "Next", style: .done, target: self, action: #selector(handleNextButtonTap))
+      UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .done, target: self, action: #selector(handleNextButtonTap))
     #endif
   }()
 

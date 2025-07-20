@@ -225,22 +225,26 @@ public final class NotebookViewController: UISplitViewController {
       }
       present(navigationController, animated: true)
     } else {
-      let hashtag = focusedNotebookStructure.hashtag
-      let folder = focusedNotebookStructure.predefinedFolder
-      let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
-      var note = Note(markdown: text)
-      note.metadata.folder = folder?.rawValue
-      let viewController = SavingTextEditViewController(
-        note: note,
-        database: database,
-        coverImageCache: coverImageCache,
-        containsOnlyDefaultContent: true,
-        initialSelectedRange: NSRange(location: offset, length: 0),
-        autoFirstResponder: true
-      )
-      setSecondaryViewController(viewController, pushIfCollapsed: true)
-      Logger.shared.info("Created a new view controller for a blank document")
+      createAndNavigateToNewNote()
     }
+  }
+
+  func createAndNavigateToNewNote() {
+    let hashtag = focusedNotebookStructure.hashtag
+    let folder = focusedNotebookStructure.predefinedFolder
+    let (text, offset) = Note.makeBlankNoteText(hashtag: hashtag)
+    var note = Note(markdown: text)
+    note.metadata.folder = folder?.rawValue
+    let viewController = SavingTextEditViewController(
+      note: note,
+      database: database,
+      coverImageCache: coverImageCache,
+      containsOnlyDefaultContent: true,
+      initialSelectedRange: NSRange(location: offset, length: 0),
+      autoFirstResponder: true
+    )
+    setSecondaryViewController(viewController, pushIfCollapsed: true)
+    Logger.shared.info("Created a new view controller for a blank document")
   }
 
   override public func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
@@ -444,8 +448,7 @@ extension NotebookViewController: BookEditDetailsViewControllerDelegate {
 
   public func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
-    // TODO: This seems wrong
-    makeNewNote(sender: NotebookViewController.makeNewNoteButtonItem())
+    createAndNavigateToNewNote()
   }
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {

@@ -238,6 +238,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     bookViewController.title = "Insert Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
     navigationController.navigationBar.tintColor = .grailTint
+    navigationController.modalPresentationStyle = .formSheet
     if #available(iOS 26.0, *) {
       navigationController.preferredTransition = .zoom { _ in
         sender
