@@ -299,11 +299,20 @@ final class DocumentListViewController: UIViewController {
   }
 
   private func updateToolbarAndMenu() {
-    var toolbarItems = [
-      UIBarButtonItem.flexibleSpace(),
-      displayBarButtonItem,
-      UIBarButtonItem.flexibleSpace(),
-    ]
+    var toolbarItems: [UIBarButtonItem] = []
+    if #available(iOS 26.0, *) {
+      navigationItem.subtitle = dataSource.bookCount == 1 ? "1 book" : "\(dataSource.bookCount) books"
+      toolbarItems = [
+        UIBarButtonItem.flexibleSpace(),
+      ]
+    } else {
+      // Fallback on earlier versions
+      toolbarItems = [
+        UIBarButtonItem.flexibleSpace(),
+        displayBarButtonItem,
+        UIBarButtonItem.flexibleSpace(),
+      ]
+    }
     if splitViewController?.isCollapsed ?? false {
       toolbarItems.append(NotebookViewController.makeNewNoteButtonItem())
     }
