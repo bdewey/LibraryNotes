@@ -345,6 +345,7 @@ extension NSUserActivity {
 
   func sceneWillResignActive(_ scene: UIScene) {
     guard let browser = window?.rootViewController as? DocumentBrowserViewController else {
+      Logger.sceneDelegate.debug("Taking early exit from sceneWillResignActive. Why?")
       return
     }
     Logger.sceneDelegate.info("Saving user activity for sceneWillResignActive")
