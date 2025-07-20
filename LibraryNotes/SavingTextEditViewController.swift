@@ -216,32 +216,50 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     dismiss(animated: true, completion: nil)
   }
 
-  func editBookDetails(book: AugmentedBook) {
+  func editBookDetails(book: AugmentedBook, sender: UIBarButtonItem) {
     guard let apiKey = ApiKey.googleBooks else { return }
     let bookViewController = BookEditDetailsViewController(apiKey: apiKey, book: book, coverImage: coverImage, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Edit Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
     navigationController.navigationBar.tintColor = .grailTint
+    navigationController.modalPresentationStyle = .formSheet
+    if #available(iOS 26.0, *) {
+      navigationController.preferredTransition = .zoom { _ in
+        sender
+      }
+    }
     present(navigationController, animated: true, completion: nil)
   }
 
-  func insertBookDetails(apiKey: String) {
+  func insertBookDetails(apiKey: String, sender: UIBarButtonItem) {
     let bookViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: false)
     bookViewController.delegate = self
     bookViewController.title = "Insert Book Details"
     let navigationController = UINavigationController(rootViewController: bookViewController)
     navigationController.navigationBar.tintColor = .grailTint
+    if #available(iOS 26.0, *) {
+      navigationController.preferredTransition = .zoom { _ in
+        sender
+      }
+    }
     present(navigationController, animated: true, completion: nil)
   }
 
-  @objc func editOrInsertBookDetails() {
+  @objc func editOrInsertBookDetails(sender: UIBarButtonItem) {
     if let book = note.metadata.book {
-      editBookDetails(book: book)
+      editBookDetails(book: book, sender: sender)
     } else if let apiKey = ApiKey.googleBooks {
-      insertBookDetails(apiKey: apiKey)
+      insertBookDetails(apiKey: apiKey, sender: sender)
     }
   }
+
+  private static let infoButton = UIBarButtonItem(
+    title: "Info",
+    image: UIImage(systemName: "info.circle"),
+    target: nil,
+    action: #selector(editOrInsertBookDetails)
+  ).creatingFixedGroup()
 
   static var centerItemGroups: [UIBarButtonItemGroup] {
     let blockFormatItems: [UIBarButtonItem] = [
@@ -252,7 +270,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       UIBarButtonItem(title: "Summary", image: UIImage(systemName: "text.insert"), target: nil, action: #selector(TextEditingFormattingActions.toggleSummaryParagraph)),
     ]
     return [
-      UIBarButtonItem(title: "Info", image: UIImage(systemName: "info.circle"), target: nil, action: #selector(editOrInsertBookDetails)).creatingFixedGroup(),
+      infoButton,
       .optionalGroup(
         customizationIdentifier: "block-format",
         representativeItem: UIBarButtonItem(title: "Paragraph", image: UIImage(systemName: "paragraphsign")),
@@ -269,6 +287,8 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     ]
   }
 
+  private static let newNoteButtonItem = NotebookViewController.makeNewNoteButtonItem().creatingFixedGroup()
+
   private func configureToolbar() {
     navigationItem.customizationIdentifier = "savingTextEditViewController"
     navigationItem.centerItemGroups = Self.centerItemGroups
@@ -276,7 +296,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       navigationController?.isToolbarHidden = false
       toolbarItems = [UIBarButtonItem.flexibleSpace(), NotebookViewController.makeNewNoteButtonItem()]
     } else {
-      navigationItem.pinnedTrailingGroup = NotebookViewController.makeNewNoteButtonItem().creatingFixedGroup()
+      navigationItem.pinnedTrailingGroup = Self.newNoteButtonItem
     }
   }
 

@@ -51,29 +51,69 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   static var isUITesting: Bool = ProcessInfo.processInfo.arguments.contains("--uitesting")
 
   override func buildMenu(with builder: UIMenuBuilder) {
-    let newNoteCommand = UIKeyCommand(
-      title: "New Note",
-      action: #selector(NotebookViewController.makeNewNote),
-      input: "n",
-      modifierFlags: [.command]
+    builder.remove(menu: .newScene)
+    builder.insertChild(
+      UIMenu(options: .displayInline, children: [
+        UIKeyCommand(
+          title: "New Book",
+          image: UIImage(systemName: "plus"),
+          action: #selector(NotebookViewController.makeNewNote),
+          input: "n",
+          modifierFlags: [.command]
+        ),
+      ]),
+      atStartOfMenu: .file
     )
-    let openMenu = UIMenu(
-      title: "",
-      image: nil,
-      identifier: .openMenu,
-      options: .displayInline,
-      children: [
-        newNoteCommand,
-        UIKeyCommand(title: "Open...", action: #selector(openCommand), input: "o", modifierFlags: .command),
-      ]
+    builder.replace(
+      menu: .open,
+      with: UIMenu(
+        title: "",
+        image: nil,
+        identifier: .openMenu,
+        options: .displayInline,
+        children: [
+          UIKeyCommand(
+            title: "Open...",
+            image: UIImage(
+              systemName: "arrow.up.right.square"
+            ),
+            action: #selector(openCommand),
+            input: "o",
+            modifierFlags: [.command]
+          ),
+        ]
+      )
     )
-    builder.replace(menu: .newScene, with: openMenu)
-    builder.insertSibling(UIMenu(options: .displayInline, children: [
-      UIKeyCommand(title: "Review", action: #selector(DocumentListViewController.performReview), input: "r", modifierFlags: [.command, .shift]),
-    ]), afterMenu: .openMenu)
-    builder.insertSibling(UIMenu(options: .displayInline, children: [
-      UIKeyCommand(title: "Random Quotes", action: #selector(DocumentListViewController.showRandomQuotes), input: "1", modifierFlags: [.command]),
-    ]), beforeMenu: .bringAllToFront)
+    builder.insertSibling(
+      UIMenu(
+        options: .displayInline,
+        children: [
+          UIKeyCommand(
+            title: "Review",
+            image: UIImage(systemName: "sparkles.rectangle.stack"),
+            action: #selector(DocumentListViewController.performReview),
+            input: "r",
+            modifierFlags: [.command, .shift]
+          ),
+        ]
+      ),
+      afterMenu: .openMenu
+    )
+    builder.insertSibling(
+      UIMenu(
+        options: .displayInline,
+        children: [
+          UIKeyCommand(
+            title: "Random Quotes",
+            image: UIImage(systemName: "text.quote"),
+            action: #selector(DocumentListViewController.showRandomQuotes),
+            input: "1",
+            modifierFlags: [.command]
+          ),
+        ]
+      ),
+      beforeMenu: .bringAllToFront
+    )
     builder.insertChild(
       UIMenu(options: .displayInline, children: [DocumentListViewController.groupByYearReadCommand]),
       atStartOfMenu: .view
@@ -82,10 +122,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     if #available(macCatalyst 16.0, iOS 16.0, *) {
       builder.remove(menu: .document)
     }
-    let exportMenu = UIMenu(title: "Export", image: nil, identifier: .init("org.brians-brain.LibraryNotes.Export"), options: [], children: [
-      UICommand(title: "Export to CSV...", action: #selector(DocumentListViewController.exportToCSV)),
-      UICommand(title: "Export to Zip...", action: #selector(DocumentListViewController.exportToZip)),
-    ])
+    let exportMenu = UIMenu(
+      title: "Export",
+      image: UIImage(systemName: "square.and.arrow.up"),
+      identifier: .init("org.brians-brain.LibraryNotes.Export"),
+      options: [],
+      children: [
+        UICommand(title: "Export to CSV...", action: #selector(DocumentListViewController.exportToCSV)),
+        UICommand(title: "Export to Zip...", image: UIImage(systemName: "zipper.page"), action: #selector(DocumentListViewController.exportToZip)),
+      ]
+    )
     builder.insertChild(
       UIMenu(
         title: "",
@@ -93,7 +139,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         identifier: .init("org.brians-brain.LibraryNotes.Import"),
         options: .displayInline,
         children: [
-          UIKeyCommand(title: "Import...", action: #selector(DocumentListViewController.importBooks), input: "i", modifierFlags: [.shift, .command]),
+          UIKeyCommand(title: "Import...", image: UIImage(systemName: "square.and.arrow.down"), action: #selector(DocumentListViewController.importBooks), input: "i", modifierFlags: [.shift, .command]),
           exportMenu,
         ]
       ),

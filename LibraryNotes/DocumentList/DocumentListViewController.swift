@@ -667,7 +667,11 @@ extension DocumentListViewController {
     let sortCommands = NoteIdentifierRecord.SortOrder.allCases.map { sortOrder -> UICommand in
       UICommand(title: sortOrder.rawValue, action: #selector(handleSortCommand), propertyList: sortOrder.rawValue)
     }
-    return UIMenu(title: "Sort", image: UIImage(systemName: "arrow.up.arrow.down.circle"), options: .displayInline, children: sortCommands)
+    return UIMenu(
+      title: "Sort",
+      image: UIImage(systemName: "arrow.up.arrow.down"),
+      children: sortCommands
+    )
   }
 }
 

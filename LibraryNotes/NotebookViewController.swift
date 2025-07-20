@@ -208,13 +208,21 @@ public final class NotebookViewController: UISplitViewController {
 //    }
   }
 
-  @objc func makeNewNote() {
+  @objc func makeNewNoteFromBarButtonItem(sender: UIBarButtonItem) {
+    makeNewNote(sender: sender)
+  }
+
+  @objc func makeNewNote(sender: Any? = nil) {
     if let apiKey = ApiKey.googleBooks, !apiKey.isEmpty {
       let bookSearchViewController = BookEditDetailsViewController(apiKey: apiKey, showSkipButton: true)
       bookSearchViewController.delegate = self
       bookSearchViewController.title = "Add Book"
       let navigationController = UINavigationController(rootViewController: bookSearchViewController)
       navigationController.navigationBar.tintColor = .grailTint
+      navigationController.modalPresentationStyle = .formSheet
+      if #available(iOS 26.0, *), let sender = sender as? UIBarButtonItem {
+        navigationController.preferredTransition = .zoom { _ in sender }
+      }
       present(navigationController, animated: true)
     } else {
       let hashtag = focusedNotebookStructure.hashtag
@@ -246,15 +254,20 @@ public final class NotebookViewController: UISplitViewController {
   /// Forward the `editOrInsertBookDetails` selector to the active `SavingTextEditViewController`, if it is visible in the window.
   ///
   /// This is to enable the "info" toolbar button to work even when the editor window doesn't have focus, but something else in the notebook does.
-  @objc private func editOrInsertBookDetails() {
+  @objc private func editOrInsertBookDetails(sender: UIBarButtonItem) {
     guard let editor = secondaryViewController as? SavingTextEditViewController else {
       return
     }
-    editor.editOrInsertBookDetails()
+    editor.editOrInsertBookDetails(sender: sender)
   }
 
   public static func makeNewNoteButtonItem() -> UIBarButtonItem {
-    UIBarButtonItem(title: "New book", image: UIImage(systemName: "plus"), target: nil, action: #selector(makeNewNote))
+    UIBarButtonItem(
+      title: "New book",
+      image: UIImage(systemName: "plus"),
+      target: nil,
+      action: #selector(makeNewNoteFromBarButtonItem)
+    )
   }
 
   func showNoteEditor(noteIdentifier: Note.Identifier?, note: Note, shiftFocus: Bool) {
@@ -431,7 +444,8 @@ extension NotebookViewController: BookEditDetailsViewControllerDelegate {
 
   public func bookSearchViewControllerDidSkip(_ viewController: BookEditDetailsViewController) {
     dismiss(animated: true, completion: nil)
-    makeNewNote()
+    // TODO: This seems wrong
+    makeNewNote(sender: NotebookViewController.makeNewNoteButtonItem())
   }
 
   public func bookSearchViewControllerDidCancel(_ viewController: BookEditDetailsViewController) {
