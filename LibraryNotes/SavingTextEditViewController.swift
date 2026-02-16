@@ -9,6 +9,7 @@ import LinkPresentation
 import ObjectiveCTextStorageWrapper
 import os
 import SnapKit
+import SwiftUI
 import TextMarkupKit
 import UIKit
 import UniformTypeIdentifiers
@@ -120,6 +121,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
   private let initialSelectedRange: NSRange?
   private let autoFirstResponder: Bool
   private let textEditViewController: TextEditViewController
+  private var bookHeaderView: BookHeader?
 
   private static func makeTextEditViewController(
     imageStorage: NoteScopedImageStorage,
@@ -186,6 +188,7 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
         coverImage: coverImageCache.coverImage(bookID: noteIdentifier, maxSize: 250)
       )
       bookHeader.delegate = self
+      bookHeaderView = bookHeader
       textEditViewController.extendedNavigationHeaderView = bookHeader
     }
     view.addSubview(textEditViewController.view)
@@ -254,6 +257,32 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
     } else if let apiKey = ApiKey.googleBooks {
       insertBookDetails(apiKey: apiKey, sender: sender)
     }
+  }
+
+  @MainActor
+  private func presentReadingHistoryEditor() {
+    guard let book = note.metadata.book else { return }
+    let editor = ReadingHistoryEditorView(
+      history: book.readingHistory,
+      onSave: { [weak self] updatedHistory in
+        guard let self else { return }
+        guard var currentBook = self.note.metadata.book else { return }
+        currentBook.readingHistory = updatedHistory
+        self.note.metadata.book = currentBook
+        self.note.metadata.modifiedTimestamp = Date()
+        self.bookHeaderView?.update(book: currentBook)
+        self.tryUpdateNote()
+      },
+      onDismiss: { [weak self] in
+        self?.dismiss(animated: true, completion: nil)
+      }
+    )
+    let hostingController = UIHostingController(rootView: editor)
+    hostingController.title = "Reading History"
+    let navigationController = UINavigationController(rootViewController: hostingController)
+    navigationController.navigationBar.tintColor = .grailTint
+    navigationController.modalPresentationStyle = .formSheet
+    present(navigationController, animated: true, completion: nil)
   }
 
   private static let infoButton = UIBarButtonItem(
@@ -441,6 +470,10 @@ extension SavingTextEditViewController: BookHeaderDelegate {
     note.metadata.book = book
     note.metadata.modifiedTimestamp = Date()
     tryUpdateNote()
+  }
+
+  func bookHeaderDidRequestReadingHistory(_ bookHeader: BookHeader) {
+    presentReadingHistoryEditor()
   }
 }
 

@@ -13,6 +13,7 @@ private extension Logger {
 @MainActor
 protocol BookHeaderDelegate: AnyObject {
   func bookHeader(_ bookHeader: BookHeader, didUpdate book: AugmentedBook)
+  func bookHeaderDidRequestReadingHistory(_ bookHeader: BookHeader)
 }
 
 /// Displays information about a book, intended to be used as a scrollaway header when looking at book notes.
@@ -34,6 +35,7 @@ final class BookHeader: UIView {
       starRatingView,
       tagsLabel,
       readingStatusLabel,
+      readingHistoryDetailsButton,
       readingHistoryButton,
       coverImageView,
     ] {
@@ -50,10 +52,13 @@ final class BookHeader: UIView {
   }
 
   private let coverImageView: UIImageView
+  private var shouldNotifyDelegate = true
   private var book: AugmentedBook {
     didSet {
       configureReadingHistoryButton()
-      delegate?.bookHeader(self, didUpdate: book)
+      if shouldNotifyDelegate {
+        delegate?.bookHeader(self, didUpdate: book)
+      }
     }
   }
 
@@ -95,6 +100,15 @@ final class BookHeader: UIView {
     return label
   }()
 
+  private lazy var readingHistoryDetailsButton: UIButton = {
+    let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
+      guard let self else { return }
+      delegate?.bookHeaderDidRequestReadingHistory(self)
+    }))
+    button.setTitle("History", for: .normal)
+    return button
+  }()
+
   private lazy var readingHistoryButton: UIButton = {
     let button = UIButton(type: .system, primaryAction: UIAction(handler: { [weak self] _ in
       guard let self else { return }
@@ -117,6 +131,16 @@ final class BookHeader: UIView {
       readingHistoryButton.setTitle("Start rereading", for: .normal)
     }
     readingStatusLabel.text = book.readingHistory?.currentReadingStatus
+  }
+
+  func update(book: AugmentedBook) {
+    shouldNotifyDelegate = false
+    self.book = book
+    shouldNotifyDelegate = true
+    titleLabel.text = book.title
+    authorLabel.text = book.authors.joined(separator: ", ")
+    tagsLabel.text = book.tags?.joined(separator: ", ")
+    starRatingView.rating = book.rating ?? 0
   }
 
   private func startReading() {
@@ -154,6 +178,7 @@ final class BookHeader: UIView {
     authorLabel.frame = frames.authorLabel
     starRatingView.frame = frames.starRatingView
     readingHistoryButton.frame = frames.readingHistoryButton
+    readingHistoryDetailsButton.frame = frames.readingHistoryDetailsButton
     readingStatusLabel.frame = frames.readingStatusLabel
     tagsLabel.frame = frames.tagsLabel
   }
@@ -174,6 +199,7 @@ final class BookHeader: UIView {
     var authorLabel: CGRect = .zero
     var starRatingView: CGRect = .zero
     var readingHistoryButton: CGRect = .zero
+    var readingHistoryDetailsButton: CGRect = .zero
     var readingStatusLabel: CGRect = .zero
     var tagsLabel: CGRect = .zero
     var imageColumnHeight: CGFloat = 0
@@ -188,6 +214,7 @@ final class BookHeader: UIView {
         \.authorLabel,
         \.starRatingView,
         \.readingHistoryButton,
+        \.readingHistoryDetailsButton,
         \.readingStatusLabel,
         \.tagsLabel,
       ]
@@ -253,6 +280,11 @@ final class BookHeader: UIView {
     let buttonSize = readingHistoryButton.sizeThatFits(layoutArea.size)
     (frames.readingHistoryButton, layoutArea) = layoutArea.divided(atDistance: buttonSize.height, from: .maxYEdge)
     frames.readingHistoryButton.size.width = min(buttonSize.width, layoutArea.width)
+    layoutArea = layoutArea.inset(by: .bottom(padding))
+
+    let historyButtonSize = readingHistoryDetailsButton.sizeThatFits(layoutArea.size)
+    (frames.readingHistoryDetailsButton, layoutArea) = layoutArea.divided(atDistance: historyButtonSize.height, from: .maxYEdge)
+    frames.readingHistoryDetailsButton.size.width = min(historyButtonSize.width, layoutArea.width)
     layoutArea = layoutArea.inset(by: .bottom(padding))
 
     let readLabelSize = readingStatusLabel.sizeThatFits(layoutArea.size)
