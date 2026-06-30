@@ -432,25 +432,7 @@ final class DocumentListViewController: UIViewController {
       let fileURL = fileURL(title: note.metadata.exportTitle, directory: destinationURL)
       var buffer = ""
       if let book = note.metadata.book {
-        buffer = "---\n"
-        buffer.append("title: \(book.title)\n")
-        buffer.append("authors:\n")
-        for author in book.authors {
-          buffer.append("- \(author)\n")
-        }
-        if let year = book.originalYearPublished ?? book.yearPublished {
-          buffer.append("year-published: \(year)\n")
-        }
-        if let rating = book.rating {
-          buffer.append("rating: \(rating)\n")
-        }
-        if let readingHistoryEntries = book.readingHistory?.entries?.filter({ $0.finish != nil }), !readingHistoryEntries.isEmpty {
-          buffer.append("reading-history:\n")
-          for entry in readingHistoryEntries {
-            buffer.append("- \(entry.finish!.yaml)\n")
-          }
-        }
-        buffer.append("---\n\n")
+        buffer = MarkdownExport.frontmatter(for: book)
       }
       let imageDirectory = fileURL.deletingPathExtension()
       if let coverImage = try? database.read(noteIdentifier: noteIdentifier.noteIdentifier, key: .coverImage).resolved(with: .lastWriterWins) {
@@ -847,23 +829,5 @@ private extension BookNoteMetadata {
     } else {
       title
     }
-  }
-}
-
-private extension DateComponents {
-  var yaml: String {
-    guard let year else {
-      return ""
-    }
-    var output = "\(year)"
-    guard let month else {
-      return output
-    }
-    output.append("-\(month.formatted(.number.precision(.integerLength(2))))")
-    guard let day else {
-      return output
-    }
-    output.append("-\(day.formatted(.number.precision(.integerLength(2))))")
-    return output
   }
 }
