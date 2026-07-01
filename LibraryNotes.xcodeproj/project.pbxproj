@@ -176,7 +176,6 @@
 		D3378CED26DBE934006750EC /* BookAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAction.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
-		D34E334B2FF55DD600BAD723 /* TextMarkupKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = TextMarkupKit; path = ../TextMarkupKit; sourceTree = SOURCE_ROOT; };
 		D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookEditDetailsViewController.swift; sourceTree = "<group>"; };
 		D3558D7625D9741100746600 /* ImageCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCache.swift; sourceTree = "<group>"; };
 		D3558D7825D9AFB700746600 /* Api.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Api.xcconfig; sourceTree = "<group>"; };
@@ -362,7 +361,6 @@
 		D3DC5EB620EC9B0100F0B74B = {
 			isa = PBXGroup;
 			children = (
-				D34E334B2FF55DD600BAD723 /* TextMarkupKit */,
 				D40100000000000000000001 /* LibraryNotesCore */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
@@ -1168,7 +1166,7 @@
 			repositoryURL = "https://github.com/bdewey/TextMarkupKit";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.7.2;
+				minimumVersion = 0.12.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
