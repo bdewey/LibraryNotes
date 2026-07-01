@@ -21,6 +21,7 @@ Dogeared Notes is an iOS app inspired by [*Commonplace Books*](https://en.wikipe
 * All of your Dogeared notes are stored in a single file that you can synchronize across your devices with the system of your choice (e.g., iCloud or DropBox). iCloud Document Storage works great for keeping your notes in sync across multiple devices.
 * Organize notes with hashtags. You can use hierarchical hashtags, too (e.g., `#books/2021`).
 * Fast full-text search.
+* Export library notes as Markdown files with YAML metadata. See [Book Note Markdown](Docs/markdown-export.md) for the proposed interchange format and importer guidance.
 
 ## Review Mode
 

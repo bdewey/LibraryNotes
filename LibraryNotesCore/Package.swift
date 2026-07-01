@@ -32,5 +32,14 @@ let package = Package(
       ],
       path: "Sources/LibraryNotesCore"
     ),
+    .testTarget(
+      name: "LibraryNotesCoreTests",
+      dependencies: [
+        "LibraryNotesCore",
+        .product(name: "BookKit", package: "BookKit"),
+        .product(name: "KeyValueCRDT", package: "KeyValueCRDT"),
+      ],
+      path: "Tests/LibraryNotesCoreTests"
+    ),
   ]
 )

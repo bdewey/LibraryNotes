@@ -39,6 +39,8 @@
 		D3378CE826DBC7E2006750EC /* BookCollectionViewItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CE726DBC7E2006750EC /* BookCollectionViewItem.swift */; };
 		D3378CEA26DBC9C5006750EC /* ClearBackgroundCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CE926DBC9C5006750EC /* ClearBackgroundCell.swift */; };
 		D3378CEE26DBE934006750EC /* BookAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3378CED26DBE934006750EC /* BookAction.swift */; };
+		D3398DC72847E70E009D2C9E /* MarkdownExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3398DC62847E70E009D2C9E /* MarkdownExport.swift */; };
+		D3398DC52847E624009D2C9E /* MarkdownExportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3398DC42847E624009D2C9E /* MarkdownExportTests.swift */; };
 		D339C70021EB940900924178 /* QuoteTemplateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */; };
 		D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3446D3F23FAF20400BC269A /* Note+TestContent.swift */; };
 		D3558D7525D87F3000746600 /* BookEditDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */; };
@@ -174,6 +176,8 @@
 		D3378CE726DBC7E2006750EC /* BookCollectionViewItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookCollectionViewItem.swift; sourceTree = "<group>"; };
 		D3378CE926DBC9C5006750EC /* ClearBackgroundCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearBackgroundCell.swift; sourceTree = "<group>"; };
 		D3378CED26DBE934006750EC /* BookAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookAction.swift; sourceTree = "<group>"; };
+		D3398DC42847E624009D2C9E /* MarkdownExportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExportTests.swift; sourceTree = "<group>"; };
+		D3398DC62847E70E009D2C9E /* MarkdownExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkdownExport.swift; sourceTree = "<group>"; };
 		D339C6FF21EB940900924178 /* QuoteTemplateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteTemplateTests.swift; sourceTree = "<group>"; };
 		D3446D3F23FAF20400BC269A /* Note+TestContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Note+TestContent.swift"; sourceTree = "<group>"; };
 		D3558D7425D87F3000746600 /* BookEditDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookEditDetailsViewController.swift; sourceTree = "<group>"; };
@@ -414,6 +418,7 @@
 				D3DC5ECD20EC9B0200F0B74B /* LaunchScreen.storyboard */,
 				D36214652334F607008C8FF4 /* LayoutManager.swift */,
 				D324409926E525ED009B58DE /* LogFileDirectory.swift */,
+				D3398DC62847E70E009D2C9E /* MarkdownExport.swift */,
 				D362999026B3234B00AF8F23 /* Models */,
 				D3677C762652A45F00307EEA /* NotebookSecondaryViewController.swift */,
 				D3D21875253A0BEE001DD2A3 /* NotebookStructureViewController.swift */,
@@ -450,6 +455,7 @@
 			children = (
 				D31AFAE5229D620B00ED2B76 /* ClozeTests.swift */,
 				D3DC5EDB20EC9B0200F0B74B /* Info.plist */,
+				D3398DC42847E624009D2C9E /* MarkdownExportTests.swift */,
 				D32A7A6F25A0CF1100950684 /* Note+RenameTests.swift */,
 				D3446D3F23FAF20400BC269A /* Note+TestContent.swift */,
 				D35D72B723F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift */,
@@ -680,6 +686,7 @@
 				D32A03B523007114002D17E7 /* DateComponentsFormatter+Document.swift in Sources */,
 				D311787E25ACA14500E473FD /* DocumentBrowserViewController.swift in Sources */,
 				D375D33C20ED9BEC00EAB4F0 /* DocumentListViewController.swift in Sources */,
+				D3398DC72847E70E009D2C9E /* MarkdownExport.swift in Sources */,
 				D36ECC962426ED4D0028D808 /* CGVector+Extensions.swift in Sources */,
 				D31AFAAE229D61EE00ED2B76 /* PromptView.swift in Sources */,
 				D31AFAD3229D61EE00ED2B76 /* NSAttributedString+ChapterAndVerse.swift in Sources */,
@@ -719,6 +726,7 @@
 				D374AB56229380E500F54561 /* TemporaryFile.swift in Sources */,
 				D3AD01CC23BE7703004BB7DF /* NoteDatabaseTests.swift in Sources */,
 				D35D72B823F8CC2300BD23DD /* NoteSqliteStorageMergeTests.swift in Sources */,
+				D3398DC52847E624009D2C9E /* MarkdownExportTests.swift in Sources */,
 				D32A7A6025A0B99900950684 /* StringProtocol+HashtagTests.swift in Sources */,
 				D32A7A7025A0CF1100950684 /* Note+RenameTests.swift in Sources */,
 				D3446D4023FAF20400BC269A /* Note+TestContent.swift in Sources */,
