@@ -2,7 +2,7 @@
 
 import Foundation
 
-extension Optional where Wrapped: Collection {
+public extension Optional where Wrapped: Collection {
   /// Convenience: A meaningful definition on `isEmpty` on an Optional collection.
   /// Nil collections are clearly empty.
   var isEmpty: Bool {

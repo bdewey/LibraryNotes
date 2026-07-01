@@ -2,7 +2,6 @@
 
 import Foundation
 import TextMarkupKit
-import UIKit
 
 public extension PromptType {
   static let questionAndAnswer = PromptType(rawValue: "prompt=qanda", factory: QuestionAndAnswerPromptFactory())
@@ -45,23 +44,4 @@ public struct QuestionAndAnswerPrompt: PromptCollection {
   public var prompts: [Prompt] { [self] }
 }
 
-extension QuestionAndAnswerPrompt: Prompt {
-  public func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
-    let view = TwoSidedCardView(frame: .zero)
-    view.context = ParsedAttributedString(string: properties.attributionMarkdown, style: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, kern: 2.0))
-    let formattedString = ParsedAttributedString(
-      string: markdown,
-      style: .plainText(textStyle: .body, imageStorage: NoteScopedImageStorage(identifier: properties.documentName, database: database))
-    )
-    if let node = try? formattedString.rawString.result.get() {
-      let anchoredNode = AnchoredNode(node: node, startIndex: 0)
-      if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
-        view.front = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: question.range)).trimmingTrailingWhitespace()
-      }
-      if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
-        view.back = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: answer.range)).trimmingTrailingWhitespace()
-      }
-    }
-    return view
-  }
-}
+extension QuestionAndAnswerPrompt: Prompt {}

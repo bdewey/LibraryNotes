@@ -1,14 +1,10 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import Algorithms
 import os
 import UIKit
 import UniformTypeIdentifiers
-
-public extension UTType {
-  static let kvcrdt = UTType("org.brians-brain.kvcrdt")!
-  static let libnotes = UTType("org.brians-brain.libnotes")!
-}
 
 private extension Logger {
   static var sceneDelegate: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "SceneDelegate") }
@@ -208,8 +204,8 @@ extension NSUserActivity {
       window.windowScene?.title = "Random Quotes"
     #endif
     Task {
-      let database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
-      let quotesViewController = QuotesViewController(database: database)
+      let document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
+      let quotesViewController = QuotesViewController(database: document.database)
       quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
       window.rootViewController = UINavigationController(rootViewController: quotesViewController)
     }
@@ -233,18 +229,18 @@ extension NSUserActivity {
       window.windowScene?.titlebar?.toolbar = toolbar
     #endif
     Task {
-      let database: NoteDatabase
+      let document: NoteDatabaseDocumentWrapper
       if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
-        database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
+        document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
       } else {
         throw CocoaError(CocoaError.fileReadUnsupportedScheme)
       }
-      Logger.sceneDelegate.info("Using document at \(database.fileURL)")
+      Logger.sceneDelegate.info("Using document at \(document.fileURL)")
       let properties: [String: String] = [
-        "documentState": String(describing: database.documentState),
+        "documentState": String(describing: document.documentState),
       ]
       Logger.sceneDelegate.info("In open completion handler. \(properties)")
-      let viewController = NotebookViewController(database: database)
+      let viewController = NotebookViewController(database: document.database)
       viewController.modalPresentationStyle = .fullScreen
       viewController.modalTransitionStyle = .crossDissolve
       viewController.view.tintColor = .systemOrange
@@ -266,7 +262,8 @@ extension NSUserActivity {
       }
     }
     Task {
-      let database = try await NoteDatabase(fileURL: databaseURL, authorDescription: UIDevice.current.name)
+      let document = try await NoteDatabaseDocumentWrapper(fileURL: databaseURL, authorDescription: UIDevice.current.name)
+      let database = document.database
       var noteIdentifiers: [Note.Identifier]?
       switch studyTarget {
       case .note(let identifier):

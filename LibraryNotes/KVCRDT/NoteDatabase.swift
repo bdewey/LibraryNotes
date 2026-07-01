@@ -8,10 +8,13 @@ import KeyValueCRDT
 import os
 import SpacedRepetitionScheduler
 import TextMarkupKit
-import UIKit
 import UniformTypeIdentifiers
 
-private extension Logger {
+public extension Logger {
+  static var shared: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes") }
+}
+
+extension Logger {
   static var keyValueNoteDatabase: Logger {
     Logger(subsystem: Bundle.main.bundleIdentifier!, category: "KeyValueNoteDatabase")
   }
@@ -37,14 +40,29 @@ public enum NoteDatabaseError: String, Swift.Error {
   case unexpectedNoteContent = "Note keys did not match the expected structure."
 }
 
+public struct NoteDatabaseDocumentActions {
+  public init(
+    refresh: (() throws -> Void)? = nil,
+    flush: (() async throws -> Void)? = nil
+  ) {
+    self.refresh = refresh
+    self.flush = flush
+  }
+
+  let refresh: (() throws -> Void)?
+  let flush: (() async throws -> Void)?
+}
+
 public extension ApplicationIdentifier {
   static let currentLibraryNotesVersion = ApplicationIdentifier(id: UTType.libnotes.identifier, majorVersion: 2, minorVersion: 0, applicationDescription: "Library Notes")
 }
 
-private struct NoteDatabaseUpgrader: ApplicationDataUpgrader {
-  let expectedApplicationIdentifier = ApplicationIdentifier.currentLibraryNotesVersion
+public struct NoteDatabaseUpgrader: ApplicationDataUpgrader {
+  public let expectedApplicationIdentifier = ApplicationIdentifier.currentLibraryNotesVersion
 
-  func upgradeApplicationData(in database: KeyValueDatabase) throws {
+  public init() {}
+
+  public func upgradeApplicationData(in database: KeyValueDatabase) throws {
     Logger.shared.info("Upgrading library")
     let allMetadata = try database.bulkRead(key: NoteDatabaseKey.metadata.rawValue)
     let upgradedMetadata = try allMetadata.mapValues { versions -> Value in
@@ -59,28 +77,22 @@ private struct NoteDatabaseUpgrader: ApplicationDataUpgrader {
   }
 }
 
-extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
+public extension ApplicationDataUpgrader where Self == NoteDatabaseUpgrader {
   static var noteDatabaseUpgrader: NoteDatabaseUpgrader { NoteDatabaseUpgrader() }
 }
 
-/// An implementation of ``NoteDatabase`` based upon ``UIKeyValueDocument``
+/// An implementation of the Library Notes content model backed by a key-value CRDT.
 public final class NoteDatabase: @unchecked Sendable {
-  public typealias IOCompletionHandler = (Bool) -> Void
-
-  /// Initializes and opens the database stored at `fileURL`
-  @MainActor
-  public init(fileURL: URL, authorDescription: String) async throws {
-    self.keyValueDocument = try UIKeyValueDocument(
-      fileURL: fileURL,
-      authorDescription: authorDescription,
-      upgrader: .noteDatabaseUpgrader
-    )
-    guard await keyValueDocument.open(), let keyValueCRDT = keyValueDocument.keyValueCRDT else {
-      throw NoteDatabaseError.databaseIsNotOpen
-    }
+  /// Initializes a Library Notes content database using an already opened key-value CRDT.
+  public init(
+    keyValueCRDT: KeyValueDatabase,
+    fileURL: URL,
+    documentActions: NoteDatabaseDocumentActions = NoteDatabaseDocumentActions()
+  ) {
     self.keyValueCRDT = keyValueCRDT
+    self.fileURL = fileURL
+    self.documentActions = documentActions
     self.instanceID = keyValueCRDT.instanceID
-    keyValueDocument.delegate = self
     self.allTagsInvalidationSubscription = notesDidChange
       .receive(on: RunLoop.main)
       .sink { [weak self] _ in
@@ -106,45 +118,41 @@ public final class NoteDatabase: @unchecked Sendable {
 //      }
   }
 
+  /// Opens a Library Notes content database directly from a file URL.
+  public convenience init(fileURL: URL, authorDescription: String) throws {
+    let keyValueCRDT = try KeyValueDatabase(
+      fileURL: fileURL,
+      authorDescription: authorDescription,
+      upgrader: .noteDatabaseUpgrader
+    )
+    self.init(keyValueCRDT: keyValueCRDT, fileURL: fileURL)
+  }
+
   public static var coverImageKey: String { NoteDatabaseKey.coverImage.rawValue }
 
-  @MainActor private let keyValueDocument: UIKeyValueDocument
-
-  /// The `KeyValueDatabase` contained in `keyValueDocument`
+  /// The key-value CRDT that stores the Library Notes content.
   private let keyValueCRDT: KeyValueDatabase
 
-  @MainActor public var fileURL: URL { keyValueDocument.fileURL }
+  public let fileURL: URL
+
+  private let documentActions: NoteDatabaseDocumentActions
 
   public let instanceID: UUID
 
-  @MainActor public var documentState: UIDocument.State { keyValueDocument.documentState }
-
-  @MainActor public var hasUnsavedChanges: Bool { keyValueDocument.hasUnsavedChanges }
-
-  @MainActor public func close() async -> Bool {
-    await keyValueDocument.close()
-  }
-
-  @MainActor public func save(to url: URL, for saveOperation: UIDocument.SaveOperation) async -> Bool {
-    await keyValueDocument.save(to: url, for: saveOperation)
-  }
-
-  @MainActor
-  public func refresh() throws {
-    try FileManager.default.startDownloadingUbiquitousItem(at: fileURL)
-  }
-
-  @MainActor
-  public func flush() async throws {
-    await keyValueDocument.save(to: fileURL, for: .forOverwriting)
-  }
-
-  @MainActor
   public func merge(other: NoteDatabase) throws {
-    guard let keyValueCRDT = keyValueDocument.keyValueCRDT, let otherKeyValueCRDT = other.keyValueDocument.keyValueCRDT else {
-      throw NoteDatabaseError.databaseIsNotOpen
-    }
-    try keyValueCRDT.merge(source: otherKeyValueCRDT)
+    try keyValueCRDT.merge(source: other.keyValueCRDT)
+  }
+
+  public func save(to url: URL) throws {
+    try keyValueCRDT.save(to: url)
+  }
+
+  public func refresh() throws {
+    try documentActions.refresh?()
+  }
+
+  public func flush() async throws {
+    try await documentActions.flush?()
   }
 
   public var notesDidChange: AnyPublisher<Void, Never> {
@@ -216,8 +224,8 @@ public final class NoteDatabase: @unchecked Sendable {
   ///   - groupByYearRead: If true, results should be grouped by year read as well as by general "section"
   ///   - searchTerm: Optional search term for full-text search.
   /// - Returns: A publisher of `NoteIdentifierRecord` structs.
-  func noteIdentifiersPublisher(
-    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+  public func noteIdentifiersPublisher(
+    structureIdentifier: NotebookStructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
     groupByYearRead: Bool,
     searchTerm: String?
@@ -242,7 +250,7 @@ public final class NoteDatabase: @unchecked Sendable {
   ///   - searchTerm: Optional search term for full-text search.
   /// - Returns: An array of `NoteIdentifierRecord` structs.
   func noteIdentifiers(
-    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    structureIdentifier: NotebookStructureIdentifier,
     sortOrder: NoteIdentifierRecord.SortOrder,
     groupByYearRead: Bool,
     searchTerm: String?
@@ -590,29 +598,6 @@ public final class NoteDatabase: @unchecked Sendable {
     } catch {
       Logger.keyValueNoteDatabase.error("Unexpected error getting studyLog: \(error)")
       return StudyLog()
-    }
-  }
-}
-
-extension NoteDatabase: UIKeyValueDocumentDelegate {
-  public func keyValueDocument(_ document: UIKeyValueDocument, willMergeCRDT sourceCRDT: KeyValueDatabase, into destinationCRDT: KeyValueDatabase) {
-    do {
-      let documentsDirectoryURL = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-      let mergeDirectoryURL = documentsDirectoryURL.appendingPathComponent("merge-attempts")
-      let creationDate = Date()
-      let unwantedCharacters = CharacterSet(charactersIn: "-:")
-      var uniqifier = ISO8601DateFormatter().string(from: creationDate)
-      uniqifier.removeAll(where: { unwantedCharacters.contains($0.unicodeScalars.first!) })
-
-      let containerURL = mergeDirectoryURL.appendingPathComponent("merge-\(uniqifier)")
-      Logger.shared.info("Making a backup to \(containerURL)")
-      try FileManager.default.createDirectory(at: containerURL, withIntermediateDirectories: true)
-      let inMemoryURL = containerURL.appendingPathComponent("memory.sqlite")
-      try destinationCRDT.save(to: inMemoryURL)
-      let onDiskURL = containerURL.appendingPathComponent("disk.sqlite")
-      try sourceCRDT.save(to: onDiskURL)
-    } catch {
-      Logger.shared.error("Unexpected error making backup: \(error)")
     }
   }
 }

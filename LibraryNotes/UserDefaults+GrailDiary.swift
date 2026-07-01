@@ -3,7 +3,7 @@
 import Foundation
 import os
 
-extension UserDefaults {
+public extension UserDefaults {
   var immediatelySchedulePrompts: Bool {
     bool(for: "immediately_schedule_prompts", default: true)
   }

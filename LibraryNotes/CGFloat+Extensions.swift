@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import UIKit
 
 public extension CGFloat {

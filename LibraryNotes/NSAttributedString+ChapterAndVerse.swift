@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import Foundation
 
 /// "Chapter and verse" text is a parenthetical note at the end of a quote that identifies where,

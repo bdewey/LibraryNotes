@@ -3,7 +3,7 @@
 import Foundation
 import KeyValueCRDT
 
-extension Value {
+public extension Value {
   init(_ promptCollectionInfo: PromptCollectionInfo) throws {
     let jsonData = try JSONEncoder.databaseEncoder.encode(promptCollectionInfo)
     self = .json(String(data: jsonData, encoding: .utf8)!)

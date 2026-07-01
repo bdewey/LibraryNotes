@@ -3,7 +3,6 @@
 import Foundation
 import os
 import TextMarkupKit
-import UIKit
 
 public extension PromptType {
   static let cloze = PromptType(rawValue: "prompt=cloze", factory: ClozePromptCollectionFactory())
