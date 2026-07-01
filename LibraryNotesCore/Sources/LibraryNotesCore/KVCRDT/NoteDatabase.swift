@@ -121,12 +121,21 @@ public final class NoteDatabase: @unchecked Sendable {
   }
 
   /// Opens a Library Notes content database directly from a file URL.
-  public convenience init(fileURL: URL, authorDescription: String) throws {
-    let keyValueCRDT = try KeyValueDatabase(
-      fileURL: fileURL,
-      authorDescription: authorDescription,
-      upgrader: .noteDatabaseUpgrader
-    )
+  public convenience init(fileURL: URL, authorDescription: String, coordinatesFileAccess: Bool = true) throws {
+    let keyValueCRDT: KeyValueDatabase
+    if coordinatesFileAccess {
+      keyValueCRDT = try KeyValueDatabase(
+        fileURL: fileURL,
+        authorDescription: authorDescription,
+        upgrader: .noteDatabaseUpgrader
+      )
+    } else {
+      keyValueCRDT = try KeyValueDatabase(
+        databaseWriter: DatabaseQueue(path: fileURL.path),
+        authorDescription: authorDescription,
+        upgrader: .noteDatabaseUpgrader
+      )
+    }
     self.init(keyValueCRDT: keyValueCRDT, fileURL: fileURL)
   }
 
