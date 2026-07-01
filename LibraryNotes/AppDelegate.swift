@@ -20,7 +20,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
   let useCloud = true
 
-  public static let appName = "Library Notes"
+  public static let appName = "Dogeared"
 
   private enum Error: String, Swift.Error {
     case noCloud = "Not signed in to iCloud"

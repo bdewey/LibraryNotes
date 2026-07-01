@@ -8,7 +8,7 @@ import LibraryNotesCore
 struct Dogeared: ParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "dogeared",
-    abstract: "Command-line tools for Library Notes databases.",
+    abstract: "Command-line tools for Dogeared Notes databases.",
     subcommands: [
       Stats.self,
     ]
@@ -18,7 +18,7 @@ struct Dogeared: ParsableCommand {
 struct Stats: ParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "stats",
-    abstract: "Print basic statistics for a Library Notes database."
+    abstract: "Print basic statistics for a Dogeared Notes database."
   )
 
   @Argument(help: "Path to a .libnotes database.")

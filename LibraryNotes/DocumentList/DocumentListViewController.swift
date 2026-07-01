@@ -424,7 +424,7 @@ final class DocumentListViewController: UIViewController {
     var completedBooks = 0
     await Task.yield()
 
-    let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent("Library Notes")
+    let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathComponent(AppDelegate.appName)
     try? FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true)
     for noteIdentifier in noteIdentifiers {
       await Task.yield()
@@ -480,7 +480,7 @@ final class DocumentListViewController: UIViewController {
       completedBooks += 1
       progressView.progress = Float(completedBooks) / Float(noteIdentifiers.count)
     }
-    let zipArchiveURL = destinationURL.deletingLastPathComponent().appendingPathComponent("Library Notes").appendingPathExtension("zip")
+    let zipArchiveURL = destinationURL.deletingLastPathComponent().appendingPathComponent(AppDelegate.appName).appendingPathExtension("zip")
     let zipResult = await Task.detached {
       try FileManager.default.zipItem(at: destinationURL, to: zipArchiveURL, compressionMethod: .deflate)
     }.result

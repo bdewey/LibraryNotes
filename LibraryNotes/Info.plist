@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Versaria</string>
+	<string>Dogeared</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -64,9 +64,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Library Notes uses the camera to scan barcodes for book search.</string>
+	<string>Dogeared uses the camera to scan barcodes for book search.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Versaria can save your quotes to your Photos Libary.</string>
+	<string>Dogeared can save your quotes to your Photos Library.</string>
 	<key>NSUbiquitousContainers</key>
 	<dict>
 		<key>iCloud.org.brians-brain.CommonplaceBookApp</key>
@@ -139,7 +139,7 @@
 				<string>org.brians-brain.kvcrdt</string>
 			</array>
 			<key>UTTypeDescription</key>
-			<string>Library Notes</string>
+			<string>Dogeared Notes</string>
 			<key>UTTypeIconFiles</key>
 			<array/>
 			<key>UTTypeIdentifier</key>
