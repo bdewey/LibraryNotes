@@ -14,10 +14,10 @@ let package = Package(
     ),
   ],
   dependencies: [
-    .package(url: "https://github.com/bdewey/BookKit", .upToNextMajor(from: "0.6.0")),
+    .package(url: "https://github.com/bdewey/BookKit", .upToNextMajor(from: "0.7.0")),
     .package(url: "https://github.com/bdewey/KeyValueCRDT", .upToNextMajor(from: "1.4.0")),
     .package(url: "https://github.com/bdewey/SpacedRepetitionScheduler.git", .upToNextMajor(from: "0.5.0")),
-    .package(url: "https://github.com/bdewey/TextMarkupKit", .upToNextMajor(from: "0.11.0")),
+    .package(url: "https://github.com/bdewey/TextMarkupKit", .upToNextMajor(from: "0.12.0")),
     .package(url: "https://github.com/groue/GRDB.swift", .upToNextMajor(from: "7.5.0")),
   ],
   targets: [

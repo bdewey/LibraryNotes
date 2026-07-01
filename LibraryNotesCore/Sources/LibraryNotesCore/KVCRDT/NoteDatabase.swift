@@ -11,14 +11,16 @@ import TextMarkupKit
 import UniformTypeIdentifiers
 
 public extension Logger {
-  static var shared: Logger { Logger(subsystem: Bundle.main.bundleIdentifier!, category: "LibraryNotes") }
+  static var shared: Logger { Logger(subsystem: libraryNotesLoggingSubsystem, category: "LibraryNotes") }
 }
 
 extension Logger {
   static var keyValueNoteDatabase: Logger {
-    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "KeyValueNoteDatabase")
+    Logger(subsystem: libraryNotesLoggingSubsystem, category: "KeyValueNoteDatabase")
   }
 }
+
+private let libraryNotesLoggingSubsystem = Bundle.main.bundleIdentifier ?? "org.brians-brain.LibraryNotesCore"
 
 enum KeyValueNoteDatabaseScope: String {
   case studyLog = ".studyLog"
@@ -561,7 +563,7 @@ public final class NoteDatabase: @unchecked Sendable {
     }
   }
 
-  private let studySessionSignposter = OSSignposter(subsystem: Bundle.main.bundleIdentifier!, category: "StudySession")
+  private let studySessionSignposter = OSSignposter(subsystem: libraryNotesLoggingSubsystem, category: "StudySession")
 
   public func studySession(noteIdentifiers: Set<Note.Identifier>? = nil, date: Date) throws -> StudySession {
     let signpostID = studySessionSignposter.makeSignpostID()

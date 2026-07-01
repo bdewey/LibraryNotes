@@ -1,13 +1,13 @@
 {
-  "originHash" : "2488f156f1d2cb6ff86950c8e9c9d918b6001977fefc755d8158118b9532b031",
+  "originHash" : "232a0c46f78ec47f75abe8412ebe5e0776c99d2c5c953235caa7c94824ccaa34",
   "pins" : [
     {
       "identity" : "bookkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/BookKit",
       "state" : {
-        "revision" : "f1d8bbbabb00c1d6b7eb97dce6c0c71c0a8b2328",
-        "version" : "0.6.0"
+        "revision" : "5b8453d4acbfc9cd24a2ee1f9fbd8f8324b6c19b",
+        "version" : "0.7.0"
       }
     },
     {

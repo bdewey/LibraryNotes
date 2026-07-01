@@ -2,8 +2,7 @@
 
 import ArgumentParser
 import Foundation
-import KeyValueCRDT
-import TextMarkupKit
+import LibraryNotesCore
 
 @main
 struct Dogeared: ParsableCommand {
@@ -27,9 +26,9 @@ struct Stats: ParsableCommand {
 
   func run() throws {
     let databaseURL = URL(fileURLWithPath: (databasePath as NSString).expandingTildeInPath)
-    let database = try KeyValueDatabase(fileURL: databaseURL, authorDescription: "dogeared")
+    let database = try NoteDatabase(fileURL: databaseURL, authorDescription: "dogeared")
     let noteMetadata = try database.bulkRead { _, key in
-      key == ".metadata"
+      key == NoteDatabaseKey.metadata.rawValue
     }
     let noteCount = Set(noteMetadata.keys.map(\.scope)).count
     print("Notes: \(noteCount)")

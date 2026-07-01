@@ -1,13 +1,13 @@
 {
-  "originHash" : "893a3944312d99f614bbb92eef509da6d2a925688bf77874fe54b27b4cf8feff",
+  "originHash" : "391d6547fe3a7b90cb22e93aa479c0aa5c140d41cd66d2944a0873b60caeef35",
   "pins" : [
     {
       "identity" : "bookkit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/BookKit",
       "state" : {
-        "revision" : "f1d8bbbabb00c1d6b7eb97dce6c0c71c0a8b2328",
-        "version" : "0.6.0"
+        "revision" : "5b8453d4acbfc9cd24a2ee1f9fbd8f8324b6c19b",
+        "version" : "0.7.0"
       }
     },
     {
@@ -60,8 +60,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/bdewey/TextMarkupKit",
       "state" : {
-        "revision" : "31198bae36a7d4f35d5086da907b6b3067687160",
-        "version" : "0.11.0"
+        "revision" : "62c9b3bf36e9ba552b3a680ff0350bf2f61339ff",
+        "version" : "0.12.0"
       }
     }
   ],
