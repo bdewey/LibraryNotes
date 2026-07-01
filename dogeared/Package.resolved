@@ -1,0 +1,78 @@
+{
+  "originHash" : "158fc5a3b7a2e2aac6e425b37642e91fb42478e3715ba7e1755e0712475ec1be",
+  "pins" : [
+    {
+      "identity" : "bookkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/BookKit",
+      "state" : {
+        "revision" : "5b8453d4acbfc9cd24a2ee1f9fbd8f8324b6c19b",
+        "version" : "0.7.0"
+      }
+    },
+    {
+      "identity" : "codablecsv",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/dehesa/CodableCSV.git",
+      "state" : {
+        "revision" : "99ace2cfdfbc19108b529c021005fb57a460e715",
+        "version" : "0.6.7"
+      }
+    },
+    {
+      "identity" : "grdb.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/groue/GRDB.swift",
+      "state" : {
+        "revision" : "b83108d10f42680d78f23fe4d4d80fc88dab3212",
+        "version" : "7.11.1"
+      }
+    },
+    {
+      "identity" : "keyvaluecrdt",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/KeyValueCRDT",
+      "state" : {
+        "revision" : "1813a268daaac8f9a972633b52c70b0f09b8a1ee",
+        "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "spacedrepetitionscheduler",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/SpacedRepetitionScheduler.git",
+      "state" : {
+        "revision" : "54192fabf7a80b35281ff70e0375f7f20201fcad",
+        "version" : "0.5.0"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "a878e7f8f46cfc0e1125e565b5c08e7d5272dc9a",
+        "version" : "1.14.0"
+      }
+    },
+    {
+      "identity" : "textmarkupkit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/bdewey/TextMarkupKit",
+      "state" : {
+        "revision" : "62c9b3bf36e9ba552b3a680ff0350bf2f61339ff",
+        "version" : "0.12.0"
+      }
+    }
+  ],
+  "version" : 3
+}

@@ -1,34 +1,90 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import AVFoundation
+import LibraryNotesCore
 import Foundation
-import os
 import TextMarkupKit
 import UIKit
 
-/// A Card for remembering a sentence with a word/phrase removed and optionally replaced with
-/// a hint. The removed word/phrase is a "cloze".
-///
-/// See https://en.wikipedia.org/wiki/Cloze_test
-public struct ClozePrompt {
-  /// Designated initializer.
-  ///
-  /// - parameter markdown: The markdown content that contains at least one cloze.
-  /// - parameter closeIndex: The index of the cloze in `markdown` to remove when testing.
-  public init(template: ClozePromptCollection, markdown: String, clozeIndex: Int) {
-    self.markdown = markdown
-    self.clozeIndex = clozeIndex
+@MainActor
+extension Prompt {
+  func promptView(
+    database: NoteDatabase,
+    properties: CardDocumentProperties
+  ) -> PromptView {
+    switch self {
+    case let prompt as QuestionAndAnswerPrompt:
+      prompt.promptView(database: database, properties: properties)
+    case let prompt as ClozePrompt:
+      prompt.promptView(database: database, properties: properties)
+    case let prompt as QuotePrompt:
+      prompt.promptView(database: database, properties: properties)
+    default:
+      PromptView(frame: .zero)
+    }
   }
-
-  /// The markdown content that contains at least one cloze.
-  public let markdown: String
-
-  /// The index of the cloze in `markdown` to remove when testing.
-  public let clozeIndex: Int
 }
 
-extension ClozePrompt: Prompt {
-  public func promptView(
+@MainActor
+private extension QuestionAndAnswerPrompt {
+  func promptView(database: NoteDatabase, properties: CardDocumentProperties) -> PromptView {
+    let view = TwoSidedCardView(frame: .zero)
+    view.context = ParsedAttributedString(string: properties.attributionMarkdown, style: .plainText(textStyle: .subheadline, textColor: .secondaryLabel, kern: 2.0))
+    let formattedString = ParsedAttributedString(
+      string: rawValue,
+      style: .plainText(textStyle: .body, imageStorage: NoteScopedImageStorage(identifier: properties.documentName, database: database))
+    )
+    if let node = try? formattedString.rawString.result.get() {
+      let anchoredNode = AnchoredNode(node: node, startIndex: 0)
+      if let question = anchoredNode.first(where: { $0.type == .qnaQuestion }) {
+        view.front = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: question.range)).trimmingTrailingWhitespace()
+      }
+      if let answer = anchoredNode.first(where: { $0.type == .qnaAnswer }) {
+        view.back = formattedString.attributedSubstring(from: formattedString.range(forRawStringRange: answer.range)).trimmingTrailingWhitespace()
+      }
+    }
+    return view
+  }
+}
+
+@MainActor
+private extension QuotePrompt {
+  func promptView(
+    database: NoteDatabase,
+    properties: CardDocumentProperties
+  ) -> PromptView {
+    let view = TwoSidedCardView(frame: .zero)
+    view.context = NSAttributedString(
+      string: "Identify the source".uppercased(),
+      attributes: [
+        .font: UIFont.preferredFont(forTextStyle: .subheadline),
+        .foregroundColor: UIColor.secondaryLabel,
+        .kern: 2.0,
+      ]
+    )
+    let (front, chapterAndVerse) = renderCardFront(imageStorage: NoteScopedImageStorage(identifier: properties.documentName, database: database))
+    view.front = front.trimmingTrailingWhitespace()
+    let attribution = ParsedAttributedString(string: "-" + properties.attributionMarkdown + " " + chapterAndVerse, style: .plainText(textStyle: .caption1))
+    let back = NSMutableAttributedString()
+    back.append(front.trimmingTrailingWhitespace())
+    back.append(ParsedAttributedString(string: "\n\n", style: .plainText(textStyle: .caption1)))
+    back.append(attribution.trimmingTrailingWhitespace())
+    view.back = back
+    return view
+  }
+
+  func renderCardFront(
+    imageStorage: NoteScopedImageStorage?
+  ) -> (front: NSAttributedString, chapterAndVerse: Substring) {
+    let renderedMarkdown = ParsedAttributedString(string: rawValue, style: .plainText(textStyle: .body, imageStorage: imageStorage))
+    let chapterAndVerse = renderedMarkdown.chapterAndVerseAnnotation ?? ""
+    let front = renderedMarkdown.removingChapterAndVerseAnnotation()
+    return (front: front, chapterAndVerse: chapterAndVerse)
+  }
+}
+
+@MainActor
+private extension ClozePrompt {
+  func promptView(
     database: NoteDatabase,
     properties: CardDocumentProperties
   ) -> PromptView {
@@ -49,7 +105,7 @@ extension ClozePrompt: Prompt {
     )
     if !properties.attributionMarkdown.isEmpty {
       let attribution = ParsedAttributedString(
-        string: "\n\n—" + properties.attributionMarkdown + " " + chapterAndVerse,
+        string: "\n\n-" + properties.attributionMarkdown + " " + chapterAndVerse,
         style: .plainText(textStyle: .caption1)
       )
       back.append(attribution.trimmingTrailingWhitespace())
@@ -68,7 +124,7 @@ extension ClozePrompt: Prompt {
   }
 }
 
-final class HidingClozeFormatter: ParsedAttributedStringFormatter {
+private final class HidingClozeFormatter: ParsedAttributedStringFormatter {
   init(index: Int) {
     self.index = index
   }
@@ -91,8 +147,6 @@ final class HidingClozeFormatter: ParsedAttributedStringFormatter {
       let hintChars = hintNode.flatMap { buffer[$0.range] } ?? []
       let hint = String(utf16CodeUnits: hintChars, count: hintChars.count)
       if hint.strippingLeadingAndTrailingWhitespace.isEmpty {
-        // There is no hint. We're going to show a blank.
-        // The only question is: How big is the blank? Try to make it the size of the answer.
         attributes.color = .clear
         if let answerNode = AnchoredNode(node: node, startIndex: offset).first(where: { $0.type == .clozeAnswer }) {
           return (attributes, buffer[answerNode.range])
@@ -114,7 +168,7 @@ final class HidingClozeFormatter: ParsedAttributedStringFormatter {
   }
 }
 
-final class HighlightingClozeFormatter: ParsedAttributedStringFormatter {
+private final class HighlightingClozeFormatter: ParsedAttributedStringFormatter {
   let index: Int
   var formatClozeCount = 0
 
@@ -138,7 +192,7 @@ final class HighlightingClozeFormatter: ParsedAttributedStringFormatter {
   }
 }
 
-extension ParsedAttributedString.Style {
+private extension ParsedAttributedString.Style {
   func hidingCloze(at index: Int) -> Self {
     var settings = self
     settings.formatters[.cloze] = AnyParsedAttributedStringFormatter(HidingClozeFormatter(index: index))

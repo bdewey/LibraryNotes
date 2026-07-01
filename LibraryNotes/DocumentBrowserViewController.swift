@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import KeyValueCRDT
 import os
 import UIKit
@@ -75,18 +76,18 @@ extension DocumentBrowserViewController: UIDocumentBrowserViewControllerDelegate
     animated: Bool
   ) async throws {
     Logger.shared.info("Opening document at \"\(url.path)\"")
-    let database: NoteDatabase
+    let document: NoteDatabaseDocumentWrapper
     if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
-      database = try await NoteDatabase(fileURL: url, authorDescription: UIDevice.current.name)
+      document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
     } else {
       throw CocoaError(CocoaError.fileReadUnsupportedScheme)
     }
-    Logger.shared.info("Using document at \(database.fileURL)")
+    Logger.shared.info("Using document at \(document.fileURL)")
     let properties: [String: String] = [
-      "documentState": String(describing: database.documentState),
+      "documentState": String(describing: document.documentState),
     ]
     Logger.shared.info("In open completion handler. \(properties)")
-    let viewController = NotebookViewController(database: database)
+    let viewController = NotebookViewController(database: document.database)
     viewController.modalPresentationStyle = .fullScreen
     viewController.modalTransitionStyle = .crossDissolve
     viewController.view.tintColor = .systemOrange

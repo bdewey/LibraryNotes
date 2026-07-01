@@ -21,7 +21,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   }
 
   static func sqlLiteral(
-    structureIdentifier: NotebookStructureViewController.StructureIdentifier,
+    structureIdentifier: NotebookStructureIdentifier,
     sortOrder: SortOrder,
     groupByYearRead: Bool,
     searchTerm: String?
@@ -31,7 +31,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       + orderClause(sortOrder: sortOrder, groupByYearRead: groupByYearRead)
   }
 
-  private static func sql(structureIdentifier: NotebookStructureViewController.StructureIdentifier) -> SQL {
+  private static func sql(structureIdentifier: NotebookStructureIdentifier) -> SQL {
     switch structureIdentifier {
     case .read:
       """

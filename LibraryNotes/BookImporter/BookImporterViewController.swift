@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import BookKit
 import os
 import SnapKit
@@ -85,7 +86,7 @@ final class BookImporterViewController: UIViewController {
     guard url != bookImporter.database.fileURL else {
       throw CocoaError(.fileWriteFileExists)
     }
-    let sourceDatabase = try await NoteDatabase(fileURL: url, authorDescription: "Importer")
+    let sourceDatabase = try NoteDatabase(fileURL: url, authorDescription: "Importer")
     try bookImporter.database.merge(other: sourceDatabase)
   }
 }

@@ -16,7 +16,7 @@ public enum BookSection: String, Codable, Sendable {
   /// The sections that hold books.
   public static let bookSections: [BookSection] = [.currentlyReading, .wantToRead, .read]
 
-  var headerText: String {
+  public var headerText: String {
     switch self {
     case .wantToRead:
       "Want to read"

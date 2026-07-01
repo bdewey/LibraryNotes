@@ -3,20 +3,27 @@
 import Foundation
 
 /// A generic book import request.
-struct BookImportRequest<Item> {
+public struct BookImportRequest<Item> {
   /// The item to import
-  var item: Item
+  public var item: Item
 
   /// Hashtags to apply to the imported book.
-  var hashtags: String
+  public var hashtags: String
 
   /// If true, download a cover image on import.
-  var downloadCoverImages: Bool
+  public var downloadCoverImages: Bool
 
   /// If true, this request is a "dry run" -- if `Item` is a collection, do not import everything.
-  var dryRun: Bool
+  public var dryRun: Bool
 
-  func replacingItem<NewItem>(_ newItem: NewItem) -> BookImportRequest<NewItem> {
+  public init(item: Item, hashtags: String, downloadCoverImages: Bool, dryRun: Bool) {
+    self.item = item
+    self.hashtags = hashtags
+    self.downloadCoverImages = downloadCoverImages
+    self.dryRun = dryRun
+  }
+
+  public func replacingItem<NewItem>(_ newItem: NewItem) -> BookImportRequest<NewItem> {
     BookImportRequest<NewItem>(item: newItem, hashtags: hashtags, downloadCoverImages: downloadCoverImages, dryRun: dryRun)
   }
 }

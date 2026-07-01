@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import BookKit
 import CodableCSV
 import Combine
@@ -382,7 +383,7 @@ final class DocumentListViewController: UIViewController {
       try writer.write(field: book.numberOfPages?.description ?? "")
       try writer.write(field: book.yearPublished?.description ?? "")
       try writer.write(field: book.originalYearPublished?.description ?? "")
-      try writer.write(field: DayComponents(note.metadata.creationTimestamp).description)
+      try writer.write(field: LibraryNotesCore.DayComponents(note.metadata.creationTimestamp).description)
       try writer.write(field: book.publisher ?? "")
       try writer.write(field: note.text ?? "")
       try writer.endRow()

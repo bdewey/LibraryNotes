@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import BookKit
 import Combine
 import os
@@ -15,77 +16,7 @@ protocol NotebookStructureViewControllerDelegate: AnyObject {
 /// Displays a list of any "structure" inside the notebook -- currently just hashtags
 final class NotebookStructureViewController: UIViewController {
   /// What subset of notebook pages does the person want to see?
-  enum StructureIdentifier: Hashable, CustomStringConvertible, RawRepresentable {
-    case trash
-    case hashtag(String)
-    case read
-
-    /// The raw value is used to serialize the focused element for state restoration.
-    init?(rawValue: String) {
-      switch rawValue {
-      case "##all##":
-        self = .read
-      case "##trash##":
-        self = .trash
-      default:
-        self = .hashtag(rawValue)
-      }
-    }
-
-    var rawValue: String {
-      switch self {
-      case .trash:
-        "##trash##"
-      case .read:
-        "##all##"
-      case .hashtag(let hashtag):
-        hashtag
-      }
-    }
-
-    var description: String {
-      switch self {
-      case .trash: "Trash"
-      case .read: "My Books"
-      case .hashtag(let hashtag): String(hashtag.split(separator: "/").last ?? "")
-      }
-    }
-
-    var longDescription: String {
-      switch self {
-      case .trash: "Trash"
-      case .read: "My Books"
-      case .hashtag(let hashtag): hashtag
-      }
-    }
-
-    var predefinedFolder: PredefinedFolder? {
-      switch self {
-      case .hashtag, .read: nil
-      case .trash: .recentlyDeleted
-      }
-    }
-
-    var hashtag: String? {
-      guard case .hashtag(let hashtag) = self else {
-        return nil
-      }
-      return hashtag
-    }
-
-    /// A filter function that returns true if `metadata` is included in this structure.
-    func filterBookNoteMetadata(tuple: (key: String, value: BookNoteMetadata)) -> Bool {
-      let metadata = tuple.value
-      switch self {
-      case .hashtag(let hashtag):
-        return metadata.tags.contains(hashtag) || (metadata.book?.tags?.contains(hashtag) ?? false)
-      case .trash:
-        return metadata.folder == PredefinedFolder.recentlyDeleted.rawValue
-      default:
-        return metadata.folder != PredefinedFolder.recentlyDeleted.rawValue
-      }
-    }
-  }
+  typealias StructureIdentifier = NotebookStructureIdentifier
 
   /// Sections of our list.
   private enum Section: CaseIterable {
@@ -96,7 +27,7 @@ final class NotebookStructureViewController: UIViewController {
   }
 
   /// Item identifier -- this is separate from StructureIdentifier because we need to know if we have children for the disclosure indicator
-  private struct Item: Hashable, CustomStringConvertible {
+  private struct Item: Hashable, CustomStringConvertible, @unchecked Sendable {
     var structureIdentifier: StructureIdentifier
     var hasChildren: Bool
     var image: UIImage?
