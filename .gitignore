@@ -6,3 +6,4 @@ GrailDiary.xcodeproj/xcuserdata/brian.xcuserdatad/xcschemes/xcschememanagement.p
 *.grail
 *.js
 /LibraryNotesCore/.build
+/dogeared/.build

@@ -11,6 +11,7 @@ struct Dogeared: ParsableCommand {
     abstract: "Command-line tools for Dogeared Notes databases.",
     subcommands: [
       Export.self,
+      Import.self,
       Stats.self,
     ]
   )
@@ -85,6 +86,67 @@ struct Export: ParsableCommand {
       }
     } else {
       print("Exported \(plan.items.count) notes to \(outputURL.path)")
+    }
+  }
+}
+
+struct Import: ParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "import",
+    abstract: "Import Dogeared book notes from Markdown files with YAML frontmatter."
+  )
+
+  @Argument(help: "Path to a .libnotes database.")
+  var databasePath: String
+
+  @Argument(help: "Directory containing Markdown files to import.")
+  var inputDirectory: String
+
+  @Option(name: .customLong("copy-to"), help: "Copy the database to this path before importing, leaving the original untouched.")
+  var copyTo: String?
+
+  @Flag(name: .customLong("overwrite-copy"), help: "Replace the destination passed to --copy-to if it already exists.")
+  var overwriteCopy = false
+
+  @Flag(name: .customLong("dry-run"), help: "Print files that would be imported without writing to the database.")
+  var dryRun = false
+
+  func run() throws {
+    let sourceDatabaseURL = URL(fileURLWithPath: (databasePath as NSString).expandingTildeInPath)
+    let databaseURL: URL
+    if let copyTo {
+      let copyURL = URL(fileURLWithPath: (copyTo as NSString).expandingTildeInPath)
+      if FileManager.default.fileExists(atPath: copyURL.path) {
+        guard overwriteCopy else {
+          throw ValidationError("Copy destination already exists: \(copyURL.path)")
+        }
+        try FileManager.default.removeItem(at: copyURL)
+      }
+      try FileManager.default.copyItem(at: sourceDatabaseURL, to: copyURL)
+      databaseURL = copyURL
+    } else {
+      databaseURL = sourceDatabaseURL
+    }
+
+    let inputURL = URL(fileURLWithPath: (inputDirectory as NSString).expandingTildeInPath)
+    let database = try NoteDatabase(fileURL: databaseURL, authorDescription: "dogeared", coordinatesFileAccess: false)
+    let result = try BookNoteMarkdownImporter.import(
+      from: inputURL,
+      into: database,
+      options: BookNoteMarkdownImportOptions(dryRun: dryRun)
+    )
+
+    if dryRun {
+      for item in result.items {
+        print("\(item.markdownURL.lastPathComponent)\t\(item.title)")
+      }
+    } else {
+      print("Imported \(result.items.count) notes into \(databaseURL.path)")
+      for item in result.items {
+        if let noteIdentifier = item.noteIdentifier {
+          print("\(noteIdentifier)\t\(item.markdownURL.lastPathComponent)\t\(item.title)")
+        }
+      }
     }
   }
 }
