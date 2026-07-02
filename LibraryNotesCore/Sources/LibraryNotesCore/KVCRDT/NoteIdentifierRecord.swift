@@ -26,19 +26,27 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     groupByYearRead: Bool,
     searchTerm: String?
   ) -> SQL {
-    sql(structureIdentifier: structureIdentifier)
+    sql(structureIdentifier: structureIdentifier, groupByYearRead: groupByYearRead)
       + searchCondition(searchTerm: searchTerm)
       + orderClause(sortOrder: sortOrder, groupByYearRead: groupByYearRead)
   }
 
-  private static func sql(structureIdentifier: NotebookStructureIdentifier) -> SQL {
+  private static func sql(structureIdentifier: NotebookStructureIdentifier, groupByYearRead: Bool) -> SQL {
+    let baseSQL: SQL
     switch structureIdentifier {
     case .read:
-      """
+      baseSQL = """
       SELECT
-        DISTINCT scope AS noteIdentifier,
+        scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
         json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        json_extract(readingHistory.value, '$.finish.month') AS finishMonth,
+        json_extract(readingHistory.value, '$.finish.day') AS finishDay,
+        json_extract(entry.json, '$.authorLastFirst') AS authorLastFirst,
+        coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')) AS titleSort,
+        json_extract(entry.json, '$.creationTimestamp') AS creationTimestamp,
+        json_extract(entry.json, '$.modifiedTimestamp') AS modifiedTimestamp,
+        json_extract(entry.json, '$.book.rating') AS rating,
         CASE
             WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
             WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
@@ -57,11 +65,18 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .trash:
-      """
+      baseSQL = """
       SELECT
-        DISTINCT scope AS noteIdentifier,
+        scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
         json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        json_extract(readingHistory.value, '$.finish.month') AS finishMonth,
+        json_extract(readingHistory.value, '$.finish.day') AS finishDay,
+        json_extract(entry.json, '$.authorLastFirst') AS authorLastFirst,
+        coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')) AS titleSort,
+        json_extract(entry.json, '$.creationTimestamp') AS creationTimestamp,
+        json_extract(entry.json, '$.modifiedTimestamp') AS modifiedTimestamp,
+        json_extract(entry.json, '$.book.rating') AS rating,
         CASE
             WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
             WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
@@ -77,11 +92,18 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .hashtag(let hashtag):
-      """
+      baseSQL = """
       SELECT
-        DISTINCT scope AS noteIdentifier,
+        scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
         json_extract(readingHistory.value, '$.finish.year') AS finishYear,
+        json_extract(readingHistory.value, '$.finish.month') AS finishMonth,
+        json_extract(readingHistory.value, '$.finish.day') AS finishDay,
+        json_extract(entry.json, '$.authorLastFirst') AS authorLastFirst,
+        coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title')) AS titleSort,
+        json_extract(entry.json, '$.creationTimestamp') AS creationTimestamp,
+        json_extract(entry.json, '$.modifiedTimestamp') AS modifiedTimestamp,
+        json_extract(entry.json, '$.book.rating') AS rating,
         CASE
             WHEN json_extract(readingHistory.value, '$.start.year') IS NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'wantToRead'
             WHEN json_extract(readingHistory.value, '$.start.year') IS NOT NULL AND json_extract(readingHistory.value, '$.finish.year') IS NULL THEN 'currentlyReading'
@@ -101,13 +123,37 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
         )
       """
     }
+
+    guard groupByYearRead else {
+      return "SELECT DISTINCT * FROM (" + baseSQL + ")"
+    }
+
+    let groupedSQL: SQL = """
+      SELECT
+        noteIdentifier,
+        min(startYear) AS startYear,
+        coalesce(finishYear, startYear) AS finishYear,
+        bookSection,
+        max(finishMonth) AS finishMonth,
+        max(finishDay) AS finishDay,
+        max(authorLastFirst) AS authorLastFirst,
+        max(titleSort) AS titleSort,
+        max(creationTimestamp) AS creationTimestamp,
+        max(modifiedTimestamp) AS modifiedTimestamp,
+        max(rating) AS rating
+      FROM (
+      """ + baseSQL + """
+      )
+      GROUP BY noteIdentifier, coalesce(finishYear, startYear), bookSection
+      """
+    return "SELECT * FROM (" + groupedSQL + ")"
   }
 
   private static func searchCondition(searchTerm: String?) -> SQL {
     guard let searchTerm else {
       return ""
     }
-    return "AND entry.scope IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"
+    return " WHERE noteIdentifier IN (SELECT scope FROM entry JOIN entryFullText ON entryFullText.rowId = entry.rowId AND entryFullText MATCH \(searchTerm))"
   }
 
   private static func orderClause(sortOrder: SortOrder, groupByYearRead: Bool) -> SQL {
@@ -118,34 +164,34 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     switch sortOrder {
     case .author:
       sortClauses.append(contentsOf: [
-        "json_extract(entry.json, '$.authorLastFirst')",
-        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+        "authorLastFirst",
+        "modifiedTimestamp DESC",
       ])
     case .title:
       sortClauses.append(contentsOf: [
-        "coalesce(json_extract(entry.json, '$.book.title'), json_extract(entry.json, '$.title'))",
-        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+        "titleSort",
+        "modifiedTimestamp DESC",
       ])
     case .creationTimestamp:
       sortClauses.append(contentsOf: [
-        "json_extract(entry.json, '$.creationTimestamp') DESC",
+        "creationTimestamp DESC",
       ])
     case .modificationTimestap:
       sortClauses.append(contentsOf: [
-        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+        "modifiedTimestamp DESC",
       ])
     case .rating:
       sortClauses.append(contentsOf: [
-        "json_extract(entry.json, '$.book.rating') DESC",
-        "json_extract(entry.json, '$.modifiedTimestamp') DESC",
+        "rating DESC",
+        "modifiedTimestamp DESC",
       ])
     case .dateRead:
       sortClauses.append(contentsOf: [
-        "json_extract(readingHistory.value, '$.finish.month') DESC",
-        "json_extract(readingHistory.value, '$.finish.day') DESC",
-        "json_extract(entry.json, '$.creationTimestamp') DESC",
+        "finishMonth DESC",
+        "finishDay DESC",
+        "creationTimestamp DESC",
       ])
     }
-    return "ORDER BY " + sortClauses.joined(separator: ",")
+    return " ORDER BY " + sortClauses.joined(separator: ",")
   }
 }

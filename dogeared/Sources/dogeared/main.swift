@@ -93,8 +93,10 @@ struct Export: ParsableCommand {
 struct Import: ParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "import",
-    abstract: "Import Dogeared book notes from Markdown files with YAML frontmatter."
+    abstract: "Plan or execute an import of Dogeared book notes from Markdown files with YAML frontmatter."
   )
+
+  private static let defaultPlanFilename = "book-note-import-plan.json"
 
   @Argument(help: "Path to a .libnotes database.")
   var databasePath: String
@@ -102,16 +104,35 @@ struct Import: ParsableCommand {
   @Argument(help: "Directory containing Markdown files to import.")
   var inputDirectory: String
 
+  @Option(help: "Path where the generated import plan should be written. Defaults to book-note-import-plan.json.")
+  var plan: String?
+
+  @Option(help: "Execute the import plan at this path instead of creating a new plan.")
+  var executePlan: String?
+
+  @Flag(help: "Create a plan in memory and execute it immediately.")
+  var oneShot = false
+
+  @Flag(help: "Replace the generated plan file if it already exists.")
+  var overwritePlan = false
+
   @Option(name: .customLong("copy-to"), help: "Copy the database to this path before importing, leaving the original untouched.")
   var copyTo: String?
 
   @Flag(name: .customLong("overwrite-copy"), help: "Replace the destination passed to --copy-to if it already exists.")
   var overwriteCopy = false
 
-  @Flag(name: .customLong("dry-run"), help: "Print files that would be imported without writing to the database.")
-  var dryRun = false
-
   func run() throws {
+    guard !(oneShot && executePlan != nil) else {
+      throw ValidationError("--one-shot and --execute-plan cannot be used together.")
+    }
+    guard !(overwritePlan && executePlan != nil) else {
+      throw ValidationError("--overwrite-plan only applies when creating a plan.")
+    }
+    guard copyTo == nil || oneShot || executePlan != nil else {
+      throw ValidationError("--copy-to only applies when using --execute-plan or --one-shot.")
+    }
+
     let sourceDatabaseURL = URL(fileURLWithPath: (databasePath as NSString).expandingTildeInPath)
     let databaseURL: URL
     if let copyTo {
@@ -130,22 +151,62 @@ struct Import: ParsableCommand {
 
     let inputURL = URL(fileURLWithPath: (inputDirectory as NSString).expandingTildeInPath)
     let database = try NoteDatabase(fileURL: databaseURL, authorDescription: "dogeared", coordinatesFileAccess: false)
-    let result = try BookNoteMarkdownImporter.import(
-      from: inputURL,
-      into: database,
-      options: BookNoteMarkdownImportOptions(dryRun: dryRun)
-    )
 
-    if dryRun {
-      for item in result.items {
-        print("\(item.markdownURL.lastPathComponent)\t\(item.title)")
-      }
+    if let executePlan {
+      let planURL = URL(fileURLWithPath: (executePlan as NSString).expandingTildeInPath)
+      let plan = try readImportPlan(from: planURL)
+      let result = try BookNoteMarkdownImporter.execute(plan: plan, from: inputURL, into: database)
+      printExecutionResult(result, databaseURL: databaseURL)
+    } else if oneShot {
+      let plan = try BookNoteMarkdownImporter.makePlan(from: inputURL, against: database)
+      let result = try BookNoteMarkdownImporter.execute(plan: plan, from: inputURL, into: database)
+      printExecutionResult(result, databaseURL: databaseURL)
     } else {
-      print("Imported \(result.items.count) notes into \(databaseURL.path)")
-      for item in result.items {
-        if let noteIdentifier = item.noteIdentifier {
-          print("\(noteIdentifier)\t\(item.markdownURL.lastPathComponent)\t\(item.title)")
-        }
+      let plan = try BookNoteMarkdownImporter.makePlan(from: inputURL, against: database)
+      let planURL = URL(fileURLWithPath: ((self.plan ?? Self.defaultPlanFilename) as NSString).expandingTildeInPath)
+      if FileManager.default.fileExists(atPath: planURL.path), !overwritePlan {
+        throw ValidationError("Import plan already exists: \(planURL.path). Use --plan to choose another path or --overwrite-plan.")
+      }
+      try writeImportPlan(plan, to: planURL)
+      print("Wrote import plan with \(plan.items.count) items to \(planURL.path)")
+      printPlanSummary(plan)
+    }
+  }
+
+  private func readImportPlan(from planURL: URL) throws -> BookNoteImportPlan {
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    let data = try Data(contentsOf: planURL)
+    return try decoder.decode(BookNoteImportPlan.self, from: data)
+  }
+
+  private func writeImportPlan(_ plan: BookNoteImportPlan, to planURL: URL) throws {
+    let encoder = JSONEncoder()
+    encoder.dateEncodingStrategy = .iso8601
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    let data = try encoder.encode(plan)
+    try data.write(to: planURL, options: .atomic)
+  }
+
+  private func printPlanSummary(_ plan: BookNoteImportPlan) {
+    let createCount = plan.items.filter { $0.action == .create }.count
+    let skipCount = plan.items.filter { $0.action == .skip }.count
+    let mergeCount = plan.items.filter {
+      if case .merge = $0.action { return true }
+      return false
+    }.count
+    let candidateCount = plan.items.filter { !$0.candidates.isEmpty }.count
+    print("Plan actions: \(createCount) create, \(mergeCount) merge, \(skipCount) skip")
+    print("Items with merge candidates: \(candidateCount)")
+  }
+
+  private func printExecutionResult(_ result: BookNoteMarkdownImportResult, databaseURL: URL) {
+    print("Imported \(result.items.count) planned items into \(databaseURL.path)")
+    for item in result.items {
+      if let noteIdentifier = item.noteIdentifier {
+        print("\(noteIdentifier)\t\(item.markdownURL.lastPathComponent)\t\(item.title)")
+      } else {
+        print("skipped\t\(item.markdownURL.lastPathComponent)\t\(item.title)")
       }
     }
   }
