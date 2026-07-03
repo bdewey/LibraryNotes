@@ -491,16 +491,13 @@ extension SavingTextEditViewController: BookHeaderDelegate {
 
 extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
   public func bookSearchViewController(_ viewController: BookEditDetailsViewController, didSelect book: AugmentedBook, coverImage: UIImage?) {
-    if let image = coverImage, let imageData = image.jpegData(compressionQuality: 0.8) {
-      do {
-        try imageStorage.storeCoverImage(imageData, type: .jpeg)
-      } catch {
-        Logger.textSaving.error("Unexpected error saving image data: \(error)")
-      }
-    }
+    self.coverImage = coverImage
     let bookForSaving = book.preservingPersonalMetadata(from: note.metadata.book)
     textEditViewController(textEditViewController, didAttach: bookForSaving)
-    textEditViewController.extendedNavigationHeaderView = BookHeader(book: bookForSaving, coverImage: coverImage)
+    let bookHeader = BookHeader(book: bookForSaving, coverImage: coverImage)
+    bookHeader.delegate = self
+    bookHeaderView = bookHeader
+    textEditViewController.extendedNavigationHeaderView = bookHeader
     dismiss(animated: true, completion: nil)
   }
 

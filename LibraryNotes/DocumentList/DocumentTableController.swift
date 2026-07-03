@@ -50,7 +50,13 @@ public final class DocumentTableController: NSObject {
       }
     }
     self.changedNoteSubscription = database.updatedValuesPublisher
-      .filter { $0.0.key == NoteDatabaseKey.metadata.rawValue }
+      .filter { [coverImageCache] update in
+        if update.0.key == NoteDatabaseKey.coverImage.rawValue {
+          coverImageCache.invalidate()
+          return true
+        }
+        return update.0.key == NoteDatabaseKey.metadata.rawValue
+      }
       .map(\.0.scope)
       .receive(on: DispatchQueue.main)
       .sink { [weak self] noteIdentifier in
