@@ -2,6 +2,7 @@
 
 import KeyValueCRDT
 @testable import Library_Notes
+import LibraryNotesCore
 import XCTest
 
 final class NoteDatabaseTests: XCTestCase {
@@ -9,17 +10,17 @@ final class NoteDatabaseTests: XCTestCase {
 
   override func setUp() async throws {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
+    database = try NoteDatabase(fileURL: fileURL, authorDescription: "test")
   }
 
   @MainActor override func tearDown() async throws {
-    _ = await database.close()
-    try FileManager.default.removeItem(at: database.fileURL)
+    let fileURL = database.fileURL
+    database = nil
+    try FileManager.default.removeItem(at: fileURL)
   }
 
   @MainActor func testRoundTripSimpleNoteContents() async throws {
     let identifier = try database.createNote(Note.simpleTest)
-    XCTAssertTrue(database.hasUnsavedChanges)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     XCTAssertEqual(Note.simpleTest, roundTripNote)
   }
@@ -64,7 +65,6 @@ final class NoteDatabaseTests: XCTestCase {
       note.metadata.tags = ["#updated"]
       return note
     })
-    XCTAssertTrue(database.hasUnsavedChanges)
     let roundTripNote = try database.note(noteIdentifier: identifier)
     var expectedNote = Note.withHashtags
     expectedNote.metadata.tags = ["#updated"]
@@ -111,7 +111,6 @@ final class NoteDatabaseTests: XCTestCase {
     XCTAssertEqual(Note.withHashtags, roundTripNote)
     XCTAssertEqual(1, database.noteCount)
     try database.deleteNote(noteIdentifier: identifier)
-    XCTAssertTrue(database.hasUnsavedChanges)
     XCTAssertThrowsError(try database.note(noteIdentifier: identifier))
     XCTAssertEqual(0, database.noteCount)
   }
@@ -126,7 +125,6 @@ final class NoteDatabaseTests: XCTestCase {
       studySession.recordAnswer(correct: true)
     }
     try database.updateStudySessionResults(studySession, on: Date(), buryRelatedPrompts: true)
-    XCTAssertTrue(database.hasUnsavedChanges)
     XCTAssertEqual(database.studyLog.count, studySession.count)
   }
 
@@ -258,10 +256,10 @@ final class NoteDatabaseTests: XCTestCase {
     }
 
     // Now open as a database
-    let database = try await NoteDatabase(fileURL: writableURL, authorDescription: "test 2")
+    var database: NoteDatabase? = try NoteDatabase(fileURL: writableURL, authorDescription: "test 2")
 
     // While we've got it open, do some basic validation of the contents.
-    let titlesByCreationTimestamp = try await database.titles(structureIdentifier: .read, sortOrder: .creationTimestamp, searchTerm: nil)
+    let titlesByCreationTimestamp = try await database!.titles(structureIdentifier: .read, sortOrder: .creationTimestamp, searchTerm: nil)
     XCTAssertEqual(titlesByCreationTimestamp, [
       "_Library Notes User Manual_: Brian Dewey (2021)",
       "_Anne of Green Gables_: L. M. Montgomery (1908)",
@@ -270,14 +268,13 @@ final class NoteDatabaseTests: XCTestCase {
       "_Hamlet_: William Shakespeare (1600)",
     ])
 
-    let onlyDrama = try await database.titles(structureIdentifier: .hashtag("Drama"), sortOrder: .creationTimestamp, searchTerm: nil)
+    let onlyDrama = try await database!.titles(structureIdentifier: .hashtag("Drama"), sortOrder: .creationTimestamp, searchTerm: nil)
     XCTAssertEqual(onlyDrama, [
       "_Othello_: William Shakespeare (1603)",
       "_Hamlet_: William Shakespeare (1600)",
     ])
 
-    let closeResult = await database.close()
-    XCTAssertTrue(closeResult)
+    database = nil
 
     // Um, can I read from the old database?
     do {

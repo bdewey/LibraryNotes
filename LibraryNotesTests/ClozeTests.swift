@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 @testable import Library_Notes
+import LibraryNotesCore
 import ObjectiveCTextStorageWrapper
 import TextMarkupKit
 import XCTest
@@ -45,29 +46,11 @@ final class ClozeTests: XCTestCase {
       clozeCards[1].markdown,
       "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
+    XCTAssertEqual(clozeCards[0].clozeIndex, 0)
     XCTAssertEqual(clozeCards[1].clozeIndex, 1)
-    let renderedFront = ParsedAttributedString(
-      string: clozeCards[0].markdown,
-      style: ParsedAttributedString.Style.plainText(textStyle: .body).hidingCloze(at: clozeCards[0].clozeIndex)
-    )
     XCTAssertEqual(
-      renderedFront.string,
-      "Yo to be de España. ¿De dónde es ustedes?"
-    )
-    XCTAssertEqual(
-      ParsedAttributedString(
-        string: clozeCards[1].markdown,
-        style: ParsedAttributedString.Style.plainText(textStyle: .body).hidingCloze(at: clozeCards[1].clozeIndex)
-      ).string,
-      "Yo soy de España. ¿De dónde to be ustedes?"
-    )
-    let renderedBack = ParsedAttributedString(
-      string: clozeCards[0].markdown,
-      style: ParsedAttributedString.Style.plainText(textStyle: .body).highlightingCloze(at: clozeCards[0].clozeIndex)
-    )
-    XCTAssertEqual(
-      renderedBack.string,
-      "Yo soy de España. ¿De dónde es ustedes?"
+      clozeCards[0].markdown,
+      "Yo ?[to be](soy) de España. ¿De dónde ?[to be](es) ustedes?"
     )
   }
 

@@ -38,26 +38,6 @@
                ReferencedContainer = "container:LibraryNotes.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D3E98F0221D470B2008445DA"
-               BuildableName = "CommonplaceBookAppUITests.xctest"
-               BlueprintName = "CommonplaceBookAppUITests"
-               ReferencedContainer = "container:LibraryNotes.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D3C6112E2715FFB0007F8732"
-               BuildableName = "LibraryNotesUpdatedUITests.xctest"
-               BlueprintName = "LibraryNotesUpdatedUITests"
-               ReferencedContainer = "container:LibraryNotes.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction

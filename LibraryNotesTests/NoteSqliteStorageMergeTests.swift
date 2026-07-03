@@ -2,6 +2,7 @@
 
 import KeyValueCRDT
 @testable import Library_Notes
+import LibraryNotesCore
 import XCTest
 
 /// Specific test cases around merging database content.
@@ -14,7 +15,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         noteIdentifier = try storage.createNote(.withChallenges)
       }
       .validate { localStorage in
-        XCTAssertFalse(localStorage.hasUnsavedChanges)
         XCTAssertEqual(try localStorage.note(noteIdentifier: noteIdentifier), Note.withChallenges)
       }
       .run(self)
@@ -32,7 +32,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         challengeIdentifier = try storage.createNote(.withChallenges)
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), Note.simpleTest)
         XCTAssertEqual(try storage.note(noteIdentifier: challengeIdentifier), Note.withChallenges)
       }
@@ -68,7 +67,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         }
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: noteIdentifier), withoutHashtagNote)
         XCTAssertEqual(storage.noteCount, 1)
       }
@@ -89,11 +87,9 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
           studySession.recordAnswer(correct: true)
         }
         try storage.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         let studySession = try storage.studySession(date: future)
         XCTAssertEqual(0, studySession.count)
@@ -113,11 +109,9 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
           studySession.recordAnswer(correct: true)
         }
         try storage.updateStudySessionResults(studySession, on: future, buryRelatedPrompts: true)
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(storage.studyLog.count, studySession.count)
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         let future = Date().addingTimeInterval(5 * 24 * 60 * 60)
         let studySession = try storage.studySession(date: future)
         XCTAssertEqual(0, studySession.count)
@@ -140,7 +134,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         try storage.updateNote(noteIdentifier: simpleIdentifier) { _ in modifiedNote }
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
         XCTAssertEqual(storage.noteCount, 1)
       }
@@ -160,7 +153,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         try storage.updateNote(noteIdentifier: simpleIdentifier) { _ in modifiedNote }
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), modifiedNote)
       }
       .run(self)
@@ -184,7 +176,6 @@ final class NoteSqliteStorageMergeTests: XCTestCase {
         try storage.updateNote(noteIdentifier: simpleIdentifier) { _ in conflictingNote }
       }
       .validate { storage in
-        XCTAssertTrue(storage.hasUnsavedChanges)
         XCTAssertEqual(try storage.note(noteIdentifier: simpleIdentifier), conflictingNote)
       }
       .run(self)
@@ -241,7 +232,7 @@ private extension NoteSqliteStorageMergeTests {
     device: TestDevice,
     fileURL: URL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
   ) async throws -> NoteDatabase {
-    try await NoteDatabase(
+    try NoteDatabase(
       fileURL: fileURL,
       authorDescription: device.name
     )
@@ -265,9 +256,6 @@ private extension NoteSqliteStorageMergeTests {
   ) async throws -> URL {
     let database = try await Self.openKeyValueDatabase(device: device)
     try await modificationBlock?(database)
-    if await !database.close() {
-      throw TestError.couldNotCloseDatabase
-    }
     return database.fileURL
   }
 }

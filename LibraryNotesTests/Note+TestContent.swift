@@ -2,6 +2,7 @@
 
 import Foundation
 import Library_Notes
+import LibraryNotesCore
 
 extension Note {
   nonisolated(unsafe) static let simpleTest = Note(

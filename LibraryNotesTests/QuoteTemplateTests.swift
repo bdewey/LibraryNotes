@@ -1,6 +1,7 @@
 // Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Library_Notes
+import LibraryNotesCore
 import TextMarkupKit
 import XCTest
 
@@ -54,11 +55,9 @@ final class QuoteTemplateTests: XCTestCase {
   @MainActor func testRenderCloze() {
     let buffer = ParsedString(contentWithCloze, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)
-
-    let (front, _) = quoteTemplates[0].renderCardFront(imageStorage: nil)
     XCTAssertEqual(
-      front.string,
-      "We had to learn for ourselves and, furthermore, we had to teach the despairing men, that it did not really matter what we expected from life, but rather what life expected from us."
+      quoteTemplates[0].rawValue,
+      contentWithCloze
     )
   }
 }

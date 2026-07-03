@@ -2,6 +2,7 @@
 
 import KeyValueCRDT
 import Library_Notes
+import LibraryNotesCore
 import XCTest
 
 final class NoteRenameTests: XCTestCase {
@@ -9,12 +10,13 @@ final class NoteRenameTests: XCTestCase {
 
   override func setUp() async throws {
     let fileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-    database = try await NoteDatabase(fileURL: fileURL, authorDescription: "test")
+    database = try NoteDatabase(fileURL: fileURL, authorDescription: "test")
   }
 
   @MainActor override func tearDown() async throws {
-    _ = await database.close()
-    try FileManager.default.removeItem(at: database.fileURL)
+    let fileURL = database.fileURL
+    database = nil
+    try FileManager.default.removeItem(at: fileURL)
   }
 
   func testRenamePreservesPromptHistory() async throws {
