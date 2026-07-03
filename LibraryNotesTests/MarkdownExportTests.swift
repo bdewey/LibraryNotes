@@ -35,3 +35,23 @@ final class MarkdownExportTests: XCTestCase {
     )
   }
 }
+
+final class BookCoverSearchQueryTests: XCTestCase {
+  func testGoogleBooksCoverSearchQueryUsesTitleOnly() {
+    let book = AugmentedBook(title: "Dune", authors: [])
+
+    XCTAssertEqual(book.googleBooksCoverSearchQuery, "Dune")
+  }
+
+  func testGoogleBooksCoverSearchQueryUsesAuthorsOnlyWhenTitleIsEmpty() {
+    let book = AugmentedBook(title: "  ", authors: ["Frank Herbert"])
+
+    XCTAssertEqual(book.googleBooksCoverSearchQuery, "Frank Herbert")
+  }
+
+  func testGoogleBooksCoverSearchQueryUsesTitleAndAuthors() {
+    let book = AugmentedBook(title: "Dune", authors: ["Frank Herbert", "Brian Herbert"])
+
+    XCTAssertEqual(book.googleBooksCoverSearchQuery, "Dune Frank Herbert Brian Herbert")
+  }
+}

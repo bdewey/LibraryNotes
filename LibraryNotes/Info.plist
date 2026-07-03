@@ -64,7 +64,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Dogeared uses the camera to scan barcodes for book search.</string>
+	<string>Dogeared uses the camera to scan barcodes for book search and cover images for your books.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Dogeared can save your quotes to your Photos Library.</string>
 	<key>NSUbiquitousContainers</key>

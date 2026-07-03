@@ -62,32 +62,30 @@ final class BookEditViewModel: ObservableObject {
 
 /// A form that allows editing the metadata of its book and its cover image.
 struct BookEditView: View {
+  private enum SheetDestination: Identifiable {
+    case coverImageSource
+
+    var id: String {
+      switch self {
+      case .coverImageSource:
+        "cover-image-source"
+      }
+    }
+  }
+
   @ObservedObject var model: BookEditViewModel
+  var canPasteCoverImage: () -> Bool = { UIPasteboard.general.image != nil }
+  var canScanCoverImage: () -> Bool = { false }
+  var pasteCoverImage: () -> Void = {}
+  var scanCoverImage: () -> Void = {}
+  var searchCoverImage: () -> Void = {}
+
+  @State private var sheetDestination: SheetDestination?
 
   var body: some View {
     Form {
-      Section(header: Text("Cover Image"), footer: Text("Long-press to paste a new image")) {
+      Section(header: Text("Cover Image")) {
         coverImageView
-
-          .contextMenu {
-            Button {
-              withAnimation {
-                if let image = UIPasteboard.general.image {
-                  model.coverImage = image
-                }
-              }
-            } label: {
-              Label("Paste", systemImage: "doc.on.clipboard")
-            }
-
-            Button(role: .destructive) {
-              withAnimation {
-                model.coverImage = nil
-              }
-            } label: {
-              Label("Delete", systemImage: "trash")
-            }.disabled(model.coverImage == nil)
-          }
       }
       .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
 
@@ -104,13 +102,119 @@ struct BookEditView: View {
       .listRowBackground(Color(uiColor: .grailSecondaryGroupedBackground))
     }
     .grailListBackground()
+    .sheet(item: $sheetDestination) { destination in
+      switch destination {
+      case .coverImageSource:
+        CoverImageSourceSheet(
+          hasCoverImage: model.coverImage != nil,
+          canPasteCoverImage: canPasteCoverImage(),
+          canScanCoverImage: canScanCoverImage(),
+          pasteCoverImage: pasteCoverImage,
+          scanCoverImage: scanCoverImage,
+          searchCoverImage: searchCoverImage,
+          deleteCoverImage: {
+            withAnimation {
+              model.coverImage = nil
+            }
+          }
+        )
+      }
+    }
   }
 
   @ViewBuilder var coverImageView: some View {
-    if let coverImage = model.coverImage {
-      Image(uiImage: coverImage).resizable().scaledToFit().frame(maxHeight: 200)
-    } else {
-      Image(systemName: "square.slash").resizable().scaledToFit().frame(maxHeight: 200)
+    ZStack(alignment: .bottomTrailing) {
+      Group {
+        if let coverImage = model.coverImage {
+          Image(uiImage: coverImage)
+            .resizable()
+            .scaledToFit()
+        } else {
+          Image(systemName: "square.slash")
+            .resizable()
+            .scaledToFit()
+            .foregroundStyle(.secondary)
+            .padding(32)
+        }
+      }
+      .frame(maxWidth: .infinity, maxHeight: 200)
+
+      Button {
+        sheetDestination = .coverImageSource
+      } label: {
+        Image(systemName: "pencil")
+          .font(.headline)
+          .foregroundStyle(Color(uiColor: .grailBackground))
+          .frame(width: 44, height: 44)
+          .background(Circle().fill(Color(uiColor: .grailTint)))
+          .shadow(radius: 2, y: 1)
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("Change cover image")
+      .padding(8)
+    }
+  }
+}
+
+private struct CoverImageSourceSheet: View {
+  @Environment(\.dismiss) private var dismiss
+
+  let hasCoverImage: Bool
+  let canPasteCoverImage: Bool
+  let canScanCoverImage: Bool
+  let pasteCoverImage: () -> Void
+  let scanCoverImage: () -> Void
+  let searchCoverImage: () -> Void
+  let deleteCoverImage: () -> Void
+
+  var body: some View {
+    NavigationView {
+      List {
+        if canPasteCoverImage {
+          Button {
+            pasteCoverImage()
+            dismiss()
+          } label: {
+            Label("Paste Cover", systemImage: "doc.on.clipboard")
+          }
+        }
+
+        #if !targetEnvironment(macCatalyst)
+          if canScanCoverImage {
+            Button {
+              scanCoverImage()
+              dismiss()
+            } label: {
+              Label("Scan Cover", systemImage: "doc.viewfinder")
+            }
+          }
+        #endif
+
+        Button {
+          searchCoverImage()
+          dismiss()
+        } label: {
+          Label("Search Google Books", systemImage: "magnifyingglass")
+        }
+
+        if hasCoverImage {
+          Button(role: .destructive) {
+            deleteCoverImage()
+            dismiss()
+          } label: {
+            Label("Delete Cover", systemImage: "trash")
+          }
+        }
+      }
+      .navigationTitle("Cover Image")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .cancellationAction) {
+          Button("Cancel") {
+            dismiss()
+          }
+        }
+      }
     }
   }
 }

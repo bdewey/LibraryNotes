@@ -7,6 +7,9 @@ import os
 import SnapKit
 import SwiftUI
 import UIKit
+#if !targetEnvironment(macCatalyst)
+  import VisionKit
+#endif
 
 private extension Logger {
   @MainActor
@@ -29,6 +32,13 @@ public protocol BookEditDetailsViewControllerDelegate: AnyObject {
 public extension AugmentedBook {
   /// A blank book.
   static let blank = AugmentedBook(title: "", authors: [])
+
+  var googleBooksCoverSearchQuery: String {
+    ([book.title] + book.authors)
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .filter { !$0.isEmpty }
+      .joined(separator: " ")
+  }
 }
 
 /// This view controller allows editing of book details and cover images.
@@ -111,6 +121,12 @@ public final class BookEditDetailsViewController: UIViewController {
   private let imageCache = ImageCache()
   private var searchResultsViewModels = [SearchResultsViewModel]()
   private var model = BookEditViewModel(book: AugmentedBook(title: "", authors: []), coverImage: nil)
+  private enum SearchSelectionMode {
+    case bookDetails
+    case coverOnly
+  }
+
+  private var searchSelectionMode = SearchSelectionMode.bookDetails
   private lazy var decoder: JSONDecoder = {
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
@@ -261,7 +277,20 @@ public final class BookEditDetailsViewController: UIViewController {
     super.viewDidLoad()
     addChild(barcodeScannerViewController)
     barcodeScannerViewController.didMove(toParent: self)
-    let hostingViewController = UIHostingController(rootView: BookEditView(model: model))
+    let hostingViewController = UIHostingController(rootView: BookEditView(
+      model: model,
+      canPasteCoverImage: { UIPasteboard.general.image != nil },
+      canScanCoverImage: { Self.canScanCoverImages },
+      pasteCoverImage: { [weak self] in
+        self?.pasteCoverImage()
+      },
+      scanCoverImage: { [weak self] in
+        self?.scanCoverImage()
+      },
+      searchCoverImage: { [weak self] in
+        self?.searchGoogleBooksForCoverImage()
+      }
+    ))
     addChild(hostingViewController)
     hostingViewController.didMove(toParent: self)
 
@@ -369,14 +398,61 @@ public final class BookEditDetailsViewController: UIViewController {
       navigationItem.rightBarButtonItem = primaryActionButtonItem
     #endif
   }
+
+  private static var canScanCoverImages: Bool {
+    #if targetEnvironment(macCatalyst)
+      return false
+    #else
+      return VNDocumentCameraViewController.isSupported
+    #endif
+  }
+
+  private func pasteCoverImage() {
+    guard let image = UIPasteboard.general.image else { return }
+    withAnimation {
+      model.coverImage = image
+    }
+  }
+
+  private func searchGoogleBooksForCoverImage() {
+    let searchTerm = model.book.googleBooksCoverSearchQuery
+    guard !searchTerm.isEmpty else { return }
+    searchSelectionMode = .coverOnly
+    searchController.searchBar.text = searchTerm
+    Task {
+      do {
+        try await searchGoogleBooks(for: searchTerm, apiKey: apiKey)
+      } catch {
+        Logger.shared.error("Unexpected error searching Google Books for a cover image: \(error)")
+      }
+    }
+  }
+
+  private func scanCoverImage() {
+    #if !targetEnvironment(macCatalyst)
+      guard VNDocumentCameraViewController.isSupported else {
+        Logger.bookSearch.info("Cannot scan cover image: Document camera is not supported")
+        return
+      }
+      let viewController = VNDocumentCameraViewController()
+      viewController.delegate = self
+      present(viewController, animated: true)
+    #endif
+  }
 }
 
 extension BookEditDetailsViewController: UICollectionViewDelegate {
   public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
     Logger.bookSearch.debug("Selected item at \(indexPath)")
     guard let viewModel = dataSource.itemIdentifier(for: indexPath) else { return }
-    model.book = AugmentedBook(viewModel.book)
-    model.coverImage = viewModel.coverImage
+    switch searchSelectionMode {
+    case .bookDetails:
+      model.book = AugmentedBook(viewModel.book)
+      model.coverImage = viewModel.coverImage
+    case .coverOnly:
+      model.coverImage = viewModel.coverImage
+      searchSelectionMode = .bookDetails
+    }
     hideSearchResults()
   }
 }
@@ -390,8 +466,12 @@ extension BookEditDetailsViewController: UISearchControllerDelegate {
 // MARK: - UISearchBarDelegate
 
 extension BookEditDetailsViewController: UISearchBarDelegate {
+  public func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+    searchSelectionMode = .bookDetails
+  }
+
   public func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-    guard let searchTerm = searchBar.text, let apiKey = ApiKey.googleBooks else { return }
+    guard let searchTerm = searchBar.text else { return }
     Task {
       do {
         try await searchGoogleBooks(for: searchTerm, apiKey: apiKey)
@@ -438,6 +518,32 @@ extension BookEditDetailsViewController: BarcodeScannerViewControllerDelegate {
     }
   }
 }
+
+#if !targetEnvironment(macCatalyst)
+  extension BookEditDetailsViewController: VNDocumentCameraViewControllerDelegate {
+    public func documentCameraViewController(
+      _ controller: VNDocumentCameraViewController,
+      didFinishWith scan: VNDocumentCameraScan
+    ) {
+      if scan.pageCount > 0 {
+        model.coverImage = scan.imageOfPage(at: 0)
+      }
+      controller.dismiss(animated: true)
+    }
+
+    public func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+      controller.dismiss(animated: true)
+    }
+
+    public func documentCameraViewController(
+      _ controller: VNDocumentCameraViewController,
+      didFailWithError error: Swift.Error
+    ) {
+      Logger.bookSearch.error("Unexpected error scanning cover image: \(error)")
+      controller.dismiss(animated: true)
+    }
+  }
+#endif
 
 private struct SearchResultsViewModel: Hashable, Identifiable, Sendable {
   var id = UUID()
