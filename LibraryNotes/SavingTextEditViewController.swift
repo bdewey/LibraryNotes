@@ -20,6 +20,18 @@ private extension Logger {
   }
 }
 
+extension AugmentedBook {
+  func preservingPersonalMetadata(from existingBook: AugmentedBook?) -> AugmentedBook {
+    guard let existingBook else { return self }
+    var mergedBook = self
+    mergedBook.review = existingBook.review
+    mergedBook.rating = existingBook.rating
+    mergedBook.dateAdded = existingBook.dateAdded
+    mergedBook.readingHistory = existingBook.readingHistory
+    return mergedBook
+  }
+}
+
 /// Creates and wraps a TextEditViewController, then watches for changes and saves them to a database.
 /// Changes are autosaved on a periodic interval and flushed when this VC closes.
 final class SavingTextEditViewController: UIViewController, TextEditViewControllerDelegate {
@@ -486,8 +498,9 @@ extension SavingTextEditViewController: BookEditDetailsViewControllerDelegate {
         Logger.textSaving.error("Unexpected error saving image data: \(error)")
       }
     }
-    textEditViewController(textEditViewController, didAttach: book)
-    textEditViewController.extendedNavigationHeaderView = BookHeader(book: book, coverImage: coverImage)
+    let bookForSaving = book.preservingPersonalMetadata(from: note.metadata.book)
+    textEditViewController(textEditViewController, didAttach: bookForSaving)
+    textEditViewController.extendedNavigationHeaderView = BookHeader(book: bookForSaving, coverImage: coverImage)
     dismiss(animated: true, completion: nil)
   }
 
