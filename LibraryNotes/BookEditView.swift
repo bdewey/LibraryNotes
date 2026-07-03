@@ -170,14 +170,13 @@ private struct CoverImageSourceSheet: View {
   var body: some View {
     NavigationView {
       List {
-        if canPasteCoverImage {
-          Button {
-            pasteCoverImage()
-            dismiss()
-          } label: {
-            Label("Paste Cover", systemImage: "doc.on.clipboard")
-          }
+        Button {
+          pasteCoverImage()
+          dismiss()
+        } label: {
+          Label("Paste Cover", systemImage: "doc.on.clipboard")
         }
+        .disabled(!canPasteCoverImage)
 
         #if !targetEnvironment(macCatalyst)
           if canScanCoverImage {

@@ -417,11 +417,12 @@ public final class BookEditDetailsViewController: UIViewController {
   private func searchGoogleBooksForCoverImage() {
     let searchTerm = model.book.googleBooksCoverSearchQuery
     guard !searchTerm.isEmpty else { return }
-    searchSelectionMode = .coverOnly
     searchController.searchBar.text = searchTerm
+    searchController.isActive = true
+    searchSelectionMode = .coverOnly
     Task {
       do {
-        try await searchGoogleBooks(for: searchTerm, apiKey: apiKey)
+        try await searchGoogleBooks(for: searchTerm, apiKey: apiKey, keepsSearchControllerActive: true)
       } catch {
         Logger.shared.error("Unexpected error searching Google Books for a cover image: \(error)")
       }
@@ -493,7 +494,7 @@ extension BookEditDetailsViewController: UISearchBarDelegate {
   }
 
   @MainActor
-  private func searchGoogleBooks(for searchTerm: String, apiKey: String) async throws {
+  private func searchGoogleBooks(for searchTerm: String, apiKey: String, keepsSearchControllerActive: Bool = false) async throws {
     activityView.startAnimating()
     defer {
       activityView.stopAnimating()
@@ -502,7 +503,9 @@ extension BookEditDetailsViewController: UISearchBarDelegate {
     let viewModels = response.items.compactMap { SearchResultsViewModel($0) }
     await updateViewModels(viewModels)
     showSearchResults()
-    searchController.isActive = false
+    if !keepsSearchControllerActive {
+      searchController.isActive = false
+    }
   }
 }
 
