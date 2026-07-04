@@ -2,7 +2,7 @@
 
 > A commonplace book is a central resource or depository for ideas, quotes, anecdotes, observations and information you come across during your life and didactic pursuits. The purpose of the book is to record and organize these gems for later use in your life, in your business, in your writing, speaking or whatever it is that you do. (Ryan Holiday, [*How and Why to Keep a "Commonplace Book"](https://ryanholiday.net/how-and-why-to-keep-a-commonplace-book/)).
 
-Dogeared Notes is an iOS app inspired by [*Commonplace Books*](https://en.wikipedia.org/wiki/Commonplace_book) -- places where to record thoughts and quotes about the things you read. You can use Dogeared to:
+Dogeared Notes is an iOS and Mac app inspired by [*Commonplace Books*](https://en.wikipedia.org/wiki/Commonplace_book) -- places where to record thoughts and quotes about the things you read. You can use Dogeared to:
 
 * Keep a list of books you *want* to read
 * Record the library of books you *have read*
@@ -16,12 +16,16 @@ Dogeared Notes is an iOS app inspired by [*Commonplace Books*](https://en.wikipe
 ![iPad overview](Docs/ipad-3column.png)
 
 * Dogeared is a pure client app. There's no service, no accounts, no passwords. You always own your data.
-* Runs on the iPad or iPhone and requires iOS 15. (Creating notes works best with an iPad and a keyboard, but reviewing your notes works great on an iPhone.)
+* Runs on iPhone, iPad, and Mac. Creating notes works best with a keyboard, but reviewing your notes works great on a phone.
 * Notes are plain text with Markdown formatting.
 * All of your Dogeared notes are stored in a single file that you can synchronize across your devices with the system of your choice (e.g., iCloud or DropBox). iCloud Document Storage works great for keeping your notes in sync across multiple devices.
 * Organize notes with hashtags. You can use hierarchical hashtags, too (e.g., `#books/2021`).
 * Fast full-text search.
 * Export library notes as Markdown files with YAML metadata. See [Book Note Markdown](Docs/markdown-export.md) for the proposed interchange format and importer guidance.
+
+## Development
+
+For setup, build commands, repository layout, coding conventions, and command-line tooling, see [Contributing](CONTRIBUTING.md).
 
 ## Review Mode
 
@@ -55,15 +59,15 @@ Here's what Dogeared looks for in your notes for review mode:
 
 This is a passion project. It exists primarily to scratch an itch (I wanted a place to keep notes about what I read so I can remember more) **and** to be a playground for me to try new things. As a result, there are several things in this implementation that are probably harder than they should be because I wanted to implement things myself as a learning excercise. Specifically:
 
-### Syntax highlighting
+### Markdown parsing
 
-Because I wanted to extend Markdown syntax to support new prompt types, Dogeared does its own Markdown processing. (Actually, there's a lot of formatting that Markdown supports, like embedding arbitrary HTML, that Dogeared does not support, so internally I call the syntax *Mini Markdown*.) Dogeared uses a custom *parsing expression grammar* to define the syntax for Mini Markdown (defined in `MiniMarkdownGrammar.swift`), and I implement the incremental packrat parsing algorithm from [Dubroy and Warth](https://ohmlang.github.io/pubs/sle2017/incremental-packrat-parsing.pdf) so I don't have to re-parse everything on each keystroke. Dogeared implements a custom subclass of `NSTextStorage` to format text in a `UITextView` based on the syntax tree.
+Because I wanted to extend Markdown syntax to support new prompt types, Dogeared uses a custom Markdown grammar rather than a full CommonMark parser. There is a lot of formatting that Markdown supports, like embedding arbitrary HTML, that Dogeared does not support, so internally I call the syntax *Mini Markdown*. The app extends TextMarkupKit's Mini Markdown grammar in `LibraryNotesCore/Sources/LibraryNotesCore/GrailDiaryGrammar.swift` for Dogeared-specific constructs such as cloze deletions, question-and-answer prompts, and summaries.
 
 While writing this was a fantastic learning experience, this code is super tricky to maintain. At some point it probably makes sense to adopt a more "professional" parsing system.
 
 ### Note storage
 
-This project has been through several iterations on how to store notes. I think it's important for any notes app to be as open with its data storage as possible -- your thoughts shouldn't be trapped in a proprietary software stack. Also, Dogeared is unapolegetically in the Apple software ecosystem. I want to create an excellent iOS (and maybe someday Mac) app. I want it to be as simple as possible for someone else to write an Android or Windows version of Dogeared that is 100% compatible with Dogeared notes.
+This project has been through several iterations on how to store notes. I think it's important for any notes app to be as open with its data storage as possible -- your thoughts shouldn't be trapped in a proprietary software stack. Also, Dogeared is unapologetically in the Apple software ecosystem. I want to create an excellent iOS and Mac app. I want it to be as simple as possible for someone else to write an Android or Windows version of Dogeared that is 100% compatible with Dogeared notes.
 
 For its first few iterations, Dogeared stored its notes as plain text files in a directory. This is as open as you can get!
 
