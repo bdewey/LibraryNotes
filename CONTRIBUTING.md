@@ -5,7 +5,7 @@ This repository contains Dogeared Notes, the iOS and Mac app, plus shared domain
 ## Requirements
 
 - Xcode 26.5.
-- SwiftFormat and SwiftLint for local style checks.
+- SwiftFormat for local style checks.
 - The app currently targets iOS 18 and Mac Catalyst. The shared Swift package targets iOS 18 and macOS 14.
 
 ## Repository Map
@@ -32,18 +32,19 @@ swift build --package-path dogeared
 
 The Xcode project also contains a shared `uitesting` scheme for UI-oriented checks.
 
-## Formatting And Linting
+## Formatting
 
-Swift formatting is defined in `.swiftformat`; SwiftLint rules are defined in `.swiftlint.yml`.
+Swift formatting is defined in `.swiftformat`.
 
-Before opening a pull request or handing off a larger change, run the formatter and linter if they are installed:
+Before opening a pull request or handing off a larger change, run the formatter if it is installed:
 
 ```sh
 swiftformat .
-swiftlint
 ```
 
-The style rules intentionally cover mechanical conventions such as indentation, imports, headers, and selected lint checks. Prefer following local code structure for higher-level design conventions.
+The style rules intentionally cover mechanical conventions such as indentation, imports, and headers. Prefer following local code structure for higher-level design conventions.
+
+The repository includes a `.swiftlint.yml`, but the codebase is not currently SwiftLint-clean. Do not treat SwiftLint as a required contribution check until the project has been brought back to that state.
 
 ## Where Changes Belong
 
