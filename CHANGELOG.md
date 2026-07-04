@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.0.113] -- 2026-07-04
+
+### Fixed
+
+* Fixed remaining Dogeared Notes app naming in shared schemes
+* Fixed book list grouping, sorting, section collapse, and duplicate display bugs
+
 ## Unreleased (2.0)
 
 ### Added
