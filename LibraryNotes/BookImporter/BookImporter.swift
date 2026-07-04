@@ -1,10 +1,10 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
+import LibraryNotesCore
 import os
 
 /// An object that can download cover images from OpenLibrary and bulk-create notes for books.

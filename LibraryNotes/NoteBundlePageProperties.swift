@@ -1,8 +1,8 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import Foundation
 import IGListKit
+import LibraryNotesCore
 
 /// Metadata about pages in a NoteBundle.
 public struct PageProperties: Codable, Equatable {

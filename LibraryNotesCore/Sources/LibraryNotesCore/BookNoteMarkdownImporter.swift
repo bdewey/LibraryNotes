@@ -1,4 +1,4 @@
-// Copyright (c) 2026 Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Foundation
@@ -125,7 +125,7 @@ extension BookNoteImportAction: Codable {
     case .skip:
       self = .skip
     case .merge:
-      self = .merge(noteID: try container.decode(Note.Identifier.self, forKey: .noteID))
+      self = try .merge(noteID: container.decode(Note.Identifier.self, forKey: .noteID))
     }
   }
 
@@ -449,13 +449,12 @@ private extension BookNoteMarkdownImporter {
     try database.updateNote(noteIdentifier: destinationNoteID) { existingNote in
       let existingText = existingNote.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
       let importedText = importedNote.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-      let mergedText: String
-      if existingText.isEmpty {
-        mergedText = importedText
+      let mergedText: String = if existingText.isEmpty {
+        importedText
       } else if importedText.isEmpty {
-        mergedText = existingText
+        existingText
       } else {
-        mergedText = "\(existingText)\n\n## Imported Notes\n\nSource: \(sourceFile)\n\n\(importedText)"
+        "\(existingText)\n\n## Imported Notes\n\nSource: \(sourceFile)\n\n\(importedText)"
       }
 
       var updatedNote = existingNote
@@ -598,12 +597,12 @@ private extension BookNoteMarkdownImporter {
   static func levenshteinDistance(_ lhs: String, _ rhs: String) -> Int {
     let lhs = Array(lhs)
     let rhs = Array(rhs)
-    var previous = Array(0...rhs.count)
+    var previous = Array(0 ... rhs.count)
     var current = Array(repeating: 0, count: rhs.count + 1)
 
-    for lhsIndex in 1...lhs.count {
+    for lhsIndex in 1 ... lhs.count {
       current[0] = lhsIndex
-      for rhsIndex in 1...rhs.count {
+      for rhsIndex in 1 ... rhs.count {
         if lhs[lhsIndex - 1] == rhs[rhsIndex - 1] {
           current[rhsIndex] = previous[rhsIndex - 1]
         } else {
@@ -643,12 +642,12 @@ private struct FrontmatterDocument {
       throw BookNoteMarkdownImportError.missingFrontmatter(sourceURL)
     }
 
-    frontmatter = lines[1..<closingIndex].joined(separator: "\n")
+    self.frontmatter = lines[1 ..< closingIndex].joined(separator: "\n")
     var bodyStartIndex = lines.index(after: closingIndex)
     if bodyStartIndex < lines.endIndex, lines[bodyStartIndex].isEmpty {
       bodyStartIndex = lines.index(after: bodyStartIndex)
     }
-    body = bodyStartIndex < lines.endIndex ? lines[bodyStartIndex...].joined(separator: "\n") : ""
+    self.body = bodyStartIndex < lines.endIndex ? lines[bodyStartIndex...].joined(separator: "\n") : ""
   }
 }
 
@@ -660,9 +659,9 @@ private enum SimpleYAMLValue: Equatable {
   var stringValue: String? {
     switch self {
     case .scalar(let value):
-      return value
+      value
     case .sequence, .mapping:
-      return nil
+      nil
     }
   }
 
@@ -685,9 +684,9 @@ private enum SimpleYAMLValue: Equatable {
   var mappingValue: [String: String]? {
     switch self {
     case .mapping(let value):
-      return value
+      value
     case .scalar, .sequence:
-      return nil
+      nil
     }
   }
 }
@@ -782,20 +781,20 @@ private extension DateComponents {
 
   init?(yamlDate: String) {
     let components = yamlDate.split(separator: "-", omittingEmptySubsequences: false)
-    guard (1...3).contains(components.count), let year = Int(components[0]), components[0].count == 4 else {
+    guard (1 ... 3).contains(components.count), let year = Int(components[0]), components[0].count == 4 else {
       return nil
     }
     self.init()
     self.year = year
 
     if components.count >= 2 {
-      guard let month = Int(components[1]), (1...12).contains(month), components[1].count == 2 else {
+      guard let month = Int(components[1]), (1 ... 12).contains(month), components[1].count == 2 else {
         return nil
       }
       self.month = month
     }
     if components.count == 3 {
-      guard let day = Int(components[2]), (1...31).contains(day), components[2].count == 2 else {
+      guard let day = Int(components[2]), (1 ... 31).contains(day), components[2].count == 2 else {
         return nil
       }
       self.day = day

@@ -1,11 +1,11 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import BookKit
 import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
+import LibraryNotesCore
 import MessageUI
 import os
 import SafariServices

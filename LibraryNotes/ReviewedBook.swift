@@ -1,8 +1,8 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import BookKit
 import Foundation
+import LibraryNotesCore
 
 /// A struct that composes "Book" to include review & rating information.
 ///

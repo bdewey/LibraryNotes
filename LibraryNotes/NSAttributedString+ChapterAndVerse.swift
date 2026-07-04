@@ -1,7 +1,7 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import Foundation
+import LibraryNotesCore
 
 /// "Chapter and verse" text is a parenthetical note at the end of a quote that identifies where,
 /// in the source, the quote comes from.

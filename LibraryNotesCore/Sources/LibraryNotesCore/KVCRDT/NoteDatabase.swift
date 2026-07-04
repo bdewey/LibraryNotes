@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
 import BookKit
 import Combine
@@ -122,15 +122,14 @@ public final class NoteDatabase: @unchecked Sendable {
 
   /// Opens a Library Notes content database directly from a file URL.
   public convenience init(fileURL: URL, authorDescription: String, coordinatesFileAccess: Bool = true) throws {
-    let keyValueCRDT: KeyValueDatabase
-    if coordinatesFileAccess {
-      keyValueCRDT = try KeyValueDatabase(
+    let keyValueCRDT: KeyValueDatabase = if coordinatesFileAccess {
+      try KeyValueDatabase(
         fileURL: fileURL,
         authorDescription: authorDescription,
         upgrader: .noteDatabaseUpgrader
       )
     } else {
-      keyValueCRDT = try KeyValueDatabase(
+      try KeyValueDatabase(
         databaseWriter: DatabaseQueue(path: fileURL.path),
         authorDescription: authorDescription,
         upgrader: .noteDatabaseUpgrader

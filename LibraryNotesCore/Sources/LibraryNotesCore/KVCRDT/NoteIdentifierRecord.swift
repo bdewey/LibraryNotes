@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
 import Foundation
 import GRDB
@@ -32,10 +32,9 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
   }
 
   private static func sql(structureIdentifier: NotebookStructureIdentifier, groupByYearRead: Bool) -> SQL {
-    let baseSQL: SQL
-    switch structureIdentifier {
+    let baseSQL: SQL = switch structureIdentifier {
     case .read:
-      baseSQL = """
+      """
       SELECT
         scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
@@ -65,7 +64,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .trash:
-      baseSQL = """
+      """
       SELECT
         scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
@@ -92,7 +91,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       """
 
     case .hashtag(let hashtag):
-      baseSQL = """
+      """
       SELECT
         scope AS noteIdentifier,
         json_extract(readingHistory.value, '$.start.year') AS startYear,
@@ -129,23 +128,23 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
     }
 
     let groupedSQL: SQL = """
-      SELECT
-        noteIdentifier,
-        min(startYear) AS startYear,
-        coalesce(finishYear, startYear) AS finishYear,
-        bookSection,
-        max(finishMonth) AS finishMonth,
-        max(finishDay) AS finishDay,
-        max(authorLastFirst) AS authorLastFirst,
-        max(titleSort) AS titleSort,
-        max(creationTimestamp) AS creationTimestamp,
-        max(modifiedTimestamp) AS modifiedTimestamp,
-        max(rating) AS rating
-      FROM (
-      """ + baseSQL + """
-      )
-      GROUP BY noteIdentifier, coalesce(finishYear, startYear), bookSection
-      """
+    SELECT
+      noteIdentifier,
+      min(startYear) AS startYear,
+      coalesce(finishYear, startYear) AS finishYear,
+      bookSection,
+      max(finishMonth) AS finishMonth,
+      max(finishDay) AS finishDay,
+      max(authorLastFirst) AS authorLastFirst,
+      max(titleSort) AS titleSort,
+      max(creationTimestamp) AS creationTimestamp,
+      max(modifiedTimestamp) AS modifiedTimestamp,
+      max(rating) AS rating
+    FROM (
+    """ + baseSQL + """
+    )
+    GROUP BY noteIdentifier, coalesce(finishYear, startYear), bookSection
+    """
     return "SELECT * FROM (" + groupedSQL + ")"
   }
 

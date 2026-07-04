@@ -1,10 +1,10 @@
-// Copyright (c) 2018-2025  Brian Dewey. Covered by the Apache 2.0 license.
+// Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import LibraryNotesCore
 import BookKit
 import Combine
 import Foundation
 import KeyValueCRDT
+import LibraryNotesCore
 import LinkPresentation
 import ObjectiveCTextStorageWrapper
 import os
@@ -278,12 +278,12 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       history: book.readingHistory,
       onSave: { [weak self] updatedHistory in
         guard let self else { return }
-        guard var currentBook = self.note.metadata.book else { return }
+        guard var currentBook = note.metadata.book else { return }
         currentBook.readingHistory = updatedHistory
-        self.note.metadata.book = currentBook
-        self.note.metadata.modifiedTimestamp = Date()
-        self.bookHeaderView?.update(book: currentBook)
-        self.tryUpdateNote()
+        note.metadata.book = currentBook
+        note.metadata.modifiedTimestamp = Date()
+        bookHeaderView?.update(book: currentBook)
+        tryUpdateNote()
       },
       onDismiss: { [weak self] in
         self?.dismiss(animated: true, completion: nil)
