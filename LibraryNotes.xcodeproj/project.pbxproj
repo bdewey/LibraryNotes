@@ -451,9 +451,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */ = {
+		D3DC5EBE20EC9B0100F0B74B /* DogearedNotes */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */;
+			buildConfigurationList = D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "DogearedNotes" */;
 			buildPhases = (
 				D3DC5EBB20EC9B0100F0B74B /* Sources */,
 				D3DC5EBC20EC9B0100F0B74B /* Frameworks */,
@@ -465,7 +465,7 @@
 			);
 			dependencies = (
 			);
-			name = LibraryNotes;
+			name = DogearedNotes;
 			packageProductDependencies = (
 				D37B0DB823CD476D00F01D29 /* SpacedRepetitionScheduler */,
 				D3DA1B862569E8AB009DC866 /* SnapKit */,
@@ -556,7 +556,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */,
+				D3DC5EBE20EC9B0100F0B74B /* DogearedNotes */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 			);
 		};
@@ -680,7 +680,7 @@
 /* Begin PBXTargetDependency section */
 		D3DC5ED720EC9B0200F0B74B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = D3DC5EBE20EC9B0100F0B74B /* LibraryNotes */;
+			target = D3DC5EBE20EC9B0100F0B74B /* DogearedNotes */;
 			targetProxy = D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -960,7 +960,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "LibraryNotes" */ = {
+		D3DC5EDE20EC9B0200F0B74B /* Build configuration list for PBXNativeTarget "DogearedNotes" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D3DC5EDF20EC9B0200F0B74B /* Debug */,

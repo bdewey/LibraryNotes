@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
                BuildableName = "Dogeared Notes.app"
-               BlueprintName = "LibraryNotes"
+               BlueprintName = "DogearedNotes"
                ReferencedContainer = "container:LibraryNotes.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -56,7 +56,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
             BuildableName = "Dogeared Notes.app"
-            BlueprintName = "LibraryNotes"
+            BlueprintName = "DogearedNotes"
             ReferencedContainer = "container:LibraryNotes.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -73,7 +73,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "D3DC5EBE20EC9B0100F0B74B"
             BuildableName = "Dogeared Notes.app"
-            BlueprintName = "LibraryNotes"
+            BlueprintName = "DogearedNotes"
             ReferencedContainer = "container:LibraryNotes.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
