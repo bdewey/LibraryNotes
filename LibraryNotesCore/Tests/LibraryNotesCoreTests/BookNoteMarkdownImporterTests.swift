@@ -222,6 +222,33 @@ final class BookNoteMarkdownImporterTests: XCTestCase {
     XCTAssertEqual(records.filter { $0.noteIdentifier == noteIdentifier && $0.finishYear == 2025 }.count, 1)
   }
 
+  func testUngroupedDateReadQuerySortsByYearBeforeMonthAndDay() throws {
+    let database = try makeDatabase()
+    let mostRecentIdentifier = try database.createNote(makeBookNote(
+      title: "Recent",
+      authors: ["Author"],
+      readingHistoryDates: [
+        dateComponents(year: 2025, month: 1, day: 1),
+      ],
+      text: "Recent"
+    ))
+    let olderIdentifier = try database.createNote(makeBookNote(
+      title: "Older",
+      authors: ["Author"],
+      readingHistoryDates: [
+        dateComponents(year: 2024, month: 12, day: 31),
+      ],
+      text: "Older"
+    ))
+
+    let records = try waitForNoteIdentifiers(
+      in: database,
+      groupByYearRead: false
+    )
+
+    XCTAssertEqual(records.prefix(2).map(\.noteIdentifier), [mostRecentIdentifier, olderIdentifier])
+  }
+
   func testGroupedYearReadQuerySupportsSearch() throws {
     let database = try makeDatabase()
     let matchingNoteIdentifier = try database.createNote(makeBookNote(

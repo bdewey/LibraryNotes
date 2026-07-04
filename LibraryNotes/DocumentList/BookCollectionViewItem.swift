@@ -4,31 +4,61 @@ import Foundation
 import LibraryNotesCore
 import UIKit
 
+/// A section in the book collection view.
+enum BookCollectionViewSection: Hashable, Sendable {
+  case category(BookSection)
+  case readYear(Int)
+
+  var headerText: String {
+    switch self {
+    case .category(let category):
+      category.headerText
+    case .readYear(let year):
+      "Read in \(year)"
+    }
+  }
+
+  var includesBooksInBookCount: Bool {
+    switch self {
+    case .category(.other):
+      false
+    case .category, .readYear:
+      true
+    }
+  }
+
+  func isExpandedByDefault(currentYear: Int) -> Bool {
+    switch self {
+    case .category(.currentlyReading):
+      true
+    case .readYear(let year):
+      year == currentYear
+    case .category:
+      false
+    }
+  }
+}
+
 /// An item in the book collection view.
 enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   /// The header for a section of books.
-  case header(BookSection, Int)
-
-  /// Header for a section of books read in a particular year
-  case yearReadHeader(Int, Int)
+  case header(BookCollectionViewSection, Int)
 
   /// A single book
-  case book(Note.Identifier, Int?)
+  case book(Note.Identifier, BookCollectionViewSection)
 
   var description: String {
     switch self {
     case .book(let noteIdentifier, _):
       "Page \(noteIdentifier)"
-    case .header(let category, let count):
-      "\(category) (\(count))"
-    case .yearReadHeader(let yearRead, let count):
-      "Read \(yearRead) (\(count))"
+    case .header(let section, let count):
+      "\(section.headerText) (\(count))"
     }
   }
 
   var isHeader: Bool {
     switch self {
-    case .header, .yearReadHeader:
+    case .header:
       true
     case .book:
       false
@@ -38,10 +68,8 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   /// If this item represents a header, contains the primary & secondary text for the header row
   var headerText: (primaryHeaderText: String, secondaryHeaderText: String)? {
     switch self {
-    case .header(let bookSection, let count):
-      (primaryHeaderText: bookSection.headerText, secondaryHeaderText: "\(count)")
-    case .yearReadHeader(let yearRead, let count):
-      (primaryHeaderText: "Read in \(yearRead)", secondaryHeaderText: "\(count)")
+    case .header(let section, let count):
+      (primaryHeaderText: section.headerText, secondaryHeaderText: "\(count)")
     case .book:
       nil
     }
@@ -61,7 +89,7 @@ enum BookCollectionViewItem: Hashable, CustomStringConvertible, Sendable {
   /// - Returns: True if this is a book that matches the note identifier.
   func matchesNoteIdentifier(_ noteIdentifier: Note.Identifier) -> Bool {
     switch self {
-    case .header, .yearReadHeader:
+    case .header:
       false
     case .book(let myNoteIdentifier, _):
       myNoteIdentifier == noteIdentifier
@@ -74,23 +102,14 @@ extension NSDiffableDataSourceSectionSnapshot where ItemIdentifierType == BookCo
     var bookCount = 0
     for item in rootItems {
       switch item {
-      case .header(_, let count):
-        bookCount += count
-      case .yearReadHeader(_, let count):
+      case .header(let section, let count) where section.includesBooksInBookCount:
         bookCount += count
       case .book:
         bookCount += 1
+      case .header:
+        break
       }
     }
     return bookCount
-  }
-
-  mutating func collapseSections(in collapsedSections: Set<BookSection>) {
-    for item in rootItems {
-      guard case .header(let category, _) = item else { continue }
-      if collapsedSections.contains(category) {
-        collapse([item])
-      }
-    }
   }
 }

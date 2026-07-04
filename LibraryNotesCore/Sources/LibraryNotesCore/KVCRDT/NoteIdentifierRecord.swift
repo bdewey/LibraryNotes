@@ -157,7 +157,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
 
   private static func orderClause(sortOrder: SortOrder, groupByYearRead: Bool) -> SQL {
     var sortClauses: [SQL] = ["bookSection"]
-    if groupByYearRead {
+    if groupByYearRead, sortOrder != .dateRead {
       sortClauses.append("finishYear DESC")
     }
     switch sortOrder {
@@ -186,6 +186,7 @@ public struct NoteIdentifierRecord: TableRecord, FetchableRecord, Codable, Equat
       ])
     case .dateRead:
       sortClauses.append(contentsOf: [
+        "finishYear DESC",
         "finishMonth DESC",
         "finishDay DESC",
         "creationTimestamp DESC",

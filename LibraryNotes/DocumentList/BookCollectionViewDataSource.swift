@@ -5,7 +5,7 @@ import LibraryNotesCore
 import TextMarkupKit
 import UIKit
 
-final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<BookSection, BookCollectionViewItem> {
+final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<BookCollectionViewSection, BookCollectionViewItem> {
   init(
     collectionView: UICollectionView,
     coverImageCache: CoverImageCache,
@@ -24,7 +24,7 @@ final class BookCollectionViewDataSource: UICollectionViewDiffableDataSource<Boo
         } else {
           return collectionView.dequeueConfiguredReusableCell(using: notebookPageRegistration, for: indexPath, item: item)
         }
-      case .header, .yearReadHeader:
+      case .header:
         return collectionView.dequeueConfiguredReusableCell(using: headerRegistration, for: indexPath, item: item)
       }
     }

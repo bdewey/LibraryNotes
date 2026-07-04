@@ -1,6 +1,5 @@
 // Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Algorithms
 import BookKit
 import Combine
 import LibraryNotesCore
@@ -21,7 +20,7 @@ public protocol DocumentTableControllerDelegate: AnyObject {
   var documentTableControllerShouldGroupByYearRead: Bool { get }
 }
 
-typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookSection, BookCollectionViewItem>
+typealias BookCollectionViewSnapshot = NSDiffableDataSourceSnapshot<BookCollectionViewSection, BookCollectionViewItem>
 
 /// Given a notebook, this class can manage a table that displays the hashtags and pages of that notebook.
 @MainActor
@@ -74,7 +73,7 @@ public final class DocumentTableController: NSObject {
 
   public var bookCount: Int {
     var total = 0
-    for section in BookSection.bookSections {
+    for section in dataSource.snapshot().sectionIdentifiers where section.includesBooksInBookCount {
       total += dataSource.snapshot(for: section).bookCount
     }
     return total
@@ -107,33 +106,35 @@ public final class DocumentTableController: NSObject {
   public func performUpdates(animated: Bool) {
     let filteredRecordIdentifiers = noteIdentifiers
     let selectedItems = collectionView.indexPathsForSelectedItems?.compactMap { dataSource.itemIdentifier(for: $0) }
-    var sectionIsExpanded: [BookSection: Bool] = [:]
-    for section in BookSection.bookSections {
+    let existingSections = dataSource.snapshot().sectionIdentifiers
+    var sectionIsExpanded: [BookCollectionViewSection: Bool] = [:]
+    for section in existingSections {
       let sectionSnapshot = dataSource.snapshot(for: section)
       if let firstItem = sectionSnapshot.rootItems.first {
         sectionIsExpanded[section] = sectionSnapshot.isExpanded(firstItem)
       }
     }
 
-    let chunks = noteIdentifiers.chunked(on: { $0.bookSection ?? .other })
-    let noteIdentifiersBySection = Dictionary(uniqueKeysWithValues: chunks)
-    for section in BookSection.bookSections {
-      if var sectionSnapshot = sectionSnapshot(for: section, noteIdentifiersBySection: noteIdentifiersBySection) {
-        let isExpanded = sectionIsExpanded[section] ?? (section == .wantToRead ? false : true)
-        if isExpanded {
-          sectionSnapshot.expand(sectionSnapshot.rootItems)
-        } else {
-          sectionSnapshot.collapse(sectionSnapshot.rootItems)
-        }
-        dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
+    let groupByYearRead = delegate?.documentTableControllerShouldGroupByYearRead ?? false
+    let currentYear = Calendar.current.component(.year, from: Date())
+    let displayRecords = Self.displayRecords(from: noteIdentifiers, groupByYearRead: groupByYearRead, currentYear: currentYear)
+    let recordsBySection = Dictionary(grouping: displayRecords, by: \.section)
+    let sections = Self.orderedSections(for: displayRecords)
+
+    var snapshot = BookCollectionViewSnapshot()
+    snapshot.appendSections(sections)
+    dataSource.apply(snapshot, animatingDifferences: animated)
+
+    for section in sections {
+      let records = recordsBySection[section] ?? []
+      var sectionSnapshot = sectionSnapshot(for: section, displayRecords: records)
+      let isExpanded = sectionIsExpanded[section] ?? section.isExpandedByDefault(currentYear: currentYear)
+      if isExpanded {
+        sectionSnapshot.expand(sectionSnapshot.rootItems)
       } else {
-        dataSource.apply(.init(), to: section, animatingDifferences: animated)
+        sectionSnapshot.collapse(sectionSnapshot.rootItems)
       }
-    }
-    if let otherItems = sectionSnapshot(for: .other, noteIdentifiersBySection: noteIdentifiersBySection) {
-      dataSource.apply(otherItems, to: .other, animatingDifferences: animated)
-    } else {
-      dataSource.apply(.init(), to: .other, animatingDifferences: animated)
+      dataSource.apply(sectionSnapshot, to: section, animatingDifferences: animated)
     }
     selectedItems?.forEach { item in
       guard let indexPath = dataSource.indexPath(for: item) else { return }
@@ -142,35 +143,21 @@ public final class DocumentTableController: NSObject {
     delegate?.documentTableController(self, didUpdateWithNoteCount: filteredRecordIdentifiers.count)
   }
 
-  func sectionSnapshot(for section: BookSection, noteIdentifiersBySection: [BookSection: ArraySlice<NoteIdentifierRecord>]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>? {
-    guard let slice = noteIdentifiersBySection[section], !slice.isEmpty else {
-      return nil
-    }
-    if section == .read, delegate?.documentTableControllerShouldGroupByYearRead ?? false {
-      var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
-      let booksByYear = slice.chunked(on: { $0.finishYear })
-      for (year, yearSlice) in booksByYear {
-        let headerItem: BookCollectionViewItem = if let year {
-          .yearReadHeader(year, yearSlice.count)
-        } else {
-          .header(.read, yearSlice.count)
-        }
-        let items: [BookCollectionViewItem] = yearSlice.map { .book($0.noteIdentifier, year) }
-        bookSection.append([headerItem])
-        bookSection.append(items, to: headerItem)
-        bookSection.expand([headerItem])
-      }
-      return bookSection
-    } else {
-      var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
-      let headerItem = BookCollectionViewItem.header(section, slice.count)
-      let items: [BookCollectionViewItem] = slice.map { .book($0.noteIdentifier, $0.finishYear) }
-      bookSection.append([headerItem])
-      bookSection.append(items, to: headerItem)
-      bookSection.expand([headerItem])
-      return bookSection
-    }
+  func sectionSnapshot(for section: BookCollectionViewSection, displayRecords: [BookDisplayRecord]) -> NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem> {
+    var bookSection = NSDiffableDataSourceSectionSnapshot<BookCollectionViewItem>()
+    let headerItem = BookCollectionViewItem.header(section, displayRecords.count)
+    let items: [BookCollectionViewItem] = displayRecords.map { .book($0.noteIdentifier, section) }
+    bookSection.append([headerItem])
+    bookSection.append(items, to: headerItem)
+    bookSection.expand([headerItem])
+    return bookSection
   }
+}
+
+struct BookDisplayRecord: Equatable {
+  var noteIdentifier: Note.Identifier
+  var source: NoteIdentifierRecord
+  var section: BookCollectionViewSection
 }
 
 // MARK: - Swipe & context menu actions
@@ -184,7 +171,7 @@ extension DocumentTableController {
     case .book(let properties, _):
       let actions = availableItemActionConfigurations(properties).reversed().compactMap { $0.asContextualAction() }
       return UISwipeActionsConfiguration(actions: actions)
-    case .header, .yearReadHeader:
+    case .header:
       return nil
     }
   }
@@ -215,7 +202,7 @@ public extension DocumentTableController {
     case .book(let noteIdentifier, _):
       delegate?.showPage(with: noteIdentifier, shiftFocus: shiftFocus)
       return true
-    case .header, .yearReadHeader:
+    case .header:
       var bookSection = dataSource.snapshot(for: section)
       if bookSection.isExpanded(item) {
         bookSection.collapse([item])
@@ -228,8 +215,8 @@ public extension DocumentTableController {
   }
 
   func indexPath(noteIdentifier: Note.Identifier) -> IndexPath? {
-    // TODO: This is a hack
-    dataSource.indexPath(for: .book(noteIdentifier, nil))
+    let item = dataSource.snapshot().itemIdentifiers.first { $0.matchesNoteIdentifier(noteIdentifier) }
+    return item.flatMap { dataSource.indexPath(for: $0) }
   }
 
   func selectFirstNote() {
@@ -310,10 +297,68 @@ extension DocumentTableController: UICollectionViewDelegate {
   }
 }
 
-// MARK: - Private
+// MARK: - Display records
 
-private extension DocumentTableController {
-  @objc func handleRefreshControl() {
+extension DocumentTableController {
+  static func displayRecords(from noteIdentifiers: [NoteIdentifierRecord], groupByYearRead: Bool, currentYear: Int) -> [BookDisplayRecord] {
+    let currentlyReadingNoteIdentifiers = Set(noteIdentifiers.filter { $0.bookSection == .currentlyReading }.map(\.noteIdentifier))
+    var displayedItems: Set<BookCollectionViewItem> = []
+    return noteIdentifiers.compactMap { record in
+      if groupByYearRead,
+         record.bookSection == .read,
+         record.finishYear == currentYear,
+         currentlyReadingNoteIdentifiers.contains(record.noteIdentifier)
+      {
+        return nil
+      }
+      let section = section(for: record, groupByYearRead: groupByYearRead)
+      let item = BookCollectionViewItem.book(record.noteIdentifier, section)
+      guard displayedItems.insert(item).inserted else {
+        return nil
+      }
+      return BookDisplayRecord(
+        noteIdentifier: record.noteIdentifier,
+        source: record,
+        section: section
+      )
+    }
+  }
+
+  static func orderedSections(for displayRecords: [BookDisplayRecord]) -> [BookCollectionViewSection] {
+    var sections: [BookCollectionViewSection] = []
+    append(.category(.currentlyReading), to: &sections, ifPresentIn: displayRecords)
+    append(.category(.wantToRead), to: &sections, ifPresentIn: displayRecords)
+
+    for record in displayRecords {
+      switch record.section {
+      case .category(.read), .readYear:
+        if !sections.contains(record.section) {
+          sections.append(record.section)
+        }
+      case .category:
+        break
+      }
+    }
+
+    append(.category(.other), to: &sections, ifPresentIn: displayRecords)
+    return sections
+  }
+
+  static func section(for record: NoteIdentifierRecord, groupByYearRead: Bool) -> BookCollectionViewSection {
+    let bookSection = record.bookSection ?? .other
+    if groupByYearRead, bookSection == .read, let finishYear = record.finishYear {
+      return .readYear(finishYear)
+    }
+    return .category(bookSection)
+  }
+
+  static func append(_ section: BookCollectionViewSection, to sections: inout [BookCollectionViewSection], ifPresentIn displayRecords: [BookDisplayRecord]) {
+    if displayRecords.contains(where: { $0.section == section }) {
+      sections.append(section)
+    }
+  }
+
+  @objc private func handleRefreshControl() {
     do {
       try database.refresh()
     } catch {
