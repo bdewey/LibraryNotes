@@ -102,6 +102,8 @@
 		D40100000000000000000003 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40100000000000000000002 /* LibraryNotesCore */; };
 		D40200000000000000000001 /* QuoteOfTheDayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200000000000000000003 /* QuoteOfTheDayWidget.swift */; };
 		D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D40300000000000000000003 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000002 /* LibraryNotesUI */; };
+		D40300000000000000000005 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000004 /* LibraryNotesUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -243,6 +245,7 @@
 		D40200000000000000000003 /* QuoteOfTheDayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteOfTheDayWidget.swift; sourceTree = "<group>"; };
 		D40200000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D40200000000000000000005 /* QuoteOfTheDayWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D40300000000000000000001 /* LibraryNotesUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LibraryNotesUI; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -251,6 +254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D40100000000000000000003 /* LibraryNotesCore in Frameworks */,
+				D40300000000000000000003 /* LibraryNotesUI in Frameworks */,
 				D3DAF6022777936D0055FA5F /* Algorithms in Frameworks */,
 				D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
@@ -275,6 +279,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D40300000000000000000005 /* LibraryNotesUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +370,7 @@
 			isa = PBXGroup;
 			children = (
 				D40100000000000000000001 /* LibraryNotesCore */,
+				D40300000000000000000001 /* LibraryNotesUI */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
@@ -512,6 +518,7 @@
 				D3DAF6012777936D0055FA5F /* Algorithms */,
 				D31335B62B3606A100F97066 /* GRDB */,
 				D40100000000000000000002 /* LibraryNotesCore */,
+				D40300000000000000000002 /* LibraryNotesUI */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* Dogeared Notes.app */;
@@ -551,6 +558,7 @@
 			);
 			name = QuoteOfTheDayWidget;
 			packageProductDependencies = (
+				D40300000000000000000004 /* LibraryNotesUI */,
 			);
 			productName = QuoteOfTheDayWidget;
 			productReference = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */;
@@ -1249,6 +1257,14 @@
 		D40100000000000000000002 /* LibraryNotesCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibraryNotesCore;
+		};
+		D40300000000000000000002 /* LibraryNotesUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesUI;
+		};
+		D40300000000000000000004 /* LibraryNotesUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

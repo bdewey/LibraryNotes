@@ -1,12 +1,12 @@
 // Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesUI
 import SwiftUI
 import WidgetKit
 
 struct QuoteOfTheDayEntry: TimelineEntry {
   let date: Date
-  let quote: String
-  let attribution: String
+  let quote: QuoteDisplayModel
 }
 
 struct QuoteOfTheDayProvider: TimelineProvider {
@@ -25,8 +25,12 @@ struct QuoteOfTheDayProvider: TimelineProvider {
   private static var staticEntry: QuoteOfTheDayEntry {
     QuoteOfTheDayEntry(
       date: .now,
-      quote: "The road goes ever on and on",
-      attribution: "J.R.R. Tolkien, The Lord of the Rings"
+      quote: QuoteDisplayModel(
+        noteId: "static-preview",
+        key: "tolkien",
+        quoteText: "The road goes ever on and on",
+        attributionText: "J.R.R. Tolkien, The Lord of the Rings"
+      )
     )
   }
 }
@@ -34,21 +38,22 @@ struct QuoteOfTheDayProvider: TimelineProvider {
 struct QuoteOfTheDayWidgetView: View {
   let entry: QuoteOfTheDayEntry
 
-  var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text(entry.quote)
-        .font(.headline)
-        .fontDesign(.serif)
-        .lineLimit(4)
-        .minimumScaleFactor(0.8)
+  @Environment(\.widgetFamily) private var widgetFamily
 
-      Text(entry.attribution)
-        .font(.caption)
-        .foregroundStyle(.secondary)
-        .lineLimit(2)
+  var body: some View {
+    QuoteCardView(model: entry.quote, mode: displayMode)
+      .padding(12)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+      .containerBackground(Color.grailBackground, for: .widget)
+  }
+
+  private var displayMode: QuoteCardDisplayMode {
+    switch widgetFamily {
+    case .systemMedium:
+      .widgetMedium
+    default:
+      .widgetSmall
     }
-    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    .containerBackground(.background, for: .widget)
   }
 }
 
@@ -71,7 +76,11 @@ struct QuoteOfTheDayWidget: Widget {
 } timeline: {
   QuoteOfTheDayEntry(
     date: .now,
-    quote: "The road goes ever on and on",
-    attribution: "J.R.R. Tolkien, The Lord of the Rings"
+    quote: QuoteDisplayModel(
+      noteId: "static-preview",
+      key: "tolkien",
+      quoteText: "The road goes ever on and on",
+      attributionText: "J.R.R. Tolkien, The Lord of the Rings"
+    )
   )
 }
