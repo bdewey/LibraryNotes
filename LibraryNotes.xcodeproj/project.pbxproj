@@ -101,7 +101,7 @@
 		D40000000000000000000049 /* PromptRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000012 /* PromptRendering.swift */; };
 		D40100000000000000000003 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40100000000000000000002 /* LibraryNotesCore */; };
 		D40200000000000000000001 /* QuoteOfTheDayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200000000000000000003 /* QuoteOfTheDayWidget.swift */; };
-		D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D40300000000000000000003 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000002 /* LibraryNotesUI */; };
 		D40300000000000000000005 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000004 /* LibraryNotesUI */; };
 /* End PBXBuildFile section */
@@ -767,6 +767,7 @@
 		};
 		D4020000000000000000000E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = D4020000000000000000000A /* QuoteOfTheDayWidget */;
 			targetProxy = D4020000000000000000000F /* PBXContainerItemProxy */;
 		};
