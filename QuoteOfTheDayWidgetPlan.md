@@ -4,7 +4,7 @@
 
 Add a WidgetKit extension in learning-sized phases, keeping Dogeared document-based. The first real widget source will be an explicit “Widget Library” chosen by the user, not “last opened,” because it creates a clearer mental model and avoids a large storage/sync rewrite.
 
-The first checkpoint is already underway: a static `QuoteOfTheDayWidget` target exists and shows a hard-coded Tolkien quote. Future work should build from that target gradually instead of jumping straight to document-backed data.
+The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target exists, and its provider now separates placeholder, snapshot, and timeline sample entries while still using fake quote data. Future work should build from that target gradually instead of jumping straight to document-backed data.
 
 ## Key Decisions
 
@@ -77,8 +77,9 @@ The first checkpoint is already underway: a static `QuoteOfTheDayWidget` target 
 ## Current Checkpoint
 
 - `QuoteOfTheDayWidget` target exists.
-- `QuoteOfTheDayWidget/QuoteOfTheDayWidget.swift` contains a static WidgetKit implementation.
-- The static quote is “The road goes ever on and on” attributed to “J.R.R. Tolkien, The Lord of the Rings.”
+- `QuoteOfTheDayWidget/QuoteOfTheDayWidget.swift` contains a fake-data WidgetKit implementation with distinct placeholder, snapshot, and timeline entries.
+- The placeholder entry is redacted in the widget view.
+- The snapshot and timeline entries intentionally use different fake quotes so WidgetKit lifecycle behavior is visible in previews and simulator inspection.
 - The app build has validated that `QuoteOfTheDayWidget.appex` embeds in `Dogeared Notes.app/PlugIns`.
 
 ## Assumptions

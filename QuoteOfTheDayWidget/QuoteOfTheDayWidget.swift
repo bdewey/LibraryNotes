@@ -6,30 +6,95 @@ import WidgetKit
 
 struct QuoteOfTheDayEntry: TimelineEntry {
   let date: Date
+  let state: QuoteOfTheDayEntryState
   let quote: QuoteDisplayModel
+}
+
+enum QuoteOfTheDayEntryState: Sendable {
+  case placeholder
+  case snapshot
+  case timeline
 }
 
 struct QuoteOfTheDayProvider: TimelineProvider {
   func placeholder(in context: Context) -> QuoteOfTheDayEntry {
-    Self.staticEntry
+    Self.placeholderEntry(date: .now)
   }
 
   func getSnapshot(in context: Context, completion: @escaping (QuoteOfTheDayEntry) -> Void) {
-    completion(Self.staticEntry)
+    completion(Self.snapshotEntry(date: .now))
   }
 
   func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteOfTheDayEntry>) -> Void) {
-    completion(Timeline(entries: [Self.staticEntry], policy: .never))
+    let now = Date()
+    let entries = Self.timelineEntries(startingAt: now)
+    completion(Timeline(entries: entries, policy: .atEnd))
   }
 
-  private static var staticEntry: QuoteOfTheDayEntry {
+  static func placeholderEntry(date: Date) -> QuoteOfTheDayEntry {
     QuoteOfTheDayEntry(
-      date: .now,
+      date: date,
+      state: .placeholder,
       quote: QuoteDisplayModel(
-        noteId: "static-preview",
+        noteId: "placeholder",
+        key: "placeholder",
+        quoteText: "A favorite passage from your Dogeared library will appear here.",
+        attributionText: "Quote of the Day"
+      )
+    )
+  }
+
+  static func snapshotEntry(date: Date) -> QuoteOfTheDayEntry {
+    QuoteOfTheDayEntry(
+      date: date,
+      state: .snapshot,
+      quote: QuoteDisplayModel(
+        noteId: "snapshot-preview",
+        key: "austen",
+        quoteText: "There is a stubbornness about me that never can bear to be frightened at the will of others.",
+        attributionText: "Jane Austen, Pride and Prejudice"
+      )
+    )
+  }
+
+  static func timelineEntries(startingAt startDate: Date) -> [QuoteOfTheDayEntry] {
+    let calendar = Calendar.current
+    return [
+      timelineEntry(
+        date: startDate,
         key: "tolkien",
         quoteText: "The road goes ever on and on",
         attributionText: "J.R.R. Tolkien, The Lord of the Rings"
+      ),
+      timelineEntry(
+        date: calendar.date(byAdding: .minute, value: 15, to: startDate) ?? startDate,
+        key: "aurelius",
+        quoteText: "The impediment to action advances action. What stands in the way becomes the way.",
+        attributionText: "Marcus Aurelius, Meditations"
+      ),
+      timelineEntry(
+        date: calendar.date(byAdding: .minute, value: 30, to: startDate) ?? startDate,
+        key: "dickinson",
+        quoteText: "Forever is composed of nows.",
+        attributionText: "Emily Dickinson"
+      ),
+    ]
+  }
+
+  static func timelineEntry(
+    date: Date,
+    key: String,
+    quoteText: String,
+    attributionText: String
+  ) -> QuoteOfTheDayEntry {
+    QuoteOfTheDayEntry(
+      date: date,
+      state: .timeline,
+      quote: QuoteDisplayModel(
+        noteId: "timeline-\(key)",
+        key: key,
+        quoteText: quoteText,
+        attributionText: attributionText
       )
     )
   }
@@ -45,6 +110,7 @@ struct QuoteOfTheDayWidgetView: View {
       .padding(12)
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
       .containerBackground(Color.grailBackground, for: .widget)
+      .redacted(reason: entry.state == .placeholder ? .placeholder : [])
   }
 
   private var displayMode: QuoteCardDisplayMode {
@@ -74,13 +140,12 @@ struct QuoteOfTheDayWidget: Widget {
 #Preview(as: .systemSmall) {
   QuoteOfTheDayWidget()
 } timeline: {
-  QuoteOfTheDayEntry(
+  QuoteOfTheDayProvider.placeholderEntry(date: .now)
+  QuoteOfTheDayProvider.snapshotEntry(date: .now)
+  QuoteOfTheDayProvider.timelineEntry(
     date: .now,
-    quote: QuoteDisplayModel(
-      noteId: "static-preview",
-      key: "tolkien",
-      quoteText: "The road goes ever on and on",
-      attributionText: "J.R.R. Tolkien, The Lord of the Rings"
-    )
+    key: "preview-timeline",
+    quoteText: "The road goes ever on and on",
+    attributionText: "J.R.R. Tolkien, The Lord of the Rings"
   )
 }
