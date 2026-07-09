@@ -56,4 +56,22 @@ final class QuoteDisplayModelTests: XCTestCase {
     XCTAssertEqual(model.quoteText, "A quote without a source suffix.")
     XCTAssertEqual(model.attributionText, "")
   }
+
+  func testWidgetCandidateInitializesDisplayModel() {
+    let model = QuoteDisplayModel(QuoteWidgetCandidate(
+      noteId: "note",
+      quoteKey: "quote",
+      quoteText: "A cached quote.",
+      attributionText: "Cached Book, 12",
+      sourceTitle: "Cached Book",
+      selectedText: "A cached quote. (12)",
+      tags: ["favorite"]
+    ))
+
+    XCTAssertEqual(model.noteId, "note")
+    XCTAssertEqual(model.key, "quote")
+    XCTAssertEqual(model.quoteText, "A cached quote.")
+    XCTAssertEqual(model.attributionText, "Cached Book, 12")
+    XCTAssertEqual(model.selectedText, "A cached quote. (12)")
+  }
 }

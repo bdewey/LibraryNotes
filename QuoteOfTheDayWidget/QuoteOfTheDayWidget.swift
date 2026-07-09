@@ -1,5 +1,6 @@
 // Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
+import LibraryNotesCore
 import LibraryNotesUI
 import SwiftUI
 import WidgetKit
@@ -45,20 +46,32 @@ struct QuoteOfTheDayProvider: TimelineProvider {
   }
 
   static func snapshotEntry(date: Date) -> QuoteOfTheDayEntry {
-    QuoteOfTheDayEntry(
-      date: date,
-      state: .snapshot,
-      quote: QuoteDisplayModel(
+    let quote = if let candidate = cachedCandidates().first {
+      QuoteDisplayModel(candidate)
+    } else {
+      QuoteDisplayModel(
         noteId: "snapshot-preview",
         key: "austen",
         quoteText: "There is a stubbornness about me that never can bear to be frightened at the will of others.",
         attributionText: "Jane Austen, Pride and Prejudice"
       )
-    )
+    }
+    return QuoteOfTheDayEntry(date: date, state: .snapshot, quote: quote)
   }
 
   static func timelineEntries(startingAt startDate: Date) -> [QuoteOfTheDayEntry] {
     let calendar = Calendar.current
+    let candidates = cachedCandidates()
+    if !candidates.isEmpty {
+      return candidates.prefix(3).enumerated().map { offset, candidate in
+        QuoteOfTheDayEntry(
+          date: calendar.date(byAdding: .minute, value: offset * 15, to: startDate) ?? startDate,
+          state: .timeline,
+          quote: QuoteDisplayModel(candidate)
+        )
+      }
+    }
+
     return [
       timelineEntry(
         date: startDate,
@@ -97,6 +110,14 @@ struct QuoteOfTheDayProvider: TimelineProvider {
         attributionText: attributionText
       )
     )
+  }
+
+  private static func cachedCandidates(store: QuoteWidgetStore = QuoteWidgetStore()) -> [QuoteWidgetCandidate] {
+    do {
+      return try store.readSnapshot().candidates
+    } catch {
+      return []
+    }
   }
 }
 

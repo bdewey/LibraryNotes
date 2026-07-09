@@ -102,6 +102,7 @@
 		D40100000000000000000003 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40100000000000000000002 /* LibraryNotesCore */; };
 		D40200000000000000000001 /* QuoteOfTheDayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200000000000000000003 /* QuoteOfTheDayWidget.swift */; };
 		D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D40400000000000000000001 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40400000000000000000003 /* LibraryNotesCore */; };
 		D40300000000000000000003 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000002 /* LibraryNotesUI */; };
 		D40300000000000000000005 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000004 /* LibraryNotesUI */; };
 /* End PBXBuildFile section */
@@ -245,6 +246,7 @@
 		D40200000000000000000003 /* QuoteOfTheDayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteOfTheDayWidget.swift; sourceTree = "<group>"; };
 		D40200000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D40200000000000000000005 /* QuoteOfTheDayWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D40400000000000000000002 /* QuoteOfTheDayWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidget.entitlements; sourceTree = "<group>"; };
 		D40300000000000000000001 /* LibraryNotesUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LibraryNotesUI; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -279,6 +281,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D40400000000000000000001 /* LibraryNotesCore in Frameworks */,
 				D40300000000000000000005 /* LibraryNotesUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -484,6 +487,7 @@
 			children = (
 				D40200000000000000000003 /* QuoteOfTheDayWidget.swift */,
 				D40200000000000000000004 /* Info.plist */,
+				D40400000000000000000002 /* QuoteOfTheDayWidget.entitlements */,
 			);
 			path = QuoteOfTheDayWidget;
 			sourceTree = "<group>";
@@ -558,6 +562,7 @@
 			);
 			name = QuoteOfTheDayWidget;
 			packageProductDependencies = (
+				D40400000000000000000003 /* LibraryNotesCore */,
 				D40300000000000000000004 /* LibraryNotesUI */,
 			);
 			productName = QuoteOfTheDayWidget;
@@ -1041,6 +1046,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidget/QuoteOfTheDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -1070,6 +1076,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidget/QuoteOfTheDayWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_TEAM = K2UU8WDD8H;
@@ -1256,6 +1263,10 @@
 			productName = TextMarkupKit;
 		};
 		D40100000000000000000002 /* LibraryNotesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesCore;
+		};
+		D40400000000000000000003 /* LibraryNotesCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibraryNotesCore;
 		};

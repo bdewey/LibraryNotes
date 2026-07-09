@@ -47,6 +47,16 @@ public struct QuoteDisplayModel: Identifiable, Equatable, Sendable {
     )
   }
 
+  public init(_ candidate: QuoteWidgetCandidate) {
+    self.init(
+      noteId: candidate.noteId,
+      key: candidate.quoteKey,
+      quoteText: candidate.quoteText,
+      attributionText: candidate.attributionText,
+      selectedText: candidate.selectedText
+    )
+  }
+
   private static func attributionText(title: String, fragment: String) -> String {
     let trimmedFragment = fragment
       .strippingLeadingAndTrailingWhitespace
