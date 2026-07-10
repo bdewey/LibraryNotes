@@ -53,6 +53,7 @@ public struct QuoteDisplayModel: Identifiable, Equatable, Sendable {
       key: candidate.quoteKey,
       quoteText: candidate.quoteText,
       attributionText: candidate.attributionText,
+      thumbnailImage: candidate.thumbnailImage,
       selectedText: candidate.selectedText
     )
   }

@@ -64,6 +64,7 @@ final class QuoteDisplayModelTests: XCTestCase {
       quoteText: "A cached quote.",
       attributionText: "Cached Book, 12",
       sourceTitle: "Cached Book",
+      thumbnailImage: Data([0x07, 0x08, 0x09]),
       selectedText: "A cached quote. (12)",
       tags: ["favorite"]
     ))
@@ -72,6 +73,7 @@ final class QuoteDisplayModelTests: XCTestCase {
     XCTAssertEqual(model.key, "quote")
     XCTAssertEqual(model.quoteText, "A cached quote.")
     XCTAssertEqual(model.attributionText, "Cached Book, 12")
+    XCTAssertEqual(model.thumbnailImage, Data([0x07, 0x08, 0x09]))
     XCTAssertEqual(model.selectedText, "A cached quote. (12)")
   }
 }

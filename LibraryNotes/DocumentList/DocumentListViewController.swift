@@ -5,6 +5,7 @@ import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
+import ImageIO
 import LibraryNotesCore
 import MessageUI
 import os
@@ -12,6 +13,7 @@ import SafariServices
 import SnapKit
 import UIKit
 import UniformTypeIdentifiers
+import WidgetKit
 import ZIPFoundation
 
 /// Implements a filterable list of documents in an interactive notebook.
@@ -509,6 +511,7 @@ extension DocumentListViewController {
       openCommand,
       reviewAction,
       quotesAction,
+      makePreferredLibraryAction,
       exportMenu,
       importLibraryThingAction,
       sendFeedbackAction,
@@ -545,6 +548,67 @@ extension DocumentListViewController {
     UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
       self?.showRandomQuotes()
     }
+  }
+
+  private var makePreferredLibraryAction: UIAction {
+    UIAction(title: "Make Preferred Library", image: UIImage(systemName: "star")) { [weak self] _ in
+      self?.makePreferredLibrary()
+    }
+  }
+
+  private func makePreferredLibrary() {
+    Task {
+      do {
+        let stats = try await publishPreferredLibraryForQuoteWidget()
+        let title = database.fileURL.deletingPathExtension().lastPathComponent
+        showAlert(
+          title: "Preferred Library Set",
+          message: "\(title) will be used for Quote of the Day. Cached \(stats.quoteCount) quotes and \(stats.coverCount) covers."
+        )
+      } catch {
+        Logger.shared.error("Error setting preferred library: \(error)")
+        showAlert(message: "Could not make this the preferred library: \(error.localizedDescription)")
+      }
+    }
+  }
+
+  private struct QuoteWidgetPublishStats {
+    var quoteCount: Int
+    var coverCount: Int
+  }
+
+  private func publishPreferredLibraryForQuoteWidget() async throws -> QuoteWidgetPublishStats {
+    let quoteIdentifiers = try await allQuoteIdentifiers()
+    let quotes = try database.attributedQuotes(for: quoteIdentifiers)
+    let candidates = quotes.map { quote in
+      var candidate = QuoteWidgetCandidate(quote)
+      candidate.thumbnailImage = quote.thumbnailImage?.widgetThumbnailData(maxPixelSize: 160)
+      return candidate
+    }
+    let coverCount = candidates.count { $0.thumbnailImage != nil }
+    let firstCoverByteCount = candidates.first(where: { $0.thumbnailImage != nil })?.thumbnailImage?.count ?? 0
+    let displayName = database.fileURL.deletingPathExtension().lastPathComponent
+    let snapshot = QuoteOfTheDaySnapshot(
+      sourceLibraryDisplayName: displayName,
+      cacheTimestamp: .now,
+      candidates: candidates
+    )
+    let store = QuoteWidgetStore()
+    try store.writeSnapshot(snapshot)
+    let snapshotByteCount = try store.snapshotURL.map { try Data(contentsOf: $0).count } ?? 0
+    try store.writePreferredLibraryBookmark(for: database.fileURL, displayName: displayName)
+    WidgetCenter.shared.reloadTimelines(ofKind: "QuoteOfTheDayWidget")
+    Logger.shared.info(
+      "Published Quote of the Day snapshot for \(displayName, privacy: .public): quotes=\(candidates.count), covers=\(coverCount), firstCoverBytes=\(firstCoverByteCount), snapshotBytes=\(snapshotByteCount), snapshotURL=\(store.snapshotURL?.path ?? "nil", privacy: .public)"
+    )
+    return QuoteWidgetPublishStats(quoteCount: candidates.count, coverCount: coverCount)
+  }
+
+  private func allQuoteIdentifiers() async throws -> [ContentIdentifier] {
+    for try await quoteIdentifiers in database.promptCollectionPublisher(promptType: .quote, tagged: nil).values {
+      return quoteIdentifiers
+    }
+    return []
   }
 
   @objc func showRandomQuotes() {
@@ -684,6 +748,23 @@ extension MFMailComposeResult: @retroactive CustomStringConvertible {
   }
 }
 
+private extension Data {
+  func widgetThumbnailData(maxPixelSize: CGFloat) -> Data? {
+    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
+      return nil
+    }
+    let options: [NSString: NSObject] = [
+      kCGImageSourceThumbnailMaxPixelSize: maxPixelSize as NSObject,
+      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
+      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
+    ]
+    guard let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?) else {
+      return nil
+    }
+    return UIImage(cgImage: image).jpegData(compressionQuality: 0.72)
+  }
+}
+
 // MARK: - DocumentTableControllerDelegate
 
 extension DocumentListViewController: DocumentTableControllerDelegate {
@@ -736,7 +817,15 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 
   func showAlert(_ alertMessage: String) {
-    let alert = UIAlertController(title: "Oops", message: alertMessage, preferredStyle: .alert)
+    showAlert(message: alertMessage)
+  }
+
+  func showAlert(message: String) {
+    showAlert(title: "Oops", message: message)
+  }
+
+  func showAlert(title: String, message: String) {
+    let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     present(alert, animated: true, completion: nil)
   }

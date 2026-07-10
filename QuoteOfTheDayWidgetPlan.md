@@ -11,7 +11,7 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 - Keep Dogeared document-based for this feature.
 - Do not have the widget open a `.libnotes` document directly.
 - Add a small shared quote cache in the existing app group `group.org.brians-brain.grail-diary`.
-- Store the selected widget library as bookmark data in app-group defaults so the app can reopen it later.
+- Store the preferred library as bookmark data in app-group defaults so widget and future app workflows can resolve it later.
 - Make the widget read only a Codable snapshot cache: quote text, note id, quote key, book title, source library display name, and cache timestamp.
 - Make “Quote of the Day” deterministic per local day, selected from the cached quote pool by date-based hashing rather than live randomization.
 - Make widget taps deep-link into Dogeared, resolve the selected library bookmark, open the note, and highlight/select the quote text when possible.
@@ -33,11 +33,12 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
    - Read a fixture snapshot from the app-group container.
    - Do not touch document access yet.
 
-4. Explicit widget library selection
-   - Add a “Use This Library for Quote Widget” action in the open library UI.
-   - Save selected-library bookmark data and display name in app-group defaults.
+4. Explicit preferred library selection
+   - Add a “Make Preferred Library” action in the open library UI.
+   - Save preferred-library bookmark data and display name in app-group defaults.
    - Publish a quote snapshot from the current `NoteDatabase` using existing quote extraction APIs.
    - Inspect app-group defaults and snapshot JSON after selection.
+   - Do not auto-open the preferred library at launch in this checkpoint.
 
 5. Daily quote selection and refresh
    - Generate the quote deterministically from local day plus the cached quote pool.
@@ -53,7 +54,7 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 7. Widget polish
    - Support `systemSmall` and `systemMedium` first.
    - Show quote text and book title.
-   - Omit thumbnails for v1 unless layout remains readable.
+   - Show cached book covers in `systemMedium`; keep `systemSmall` quote-first unless layout remains readable.
    - Use `containerBackground(for: .widget)` and provide placeholder/redacted UI.
 
 ## Public Interfaces And Types
@@ -61,7 +62,7 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 - `QuoteOfTheDaySnapshot: Codable, Sendable`
 - `QuoteWidgetCandidate: Codable, Sendable`
 - `QuoteWidgetStore` for app-group read/write, deterministic daily selection, and cache validation
-- `UserDefaults` helpers for app-group suite access and selected widget library bookmark data
+- `UserDefaults` helpers for app-group suite access and preferred-library bookmark data
 - One quote widget deep-link route
 - One WidgetKit extension target, eventually linked only to the minimum shared code it needs
 

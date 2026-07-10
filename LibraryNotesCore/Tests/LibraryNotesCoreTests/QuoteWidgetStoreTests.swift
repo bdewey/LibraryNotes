@@ -24,6 +24,7 @@ final class QuoteWidgetStoreTests: XCTestCase {
           quoteText: "The answer is not in the back of the book.",
           attributionText: "Thinking Fast and Slow, 80",
           sourceTitle: "Thinking Fast and Slow",
+          thumbnailImage: Data([0x01, 0x02, 0x03]),
           selectedText: "The answer is not in the back of the book. (80)",
           tags: ["psychology"]
         ),
@@ -58,6 +59,44 @@ final class QuoteWidgetStoreTests: XCTestCase {
 
     XCTAssertEqual(store.snapshotURL, containerURL.appendingPathComponent(QuoteWidgetStore.snapshotFileName))
     XCTAssertEqual(try store.readSnapshot(), snapshot)
+  }
+
+  func testStoreWritesPreferredLibraryBookmarkInAppGroupDefaults() throws {
+    let suiteName = "QuoteWidgetStoreTests.\(UUID().uuidString)"
+    let store = try QuoteWidgetStore(appGroupIdentifier: suiteName, containerURL: makeTemporaryDirectory())
+    let libraryURL = FileManager.default.temporaryDirectory
+      .appendingPathComponent("Favorite Library")
+      .appendingPathExtension("libnotes")
+    try Data().write(to: libraryURL)
+    defer { try? FileManager.default.removeItem(at: libraryURL) }
+
+    try store.writePreferredLibraryBookmark(for: libraryURL, displayName: "Favorite Library")
+
+    let bookmarkData = try store.preferredLibraryBookmarkData()
+    var isStale = false
+    let resolvedURL = try URL(resolvingBookmarkData: bookmarkData, bookmarkDataIsStale: &isStale)
+    XCTAssertEqual(resolvedURL.standardizedFileURL, libraryURL.standardizedFileURL)
+    XCTAssertFalse(isStale)
+    XCTAssertEqual(try store.preferredLibraryDisplayName(), "Favorite Library")
+    UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+  }
+
+  func testCandidateProjectionFromAttributedQuote() {
+    let candidate = QuoteWidgetCandidate(AttributedQuote(
+      noteId: "note-1",
+      key: "prompt=quote:abc",
+      text: " The answer is not in the back of the book. (80) ",
+      title: "Thinking Fast and Slow",
+      thumbnailImage: Data([0x04, 0x05, 0x06])
+    ))
+
+    XCTAssertEqual(candidate.noteId, "note-1")
+    XCTAssertEqual(candidate.quoteKey, "prompt=quote:abc")
+    XCTAssertEqual(candidate.quoteText, "The answer is not in the back of the book.")
+    XCTAssertEqual(candidate.attributionText, "Thinking Fast and Slow, 80")
+    XCTAssertEqual(candidate.sourceTitle, "Thinking Fast and Slow")
+    XCTAssertEqual(candidate.thumbnailImage, Data([0x04, 0x05, 0x06]))
+    XCTAssertEqual(candidate.selectedText, " The answer is not in the back of the book. (80) ")
   }
 
   func testMissingSnapshotThrows() throws {

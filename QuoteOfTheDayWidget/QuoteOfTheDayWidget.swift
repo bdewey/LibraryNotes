@@ -2,8 +2,13 @@
 
 import LibraryNotesCore
 import LibraryNotesUI
+import os
 import SwiftUI
 import WidgetKit
+
+private extension Logger {
+  static let quoteWidget = Logger(subsystem: Bundle.main.bundleIdentifier ?? "QuoteOfTheDayWidget", category: "QuoteOfTheDayWidget")
+}
 
 struct QuoteOfTheDayEntry: TimelineEntry {
   let date: Date
@@ -46,24 +51,27 @@ struct QuoteOfTheDayProvider: TimelineProvider {
   }
 
   static func snapshotEntry(date: Date) -> QuoteOfTheDayEntry {
-    let quote = if let candidate = cachedCandidates().first {
+    let snapshot = cachedSnapshot()
+    let quote = if let candidate = snapshot.candidates.first {
       QuoteDisplayModel(candidate)
     } else {
-      QuoteDisplayModel(
-        noteId: "snapshot-preview",
-        key: "austen",
-        quoteText: "There is a stubbornness about me that never can bear to be frightened at the will of others.",
-        attributionText: "Jane Austen, Pride and Prejudice"
-      )
+      diagnosticQuote(key: "snapshot", errorDescription: snapshot.errorDescription)
     }
     return QuoteOfTheDayEntry(date: date, state: .snapshot, quote: quote)
   }
 
   static func timelineEntries(startingAt startDate: Date) -> [QuoteOfTheDayEntry] {
     let calendar = Calendar.current
-    let candidates = cachedCandidates()
+    let snapshot = cachedSnapshot()
+    let candidates = snapshot.candidates
     if !candidates.isEmpty {
-      return candidates.prefix(3).enumerated().map { offset, candidate in
+      let displayCandidates = candidates.sorted { lhs, rhs in
+        lhs.thumbnailImage != nil && rhs.thumbnailImage == nil
+      }
+      Logger.quoteWidget.info(
+        "Building quote widget timeline: candidates=\(candidates.count), covers=\(candidates.count { $0.thumbnailImage != nil }), firstDisplayCoverBytes=\(displayCandidates.first?.thumbnailImage?.count ?? 0)"
+      )
+      return displayCandidates.prefix(3).enumerated().map { offset, candidate in
         QuoteOfTheDayEntry(
           date: calendar.date(byAdding: .minute, value: offset * 15, to: startDate) ?? startDate,
           state: .timeline,
@@ -73,23 +81,10 @@ struct QuoteOfTheDayProvider: TimelineProvider {
     }
 
     return [
-      timelineEntry(
+      QuoteOfTheDayEntry(
         date: startDate,
-        key: "tolkien",
-        quoteText: "The road goes ever on and on",
-        attributionText: "J.R.R. Tolkien, The Lord of the Rings"
-      ),
-      timelineEntry(
-        date: calendar.date(byAdding: .minute, value: 15, to: startDate) ?? startDate,
-        key: "aurelius",
-        quoteText: "The impediment to action advances action. What stands in the way becomes the way.",
-        attributionText: "Marcus Aurelius, Meditations"
-      ),
-      timelineEntry(
-        date: calendar.date(byAdding: .minute, value: 30, to: startDate) ?? startDate,
-        key: "dickinson",
-        quoteText: "Forever is composed of nows.",
-        attributionText: "Emily Dickinson"
+        state: .timeline,
+        quote: diagnosticQuote(key: "timeline", errorDescription: snapshot.errorDescription)
       ),
     ]
   }
@@ -112,12 +107,32 @@ struct QuoteOfTheDayProvider: TimelineProvider {
     )
   }
 
-  private static func cachedCandidates(store: QuoteWidgetStore = QuoteWidgetStore()) -> [QuoteWidgetCandidate] {
+  private struct CachedSnapshot {
+    var candidates: [QuoteWidgetCandidate]
+    var errorDescription: String?
+  }
+
+  private static func cachedSnapshot(store: QuoteWidgetStore = QuoteWidgetStore()) -> CachedSnapshot {
     do {
-      return try store.readSnapshot().candidates
+      let snapshot = try store.readSnapshot()
+      Logger.quoteWidget.info(
+        "Read quote widget snapshot: source=\(snapshot.sourceLibraryDisplayName, privacy: .public), candidates=\(snapshot.candidates.count), covers=\(snapshot.candidates.count { $0.thumbnailImage != nil }), firstCoverBytes=\(snapshot.candidates.first(where: { $0.thumbnailImage != nil })?.thumbnailImage?.count ?? 0)"
+      )
+      return CachedSnapshot(candidates: snapshot.candidates, errorDescription: nil)
     } catch {
-      return []
+      let errorDescription = error.localizedDescription
+      Logger.quoteWidget.error("Could not read quote widget snapshot: \(errorDescription, privacy: .public)")
+      return CachedSnapshot(candidates: [], errorDescription: errorDescription)
     }
+  }
+
+  private static func diagnosticQuote(key: String, errorDescription: String?) -> QuoteDisplayModel {
+    QuoteDisplayModel(
+      noteId: "diagnostic",
+      key: key,
+      quoteText: "Widget cache unavailable.",
+      attributionText: errorDescription ?? "No cached quote data was loaded."
+    )
   }
 }
 
