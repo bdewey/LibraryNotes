@@ -13,52 +13,45 @@ final class QuoteWidgetStoreTests: XCTestCase {
     temporaryDirectories.removeAll()
   }
 
-  func testSnapshotRoundTrip() throws {
-    let snapshot = QuoteOfTheDaySnapshot(
-      sourceLibraryDisplayName: "Fixture Library",
-      cacheTimestamp: Date(timeIntervalSince1970: 1800000000),
-      candidates: [
-        QuoteWidgetCandidate(
-          noteId: "note-1",
-          quoteKey: "prompt=quote:abc",
-          quoteText: "The answer is not in the back of the book.",
-          attributionText: "Thinking Fast and Slow, 80",
-          sourceTitle: "Thinking Fast and Slow",
-          thumbnailImage: Data([0x01, 0x02, 0x03]),
-          selectedText: "The answer is not in the back of the book. (80)",
-          tags: ["psychology"]
-        ),
-      ]
-    )
-    let data = try JSONEncoder().encode(snapshot)
-
-    let decoded = try JSONDecoder().decode(QuoteOfTheDaySnapshot.self, from: data)
-
-    XCTAssertEqual(decoded, snapshot)
-    XCTAssertTrue(decoded.isReadableByCurrentVersion)
-  }
-
-  func testStoreReadsAndWritesSnapshotInContainer() throws {
+  func testStoreReadsOnlyRequestedCandidatesFromDatabase() throws {
     let containerURL = try makeTemporaryDirectory()
     let store = QuoteWidgetStore(containerURL: containerURL)
-    let snapshot = QuoteOfTheDaySnapshot(
+    let candidates = [
+      QuoteWidgetCandidate(
+        noteId: "note-1",
+        quoteKey: "quote-1",
+        quoteText: "A quote without a cover.",
+        attributionText: "Book One",
+        sourceTitle: "Book One"
+      ),
+      QuoteWidgetCandidate(
+        noteId: "note-2",
+        quoteKey: "quote-2",
+        quoteText: "A quote with a cover.",
+        attributionText: "Book Two",
+        sourceTitle: "Book Two",
+        thumbnailImage: Data([0x01, 0x02, 0x03]),
+        selectedText: "A quote with a cover. (12)",
+        tags: ["fiction"]
+      ),
+      QuoteWidgetCandidate(
+        noteId: "note-3",
+        quoteKey: "quote-3",
+        quoteText: "Another quote with a cover.",
+        attributionText: "Book Three",
+        sourceTitle: "Book Three",
+        thumbnailImage: Data([0x04, 0x05, 0x06])
+      ),
+    ]
+    try store.replaceQuotes(
       sourceLibraryDisplayName: "Fixture Library",
       cacheTimestamp: Date(timeIntervalSince1970: 1800000000),
-      candidates: [
-        QuoteWidgetCandidate(
-          noteId: "note-1",
-          quoteKey: "quote-1",
-          quoteText: "A cached quote.",
-          attributionText: "Cached Book",
-          sourceTitle: "Cached Book"
-        ),
-      ]
+      candidates: candidates
     )
 
-    try store.writeSnapshot(snapshot)
-
-    XCTAssertEqual(store.snapshotURL, containerURL.appendingPathComponent(QuoteWidgetStore.snapshotFileName))
-    XCTAssertEqual(try store.readSnapshot(), snapshot)
+    XCTAssertEqual(store.databaseURL, containerURL.appendingPathComponent(QuoteWidgetStore.databaseFileName))
+    XCTAssertEqual(try store.readCandidates(limit: 1), [candidates[1]])
+    XCTAssertEqual(try store.readCandidates(limit: 2), [candidates[1], candidates[2]])
   }
 
   func testStoreWritesPreferredLibraryBookmarkInAppGroupDefaults() throws {
@@ -99,28 +92,12 @@ final class QuoteWidgetStoreTests: XCTestCase {
     XCTAssertEqual(candidate.selectedText, " The answer is not in the back of the book. (80) ")
   }
 
-  func testMissingSnapshotThrows() throws {
+  func testMissingDatabaseThrows() throws {
     let store = try QuoteWidgetStore(containerURL: makeTemporaryDirectory())
-    let snapshotURL = try XCTUnwrap(store.snapshotURL)
+    let databaseURL = try XCTUnwrap(store.databaseURL)
 
-    XCTAssertThrowsError(try store.readSnapshot()) { error in
-      XCTAssertEqual(error as? QuoteWidgetStoreError, .missingSnapshot(snapshotURL))
-    }
-  }
-
-  func testUnsupportedSchemaVersionThrows() throws {
-    let containerURL = try makeTemporaryDirectory()
-    let store = QuoteWidgetStore(containerURL: containerURL)
-    let snapshot = QuoteOfTheDaySnapshot(
-      schemaVersion: QuoteOfTheDaySnapshot.currentSchemaVersion + 1,
-      sourceLibraryDisplayName: "Future Library",
-      cacheTimestamp: Date(timeIntervalSince1970: 1800000000),
-      candidates: []
-    )
-    try store.writeSnapshot(snapshot)
-
-    XCTAssertThrowsError(try store.readSnapshot()) { error in
-      XCTAssertEqual(error as? QuoteWidgetStoreError, .unsupportedSchemaVersion(snapshot.schemaVersion))
+    XCTAssertThrowsError(try store.readCandidates(limit: 1)) { error in
+      XCTAssertEqual(error as? QuoteWidgetStoreError, .missingDatabase(databaseURL))
     }
   }
 

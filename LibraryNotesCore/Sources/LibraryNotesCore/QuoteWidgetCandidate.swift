@@ -2,11 +2,11 @@
 
 import Foundation
 
-/// A portable quote projection that can be copied into the widget cache.
+/// A portable quote projection stored in the widget's app-group database.
 ///
-/// The main library database remains the source of truth. This type is the
-/// small Codable shape that the app writes and the widget reads.
-public struct QuoteWidgetCandidate: Codable, Hashable, Identifiable, Sendable {
+/// The main library database remains the source of truth. The widget database
+/// contains only the fields it needs to display a quote and its cover.
+public struct QuoteWidgetCandidate: Hashable, Identifiable, Sendable {
   public var id: String { "\(noteId):\(quoteKey)" }
 
   public var noteId: String
@@ -80,30 +80,5 @@ private extension String {
     let attributionFragment = String(quoteText[range])
     quoteText.removeSubrange(range)
     return (quoteText, attributionFragment)
-  }
-}
-
-public struct QuoteOfTheDaySnapshot: Codable, Equatable, Sendable {
-  public static let currentSchemaVersion = 1
-
-  public var schemaVersion: Int
-  public var sourceLibraryDisplayName: String
-  public var cacheTimestamp: Date
-  public var candidates: [QuoteWidgetCandidate]
-
-  public init(
-    schemaVersion: Int = Self.currentSchemaVersion,
-    sourceLibraryDisplayName: String,
-    cacheTimestamp: Date,
-    candidates: [QuoteWidgetCandidate]
-  ) {
-    self.schemaVersion = schemaVersion
-    self.sourceLibraryDisplayName = sourceLibraryDisplayName
-    self.cacheTimestamp = cacheTimestamp
-    self.candidates = candidates
-  }
-
-  public var isReadableByCurrentVersion: Bool {
-    schemaVersion == Self.currentSchemaVersion
   }
 }

@@ -588,18 +588,17 @@ extension DocumentListViewController {
     let coverCount = candidates.count { $0.thumbnailImage != nil }
     let firstCoverByteCount = candidates.first(where: { $0.thumbnailImage != nil })?.thumbnailImage?.count ?? 0
     let displayName = database.fileURL.deletingPathExtension().lastPathComponent
-    let snapshot = QuoteOfTheDaySnapshot(
+    let store = QuoteWidgetStore()
+    try store.replaceQuotes(
       sourceLibraryDisplayName: displayName,
       cacheTimestamp: .now,
       candidates: candidates
     )
-    let store = QuoteWidgetStore()
-    try store.writeSnapshot(snapshot)
-    let snapshotByteCount = try store.snapshotURL.map { try Data(contentsOf: $0).count } ?? 0
+    let databaseByteCount = try store.databaseURL.map { try Data(contentsOf: $0).count } ?? 0
     try store.writePreferredLibraryBookmark(for: database.fileURL, displayName: displayName)
     WidgetCenter.shared.reloadTimelines(ofKind: "QuoteOfTheDayWidget")
     Logger.shared.info(
-      "Published Quote of the Day snapshot for \(displayName, privacy: .public): quotes=\(candidates.count), covers=\(coverCount), firstCoverBytes=\(firstCoverByteCount), snapshotBytes=\(snapshotByteCount), snapshotURL=\(store.snapshotURL?.path ?? "nil", privacy: .public)"
+      "Published Quote of the Day database for \(displayName, privacy: .public): quotes=\(candidates.count), covers=\(coverCount), firstCoverBytes=\(firstCoverByteCount), databaseBytes=\(databaseByteCount), databaseURL=\(store.databaseURL?.path ?? "nil", privacy: .public)"
     )
     return QuoteWidgetPublishStats(quoteCount: candidates.count, coverCount: coverCount)
   }

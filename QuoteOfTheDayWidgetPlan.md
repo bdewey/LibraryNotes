@@ -12,7 +12,7 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 - Do not have the widget open a `.libnotes` document directly.
 - Add a small shared quote cache in the existing app group `group.org.brians-brain.grail-diary`.
 - Store the preferred library as bookmark data in app-group defaults so widget and future app workflows can resolve it later.
-- Make the widget read only a Codable snapshot cache: quote text, note id, quote key, book title, source library display name, and cache timestamp.
+- Make the widget read only a dedicated SQLite cache in the app group: quote text, note id, quote key, book title, source library display name, cache timestamp, and a small cover thumbnail.
 - Make “Quote of the Day” deterministic per local day, selected from the cached quote pool by date-based hashing rather than live randomization.
 - Make widget taps deep-link into Dogeared, resolve the selected library bookmark, open the note, and highlight/select the quote text when possible.
 
@@ -29,15 +29,15 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
    - Build and inspect Xcode previews, simulator widget gallery behavior, and the difference between widget timeline state and normal app state.
 
 3. Shared model and fixture data
-   - Add `QuoteOfTheDaySnapshot`, `QuoteWidgetCandidate`, and `QuoteWidgetStore`.
-   - Read a fixture snapshot from the app-group container.
+   - Add `QuoteWidgetCandidate` and `QuoteWidgetStore`.
+   - Read fixture quote rows from the app-group database.
    - Do not touch document access yet.
 
 4. Explicit preferred library selection
    - Add a “Make Preferred Library” action in the open library UI.
    - Save preferred-library bookmark data and display name in app-group defaults.
-   - Publish a quote snapshot from the current `NoteDatabase` using existing quote extraction APIs.
-   - Inspect app-group defaults and snapshot JSON after selection.
+   - Publish a quote projection from the current `NoteDatabase` using existing quote extraction APIs.
+   - Inspect app-group defaults and the widget database after selection.
    - Do not auto-open the preferred library at launch in this checkpoint.
 
 5. Daily quote selection and refresh
@@ -59,9 +59,8 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 
 ## Public Interfaces And Types
 
-- `QuoteOfTheDaySnapshot: Codable, Sendable`
-- `QuoteWidgetCandidate: Codable, Sendable`
-- `QuoteWidgetStore` for app-group read/write, deterministic daily selection, and cache validation
+- `QuoteWidgetCandidate: Sendable`
+- `QuoteWidgetStore` for app-group SQLite read/write, deterministic daily selection, and cache validation
 - `UserDefaults` helpers for app-group suite access and preferred-library bookmark data
 - One quote widget deep-link route
 - One WidgetKit extension target, eventually linked only to the minimum shared code it needs
@@ -69,8 +68,8 @@ The first two checkpoints are underway: a static `QuoteOfTheDayWidget` target ex
 ## Test Plan
 
 - Unit test deterministic daily quote selection: same day gives same quote, next day can change, empty cache returns empty state.
-- Unit test snapshot encoding/decoding and app-group file path construction.
-- App integration test or manual smoke: select widget library, verify snapshot contains quote candidates from `promptCollectionPublisher(promptType: .quote, tagged: nil)`.
+- Unit test database round trips, limited reads, and app-group file path construction.
+- App integration test or manual smoke: select widget library, verify the database contains quote candidates from `promptCollectionPublisher(promptType: .quote, tagged: nil)`.
 - Manual widget smoke: placeholder before selection, populated widget after selection, quote changes across injected dates, widget tap opens the right note.
 - Run `xcodebuild -scheme "Dogeared Notes" -project LibraryNotes.xcodeproj build`.
 - Run `swift test --package-path LibraryNotesCore` if shared model logic lands in `LibraryNotesCore`.
