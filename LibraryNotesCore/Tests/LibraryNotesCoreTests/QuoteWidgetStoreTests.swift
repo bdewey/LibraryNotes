@@ -92,6 +92,20 @@ final class QuoteWidgetStoreTests: XCTestCase {
     XCTAssertEqual(candidate.selectedText, " The answer is not in the back of the book. (80) ")
   }
 
+  func testPublisherProjectsQuotesFromNoteDatabase() async throws {
+    let libraryURL = try makeTemporaryDirectory().appendingPathComponent("Fixture Library.libnotes")
+    let database = try NoteDatabase(fileURL: libraryURL, authorDescription: "test")
+    _ = try database.createNote(Note(markdown: "# Fixture Book\n\n> A published quote. (12)"))
+    let store = try QuoteWidgetStore(containerURL: makeTemporaryDirectory())
+
+    let publication = try await QuoteWidgetPublisher(store: store).publish(from: database)
+
+    XCTAssertEqual(publication.sourceLibraryDisplayName, "Fixture Library")
+    XCTAssertEqual(publication.quoteCount, 1)
+    XCTAssertEqual(publication.coverCount, 0)
+    XCTAssertEqual(try store.readCandidates(limit: 1).map(\.quoteText), ["> A published quote."])
+  }
+
   func testMissingDatabaseThrows() throws {
     let store = try QuoteWidgetStore(containerURL: makeTemporaryDirectory())
     let databaseURL = try XCTUnwrap(store.databaseURL)

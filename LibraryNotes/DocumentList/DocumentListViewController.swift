@@ -5,7 +5,6 @@ import CodableCSV
 import Combine
 import CoreServices
 import CoreSpotlight
-import ImageIO
 import LibraryNotesCore
 import MessageUI
 import os
@@ -572,42 +571,16 @@ extension DocumentListViewController {
     }
   }
 
-  private struct QuoteWidgetPublishStats {
-    var quoteCount: Int
-    var coverCount: Int
-  }
-
-  private func publishPreferredLibraryForQuoteWidget() async throws -> QuoteWidgetPublishStats {
-    let quoteIdentifiers = try await allQuoteIdentifiers()
-    let quotes = try database.attributedQuotes(for: quoteIdentifiers)
-    let candidates = quotes.map { quote in
-      var candidate = QuoteWidgetCandidate(quote)
-      candidate.thumbnailImage = quote.thumbnailImage?.widgetThumbnailData(maxPixelSize: 160)
-      return candidate
-    }
-    let coverCount = candidates.count { $0.thumbnailImage != nil }
-    let firstCoverByteCount = candidates.first(where: { $0.thumbnailImage != nil })?.thumbnailImage?.count ?? 0
-    let displayName = database.fileURL.deletingPathExtension().lastPathComponent
+  private func publishPreferredLibraryForQuoteWidget() async throws -> QuoteWidgetPublication {
     let store = QuoteWidgetStore()
-    try store.replaceQuotes(
-      sourceLibraryDisplayName: displayName,
-      cacheTimestamp: .now,
-      candidates: candidates
-    )
-    let databaseByteCount = try store.databaseURL.map { try Data(contentsOf: $0).count } ?? 0
-    try store.writePreferredLibraryBookmark(for: database.fileURL, displayName: displayName)
+    let publication = try await QuoteWidgetPublisher(store: store).publish(from: database)
+    let databaseByteCount = try publication.databaseURL.map { try Data(contentsOf: $0).count } ?? 0
+    try store.writePreferredLibraryBookmark(for: database.fileURL, displayName: publication.sourceLibraryDisplayName)
     WidgetCenter.shared.reloadTimelines(ofKind: "QuoteOfTheDayWidget")
     Logger.shared.info(
-      "Published Quote of the Day database for \(displayName, privacy: .public): quotes=\(candidates.count), covers=\(coverCount), firstCoverBytes=\(firstCoverByteCount), databaseBytes=\(databaseByteCount), databaseURL=\(store.databaseURL?.path ?? "nil", privacy: .public)"
+      "Published Quote of the Day database for \(publication.sourceLibraryDisplayName, privacy: .public): quotes=\(publication.quoteCount), covers=\(publication.coverCount), firstCoverBytes=\(publication.firstCoverByteCount), databaseBytes=\(databaseByteCount), databaseURL=\(publication.databaseURL?.path ?? "nil", privacy: .public)"
     )
-    return QuoteWidgetPublishStats(quoteCount: candidates.count, coverCount: coverCount)
-  }
-
-  private func allQuoteIdentifiers() async throws -> [ContentIdentifier] {
-    for try await quoteIdentifiers in database.promptCollectionPublisher(promptType: .quote, tagged: nil).values {
-      return quoteIdentifiers
-    }
-    return []
+    return publication
   }
 
   @objc func showRandomQuotes() {
@@ -744,23 +717,6 @@ extension MFMailComposeResult: @retroactive CustomStringConvertible {
     @unknown default:
       "unknown"
     }
-  }
-}
-
-private extension Data {
-  func widgetThumbnailData(maxPixelSize: CGFloat) -> Data? {
-    guard let imageSource = CGImageSourceCreateWithData(self as CFData, nil) else {
-      return nil
-    }
-    let options: [NSString: NSObject] = [
-      kCGImageSourceThumbnailMaxPixelSize: maxPixelSize as NSObject,
-      kCGImageSourceCreateThumbnailFromImageAlways: true as NSObject,
-      kCGImageSourceCreateThumbnailWithTransform: true as NSObject,
-    ]
-    guard let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary?) else {
-      return nil
-    }
-    return UIImage(cgImage: image).jpegData(compressionQuality: 0.72)
   }
 }
 
