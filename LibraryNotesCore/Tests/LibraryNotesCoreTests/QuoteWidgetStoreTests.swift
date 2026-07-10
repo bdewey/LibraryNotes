@@ -52,6 +52,7 @@ final class QuoteWidgetStoreTests: XCTestCase {
     XCTAssertEqual(store.databaseURL, containerURL.appendingPathComponent(QuoteWidgetStore.databaseFileName))
     XCTAssertEqual(try store.readCandidates(limit: 1), [candidates[1]])
     XCTAssertEqual(try store.readCandidates(limit: 2), [candidates[1], candidates[2]])
+    XCTAssertEqual(try store.readCandidates().count, candidates.count)
   }
 
   func testStoreWritesPreferredLibraryBookmarkInAppGroupDefaults() throws {
@@ -113,6 +114,99 @@ final class QuoteWidgetStoreTests: XCTestCase {
     XCTAssertThrowsError(try store.readCandidates(limit: 1)) { error in
       XCTAssertEqual(error as? QuoteWidgetStoreError, .missingDatabase(databaseURL))
     }
+  }
+
+  func testManualAdvanceSelectsAnotherQuoteWithinTheCurrentDailyInterval() throws {
+    let store = try QuoteWidgetStore(containerURL: makeTemporaryDirectory())
+    let candidates = (1 ... 3).map { index in
+      QuoteWidgetCandidate(
+        noteId: "note-\(index)",
+        quoteKey: "quote-\(index)",
+        quoteText: "Quote \(index)",
+        attributionText: "Book \(index)",
+        sourceTitle: "Book \(index)"
+      )
+    }
+    try store.replaceQuotes(sourceLibraryDisplayName: "Fixture Library", cacheTimestamp: .now, candidates: candidates)
+    let calendar = Calendar(identifier: .gregorian)
+    let date = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 7, day: 10, hour: 9)))
+
+    let first = try QuoteWidgetSelection.selectedCandidate(
+      from: candidates,
+      schedule: .daily,
+      date: date,
+      manualAdvanceCount: store.manualAdvanceCount(
+        widgetIdentifier: "daily-widget",
+        schedule: .daily,
+        date: date,
+        calendar: calendar
+      ),
+      calendar: calendar
+    )
+    XCTAssertEqual(try store.advanceManualSelection(
+      widgetIdentifier: "daily-widget",
+      schedule: .daily,
+      date: date,
+      calendar: calendar
+    ), 1)
+    let second = try QuoteWidgetSelection.selectedCandidate(
+      from: candidates,
+      schedule: .daily,
+      date: date,
+      manualAdvanceCount: store.manualAdvanceCount(
+        widgetIdentifier: "daily-widget",
+        schedule: .daily,
+        date: date,
+        calendar: calendar
+      ),
+      calendar: calendar
+    )
+
+    XCTAssertNotEqual(first?.id, second?.id)
+  }
+
+  func testManualAdvanceIsIndependentForEachWidgetAndHourlyInterval() throws {
+    let candidates = (1 ... 4).map { index in
+      QuoteWidgetCandidate(
+        noteId: "note-\(index)",
+        quoteKey: "quote-\(index)",
+        quoteText: "Quote \(index)",
+        attributionText: "Book \(index)",
+        sourceTitle: "Book \(index)"
+      )
+    }
+    let calendar = Calendar(identifier: .gregorian)
+    let firstHour = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 7, day: 10, hour: 9)))
+    let nextHour = try XCTUnwrap(calendar.date(byAdding: .hour, value: 1, to: firstHour))
+
+    let store = try QuoteWidgetStore(containerURL: makeTemporaryDirectory())
+    try store.replaceQuotes(sourceLibraryDisplayName: "Fixture Library", cacheTimestamp: .now, candidates: candidates)
+    XCTAssertEqual(try store.advanceManualSelection(
+      widgetIdentifier: "hourly-widget-one",
+      schedule: .hourly,
+      date: firstHour,
+      calendar: calendar
+    ), 1)
+    XCTAssertEqual(QuoteWidgetRotationSchedule.hourly.slotIdentifier(for: firstHour, calendar: calendar), "2026-07-10T09")
+    XCTAssertEqual(QuoteWidgetRotationSchedule.hourly.slotIdentifier(for: nextHour, calendar: calendar), "2026-07-10T10")
+    XCTAssertEqual(try store.manualAdvanceCount(
+      widgetIdentifier: "hourly-widget-one",
+      schedule: .hourly,
+      date: firstHour,
+      calendar: calendar
+    ), 1)
+    XCTAssertEqual(try store.manualAdvanceCount(
+      widgetIdentifier: "hourly-widget-two",
+      schedule: .hourly,
+      date: firstHour,
+      calendar: calendar
+    ), 0)
+    XCTAssertEqual(try store.manualAdvanceCount(
+      widgetIdentifier: "hourly-widget-one",
+      schedule: .hourly,
+      date: nextHour,
+      calendar: calendar
+    ), 0)
   }
 
   private func makeTemporaryDirectory() throws -> URL {

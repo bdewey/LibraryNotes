@@ -56,6 +56,7 @@ public struct QuoteWidgetStore {
       for (sortOrder, candidate) in candidates.enumerated() {
         try insert(candidate, sortOrder: sortOrder, into: database)
       }
+      try database.execute(sql: "DELETE FROM quoteWidgetManualAdvance")
     }
   }
 
@@ -77,7 +78,7 @@ public struct QuoteWidgetStore {
         throw QuoteWidgetStoreError.missingQuoteData
       }
       let schemaVersion: Int = metadata["schemaVersion"]
-      guard schemaVersion == QuoteWidgetDatabaseSchema.currentVersion else {
+      guard QuoteWidgetDatabaseSchema.supportedVersions.contains(schemaVersion) else {
         throw QuoteWidgetStoreError.unsupportedSchemaVersion(schemaVersion)
       }
       let rows = try Row.fetchAll(
@@ -91,6 +92,80 @@ public struct QuoteWidgetStore {
         arguments: [limit]
       )
       return try rows.map(QuoteWidgetCandidate.init(row:))
+    }
+  }
+
+  /// Reads the complete quote pool used to build a deterministic shuffle order.
+  public func readCandidates() throws -> [QuoteWidgetCandidate] {
+    try readCandidates(limit: .max)
+  }
+
+  /// Returns the number of manually requested quotes for the interval containing `date`.
+  public func manualAdvanceCount(
+    widgetIdentifier: String,
+    schedule: QuoteWidgetRotationSchedule,
+    date: Date,
+    calendar: Calendar = .current
+  ) throws -> Int {
+    guard let databaseURL else {
+      throw QuoteWidgetStoreError.missingAppGroupContainer(appGroupIdentifier)
+    }
+    guard fileManager.fileExists(atPath: databaseURL.path) else {
+      throw QuoteWidgetStoreError.missingDatabase(databaseURL)
+    }
+    let slotIdentifier = schedule.slotIdentifier(for: date, calendar: calendar)
+    let databaseQueue = try DatabaseQueue(path: databaseURL.path, configuration: readOnlyConfiguration)
+    return try databaseQueue.read { database in
+      try validateSchema(in: database)
+      return try Int.fetchOne(
+        database,
+        sql: """
+        SELECT advanceCount
+        FROM quoteWidgetManualAdvance
+        WHERE widgetIdentifier = ? AND schedule = ? AND slotIdentifier = ?
+        """,
+        arguments: [widgetIdentifier, schedule.rawValue, slotIdentifier]
+      ) ?? 0
+    }
+  }
+
+  /// Advances to the next quote for the interval containing `date`.
+  @discardableResult
+  public func advanceManualSelection(
+    widgetIdentifier: String,
+    schedule: QuoteWidgetRotationSchedule,
+    date: Date,
+    calendar: Calendar = .current
+  ) throws -> Int {
+    guard let databaseURL else {
+      throw QuoteWidgetStoreError.missingAppGroupContainer(appGroupIdentifier)
+    }
+    guard fileManager.fileExists(atPath: databaseURL.path) else {
+      throw QuoteWidgetStoreError.missingDatabase(databaseURL)
+    }
+    let slotIdentifier = schedule.slotIdentifier(for: date, calendar: calendar)
+    let databaseQueue = try DatabaseQueue(path: databaseURL.path)
+    return try databaseQueue.write { database in
+      try createSchema(in: database)
+      try validateSchema(in: database)
+      try database.execute(
+        sql: """
+        INSERT INTO quoteWidgetManualAdvance (widgetIdentifier, schedule, slotIdentifier, advanceCount)
+        VALUES (?, ?, ?, 1)
+        ON CONFLICT (widgetIdentifier, schedule, slotIdentifier)
+        DO UPDATE SET advanceCount = advanceCount + 1
+        """,
+        arguments: [widgetIdentifier, schedule.rawValue, slotIdentifier]
+      )
+      return try Int.fetchOne(
+        database,
+        sql: """
+        SELECT advanceCount
+        FROM quoteWidgetManualAdvance
+        WHERE widgetIdentifier = ? AND schedule = ? AND slotIdentifier = ?
+        """,
+        arguments: [widgetIdentifier, schedule.rawValue, slotIdentifier]
+      ) ?? 0
     }
   }
 
@@ -155,6 +230,38 @@ public struct QuoteWidgetStore {
       PRIMARY KEY (noteId, quoteKey)
     )
     """)
+    try migrateManualAdvanceSchema(in: database)
+  }
+
+  private func migrateManualAdvanceSchema(in database: Database) throws {
+    let columnNames = try Row.fetchAll(database, sql: "PRAGMA table_info(quoteWidgetManualAdvance)")
+      .map { row in row["name"] as String }
+    if !columnNames.isEmpty, !columnNames.contains("widgetIdentifier") {
+      try database.execute(sql: "DROP TABLE quoteWidgetManualAdvance")
+    }
+    try database.execute(sql: """
+    CREATE TABLE IF NOT EXISTS quoteWidgetManualAdvance (
+      widgetIdentifier TEXT NOT NULL,
+      schedule TEXT NOT NULL,
+      slotIdentifier TEXT NOT NULL,
+      advanceCount INTEGER NOT NULL,
+      PRIMARY KEY (widgetIdentifier, schedule, slotIdentifier)
+    )
+    """)
+  }
+
+  private func validateSchema(in database: Database) throws {
+    let metadata = try Row.fetchOne(
+      database,
+      sql: "SELECT schemaVersion FROM quoteWidgetMetadata LIMIT 1"
+    )
+    guard let metadata else {
+      throw QuoteWidgetStoreError.missingQuoteData
+    }
+    let schemaVersion: Int = metadata["schemaVersion"]
+    guard QuoteWidgetDatabaseSchema.supportedVersions.contains(schemaVersion) else {
+      throw QuoteWidgetStoreError.unsupportedSchemaVersion(schemaVersion)
+    }
   }
 
   private func insert(_ candidate: QuoteWidgetCandidate, sortOrder: Int, into database: Database) throws {
@@ -182,7 +289,8 @@ public struct QuoteWidgetStore {
 }
 
 private enum QuoteWidgetDatabaseSchema {
-  static let currentVersion = 1
+  static let currentVersion = 3
+  static let supportedVersions = 1 ... currentVersion
 }
 
 private extension QuoteWidgetCandidate {
