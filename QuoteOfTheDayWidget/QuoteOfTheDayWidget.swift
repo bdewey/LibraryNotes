@@ -87,7 +87,7 @@ struct QuoteOfTheDayEntry: TimelineEntry {
   let canRequestNewQuote: Bool
 }
 
-enum QuoteOfTheDayEntryState: Sendable {
+enum QuoteOfTheDayEntryState: Equatable, Sendable {
   case placeholder
   case snapshot
   case timeline
@@ -304,7 +304,13 @@ struct QuoteOfTheDayWidgetView: View {
       }
     }
     .containerBackground(Color.grailBackground, for: .widget)
+    .widgetURL(deepLinkURL)
     .redacted(reason: entry.state == .placeholder ? .placeholder : [])
+  }
+
+  private var deepLinkURL: URL? {
+    guard entry.state != .placeholder, entry.quote.noteId != "diagnostic" else { return nil }
+    return try? QuoteWidgetDeepLink(noteId: entry.quote.noteId, quoteKey: entry.quote.key).url
   }
 
   private var displayMode: QuoteCardDisplayMode {

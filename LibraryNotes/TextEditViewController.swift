@@ -9,6 +9,12 @@ import SnapKit
 import TextMarkupKit
 import UIKit
 
+private extension Logger {
+  static var textEditing: Logger {
+    Logger(subsystem: Bundle.main.bundleIdentifier!, category: "TextEditViewController")
+  }
+}
+
 @MainActor
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
@@ -119,8 +125,16 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     set {
       let visibleRange = parsedAttributedString.range(forRawStringRange: newValue)
       textView.selectedRange = visibleRange
+      shouldRevealSelectedRange = true
+      Logger.textEditing.info(
+        "Prepared initial selection: editor=\(String(describing: ObjectIdentifier(self))), rawRange=\(newValue.location)..<\(newValue.upperBound), visibleRange=\(visibleRange.location)..<\(visibleRange.upperBound), renderedTextLength=\(self.textView.textStorage.length)"
+      )
     }
   }
+
+  private var shouldRevealSelectedRange = false
+  private var temporaryQuoteHighlightRange: NSRange?
+  private var quoteHighlightFadeTask: Task<Void, Never>?
 
   /// An optional view that will appear at the top of the textView and look like an extension of the navigation bar when scrolled to the top.
   var extendedNavigationHeaderView: UIView? {
@@ -323,8 +337,78 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     }
   }
 
+  override public func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    Logger.textEditing.info(
+      "viewDidAppear: editor=\(String(describing: ObjectIdentifier(self))), pendingInitialReveal=\(self.shouldRevealSelectedRange)"
+    )
+    guard shouldRevealSelectedRange else { return }
+    shouldRevealSelectedRange = false
+    textView.layoutManager.ensureLayout(for: textView.textContainer)
+    logInitialRevealState(stage: "before scrollRangeToVisible")
+    textView.scrollRangeToVisible(textView.selectedRange)
+    showTemporaryQuoteHighlight(for: textView.selectedRange)
+    logInitialRevealState(stage: "immediately after scrollRangeToVisible")
+    DispatchQueue.main.async { [weak self] in
+      self?.logInitialRevealState(stage: "next run loop after scrollRangeToVisible")
+    }
+  }
+
+  private func showTemporaryQuoteHighlight(for range: NSRange) {
+    clearTemporaryQuoteHighlight()
+    guard range.length > 0 else { return }
+    temporaryQuoteHighlightRange = range
+    setTemporaryQuoteHighlight(alpha: 0.28, range: range)
+    quoteHighlightFadeTask = Task { [weak self] in
+      do {
+        try await Task.sleep(for: .seconds(3))
+        let fadeSteps = 12
+        for step in 1 ... fadeSteps {
+          try await Task.sleep(for: .seconds(1.0 / Double(fadeSteps)))
+          guard let self, temporaryQuoteHighlightRange == range else { return }
+          let remainingAlpha = 0.28 * (1 - Double(step) / Double(fadeSteps))
+          setTemporaryQuoteHighlight(alpha: remainingAlpha, range: range)
+        }
+        self?.clearTemporaryQuoteHighlight()
+      } catch {
+        // Cancellation is expected when the user edits or leaves the note.
+      }
+    }
+  }
+
+  private func setTemporaryQuoteHighlight(alpha: Double, range: NSRange) {
+    (textView.layoutManager as? LayoutManager)?.setTemporaryHighlight(
+      range: range,
+      color: UIColor.systemOrange.withAlphaComponent(alpha)
+    )
+  }
+
+  private func clearTemporaryQuoteHighlight() {
+    quoteHighlightFadeTask?.cancel()
+    quoteHighlightFadeTask = nil
+    guard temporaryQuoteHighlightRange != nil else { return }
+    temporaryQuoteHighlightRange = nil
+    (textView.layoutManager as? LayoutManager)?.clearTemporaryHighlight()
+  }
+
+  private func logInitialRevealState(stage: String) {
+    let selection = textView.selectedRange
+    let glyphRange = textView.layoutManager.glyphRange(
+      forCharacterRange: selection,
+      actualCharacterRange: nil
+    )
+    let selectionRect = textView.layoutManager.boundingRect(
+      forGlyphRange: glyphRange,
+      in: textView.textContainer
+    )
+    Logger.textEditing.info(
+      "Initial selection reveal (\(stage)): editor=\(String(describing: ObjectIdentifier(self))), selection=\(selection.location)..<\(selection.upperBound), glyphRange=\(glyphRange.location)..<\(glyphRange.upperBound), selectionRect=\(String(describing: selectionRect)), contentOffset=\(String(describing: self.textView.contentOffset)), contentSize=\(String(describing: self.textView.contentSize)), bounds=\(String(describing: self.textView.bounds)), adjustedInset=\(String(describing: self.textView.adjustedContentInset)), isInWindow=\(self.textView.window != nil)"
+    )
+  }
+
   override public func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(animated)
+    clearTemporaryQuoteHighlight()
     delegate?.textEditViewControllerDidClose(self)
     layoutNavigationBorderView()
   }
@@ -348,6 +432,9 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     if !didPerformInitialLayout {
       didPerformInitialLayout = true
       textView.contentOffset.y = -textView.adjustedContentInset.top
+    }
+    if shouldRevealSelectedRange {
+      logInitialRevealState(stage: "viewDidLayoutSubviews while reveal pending")
     }
     layoutNavigationBorderView()
   }
@@ -517,6 +604,7 @@ extension TextEditViewController: NSTextStorageDelegate {
   ) {
     guard editedMask.contains(.editedCharacters) else { return }
     MainActor.assumeIsolated {
+      clearTemporaryQuoteHighlight()
       delegate?.textEditViewControllerDidChangeContents(self)
     }
   }

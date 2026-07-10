@@ -139,11 +139,40 @@ public final class NotebookViewController: UISplitViewController {
   override public var canBecomeFirstResponder: Bool { true }
 
   private var isFirstAppearance = true
+  private var hasAppeared = false
+  private var pendingNoteNavigation: (noteIdentifier: Note.Identifier, selectedText: String)?
+
   override public func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
+    hasAppeared = true
     if isFirstAppearance {
       isFirstAppearance = false
       documentListViewController.becomeFirstResponder()
+    }
+    if let pendingNoteNavigation {
+      self.pendingNoteNavigation = nil
+      navigateToNoteAfterAppearance(
+        pendingNoteNavigation.noteIdentifier,
+        selectedText: pendingNoteNavigation.selectedText
+      )
+    }
+  }
+
+  func pushNoteWhenVisible(with noteIdentifier: Note.Identifier, selectedText: String) {
+    if hasAppeared {
+      navigateToNoteAfterAppearance(noteIdentifier, selectedText: selectedText)
+    } else {
+      pendingNoteNavigation = (noteIdentifier, selectedText)
+    }
+  }
+
+  private func navigateToNoteAfterAppearance(_ noteIdentifier: Note.Identifier, selectedText: String) {
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      Logger.shared.info(
+        "Navigating to widget quote after notebook appearance: isCollapsed=\(self.isCollapsed), horizontalSizeClass=\(String(describing: self.traitCollection.horizontalSizeClass))"
+      )
+      pushNote(with: noteIdentifier, selectedText: selectedText)
     }
   }
 
@@ -373,7 +402,21 @@ public extension NotebookViewController {
     do {
       let note = try database.note(noteIdentifier: noteIdentifier)
       let rawText = note.text ?? ""
-      let initialRange = selectedText.flatMap { (rawText as NSString).range(of: $0) }
+      let initialRange: NSRange?
+      if let selectedText {
+        let matchingRange = (rawText as NSString).range(of: selectedText)
+        if matchingRange.location == NSNotFound {
+          Logger.shared.warning("Could not find requested text in note \(noteIdentifier)")
+          initialRange = nil
+        } else {
+          Logger.shared.info(
+            "Found requested text in note \(noteIdentifier): rawTextLength=\((rawText as NSString).length), selectedTextLength=\((selectedText as NSString).length), range=\(matchingRange.location)..<\(matchingRange.upperBound)"
+          )
+          initialRange = matchingRange
+        }
+      } else {
+        initialRange = nil
+      }
       let noteViewController = SavingTextEditViewController(
         noteIdentifier: noteIdentifier,
         note: note,
