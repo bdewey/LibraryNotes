@@ -262,10 +262,14 @@ extension NSUserActivity {
       window.windowScene?.title = "Random Quotes"
     #endif
     Task {
-      let document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
-      let quotesViewController = QuotesViewController(database: document.database)
-      quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
-      window.rootViewController = UINavigationController(rootViewController: quotesViewController)
+      do {
+        let document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
+        let quotesViewController = QuotesViewController(database: document.database)
+        quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
+        window.rootViewController = UINavigationController(rootViewController: quotesViewController)
+      } catch {
+        Logger.shared.error("Error creating quotes view controller: \(error)")
+      }
     }
     return true
   }
@@ -296,27 +300,31 @@ extension NSUserActivity {
       window.windowScene?.titlebar?.toolbar = toolbar
     #endif
     Task {
-      let document: NoteDatabaseDocumentWrapper
-      if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
-        document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
-      } else {
-        throw CocoaError(CocoaError.fileReadUnsupportedScheme)
-      }
-      Logger.sceneDelegate.info("Using document at \(document.fileURL)")
-      let properties: [String: String] = [
-        "documentState": String(describing: document.documentState),
-      ]
-      Logger.sceneDelegate.info("In open completion handler. \(properties)")
-      let viewController = NotebookViewController(database: document.database)
-      viewController.modalPresentationStyle = .fullScreen
-      viewController.modalTransitionStyle = .crossDissolve
-      viewController.view.tintColor = .systemOrange
-      window.rootViewController = viewController
-      if let selection {
-        viewController.pushNoteWhenVisible(
-          with: selection.noteIdentifier,
-          selectedText: selection.selectedText
-        )
+      do {
+        let document: NoteDatabaseDocumentWrapper
+        if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
+          document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
+        } else {
+          throw CocoaError(CocoaError.fileReadUnsupportedScheme)
+        }
+        Logger.sceneDelegate.info("Using document at \(document.fileURL)")
+        let properties: [String: String] = [
+          "documentState": String(describing: document.documentState),
+        ]
+        Logger.sceneDelegate.info("In open completion handler. \(properties)")
+        let viewController = NotebookViewController(database: document.database)
+        viewController.modalPresentationStyle = .fullScreen
+        viewController.modalTransitionStyle = .crossDissolve
+        viewController.view.tintColor = .systemOrange
+        window.rootViewController = viewController
+        if let selection {
+          viewController.pushNoteWhenVisible(
+            with: selection.noteIdentifier,
+            selectedText: selection.selectedText
+          )
+        }
+      } catch {
+        Logger.shared.error("Error opening window: \(error)")
       }
     }
   }
@@ -334,24 +342,28 @@ extension NSUserActivity {
       }
     }
     Task {
-      let document = try await NoteDatabaseDocumentWrapper(fileURL: databaseURL, authorDescription: UIDevice.current.name)
-      let database = document.database
-      var noteIdentifiers: [Note.Identifier]?
-      switch studyTarget {
-      case .note(let identifier):
-        noteIdentifiers = [identifier]
-      case .focusStructure(let structureIdentifier):
-        for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
-          noteIdentifiers = noteIdentifierRecords.map(\.noteIdentifier)
-          break
+      do {
+        let document = try await NoteDatabaseDocumentWrapper(fileURL: databaseURL, authorDescription: UIDevice.current.name)
+        let database = document.database
+        var noteIdentifiers: [Note.Identifier]?
+        switch studyTarget {
+        case .note(let identifier):
+          noteIdentifiers = [identifier]
+        case .focusStructure(let structureIdentifier):
+          for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
+            noteIdentifiers = noteIdentifierRecords.map(\.noteIdentifier)
+            break
+          }
         }
+        guard let noteIdentifiers else { return }
+        let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
+        let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
+        studyViewController.view.backgroundColor = .grailBackground
+        window.rootViewController = studyViewController
+        self.studyWindow = window
+      } catch {
+        Logger.shared.error("Error configuring study session: \(error)")
       }
-      guard let noteIdentifiers else { return }
-      let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
-      let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
-      studyViewController.view.backgroundColor = .grailBackground
-      window.rootViewController = studyViewController
-      self.studyWindow = window
     }
     return true
   }

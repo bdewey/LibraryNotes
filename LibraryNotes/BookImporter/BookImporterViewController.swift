@@ -59,7 +59,7 @@ final class BookImporterViewController: UIViewController {
       } catch {
         Logger.shared.error("Error importing \(url): \(error)")
         let alertViewController = UIAlertController(title: "Error", message: "Unexpected error importing books from \(importRequest.item.lastPathComponent)", preferredStyle: .alert)
-        let okButton = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+        let okButton = UIAlertAction(title: "OK", style: .default) { [weak self = self] _ in
           self?.dismiss(animated: true)
         }
         alertViewController.addAction(okButton)

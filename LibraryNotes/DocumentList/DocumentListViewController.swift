@@ -395,19 +395,27 @@ final class DocumentListViewController: UIViewController {
 
   @objc func exportToZip() {
     Task {
-      let url = try await exportToZip()
-      let exportPicker = UIDocumentPickerViewController(forExporting: [url])
-      present(exportPicker, animated: true)
+      do {
+        let url = try await exportToZip()
+        let exportPicker = UIDocumentPickerViewController(forExporting: [url])
+        present(exportPicker, animated: true)
+      } catch {
+        Logger.shared.error("Error exporting to zip: \(error)")
+      }
     }
   }
 
   private func shareExportedZip() {
     Task {
-      let destinationURL = try await exportToZip()
-      let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
-      let popover = activityViewController.popoverPresentationController
-      popover?.barButtonItem = navigationItem.rightBarButtonItem
-      present(activityViewController, animated: true)
+      do {
+        let destinationURL = try await exportToZip()
+        let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
+        let popover = activityViewController.popoverPresentationController
+        popover?.barButtonItem = navigationItem.rightBarButtonItem
+        present(activityViewController, animated: true)
+      } catch {
+        Logger.shared.error("Error exporting to zip: \(error)")
+      }
     }
   }
 
