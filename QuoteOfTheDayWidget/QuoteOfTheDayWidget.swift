@@ -341,9 +341,11 @@ struct QuoteOfTheDayWidgetView: View {
     if widgetFamily == .systemLarge || widgetFamily == .systemExtraLarge {
       return true
     }
-    if #available(iOS 27.0, *), widgetFamily == .systemExtraLargePortrait {
-      return true
-    }
+    #if compiler(>=6.4)
+      if #available(iOS 27.0, *), widgetFamily == .systemExtraLargePortrait {
+        return true
+      }
+    #endif
     return false
   }
 
@@ -366,9 +368,11 @@ struct QuoteOfTheDayWidget: Widget {
 
   private var supportedFamilies: [WidgetFamily] {
     var families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge]
-    if #available(iOS 27.0, *) {
-      families.append(.systemExtraLargePortrait)
-    }
+    #if compiler(>=6.4)
+      if #available(iOS 27.0, *) {
+        families.append(.systemExtraLargePortrait)
+      }
+    #endif
     return families
   }
 }
