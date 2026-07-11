@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.0.0.114] -- 2026-07-11
+
+### Added
+
+* Added a configurable Quote of the Day widget with daily or hourly rotation
+
+### Fixed
+
+* Fixed build compatibility with Xcode 26
+
 ## [3.0.0.113] -- 2026-07-04
 
 ### Fixed
