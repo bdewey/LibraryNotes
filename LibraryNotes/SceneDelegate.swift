@@ -20,6 +20,9 @@ enum LibraryNotesActivityType: String {
 
   /// Show random quotes
   case showRandomQuotes = "org.brians-brain.LibraryNotes.RandomQuotes"
+
+  /// Open the preferred library at a quote selected by the widget.
+  case quoteOfTheDay = "org.brians-brain.LibraryNotes.QuoteOfTheDay"
 }
 
 extension NSUserActivity {
@@ -27,6 +30,8 @@ extension NSUserActivity {
     static let documentURL = "org.brians-brain.GrailDiary.OpenNotebook.URL"
     static let focusStructure = "org.brians-brain.LibraryNotes.FocusStructure"
     static let quoteIdentifiers = "org.brians-brain.LibraryNotes.QuoteIdentifiers"
+    static let noteIdentifier = "org.brians-brain.LibraryNotes.NoteIdentifier"
+    static let selectedText = "org.brians-brain.LibraryNotes.SelectedText"
   }
 
   /// A "thing" that can be studied in a notebook.
@@ -125,6 +130,39 @@ extension NSUserActivity {
     ])
     return activity
   }
+
+  static func quoteOfTheDay(url: URL, store: QuoteWidgetStore = QuoteWidgetStore()) throws -> NSUserActivity {
+    let deepLink = try QuoteWidgetDeepLink(url: url)
+    let bookmarkData = try store.preferredLibraryBookmarkData()
+    let activity = NSUserActivity(activityType: LibraryNotesActivityType.quoteOfTheDay.rawValue)
+    activity.title = "Quote of the Day"
+    var userInfo: [String: Any] = [UserInfoKey.documentURL: bookmarkData]
+    if let candidate = try? store.readCandidates().first(where: {
+      $0.noteId == deepLink.noteId && $0.quoteKey == deepLink.quoteKey
+    }) {
+      Logger.sceneDelegate.info(
+        "Resolved widget quote: note=\(candidate.noteId), quoteKey=\(candidate.quoteKey), selectedTextLength=\(candidate.selectedText.utf16.count)"
+      )
+      userInfo[UserInfoKey.noteIdentifier] = candidate.noteId
+      userInfo[UserInfoKey.selectedText] = candidate.selectedText
+    } else {
+      Logger.sceneDelegate.warning(
+        "Widget quote was not found in the cache: note=\(deepLink.noteId), quoteKey=\(deepLink.quoteKey); opening the library without a selection"
+      )
+    }
+    activity.addUserInfoEntries(from: userInfo)
+    return activity
+  }
+
+  var quoteOfTheDaySelection: (noteIdentifier: Note.Identifier, selectedText: String)? {
+    guard
+      let noteIdentifier = userInfo?[UserInfoKey.noteIdentifier] as? String,
+      let selectedText = userInfo?[UserInfoKey.selectedText] as? String
+    else {
+      return nil
+    }
+    return (noteIdentifier, selectedText)
+  }
 }
 
 @objc final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
@@ -152,14 +190,26 @@ extension NSUserActivity {
     let window = UIWindow(windowScene: windowScene)
     var isConfigured = false
 
-    if let stateRestorationActivity = session.stateRestorationActivity {
-      Logger.sceneDelegate.debug("Attempting to restore state activity: \(stateRestorationActivity.activityType)")
-      isConfigured = isConfigured || configureWindow(window, userActivity: stateRestorationActivity)
-    }
     for userActivity in connectionOptions.userActivities {
       Logger.sceneDelegate.trace("Will consider connectionOptions.userActivity \(userActivity.activityType), isConfigured = \(isConfigured)")
       isConfigured = isConfigured || configureWindow(window, userActivity: userActivity)
       Logger.sceneDelegate.debug("Did consider connectionOptions.userActivity \(userActivity.activityType), isConfigured = \(isConfigured)")
+    }
+    for urlContext in connectionOptions.urlContexts where !isConfigured {
+      do {
+        let activity = if urlContext.url.scheme?.lowercased() == QuoteWidgetDeepLink.scheme {
+          try NSUserActivity.quoteOfTheDay(url: urlContext.url)
+        } else {
+          try NSUserActivity.openLibrary(at: urlContext.url)
+        }
+        isConfigured = configureWindow(window, userActivity: activity)
+      } catch {
+        Logger.sceneDelegate.error("Could not handle incoming URL: \(error.localizedDescription)")
+      }
+    }
+    if !isConfigured, let stateRestorationActivity = session.stateRestorationActivity {
+      Logger.sceneDelegate.debug("Attempting to restore state activity: \(stateRestorationActivity.activityType)")
+      isConfigured = configureWindow(window, userActivity: stateRestorationActivity)
     }
 
     if !isConfigured {
@@ -192,7 +242,15 @@ extension NSUserActivity {
       return configureStudySessionWindow(window, userActivity: userActivity)
     case .showRandomQuotes:
       return configureQuotesWindow(window, userActivity: userActivity)
+    case .quoteOfTheDay:
+      return configureQuoteOfTheDayWindow(window, userActivity: userActivity)
     }
+  }
+
+  func configureQuoteOfTheDayWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {
+    guard let url = try? userActivity.libraryURL else { return false }
+    configureLibraryWindow(window, url: url, selection: userActivity.quoteOfTheDaySelection)
+    return true
   }
 
   func configureQuotesWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {
@@ -204,10 +262,14 @@ extension NSUserActivity {
       window.windowScene?.title = "Random Quotes"
     #endif
     Task {
-      let document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
-      let quotesViewController = QuotesViewController(database: document.database)
-      quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
-      window.rootViewController = UINavigationController(rootViewController: quotesViewController)
+      do {
+        let document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
+        let quotesViewController = QuotesViewController(database: document.database)
+        quotesViewController.quoteIdentifiers = try userActivity.quoteIdentifiers
+        window.rootViewController = UINavigationController(rootViewController: quotesViewController)
+      } catch {
+        Logger.shared.error("Error creating quotes view controller: \(error)")
+      }
     }
     return true
   }
@@ -216,6 +278,15 @@ extension NSUserActivity {
     guard let url = try? userActivity.libraryURL else {
       return false
     }
+    configureLibraryWindow(window, url: url)
+    return true
+  }
+
+  private func configureLibraryWindow(
+    _ window: UIWindow,
+    url: URL,
+    selection: (noteIdentifier: Note.Identifier, selectedText: String)? = nil
+  ) {
     Logger.sceneDelegate.info("Opening document at \"\(url.path)\"")
     #if targetEnvironment(macCatalyst)
       window.windowScene?.title = url.deletingPathExtension().lastPathComponent
@@ -229,24 +300,33 @@ extension NSUserActivity {
       window.windowScene?.titlebar?.toolbar = toolbar
     #endif
     Task {
-      let document: NoteDatabaseDocumentWrapper
-      if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
-        document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
-      } else {
-        throw CocoaError(CocoaError.fileReadUnsupportedScheme)
+      do {
+        let document: NoteDatabaseDocumentWrapper
+        if url.pathExtension == UTType.libnotes.preferredFilenameExtension || url.pathExtension == "kvcrdt" {
+          document = try await NoteDatabaseDocumentWrapper(fileURL: url, authorDescription: UIDevice.current.name)
+        } else {
+          throw CocoaError(CocoaError.fileReadUnsupportedScheme)
+        }
+        Logger.sceneDelegate.info("Using document at \(document.fileURL)")
+        let properties: [String: String] = [
+          "documentState": String(describing: document.documentState),
+        ]
+        Logger.sceneDelegate.info("In open completion handler. \(properties)")
+        let viewController = NotebookViewController(database: document.database)
+        viewController.modalPresentationStyle = .fullScreen
+        viewController.modalTransitionStyle = .crossDissolve
+        viewController.view.tintColor = .systemOrange
+        window.rootViewController = viewController
+        if let selection {
+          viewController.pushNoteWhenVisible(
+            with: selection.noteIdentifier,
+            selectedText: selection.selectedText
+          )
+        }
+      } catch {
+        Logger.shared.error("Error opening window: \(error)")
       }
-      Logger.sceneDelegate.info("Using document at \(document.fileURL)")
-      let properties: [String: String] = [
-        "documentState": String(describing: document.documentState),
-      ]
-      Logger.sceneDelegate.info("In open completion handler. \(properties)")
-      let viewController = NotebookViewController(database: document.database)
-      viewController.modalPresentationStyle = .fullScreen
-      viewController.modalTransitionStyle = .crossDissolve
-      viewController.view.tintColor = .systemOrange
-      window.rootViewController = viewController
     }
-    return true
   }
 
   func configureStudySessionWindow(_ window: UIWindow, userActivity: NSUserActivity) -> Bool {
@@ -262,24 +342,28 @@ extension NSUserActivity {
       }
     }
     Task {
-      let document = try await NoteDatabaseDocumentWrapper(fileURL: databaseURL, authorDescription: UIDevice.current.name)
-      let database = document.database
-      var noteIdentifiers: [Note.Identifier]?
-      switch studyTarget {
-      case .note(let identifier):
-        noteIdentifiers = [identifier]
-      case .focusStructure(let structureIdentifier):
-        for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
-          noteIdentifiers = noteIdentifierRecords.map(\.noteIdentifier)
-          break
+      do {
+        let document = try await NoteDatabaseDocumentWrapper(fileURL: databaseURL, authorDescription: UIDevice.current.name)
+        let database = document.database
+        var noteIdentifiers: [Note.Identifier]?
+        switch studyTarget {
+        case .note(let identifier):
+          noteIdentifiers = [identifier]
+        case .focusStructure(let structureIdentifier):
+          for try await noteIdentifierRecords in database.noteIdentifiersPublisher(structureIdentifier: structureIdentifier, sortOrder: .creationTimestamp, groupByYearRead: false, searchTerm: nil).values {
+            noteIdentifiers = noteIdentifierRecords.map(\.noteIdentifier)
+            break
+          }
         }
+        guard let noteIdentifiers else { return }
+        let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
+        let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
+        studyViewController.view.backgroundColor = .grailBackground
+        window.rootViewController = studyViewController
+        self.studyWindow = window
+      } catch {
+        Logger.shared.error("Error configuring study session: \(error)")
       }
-      guard let noteIdentifiers else { return }
-      let studySession = try database.studySession(noteIdentifiers: Set(noteIdentifiers), date: .now).shuffling().ensuringUniquePromptCollections().limiting(to: 20)
-      let studyViewController = StudyViewController(studySession: studySession, database: database, delegate: self)
-      studyViewController.view.backgroundColor = .grailBackground
-      window.rootViewController = studyViewController
-      self.studyWindow = window
     }
     return true
   }
@@ -290,11 +374,21 @@ extension NSUserActivity {
       return
     }
     do {
-      let activity = try NSUserActivity.openLibrary(at: urlContext.url)
-      Logger.sceneDelegate.info("\(#function) Creating new scene to open \(urlContext.url)")
-      UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil)
+      if urlContext.url.scheme?.lowercased() == QuoteWidgetDeepLink.scheme {
+        guard let window else {
+          Logger.sceneDelegate.error("\(#function): The current scene does not have a window")
+          return
+        }
+        let activity = try NSUserActivity.quoteOfTheDay(url: urlContext.url)
+        Logger.sceneDelegate.info("\(#function) Opening quote in the current scene: \(urlContext.url)")
+        _ = configureWindow(window, userActivity: activity)
+      } else {
+        let activity = try NSUserActivity.openLibrary(at: urlContext.url)
+        Logger.sceneDelegate.info("\(#function) Creating new scene to open \(urlContext.url)")
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil)
+      }
     } catch {
-      Logger.sceneDelegate.error("\(#function): Error creating openLibrary activity: \(error)")
+      Logger.sceneDelegate.error("\(#function): Error handling URL: \(error)")
     }
   }
 

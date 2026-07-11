@@ -10,6 +10,14 @@ public struct AttributedQuote: Identifiable, Hashable, Sendable {
   public var title: String
   public var thumbnailImage: Data?
 
+  public init(noteId: String, key: String, text: String, title: String, thumbnailImage: Data? = nil) {
+    self.noteId = noteId
+    self.key = key
+    self.text = text
+    self.title = title
+    self.thumbnailImage = thumbnailImage
+  }
+
   public static func == (lhs: AttributedQuote, rhs: AttributedQuote) -> Bool {
     lhs.id == rhs.id
   }

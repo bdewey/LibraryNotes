@@ -5,6 +5,5 @@ xcuserdata
 GrailDiary.xcodeproj/xcuserdata/brian.xcuserdatad/xcschemes/xcschememanagement.plist
 *.grail
 *.js
-/LibraryNotesCore/.build
-/dogeared/.build
+.build/
 /TestData

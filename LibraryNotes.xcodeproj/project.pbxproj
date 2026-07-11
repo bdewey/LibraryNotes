@@ -100,6 +100,11 @@
 		D40000000000000000000048 /* NoteDatabaseDocumentWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000011 /* NoteDatabaseDocumentWrapper.swift */; };
 		D40000000000000000000049 /* PromptRendering.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40000000000000000000012 /* PromptRendering.swift */; };
 		D40100000000000000000003 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40100000000000000000002 /* LibraryNotesCore */; };
+		D40200000000000000000001 /* QuoteOfTheDayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40200000000000000000003 /* QuoteOfTheDayWidget.swift */; };
+		D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		D40400000000000000000001 /* LibraryNotesCore in Frameworks */ = {isa = PBXBuildFile; productRef = D40400000000000000000003 /* LibraryNotesCore */; };
+		D40300000000000000000003 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000002 /* LibraryNotesUI */; };
+		D40300000000000000000005 /* LibraryNotesUI in Frameworks */ = {isa = PBXBuildFile; productRef = D40300000000000000000004 /* LibraryNotesUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -109,6 +114,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D3DC5EBE20EC9B0100F0B74B;
 			remoteInfo = CommonplaceBookApp;
+		};
+		D4020000000000000000000F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3DC5EB720EC9B0100F0B74B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D4020000000000000000000A;
+			remoteInfo = QuoteOfTheDayWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -129,6 +141,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				D40200000000000000000002 /* QuoteOfTheDayWidget.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -230,6 +243,11 @@
 		D40000000000000000000011 /* NoteDatabaseDocumentWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NoteDatabaseDocumentWrapper.swift; path = LibraryNotes/KVCRDT/NoteDatabaseDocumentWrapper.swift; sourceTree = SOURCE_ROOT; };
 		D40000000000000000000012 /* PromptRendering.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PromptRendering.swift; path = LibraryNotes/PromptRendering.swift; sourceTree = SOURCE_ROOT; };
 		D40100000000000000000001 /* LibraryNotesCore */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LibraryNotesCore; sourceTree = "<group>"; };
+		D40200000000000000000003 /* QuoteOfTheDayWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteOfTheDayWidget.swift; sourceTree = "<group>"; };
+		D40200000000000000000004 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D40200000000000000000005 /* QuoteOfTheDayWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		D40400000000000000000002 /* QuoteOfTheDayWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidget.entitlements; sourceTree = "<group>"; };
+		D40300000000000000000001 /* LibraryNotesUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = LibraryNotesUI; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +256,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D40100000000000000000003 /* LibraryNotesCore in Frameworks */,
+				D40300000000000000000003 /* LibraryNotesUI in Frameworks */,
 				D3DAF6022777936D0055FA5F /* Algorithms in Frameworks */,
 				D37FF2B726BDE2A500E06747 /* KeyValueCRDT in Frameworks */,
 				D3C1F403210E5AC400F92E85 /* CoreServices.framework in Frameworks */,
@@ -255,6 +274,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D40200000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D40400000000000000000001 /* LibraryNotesCore in Frameworks */,
+				D40300000000000000000005 /* LibraryNotesUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -345,10 +373,12 @@
 			isa = PBXGroup;
 			children = (
 				D40100000000000000000001 /* LibraryNotesCore */,
+				D40300000000000000000001 /* LibraryNotesUI */,
 				D3558D7825D9AFB700746600 /* Api.xcconfig */,
 				D311774925A4B67600E473FD /* README.md */,
 				D311774725A4B64900E473FD /* Content */,
 				D3DC5EC120EC9B0100F0B74B /* LibraryNotes */,
+				D40200000000000000000006 /* QuoteOfTheDayWidget */,
 				D3DC5ED820EC9B0200F0B74B /* LibraryNotesTests */,
 				D3DC5EC020EC9B0100F0B74B /* Products */,
 				0D695C07C08EFF8CC9D9B854 /* Frameworks */,
@@ -362,6 +392,7 @@
 			isa = PBXGroup;
 			children = (
 				D3DC5EBF20EC9B0100F0B74B /* Dogeared Notes.app */,
+				D40200000000000000000005 /* QuoteOfTheDayWidget.appex */,
 				D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */,
 			);
 			name = Products;
@@ -451,6 +482,16 @@
 			path = LibraryNotesTests;
 			sourceTree = "<group>";
 		};
+		D40200000000000000000006 /* QuoteOfTheDayWidget */ = {
+			isa = PBXGroup;
+			children = (
+				D40200000000000000000003 /* QuoteOfTheDayWidget.swift */,
+				D40200000000000000000004 /* Info.plist */,
+				D40400000000000000000002 /* QuoteOfTheDayWidget.entitlements */,
+			);
+			path = QuoteOfTheDayWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -467,6 +508,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				D4020000000000000000000E /* PBXTargetDependency */,
 			);
 			name = DogearedNotes;
 			packageProductDependencies = (
@@ -480,6 +522,7 @@
 				D3DAF6012777936D0055FA5F /* Algorithms */,
 				D31335B62B3606A100F97066 /* GRDB */,
 				D40100000000000000000002 /* LibraryNotesCore */,
+				D40300000000000000000002 /* LibraryNotesUI */,
 			);
 			productName = CommonplaceBookApp;
 			productReference = D3DC5EBF20EC9B0100F0B74B /* Dogeared Notes.app */;
@@ -504,6 +547,27 @@
 			productName = CommonplaceBookAppTests;
 			productReference = D3DC5ED520EC9B0200F0B74B /* CommonplaceBookAppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D4020000000000000000000A /* QuoteOfTheDayWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4020000000000000000000B /* Build configuration list for PBXNativeTarget "QuoteOfTheDayWidget" */;
+			buildPhases = (
+				D40200000000000000000008 /* Sources */,
+				D40200000000000000000007 /* Frameworks */,
+				D40200000000000000000009 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = QuoteOfTheDayWidget;
+			packageProductDependencies = (
+				D40400000000000000000003 /* LibraryNotesCore */,
+				D40300000000000000000004 /* LibraryNotesUI */,
+			);
+			productName = QuoteOfTheDayWidget;
+			productReference = D40200000000000000000005 /* QuoteOfTheDayWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -533,6 +597,9 @@
 						LastSwiftMigration = 1520;
 						TestTargetID = D3DC5EBE20EC9B0100F0B74B;
 					};
+					D4020000000000000000000A = {
+						CreatedOnToolsVersion = 16.0;
+					};
 				};
 			};
 			buildConfigurationList = D3DC5EBA20EC9B0100F0B74B /* Build configuration list for PBXProject "LibraryNotes" */;
@@ -560,6 +627,7 @@
 			projectRoot = "";
 			targets = (
 				D3DC5EBE20EC9B0100F0B74B /* DogearedNotes */,
+				D4020000000000000000000A /* QuoteOfTheDayWidget */,
 				D3DC5ED420EC9B0200F0B74B /* CommonplaceBookAppTests */,
 			);
 		};
@@ -583,6 +651,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3C6113A271748C2007F8732 /* library.libnotes in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D40200000000000000000009 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -679,6 +754,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D40200000000000000000008 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D40200000000000000000001 /* QuoteOfTheDayWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -686,6 +769,12 @@
 			isa = PBXTargetDependency;
 			target = D3DC5EBE20EC9B0100F0B74B /* DogearedNotes */;
 			targetProxy = D3DC5ED620EC9B0200F0B74B /* PBXContainerItemProxy */;
+		};
+		D4020000000000000000000E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = D4020000000000000000000A /* QuoteOfTheDayWidget */;
+			targetProxy = D4020000000000000000000F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -952,6 +1041,65 @@
 			};
 			name = Release;
 		};
+		D4020000000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidget/QuoteOfTheDayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 113;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.QuoteOfTheDayWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D4020000000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidget/QuoteOfTheDayWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 113;
+				DEVELOPMENT_TEAM = K2UU8WDD8H;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "org.brians-brain.CommonplaceBookApp.QuoteOfTheDayWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -978,6 +1126,15 @@
 			buildConfigurations = (
 				D3DC5EE220EC9B0200F0B74B /* Debug */,
 				D3DC5EE320EC9B0200F0B74B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4020000000000000000000B /* Build configuration list for PBXNativeTarget "QuoteOfTheDayWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4020000000000000000000C /* Debug */,
+				D4020000000000000000000D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1108,6 +1265,18 @@
 		D40100000000000000000002 /* LibraryNotesCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = LibraryNotesCore;
+		};
+		D40400000000000000000003 /* LibraryNotesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesCore;
+		};
+		D40300000000000000000002 /* LibraryNotesUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesUI;
+		};
+		D40300000000000000000004 /* LibraryNotesUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = LibraryNotesUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

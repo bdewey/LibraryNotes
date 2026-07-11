@@ -12,6 +12,7 @@ import SafariServices
 import SnapKit
 import UIKit
 import UniformTypeIdentifiers
+import WidgetKit
 import ZIPFoundation
 
 /// Implements a filterable list of documents in an interactive notebook.
@@ -394,19 +395,27 @@ final class DocumentListViewController: UIViewController {
 
   @objc func exportToZip() {
     Task {
-      let url = try await exportToZip()
-      let exportPicker = UIDocumentPickerViewController(forExporting: [url])
-      present(exportPicker, animated: true)
+      do {
+        let url = try await exportToZip()
+        let exportPicker = UIDocumentPickerViewController(forExporting: [url])
+        present(exportPicker, animated: true)
+      } catch {
+        Logger.shared.error("Error exporting to zip: \(error)")
+      }
     }
   }
 
   private func shareExportedZip() {
     Task {
-      let destinationURL = try await exportToZip()
-      let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
-      let popover = activityViewController.popoverPresentationController
-      popover?.barButtonItem = navigationItem.rightBarButtonItem
-      present(activityViewController, animated: true)
+      do {
+        let destinationURL = try await exportToZip()
+        let activityViewController = UIActivityViewController(activityItems: [destinationURL], applicationActivities: nil)
+        let popover = activityViewController.popoverPresentationController
+        popover?.barButtonItem = navigationItem.rightBarButtonItem
+        present(activityViewController, animated: true)
+      } catch {
+        Logger.shared.error("Error exporting to zip: \(error)")
+      }
     }
   }
 
@@ -509,6 +518,7 @@ extension DocumentListViewController {
       openCommand,
       reviewAction,
       quotesAction,
+      makePreferredLibraryAction,
       exportMenu,
       importLibraryThingAction,
       sendFeedbackAction,
@@ -545,6 +555,40 @@ extension DocumentListViewController {
     UIAction(title: "Random Quotes", image: UIImage(systemName: "text.quote")) { [weak self] _ in
       self?.showRandomQuotes()
     }
+  }
+
+  private var makePreferredLibraryAction: UIAction {
+    UIAction(title: "Make Preferred Library", image: UIImage(systemName: "star")) { [weak self] _ in
+      self?.makePreferredLibrary()
+    }
+  }
+
+  private func makePreferredLibrary() {
+    Task {
+      do {
+        let stats = try await publishPreferredLibraryForQuoteWidget()
+        let title = database.fileURL.deletingPathExtension().lastPathComponent
+        showAlert(
+          title: "Preferred Library Set",
+          message: "\(title) will be used for Quote of the Day. Cached \(stats.quoteCount) quotes and \(stats.coverCount) covers."
+        )
+      } catch {
+        Logger.shared.error("Error setting preferred library: \(error)")
+        showAlert(message: "Could not make this the preferred library: \(error.localizedDescription)")
+      }
+    }
+  }
+
+  private func publishPreferredLibraryForQuoteWidget() async throws -> QuoteWidgetPublication {
+    let store = QuoteWidgetStore()
+    let publication = try await QuoteWidgetPublisher(store: store).publish(from: database)
+    let databaseByteCount = try publication.databaseURL.map { try Data(contentsOf: $0).count } ?? 0
+    try store.writePreferredLibraryBookmark(for: database.fileURL, displayName: publication.sourceLibraryDisplayName)
+    WidgetCenter.shared.reloadTimelines(ofKind: "QuoteOfTheDayWidget")
+    Logger.shared.info(
+      "Published Quote of the Day database for \(publication.sourceLibraryDisplayName, privacy: .public): quotes=\(publication.quoteCount), covers=\(publication.coverCount), firstCoverBytes=\(publication.firstCoverByteCount), databaseBytes=\(databaseByteCount), databaseURL=\(publication.databaseURL?.path ?? "nil", privacy: .public)"
+    )
+    return publication
   }
 
   @objc func showRandomQuotes() {
@@ -736,7 +780,15 @@ extension DocumentListViewController: DocumentTableControllerDelegate {
   }
 
   func showAlert(_ alertMessage: String) {
-    let alert = UIAlertController(title: "Oops", message: alertMessage, preferredStyle: .alert)
+    showAlert(message: alertMessage)
+  }
+
+  func showAlert(message: String) {
+    showAlert(title: "Oops", message: message)
+  }
+
+  func showAlert(title: String, message: String) {
+    let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
     present(alert, animated: true, completion: nil)
   }

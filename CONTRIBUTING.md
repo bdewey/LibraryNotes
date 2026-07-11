@@ -25,10 +25,13 @@ Open `LibraryNotes.xcodeproj` in Xcode and use the shared `Dogeared Notes` schem
 Useful command-line checks:
 
 ```sh
-xcodebuild -scheme "Dogeared Notes" -project LibraryNotes.xcodeproj build
+xcodebuild -scheme "Dogeared Notes" -project LibraryNotes.xcodeproj -destination 'generic/platform=iOS' build
+xcodebuild -scheme "Dogeared Notes" -project LibraryNotes.xcodeproj -destination 'generic/platform=macOS,variant=Mac Catalyst' build
 swift test --package-path LibraryNotesCore
 swift build --package-path dogeared
 ```
+
+For app changes, run both Xcode builds so regressions in either the iOS or Mac Catalyst product are caught before handoff.
 
 The Xcode project also contains a shared `uitesting` scheme for UI-oriented checks.
 
