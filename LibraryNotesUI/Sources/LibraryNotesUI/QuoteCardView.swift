@@ -2,6 +2,7 @@
 
 import ImageIO
 import SwiftUI
+import WidgetKit
 
 #if canImport(UIKit)
   import UIKit
@@ -14,15 +15,27 @@ public enum QuoteCardDisplayMode: Sendable {
   case share
   case widgetSmall
   case widgetMedium
+  case widgetLarge
 }
 
 public struct QuoteCardView: View {
   private let model: QuoteDisplayModel
   private let mode: QuoteCardDisplayMode
+  private let accessory: AnyView?
 
-  public init(model: QuoteDisplayModel, mode: QuoteCardDisplayMode = .list) {
+  @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+  @ScaledMetric(relativeTo: .headline) private var widgetQuoteFontSize = 17
+  @ScaledMetric(relativeTo: .headline) private var widgetAttributionFontSize = 12
+  @ScaledMetric(relativeTo: .title3) private var largeWidgetQuoteFontSize = 20
+
+  public init(
+    model: QuoteDisplayModel,
+    mode: QuoteCardDisplayMode = .list,
+    accessory: AnyView? = nil
+  ) {
     self.model = model
     self.mode = mode
+    self.accessory = accessory
   }
 
   public var body: some View {
@@ -35,6 +48,8 @@ public struct QuoteCardView: View {
       compactWidgetBody
     case .widgetMedium:
       mediumWidgetBody
+    case .widgetLarge:
+      largeWidgetBody
     }
   }
 
@@ -42,7 +57,6 @@ public struct QuoteCardView: View {
     HStack(alignment: .top, spacing: 8) {
       if let image = thumbnailImage(maxPixelSize: 320) {
         imageView(image)
-          .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(maxWidth: 160, alignment: .top)
           .containerRelativeFrame(.horizontal, count: 4, spacing: 8)
@@ -58,7 +72,6 @@ public struct QuoteCardView: View {
     HStack(alignment: .top, spacing: 8) {
       if let image = thumbnailImage(maxPixelSize: 320) {
         imageView(image)
-          .resizable()
           .aspectRatio(contentMode: .fit)
           .frame(width: 140)
           .accessibilityHidden(true)
@@ -70,21 +83,103 @@ public struct QuoteCardView: View {
   }
 
   private var compactWidgetBody: some View {
-    textStack(quoteLineLimit: 5, attributionLineLimit: 2)
-      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    VStack(alignment: .leading, spacing: 8) {
+      Text(model.attributedQuoteText)
+        .font(.system(size: widgetQuoteFontSize, weight: .semibold, design: .serif))
+        .lineLimit(5)
+        .minimumScaleFactor(0.85)
+        .fixedSize(horizontal: false, vertical: true)
+
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        if !model.attributionText.isEmpty {
+          Text(model.attributedAttributionText)
+            .font(.system(size: widgetAttributionFontSize))
+            .foregroundStyle(.primary)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+        }
+
+        Spacer(minLength: 0)
+
+        accessory
+      }
+
+      Spacer(minLength: 0)
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
   }
 
   private var mediumWidgetBody: some View {
-    HStack(alignment: .top, spacing: 8) {
+    HStack(alignment: .top, spacing: 12) {
       if let image = thumbnailImage(maxPixelSize: 160) {
         imageView(image)
-          .resizable()
           .aspectRatio(contentMode: .fit)
-          .frame(width: 58)
+          .frame(width: 88)
+          .frame(maxHeight: .infinity, alignment: .top)
           .accessibilityHidden(true)
       }
 
-      textStack(quoteLineLimit: 4, attributionLineLimit: 2)
+      mediumWidgetTextStack
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+
+  private var mediumWidgetTextStack: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text(model.attributedQuoteText)
+        .font(.system(size: widgetQuoteFontSize, weight: .semibold, design: .serif))
+        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 6 : 5)
+        .minimumScaleFactor(0.85)
+        .fixedSize(horizontal: false, vertical: true)
+
+      Spacer(minLength: 4)
+
+      HStack(alignment: .firstTextBaseline, spacing: 8) {
+        if !model.attributionText.isEmpty {
+          Text(model.attributedAttributionText)
+            .font(.system(size: widgetAttributionFontSize))
+            .foregroundStyle(.primary)
+            .lineLimit(2)
+            .minimumScaleFactor(0.85)
+        }
+
+        Spacer(minLength: 0)
+
+        accessory
+      }
+    }
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+  }
+
+  private var largeWidgetBody: some View {
+    VStack(alignment: .leading, spacing: 18) {
+      HStack(alignment: .bottom, spacing: 14) {
+        if let image = thumbnailImage(maxPixelSize: 240) {
+          imageView(image)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 96, height: 144)
+            .accessibilityHidden(true)
+        }
+
+        if !model.attributionText.isEmpty {
+          Text(model.attributedAttributionText)
+            .font(.system(size: widgetAttributionFontSize))
+            .foregroundStyle(.secondary)
+            .lineLimit(3)
+        }
+
+        Spacer(minLength: 0)
+
+        accessory
+      }
+
+      Text(model.attributedQuoteText)
+        .font(.system(size: largeWidgetQuoteFontSize, weight: .semibold, design: .serif))
+        .lineLimit(dynamicTypeSize.isAccessibilitySize ? 12 : 9)
+        .minimumScaleFactor(0.9)
+        .fixedSize(horizontal: false, vertical: true)
+
+      Spacer(minLength: 0)
     }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
   }
@@ -108,11 +203,26 @@ public struct QuoteCardView: View {
     .frame(maxWidth: .infinity, alignment: .leading)
   }
 
-  private func imageView(_ image: PlatformImage) -> Image {
+  @ViewBuilder
+  private func imageView(_ image: PlatformImage) -> some View {
     #if canImport(UIKit)
-      Image(uiImage: image)
+      if #available(iOS 18.0, *) {
+        Image(uiImage: image)
+          .resizable()
+          .widgetAccentedRenderingMode(.fullColor)
+      } else {
+        Image(uiImage: image)
+          .resizable()
+      }
     #else
-      Image(nsImage: image)
+      if #available(macOS 15.0, *) {
+        Image(nsImage: image)
+          .resizable()
+          .widgetAccentedRenderingMode(.fullColor)
+      } else {
+        Image(nsImage: image)
+          .resizable()
+      }
     #endif
   }
 
@@ -123,8 +233,10 @@ public struct QuoteCardView: View {
 
   private var shouldShowCoverImage: Bool {
     switch mode {
-    case .list, .share, .widgetMedium:
+    case .list, .share:
       true
+    case .widgetMedium, .widgetLarge:
+      !dynamicTypeSize.isAccessibilitySize
     case .widgetSmall:
       false
     }

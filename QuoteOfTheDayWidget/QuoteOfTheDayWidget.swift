@@ -5,6 +5,7 @@ import LibraryNotesCore
 import LibraryNotesUI
 import os
 import SwiftUI
+import UIKit
 import WidgetKit
 
 private extension Logger {
@@ -175,7 +176,8 @@ struct QuoteOfTheDayProvider: AppIntentTimelineProvider {
     date: Date,
     key: String,
     quoteText: String,
-    attributionText: String
+    attributionText: String,
+    thumbnailImage: Data? = nil
   ) -> QuoteOfTheDayEntry {
     QuoteOfTheDayEntry(
       date: date,
@@ -184,7 +186,8 @@ struct QuoteOfTheDayProvider: AppIntentTimelineProvider {
         noteId: "timeline-\(key)",
         key: key,
         quoteText: quoteText,
-        attributionText: attributionText
+        attributionText: attributionText,
+        thumbnailImage: thumbnailImage
       ),
       refreshSchedule: .daily,
       widgetIdentifier: "preview",
@@ -284,42 +287,69 @@ struct QuoteOfTheDayWidgetView: View {
   @Environment(\.widgetFamily) private var widgetFamily
 
   var body: some View {
-    ZStack(alignment: .bottomTrailing) {
-      QuoteCardView(model: entry.quote, mode: displayMode)
-        .padding(12)
-        .padding(.bottom, entry.canRequestNewQuote ? 24 : 0)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    widgetContent
+      .containerBackground(Color.grailBackground, for: .widget)
+      .widgetURL(deepLinkURL)
+      .redacted(reason: entry.state == .placeholder ? .placeholder : [])
+  }
 
-      if entry.canRequestNewQuote {
-        Button(intent: NewQuoteIntent(
-          refreshSchedule: entry.refreshSchedule,
-          widgetIdentifier: entry.widgetIdentifier
-        )) {
-          Image(systemName: "arrow.clockwise")
-            .font(.caption.weight(.semibold))
-        }
-        .buttonStyle(.plain)
-        .padding(12)
-        .accessibilityLabel("New quote")
-      }
+  @ViewBuilder
+  private var widgetContent: some View {
+    if isLargeWidget {
+      QuoteCardView(
+        model: entry.quote,
+        mode: .widgetLarge,
+        accessory: refreshAccessory
+      )
+      .padding(20)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    } else if widgetFamily == .systemMedium {
+      QuoteCardView(
+        model: entry.quote,
+        mode: .widgetMedium,
+        accessory: refreshAccessory
+      )
+      .padding(12)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    } else {
+      QuoteCardView(
+        model: entry.quote,
+        mode: .widgetSmall,
+        accessory: refreshAccessory
+      )
+      .padding(12)
+      .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
-    .containerBackground(Color.grailBackground, for: .widget)
-    .widgetURL(deepLinkURL)
-    .redacted(reason: entry.state == .placeholder ? .placeholder : [])
+  }
+
+  private var refreshAccessory: AnyView? {
+    guard entry.canRequestNewQuote else { return nil }
+    return AnyView(
+      Button(intent: NewQuoteIntent(
+        refreshSchedule: entry.refreshSchedule,
+        widgetIdentifier: entry.widgetIdentifier
+      )) {
+        Image(systemName: "arrow.clockwise")
+          .font(.caption.weight(.semibold))
+      }
+      .buttonStyle(.plain)
+      .accessibilityLabel("New quote")
+    )
+  }
+
+  private var isLargeWidget: Bool {
+    if widgetFamily == .systemLarge || widgetFamily == .systemExtraLarge {
+      return true
+    }
+    if #available(iOS 27.0, *), widgetFamily == .systemExtraLargePortrait {
+      return true
+    }
+    return false
   }
 
   private var deepLinkURL: URL? {
     guard entry.state != .placeholder, entry.quote.noteId != "diagnostic" else { return nil }
     return try? QuoteWidgetDeepLink(noteId: entry.quote.noteId, quoteKey: entry.quote.key).url
-  }
-
-  private var displayMode: QuoteCardDisplayMode {
-    switch widgetFamily {
-    case .systemMedium:
-      .widgetMedium
-    default:
-      .widgetSmall
-    }
   }
 }
 
@@ -331,7 +361,15 @@ struct QuoteOfTheDayWidget: Widget {
     }
     .configurationDisplayName("Quote of the Day")
     .description("Shows a favorite Dogeared quote. Choose daily or hourly refresh.")
-    .supportedFamilies([.systemSmall, .systemMedium])
+    .supportedFamilies(supportedFamilies)
+  }
+
+  private var supportedFamilies: [WidgetFamily] {
+    var families: [WidgetFamily] = [.systemSmall, .systemMedium, .systemLarge, .systemExtraLarge]
+    if #available(iOS 27.0, *) {
+      families.append(.systemExtraLargePortrait)
+    }
+    return families
   }
 }
 
@@ -346,4 +384,50 @@ struct QuoteOfTheDayWidget: Widget {
     quoteText: "The road goes ever on and on",
     attributionText: "J.R.R. Tolkien, The Lord of the Rings"
   )
+}
+
+#Preview("Medium with cover", as: .systemMedium) {
+  QuoteOfTheDayWidget()
+} timeline: {
+  QuoteOfTheDayProvider.timelineEntry(
+    date: .now,
+    key: "preview-medium-cover",
+    quoteText: "“All salvation is temporary,” Augustus shot back. “I bought them a minute. Maybe that’s the minute that buys them an hour, which is the hour that buys them forever.”",
+    attributionText: "The Fault in Our Stars, 59",
+    thumbnailImage: previewCoverImageData()
+  )
+}
+
+private func previewCoverImageData() -> Data? {
+  let size = CGSize(width: 240, height: 360)
+  let renderer = UIGraphicsImageRenderer(size: size)
+  return renderer.pngData { context in
+    UIColor(red: 0.02, green: 0.67, blue: 0.87, alpha: 1).setFill()
+    context.fill(CGRect(origin: .zero, size: size))
+
+    UIColor(red: 0.98, green: 0.82, blue: 0.10, alpha: 1).setFill()
+    context.fill(CGRect(x: 222, y: 0, width: 18, height: 360))
+
+    let paragraphStyle = NSMutableParagraphStyle()
+    paragraphStyle.alignment = .center
+    let titleAttributes: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 28, weight: .black),
+      .foregroundColor: UIColor.white,
+      .paragraphStyle: paragraphStyle,
+    ]
+    NSString(string: "A PREVIEW\nBOOK").draw(
+      in: CGRect(x: 22, y: 115, width: 178, height: 100),
+      withAttributes: titleAttributes
+    )
+
+    let authorAttributes: [NSAttributedString.Key: Any] = [
+      .font: UIFont.systemFont(ofSize: 15, weight: .semibold),
+      .foregroundColor: UIColor.white.withAlphaComponent(0.9),
+      .paragraphStyle: paragraphStyle,
+    ]
+    NSString(string: "DOGEARED PRESS").draw(
+      in: CGRect(x: 22, y: 315, width: 178, height: 24),
+      withAttributes: authorAttributes
+    )
+  }
 }
