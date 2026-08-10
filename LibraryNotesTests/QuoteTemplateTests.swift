@@ -1,6 +1,6 @@
 // Copyright (c) 2018-2026  Brian Dewey. Covered by the Apache 2.0 license.
 
-import Library_Notes
+@testable import Library_Notes
 import LibraryNotesCore
 import TextMarkupKit
 import XCTest
@@ -31,6 +31,37 @@ private let contentWithCloze = """
 """
 
 final class QuoteTemplateTests: XCTestCase {
+  @MainActor func testFindsQuoteContainingVisibleCharacter() {
+    let markdown = "Before\n\n> A quote to share. (12)\n\nAfter"
+    let parsedString = ParsedAttributedString(
+      string: markdown,
+      style: GrailDiaryGrammar.defaultEditingStyle()
+    )
+    let visibleQuoteLocation = (parsedString.string as NSString).range(of: "quote to share").location
+
+    XCTAssertEqual(
+      TextEditViewController.quoteRawRange(
+        containingVisibleCharacterAt: visibleQuoteLocation,
+        in: parsedString
+      ),
+      (markdown as NSString).range(of: "> A quote to share. (12)\n")
+    )
+  }
+
+  @MainActor func testDoesNotFindQuoteForOrdinaryParagraph() {
+    let markdown = "Before\n\n> A quote to share. (12)\n\nAfter"
+    let parsedString = ParsedAttributedString(
+      string: markdown,
+      style: GrailDiaryGrammar.defaultEditingStyle()
+    )
+    let visibleParagraphLocation = (parsedString.string as NSString).range(of: "Before").location
+
+    XCTAssertNil(TextEditViewController.quoteRawRange(
+      containingVisibleCharacterAt: visibleParagraphLocation,
+      in: parsedString
+    ))
+  }
+
   @MainActor func testLoadQuotes() {
     let buffer = ParsedString(testContent, grammar: MiniMarkdownGrammar.shared)
     let quoteTemplates = QuotePrompt.extract(from: buffer)

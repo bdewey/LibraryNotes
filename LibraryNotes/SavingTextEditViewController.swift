@@ -5,6 +5,7 @@ import Combine
 import Foundation
 import KeyValueCRDT
 import LibraryNotesCore
+import LibraryNotesUI
 import LinkPresentation
 import ObjectiveCTextStorageWrapper
 import os
@@ -424,6 +425,24 @@ final class SavingTextEditViewController: UIViewController, TextEditViewControll
       autosaveTimer?.invalidate()
       autosaveTimer = nil
     }
+  }
+
+  func textEditViewController(_ viewController: TextEditViewController, shareText text: String, sourceRect: CGRect) {
+    let title = note.metadata.book?.title ?? note.metadata.title
+    let thumbnailImage = try? noteStorage.read(noteIdentifier: noteIdentifier, key: .coverImage).blob
+    let quote = AttributedQuote(
+      noteId: noteIdentifier,
+      key: "selection",
+      text: text,
+      title: title,
+      thumbnailImage: thumbnailImage
+    )
+    QuoteSharing.present(
+      QuoteDisplayModel(quote),
+      from: self,
+      sourceView: viewController.textView,
+      sourceRect: sourceRect
+    )
   }
 
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String] {

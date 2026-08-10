@@ -125,13 +125,29 @@ extension QuotesViewController: NotebookSecondaryViewController {
 
 extension QuotesViewController {
   private func shareQuote(_ quote: QuoteDisplayModel) {
+    QuoteSharing.present(
+      quote,
+      from: self,
+      sourceView: view,
+      sourceRect: CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
+    )
+  }
+}
+
+@MainActor enum QuoteSharing {
+  static func present(
+    _ quote: QuoteDisplayModel,
+    from presentingViewController: UIViewController,
+    sourceView: UIView,
+    sourceRect: CGRect
+  ) {
     let content = QuoteCardView(model: quote, mode: .share)
       .frame(width: 584, alignment: .topLeading)
       .padding(8)
       .background(Color.grailBackground)
 
     let renderer = ImageRenderer(content: content)
-    renderer.scale = view.window?.screen.scale ?? UIScreen.main.scale
+    renderer.scale = sourceView.window?.screen.scale ?? UIScreen.main.scale
     let activityItems: [Any]
     if let image = renderer.uiImage {
       activityItems = [image, quote.quoteText]
@@ -141,8 +157,8 @@ extension QuotesViewController {
 
     let activityViewController = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
     let popover = activityViewController.popoverPresentationController
-    popover?.sourceView = view
-    popover?.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1)
-    present(activityViewController, animated: true, completion: nil)
+    popover?.sourceView = sourceView
+    popover?.sourceRect = sourceRect
+    presentingViewController.present(activityViewController, animated: true, completion: nil)
   }
 }

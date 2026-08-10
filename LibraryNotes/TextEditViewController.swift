@@ -19,6 +19,7 @@ private extension Logger {
 public protocol TextEditViewControllerDelegate: AnyObject {
   func textEditViewControllerDidChangeContents(_ viewController: TextEditViewController)
   func textEditViewControllerDidClose(_ viewController: TextEditViewController)
+  func textEditViewController(_ viewController: TextEditViewController, shareText text: String, sourceRect: CGRect)
   func testEditViewController(_ viewController: TextEditViewController, hashtagSuggestionsFor hashtag: String) -> [String]
   func textEditViewController(_ viewController: TextEditViewController, didAttach book: AugmentedBook)
 }
@@ -97,6 +98,12 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   }
 
   public let textView: MarkupFormattingTextView
+
+  private lazy var quoteRailTapGestureRecognizer: UITapGestureRecognizer = {
+    let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapQuoteRail(_:)))
+    gestureRecognizer.delegate = self
+    return gestureRecognizer
+  }()
 
   private static func makeTextView(parsedAttributedString: ParsedAttributedString) -> MarkupFormattingTextView {
     let view = MarkupFormattingTextView(parsedAttributedString: parsedAttributedString, layoutManager: LayoutManager())
@@ -256,6 +263,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
   override public func viewDidLoad() {
     super.viewDidLoad()
     view.addSubview(textView)
+    textView.addGestureRecognizer(quoteRailTapGestureRecognizer)
     textView.snp.makeConstraints { make in
       make.edges.equalToSuperview()
     }
@@ -474,6 +482,62 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     textView.becomeFirstResponder()
   }
 
+  @objc private func didTapQuoteRail(_ gestureRecognizer: UITapGestureRecognizer) {
+    let location = gestureRecognizer.location(in: textView)
+    guard let rawRange = quoteRawRange(atRailLocation: location) else { return }
+    let visibleRange = parsedAttributedString.range(forRawStringRange: rawRange)
+    textView.selectedRange = visibleRange
+    textView.becomeFirstResponder()
+
+    DispatchQueue.main.async { [weak self] in
+      guard
+        let self,
+        textView.selectedRange == visibleRange,
+        let editMenuInteraction = textView.interactions.compactMap({ $0 as? UIEditMenuInteraction }).first
+      else { return }
+      let configuration = UIEditMenuConfiguration(identifier: "quote-selection", sourcePoint: location)
+      editMenuInteraction.presentEditMenu(with: configuration)
+    }
+  }
+
+  private func quoteRawRange(atRailLocation location: CGPoint) -> NSRange? {
+    let locationInTextContainer = CGPoint(
+      x: location.x - textView.textContainerInset.left,
+      y: location.y - textView.textContainerInset.top
+    )
+    let layoutManager = textView.layoutManager
+    guard layoutManager.numberOfGlyphs > 0 else { return nil }
+    let glyphIndex = layoutManager.glyphIndex(
+      for: locationInTextContainer,
+      in: textView.textContainer,
+      fractionOfDistanceThroughGlyph: nil
+    )
+    guard glyphIndex < layoutManager.numberOfGlyphs else { return nil }
+    let lineFragmentRect = layoutManager.lineFragmentRect(forGlyphAt: glyphIndex, effectiveRange: nil)
+    let quoteRailHitRect = CGRect(
+      x: lineFragmentRect.minX - 8,
+      y: lineFragmentRect.minY,
+      width: 36,
+      height: lineFragmentRect.height
+    )
+    guard quoteRailHitRect.contains(locationInTextContainer) else { return nil }
+    let characterIndex = layoutManager.characterIndexForGlyph(at: glyphIndex)
+    return Self.quoteRawRange(containingVisibleCharacterAt: characterIndex, in: parsedAttributedString)
+  }
+
+  static func quoteRawRange(
+    containingVisibleCharacterAt characterIndex: Int,
+    in parsedAttributedString: ParsedAttributedString
+  ) -> NSRange? {
+    guard
+      characterIndex >= 0,
+      characterIndex < parsedAttributedString.length,
+      let nodePath = try? parsedAttributedString.path(to: characterIndex),
+      let quoteNode = nodePath.first(where: { $0.node.type == .blockquote })
+    else { return nil }
+    return quoteNode.range
+  }
+
   static var toggleBoldfaceBarButtonItem: UIBarButtonItem {
     UIBarButtonItem(title: "Bold", image: UIImage(systemName: "bold"), target: nil, action: #selector(toggleBoldface))
   }
@@ -629,6 +693,15 @@ extension TextEditViewController: UICollectionViewDelegate {
   }
 }
 
+// MARK: - UIGestureRecognizerDelegate
+
+extension TextEditViewController: UIGestureRecognizerDelegate {
+  public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+    guard gestureRecognizer === quoteRailTapGestureRecognizer else { return true }
+    return quoteRawRange(atRailLocation: gestureRecognizer.location(in: textView)) != nil
+  }
+}
+
 // MARK: - UITextViewDelegate
 
 extension TextEditViewController: UITextViewDelegate {
@@ -746,8 +819,43 @@ extension TextEditViewController: UITextViewDelegate {
     guard range.length > 0 else {
       return nil
     }
+    let share = UIAction(title: "Share", image: UIImage(systemName: "square.and.arrow.up")) { [weak self] _ in
+      self?.shareText(in: range)
+    }
     let highlight = UICommand(title: "Highlight", action: #selector(convertTextToCloze))
-    return UIMenu(children: suggestedActions + [highlight])
+    var replacedSystemShare = false
+    var actions = suggestedActions.map { element -> UIMenuElement in
+      guard let menu = element as? UIMenu, menu.identifier == .share else { return element }
+      replacedSystemShare = true
+      return share
+    }
+    if !replacedSystemShare {
+      actions.append(share)
+    }
+    actions.append(highlight)
+    return UIMenu(children: actions)
+  }
+
+  private func shareText(in visibleRange: NSRange) {
+    let rawRange = parsedAttributedString.rawStringRange(forRange: visibleRange)
+    let characters = parsedAttributedString[rawRange]
+    let text = String(utf16CodeUnits: characters, count: characters.count)
+    let sourceRect = selectionBoundingRect(for: visibleRange)
+    delegate?.textEditViewController(self, shareText: text, sourceRect: sourceRect)
+  }
+
+  private func selectionBoundingRect(for characterRange: NSRange) -> CGRect {
+    let glyphRange = textView.layoutManager.glyphRange(
+      forCharacterRange: characterRange,
+      actualCharacterRange: nil
+    )
+    return textView.layoutManager.boundingRect(
+      forGlyphRange: glyphRange,
+      in: textView.textContainer
+    ).offsetBy(
+      dx: textView.textContainerInset.left,
+      dy: textView.textContainerInset.top
+    )
   }
 
   /// Gets the line of text that contains a given location.
