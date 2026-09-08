@@ -490,13 +490,8 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     textView.becomeFirstResponder()
 
     DispatchQueue.main.async { [weak self] in
-      guard
-        let self,
-        textView.selectedRange == visibleRange,
-        let editMenuInteraction = textView.interactions.compactMap({ $0 as? UIEditMenuInteraction }).first
-      else { return }
-      let configuration = UIEditMenuConfiguration(identifier: "quote-selection", sourcePoint: location)
-      editMenuInteraction.presentEditMenu(with: configuration)
+      guard let self, textView.selectedRange == visibleRange else { return }
+      shareText(in: visibleRange)
     }
   }
 
@@ -517,7 +512,7 @@ public protocol TextEditViewControllerDelegate: AnyObject {
     let quoteRailHitRect = CGRect(
       x: lineFragmentRect.minX - 8,
       y: lineFragmentRect.minY,
-      width: 36,
+      width: 44,
       height: lineFragmentRect.height
     )
     guard quoteRailHitRect.contains(locationInTextContainer) else { return nil }

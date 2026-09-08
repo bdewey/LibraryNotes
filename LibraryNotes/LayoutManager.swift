@@ -15,6 +15,9 @@ private extension Logger {
 /// Implementation inspired by the Wordpress Aztec HTML editing component:
 /// https://github.com/wordpress-mobile/AztecEditor-iOS/blob/develop/Aztec/Classes/TextKit/LayoutManager.swift
 final class LayoutManager: NSLayoutManager {
+  /// Toggle this while evaluating whether the quote rail helps or competes with the share badge.
+  var shouldDrawRail = false
+
   private var temporaryHighlight: (range: NSRange, color: UIColor)?
 
   func setTemporaryHighlight(range: NSRange, color: UIColor) {
@@ -40,6 +43,11 @@ final class LayoutManager: NSLayoutManager {
     super.drawBackground(forGlyphRange: glyphsToShow, at: origin)
     drawTemporaryHighlight(forGlyphRange: glyphsToShow, at: origin)
     drawBlockquotes(forGlyphRange: glyphsToShow, at: origin)
+  }
+
+  override func drawGlyphs(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
+    super.drawGlyphs(forGlyphRange: glyphsToShow, at: origin)
+    drawBlockquoteShareBadges(forGlyphRange: glyphsToShow, at: origin)
   }
 }
 
@@ -70,7 +78,8 @@ private extension LayoutManager {
 
   /// Text with a `.blockquoteBorderColor` attribute gets rendered as a block quote:
   /// - The background is `quaternarySystemFill`
-  /// - A 4 point border on the left edge is filled with `blockquoteBorderColor`
+  /// - When `shouldDrawRail` is true, a 4 point border on the left edge is filled with
+  ///   `blockquoteBorderColor`
   func drawBlockquotes(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
     guard let textStorage else {
       return
@@ -87,13 +96,78 @@ private extension LayoutManager {
       }
       let verticalBarGlyphRange = glyphRange(forCharacterRange: range, actualCharacterRange: nil)
       enumerateLineFragments(forGlyphRange: verticalBarGlyphRange) { rect, _, _, _, _ in
-        var verticalBarRect = rect.offsetBy(dx: origin.x, dy: origin.y)
+        var blockquoteRect = rect.offsetBy(dx: origin.x, dy: origin.y)
         UIColor.quaternarySystemFill.setFill()
-        context.fill(verticalBarRect)
-        verticalBarRect.size.width = 4
+        context.fill(blockquoteRect)
+        guard self.shouldDrawRail else { return }
+        blockquoteRect.size.width = 4
         color.setFill()
-        context.fill(verticalBarRect)
+        context.fill(blockquoteRect)
       }
     }
+  }
+
+  /// Draws a share badge over the Markdown delimiter on the first line of each quote.
+  /// The editor handles taps in the surrounding rail as a request to share the quote.
+  func drawBlockquoteShareBadges(forGlyphRange glyphsToShow: NSRange, at origin: CGPoint) {
+    guard
+      let textStorage,
+      textStorage.length > 0,
+      UIGraphicsGetCurrentContext() != nil
+    else { return }
+
+    let characterRange = characterRange(forGlyphRange: glyphsToShow, actualGlyphRange: nil)
+    textStorage.enumerateAttribute(.blockquoteBorderColor, in: characterRange, options: []) { _, range, _ in
+      var quoteRange = NSRange()
+      guard
+        let color = textStorage.attribute(
+          .blockquoteBorderColor,
+          at: range.location,
+          longestEffectiveRange: &quoteRange,
+          in: NSRange(location: 0, length: textStorage.length)
+        ) as? UIColor
+      else { return }
+      let quoteGlyphRange = glyphRange(forCharacterRange: quoteRange, actualCharacterRange: nil)
+      guard quoteGlyphRange.length > 0 else { return }
+
+      var firstLineGlyphRange = NSRange()
+      let firstLineRect = lineFragmentRect(
+        forGlyphAt: quoteGlyphRange.location,
+        effectiveRange: &firstLineGlyphRange
+      )
+      guard NSIntersectionRange(firstLineGlyphRange, glyphsToShow).length > 0 else { return }
+
+      drawShareBadge(in: firstLineRect.offsetBy(dx: origin.x, dy: origin.y), color: color)
+    }
+  }
+
+  func drawShareBadge(in lineFragmentRect: CGRect, color: UIColor) {
+    let diameter = min(max(lineFragmentRect.height - 6, 22), 30)
+    let badgeRect = CGRect(
+      x: lineFragmentRect.minX + 16 - diameter / 2,
+      y: lineFragmentRect.midY - diameter / 2,
+      width: diameter,
+      height: diameter
+    )
+    UIColor.grailBackground.setFill()
+    let badgePath = UIBezierPath(ovalIn: badgeRect)
+    badgePath.fill()
+    badgePath.lineWidth = 1.5
+    color.setStroke()
+    badgePath.stroke()
+
+    let configuration = UIImage.SymbolConfiguration(pointSize: diameter * 0.48, weight: .medium)
+    guard let symbol = UIImage(systemName: "square.and.arrow.up", withConfiguration: configuration)?
+      .withTintColor(color, renderingMode: .alwaysOriginal)
+    else { return }
+    let availableRect = badgeRect.insetBy(dx: diameter * 0.22, dy: diameter * 0.22)
+    let scale = min(availableRect.width / symbol.size.width, availableRect.height / symbol.size.height)
+    let symbolSize = CGSize(width: symbol.size.width * scale, height: symbol.size.height * scale)
+    symbol.draw(in: CGRect(
+      x: availableRect.midX - symbolSize.width / 2,
+      y: availableRect.midY - symbolSize.height / 2,
+      width: symbolSize.width,
+      height: symbolSize.height
+    ))
   }
 }
